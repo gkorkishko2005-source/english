@@ -1,5 +1,6 @@
 """
-LinguaMax · База данных и вспомогательные функции
+LinguaMax · База данных v3
+Новое: adaptive difficulty, interest auto-save, debate log, story progress
 """
 
 import sqlite3
@@ -13,16 +14,20 @@ def db_init():
     c   = con.cursor()
 
     c.execute("""CREATE TABLE IF NOT EXISTS users (
-        uid           INTEGER PRIMARY KEY,
-        name          TEXT,
-        lang          TEXT DEFAULT 'ru',
-        level         TEXT DEFAULT 'B1',
-        interests     TEXT DEFAULT '',
-        streak        INTEGER DEFAULT 0,
-        last_active   TEXT,
-        xp            INTEGER DEFAULT 0,
-        remind_time   TEXT,
-        created_at    TEXT DEFAULT (datetime('now'))
+        uid              INTEGER PRIMARY KEY,
+        name             TEXT,
+        lang             TEXT DEFAULT 'ru',
+        level            TEXT DEFAULT 'B1',
+        interests        TEXT DEFAULT '',
+        streak           INTEGER DEFAULT 0,
+        last_active      TEXT,
+        xp               INTEGER DEFAULT 0,
+        remind_time      TEXT,
+        -- Адаптивная сложность
+        complex_streak   INTEGER DEFAULT 0,
+        simple_streak    INTEGER DEFAULT 0,
+        auto_level       INTEGER DEFAULT 1,
+        created_at       TEXT DEFAULT (datetime('now'))
     )""")
 
     c.execute("""CREATE TABLE IF NOT EXISTS sessions (
@@ -69,11 +74,23 @@ def db_init():
         date      TEXT
     )""")
 
-    c.execute("""CREATE TABLE IF NOT EXISTS daily_words (
-        id      INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid     INTEGER,
-        date    TEXT,
-        sent    INTEGER DEFAULT 0
+    c.execute("""CREATE TABLE IF NOT EXISTS interests_log (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid        INTEGER,
+        interest   TEXT,
+        source     TEXT,
+        created_at TEXT DEFAULT (datetime('now'))
+    )""")
+
+    c.execute("""CREATE TABLE IF NOT EXISTS story_progress (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid        INTEGER,
+        story_type TEXT,
+        chapter    INTEGER DEFAULT 1,
+        hp         INTEGER DEFAULT 100,
+        score      INTEGER DEFAULT 0,
+        active     INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now'))
     )""")
 
     con.commit()
@@ -98,16 +115,13 @@ def get_user(uid: int):
     return dict(rows[0]) if rows else None
 
 def get_lang(uid: int) -> str:
-    u = get_user(uid)
-    return (u.get("lang") or "ru") if u else "ru"
+    u = get_user(uid); return (u.get("lang") or "ru") if u else "ru"
 
 def get_level(uid: int) -> str:
-    u = get_user(uid)
-    return (u.get("level") or "B1") if u else "B1"
+    u = get_user(uid); return (u.get("level") or "B1") if u else "B1"
 
 def get_interests(uid: int) -> str:
-    u = get_user(uid)
-    return (u.get("interests") or "") if u else ""
+    u = get_user(uid); return (u.get("interests") or "") if u else ""
 
 def upsert_user(uid: int, name: str):
     db("INSERT OR IGNORE INTO users (uid, name, last_active) VALUES (?,?,?)",
@@ -121,28 +135,22 @@ def add_xp(uid: int, amount: int):
     db("UPDATE users SET xp=xp+? WHERE uid=?", (amount, uid))
 
 def update_streak(uid: int):
-    """Обновляет стрик — вызывать при каждой активности."""
     user = get_user(uid)
     if not user: return
     today = datetime.now().strftime("%Y-%m-%d")
     last  = user.get("last_active") or ""
-    if last == today:
-        return  # уже сегодня активен
+    if last == today: return
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     if last == yesterday:
-        # продолжаем стрик
         db("UPDATE users SET streak=streak+1, last_active=?, xp=xp+10 WHERE uid=?", (today, uid))
     else:
-        # стрик сброшен
         db("UPDATE users SET streak=1, last_active=? WHERE uid=?", (today, uid))
 
 def get_streak_count(uid: int) -> int:
-    u = get_user(uid)
-    return (u.get("streak") or 0) if u else 0
+    u = get_user(uid); return (u.get("streak") or 0) if u else 0
 
 def get_xp(uid: int) -> int:
-    u = get_user(uid)
-    return (u.get("xp") or 0) if u else 0
+    u = get_user(uid); return (u.get("xp") or 0) if u else 0
 
 def get_rank(xp: int) -> str:
     if xp < 100:   return "🌱 Seedling"
@@ -155,7 +163,64 @@ def get_rank(xp: int) -> str:
     return "🏆 Master"
 
 
-# ── Словарь ───────────────────────────────────────────────────────
+# ── Адаптивная сложность ──────────────────────────────────────────
+
+LEVEL_ORDER = ["A1","A2","B1","B2","C1","C2"]
+
+def track_complexity(uid: int, is_complex: bool):
+    """Отслеживает сложность текстов и автоматически меняет уровень."""
+    user = get_user(uid)
+    if not user or not user.get("auto_level", 1): return None
+
+    if is_complex:
+        new_cs = (user.get("complex_streak") or 0) + 1
+        db("UPDATE users SET complex_streak=?, simple_streak=0 WHERE uid=?", (new_cs, uid))
+        if new_cs >= 3:  # 3 сложных подряд → повышаем уровень
+            current = get_level(uid)
+            idx = LEVEL_ORDER.index(current) if current in LEVEL_ORDER else 2
+            if idx < len(LEVEL_ORDER) - 1:
+                new_level = LEVEL_ORDER[idx + 1]
+                update_user(uid, level=new_level, complex_streak=0)
+                return f"up:{new_level}"
+    else:
+        new_ss = (user.get("simple_streak") or 0) + 1
+        db("UPDATE users SET simple_streak=?, complex_streak=0 WHERE uid=?", (new_ss, uid))
+        if new_ss >= 5:  # 5 простых подряд → понижаем
+            current = get_level(uid)
+            idx = LEVEL_ORDER.index(current) if current in LEVEL_ORDER else 2
+            if idx > 0:
+                new_level = LEVEL_ORDER[idx - 1]
+                update_user(uid, level=new_level, simple_streak=0)
+                return f"down:{new_level}"
+    return None
+
+
+# ── Интересы — автосохранение ─────────────────────────────────────
+
+def save_interest(uid: int, interest: str, source: str = "auto"):
+    """Сохраняет новый интерес и обновляет строку интересов пользователя."""
+    # Проверяем дубликат
+    existing = db("SELECT id FROM interests_log WHERE uid=? AND LOWER(interest)=LOWER(?)",
+                  (uid, interest), fetch=True)
+    if existing: return False
+
+    db("INSERT INTO interests_log (uid, interest, source) VALUES (?,?,?)", (uid, interest, source))
+
+    # Обновляем строку интересов
+    user = get_user(uid)
+    current = user.get("interests", "") if user else ""
+    parts = [p.strip() for p in current.split(",") if p.strip()]
+    if interest.lower() not in [p.lower() for p in parts]:
+        parts.append(interest)
+        update_user(uid, interests=", ".join(parts[:10]))  # max 10 интересов
+    return True
+
+def get_all_interests(uid: int):
+    return db("SELECT interest, source FROM interests_log WHERE uid=? ORDER BY created_at DESC",
+              (uid,), fetch=True)
+
+
+# ── Словарь (SM-2) ────────────────────────────────────────────────
 
 def add_word(uid: int, word: str, translation: str, example: str, topic: str = "general"):
     exists = db("SELECT id FROM vocabulary WHERE uid=? AND LOWER(word)=LOWER(?)", (uid, word), fetch=True)
@@ -172,7 +237,6 @@ def get_due_words(uid: int, limit: int = 5):
               (uid, today, limit), fetch=True)
 
 def update_word_review(word_id: int, quality: int):
-    """SM-2 алгоритм интервального повторения (как Anki)."""
     rows = db("SELECT ease, interval FROM vocabulary WHERE id=?", (word_id,), fetch=True)
     if not rows: return
     ease = rows[0]["ease"]; interval = rows[0]["interval"]
@@ -180,11 +244,9 @@ def update_word_review(word_id: int, quality: int):
         if interval == 1:    new_interval = 6
         elif interval == 6:  new_interval = 15
         else:                new_interval = round(interval * ease)
-        new_ease = ease + (0.1 - (5-quality)*(0.08+(5-quality)*0.02))
-        new_ease = max(1.3, new_ease)
+        new_ease = max(1.3, ease + (0.1 - (5-quality)*(0.08+(5-quality)*0.02)))
     else:
-        new_interval = 1
-        new_ease = ease
+        new_interval = 1; new_ease = ease
     next_review = (datetime.now() + timedelta(days=new_interval)).strftime("%Y-%m-%d")
     db("UPDATE vocabulary SET interval=?, ease=?, next_review=?, reviews=reviews+1 WHERE id=?",
        (new_interval, new_ease, next_review, word_id))
@@ -201,8 +263,7 @@ def log_mistake(uid: int, original: str, corrected: str, explanation: str, categ
         datetime.now().strftime("%Y-%m-%d")))
 
 def get_mistakes(uid: int, limit: int = 10):
-    return db("SELECT * FROM mistakes WHERE uid=? ORDER BY created_at DESC LIMIT ?",
-              (uid, limit), fetch=True)
+    return db("SELECT * FROM mistakes WHERE uid=? ORDER BY created_at DESC LIMIT ?", (uid, limit), fetch=True)
 
 def get_mistake_count(uid: int) -> int:
     return db("SELECT COUNT(*) as c FROM mistakes WHERE uid=?", (uid,), fetch=True)[0]["c"]
@@ -220,12 +281,10 @@ def get_session_count(uid: int) -> int:
     return db("SELECT COUNT(*) as c FROM sessions WHERE uid=?", (uid,), fetch=True)[0]["c"]
 
 def get_test_count(uid: int) -> int:
-    return db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%test%'",
-              (uid,), fetch=True)[0]["c"]
+    return db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%test%'", (uid,), fetch=True)[0]["c"]
 
 def get_toefl_count(uid: int) -> int:
-    return db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'",
-              (uid,), fetch=True)[0]["c"]
+    return db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'", (uid,), fetch=True)[0]["c"]
 
 
 # ── TOEFL ─────────────────────────────────────────────────────────
@@ -237,6 +296,23 @@ def log_toefl(uid: int, section: str, score: int, max_score: int):
 def get_toefl_scores(uid: int):
     return db("SELECT section, AVG(score) as avg_s, MAX(score) as best, COUNT(*) as cnt "
               "FROM toefl_scores WHERE uid=? GROUP BY section", (uid,), fetch=True)
+
+
+# ── Story ─────────────────────────────────────────────────────────
+
+def start_story(uid: int, story_type: str):
+    db("UPDATE story_progress SET active=0 WHERE uid=?", (uid,))
+    db("INSERT INTO story_progress (uid, story_type, chapter, hp, score) VALUES (?,?,1,100,0)",
+       (uid, story_type))
+
+def get_active_story(uid: int):
+    rows = db("SELECT * FROM story_progress WHERE uid=? AND active=1 ORDER BY id DESC LIMIT 1",
+              (uid,), fetch=True)
+    return dict(rows[0]) if rows else None
+
+def update_story(uid: int, **kwargs):
+    for k, v in kwargs.items():
+        db(f"UPDATE story_progress SET {k}=? WHERE uid=? AND active=1", (v, uid))
 
 
 # ── Статистика ────────────────────────────────────────────────────

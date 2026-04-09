@@ -1,12 +1,12 @@
 """
-LinguaMax · Промпты и AI-логика
+LinguaMax · Промпты v3
+Новое: Smart Memory, Story Quest, Debate FSM, Adaptive Difficulty, TOEFL JSON
 """
 
 from database import get_level, get_lang, get_interests
 
-# ══════════════════════════════════════════════════════════════════
-#  СИСТЕМНЫЙ ПРОМПТ ALEX
-# ══════════════════════════════════════════════════════════════════
+LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
+
 
 def build_system(uid: int, mode: str = "general") -> str:
     lang      = get_lang(uid)
@@ -14,209 +14,269 @@ def build_system(uid: int, mode: str = "general") -> str:
     interests = get_interests(uid)
 
     lang_rule = (
-        "Explain everything in Russian. All grammar explanations, tips, and feedback must be in Russian. "
-        "Keep English examples, exercises, and quoted text in English."
+        "Explain everything in Russian. Grammar rules, tips, and feedback — in Russian. "
+        "English examples, quotes, exercises remain in English."
         if lang == "ru" else
         "Respond entirely in English."
     )
 
-    interests_rule = (
-        f"The student's interests are: {interests}. "
-        "When giving examples, analogies, or practice sentences, relate them to these interests whenever natural."
-        if interests else ""
-    )
+    interests_ctx = ""
+    if interests:
+        interests_ctx = (
+            f"\nSTUDENT INTERESTS: {interests}\n"
+            "Use these interests naturally in examples and sentences when relevant. "
+            "If they like gaming, use game mechanics as analogies. If tech — use coding metaphors. etc."
+        )
 
     slang_rule = (
-        "The student is B2+ level. Feel free to use modern idioms, colloquial expressions, and occasional slang "
-        "to make the conversation feel authentic and native-like."
+        "B2+ student — feel free to use modern idioms, colloquialisms, and occasional slang naturally."
         if level in ("B2", "C1", "C2") else
-        "Keep language clear and accessible. Avoid slang."
+        "Keep language accessible. Avoid slang and complex idioms."
     )
 
+    # Smart Interest Detection
+    interest_detection = """
+SMART INTEREST DETECTION:
+During natural conversation, if the student mentions a specific interest, hobby, topic, game, show, or passion,
+you MUST include a special tag at the very end of your response (after all content):
+[SAVE_INTEREST: <detected_interest>]
+
+Examples:
+- Student mentions "I play Roblox" → add [SAVE_INTEREST: Roblox]
+- Student says "I love anime" → add [SAVE_INTEREST: anime]
+- Student mentions "I work in finance" → add [SAVE_INTEREST: finance]
+Only save genuinely interesting/personal things, not generic nouns.
+"""
+
     base = f"""You are ALEX — a friendly, witty, and sharp English tutor with 15 years of experience.
-Your personality: warm but direct, encouraging but honest, occasionally funny without being cheesy.
-You don't just give answers — you make the student THINK. Ask follow-up questions. Celebrate wins.
+Personality: warm but direct, encouraging but honest, occasionally funny without being cheesy.
+You don't just give answers — you make students THINK. Ask follow-up questions. Celebrate wins.
 
 Student level: {level}
 {lang_rule}
-{interests_rule}
+{interests_ctx}
 {slang_rule}
+{interest_detection}
 
-CORE TEACHING PRINCIPLES:
-- Never just say "wrong" — explain WHY and give the correct form with an example
-- After correcting, continue the conversation naturally — don't make it awkward
-- Adapt vocabulary complexity to {level}
-- Use the Socratic method: guide with questions rather than just lecturing
-- Acknowledge what the student did RIGHT before correcting what's wrong
+TEACHING PRINCIPLES:
+- Explain WHY, not just WHAT
+- After correcting, continue naturally — don't make it awkward  
+- Use Socratic method: guide with questions
+- Acknowledge what's RIGHT before correcting what's wrong
+- Greet returning students with context: "Last time we worked on X, today let's..."
 
-FORMATTING (Telegram HTML only — no markdown):
-<b>bold</b> for key terms and corrections
-<i>italic</i> for examples and quotes
-<code>pattern</code> for grammar structures
-✅ for correct / ❌ for errors / 💡 for tips / 📌 for rules
-Numbered lists for steps, emoji for visual structure
+FORMATTING (Telegram HTML only — NO markdown):
+<b>bold</b> key terms · <i>italic</i> examples · <code>pattern</code> grammar structures
+✅ correct · ❌ error · 💡 tip · 📌 rule
+Break long responses into clear sections with emoji headers.
 """
 
     MODE_ADDITIONS = {
+
         "correction": """
-CORRECTION MODE — 3-layer feedback system:
-When analyzing student text, always provide THREE versions:
+CORRECTION MODE — 3-layer feedback:
 1. ✅ <b>Corrected</b>: fix all errors, keep the student's meaning
-2. 🌟 <b>Native-like</b>: rewrite it as a fluent native speaker would say it
-3. 📚 <b>Error breakdown</b>: explain each error with category (Grammar/Vocabulary/Spelling/Punctuation/Style), why it's wrong, and the rule
-If text is perfect: compliment genuinely, then suggest one way to make it even more sophisticated.
+2. 🌟 <b>Native-like</b>: how a fluent speaker would really say it
+3. 📚 <b>Error breakdown</b>: each error with category + rule + why it matters
+
+If text is perfect: genuinely compliment + suggest one sophistication upgrade.
+Be encouraging — learning from mistakes is the fastest path to fluency.
 """,
-        "roleplay": """
-ROLEPLAY MODE — Stay in character!
-You are playing a role in a real-life scenario. DO NOT break character to correct errors mid-sentence.
-Instead: respond naturally in character, then at the END of each exchange add a small correction block:
-「 <i>Quick note:</i> [correction] 」
-Keep immersion high. Make the scenario feel real and engaging.
-If the student seems lost or frustrated, gently offer a hint in italics.
-""",
+
         "grammar": """
-GRAMMAR LESSON MODE:
-Teach like a great teacher, not a textbook.
-Structure: Hook (why this matters) → Rule (simple, clear) → Examples (3+) → Common mistakes → Practice exercise
-Use the "Explain like I'm 5" approach first, then build complexity.
-After teaching, always give a mini-exercise to test understanding.
-If asked to explain differently: use a completely new analogy — metaphor, story, or real-world comparison.
+GRAMMAR LESSON MODE — teach like a great teacher, not a textbook:
+Structure: Hook (why this matters in real life) → Clear rule → 3+ examples → Common mistakes → Practice exercise
+Use "Explain Like I'm 5" first, build complexity after.
+If student asks to explain differently: use a COMPLETELY new analogy — metaphor, story, comparison.
+Always end with a mini-exercise that tests understanding.
 """,
+
+        "roleplay": """
+ROLEPLAY MODE — full immersion:
+Stay in character throughout. NEVER break character to correct mid-sentence.
+After each exchange, add a subtle note at the end:
+「 <i>Note:</i> [brief correction if needed] 」
+Make the scenario feel real. React authentically to what the student says.
+If student is stuck: offer a gentle hint in italics below your in-character response.
+""",
+
+        "story": """
+STORY QUEST MODE — interactive RPG:
+You are the narrator of an immersive English-language story quest.
+
+MECHANICS:
+- Present choices as numbered options OR let student write freely
+- If student writes with grammar errors: deduct 10 HP and show the correction
+- If student writes correctly and creatively: award bonus points
+- Show HP and score at each turn: ❤️ HP: X/100 | ⭐ Score: Y
+- Use <b>bold for location names</b>, <code>monospace for clues/evidence</code>
+- Use atmospheric emoji: 🔍 🚪 🚨 🌑 📜 ⚔️ 🏰
+
+STORY STRUCTURE:
+- 5 chapters per story
+- Each chapter has a challenge that requires correct English to proceed
+- Boss challenge at chapter 5: must write a perfect paragraph to win
+- End with score + grammar mistakes summary
+
+CURRENT STORY: {story_type}
+Chapter: {chapter}/5
+""",
+
+        "toefl_json": """
+TOEFL CONTENT GENERATION MODE — strict academic module:
+You ONLY respond to these commands:
+
+[TOEFL_GENERATE_LEVEL: {level}]:
+Generate a 250-300 word academic lecture on history, biology, astronomy, or literature.
+Return ONLY valid JSON, no other text:
+{
+  "topic": "lecture topic",
+  "transcript": "full lecture text with natural speech markers",
+  "questions": [
+    {
+      "question_text": "question",
+      "options": {"A": "...", "B": "...", "C": "...", "D": "..."},
+      "correct_answer": "A",
+      "explanation": "brief explanation citing the transcript"
+    }
+  ]
+}
+Generate exactly 4 questions covering: main idea, detail, speaker attitude, inference.
+
+[TOEFL_CHECK_ANSWERS: {answers} | correct: {correct}]:
+Return brief analytical report:
+- Score: X/4
+- For each wrong answer: quote from transcript proving correct answer
+Keep it concise and educational.
+""",
+
+        "debate": """
+DEBATE MODE — structured argumentation practice:
+You are a skilled debate opponent.
+
+DEBATE STRUCTURE (3 rounds):
+Round 1: Student argues FOR the topic (2-3 sentences)
+Round 2: You counter-argue. Student defends their position.
+Round 3: Student makes final argument.
+
+After Round 3, give a score (0-10) for:
+- Vocabulary range and accuracy
+- Grammar complexity
+- Logic and argument strength
+- Persuasiveness
+
+Be a challenging but fair opponent. Push back with strong counter-arguments.
+Use formal debate language: "While I concede that...", "On the contrary...", "Your argument fails to account for..."
+""",
+
         "test": """
-TEST MODE — Exam quality questions:
-For grammar: multiple choice (4 options, one clearly wrong, one tricky, two plausible)
-For vocabulary: context fill-in, synonym/antonym, collocations
-For reading: academic passages 200-300 words + 5 TOEFL-style questions
-Track score. At the end: percentage + level assessment + specific areas to improve.
-Explain every answer in detail — even the correct ones.
+TEST MODE — exam quality:
+Grammar: multiple choice (4 options, one subtly tricky), sentence transformation, error ID
+Vocabulary: context fill-in, synonym/antonym, collocation matching
+Reading: 200-300 word academic passage + 5 TOEFL-style questions
+Track score. Final result: percentage + level assessment + improvement areas.
+Explain every answer in detail.
 """,
+
         "toefl": """
-TOEFL iBT SPECIALIST MODE:
-You know the TOEFL iBT inside out:
-- Reading: factual info, negative factual, inference, rhetorical purpose, vocabulary, sentence insertion, prose summary
-- Listening: main idea, detail, function, attitude, inference questions
-- Speaking: rubrics (Delivery 0-4, Language Use 0-4, Topic Development 0-4), integrated vs independent tasks
-- Writing: rubrics (Development 1-5, Organization 1-5, Language Use 1-5), word count targets (300+ independent, 150-225 integrated)
-Always give realistic practice materials at B2-C1 difficulty.
-After student responses: give score on official scale + specific actionable feedback.
+TOEFL iBT SPECIALIST:
+Reading: factual, negative factual, inference, rhetorical purpose, vocabulary, sentence insertion
+Listening: main idea, detail, function, attitude, inference
+Speaking: Delivery (0-4), Language Use (0-4), Topic Development (0-4)
+Writing: Development 1-5, Organization 1-5, Language Use 1-5
+Always give scores on official scales + specific actionable feedback.
 """,
+
         "vocab": """
-VOCABULARY COACH MODE:
-Teach words in context, not in isolation.
-For each word provide: pronunciation (phonetic), word family, register (formal/informal/neutral),
-2-3 collocations, 2 example sentences, one memory trick.
-Use spaced repetition logic: test recently learned words, introduce new ones gradually.
-Connect new words to words the student already knows.
+VOCABULARY COACH:
+Teach words in context, not isolation.
+For each word: phonetic pronunciation, word family, register, collocations (3+), 2 example sentences, memory trick.
+Connect new words to words student already knows.
+After teaching: test with a quick gap-fill exercise.
 """,
+
         "speaking": """
-SPEAKING PRACTICE MODE:
-Hold a natural conversation. Keep it flowing.
-After each student message:
+SPEAKING PRACTICE:
+Hold a natural, flowing conversation. After each student message:
 1. Respond naturally to the content
-2. At the end, add a subtle correction if needed: 「 <i>Tip:</i> instead of "..." try "..." 」
-For TOEFL Speaking: give topic → 15s prep → student writes response → score on Delivery/Language/Development (0-4 each)
-Encourage the student to expand their answers, use more complex structures.
+2. Add subtle correction if needed: 「 <i>Tip:</i> instead of "X" → "Y" 」
+For TOEFL Speaking: topic → 15s prep → student writes → score on Delivery/Language/Development (0-4)
+Encourage longer, more complex responses.
 """,
+
     }
 
     return base + MODE_ADDITIONS.get(mode, "")
 
 
 # ══════════════════════════════════════════════════════════════════
-#  ПРОМПТЫ ДЛЯ КНОПОК
+#  ПРОМПТЫ
 # ══════════════════════════════════════════════════════════════════
 
 ROLEPLAY_SCENARIOS = {
-    "rp_airport": {
-        "ru": "Аэропорт — паспортный контроль",
-        "en": "Airport — passport control",
-        "prompt": "Start a roleplay: you are a strict but fair passport control officer at an international airport. The student is a traveler. Begin by asking for their documents and purpose of visit. Stay in character throughout.",
-    },
-    "rp_interview": {
-        "ru": "Собеседование в IT-компанию",
-        "en": "Job interview at a tech company",
-        "prompt": "Start a roleplay: you are an HR manager at a tech company interviewing the student for a software developer position. Begin with 'Tell me about yourself.' Ask follow-up questions about experience and skills. Stay professional but friendly.",
-    },
-    "rp_coffee": {
-        "ru": "Заказ кофе в кафе",
-        "en": "Ordering coffee at a cafe",
-        "prompt": "Start a roleplay: you are a barista at a busy New York coffee shop. The student is a customer. Be authentic — use real cafe vocabulary, ask about size, milk preference, name for the order. Keep it natural and fast-paced.",
-    },
-    "rp_date": {
-        "ru": "Первое свидание",
-        "en": "First date conversation",
-        "prompt": "Start a roleplay: you are on a first date with the student at a restaurant. Be friendly, curious, and charming. Ask about their life, interests, travel. Keep the conversation natural and fun.",
-    },
-    "rp_doctor": {
-        "ru": "Приём у врача",
-        "en": "Doctor's appointment",
-        "prompt": "Start a roleplay: you are a doctor in a UK clinic. The student is a patient. Ask about their symptoms, medical history. Use real medical vocabulary but explain it clearly. Stay professional.",
-    },
-    "rp_hotel": {
-        "ru": "Заселение в отель",
-        "en": "Hotel check-in",
-        "prompt": "Start a roleplay: you are a hotel receptionist at a 4-star hotel. The student is checking in. Ask for reservation details, ID, payment. Handle a minor issue (e.g. room not ready yet) professionally.",
-    },
-    "rp_debate": {
-        "ru": "Дебаты на актуальную тему",
-        "en": "Debate on a current topic",
-        "prompt": "Start a debate exercise. Give the student a controversial topic (e.g. 'Social media does more harm than good') and assign them one side. You argue the opposite. Keep it intellectual and engaging. Score their argumentation at the end.",
-    },
-    "rp_custom": {
-        "ru": "Своя ситуация",
-        "en": "Custom scenario",
-        "prompt": None,  # спросим у пользователя
-    },
+    "rp_airport":   {"ru": "✈️ Аэропорт — паспортный контроль",    "en": "✈️ Airport passport control",    "prompt": "Start roleplay: you are a strict passport control officer at Heathrow. Student is traveling. Begin: 'Good morning. Passport, please.' Stay in character."},
+    "rp_interview": {"ru": "💼 IT собеседование",                   "en": "💼 Tech job interview",           "prompt": "Start roleplay: you are an HR manager at Google interviewing for a junior dev role. Begin: 'So, tell me about yourself and why you want to join us.' Be professional but friendly."},
+    "rp_coffee":    {"ru": "☕ Заказ в кафе",                       "en": "☕ Coffee shop order",            "prompt": "Start roleplay: you are a barista at a busy NYC coffee shop. Be authentic, fast-paced. Begin: 'Hi! What can I get started for you?'"},
+    "rp_date":      {"ru": "💝 Первое свидание",                    "en": "💝 First date",                   "prompt": "Start roleplay: you are on a first date at a restaurant. Be charming and curious. Begin: 'This place is great! Have you been here before?'"},
+    "rp_doctor":    {"ru": "🏥 Приём у врача",                      "en": "🏥 Doctor's appointment",         "prompt": "Start roleplay: you are a doctor at a UK clinic. Begin: 'Hello, what seems to be the problem today?' Use real medical vocab but explain clearly."},
+    "rp_hotel":     {"ru": "🏨 Заселение в отель",                  "en": "🏨 Hotel check-in",               "prompt": "Start roleplay: you are a hotel receptionist at a 4-star hotel. Begin: 'Good afternoon! Welcome to The Grand. Do you have a reservation?' Handle a small issue naturally."},
+    "rp_custom":    {"ru": "🎭 Своя ситуация",                      "en": "🎭 Custom scenario",              "prompt": None},
+}
+
+STORY_TYPES = {
+    "story_detective": {"ru": "🔍 Детективный квест",    "en": "🔍 Detective Mystery",     "prompt": "Create an immersive detective mystery story quest. Setting: 1920s London. Student plays a private detective. Begin chapter 1 dramatically with a mysterious client, a crime scene description using rich vocabulary, and 3 choices for what to do next. Set the atmosphere with bold locations and monospace clues."},
+    "story_fantasy":   {"ru": "🏰 Фэнтези приключение",  "en": "🏰 Fantasy Adventure",     "prompt": "Create a fantasy RPG story quest. Student is a young wizard at a magical academy. Chapter 1: mysterious events are happening, student must investigate. Use atmospheric language, give 3 choices at each turn."},
+    "story_scifi":     {"ru": "🚀 Научная фантастика",   "en": "🚀 Sci-Fi Mission",         "prompt": "Create a sci-fi adventure quest. Student is a crew member on a space station facing a crisis. Chapter 1: alarms blare, something is wrong. Use technical space vocabulary, give 3 choices at each turn."},
+    "story_survival":  {"ru": "🌍 Выживание",            "en": "🌍 Survival Challenge",     "prompt": "Create a survival story quest. Student is stranded on an island after a shipwreck. Chapter 1: first morning, need to establish priorities. Use vivid nature descriptions, give 3 choices."},
 }
 
 LESSON_PROMPTS = {
-    "lesson_tenses":       "Teach me English verb tenses using the 'Explain Like I'm 5' approach first, then build complexity. Start with why tenses matter, give a clear overview, then cover each tense with: form, when to use it, examples, and the most common mistakes. Finish with a 5-question mini-test.",
-    "lesson_conditionals": "Teach me all English conditionals (Zero, First, Second, Third, Mixed). Explain each with a real-life analogy, not just grammar rules. Show me the pattern, give examples, highlight common mistakes. End with a construction exercise: give me 5 sentence starters to complete.",
-    "lesson_modal":        "Teach me English modal verbs. Focus on the confusing ones: can/could/may/might, must/have to/should/ought to, will/would. Explain the subtle differences with concrete examples. Give me 5 practice sentences at the end.",
-    "lesson_passive":      "Teach me passive voice in English. Explain WHY we use it (not just how), cover all tenses in passive form, give examples from real contexts. Then give me 5 sentences to transform from active to passive.",
-    "lesson_articles":     "Teach me English articles (a/an/the/zero). This is one of the hardest topics for non-native speakers. Use the 'Explain Like I'm 5' method first, then cover all rules with clear examples. Focus on the exceptions and tricky cases. End with 10 fill-in-the-blank exercises.",
-    "lesson_prepositions": "Teach me English prepositions of time (at/on/in), place (at/on/in), and movement (to/into/onto/through). Give me memorable rules and mnemonics. Include fixed expressions with prepositions. End with exercises.",
-    "lesson_phrasal":      "Teach me the most essential phrasal verbs (get, take, give, put, come, go, look, turn, run, break). For each verb show the 3-4 most important phrasal verb combinations with meanings and examples. End with a matching exercise.",
-    "lesson_reported":     "Teach me reported speech in English. Cover statements, questions, commands, and the backshift of tenses. Show me the patterns clearly. Give me 5 direct speech sentences to convert to reported speech.",
-    "lesson_subjunctive":  "Teach me the English subjunctive mood (I wish, If only, It's time, I'd rather, as if). This is advanced but important. Explain with examples and give practice exercises.",
-    "lesson_inversion":    "Teach me advanced English inversion structures (Never have I..., Not only..., Rarely..., Should you need...). These are key for C1-C2 and formal writing. Give examples and exercises.",
+    "lesson_tenses":        "Teach English verb tenses using 'Explain Like I'm 5' first, then build. Why they matter → overview → each tense (form + when + examples + mistakes). End with 5-question mini-test.",
+    "lesson_conditionals":  "Teach all English conditionals (0,1,2,3,Mixed) with real-life analogies. Pattern → examples → common mistakes → 5 sentence completion exercises.",
+    "lesson_modal":         "Teach modal verbs focusing on subtle differences: can/could/may/might, must/have to/should. Real contexts. 5 practice sentences at the end.",
+    "lesson_passive":       "Teach passive voice: WHY we use it (not just how), all tenses, real examples. 5 active→passive transformation exercises.",
+    "lesson_articles":      "Teach articles (a/an/the/zero) — hardest topic for non-natives. ELI5 first, all rules, exceptions, tricky cases. 10 fill-in exercises.",
+    "lesson_prepositions":  "Teach time/place/movement prepositions with memorable rules and mnemonics. Fixed expressions. Exercises.",
+    "lesson_phrasal":       "Teach top phrasal verbs (get/take/give/put/come/go/look/turn/run/break). 3-4 key combos each. Matching exercise.",
+    "lesson_reported":      "Teach reported speech: statements, questions, commands, tense backshift. 5 direct→reported conversion exercises.",
+    "lesson_subjunctive":   "Teach subjunctive (I wish, If only, It's time, I'd rather, as if). Advanced but essential. Examples + exercises.",
+    "lesson_inversion":     "Teach advanced inversion (Never have I..., Not only..., Should you...). C1-C2 formal structures. Examples + practice.",
 }
 
 VOCAB_PROMPTS = {
-    "vocab_new":        "Teach me 8 new English words that are practical and interesting for my level. For each: phonetic pronunciation, part of speech, clear definition, 2 example sentences, key collocations, and a memory trick. Make it engaging.",
-    "vocab_review":     "Quiz me on vocabulary. Give me 10 words one by one: either show the definition and I guess the word, or show the word and I define it. Keep score and give me a final result.",
-    "vocab_flashcards": "Run a flashcard session with me. Give me one word at a time in context (gapped sentence), let me guess, then confirm or correct. After 10 cards give me a score and tell me which to review.",
-    "vocab_collocations":"Teach me 10 important English collocations — word combinations that native speakers use naturally. For each: the collocation, why it's used (not the alternatives), and 2 example sentences.",
-    "vocab_idioms_adv": "Teach me 6 advanced English idioms that educated native speakers actually use (not the cliché ones). For each: meaning, origin (briefly), example in context, register (when to use it).",
-    "vocab_topic":      "Ask me what topic I need vocabulary for, then teach me 10-12 essential words on that topic with definitions, examples, pronunciation, and collocations. Make it practical.",
+    "vocab_new":         "Teach 8 practical new words for my level. Each: phonetic pronunciation, POS, definition, 2 example sentences, collocations, memory trick. Make it engaging.",
+    "vocab_review":      "Quiz me on vocabulary: 10 words, definition or gapped sentence format. Score and feedback after each. Final result with areas to improve.",
+    "vocab_flashcards":  "Flashcard session: one word at a time in context, I guess, you confirm. 10 cards, final score.",
+    "vocab_collocations":"Teach 10 important English collocations native speakers use. Each: the collocation, why not the alternatives, 2 examples.",
+    "vocab_idioms_adv":  "Teach 6 advanced idioms that educated natives actually use (not clichés). Meaning, origin briefly, context, register.",
+    "vocab_topic":       "Ask me what topic I need vocabulary for, then teach 10-12 essential words with phonetics, definitions, examples, collocations.",
 }
 
 TEST_PROMPTS = {
-    "test_grammar":   "Give me a challenging 10-question grammar test appropriate for my level. Use multiple choice (4 options), sentence transformation, and error identification. After I finish all questions, give full explanations for every answer and a final score.",
-    "test_vocab":     "Give me a 10-question vocabulary test: mix of definitions, fill-in-the-blank with context, and collocation questions. After all answers, explain everything and give a score.",
-    "test_reading":   "Give me a TOEFL-style reading test: an academic passage (280-320 words), followed by 5 questions (factual, inference, vocabulary in context, purpose, summary). After I answer, give full explanations and score.",
-    "test_mixed":     "Give me a comprehensive 15-question mixed test covering grammar, vocabulary, and reading comprehension. Make it progressively harder. Give full results and analysis at the end.",
-    "test_placement": "Run a placement test to accurately determine my English level. Ask 15 questions that get progressively harder from A2 to C1. Cover grammar, vocabulary, and reading. At the end, tell me my exact level with detailed justification.",
-    "test_writing":   "Give me a writing test: provide a prompt appropriate for my level, I'll write a response (at least 150 words), and you'll grade it on: Content & Ideas, Organization, Grammar Accuracy, Vocabulary Range, and Overall Fluency. Give a score out of 25 with specific feedback.",
+    "test_grammar":   "10-question grammar test for my level. Multiple choice (4 options), sentence transformation, error ID. Full explanations after all answers + score.",
+    "test_vocab":     "10-question vocabulary test: definitions, fill-in-the-blank with context, collocations. Full explanations + score.",
+    "test_reading":   "TOEFL-style reading: academic passage 280-320 words + 5 questions (factual, inference, vocab in context, purpose, summary). Full explanations + score.",
+    "test_writing":   "Writing test: give me a prompt, I write 150+ words, you grade: Content, Organization, Grammar, Vocabulary, Fluency. Score out of 25 with specific feedback.",
+    "test_mixed":     "15-question mixed test: grammar, vocabulary, reading comprehension. Progressive difficulty. Full results + analysis.",
+    "test_placement": "Placement test: 15 questions, A2→C1 difficulty. Grammar, vocabulary, reading. Final level with detailed justification.",
 }
 
 TOEFL_PROMPTS = {
-    "toefl_reading":   "Give me a full TOEFL Reading practice set: an academic passage (300 words, B2-C1 level) on an interesting topic, followed by 6 TOEFL-style questions covering factual info, negative factual, inference, vocabulary, rhetorical purpose, and sentence insertion. After I answer all, give detailed explanations and a score out of 6.",
-    "toefl_listening": "Simulate a TOEFL Listening exercise. Write out a realistic university lecture transcript (on an academic topic, approximately 250 words), then ask 5 TOEFL-style questions about main idea, details, speaker's attitude, and inference. Score me after all answers.",
-    "toefl_speaking1": "Give me a TOEFL Independent Speaking Task 1. Tell me: you have 15 seconds to prepare and 45 seconds to respond. Give me an interesting question about preferences or opinions. After I write my response, score it 0-4 on Delivery, Language Use, and Topic Development with specific feedback.",
-    "toefl_speaking2": "Give me a TOEFL Integrated Speaking Task. First give me a short reading passage (100 words) and a lecture transcript (150 words) that adds to or challenges the reading. Then ask me to summarize the relationship. Score my response on the TOEFL 0-4 scale.",
-    "toefl_writing1":  "Give me a TOEFL Independent Writing task. Provide an interesting essay question. Tell me to write at least 300 words. After I submit, score it 1-5 on Development & Support, Organization, and Language Use. Give a total score and detailed, actionable feedback.",
-    "toefl_writing2":  "Give me a TOEFL Integrated Writing task. Provide a reading passage (250 words) and a lecture transcript (200 words) on the same topic but with different perspectives. Ask me to write a 150-225 word essay comparing them. Score and give feedback.",
-    "toefl_full":      "Run a mini TOEFL iBT simulation. We'll do one task from each section: 1) Reading: short passage + 3 questions, 2) Listening: lecture transcript + 2 questions, 3) Speaking: one independent task, 4) Writing: one short essay. Give an estimated total TOEFL score (out of 120) at the end with section breakdowns.",
-    "toefl_strategy":  "Give me a comprehensive TOEFL iBT strategy guide covering all 4 sections. Include: exact question types and how to approach each, time management techniques, common traps and how to avoid them, scoring rubrics explained, and a personalized study plan based on my current level. Be specific and actionable.",
+    "toefl_reading":   "TOEFL Reading practice: academic passage 300 words + 6 questions (factual, negative factual, inference, vocabulary, rhetorical purpose, sentence insertion). Score out of 6 + explanations.",
+    "toefl_speaking1": "TOEFL Independent Speaking Task 1. Give me an interesting topic. 15s prep, 45s response. After I write: score 0-4 on Delivery/Language Use/Topic Development + feedback.",
+    "toefl_speaking2": "TOEFL Integrated Speaking: reading 100 words + lecture 150 words → I summarize relationship. Score on TOEFL 0-4 scale.",
+    "toefl_writing1":  "TOEFL Independent Writing: prompt → I write 300+ words → score 1-5 on Development, Organization, Language. Detailed actionable feedback.",
+    "toefl_writing2":  "TOEFL Integrated Writing: reading 250 words + lecture 200 words → I write 150-225 word essay comparing them. Score + feedback.",
+    "toefl_full":      "Mini TOEFL iBT simulation: one task each section (Reading 3Q, Listening transcript 2Q, Speaking 1 task, Writing short essay). Estimated total score out of 120 at end.",
+    "toefl_strategy":  "Comprehensive TOEFL iBT strategy guide: all 4 sections, question types, time management, common traps, scoring rubrics, personalized study plan for my level.",
 }
 
 TALK_PROMPTS = {
-    "talk_daily":    "Let's have a natural conversation about daily life. Start by asking me about my morning routine or weekend plans. Keep it going with follow-up questions. Gently note any language errors at the end of each exchange.",
-    "talk_travel":   "Let's talk about travel and culture. Ask me about the most interesting place I've visited or want to visit, and why. Share opinions to keep the dialogue going. Correct my English naturally.",
-    "talk_work":     "Let's practice professional English. Simulate a casual work conversation — maybe we're colleagues discussing a project, or you're a mentor giving career advice. Use real workplace vocabulary.",
-    "talk_debate":   "Let's do a structured debate. Give me a thought-provoking topic, assign me one position, and argue the other side. Be a strong debater. Score my argumentation (logic, vocabulary, grammar) at the end.",
-    "talk_business": "Let's practice Business English. Choose a scenario: negotiation, client meeting, or project update presentation. Use formal business language and correct any inappropriate register.",
-    "talk_free":     "Let's just talk. Ask me what's on my mind today — anything goes. Keep it natural, like chatting with a smart friend who also happens to correct your English gently.",
-    "talk_interview": "Let's practice for a job interview. You're a senior interviewer. Start with behavioral questions (Tell me about a time when...) and situational questions. Give feedback on my communication skills at the end.",
+    "talk_daily":     "Natural conversation about daily life. Ask about my routine or weekend. Follow-up questions. Note errors gently at end of each exchange.",
+    "talk_travel":    "Talk about travel and culture. Ask about interesting places I've visited or want to visit. Share opinions to keep dialogue flowing.",
+    "talk_work":      "Professional English practice. Simulate a work conversation — colleague discussion or mentor advice. Real workplace vocabulary.",
+    "talk_debate":    "Structured debate practice. Give me a provocative topic, assign me a position. Score argumentation (logic, vocabulary, grammar) at the end.",
+    "talk_business":  "Business English scenario: negotiation, client meeting, or project update. Formal language, correct any inappropriate register.",
+    "talk_free":      "Just talk — ask what's on my mind. Natural, like chatting with a smart friend who also happens to correct English gently.",
+    "talk_interview": "Mock interview practice. Behavioral questions (Tell me about a time when...) and situational. Feedback on communication at the end.",
 }
