@@ -1,22 +1,24 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
-   LinguaMax · Репетитор английского ALEX
+   LinguaMax · Репетитор ALEX — Ultimate Edition
    aiogram 3.x · Anthropic Claude Haiku · SQLite · APScheduler
-   
+
    ФУНКЦИИ:
-   ✅ Уроки грамматики (8 тем)
-   ✅ Словарный тренажёр + флэш-карточки
+   ✅ Ситуативный диалог / Roleplay (7 сценариев + свой)
+   ✅ 3-слойная коррекция текста (исправленный / native-like / разбор)
+   ✅ "Объясни иначе" — новая аналогия по запросу
+   ✅ Конструктор предложений
+   ✅ 10 тем грамматики с интерактивными упражнениями
+   ✅ Словарь с SM-2 интервальным повторением (как Anki)
+   ✅ Ежедневный квиз из личного словаря
+   ✅ Тесты: грамматика, словарь, чтение, письмо, смешанный
+   ✅ TOEFL iBT: все 4 секции + стратегии + мини-симуляция
    ✅ Разговорная практика (7 тем)
-   ✅ Диктант
-   ✅ Проверка и исправление текста
-   ✅ Идиомы и сленг
-   ✅ Тесты по грамматике, лексике, чтению
-   ✅ Определение уровня (A1-C2)
-   ✅ Подготовка к TOEFL (все 4 секции)
-   ✅ База ошибок пользователя
-   ✅ Стрик занятий
+   ✅ XP + ранги + стрик занятий
+   ✅ База ошибок + статистика
    ✅ Анализ фото с текстом
-   ✅ Еженедельный отчёт
+   ✅ Персонализация по интересам
+   ✅ Ежедневные напоминания
 ╚══════════════════════════════════════════════════════════════════╝
 """
 
@@ -25,9 +27,6 @@ import base64
 import logging
 import os
 import random
-import re
-import sqlite3
-from datetime import datetime, timedelta
 
 import httpx
 from aiogram import Bot, Dispatcher, F
@@ -43,7 +42,20 @@ from aiogram.types import (
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
-from translations import T, t
+from database import (
+    db_init, get_user, get_lang, get_level, get_interests,
+    upsert_user, update_user, add_xp, update_streak,
+    get_streak_count, get_xp, get_rank,
+    add_word, get_due_words, update_word_review, get_word_count,
+    log_mistake, get_mistakes,
+    log_session, get_full_stats,
+    log_toefl, get_toefl_scores,
+)
+from prompts import (
+    build_system,
+    ROLEPLAY_SCENARIOS, LESSON_PROMPTS, VOCAB_PROMPTS,
+    TEST_PROMPTS, TOEFL_PROMPTS, TALK_PROMPTS,
+)
 
 load_dotenv()
 BOT_TOKEN     = os.getenv("BOT_TOKEN")
@@ -60,238 +72,12 @@ scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
 
 # ══════════════════════════════════════════════════════════════════
-#  БАЗА ДАННЫХ
-# ══════════════════════════════════════════════════════════════════
-
-DB = "linguamax.db"
-
-def db_init():
-    con = sqlite3.connect(DB)
-    c   = con.cursor()
-
-    c.execute("""CREATE TABLE IF NOT EXISTS users (
-        uid          INTEGER PRIMARY KEY,
-        name         TEXT,
-        lang         TEXT DEFAULT 'ru',
-        level        TEXT DEFAULT 'B1',
-        remind_time  TEXT,
-        created_at   TEXT DEFAULT (datetime('now'))
-    )""")
-
-    c.execute("""CREATE TABLE IF NOT EXISTS sessions (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid        INTEGER,
-        type       TEXT,
-        date       TEXT,
-        score      INTEGER DEFAULT 0,
-        total      INTEGER DEFAULT 0,
-        notes      TEXT,
-        created_at TEXT DEFAULT (datetime('now'))
-    )""")
-
-    c.execute("""CREATE TABLE IF NOT EXISTS vocabulary (
-        id           INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid          INTEGER,
-        word         TEXT,
-        translation  TEXT,
-        example      TEXT,
-        topic        TEXT,
-        learned      INTEGER DEFAULT 0,
-        review_count INTEGER DEFAULT 0,
-        created_at   TEXT DEFAULT (datetime('now'))
-    )""")
-
-    c.execute("""CREATE TABLE IF NOT EXISTS mistakes (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid         INTEGER,
-        original    TEXT,
-        corrected   TEXT,
-        explanation TEXT,
-        category    TEXT,
-        date        TEXT,
-        created_at  TEXT DEFAULT (datetime('now'))
-    )""")
-
-    c.execute("""CREATE TABLE IF NOT EXISTS toefl_scores (
-        id       INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid      INTEGER,
-        section  TEXT,
-        score    INTEGER,
-        max_score INTEGER,
-        date     TEXT,
-        created_at TEXT DEFAULT (datetime('now'))
-    )""")
-
-    con.commit()
-    con.close()
-
-
-def db(query: str, params=(), fetch=False):
-    con = sqlite3.connect(DB)
-    con.row_factory = sqlite3.Row
-    c = con.cursor()
-    c.execute(query, params)
-    result = c.fetchall() if fetch else None
-    con.commit()
-    con.close()
-    return result
-
-
-def get_user(uid: int):
-    rows = db("SELECT * FROM users WHERE uid=?", (uid,), fetch=True)
-    return dict(rows[0]) if rows else None
-
-def get_lang(uid: int) -> str:
-    u = get_user(uid)
-    return (u.get("lang") or "ru") if u else "ru"
-
-def get_level(uid: int) -> str:
-    u = get_user(uid)
-    return (u.get("level") or "B1") if u else "B1"
-
-def upsert_user(uid: int, name: str):
-    db("INSERT OR IGNORE INTO users (uid, name) VALUES (?,?)", (uid, name))
-
-def update_user(uid: int, **kwargs):
-    for k, v in kwargs.items():
-        db(f"UPDATE users SET {k}=? WHERE uid=?", (v, uid))
-
-def log_session(uid: int, stype: str, score: int = 0, total: int = 0, notes: str = ""):
-    db("INSERT INTO sessions (uid,type,date,score,total,notes) VALUES (?,?,?,?,?,?)",
-       (uid, stype, datetime.now().strftime("%Y-%m-%d"), score, total, notes))
-
-def log_mistake(uid: int, original: str, corrected: str, explanation: str, category: str = "grammar"):
-    db("INSERT INTO mistakes (uid,original,corrected,explanation,category,date) VALUES (?,?,?,?,?,?)",
-       (uid, original[:200], corrected[:200], explanation[:500], category, datetime.now().strftime("%Y-%m-%d")))
-
-def log_toefl(uid: int, section: str, score: int, max_score: int):
-    db("INSERT INTO toefl_scores (uid,section,score,max_score,date) VALUES (?,?,?,?,?)",
-       (uid, section, score, max_score, datetime.now().strftime("%Y-%m-%d")))
-
-def add_word(uid: int, word: str, translation: str, example: str, topic: str = "general"):
-    exists = db("SELECT id FROM vocabulary WHERE uid=? AND word=?", (uid, word.lower()), fetch=True)
-    if not exists:
-        db("INSERT INTO vocabulary (uid,word,translation,example,topic) VALUES (?,?,?,?,?)",
-           (uid, word.lower(), translation, example, topic))
-
-def get_stats(uid: int) -> dict:
-    week = (datetime.now()-timedelta(days=7)).strftime("%Y-%m-%d")
-    total_s  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=?", (uid,), fetch=True)[0]["c"]
-    total_t  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%test%'", (uid,), fetch=True)[0]["c"]
-    total_w  = db("SELECT COUNT(*) as c FROM vocabulary WHERE uid=? AND learned=1", (uid,), fetch=True)[0]["c"]
-    total_e  = db("SELECT COUNT(*) as c FROM mistakes WHERE uid=?", (uid,), fetch=True)[0]["c"]
-    toefl_c  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'", (uid,), fetch=True)[0]["c"]
-    streak   = get_streak(uid)
-    return {"sessions": total_s, "tests": total_t, "words": total_w,
-            "errors": total_e, "toefl": toefl_c, "streak": streak}
-
-def get_streak(uid: int) -> int:
-    rows = db("SELECT DISTINCT date FROM sessions WHERE uid=? ORDER BY date DESC", (uid,), fetch=True)
-    if not rows: return 0
-    streak = 0; current = datetime.now().date()
-    for row in rows:
-        d = datetime.strptime(row["date"], "%Y-%m-%d").date()
-        if (current - d).days <= 1:
-            streak += 1; current = d
-        else: break
-    return streak
-
-
-# ══════════════════════════════════════════════════════════════════
-#  СИСТЕМНЫЙ ПРОМПТ ALEX
-# ══════════════════════════════════════════════════════════════════
-
-def build_system(uid: int, mode: str = "general") -> str:
-    lang  = get_lang(uid)
-    level = get_level(uid)
-    lang_instruction = "Explain everything in Russian. Use Russian for all explanations, but keep English examples and exercises in English." if lang == "ru" else "Use English for everything."
-
-    base = f"""You are ALEX, a professional English language tutor with 15 years of experience.
-You specialize in teaching students from {level} level upward.
-Student's current level: {level}
-
-{lang_instruction}
-
-YOUR TEACHING STYLE:
-- Patient, encouraging, and precise
-- Always explain WHY something is correct or wrong, not just WHAT
-- Give concrete examples after every rule
-- Adapt complexity to the student's level ({level})
-- Celebrate progress, normalize mistakes as part of learning
-- When correcting errors: first acknowledge what's good, then correct gently
-
-FORMATTING (Telegram HTML only):
-<b>bold</b> for key terms, <i>italic</i> for examples, <code>code</code> for grammar patterns
-NO markdown: *, _, #
-Use emoji for structure: 📌 rules, ✅ correct, ❌ wrong, 💡 tips
-Always respond according to the language instruction above.
-"""
-
-    if mode == "correction":
-        base += """
-CORRECTION MODE:
-When the student writes in English:
-1. Acknowledge any good points first
-2. List ALL errors clearly with the category (grammar/vocabulary/spelling/punctuation)
-3. Show corrected version
-4. Explain each error in a clear, educational way
-5. Give one extra tip related to the most important error
-Format: use numbered list for errors, show original → corrected
-"""
-    elif mode == "toefl":
-        base += """
-TOEFL MODE:
-You are a TOEFL iBT specialist. You know:
-- Reading: academic passages, question types (factual, inference, vocabulary, rhetorical purpose, insert text)
-- Listening: lectures, conversations, question types (main idea, detail, inference, attitude, purpose)
-- Speaking: integrated and independent tasks, scoring rubrics (delivery, language use, topic development)
-- Writing: integrated essay (reading+lecture), independent essay, scoring criteria (development, organization, language use)
-Target score guidance, time management strategies, common traps and how to avoid them.
-Always provide practice materials at appropriate difficulty (B2-C1 level for TOEFL).
-"""
-    elif mode == "test":
-        base += """
-TEST MODE:
-Create challenging, exam-quality questions. 
-For grammar tests: use multiple choice (4 options), sentence transformation, error identification.
-For vocabulary: definitions, context fill-in, synonyms/antonyms, collocations.
-For reading: use authentic-style academic or semi-academic passages (150-300 words), then ask 5 comprehension questions.
-Always explain the correct answers after the student responds.
-Track score and give percentage at the end.
-"""
-    elif mode == "vocab":
-        base += """
-VOCABULARY MODE:
-Teach vocabulary systematically:
-- Word family (noun/verb/adjective/adverb forms)
-- Collocations (what words go together)
-- Register (formal/informal/neutral)
-- Common mistakes with this word
-- 2-3 example sentences showing different uses
-- Memory tip or mnemonic when helpful
-Focus on vocabulary that is useful for the student's level and TOEFL if relevant.
-"""
-    elif mode == "speaking":
-        base += """
-SPEAKING PRACTICE MODE:
-Simulate a natural conversation. 
-- Ask follow-up questions to keep the conversation going
-- When the student makes errors, note them but continue the conversation naturally
-- At the end of each exchange, give a brief correction summary
-- For TOEFL Speaking practice: give a topic, time limit (15s prep, 45s response for independent; 30s prep, 60s response for integrated)
-- Score speaking responses on: delivery, language use, topic development (like real TOEFL rubric)
-"""
-
-    return base
-
-
-# ══════════════════════════════════════════════════════════════════
 #  ИСТОРИЯ И СОСТОЯНИЯ
 # ══════════════════════════════════════════════════════════════════
 
-histories: dict[int, list[dict]] = {}
-waiting:   dict[int, str]        = {}
-session_data: dict[int, dict]    = {}  # временные данные текущей сессии
+histories:  dict[int, list[dict]] = {}
+waiting:    dict[int, str]        = {}
+session_ctx: dict[int, dict]      = {}  # контекст текущей сессии
 
 def get_history(uid): return histories.setdefault(uid, [])
 
@@ -302,27 +88,20 @@ def add_message(uid: int, role: str, content):
 
 def clear_history(uid): histories[uid] = []
 
-def set_session(uid: int, **kwargs):
-    session_data.setdefault(uid, {}).update(kwargs)
-
-def get_session(uid: int) -> dict:
-    return session_data.get(uid, {})
-
-def clear_session(uid: int):
-    session_data.pop(uid, None)
-
+def set_ctx(uid: int, **kw): session_ctx.setdefault(uid, {}).update(kw)
+def get_ctx(uid: int) -> dict: return session_ctx.get(uid, {})
+def clear_ctx(uid: int): session_ctx.pop(uid, None)
 
 # ══════════════════════════════════════════════════════════════════
 #  ANTHROPIC API
 # ══════════════════════════════════════════════════════════════════
 
-CMD_FOOTER_SEP = "\n\n<i>─────────────────────────────────</i>\n<i>"
+FOOTER = "\n\n<i>──────────────────────────────────</i>\n<i>/lesson · /vocab · /test · /toefl · /roleplay · /talk · /help</i>"
 
 async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str = "") -> str:
     add_message(uid, "user", user_text)
     system = build_system(uid, mode)
     if extra: system += f"\n\n{extra}"
-
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             r = await client.post(
@@ -332,27 +111,24 @@ async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str =
             )
             data = r.json()
             if "error" in data:
-                return f"⚠️ <code>{data['error'].get('message','')[:120]}</code>"
+                return f"⚠️ <code>{data['error'].get('message','')[:150]}</code>"
             reply = data["content"][0]["text"].strip()
     except Exception as e:
-        return f"⚠️ Error. Try again.\n<i>{str(e)[:80]}</i>"
-
+        return f"⚠️ Connection error. Try again.\n<i>{str(e)[:80]}</i>"
     add_message(uid, "assistant", reply)
-    lang   = get_lang(uid)
-    footer = CMD_FOOTER_SEP + t("cmd_footer", lang) + "</i>"
-    return reply + footer
+    return reply + FOOTER
 
 
-async def analyze_photo_text(uid: int, photo_bytes: bytes) -> str:
-    b64  = base64.standard_b64encode(photo_bytes).decode()
+async def analyze_photo(uid: int, photo_bytes: bytes) -> str:
+    b64 = base64.standard_b64encode(photo_bytes).decode()
     lang = get_lang(uid)
     prompt = (
-        "The photo contains text in English. Please:\n"
-        "1. Extract all the text you can see\n"
-        "2. Identify any grammar or spelling errors\n"
-        "3. Explain any difficult vocabulary\n"
-        "4. If it's an exercise or test, help solve it with explanations\n"
-        "5. Give overall feedback on the text quality"
+        "Analyze the English text in this photo:\n"
+        "1. Extract all visible text\n"
+        "2. Correct any grammar/spelling errors\n"
+        "3. Explain difficult vocabulary in context\n"
+        "4. If it's an exercise — solve it with explanations\n"
+        "5. Rate the overall English quality"
     )
     system = build_system(uid, "correction")
     try:
@@ -370,76 +146,152 @@ async def analyze_photo_text(uid: int, photo_bytes: bytes) -> str:
             )
             data = r.json()
             if "error" in data: return f"⚠️ <code>{data['error'].get('message','')[:120]}</code>"
-            footer = CMD_FOOTER_SEP + t("cmd_footer", lang) + "</i>"
-            return data["content"][0]["text"].strip() + footer
+            return data["content"][0]["text"].strip() + FOOTER
     except Exception as e:
         return f"⚠️ <i>{str(e)[:100]}</i>"
-
 
 # ══════════════════════════════════════════════════════════════════
 #  КЛАВИАТУРЫ
 # ══════════════════════════════════════════════════════════════════
 
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
+    if lang == "ru":
+        rows = [
+            ["📚 Урок грамматики",    "📝 Словарь"],
+            ["🎭 Ролевой диалог",     "✅ Тест"],
+            ["🎓 TOEFL",              "✍️ Проверить текст"],
+            ["💬 Разговор",           "🗣 Идиомы"],
+            ["❌ Мои ошибки",         "📊 Прогресс"],
+        ]
+        placeholder = "Напиши по-английски — ALEX проверит..."
+    else:
+        rows = [
+            ["📚 Grammar Lesson",    "📝 Vocabulary"],
+            ["🎭 Roleplay",          "✅ Test"],
+            ["🎓 TOEFL",             "✍️ Check Writing"],
+            ["💬 Speaking",          "🗣 Idioms"],
+            ["❌ My Mistakes",       "📊 Progress"],
+        ]
+        placeholder = "Write in English — ALEX will check..."
     return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text=t("btn_lesson",lang)),    KeyboardButton(text=t("btn_vocab",lang))],
-            [KeyboardButton(text=t("btn_talk",lang)),      KeyboardButton(text=t("btn_test",lang))],
-            [KeyboardButton(text=t("btn_toefl",lang)),     KeyboardButton(text=t("btn_writing",lang))],
-            [KeyboardButton(text=t("btn_idioms",lang)),    KeyboardButton(text=t("btn_dictation",lang))],
-            [KeyboardButton(text=t("btn_mistakes",lang)),  KeyboardButton(text=t("btn_stats",lang))],
-        ],
+        keyboard=[[KeyboardButton(text=t) for t in row] for row in rows],
         resize_keyboard=True,
-        input_field_placeholder=t("input_placeholder", lang),
+        input_field_placeholder=placeholder,
     )
 
 
 def lang_kb() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
-         InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")],
-    ])
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
+        InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"),
+    ]])
 
 
-def level_kb(lang: str) -> InlineKeyboardMarkup:
-    rows = [[InlineKeyboardButton(text=lv, callback_data=f"level_{lv}")] for lv in LEVELS]
-    rows.append([InlineKeyboardButton(text=t("level_test_btn", lang), callback_data="level_test")])
+def level_kb() -> InlineKeyboardMarkup:
+    rows = [[InlineKeyboardButton(text=lv, callback_data=f"setlevel_{lv}")] for lv in LEVELS]
+    rows.append([InlineKeyboardButton(text="🔍 Placement test", callback_data="test_placement")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def toefl_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["toefl_reading","toefl_listening","toefl_speaking","toefl_writing","toefl_full","toefl_strategy","toefl_score"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def test_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["test_grammar","test_vocab","test_reading","test_mixed","test_placement"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def talk_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["talk_daily","talk_travel","talk_work","talk_culture","talk_debate","talk_business","talk_free"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
+def roleplay_kb(lang: str) -> InlineKeyboardMarkup:
+    rows = []
+    for key, data in ROLEPLAY_SCENARIOS.items():
+        label = data["ru"] if lang == "ru" else data["en"]
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def lesson_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["lesson_tenses","lesson_conditionals","lesson_modal","lesson_passive",
-            "lesson_articles","lesson_prepositions","lesson_phrasal","lesson_reported"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
+    labels = {
+        "lesson_tenses":       ("⏰ Времена глагола",         "⏰ Verb Tenses"),
+        "lesson_conditionals": ("🔀 Условные предложения",    "🔀 Conditionals"),
+        "lesson_modal":        ("💭 Модальные глаголы",       "💭 Modal Verbs"),
+        "lesson_passive":      ("🔄 Пассивный залог",         "🔄 Passive Voice"),
+        "lesson_articles":     ("📌 Артикли",                 "📌 Articles"),
+        "lesson_prepositions": ("📍 Предлоги",                "📍 Prepositions"),
+        "lesson_phrasal":      ("🔗 Фразовые глаголы",        "🔗 Phrasal Verbs"),
+        "lesson_reported":     ("💬 Косвенная речь",          "💬 Reported Speech"),
+        "lesson_subjunctive":  ("🌙 Сослагательное наклонение","🌙 Subjunctive"),
+        "lesson_inversion":    ("🔁 Инверсия (C1-C2)",        "🔁 Inversion (C1-C2)"),
+    }
+    rows = []
+    for key, (ru, en) in labels.items():
+        label = ru if lang == "ru" else en
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
+    rows.append([InlineKeyboardButton(text="← Назад" if lang=="ru" else "← Back", callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def vocab_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["vocab_new","vocab_review","vocab_topic","vocab_flashcards"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
+    labels = {
+        "vocab_new":         ("🆕 Новые слова",           "🆕 New Words"),
+        "vocab_review":      ("🔄 Повторение (SM-2)",     "🔄 Review (SM-2)"),
+        "vocab_flashcards":  ("🃏 Флэш-карточки",         "🃏 Flashcards"),
+        "vocab_collocations":("🤝 Коллокации",            "🤝 Collocations"),
+        "vocab_idioms_adv":  ("🗣 Продвинутые идиомы",    "🗣 Advanced Idioms"),
+        "vocab_topic":       ("📂 По теме",               "📂 By Topic"),
+        "daily_quiz":        ("📅 Квиз из словаря",       "📅 Daily Word Quiz"),
+    }
+    rows = []
+    for key, (ru, en) in labels.items():
+        label = ru if lang == "ru" else en
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
+    rows.append([InlineKeyboardButton(text="← Назад" if lang=="ru" else "← Back", callback_data="back_main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def test_kb(lang: str) -> InlineKeyboardMarkup:
+    labels = {
+        "test_grammar":   ("📐 Грамматика",            "📐 Grammar"),
+        "test_vocab":     ("📝 Лексика",               "📝 Vocabulary"),
+        "test_reading":   ("📖 Чтение (TOEFL-style)",  "📖 Reading (TOEFL-style)"),
+        "test_writing":   ("✍️ Письмо",                "✍️ Writing"),
+        "test_mixed":     ("🎲 Смешанный",             "🎲 Mixed"),
+        "test_placement": ("🔍 Определение уровня",    "🔍 Placement Test"),
+    }
+    rows = []
+    for key, (ru, en) in labels.items():
+        label = ru if lang == "ru" else en
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
+    rows.append([InlineKeyboardButton(text="← Назад" if lang=="ru" else "← Back", callback_data="back_main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def toefl_kb(lang: str) -> InlineKeyboardMarkup:
+    labels = {
+        "toefl_reading":   ("📖 Reading",            "📖 Reading"),
+        "toefl_listening": ("🎧 Listening",           "🎧 Listening"),
+        "toefl_speaking1": ("🗣 Speaking — Independent", "🗣 Speaking — Independent"),
+        "toefl_speaking2": ("🗣 Speaking — Integrated",  "🗣 Speaking — Integrated"),
+        "toefl_writing1":  ("✍️ Writing — Independent",  "✍️ Writing — Independent"),
+        "toefl_writing2":  ("✍️ Writing — Integrated",   "✍️ Writing — Integrated"),
+        "toefl_full":      ("🏆 Полный мини-тест",    "🏆 Full Mini-Test"),
+        "toefl_strategy":  ("💡 Стратегии и советы",  "💡 Tips & Strategies"),
+        "toefl_score":     ("📊 Мои баллы",           "📊 My Scores"),
+    }
+    rows = []
+    for key, (ru, en) in labels.items():
+        label = ru if lang == "ru" else en
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
+    rows.append([InlineKeyboardButton(text="← Назад" if lang=="ru" else "← Back", callback_data="back_main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def talk_kb(lang: str) -> InlineKeyboardMarkup:
+    labels = {
+        "talk_daily":     ("☀️ Повседневная жизнь",  "☀️ Daily Life"),
+        "talk_travel":    ("✈️ Путешествия",          "✈️ Travel"),
+        "talk_work":      ("💼 Работа",              "💼 Work"),
+        "talk_debate":    ("🗣 Дебаты",              "🗣 Debate"),
+        "talk_business":  ("🤝 Бизнес English",      "🤝 Business English"),
+        "talk_free":      ("💭 Свободная беседа",    "💭 Free Chat"),
+        "talk_interview": ("👔 Mock Interview",      "👔 Mock Interview"),
+    }
+    rows = []
+    for key, (ru, en) in labels.items():
+        label = ru if lang == "ru" else en
+        rows.append([InlineKeyboardButton(text=label, callback_data=key)])
+    rows.append([InlineKeyboardButton(text="← Назад" if lang=="ru" else "← Back", callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -451,58 +303,19 @@ def remind_kb() -> InlineKeyboardMarkup:
          InlineKeyboardButton(text="🌇 18:00", callback_data="remind_18:00")],
         [InlineKeyboardButton(text="🌆 19:00", callback_data="remind_19:00"),
          InlineKeyboardButton(text="🌙 21:00", callback_data="remind_21:00")],
-        [InlineKeyboardButton(text="❌ Отключить / Disable", callback_data="remind_off")],
+        [InlineKeyboardButton(text="❌ Disable", callback_data="remind_off")],
     ])
 
 
-# ══════════════════════════════════════════════════════════════════
-#  ПРОМПТЫ ДЛЯ РАЗДЕЛОВ
-# ══════════════════════════════════════════════════════════════════
-
-LESSON_PROMPTS = {
-    "lesson_tenses":      "Teach me English verb tenses systematically. Start with an overview, then cover each tense with: form, usage, examples, common mistakes. Include a mini-quiz at the end.",
-    "lesson_conditionals":"Teach me all types of English conditionals (0,1,2,3 and mixed). Explain when to use each, give clear examples, then test me with 5 sentences to complete.",
-    "lesson_modal":       "Teach me English modal verbs (can, could, may, might, must, shall, should, will, would, ought to, need to). Cover meaning, usage differences, and give practice exercises.",
-    "lesson_passive":     "Teach me the passive voice in English. Cover all tenses in passive, when and why we use passive, with examples and transformation exercises.",
-    "lesson_articles":    "Teach me English articles (a/an/the/zero article). This is one of the hardest topics. Cover all rules with clear examples and exceptions, then give practice exercises.",
-    "lesson_prepositions":"Teach me English prepositions of time, place, and movement. Cover the most common ones with examples and give exercises.",
-    "lesson_phrasal":     "Teach me the most important English phrasal verbs. Organize by verb (get, take, give, put, come, go, look, turn). Give meanings and example sentences, then practice exercises.",
-    "lesson_reported":    "Teach me reported speech in English. Cover statements, questions, and commands, plus the backshift of tenses. Give transformation exercises.",
-}
-
-TALK_PROMPTS = {
-    "talk_daily":    "Let's have a conversation about daily life. Start by asking me about my typical day, then keep the conversation going naturally. Correct my English gently.",
-    "talk_travel":   "Let's talk about travel. Ask me about places I've been or want to visit, and share some interesting discussion points. Correct my errors naturally.",
-    "talk_work":     "Let's practice professional English. Simulate a work-related conversation — could be a job interview, meeting, or workplace discussion. Correct my language.",
-    "talk_culture":  "Let's discuss culture, arts, movies, or music. Start a conversation on an interesting cultural topic suited to my level.",
-    "talk_debate":   "Let's do a debate exercise. Give me a controversial topic, state one position, and I'll argue the other. This will improve my argumentative English.",
-    "talk_business": "Let's practice Business English. We'll do a business scenario — negotiation, presentation, email discussion, or meeting. Use formal business language.",
-    "talk_free":     "Let's have a free conversation in English. Ask me what I'd like to talk about and keep it natural. Correct my mistakes gently after each response.",
-}
-
-TEST_PROMPTS = {
-    "test_grammar":    "Create a grammar test with 10 challenging multiple-choice questions appropriate for my level. Cover different grammar areas. After I answer, give full explanations.",
-    "test_vocab":      "Create a vocabulary test with 10 questions: definitions, fill-in-the-blank, and synonym/antonym questions. After I answer, explain all answers.",
-    "test_reading":    "Create a reading comprehension test: give me an academic-style passage (250-300 words), then ask 5 comprehension questions (factual, inference, vocabulary in context). Score me at the end.",
-    "test_mixed":      "Create a comprehensive mixed test with 15 questions covering grammar, vocabulary, and usage. Make it challenging but appropriate for my level.",
-    "test_placement":  "Run a placement test to determine my exact English level. Ask me 15 progressively harder questions covering grammar, vocabulary, and comprehension. At the end, tell me my level with detailed feedback.",
-}
-
-TOEFL_PROMPTS = {
-    "toefl_reading":   "Give me a TOEFL Reading practice passage (academic topic, approximately 300 words at B2-C1 level), followed by 5 TOEFL-style questions (factual information, inference, vocabulary in context, rhetorical purpose, sentence insertion). After I answer, give detailed explanations and a score.",
-    "toefl_listening": "Simulate a TOEFL Listening exercise. Describe a university lecture or conversation in detail (as if I'm reading the transcript), then ask 5 TOEFL-style listening comprehension questions. Give explanations and score.",
-    "toefl_speaking":  "Give me a TOEFL Speaking practice task. Start with an Independent Speaking task: give me a topic, tell me I have 15 seconds to prepare and 45 seconds to respond. After I write my response, score it on the TOEFL 0-4 scale for: Delivery, Language Use, and Topic Development. Give detailed feedback.",
-    "toefl_writing":   "Give me a TOEFL Writing practice task. Start with the Independent Writing task: give me a question/prompt, tell me to write a 5-paragraph essay of at least 300 words. After I submit, score it 1-5 on: Development & Support, Organization, and Language Use. Give detailed feedback with specific improvements.",
-    "toefl_full":      "Let's do a mini TOEFL iBT simulation. We'll do one task from each section in order: 1) Reading (short passage + 3 questions), 2) Listening (transcript + 2 questions), 3) Speaking (1 independent task), 4) Writing (1 short essay). Give me a final score estimate at the end.",
-    "toefl_strategy":  "Give me comprehensive TOEFL iBT strategies and tips for all 4 sections. Include: time management, common question types and how to approach them, common mistakes to avoid, and what to focus on to maximize my score. Base advice on my current level.",
-}
-
-VOCAB_TOPIC_PROMPTS = {
-    "vocab_new":        "Teach me 10 new English words appropriate for my level. For each word give: pronunciation guide, part of speech, definition, 2 example sentences, common collocations, and a memory tip.",
-    "vocab_review":     "Quiz me on vocabulary I might have learned. Give me 10 words and ask me to define them or use them in a sentence. Give feedback and explanations after each answer.",
-    "vocab_topic":      "Ask me what topic I want vocabulary for, then teach me 10-15 essential words on that topic with definitions, examples, and collocations.",
-    "vocab_flashcards": "Give me 10 vocabulary flashcard-style prompts: show the definition or a gapped sentence, let me guess the word, then confirm or correct. Keep score.",
-}
+def flashcard_kb(word_id: int, lang: str) -> InlineKeyboardMarkup:
+    if lang == "ru":
+        labels = [("😕 Не знал", 1), ("🤔 Почти", 2), ("😊 Помнил", 4), ("✅ Легко", 5)]
+    else:
+        labels = [("😕 Forgot", 1), ("🤔 Hard", 2), ("😊 Good", 4), ("✅ Easy", 5)]
+    return InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text=label, callback_data=f"fc_{word_id}_{q}")
+        for label, q in labels
+    ]])
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -513,54 +326,86 @@ async def send_reminder(uid: int):
     user = get_user(uid)
     if not user: return
     lang   = user.get("lang", "ru")
-    streak = get_streak(uid)
+    streak = get_streak_count(uid)
+
+    # Проверяем есть ли слова на повторение
+    due = get_due_words(uid, limit=3)
+    due_text = ""
+    if due:
+        count = len(due)
+        due_text = f"\n📅 <b>{count} слов{'а' if count>1 else o} ждут повторения!</b> /vocab" if lang=="ru" else f"\n📅 <b>{count} word{'s' if count>1 else ''} due for review!</b> /vocab"
+
     msgs_ru = [
-        "📚 <b>Время заниматься английским!</b>\n\nДаже 15 минут в день дают результат. ALEX ждёт! 🎓",
-        "🔥 <b>Не пропусти урок!</b>\n\nТвой английский улучшается с каждым занятием.",
-        "⚡️ <b>Ежедневная практика = быстрый прогресс.</b>\n\nНачни прямо сейчас!",
+        "📚 <b>Время практики!</b>\nДаже 10 минут в день меняют всё.{due}",
+        "🔥 <b>Не теряй прогресс!</b>\nALEX ждёт тебя.{due}",
+        "⚡️ <b>Ежедневная практика = беглый English.</b>{due}",
     ]
     msgs_en = [
-        "📚 <b>Time to practice English!</b>\n\nEven 15 minutes a day makes a difference. ALEX is ready! 🎓",
-        "🔥 <b>Don't miss your lesson!</b>\n\nYour English improves with every session.",
-        "⚡️ <b>Daily practice = fast progress.</b>\n\nStart right now!",
+        "📚 <b>Practice time!</b>\nEven 10 minutes a day makes a difference.{due}",
+        "🔥 <b>Keep your streak alive!</b>\nALEX is waiting.{due}",
+        "⚡️ <b>Daily practice = fluent English.</b>{due}",
     ]
     msgs = msgs_ru if lang == "ru" else msgs_en
-    text = random.choice(msgs)
-    if streak > 1:
-        text += f"\n\n{t('streak_msg', lang, n=streak)}"
+    text = random.choice(msgs).format(due=due_text)
+    if streak > 2:
+        text += f"\n\n🔥 <b>Streak: {streak} {'дней' if lang=='ru' else 'days'}!</b>"
     try:
         await bot.send_message(uid, text)
     except Exception as e:
         logger.warning(f"Reminder failed {uid}: {e}")
 
 
+async def send_daily_quiz(uid: int):
+    """Ежедневный квиз из личного словаря."""
+    due = get_due_words(uid, limit=5)
+    if not due: return
+    lang = get_lang(uid)
+    title = "📅 <b>Ежедневный квиз!</b>" if lang == "ru" else "📅 <b>Daily Word Quiz!</b>"
+    text  = title + "\n\n"
+    for i, w in enumerate(due, 1):
+        text += f"{i}. <b>{w['word']}</b> — ?\n"
+    hint = "Напиши перевод или используй в предложении 👇" if lang == "ru" else "Write the translation or use in a sentence 👇"
+    text += f"\n<i>{hint}</i>"
+    try:
+        await bot.send_message(uid, text)
+        # Сохраняем что квиз отправлен
+        waiting[uid] = "daily_quiz"
+        set_ctx(uid, quiz_words=[dict(w) for w in due])
+    except Exception: pass
+
+
 async def send_weekly_report(uid: int):
-    stats = get_stats(uid)
+    stats = get_full_stats(uid)
     lang  = get_lang(uid)
-    level = get_level(uid)
-    titles = {"ru": "📊 <b>Еженедельный отчёт</b>", "en": "📊 <b>Weekly Report</b>"}
     try:
         await bot.send_message(uid,
-            f"{titles.get(lang,'📊 Report')}\n\n"
-            f"🎯 {level} · 🔥 {stats['streak']} · 📅 {stats['sessions']}\n"
-            f"📝 {stats['words']} words · ✅ {stats['tests']} tests"
+            f"📊 <b>{'Еженедельный отчёт' if lang=='ru' else 'Weekly Report'}</b>\n\n"
+            f"🎯 {stats['level']} · {stats['rank']}\n"
+            f"⭐ XP: <b>{stats['xp']}</b>\n"
+            f"🔥 Streak: <b>{stats['streak']} {'дней' if lang=='ru' else 'days'}</b>\n"
+            f"📅 Sessions: <b>{stats['sessions']}</b>\n"
+            f"📝 Words: <b>{stats['words']}</b>\n"
+            f"✅ Tests: <b>{stats['tests']}</b>"
         )
     except Exception: pass
 
 
 def schedule_all():
-    rows = db("SELECT uid, remind_time FROM users WHERE remind_time IS NOT NULL AND remind_time != 'off'", fetch=True)
+    from database import db as dbq
+    rows = dbq("SELECT uid, remind_time FROM users WHERE remind_time IS NOT NULL AND remind_time != 'off'", fetch=True)
     if rows:
         for r in rows:
             try:
                 h, m = map(int, r["remind_time"].split(":"))
                 scheduler.add_job(send_reminder, "cron", hour=h, minute=m, args=[r["uid"]], id=f"remind_{r['uid']}", replace_existing=True)
+                # Квиз через час после основного напоминания
+                scheduler.add_job(send_daily_quiz, "cron", hour=(h+1)%24, minute=m, args=[r["uid"]], id=f"quiz_{r['uid']}", replace_existing=True)
             except Exception: pass
-    all_users = db("SELECT uid FROM users", fetch=True)
+    from database import db as dbq2
+    all_users = dbq2("SELECT uid FROM users", fetch=True)
     if all_users:
         for r in all_users:
             scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=19, args=[r["uid"]], id=f"weekly_{r['uid']}", replace_existing=True)
-
 
 # ══════════════════════════════════════════════════════════════════
 #  КОМАНДЫ
@@ -572,152 +417,295 @@ async def cmd_start(message: Message):
     name = message.from_user.first_name or "Student"
     upsert_user(uid, name)
     scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=19, args=[uid], id=f"weekly_{uid}", replace_existing=True)
+
     user = get_user(uid)
     if not user or not user.get("lang"):
-        await message.answer(t("choose_lang","ru"), reply_markup=lang_kb())
+        await message.answer("🌍 Choose your interface language / Выбери язык:", reply_markup=lang_kb())
         return
+
     lang = get_lang(uid)
-    await message.answer(t("welcome", lang, name=name), reply_markup=main_kb(lang))
-    await message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
+    welcome = (
+        f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b> 👋\n\n"
+        f"Я <b>ALEX</b> — {'твой репетитор английского на базе ИИ' if lang=='ru' else 'your AI English tutor'}.\n\n"
+        f"{'Работаю как живой преподаватель: объясняю, исправляю, веду ролевые диалоги, готовлю к TOEFL.' if lang=='ru' else 'I work like a real teacher: explain, correct, roleplay, and prep you for TOEFL.'}\n\n"
+        f"<i>{'Сначала выбери уровень 👇' if lang=='ru' else 'First, set your level 👇'}</i>"
+    )
+    await message.answer(welcome, reply_markup=main_kb(lang))
+    await message.answer(
+        f"🎯 <b>{'Выбери уровень или пройди тест:' if lang=='ru' else 'Choose your level or take a placement test:'}</b>",
+        reply_markup=level_kb()
+    )
 
 
 @dp.message(Command("lang"))
 async def cmd_lang(message: Message):
-    await message.answer(t("choose_lang", get_lang(message.from_user.id)), reply_markup=lang_kb())
-
-
-@dp.message(Command("help"))
-async def cmd_help(message: Message):
-    await message.answer(t("help", get_lang(message.from_user.id)))
+    await message.answer("🌍 Choose language / Выбери язык:", reply_markup=lang_kb())
 
 
 @dp.message(Command("level"))
 async def cmd_level(message: Message):
+    lang = get_lang(message.from_user.id)
+    await message.answer(
+        f"🎯 <b>{'Выбери уровень:' if lang=='ru' else 'Choose your level:'}</b>",
+        reply_markup=level_kb()
+    )
+
+
+@dp.message(Command("help"))
+async def cmd_help(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    await message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
+    if lang == "ru":
+        text = (
+            "<b>LinguaMax ALEX · Команды</b>\n\n"
+            "<b>Обучение:</b>\n"
+            "/lesson — уроки грамматики\n"
+            "/vocab — словарный тренажёр\n"
+            "/roleplay — ролевые диалоги\n"
+            "/talk — разговорная практика\n"
+            "/idioms — идиомы\n"
+            "/writing — проверка текста\n"
+            "/sentence — конструктор предложений\n\n"
+            "<b>Тесты:</b>\n"
+            "/test — тесты\n"
+            "/toefl — подготовка к TOEFL\n\n"
+            "<b>Прогресс:</b>\n"
+            "/stats — статистика\n"
+            "/mistakes — мои ошибки\n"
+            "/level — сменить уровень\n"
+            "/streak — мой стрик\n\n"
+            "<b>Прочее:</b>\n"
+            "/interests — задать интересы\n"
+            "/remind — напоминания\n"
+            "/reset — сбросить диалог\n\n"
+            "📸 Фото текста → ALEX проанализирует\n"
+            "✍️ Пиши по-английски → ALEX исправит"
+        )
+    else:
+        text = (
+            "<b>LinguaMax ALEX · Commands</b>\n\n"
+            "<b>Learning:</b>\n"
+            "/lesson — grammar lessons\n"
+            "/vocab — vocabulary trainer\n"
+            "/roleplay — roleplay scenarios\n"
+            "/talk — speaking practice\n"
+            "/idioms — idioms\n"
+            "/writing — text correction\n"
+            "/sentence — sentence builder\n\n"
+            "<b>Tests:</b>\n"
+            "/test — tests\n"
+            "/toefl — TOEFL preparation\n\n"
+            "<b>Progress:</b>\n"
+            "/stats — statistics\n"
+            "/mistakes — my errors\n"
+            "/level — change level\n"
+            "/streak — my streak\n\n"
+            "<b>Other:</b>\n"
+            "/interests — set your interests\n"
+            "/remind — reminders\n"
+            "/reset — clear dialogue\n\n"
+            "📸 Photo of text → ALEX analyzes it\n"
+            "✍️ Write in English → ALEX corrects it"
+        )
+    await message.answer(text)
 
 
 @dp.message(Command("lesson"))
 async def cmd_lesson(message: Message):
     lang = get_lang(message.from_user.id)
-    await message.answer(t("lesson_menu", lang), reply_markup=lesson_kb(lang))
+    title = "📚 <b>Уроки грамматики:</b>" if lang == "ru" else "📚 <b>Grammar Lessons:</b>"
+    await message.answer(title, reply_markup=lesson_kb(lang))
 
 
 @dp.message(Command("vocab"))
 async def cmd_vocab(message: Message):
     lang = get_lang(message.from_user.id)
-    await message.answer(t("vocab_menu", lang), reply_markup=vocab_kb(lang))
+    title = "📝 <b>Словарный тренажёр:</b>" if lang == "ru" else "📝 <b>Vocabulary Trainer:</b>"
+    await message.answer(title, reply_markup=vocab_kb(lang))
+
+
+@dp.message(Command("roleplay"))
+async def cmd_roleplay(message: Message):
+    uid  = message.from_user.id
+    lang = get_lang(uid)
+    title = "🎭 <b>Ролевые диалоги — выбери сценарий:</b>" if lang == "ru" else "🎭 <b>Roleplay — choose a scenario:</b>"
+    await message.answer(title, reply_markup=roleplay_kb(lang))
 
 
 @dp.message(Command("talk"))
 async def cmd_talk(message: Message):
     lang = get_lang(message.from_user.id)
-    await message.answer(t("talk_menu", lang), reply_markup=talk_kb(lang))
+    title = "💬 <b>Разговорная практика:</b>" if lang == "ru" else "💬 <b>Speaking Practice:</b>"
+    await message.answer(title, reply_markup=talk_kb(lang))
 
 
 @dp.message(Command("test"))
 async def cmd_test(message: Message):
     lang = get_lang(message.from_user.id)
-    await message.answer(t("test_menu", lang), reply_markup=test_kb(lang))
+    title = "✅ <b>Тесты:</b>" if lang == "ru" else "✅ <b>Tests:</b>"
+    await message.answer(title, reply_markup=test_kb(lang))
 
 
 @dp.message(Command("toefl"))
 async def cmd_toefl(message: Message):
-    lang = get_lang(message.from_user.id)
-    await message.answer(t("toefl_menu", lang), reply_markup=toefl_kb(lang))
+    uid  = message.from_user.id
+    lang = get_lang(uid)
+    text = (
+        "🎓 <b>Подготовка к TOEFL iBT</b>\n\n"
+        "Тест состоит из 4 секций:\n"
+        "📖 Reading · 🎧 Listening · 🗣 Speaking · ✍️ Writing\n\n"
+        "<i>Выбери секцию для тренировки:</i>"
+        if lang == "ru" else
+        "🎓 <b>TOEFL iBT Preparation</b>\n\n"
+        "The test has 4 sections:\n"
+        "📖 Reading · 🎧 Listening · 🗣 Speaking · ✍️ Writing\n\n"
+        "<i>Choose a section to practice:</i>"
+    )
+    await message.answer(text, reply_markup=toefl_kb(lang))
 
 
 @dp.message(Command("writing"))
 async def cmd_writing(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    await message.answer(t("writing_prompt", lang))
+    prompt = (
+        "✍️ <b>Проверка текста</b>\n\n"
+        "Отправь свой текст на английском — ALEX вернёт:\n"
+        "✅ Исправленная версия\n"
+        "🌟 Улучшенная (native-like)\n"
+        "📚 Разбор каждой ошибки"
+        if lang == "ru" else
+        "✍️ <b>Writing Check</b>\n\n"
+        "Send your English text — ALEX will return:\n"
+        "✅ Corrected version\n"
+        "🌟 Native-like improvement\n"
+        "📚 Breakdown of each error"
+    )
+    await message.answer(prompt)
     waiting[uid] = "writing"
 
 
-@dp.message(Command("dictation"))
-async def cmd_dictation(message: Message):
-    uid  = message.from_user.id
-    lang = get_lang(uid)
+@dp.message(Command("sentence"))
+async def cmd_sentence(message: Message):
+    uid   = message.from_user.id
     level = get_level(uid)
-    await message.answer(t("dictation_ready", lang))
     await bot.send_chat_action(message.chat.id, "typing")
     reply = await ask_alex(uid,
-        f"Give me one dictation sentence appropriate for {level} level. "
-        "Format: 'DICTATION: [sentence]' then below write 'Write exactly what you read above.'",
-        mode="general"
+        f"Give me a sentence builder exercise for {level} level. "
+        "Provide 6-8 jumbled words and ask me to arrange them into a correct sentence. "
+        "After I answer, confirm if correct or show the right answer with explanation.",
+        mode="grammar"
     )
     await message.answer(reply)
-    waiting[uid] = "dictation"
-    log_session(uid, "dictation")
+    log_session(uid, "sentence_builder")
+    waiting[uid] = "lesson_active"
 
 
 @dp.message(Command("idioms"))
 async def cmd_idioms(message: Message):
-    uid  = message.from_user.id
+    uid   = message.from_user.id
     level = get_level(uid)
     await bot.send_chat_action(message.chat.id, "typing")
     reply = await ask_alex(uid,
-        f"Teach me 5 useful English idioms and phrasal verbs appropriate for {level} level. "
-        "For each: the idiom, meaning, origin (briefly), 2 example sentences, and when/how to use it naturally.",
+        f"Teach me 5 useful English idioms for {level} level. "
+        "For each: the idiom, meaning, origin (very briefly), 2 natural example sentences, "
+        "and when native speakers actually use it. Make it memorable.",
         mode="vocab"
     )
     await message.answer(reply)
     log_session(uid, "idioms")
 
 
-@dp.message(Command("reading"))
-async def cmd_reading(message: Message):
-    uid = message.from_user.id
-    await bot.send_chat_action(message.chat.id, "typing")
-    reply = await ask_alex(uid, TEST_PROMPTS["test_reading"], mode="test")
-    await message.answer(reply)
-    log_session(uid, "test_reading")
-    waiting[uid] = "test_active"
-
-
 @dp.message(Command("stats"))
 async def cmd_stats(message: Message):
     uid   = message.from_user.id
     lang  = get_lang(uid)
-    stats = get_stats(uid)
-    level = get_level(uid)
-    await message.answer(t("stats_title", lang,
-        level=level, sessions=stats["sessions"], streak=stats["streak"],
-        tests=stats["tests"], words=stats["words"], errors=stats["errors"], toefl=stats["toefl"]
-    ))
+    stats = get_full_stats(uid)
+    xp    = stats["xp"]
+    next_rank_xp = {
+        "🌱 Seedling": 100, "📗 Beginner": 300, "📘 Elementary": 600,
+        "📙 Pre-Intermediate": 1000, "⭐ Intermediate": 1500,
+        "🌟 Upper-Intermediate": 2500, "💫 Advanced": 4000, "🏆 Master": 9999
+    }
+    nxt = next_rank_xp.get(stats["rank"], 9999)
+    progress_bar = "█" * min(10, int(xp/nxt*10)) + "░" * max(0, 10-int(xp/nxt*10))
+
+    text = (
+        f"📊 <b>Твой прогресс</b>\n\n"
+        f"🎯 Уровень: <b>{stats['level']}</b>\n"
+        f"{stats['rank']}\n"
+        f"⭐ XP: <b>{xp}</b> [{progress_bar}]\n\n"
+        f"🔥 Стрик: <b>{stats['streak']} дней</b>\n"
+        f"📅 Занятий: <b>{stats['sessions']}</b>\n"
+        f"✅ Тестов: <b>{stats['tests']}</b>\n"
+        f"📝 Слов в словаре: <b>{stats['words']}</b>\n"
+        f"❌ Ошибок разобрано: <b>{stats['errors']}</b>\n"
+        f"🎓 TOEFL сессий: <b>{stats['toefl']}</b>"
+        if lang == "ru" else
+        f"📊 <b>Your Progress</b>\n\n"
+        f"🎯 Level: <b>{stats['level']}</b>\n"
+        f"{stats['rank']}\n"
+        f"⭐ XP: <b>{xp}</b> [{progress_bar}]\n\n"
+        f"🔥 Streak: <b>{stats['streak']} days</b>\n"
+        f"📅 Sessions: <b>{stats['sessions']}</b>\n"
+        f"✅ Tests: <b>{stats['tests']}</b>\n"
+        f"📝 Words learned: <b>{stats['words']}</b>\n"
+        f"❌ Errors reviewed: <b>{stats['errors']}</b>\n"
+        f"🎓 TOEFL sessions: <b>{stats['toefl']}</b>"
+    )
+    await message.answer(text)
 
 
 @dp.message(Command("mistakes"))
 async def cmd_mistakes(message: Message):
-    uid  = message.from_user.id
-    lang = get_lang(uid)
-    rows = db("SELECT category, original, corrected, explanation FROM mistakes WHERE uid=? ORDER BY created_at DESC LIMIT 10", (uid,), fetch=True)
+    uid   = message.from_user.id
+    lang  = get_lang(uid)
+    rows  = get_mistakes(uid, limit=10)
     if not rows:
-        await message.answer(t("mistakes_empty", lang))
+        msg = "✅ Ошибок пока не записано. Напиши что-нибудь по-английски!" if lang=="ru" else "✅ No mistakes recorded yet. Write something in English!"
+        await message.answer(msg)
         return
-    text = t("mistakes_title", lang)
+    title = "❌ <b>Твои последние ошибки:</b>\n\n" if lang=="ru" else "❌ <b>Your recent mistakes:</b>\n\n"
+    text  = title
     for i, r in enumerate(rows, 1):
-        text += f"{i}. ❌ <code>{r['original'][:50]}</code>\n   ✅ <code>{r['corrected'][:50]}</code>\n   <i>{r['explanation'][:100]}</i>\n\n"
+        text += f"{i}. ❌ <code>{r['original'][:60]}</code>\n   ✅ <i>{r['corrected'][:60]}</i>\n   💡 {r['explanation'][:100]}\n\n"
     await message.answer(text)
 
 
 @dp.message(Command("streak"))
 async def cmd_streak(message: Message):
-    uid   = message.from_user.id
-    lang  = get_lang(uid)
-    streak = get_streak(uid)
-    if streak > 1:
-        await message.answer(t("streak_msg", lang, n=streak))
+    uid    = message.from_user.id
+    lang   = get_lang(uid)
+    streak = get_streak_count(uid)
+    xp     = get_xp(uid)
+    rank   = get_rank(xp)
+    if streak > 0:
+        msg = f"🔥 <b>Стрик: {streak} дней подряд!</b>\n{rank} · {xp} XP" if lang=="ru" else f"🔥 <b>Streak: {streak} days in a row!</b>\n{rank} · {xp} XP"
     else:
-        msgs = {"ru": "🎯 Начни стрик сегодня — занимайся каждый день!", "en": "🎯 Start your streak today — study every day!"}
-        await message.answer(msgs.get(lang, msgs["en"]))
+        msg = "🎯 Начни стрик сегодня — занимайся каждый день!" if lang=="ru" else "🎯 Start your streak today — study every day!"
+    await message.answer(msg)
+
+
+@dp.message(Command("interests"))
+async def cmd_interests(message: Message):
+    uid  = message.from_user.id
+    lang = get_lang(uid)
+    msg  = (
+        "🎮 <b>Расскажи о своих интересах!</b>\n\n"
+        "Напиши через запятую (например: <code>gaming, music, travel, tech</code>)\n\n"
+        "ALEX будет строить примеры и упражнения на основе того что тебя интересует."
+        if lang == "ru" else
+        "🎮 <b>Tell me about your interests!</b>\n\n"
+        "Write comma-separated (e.g. <code>gaming, music, travel, tech</code>)\n\n"
+        "ALEX will use examples and exercises based on your interests."
+    )
+    await message.answer(msg)
+    waiting[uid] = "set_interests"
 
 
 @dp.message(Command("remind"))
 async def cmd_remind(message: Message):
-    await message.answer("⏰ Choose reminder time:", reply_markup=remind_kb())
+    await message.answer("⏰ Set daily reminder:", reply_markup=remind_kb())
 
 
 @dp.message(Command("reset"))
@@ -726,9 +714,9 @@ async def cmd_reset(message: Message):
     lang = get_lang(uid)
     clear_history(uid)
     waiting.pop(uid, None)
-    clear_session(uid)
-    await message.answer(t("reset_done", lang))
-
+    clear_ctx(uid)
+    msg = "🔄 <b>Диалог сброшен.</b>" if lang == "ru" else "🔄 <b>Dialogue reset.</b>"
+    await message.answer(msg)
 
 # ══════════════════════════════════════════════════════════════════
 #  CALLBACK
@@ -742,8 +730,20 @@ async def cb_lang(cb: CallbackQuery):
     name = cb.from_user.first_name or "Student"
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer("✅")
-    await cb.message.answer(t("welcome", lang, name=name), reply_markup=main_kb(lang))
-    await cb.message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
+    welcome = (
+        f"<b>Привет, {name}!</b> 👋\n\n"
+        "Я <b>ALEX</b> — твой репетитор английского.\n\n"
+        "<i>Выбери уровень 👇</i>"
+        if lang == "ru" else
+        f"<b>Hey, {name}!</b> 👋\n\n"
+        "I'm <b>ALEX</b> — your English tutor.\n\n"
+        "<i>Set your level 👇</i>"
+    )
+    await cb.message.answer(welcome, reply_markup=main_kb(lang))
+    await cb.message.answer(
+        "🎯 <b>Choose your level or take a placement test:</b>",
+        reply_markup=level_kb()
+    )
 
 
 @dp.callback_query(F.data == "back_main")
@@ -751,111 +751,104 @@ async def cb_back(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = get_lang(uid)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.message.answer("Menu:", reply_markup=main_kb(lang))
+    await cb.message.answer("Menu 👇", reply_markup=main_kb(lang))
     await cb.answer()
 
 
-@dp.callback_query(F.data.startswith("level_"))
-async def cb_level(cb: CallbackQuery):
-    uid  = cb.from_user.id
-    lang = get_lang(uid)
-    data = cb.data.replace("level_","")
-
-    if data == "test":
-        # Запускаем тест определения уровня
-        await cb.answer()
-        await cb.message.edit_reply_markup(reply_markup=None)
-        await bot.send_chat_action(cb.message.chat.id, "typing")
-        reply = await ask_alex(uid, TEST_PROMPTS["test_placement"], mode="test")
-        await cb.message.answer(reply)
-        waiting[uid] = "placement_test"
-        log_session(uid, "placement_test")
-        return
-
-    update_user(uid, level=data)
-    await cb.answer(f"✅ Level: {data}")
+@dp.callback_query(F.data.startswith("setlevel_"))
+async def cb_setlevel(cb: CallbackQuery):
+    uid   = cb.from_user.id
+    lang  = get_lang(uid)
+    level = cb.data.replace("setlevel_","")
+    update_user(uid, level=level)
     await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer(f"✅ {level}")
     await bot.send_chat_action(cb.message.chat.id, "typing")
     reply = await ask_alex(uid,
-        f"My English level is {data}. Give me a brief welcome message, tell me what we'll focus on at this level, and suggest what to start with today.",
+        f"My English level is {level}. Give me a brief, encouraging welcome. Tell me what we'll focus on at this level and suggest the best way to start today. Be specific and motivating.",
         mode="general"
     )
     await cb.message.answer(reply)
     log_session(uid, "level_set")
 
 
+@dp.callback_query(F.data.startswith("rp_"))
+async def cb_roleplay(cb: CallbackQuery):
+    uid      = cb.from_user.id
+    lang     = get_lang(uid)
+    scenario = ROLEPLAY_SCENARIOS.get(cb.data)
+    if not scenario:
+        await cb.answer()
+        return
+
+    if cb.data == "rp_custom":
+        await cb.answer()
+        await cb.message.answer(
+            "🎭 Опиши свою ситуацию для ролевого диалога:" if lang == "ru" else
+            "🎭 Describe your custom roleplay scenario:"
+        )
+        waiting[uid] = "rp_custom"
+        return
+
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    clear_history(uid)
+    set_ctx(uid, mode="roleplay", scenario=cb.data)
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, scenario["prompt"], mode="roleplay")
+    await cb.message.answer(reply)
+    log_session(uid, f"roleplay_{cb.data}")
+    waiting[uid] = "roleplay_active"
+
+
 @dp.callback_query(F.data.startswith("lesson_"))
 async def cb_lesson(cb: CallbackQuery):
     uid    = cb.from_user.id
-    prompt = LESSON_PROMPTS.get(cb.data, "")
+    prompt = LESSON_PROMPTS.get(cb.data,"")
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer()
     await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_alex(uid, prompt, mode="general")
+    reply = await ask_alex(uid, prompt, mode="grammar")
     await cb.message.answer(reply)
     log_session(uid, cb.data)
     waiting[uid] = "lesson_active"
 
 
-@dp.callback_query(F.data.startswith("talk_"))
-async def cb_talk(cb: CallbackQuery):
-    uid    = cb.from_user.id
-    prompt = TALK_PROMPTS.get(cb.data, "")
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_alex(uid, prompt, mode="speaking")
-    await cb.message.answer(reply)
-    log_session(uid, cb.data)
-    waiting[uid] = "speaking_active"
-
-
-@dp.callback_query(F.data.startswith("test_"))
-async def cb_test(cb: CallbackQuery):
-    uid    = cb.from_user.id
-    prompt = TEST_PROMPTS.get(cb.data, "")
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_alex(uid, prompt, mode="test")
-    await cb.message.answer(reply)
-    log_session(uid, cb.data)
-    waiting[uid] = "test_active"
-
-
-@dp.callback_query(F.data.startswith("toefl_"))
-async def cb_toefl(cb: CallbackQuery):
+@dp.callback_query(F.data.startswith("vocab_") | F.data.in_(["daily_quiz"]))
+async def cb_vocab(cb: CallbackQuery):
     uid    = cb.from_user.id
     lang   = get_lang(uid)
 
-    if cb.data == "toefl_score":
-        # Показываем баллы
-        await cb.answer()
-        rows = db("SELECT section, AVG(score) as avg, MAX(score) as best, COUNT(*) as cnt FROM toefl_scores WHERE uid=? GROUP BY section", (uid,), fetch=True)
-        if not rows:
-            msg = "🎓 No TOEFL scores yet. Start practicing!" if lang=="en" else "🎓 Баллов TOEFL пока нет. Начни практиковаться!"
+    if cb.data == "daily_quiz" or cb.data == "vocab_review":
+        due = get_due_words(uid, limit=5)
+        if not due:
+            msg = "✅ Нет слов для повторения сегодня! Словарь в порядке." if lang=="ru" else "✅ No words due for review today! Your vocabulary is up to date."
+            await cb.answer()
             await cb.message.answer(msg)
             return
-        text = "🎓 <b>TOEFL Progress:</b>\n\n"
-        for r in rows:
-            text += f"📌 <b>{r['section']}</b>: best {r['best']}, avg {r['avg']:.0f} ({r['cnt']} sessions)\n"
-        await cb.message.answer(text)
+        # Запускаем флэш-карточки
+        await cb.message.edit_reply_markup(reply_markup=None)
+        await cb.answer()
+        word = dict(due[0])
+        set_ctx(uid, review_queue=[dict(w) for w in due], review_idx=0)
+        msg = (
+            f"🃏 <b>Флэш-карточка 1/{len(due)}</b>\n\n"
+            f"📖 <b>{word['word']}</b>\n\n"
+            f"<i>{word['example']}</i>\n\n"
+            f"Помнишь перевод?"
+            if lang == "ru" else
+            f"🃏 <b>Flashcard 1/{len(due)}</b>\n\n"
+            f"📖 <b>{word['word']}</b>\n\n"
+            f"<i>{word['example']}</i>\n\n"
+            f"Do you remember the translation?"
+        )
+        await cb.message.answer(msg, reply_markup=flashcard_kb(word["id"], lang))
         return
 
-    prompt = TOEFL_PROMPTS.get(cb.data, "")
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_alex(uid, prompt, mode="toefl")
-    await cb.message.answer(reply)
-    log_session(uid, cb.data)
-    waiting[uid] = "toefl_active"
-
-
-@dp.callback_query(F.data.startswith("vocab_"))
-async def cb_vocab(cb: CallbackQuery):
-    uid    = cb.from_user.id
-    prompt = VOCAB_TOPIC_PROMPTS.get(cb.data, "")
+    prompt = VOCAB_PROMPTS.get(cb.data,"")
+    if not prompt:
+        await cb.answer()
+        return
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer()
     await bot.send_chat_action(cb.message.chat.id, "typing")
@@ -865,23 +858,117 @@ async def cb_vocab(cb: CallbackQuery):
     waiting[uid] = "vocab_active"
 
 
+@dp.callback_query(F.data.startswith("fc_"))
+async def cb_flashcard(cb: CallbackQuery):
+    """Обработка оценки флэш-карточки."""
+    uid    = cb.from_user.id
+    lang   = get_lang(uid)
+    parts  = cb.data.split("_")
+    word_id = int(parts[1])
+    quality = int(parts[2])
+
+    update_word_review(word_id, quality)
+    add_xp(uid, 3)
+
+    ctx = get_ctx(uid)
+    queue = ctx.get("review_queue", [])
+    idx   = ctx.get("review_idx", 0) + 1
+    set_ctx(uid, review_idx=idx)
+
+    await cb.message.edit_reply_markup(reply_markup=None)
+
+    # Показываем ответ
+    from database import db as dbq
+    word_data = dbq("SELECT * FROM vocabulary WHERE id=?", (word_id,), fetch=True)
+    if word_data:
+        w = dict(word_data[0])
+        await cb.message.answer(
+            f"✅ <b>{w['word']}</b> = {w['translation']}\n<i>{w['example']}</i>"
+        )
+
+    if idx < len(queue):
+        word = queue[idx]
+        msg = (
+            f"🃏 <b>Карточка {idx+1}/{len(queue)}</b>\n\n"
+            f"📖 <b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\nПомнишь?"
+            if lang == "ru" else
+            f"🃏 <b>Card {idx+1}/{len(queue)}</b>\n\n"
+            f"📖 <b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\nDo you remember?"
+        )
+        await cb.message.answer(msg, reply_markup=flashcard_kb(word["id"], lang))
+    else:
+        done = "✅ <b>Повторение завершено!</b> +{xp} XP 🎉" if lang=="ru" else "✅ <b>Review complete!</b> +{xp} XP 🎉"
+        await cb.message.answer(done.format(xp=len(queue)*3))
+        log_session(uid, "vocab_review", score=len(queue), total=len(queue))
+        clear_ctx(uid)
+
+    await cb.answer()
+
+
+@dp.callback_query(F.data.startswith("test_") | F.data.startswith("toefl_") | F.data.startswith("talk_"))
+async def cb_section(cb: CallbackQuery):
+    uid  = cb.from_user.id
+    lang = get_lang(uid)
+
+    if cb.data == "toefl_score":
+        await cb.answer()
+        rows = get_toefl_scores(uid)
+        if not rows:
+            msg = "🎓 Баллов TOEFL пока нет. Начни практику!" if lang=="ru" else "🎓 No TOEFL scores yet. Start practicing!"
+            await cb.message.answer(msg)
+            return
+        text = "🎓 <b>TOEFL Progress:</b>\n\n"
+        for r in rows:
+            text += f"📌 <b>{r['section']}</b>: best {r['best']}, avg {r['avg_s']:.0f} ({r['cnt']} sessions)\n"
+        await cb.message.answer(text)
+        return
+
+    # Определяем промпт и режим
+    all_prompts = {**TEST_PROMPTS, **TOEFL_PROMPTS, **TALK_PROMPTS}
+    mode_map = {}
+    for k in TEST_PROMPTS:   mode_map[k] = "test"
+    for k in TOEFL_PROMPTS:  mode_map[k] = "toefl"
+    for k in TALK_PROMPTS:   mode_map[k] = "speaking"
+
+    prompt = all_prompts.get(cb.data,"")
+    mode   = mode_map.get(cb.data, "general")
+
+    if not prompt:
+        await cb.answer()
+        return
+
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode=mode)
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+
+    state_map = {
+        "test": "test_active", "toefl": "toefl_active", "speaking": "speaking_active"
+    }
+    waiting[uid] = state_map.get(mode, "active")
+
+
 @dp.callback_query(F.data.startswith("remind_"))
 async def cb_remind(cb: CallbackQuery):
     uid  = cb.from_user.id
     data = cb.data.replace("remind_","")
     if data == "off":
         update_user(uid, remind_time="off")
-        if scheduler.get_job(f"remind_{uid}"): scheduler.remove_job(f"remind_{uid}")
-        await cb.answer("Disabled")
+        for jid in [f"remind_{uid}", f"quiz_{uid}"]:
+            if scheduler.get_job(jid): scheduler.remove_job(jid)
+        await cb.answer()
         await cb.message.edit_text("❌ Reminders disabled.")
     else:
         update_user(uid, remind_time=data)
         try:
             h, m = map(int, data.split(":"))
             scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[uid],id=f"remind_{uid}",replace_existing=True)
+            scheduler.add_job(send_daily_quiz,"cron",hour=(h+1)%24,minute=m,args=[uid],id=f"quiz_{uid}",replace_existing=True)
         except Exception as e: logger.warning(e)
         await cb.answer(f"✅ {data}")
-        await cb.message.edit_text(f"✅ <b>Reminder set: {data}</b>\n\nI'll message you every day! 📚")
+        await cb.message.edit_text(f"✅ <b>Reminder set: {data}</b>\n\nI'll send you a daily quiz too! 📅")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -893,19 +980,45 @@ async def handle_photo(message: Message):
     uid   = message.from_user.id
     lang  = get_lang(uid)
     photo: PhotoSize = message.photo[-1]
-    file_info   = await bot.get_file(photo.file_id)
-    file_bytes  = await bot.download_file(file_info.file_path)
-    photo_bytes = file_bytes.read() if hasattr(file_bytes,"read") else bytes(file_bytes)
-    await message.answer(t("photo_received", lang))
+    fi    = await bot.get_file(photo.file_id)
+    fb    = await bot.download_file(fi.file_path)
+    pb    = fb.read() if hasattr(fb,"read") else bytes(fb)
+    msg   = "📸 Анализирую текст..." if lang=="ru" else "📸 Analyzing text..."
+    await message.answer(msg)
     await bot.send_chat_action(message.chat.id, "typing")
-    reply = await analyze_photo_text(uid, photo_bytes)
+    reply = await analyze_photo(uid, pb)
     await message.answer(reply)
     log_session(uid, "photo_analysis")
-
 
 # ══════════════════════════════════════════════════════════════════
 #  СВОБОДНЫЙ ТЕКСТ
 # ══════════════════════════════════════════════════════════════════
+
+MENU_RU = {
+    "📚 Урок грамматики":  "lesson",
+    "📝 Словарь":          "vocab",
+    "🎭 Ролевой диалог":   "roleplay",
+    "✅ Тест":             "test",
+    "🎓 TOEFL":            "toefl",
+    "✍️ Проверить текст":  "writing",
+    "💬 Разговор":         "talk",
+    "🗣 Идиомы":           "idioms",
+    "❌ Мои ошибки":       "mistakes",
+    "📊 Прогресс":         "stats",
+}
+MENU_EN = {
+    "📚 Grammar Lesson":   "lesson",
+    "📝 Vocabulary":       "vocab",
+    "🎭 Roleplay":         "roleplay",
+    "✅ Test":             "test",
+    "🎓 TOEFL":            "toefl",
+    "✍️ Check Writing":    "writing",
+    "💬 Speaking":         "talk",
+    "🗣 Idioms":           "idioms",
+    "❌ My Mistakes":      "mistakes",
+    "📊 Progress":         "stats",
+}
+
 
 @dp.message(F.text)
 async def handle_text(message: Message):
@@ -915,88 +1028,116 @@ async def handle_text(message: Message):
     state = waiting.get(uid, "")
 
     # ── Кнопки меню ───────────────────────────────────────────────
-    menu_map = {
-        t("btn_lesson",lang):    "lesson",
-        t("btn_vocab",lang):     "vocab",
-        t("btn_talk",lang):      "talk",
-        t("btn_test",lang):      "test",
-        t("btn_toefl",lang):     "toefl",
-        t("btn_writing",lang):   "writing",
-        t("btn_idioms",lang):    "idioms",
-        t("btn_dictation",lang): "dictation",
-        t("btn_mistakes",lang):  "mistakes",
-        t("btn_stats",lang):     "stats",
-    }
-    action = menu_map.get(text)
+    menu = MENU_RU if lang == "ru" else MENU_EN
+    action = menu.get(text)
     if action:
-        if action == "lesson":    await cmd_lesson(message)
-        elif action == "vocab":   await cmd_vocab(message)
-        elif action == "talk":    await cmd_talk(message)
-        elif action == "test":    await cmd_test(message)
-        elif action == "toefl":   await cmd_toefl(message)
+        if action == "lesson":   await cmd_lesson(message)
+        elif action == "vocab":  await cmd_vocab(message)
+        elif action == "roleplay": await cmd_roleplay(message)
+        elif action == "test":   await cmd_test(message)
+        elif action == "toefl":  await cmd_toefl(message)
         elif action == "writing": await cmd_writing(message)
-        elif action == "idioms":  await cmd_idioms(message)
-        elif action == "dictation": await cmd_dictation(message)
+        elif action == "talk":   await cmd_talk(message)
+        elif action == "idioms": await cmd_idioms(message)
         elif action == "mistakes": await cmd_mistakes(message)
-        elif action == "stats":   await cmd_stats(message)
+        elif action == "stats":  await cmd_stats(message)
         return
 
-    # ── Режим написания/проверки ───────────────────────────────────
+    # ── Состояния ─────────────────────────────────────────────────
+
+    if state == "set_interests":
+        waiting.pop(uid, None)
+        update_user(uid, interests=text[:200])
+        msg = f"✅ Запомнил: <b>{text}</b>\n\nТеперь буду строить примеры на основе твоих интересов!" if lang=="ru" else f"✅ Got it: <b>{text}</b>\n\nI'll use your interests in all examples now!"
+        await message.answer(msg)
+        return
+
+    if state == "rp_custom":
+        waiting.pop(uid, None)
+        clear_history(uid)
+        set_ctx(uid, mode="roleplay")
+        await bot.send_chat_action(message.chat.id, "typing")
+        prompt = f"Start a roleplay scenario based on this situation: {text}. Begin immediately in character."
+        reply  = await ask_alex(uid, prompt, mode="roleplay")
+        await message.answer(reply)
+        log_session(uid, "roleplay_custom")
+        waiting[uid] = "roleplay_active"
+        return
+
     if state == "writing":
         waiting.pop(uid, None)
         await bot.send_chat_action(message.chat.id, "typing")
-        # Сначала исправляем, потом логируем
         reply = await ask_alex(uid,
-            f"Please correct and analyze this text:\n\n{text}",
-            mode="correction",
-            extra="Be thorough: find ALL errors, explain each one clearly, show the corrected version."
+            f"Please analyze and correct this text using the 3-layer system:\n\n{text}",
+            mode="correction"
         )
         await message.answer(reply)
         log_session(uid, "writing_check")
-        # Логируем как ошибки если текст содержит английский
         if len(text) > 20:
-            log_mistake(uid, text[:100], "See correction above", "writing exercise", "mixed")
+            log_mistake(uid, text[:100], "See correction", "writing exercise", "mixed")
         return
 
-    # ── Активные сессии (тест, разговор, TOEFL и т.д.) ────────────
-    if state in ("test_active","lesson_active","speaking_active","toefl_active","vocab_active","placement_test","dictation"):
-        # Продолжаем текущую сессию
+    if state == "daily_quiz":
+        # Ответ на ежедневный квиз
+        ctx   = get_ctx(uid)
+        words = ctx.get("quiz_words", [])
+        waiting.pop(uid, None)
+        await bot.send_chat_action(message.chat.id, "typing")
+        words_str = ", ".join(w["word"] for w in words)
+        reply = await ask_alex(uid,
+            f"The student answered the daily vocabulary quiz. The words were: {words_str}. Their answer: {text}. Check their answers and give feedback.",
+            mode="vocab"
+        )
+        await message.answer(reply)
+        log_session(uid, "daily_quiz")
+        clear_ctx(uid)
+        return
+
+    # ── Активные сессии ───────────────────────────────────────────
+    if state in ("test_active","lesson_active","toefl_active","vocab_active","roleplay_active","speaking_active"):
         mode_map = {
-            "test_active": "test", "lesson_active": "general",
-            "speaking_active": "speaking", "toefl_active": "toefl",
-            "vocab_active": "vocab", "placement_test": "test", "dictation": "general",
+            "test_active": "test", "lesson_active": "grammar",
+            "toefl_active": "toefl", "vocab_active": "vocab",
+            "roleplay_active": "roleplay", "speaking_active": "speaking",
         }
         mode = mode_map.get(state, "general")
+
+        # Кнопка "Объясни иначе"
+        lower = text.lower()
+        if any(p in lower for p in ["объясни иначе", "не понял", "explain differently", "i don't get it", "другой пример"]):
+            await bot.send_chat_action(message.chat.id, "typing")
+            reply = await ask_alex(uid,
+                "Please explain the same concept using a completely different analogy or approach. "
+                "Try a metaphor, a story, or a real-world comparison. Make it even simpler.",
+                mode=mode
+            )
+            await message.answer(reply)
+            return
+
         await bot.send_chat_action(message.chat.id, "typing")
         reply = await ask_alex(uid, text, mode=mode)
         await message.answer(reply)
-
-        # Если текст на английском — автопроверка на ошибки в фоне
-        english_ratio = sum(1 for c in text if c.isalpha() and ord(c) < 128) / max(len(text),1)
-        if english_ratio > 0.5 and len(text) > 15 and state == "speaking_active":
-            log_session(uid, "speaking_practice")
         return
 
-    # ── Автоопределение: пользователь пишет по-английски ──────────
-    english_ratio = sum(1 for c in text if c.isalpha() and ord(c) < 128) / max(len(text), 1)
+    # ── Автоопределение: английский текст → коррекция ─────────────
+    en_ratio = sum(1 for c in text if c.isalpha() and ord(c) < 128) / max(len(text),1)
 
-    if english_ratio > 0.6 and len(text) > 10:
-        # Текст явно на английском — исправляем ошибки + отвечаем
+    if en_ratio > 0.6 and len(text) > 8:
         await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid,
-            text,
-            mode="correction",
-            extra="The student wrote something in English. First, correct any errors if there are any (if perfect, compliment them). Then respond naturally to what they said or asked."
+        reply = await ask_alex(uid, text, mode="correction",
+            extra="The student wrote in English. If there are errors: correct them clearly. "
+                  "If it's perfect: compliment and expand the conversation. Keep it natural."
         )
         await message.answer(reply)
         log_session(uid, "free_writing")
+        if len(text) > 15:
+            log_mistake(uid, text[:100], "See correction", "free writing", "mixed")
     else:
-        # Вопрос на родном языке — просто отвечаем как репетитор
+        # Вопрос на родном языке
         await bot.send_chat_action(message.chat.id, "typing")
         reply = await ask_alex(uid, text, mode="general")
         await message.answer(reply)
         log_session(uid, "chat")
-
 
 # ══════════════════════════════════════════════════════════════════
 #  ЗАПУСК
@@ -1006,7 +1147,7 @@ async def main():
     db_init()
     schedule_all()
     scheduler.start()
-    logger.info("🎓 LinguaMax ALEX — запущен!")
+    logger.info("🎓 LinguaMax ALEX Ultimate — запущен!")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
