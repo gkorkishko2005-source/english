@@ -1067,7 +1067,44 @@ async def cb_flashcard(cb: CallbackQuery):
         clear_ctx(uid)
     await cb.answer()
 
-# TOEFL callbacks
+# ── TOEFL: кнопка "Готов отвечать" — ДОЛЖНА БЫТЬ ПЕРВОЙ ──────────
+@dp.callback_query(F.data == "toefl_q_start")
+async def cb_toefl_q_start(cb: CallbackQuery):
+    uid  = cb.from_user.id
+    lang = get_lang(uid)
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer("✅")
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    await asyncio.sleep(0.5)
+    await send_toefl_question(uid, cb.message, 0)
+    set_ctx(uid, toefl_q_idx=0)
+    waiting[uid] = "toefl_listening_answers"
+
+
+# ── TOEFL: ответы на вопросы — ТОЖЕ РАНЬШЕ общего обработчика ────
+@dp.callback_query(F.data.startswith("toefl_ans_"))
+async def cb_toefl_answer(cb: CallbackQuery):
+    uid   = cb.from_user.id
+    parts = cb.data.split("_")
+    q_idx = int(parts[2]); answer = parts[3]
+    ctx   = get_ctx(uid)
+    answers = ctx.get("toefl_answers", {})
+    answers[str(q_idx)] = answer
+    set_ctx(uid, toefl_answers=answers)
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer(f"✅ {answer}")
+    next_idx = q_idx + 1
+    questions = ctx.get("toefl_questions", [])
+    if next_idx < len(questions):
+        await bot.send_chat_action(cb.message.chat.id, "typing")
+        await send_toefl_question(uid, cb.message, next_idx)
+        set_ctx(uid, toefl_q_idx=next_idx)
+    else:
+        await bot.send_chat_action(cb.message.chat.id, "typing")
+        await finish_toefl_listening(uid, cb.message)
+
+
+# ── TOEFL: общий обработчик секций — ПОСЛЕ специфичных ───────────
 @dp.callback_query(F.data.startswith("toefl_"))
 async def cb_toefl(cb: CallbackQuery):
     uid  = cb.from_user.id
@@ -1091,8 +1128,7 @@ async def cb_toefl(cb: CallbackQuery):
         await run_toefl_listening(uid, cb.message)
         return
 
-    all_prompts = {**TOEFL_PROMPTS}
-    prompt = all_prompts.get(cb.data,"")
+    prompt = TOEFL_PROMPTS.get(cb.data, "")
     if not prompt: await cb.answer(); return
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer()
@@ -1101,34 +1137,6 @@ async def cb_toefl(cb: CallbackQuery):
     await cb.message.answer(reply)
     log_session(uid, cb.data)
     waiting[uid] = "toefl_active"
-
-@dp.callback_query(F.data == "toefl_q_start")
-async def cb_toefl_q_start(cb: CallbackQuery):
-    uid = cb.from_user.id
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await send_toefl_question(uid, cb.message, 0)
-    set_ctx(uid, toefl_q_idx=0)
-    waiting[uid] = "toefl_listening_answers"
-
-@dp.callback_query(F.data.startswith("toefl_ans_"))
-async def cb_toefl_answer(cb: CallbackQuery):
-    uid   = cb.from_user.id
-    parts = cb.data.split("_")
-    q_idx = int(parts[2]); answer = parts[3]
-    ctx   = get_ctx(uid)
-    answers = ctx.get("toefl_answers", {})
-    answers[str(q_idx)] = answer
-    set_ctx(uid, toefl_answers=answers)
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(f"✅ {answer}")
-    next_idx = q_idx + 1
-    questions = ctx.get("toefl_questions", [])
-    if next_idx < len(questions):
-        await send_toefl_question(uid, cb.message, next_idx)
-        set_ctx(uid, toefl_q_idx=next_idx)
-    else:
-        await finish_toefl_listening(uid, cb.message)
 
 # Test / talk callbacks
 @dp.callback_query(F.data.startswith(("test_","talk_")))
