@@ -1,8 +1,22 @@
 """
 ╔══════════════════════════════════════════════════════════════════╗
-   FitNova · Персональный тренер MAX — Multilang Edition
+   LinguaMax · Репетитор английского ALEX
    aiogram 3.x · Anthropic Claude Haiku · SQLite · APScheduler
-   Языки: 🇷🇺 Русский · 🇬🇧 English · 🇳🇴 Norsk
+   
+   ФУНКЦИИ:
+   ✅ Уроки грамматики (8 тем)
+   ✅ Словарный тренажёр + флэш-карточки
+   ✅ Разговорная практика (7 тем)
+   ✅ Диктант
+   ✅ Проверка и исправление текста
+   ✅ Идиомы и сленг
+   ✅ Тесты по грамматике, лексике, чтению
+   ✅ Определение уровня (A1-C2)
+   ✅ Подготовка к TOEFL (все 4 секции)
+   ✅ База ошибок пользователя
+   ✅ Стрик занятий
+   ✅ Анализ фото с текстом
+   ✅ Еженедельный отчёт
 ╚══════════════════════════════════════════════════════════════════╝
 """
 
@@ -29,7 +43,7 @@ from aiogram.types import (
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
-from translations import T, LANGS, t
+from translations import T, t
 
 load_dotenv()
 BOT_TOKEN     = os.getenv("BOT_TOKEN")
@@ -43,50 +57,71 @@ bot       = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMo
 dp        = Dispatcher()
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 
+LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"]
+
 # ══════════════════════════════════════════════════════════════════
 #  БАЗА ДАННЫХ
 # ══════════════════════════════════════════════════════════════════
 
-DB = "fitnova.db"
+DB = "linguamax.db"
 
 def db_init():
     con = sqlite3.connect(DB)
     c   = con.cursor()
+
     c.execute("""CREATE TABLE IF NOT EXISTS users (
         uid          INTEGER PRIMARY KEY,
         name         TEXT,
         lang         TEXT DEFAULT 'ru',
-        goal         TEXT,
-        level        TEXT,
-        gender       TEXT,
-        age          INTEGER,
-        height       INTEGER,
-        weight       REAL,
-        activity     TEXT,
+        level        TEXT DEFAULT 'B1',
         remind_time  TEXT,
-        water_goal   INTEGER DEFAULT 8,
-        referrer_uid INTEGER,
         created_at   TEXT DEFAULT (datetime('now'))
     )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS workouts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid INTEGER, date TEXT, notes TEXT, duration INTEGER DEFAULT 0,
+
+    c.execute("""CREATE TABLE IF NOT EXISTS sessions (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid        INTEGER,
+        type       TEXT,
+        date       TEXT,
+        score      INTEGER DEFAULT 0,
+        total      INTEGER DEFAULT 0,
+        notes      TEXT,
         created_at TEXT DEFAULT (datetime('now'))
     )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS water (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid INTEGER, date TEXT, cups INTEGER DEFAULT 0
+
+    c.execute("""CREATE TABLE IF NOT EXISTS vocabulary (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid          INTEGER,
+        word         TEXT,
+        translation  TEXT,
+        example      TEXT,
+        topic        TEXT,
+        learned      INTEGER DEFAULT 0,
+        review_count INTEGER DEFAULT 0,
+        created_at   TEXT DEFAULT (datetime('now'))
     )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS personal_records (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid INTEGER, exercise TEXT, weight_kg REAL, reps INTEGER, date TEXT,
+
+    c.execute("""CREATE TABLE IF NOT EXISTS mistakes (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid         INTEGER,
+        original    TEXT,
+        corrected   TEXT,
+        explanation TEXT,
+        category    TEXT,
+        date        TEXT,
+        created_at  TEXT DEFAULT (datetime('now'))
+    )""")
+
+    c.execute("""CREATE TABLE IF NOT EXISTS toefl_scores (
+        id       INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid      INTEGER,
+        section  TEXT,
+        score    INTEGER,
+        max_score INTEGER,
+        date     TEXT,
         created_at TEXT DEFAULT (datetime('now'))
     )""")
-    c.execute("""CREATE TABLE IF NOT EXISTS referrals (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        referrer_uid INTEGER, referred_uid INTEGER,
-        created_at TEXT DEFAULT (datetime('now'))
-    )""")
+
     con.commit()
     con.close()
 
@@ -107,148 +142,193 @@ def get_user(uid: int):
     return dict(rows[0]) if rows else None
 
 def get_lang(uid: int) -> str:
-    user = get_user(uid)
-    return (user.get("lang") or "ru") if user else "ru"
+    u = get_user(uid)
+    return (u.get("lang") or "ru") if u else "ru"
 
-def upsert_user(uid: int, name: str, referrer: int = None):
+def get_level(uid: int) -> str:
+    u = get_user(uid)
+    return (u.get("level") or "B1") if u else "B1"
+
+def upsert_user(uid: int, name: str):
     db("INSERT OR IGNORE INTO users (uid, name) VALUES (?,?)", (uid, name))
-    if referrer:
-        db("UPDATE users SET referrer_uid=? WHERE uid=? AND referrer_uid IS NULL", (referrer, uid))
 
 def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         db(f"UPDATE users SET {k}=? WHERE uid=?", (v, uid))
 
-def get_water_today(uid: int) -> int:
-    today = datetime.now().strftime("%Y-%m-%d")
-    rows  = db("SELECT cups FROM water WHERE uid=? AND date=?", (uid, today), fetch=True)
-    return rows[0]["cups"] if rows else 0
+def log_session(uid: int, stype: str, score: int = 0, total: int = 0, notes: str = ""):
+    db("INSERT INTO sessions (uid,type,date,score,total,notes) VALUES (?,?,?,?,?,?)",
+       (uid, stype, datetime.now().strftime("%Y-%m-%d"), score, total, notes))
 
-def add_water(uid: int, cups: int = 1):
-    today = datetime.now().strftime("%Y-%m-%d")
-    rows  = db("SELECT id FROM water WHERE uid=? AND date=?", (uid, today), fetch=True)
-    if rows:
-        db("UPDATE water SET cups=cups+? WHERE uid=? AND date=?", (cups, uid, today))
-    else:
-        db("INSERT INTO water (uid, date, cups) VALUES (?,?,?)", (uid, today, cups))
+def log_mistake(uid: int, original: str, corrected: str, explanation: str, category: str = "grammar"):
+    db("INSERT INTO mistakes (uid,original,corrected,explanation,category,date) VALUES (?,?,?,?,?,?)",
+       (uid, original[:200], corrected[:200], explanation[:500], category, datetime.now().strftime("%Y-%m-%d")))
 
-def add_workout(uid: int, notes: str):
-    today = datetime.now().strftime("%Y-%m-%d")
-    db("INSERT INTO workouts (uid, date, notes) VALUES (?,?,?)", (uid, today, notes))
+def log_toefl(uid: int, section: str, score: int, max_score: int):
+    db("INSERT INTO toefl_scores (uid,section,score,max_score,date) VALUES (?,?,?,?,?)",
+       (uid, section, score, max_score, datetime.now().strftime("%Y-%m-%d")))
 
-def get_streak(uid: int) -> int:
-    rows = db("SELECT DISTINCT date FROM workouts WHERE uid=? ORDER BY date DESC", (uid,), fetch=True)
-    if not rows:
-        return 0
-    streak  = 0
-    current = datetime.now().date()
-    for row in rows:
-        d    = datetime.strptime(row["date"], "%Y-%m-%d").date()
-        diff = (current - d).days
-        if diff <= 1:
-            streak += 1
-            current = d
-        else:
-            break
-    return streak
+def add_word(uid: int, word: str, translation: str, example: str, topic: str = "general"):
+    exists = db("SELECT id FROM vocabulary WHERE uid=? AND word=?", (uid, word.lower()), fetch=True)
+    if not exists:
+        db("INSERT INTO vocabulary (uid,word,translation,example,topic) VALUES (?,?,?,?,?)",
+           (uid, word.lower(), translation, example, topic))
 
 def get_stats(uid: int) -> dict:
-    week_start = (datetime.now() - timedelta(days=datetime.now().weekday())).strftime("%Y-%m-%d")
-    total_w = db("SELECT COUNT(*) as c FROM workouts WHERE uid=?", (uid,), fetch=True)[0]["c"]
-    week_w  = db("SELECT COUNT(*) as c FROM workouts WHERE uid=? AND date>=?", (uid, week_start), fetch=True)[0]["c"]
-    refs    = db("SELECT COUNT(*) as c FROM referrals WHERE referrer_uid=?", (uid,), fetch=True)[0]["c"]
-    user    = get_user(uid)
-    return {
-        "total_workouts": total_w,
-        "week_workouts":  week_w,
-        "water_today":    get_water_today(uid),
-        "streak":         get_streak(uid),
-        "referrals":      refs,
-        "goal":           (user.get("goal") or "—") if user else "—",
-        "level":          (user.get("level") or "—") if user else "—",
-    }
+    week = (datetime.now()-timedelta(days=7)).strftime("%Y-%m-%d")
+    total_s  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=?", (uid,), fetch=True)[0]["c"]
+    total_t  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%test%'", (uid,), fetch=True)[0]["c"]
+    total_w  = db("SELECT COUNT(*) as c FROM vocabulary WHERE uid=? AND learned=1", (uid,), fetch=True)[0]["c"]
+    total_e  = db("SELECT COUNT(*) as c FROM mistakes WHERE uid=?", (uid,), fetch=True)[0]["c"]
+    toefl_c  = db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'", (uid,), fetch=True)[0]["c"]
+    streak   = get_streak(uid)
+    return {"sessions": total_s, "tests": total_t, "words": total_w,
+            "errors": total_e, "toefl": toefl_c, "streak": streak}
+
+def get_streak(uid: int) -> int:
+    rows = db("SELECT DISTINCT date FROM sessions WHERE uid=? ORDER BY date DESC", (uid,), fetch=True)
+    if not rows: return 0
+    streak = 0; current = datetime.now().date()
+    for row in rows:
+        d = datetime.strptime(row["date"], "%Y-%m-%d").date()
+        if (current - d).days <= 1:
+            streak += 1; current = d
+        else: break
+    return streak
+
 
 # ══════════════════════════════════════════════════════════════════
-#  MAX — СИСТЕМНЫЙ ПРОМПТ
+#  СИСТЕМНЫЙ ПРОМПТ ALEX
 # ══════════════════════════════════════════════════════════════════
 
-MAX_SYSTEM_BASE = """
-You are MAX, a professional personal trainer and nutritionist with 12 years of experience.
-You've worked with beginners, amateurs and professional athletes.
-Your character: direct, lively, with humor — you talk like a human, not a lecturer.
+def build_system(uid: int, mode: str = "general") -> str:
+    lang  = get_lang(uid)
+    level = get_level(uid)
+    lang_instruction = "Explain everything in Russian. Use Russian for all explanations, but keep English examples and exercises in English." if lang == "ru" else "Use English for everything."
 
-EXPERTISE:
-Training: progressive overload, supercompensation, periodization, biomechanics, hypertrophy (8-12 reps, RIR 1-3), strength (1-5 reps), endurance, HIIT vs LISS, heart rate zones, modifications for injuries/home.
-Nutrition: BMR (Mifflin-St Jeor), TDEE, macros (protein 1.6-2.2 g/kg bulk, 2.0-2.4 g/kg cut, fat min 0.8 g/kg), meal timing, recomposition, cheat meals, supplements (protein, creatine, caffeine, D3, omega-3).
-Recovery: sleep 7-9h critical for protein synthesis, MFR, mobility, overtraining signs.
-Psychology: plateaus, motivation, habit loops, setbacks.
+    base = f"""You are ALEX, a professional English language tutor with 15 years of experience.
+You specialize in teaching students from {level} level upward.
+Student's current level: {level}
 
-STYLE:
-- Talk to the user on friendly first-name basis
-- Ask ONE question if you lack data, not a whole questionnaire
-- Short answers for simple questions, detailed for complex ones
-- React humanly to emotional messages first
-- Honestly say when a doctor is needed
+{lang_instruction}
 
-FORMATTING:
-Only Telegram HTML: <b>bold</b>, <i>italic</i>, <code>code</code>
-NO markdown: *, _, #, **
-Lists only with emoji. Always respond in the user's language.
+YOUR TEACHING STYLE:
+- Patient, encouraging, and precise
+- Always explain WHY something is correct or wrong, not just WHAT
+- Give concrete examples after every rule
+- Adapt complexity to the student's level ({level})
+- Celebrate progress, normalize mistakes as part of learning
+- When correcting errors: first acknowledge what's good, then correct gently
+
+FORMATTING (Telegram HTML only):
+<b>bold</b> for key terms, <i>italic</i> for examples, <code>code</code> for grammar patterns
+NO markdown: *, _, #
+Use emoji for structure: 📌 rules, ✅ correct, ❌ wrong, 💡 tips
+Always respond according to the language instruction above.
 """
 
-CMD_FOOTER_SEP = "\n\n<i>─────────────────────────────────</i>\n<i>"
+    if mode == "correction":
+        base += """
+CORRECTION MODE:
+When the student writes in English:
+1. Acknowledge any good points first
+2. List ALL errors clearly with the category (grammar/vocabulary/spelling/punctuation)
+3. Show corrected version
+4. Explain each error in a clear, educational way
+5. Give one extra tip related to the most important error
+Format: use numbered list for errors, show original → corrected
+"""
+    elif mode == "toefl":
+        base += """
+TOEFL MODE:
+You are a TOEFL iBT specialist. You know:
+- Reading: academic passages, question types (factual, inference, vocabulary, rhetorical purpose, insert text)
+- Listening: lectures, conversations, question types (main idea, detail, inference, attitude, purpose)
+- Speaking: integrated and independent tasks, scoring rubrics (delivery, language use, topic development)
+- Writing: integrated essay (reading+lecture), independent essay, scoring criteria (development, organization, language use)
+Target score guidance, time management strategies, common traps and how to avoid them.
+Always provide practice materials at appropriate difficulty (B2-C1 level for TOEFL).
+"""
+    elif mode == "test":
+        base += """
+TEST MODE:
+Create challenging, exam-quality questions. 
+For grammar tests: use multiple choice (4 options), sentence transformation, error identification.
+For vocabulary: definitions, context fill-in, synonyms/antonyms, collocations.
+For reading: use authentic-style academic or semi-academic passages (150-300 words), then ask 5 comprehension questions.
+Always explain the correct answers after the student responds.
+Track score and give percentage at the end.
+"""
+    elif mode == "vocab":
+        base += """
+VOCABULARY MODE:
+Teach vocabulary systematically:
+- Word family (noun/verb/adjective/adverb forms)
+- Collocations (what words go together)
+- Register (formal/informal/neutral)
+- Common mistakes with this word
+- 2-3 example sentences showing different uses
+- Memory tip or mnemonic when helpful
+Focus on vocabulary that is useful for the student's level and TOEFL if relevant.
+"""
+    elif mode == "speaking":
+        base += """
+SPEAKING PRACTICE MODE:
+Simulate a natural conversation. 
+- Ask follow-up questions to keep the conversation going
+- When the student makes errors, note them but continue the conversation naturally
+- At the end of each exchange, give a brief correction summary
+- For TOEFL Speaking practice: give a topic, time limit (15s prep, 45s response for independent; 30s prep, 60s response for integrated)
+- Score speaking responses on: delivery, language use, topic development (like real TOEFL rubric)
+"""
 
-def build_system(uid: int) -> str:
-    lang = get_lang(uid)
-    user = get_user(uid)
-    system = MAX_SYSTEM_BASE
-    system += f"\n\nLANGUAGE INSTRUCTION: {t('max_lang_instruction', lang)}"
-    if user:
-        parts = []
-        for field, label in [
-            ("goal","Goal"),("level","Level"),("gender","Gender"),
-            ("age","Age"),("height","Height (cm)"),("weight","Weight (kg)"),("activity","Activity"),
-        ]:
-            if user.get(field):
-                parts.append(f"{label}: {user[field]}")
-        if parts:
-            system += "\n\nUSER PROFILE:\n" + "\n".join(parts)
-    return system
+    return base
+
 
 # ══════════════════════════════════════════════════════════════════
-#  ИСТОРИЯ
+#  ИСТОРИЯ И СОСТОЯНИЯ
 # ══════════════════════════════════════════════════════════════════
 
-histories:     dict[int, list[dict]] = {}
-waiting:       dict[int, str]        = {}
-pending_photo: dict[int, bytes]      = {}
+histories: dict[int, list[dict]] = {}
+waiting:   dict[int, str]        = {}
+session_data: dict[int, dict]    = {}  # временные данные текущей сессии
 
 def get_history(uid): return histories.setdefault(uid, [])
 
 def add_message(uid: int, role: str, content):
     h = get_history(uid)
     h.append({"role": role, "content": content})
-    if len(h) > 40:
-        histories[uid] = h[-40:]
+    if len(h) > 30: histories[uid] = h[-30:]
 
-def clear_history(uid: int): histories[uid] = []
+def clear_history(uid): histories[uid] = []
+
+def set_session(uid: int, **kwargs):
+    session_data.setdefault(uid, {}).update(kwargs)
+
+def get_session(uid: int) -> dict:
+    return session_data.get(uid, {})
+
+def clear_session(uid: int):
+    session_data.pop(uid, None)
+
 
 # ══════════════════════════════════════════════════════════════════
-#  ANTHROPIC — текст
+#  ANTHROPIC API
 # ══════════════════════════════════════════════════════════════════
 
-async def ask_max(uid: int, user_text: str, extra: str = "") -> str:
-    lang = get_lang(uid)
+CMD_FOOTER_SEP = "\n\n<i>─────────────────────────────────</i>\n<i>"
+
+async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str = "") -> str:
     add_message(uid, "user", user_text)
-    system = build_system(uid)
-    if extra:
-        system += f"\n\n{extra}"
+    system = build_system(uid, mode)
+    if extra: system += f"\n\n{extra}"
+
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             r = await client.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-                json={"model": MODEL, "max_tokens": 1024, "system": system, "messages": get_history(uid)},
+                json={"model": MODEL, "max_tokens": 1500, "system": system, "messages": get_history(uid)},
             )
             data = r.json()
             if "error" in data:
@@ -256,40 +336,32 @@ async def ask_max(uid: int, user_text: str, extra: str = "") -> str:
             reply = data["content"][0]["text"].strip()
     except Exception as e:
         return f"⚠️ Error. Try again.\n<i>{str(e)[:80]}</i>"
+
     add_message(uid, "assistant", reply)
+    lang   = get_lang(uid)
     footer = CMD_FOOTER_SEP + t("cmd_footer", lang) + "</i>"
     return reply + footer
 
-# ══════════════════════════════════════════════════════════════════
-#  ANTHROPIC — фото
-# ══════════════════════════════════════════════════════════════════
 
-async def analyze_photo(uid: int, photo_bytes: bytes, mode: str) -> str:
-    lang = get_lang(uid)
+async def analyze_photo_text(uid: int, photo_bytes: bytes) -> str:
     b64  = base64.standard_b64encode(photo_bytes).decode()
-    if mode == "food":
-        if lang == "en":
-            prompt = "The photo shows food. Identify the dishes and give an approximate macro breakdown (calories, protein, fat, carbs) per portion. If multiple items — list each separately plus total. If unsure — give a range."
-        elif lang == "no":
-            prompt = "Bildet viser mat. Identifiser rettene og gi en omtrentlig makrofordeling (kalorier, protein, fett, karbohydrater) per porsjon. Hvis flere matvarer — list hver for seg pluss totalt."
-        else:
-            prompt = "На фото еда. Определи блюда и дай примерный расчёт КБЖУ на всю порцию. Если несколько блюд — по каждому отдельно и итого. Если не уверен — дай диапазон."
-    else:
-        if lang == "en":
-            prompt = "The photo shows a person's body (progress photo). Give professional feedback as a trainer: what you see (muscle mass, definition, proportions), what to focus on in training, what already looks good. Be tactful, specific and motivating."
-        elif lang == "no":
-            prompt = "Bildet viser en persons kropp (fremgangsbilde). Gi profesjonell tilbakemelding som trener: hva du ser (muskelmasse, definisjon, proporsjoner), hva du bør fokusere på, hva som allerede ser bra ut. Vær taktfull, konkret og motiverende."
-        else:
-            prompt = "На фото тело человека. Дай профессиональную обратную связь как тренер: что видно (мышечная масса, рельеф, пропорции), на что обратить внимание, что уже хорошо. Будь тактичным, конкретным и мотивирующим."
-
-    system = build_system(uid)
+    lang = get_lang(uid)
+    prompt = (
+        "The photo contains text in English. Please:\n"
+        "1. Extract all the text you can see\n"
+        "2. Identify any grammar or spelling errors\n"
+        "3. Explain any difficult vocabulary\n"
+        "4. If it's an exercise or test, help solve it with explanations\n"
+        "5. Give overall feedback on the text quality"
+    )
+    system = build_system(uid, "correction")
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             r = await client.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
                 json={
-                    "model": MODEL, "max_tokens": 1024, "system": system,
+                    "model": MODEL, "max_tokens": 1500, "system": system,
                     "messages": [{"role": "user", "content": [
                         {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b64}},
                         {"type": "text", "text": prompt},
@@ -297,63 +369,12 @@ async def analyze_photo(uid: int, photo_bytes: bytes, mode: str) -> str:
                 },
             )
             data = r.json()
-            if "error" in data:
-                return f"⚠️ <code>{data['error'].get('message','')[:120]}</code>"
+            if "error" in data: return f"⚠️ <code>{data['error'].get('message','')[:120]}</code>"
             footer = CMD_FOOTER_SEP + t("cmd_footer", lang) + "</i>"
             return data["content"][0]["text"].strip() + footer
     except Exception as e:
         return f"⚠️ <i>{str(e)[:100]}</i>"
 
-# ══════════════════════════════════════════════════════════════════
-#  ПРОМПТЫ КНОПОК (нейтральные, MAX ответит на нужном языке)
-# ══════════════════════════════════════════════════════════════════
-
-GOAL_PROMPTS = {
-    "goal_mass":   "My goal is to build muscle mass. Ask me questions and help me create a plan.",
-    "goal_cut":    "I want to lose fat and cut. Ask me and help me get started.",
-    "goal_tone":   "I want to improve muscle tone and definition.",
-    "goal_cardio": "I want to improve endurance and cardio fitness.",
-    "goal_health": "I just want to be healthier and in better shape.",
-    "goal_home":   "I work out at home. Help me build a program.",
-    "goal_rehab":  "I'm recovering from an injury. Ask me about it.",
-}
-GOAL_NAMES = {
-    "goal_mass": "muscle building", "goal_cut": "fat loss", "goal_tone": "toning",
-    "goal_cardio": "endurance",     "goal_health": "health", "goal_home": "home training",
-    "goal_rehab": "rehabilitation",
-}
-SECTION_PROMPTS = {
-    "w_beginner":     "I'm a beginner (less than 6 months). Build me a program from scratch.",
-    "w_intermediate": "I'm intermediate (about 1 year). I want a new program for progress.",
-    "w_advanced":     "I've been training 3+ years. I want an advanced program with periodization.",
-    "w_home":         "I only have a pull-up bar and dumbbells at home. What do you suggest?",
-    "w_quick":        "I have max 30-40 minutes a day. How do I train effectively?",
-    "n_calc":         "Calculate my daily macros — ask me about my weight, height, goal and activity level.",
-    "n_menu":         "Create a sample meal plan for today. Ask about my preferences.",
-    "n_week":         "Create a full 7-day meal plan with macros per day.",
-    "n_timing":       "Explain meal timing — when and what to eat before and after training.",
-    "n_grocery":      "Create a grocery list for a sports nutrition diet.",
-    "n_cheatmeal":    "Tell me about cheat meals — good or bad? How to do it right?",
-    "n_photo":        "I'll send a photo of my food — estimate the macros.",
-    "p_plateau":      "My weight has stalled for weeks even though I train and track nutrition. What to do?",
-    "p_strength":     "My strength gains have stopped. How do I break through a strength plateau?",
-    "p_measure":      "How do I properly measure my progress — weight, measurements, photos?",
-    "p_timeline":     "When can I realistically expect visible results from training?",
-    "r_sleep":        "How does sleep affect gym results?",
-    "r_soreness":     "My muscles are very sore after training — is that normal?",
-    "r_overtrain":    "How do I know if I'm overtraining? Signs and what to do?",
-    "r_mobility":     "Tell me about mobility and stretching — when and what to do.",
-    "s_protein":      "Explain protein supplements — do I need them and how to take them?",
-    "s_creatine":     "Tell me about creatine — how to take it, when to expect results, side effects?",
-    "s_preworkout":   "Are pre-workout supplements worth it? What actually works?",
-    "s_vitamins":     "What vitamins are important for athletes?",
-    "t_squat":        "Explain squat technique — key points and common mistakes.",
-    "t_deadlift":     "Deadlift technique — what to focus on to avoid injury.",
-    "t_bench":        "Bench press technique — grip, arch, scapulae, bar path.",
-    "t_pullup":       "How to do pull-ups correctly? Grips and how to increase reps.",
-    "t_ohp":          "Overhead press technique — stance, grip, bar path.",
-    "motivation":     "I really don't want to train today. I'm tired, no energy, losing motivation. Talk to me honestly as a trainer — no clichés.",
-}
 
 # ══════════════════════════════════════════════════════════════════
 #  КЛАВИАТУРЫ
@@ -362,11 +383,11 @@ SECTION_PROMPTS = {
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=t("btn_workout",lang)),    KeyboardButton(text=t("btn_nutrition",lang))],
-            [KeyboardButton(text=t("btn_progress",lang)),   KeyboardButton(text=t("btn_recovery",lang))],
-            [KeyboardButton(text=t("btn_motivation",lang)), KeyboardButton(text=t("btn_supplements",lang))],
-            [KeyboardButton(text=t("btn_technique",lang)),  KeyboardButton(text=t("btn_kbju",lang))],
-            [KeyboardButton(text=t("btn_water",lang)),      KeyboardButton(text=t("btn_diary",lang))],
+            [KeyboardButton(text=t("btn_lesson",lang)),    KeyboardButton(text=t("btn_vocab",lang))],
+            [KeyboardButton(text=t("btn_talk",lang)),      KeyboardButton(text=t("btn_test",lang))],
+            [KeyboardButton(text=t("btn_toefl",lang)),     KeyboardButton(text=t("btn_writing",lang))],
+            [KeyboardButton(text=t("btn_idioms",lang)),    KeyboardButton(text=t("btn_dictation",lang))],
+            [KeyboardButton(text=t("btn_mistakes",lang)),  KeyboardButton(text=t("btn_stats",lang))],
         ],
         resize_keyboard=True,
         input_field_placeholder=t("input_placeholder", lang),
@@ -375,108 +396,113 @@ def main_kb(lang: str) -> ReplyKeyboardMarkup:
 
 def lang_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=label, callback_data=f"lang_{code}")]
-        for code, label in LANGS.items()
+        [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
+         InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")],
     ])
 
 
-def goals_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["goal_mass","goal_cut","goal_tone","goal_cardio","goal_health","goal_home","goal_rehab"]
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys])
+def level_kb(lang: str) -> InlineKeyboardMarkup:
+    rows = [[InlineKeyboardButton(text=lv, callback_data=f"level_{lv}")] for lv in LEVELS]
+    rows.append([InlineKeyboardButton(text=t("level_test_btn", lang), callback_data="level_test")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def workouts_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["w_beginner","w_intermediate","w_advanced","w_home","w_quick"]
+def toefl_kb(lang: str) -> InlineKeyboardMarkup:
+    keys = ["toefl_reading","toefl_listening","toefl_speaking","toefl_writing","toefl_full","toefl_strategy","toefl_score"]
     rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
     rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def nutrition_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["n_calc","n_menu","n_week","n_timing","n_grocery","n_cheatmeal","n_photo"]
+def test_kb(lang: str) -> InlineKeyboardMarkup:
+    keys = ["test_grammar","test_vocab","test_reading","test_mixed","test_placement"]
     rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
     rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def progress_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["p_plateau","p_strength","p_measure","p_timeline"]
+def talk_kb(lang: str) -> InlineKeyboardMarkup:
+    keys = ["talk_daily","talk_travel","talk_work","talk_culture","talk_debate","talk_business","talk_free"]
     rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
     rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def recovery_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["r_sleep","r_soreness","r_overtrain","r_mobility"]
+def lesson_kb(lang: str) -> InlineKeyboardMarkup:
+    keys = ["lesson_tenses","lesson_conditionals","lesson_modal","lesson_passive",
+            "lesson_articles","lesson_prepositions","lesson_phrasal","lesson_reported"]
     rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
     rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def supplements_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["s_protein","s_creatine","s_preworkout","s_vitamins"]
+def vocab_kb(lang: str) -> InlineKeyboardMarkup:
+    keys = ["vocab_new","vocab_review","vocab_topic","vocab_flashcards"]
     rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
     rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def technique_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["t_squat","t_deadlift","t_bench","t_pullup","t_ohp"]
-    rows = [[InlineKeyboardButton(text=t(k,lang), callback_data=k)] for k in keys]
-    rows.append([InlineKeyboardButton(text=t("btn_back",lang), callback_data="back_main")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def water_kb(lang: str) -> InlineKeyboardMarkup:
+def remind_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=t("water_add1",lang), callback_data="water_1"),
-         InlineKeyboardButton(text=t("water_add2",lang), callback_data="water_2")],
-        [InlineKeyboardButton(text=t("water_status",lang), callback_data="water_status")],
-        [InlineKeyboardButton(text=t("water_set_goal",lang), callback_data="water_goal")],
-    ])
-
-
-def timer_kb(lang: str) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⏱ 60s", callback_data="timer_60"),
-         InlineKeyboardButton(text="⏱ 90s", callback_data="timer_90"),
-         InlineKeyboardButton(text="⏱ 2m",  callback_data="timer_120")],
-        [InlineKeyboardButton(text="⏱ 3m",  callback_data="timer_180"),
-         InlineKeyboardButton(text="⏱ 5m",  callback_data="timer_300")],
-    ])
-
-
-def diary_kb(lang: str) -> InlineKeyboardMarkup:
-    keys = ["diary_add","diary_list","diary_generate","diary_pr","diary_report"]
-    labels = {
-        "diary_add":      t("diary_add",lang),
-        "diary_list":     t("diary_list",lang),
-        "diary_generate": t("diary_generate",lang),
-        "diary_pr":       t("diary_pr",lang),
-        "diary_report":   t("diary_report",lang),
-    }
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=labels[k], callback_data=k)] for k in keys])
-
-
-def remind_kb(lang: str) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌅 07:00", callback_data="remind_07:00"),
-         InlineKeyboardButton(text="🌞 09:00", callback_data="remind_09:00")],
-        [InlineKeyboardButton(text="☀️ 12:00", callback_data="remind_12:00"),
-         InlineKeyboardButton(text="🌇 17:00", callback_data="remind_17:00")],
-        [InlineKeyboardButton(text="🌆 18:00", callback_data="remind_18:00"),
-         InlineKeyboardButton(text="🌃 19:00", callback_data="remind_19:00")],
-        [InlineKeyboardButton(text="🌙 20:00", callback_data="remind_20:00"),
+        [InlineKeyboardButton(text="🌅 08:00", callback_data="remind_08:00"),
+         InlineKeyboardButton(text="☀️ 10:00", callback_data="remind_10:00")],
+        [InlineKeyboardButton(text="🌞 12:00", callback_data="remind_12:00"),
+         InlineKeyboardButton(text="🌇 18:00", callback_data="remind_18:00")],
+        [InlineKeyboardButton(text="🌆 19:00", callback_data="remind_19:00"),
          InlineKeyboardButton(text="🌙 21:00", callback_data="remind_21:00")],
-        [InlineKeyboardButton(text=t("remind_off_btn",lang), callback_data="remind_off")],
+        [InlineKeyboardButton(text="❌ Отключить / Disable", callback_data="remind_off")],
     ])
 
 
-def photo_kb(lang: str) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=t("photo_food_btn",lang), callback_data="photo_food")],
-        [InlineKeyboardButton(text=t("photo_body_btn",lang), callback_data="photo_body")],
-    ])
+# ══════════════════════════════════════════════════════════════════
+#  ПРОМПТЫ ДЛЯ РАЗДЕЛОВ
+# ══════════════════════════════════════════════════════════════════
+
+LESSON_PROMPTS = {
+    "lesson_tenses":      "Teach me English verb tenses systematically. Start with an overview, then cover each tense with: form, usage, examples, common mistakes. Include a mini-quiz at the end.",
+    "lesson_conditionals":"Teach me all types of English conditionals (0,1,2,3 and mixed). Explain when to use each, give clear examples, then test me with 5 sentences to complete.",
+    "lesson_modal":       "Teach me English modal verbs (can, could, may, might, must, shall, should, will, would, ought to, need to). Cover meaning, usage differences, and give practice exercises.",
+    "lesson_passive":     "Teach me the passive voice in English. Cover all tenses in passive, when and why we use passive, with examples and transformation exercises.",
+    "lesson_articles":    "Teach me English articles (a/an/the/zero article). This is one of the hardest topics. Cover all rules with clear examples and exceptions, then give practice exercises.",
+    "lesson_prepositions":"Teach me English prepositions of time, place, and movement. Cover the most common ones with examples and give exercises.",
+    "lesson_phrasal":     "Teach me the most important English phrasal verbs. Organize by verb (get, take, give, put, come, go, look, turn). Give meanings and example sentences, then practice exercises.",
+    "lesson_reported":    "Teach me reported speech in English. Cover statements, questions, and commands, plus the backshift of tenses. Give transformation exercises.",
+}
+
+TALK_PROMPTS = {
+    "talk_daily":    "Let's have a conversation about daily life. Start by asking me about my typical day, then keep the conversation going naturally. Correct my English gently.",
+    "talk_travel":   "Let's talk about travel. Ask me about places I've been or want to visit, and share some interesting discussion points. Correct my errors naturally.",
+    "talk_work":     "Let's practice professional English. Simulate a work-related conversation — could be a job interview, meeting, or workplace discussion. Correct my language.",
+    "talk_culture":  "Let's discuss culture, arts, movies, or music. Start a conversation on an interesting cultural topic suited to my level.",
+    "talk_debate":   "Let's do a debate exercise. Give me a controversial topic, state one position, and I'll argue the other. This will improve my argumentative English.",
+    "talk_business": "Let's practice Business English. We'll do a business scenario — negotiation, presentation, email discussion, or meeting. Use formal business language.",
+    "talk_free":     "Let's have a free conversation in English. Ask me what I'd like to talk about and keep it natural. Correct my mistakes gently after each response.",
+}
+
+TEST_PROMPTS = {
+    "test_grammar":    "Create a grammar test with 10 challenging multiple-choice questions appropriate for my level. Cover different grammar areas. After I answer, give full explanations.",
+    "test_vocab":      "Create a vocabulary test with 10 questions: definitions, fill-in-the-blank, and synonym/antonym questions. After I answer, explain all answers.",
+    "test_reading":    "Create a reading comprehension test: give me an academic-style passage (250-300 words), then ask 5 comprehension questions (factual, inference, vocabulary in context). Score me at the end.",
+    "test_mixed":      "Create a comprehensive mixed test with 15 questions covering grammar, vocabulary, and usage. Make it challenging but appropriate for my level.",
+    "test_placement":  "Run a placement test to determine my exact English level. Ask me 15 progressively harder questions covering grammar, vocabulary, and comprehension. At the end, tell me my level with detailed feedback.",
+}
+
+TOEFL_PROMPTS = {
+    "toefl_reading":   "Give me a TOEFL Reading practice passage (academic topic, approximately 300 words at B2-C1 level), followed by 5 TOEFL-style questions (factual information, inference, vocabulary in context, rhetorical purpose, sentence insertion). After I answer, give detailed explanations and a score.",
+    "toefl_listening": "Simulate a TOEFL Listening exercise. Describe a university lecture or conversation in detail (as if I'm reading the transcript), then ask 5 TOEFL-style listening comprehension questions. Give explanations and score.",
+    "toefl_speaking":  "Give me a TOEFL Speaking practice task. Start with an Independent Speaking task: give me a topic, tell me I have 15 seconds to prepare and 45 seconds to respond. After I write my response, score it on the TOEFL 0-4 scale for: Delivery, Language Use, and Topic Development. Give detailed feedback.",
+    "toefl_writing":   "Give me a TOEFL Writing practice task. Start with the Independent Writing task: give me a question/prompt, tell me to write a 5-paragraph essay of at least 300 words. After I submit, score it 1-5 on: Development & Support, Organization, and Language Use. Give detailed feedback with specific improvements.",
+    "toefl_full":      "Let's do a mini TOEFL iBT simulation. We'll do one task from each section in order: 1) Reading (short passage + 3 questions), 2) Listening (transcript + 2 questions), 3) Speaking (1 independent task), 4) Writing (1 short essay). Give me a final score estimate at the end.",
+    "toefl_strategy":  "Give me comprehensive TOEFL iBT strategies and tips for all 4 sections. Include: time management, common question types and how to approach them, common mistakes to avoid, and what to focus on to maximize my score. Base advice on my current level.",
+}
+
+VOCAB_TOPIC_PROMPTS = {
+    "vocab_new":        "Teach me 10 new English words appropriate for my level. For each word give: pronunciation guide, part of speech, definition, 2 example sentences, common collocations, and a memory tip.",
+    "vocab_review":     "Quiz me on vocabulary I might have learned. Give me 10 words and ask me to define them or use them in a sentence. Give feedback and explanations after each answer.",
+    "vocab_topic":      "Ask me what topic I want vocabulary for, then teach me 10-15 essential words on that topic with definitions, examples, and collocations.",
+    "vocab_flashcards": "Give me 10 vocabulary flashcard-style prompts: show the definition or a gapped sentence, let me guess the word, then confirm or correct. Keep score.",
+}
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -486,16 +512,22 @@ def photo_kb(lang: str) -> InlineKeyboardMarkup:
 async def send_reminder(uid: int):
     user = get_user(uid)
     if not user: return
-    lang   = user.get("lang","ru")
+    lang   = user.get("lang", "ru")
     streak = get_streak(uid)
-    name   = user.get("name","")
-    msgs_ru = [f"💪 <b>Эй, {name}!</b> Пора на тренировку!", f"🔥 <b>{name}, время действовать!</b>", f"⚡️ Привет! Напоминаю — сегодня тренировочный день."]
-    msgs_en = [f"💪 <b>Hey, {name}!</b> Time to work out!", f"🔥 <b>{name}, let's go!</b>", f"⚡️ Hi! Reminder — today is a training day."]
-    msgs_no = [f"💪 <b>Hei, {name}!</b> På tide å trene!", f"🔥 <b>{name}, la oss gå!</b>", f"⚡️ Hei! Påminnelse — i dag er det treningsdag."]
-    msgs = {"ru": msgs_ru, "en": msgs_en, "no": msgs_no}.get(lang, msgs_en)
+    msgs_ru = [
+        "📚 <b>Время заниматься английским!</b>\n\nДаже 15 минут в день дают результат. ALEX ждёт! 🎓",
+        "🔥 <b>Не пропусти урок!</b>\n\nТвой английский улучшается с каждым занятием.",
+        "⚡️ <b>Ежедневная практика = быстрый прогресс.</b>\n\nНачни прямо сейчас!",
+    ]
+    msgs_en = [
+        "📚 <b>Time to practice English!</b>\n\nEven 15 minutes a day makes a difference. ALEX is ready! 🎓",
+        "🔥 <b>Don't miss your lesson!</b>\n\nYour English improves with every session.",
+        "⚡️ <b>Daily practice = fast progress.</b>\n\nStart right now!",
+    ]
+    msgs = msgs_ru if lang == "ru" else msgs_en
     text = random.choice(msgs)
     if streak > 1:
-        text += "\n\n" + t("streak_active", lang, n=streak)
+        text += f"\n\n{t('streak_msg', lang, n=streak)}"
     try:
         await bot.send_message(uid, text)
     except Exception as e:
@@ -505,22 +537,13 @@ async def send_reminder(uid: int):
 async def send_weekly_report(uid: int):
     stats = get_stats(uid)
     lang  = get_lang(uid)
-    rows  = db("SELECT date, notes FROM workouts WHERE uid=? ORDER BY date DESC LIMIT 5", (uid,), fetch=True)
-    workouts_text = ""
-    if rows:
-        for r in rows:
-            workouts_text += f"\n📅 <b>{r['date']}</b>: {r['notes'][:50]}"
-    streak_text = t("streak_active",lang,n=stats["streak"]) if stats["streak"] > 1 else t("streak_start",lang)
-    titles = {"ru":"📊 <b>Еженедельный отчёт</b>","en":"📊 <b>Weekly Report</b>","no":"📊 <b>Ukentlig rapport</b>"}
-    workouts_labels = {"ru":"Тренировок за неделю","en":"Workouts this week","no":"Treninger denne uken"}
+    level = get_level(uid)
+    titles = {"ru": "📊 <b>Еженедельный отчёт</b>", "en": "📊 <b>Weekly Report</b>"}
     try:
         await bot.send_message(uid,
             f"{titles.get(lang,'📊 Report')}\n\n"
-            f"💪 {workouts_labels.get(lang,'Workouts')}: <b>{stats['week_workouts']}</b>\n"
-            f"🔥 {streak_text}\n"
-            f"💧 {stats['water_today']}\n"
-            f"🎯 {stats['goal']}"
-            + (f"\n\n{workouts_text}" if workouts_text else "")
+            f"🎯 {level} · 🔥 {stats['streak']} · 📅 {stats['sessions']}\n"
+            f"📝 {stats['words']} words · ✅ {stats['tests']} tests"
         )
     except Exception: pass
 
@@ -532,13 +555,12 @@ def schedule_all():
             try:
                 h, m = map(int, r["remind_time"].split(":"))
                 scheduler.add_job(send_reminder, "cron", hour=h, minute=m, args=[r["uid"]], id=f"remind_{r['uid']}", replace_existing=True)
-                wh = (h+2)%24
-                scheduler.add_job(lambda uid=r["uid"]: asyncio.create_task(bot.send_message(uid, "💧")), "cron", hour=wh, args=[], id=f"water_{r['uid']}", replace_existing=True)
             except Exception: pass
     all_users = db("SELECT uid FROM users", fetch=True)
     if all_users:
         for r in all_users:
-            scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=20, args=[r["uid"]], id=f"weekly_{r['uid']}", replace_existing=True)
+            scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=19, args=[r["uid"]], id=f"weekly_{r['uid']}", replace_existing=True)
+
 
 # ══════════════════════════════════════════════════════════════════
 #  КОМАНДЫ
@@ -547,33 +569,16 @@ def schedule_all():
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     uid  = message.from_user.id
-    name = message.from_user.first_name or "friend"
-
-    referrer = None
-    args = message.text.split()
-    if len(args) > 1 and args[1].startswith("ref_"):
-        try:
-            referrer = int(args[1].replace("ref_",""))
-            if referrer != uid:
-                db("INSERT OR IGNORE INTO referrals (referrer_uid, referred_uid) VALUES (?,?)", (referrer, uid))
-                ref_lang = get_lang(referrer)
-                try:
-                    await bot.send_message(referrer, t("referral_notify", ref_lang, name=name))
-                except Exception: pass
-        except Exception: pass
-
-    upsert_user(uid, name, referrer)
-    scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=20, args=[uid], id=f"weekly_{uid}", replace_existing=True)
-
-    # Если новый пользователь — сначала выбор языка
+    name = message.from_user.first_name or "Student"
+    upsert_user(uid, name)
+    scheduler.add_job(send_weekly_report, "cron", day_of_week="sun", hour=19, args=[uid], id=f"weekly_{uid}", replace_existing=True)
     user = get_user(uid)
     if not user or not user.get("lang"):
         await message.answer(t("choose_lang","ru"), reply_markup=lang_kb())
         return
-
     lang = get_lang(uid)
     await message.answer(t("welcome", lang, name=name), reply_markup=main_kb(lang))
-    await message.answer(t("choose_goal", lang), reply_markup=goals_kb(lang))
+    await message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
 
 
 @dp.message(Command("lang"))
@@ -581,79 +586,95 @@ async def cmd_lang(message: Message):
     await message.answer(t("choose_lang", get_lang(message.from_user.id)), reply_markup=lang_kb())
 
 
-@dp.message(Command("goal"))
-async def cmd_goal(message: Message):
-    lang = get_lang(message.from_user.id)
-    await message.answer(t("choose_goal", lang), reply_markup=goals_kb(lang))
-
-
 @dp.message(Command("help"))
 async def cmd_help(message: Message):
+    await message.answer(t("help", get_lang(message.from_user.id)))
+
+
+@dp.message(Command("level"))
+async def cmd_level(message: Message):
+    uid  = message.from_user.id
+    lang = get_lang(uid)
+    await message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
+
+
+@dp.message(Command("lesson"))
+async def cmd_lesson(message: Message):
     lang = get_lang(message.from_user.id)
-    await message.answer(t("help", lang))
+    await message.answer(t("lesson_menu", lang), reply_markup=lesson_kb(lang))
 
 
-@dp.message(Command("reset"))
-async def cmd_reset(message: Message):
-    uid = message.from_user.id
-    lang = get_lang(uid)
-    clear_history(uid)
-    waiting.pop(uid, None)
-    await message.answer(t("reset_done", lang), reply_markup=goals_kb(lang))
+@dp.message(Command("vocab"))
+async def cmd_vocab(message: Message):
+    lang = get_lang(message.from_user.id)
+    await message.answer(t("vocab_menu", lang), reply_markup=vocab_kb(lang))
 
 
-@dp.message(Command("profile"))
-async def cmd_profile(message: Message):
-    uid = message.from_user.id
-    lang = get_lang(uid)
-    await message.answer(t("profile_prompt", lang))
-    waiting[uid] = "profile"
+@dp.message(Command("talk"))
+async def cmd_talk(message: Message):
+    lang = get_lang(message.from_user.id)
+    await message.answer(t("talk_menu", lang), reply_markup=talk_kb(lang))
 
 
-@dp.message(Command("calc"))
-async def cmd_calc(message: Message):
+@dp.message(Command("test"))
+async def cmd_test(message: Message):
+    lang = get_lang(message.from_user.id)
+    await message.answer(t("test_menu", lang), reply_markup=test_kb(lang))
+
+
+@dp.message(Command("toefl"))
+async def cmd_toefl(message: Message):
+    lang = get_lang(message.from_user.id)
+    await message.answer(t("toefl_menu", lang), reply_markup=toefl_kb(lang))
+
+
+@dp.message(Command("writing"))
+async def cmd_writing(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    prompts = {
-        "ru": "<b>Калькулятор КБЖУ</b> 🧮\n\nНапиши:\n<code>пол, возраст, рост, вес, активность, цель</code>\n\n<b>Пример:</b>\n<code>мужчина, 24, 180, 78, средняя, похудение</code>",
-        "en": "<b>Macro Calculator</b> 🧮\n\nWrite:\n<code>gender, age, height, weight, activity, goal</code>\n\n<b>Example:</b>\n<code>male, 24, 180, 78, moderate, fat loss</code>",
-        "no": "<b>Makrokalkulator</b> 🧮\n\nSkriv:\n<code>kjønn, alder, høyde, vekt, aktivitet, mål</code>\n\n<b>Eksempel:</b>\n<code>mann, 24, 180, 78, moderat, vekttap</code>",
-    }
-    await message.answer(prompts.get(lang, prompts["en"]))
+    await message.answer(t("writing_prompt", lang))
+    waiting[uid] = "writing"
 
 
-@dp.message(Command("workout"))
-async def cmd_workout(message: Message):
+@dp.message(Command("dictation"))
+async def cmd_dictation(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    await message.answer(t("workout_prompt", lang))
-    waiting[uid] = "workout_add"
-
-
-@dp.message(Command("generate"))
-async def cmd_generate(message: Message):
-    uid  = message.from_user.id
-    user = get_user(uid)
-    goal  = (user.get("goal") or "general fitness") if user else "general fitness"
-    level = (user.get("level") or "intermediate")   if user else "intermediate"
+    level = get_level(uid)
+    await message.answer(t("dictation_ready", lang))
     await bot.send_chat_action(message.chat.id, "typing")
-    reply = await ask_max(uid, f"Generate a workout for today. Goal: {goal}. Level: {level}. Give specific exercises with sets, reps and rest time.")
-    await message.answer(reply)
-
-
-@dp.message(Command("water"))
-async def cmd_water(message: Message):
-    uid  = message.from_user.id
-    lang = get_lang(uid)
-    cups = get_water_today(uid)
-    user = get_user(uid)
-    goal = (user.get("water_goal") or 8) if user else 8
-    pct  = min(int(cups / goal * 100), 100)
-    bar  = "🟦"*(pct//10) + "⬜"*(10-pct//10)
-    await message.answer(
-        t("water_title",lang) + "\n\n" + bar + "\n" + t("water_of",lang,cups=cups,goal=goal,pct=pct),
-        reply_markup=water_kb(lang)
+    reply = await ask_alex(uid,
+        f"Give me one dictation sentence appropriate for {level} level. "
+        "Format: 'DICTATION: [sentence]' then below write 'Write exactly what you read above.'",
+        mode="general"
     )
+    await message.answer(reply)
+    waiting[uid] = "dictation"
+    log_session(uid, "dictation")
+
+
+@dp.message(Command("idioms"))
+async def cmd_idioms(message: Message):
+    uid  = message.from_user.id
+    level = get_level(uid)
+    await bot.send_chat_action(message.chat.id, "typing")
+    reply = await ask_alex(uid,
+        f"Teach me 5 useful English idioms and phrasal verbs appropriate for {level} level. "
+        "For each: the idiom, meaning, origin (briefly), 2 example sentences, and when/how to use it naturally.",
+        mode="vocab"
+    )
+    await message.answer(reply)
+    log_session(uid, "idioms")
+
+
+@dp.message(Command("reading"))
+async def cmd_reading(message: Message):
+    uid = message.from_user.id
+    await bot.send_chat_action(message.chat.id, "typing")
+    reply = await ask_alex(uid, TEST_PROMPTS["test_reading"], mode="test")
+    await message.answer(reply)
+    log_session(uid, "test_reading")
+    waiting[uid] = "test_active"
 
 
 @dp.message(Command("stats"))
@@ -661,88 +682,53 @@ async def cmd_stats(message: Message):
     uid   = message.from_user.id
     lang  = get_lang(uid)
     stats = get_stats(uid)
-    user  = get_user(uid)
-    name  = (user.get("name") or "") if user else ""
-    streak_text = t("streak_active",lang,n=stats["streak"]) if stats["streak"] > 1 else t("streak_start",lang)
-    await message.answer(t("stats",lang,
-        name=name, goal=stats["goal"], level=stats["level"],
-        total=stats["total_workouts"], week=stats["week_workouts"],
-        streak=streak_text, water=stats["water_today"], refs=stats["referrals"]
+    level = get_level(uid)
+    await message.answer(t("stats_title", lang,
+        level=level, sessions=stats["sessions"], streak=stats["streak"],
+        tests=stats["tests"], words=stats["words"], errors=stats["errors"], toefl=stats["toefl"]
     ))
 
 
-@dp.message(Command("pr"))
-async def cmd_pr(message: Message):
+@dp.message(Command("mistakes"))
+async def cmd_mistakes(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    rows = db("SELECT exercise, MAX(weight_kg) as w, reps, MAX(date) as d FROM personal_records WHERE uid=? GROUP BY exercise ORDER BY d DESC", (uid,), fetch=True)
+    rows = db("SELECT category, original, corrected, explanation FROM mistakes WHERE uid=? ORDER BY created_at DESC LIMIT 10", (uid,), fetch=True)
     if not rows:
-        await message.answer(t("pr_empty", lang))
+        await message.answer(t("mistakes_empty", lang))
         return
-    text = t("pr_title", lang)
-    for r in rows:
-        text += f"💪 <b>{r['exercise']}</b>: {r['w']} kg × {r['reps']} reps <i>({r['d']})</i>\n"
-    text += t("pr_hint", lang)
+    text = t("mistakes_title", lang)
+    for i, r in enumerate(rows, 1):
+        text += f"{i}. ❌ <code>{r['original'][:50]}</code>\n   ✅ <code>{r['corrected'][:50]}</code>\n   <i>{r['explanation'][:100]}</i>\n\n"
     await message.answer(text)
+
+
+@dp.message(Command("streak"))
+async def cmd_streak(message: Message):
+    uid   = message.from_user.id
+    lang  = get_lang(uid)
+    streak = get_streak(uid)
+    if streak > 1:
+        await message.answer(t("streak_msg", lang, n=streak))
+    else:
+        msgs = {"ru": "🎯 Начни стрик сегодня — занимайся каждый день!", "en": "🎯 Start your streak today — study every day!"}
+        await message.answer(msgs.get(lang, msgs["en"]))
 
 
 @dp.message(Command("remind"))
 async def cmd_remind(message: Message):
-    lang = get_lang(message.from_user.id)
-    await message.answer(t("remind_title", lang), reply_markup=remind_kb(lang))
+    await message.answer("⏰ Choose reminder time:", reply_markup=remind_kb())
 
 
-@dp.message(Command("week"))
-async def cmd_week(message: Message):
-    uid = message.from_user.id
-    await bot.send_chat_action(message.chat.id, "typing")
-    reply = await ask_max(uid, "Create a full 7-day meal plan with macros for each day. Include breakfast, lunch, snack and dinner.")
-    await message.answer(reply)
-
-
-@dp.message(Command("report"))
-async def cmd_report(message: Message):
-    uid   = message.from_user.id
-    lang  = get_lang(uid)
-    stats = get_stats(uid)
-    rows  = db("SELECT date, notes FROM workouts WHERE uid=? ORDER BY date DESC LIMIT 7", (uid,), fetch=True)
-    text  = f"📊 <b>{'Отчёт за неделю' if lang=='ru' else 'Weekly Report' if lang=='en' else 'Ukentlig rapport'}</b>\n\n"
-    text += f"💪 {stats['week_workouts']} · 🔥 {stats['streak']} · 💧 {stats['water_today']}\n\n"
-    if rows:
-        for r in rows:
-            text += f"📅 <b>{r['date']}</b>: {r['notes'][:60]}\n"
-    await message.answer(text)
-
-
-@dp.message(Command("invite"))
-async def cmd_invite(message: Message):
-    uid      = message.from_user.id
-    lang     = get_lang(uid)
-    bot_info = await bot.get_me()
-    link     = f"https://t.me/{bot_info.username}?start=ref_{uid}"
-    stats    = get_stats(uid)
-    await message.answer(t("invite", lang, link=link, refs=stats["referrals"]))
-
-
-@dp.message(Command("export"))
-async def cmd_export(message: Message):
+@dp.message(Command("reset"))
+async def cmd_reset(message: Message):
     uid  = message.from_user.id
     lang = get_lang(uid)
-    user = get_user(uid)
-    rows = db("SELECT date, notes FROM workouts WHERE uid=? ORDER BY date DESC", (uid,), fetch=True)
-    prs  = db("SELECT exercise, weight_kg, reps, date FROM personal_records WHERE uid=? ORDER BY date DESC", (uid,), fetch=True)
-    lines = ["FitNova Export", "="*40, ""]
-    if user:
-        lines += [f"Name: {user.get('name','')}", f"Goal: {user.get('goal','')}", f"Lang: {user.get('lang','')}", ""]
-    if rows:
-        lines += ["WORKOUTS:", "-"*30]
-        for r in rows: lines.append(f"{r['date']}: {r['notes']}")
-        lines.append("")
-    if prs:
-        lines += ["PERSONAL RECORDS:", "-"*30]
-        for r in prs: lines.append(f"{r['date']} | {r['exercise']}: {r['weight_kg']} kg × {r['reps']} reps")
-    content = "\n".join(lines).encode("utf-8")
-    await message.answer_document(BufferedInputFile(content, filename=f"fitnova_{uid}.txt"), caption=t("export_caption", lang))
+    clear_history(uid)
+    waiting.pop(uid, None)
+    clear_session(uid)
+    await message.answer(t("reset_done", lang))
+
 
 # ══════════════════════════════════════════════════════════════════
 #  CALLBACK
@@ -753,11 +739,11 @@ async def cb_lang(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = cb.data.replace("lang_","")
     update_user(uid, lang=lang)
-    name = cb.from_user.first_name or "friend"
+    name = cb.from_user.first_name or "Student"
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(f"✅ {LANGS.get(lang,'')}")
+    await cb.answer("✅")
     await cb.message.answer(t("welcome", lang, name=name), reply_markup=main_kb(lang))
-    await cb.message.answer(t("choose_goal", lang), reply_markup=goals_kb(lang))
+    await cb.message.answer(t("choose_level", lang), reply_markup=level_kb(lang))
 
 
 @dp.callback_query(F.data == "back_main")
@@ -765,164 +751,138 @@ async def cb_back(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = get_lang(uid)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.message.answer(t("back_menu", lang), reply_markup=main_kb(lang))
+    await cb.message.answer("Menu:", reply_markup=main_kb(lang))
     await cb.answer()
 
 
-@dp.callback_query(F.data.startswith("goal_"))
-async def cb_goal(cb: CallbackQuery):
-    uid    = cb.from_user.id
-    lang   = get_lang(uid)
-    goal   = GOAL_NAMES.get(cb.data, cb.data)
-    prompt = GOAL_PROMPTS.get(cb.data, "")
-    update_user(uid, goal=goal)
-    clear_history(uid)
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(t("goal_saved", lang))
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_max(uid, prompt)
-    await cb.message.answer(reply)
-
-
-@dp.callback_query(F.data.startswith("w_"))
-async def cb_workout_level(cb: CallbackQuery):
-    uid   = cb.from_user.id
-    lang  = get_lang(uid)
-    level_map = {"w_beginner":"beginner","w_intermediate":"intermediate","w_advanced":"advanced","w_home":"home","w_quick":"limited time"}
-    update_user(uid, level=level_map.get(cb.data,""))
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_max(uid, SECTION_PROMPTS.get(cb.data,""))
-    await cb.message.answer(reply)
-
-
-@dp.callback_query(F.data.startswith(("n_","p_","r_","s_","t_")))
-async def cb_section(cb: CallbackQuery):
-    uid    = cb.from_user.id
-    lang   = get_lang(uid)
-    prompt = SECTION_PROMPTS.get(cb.data)
-    if not prompt:
-        await cb.answer()
-        return
-    if cb.data == "n_photo":
-        await cb.answer()
-        await cb.message.answer(t("photo_send_food", lang))
-        waiting[uid] = "photo_food"
-        return
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_max(uid, prompt)
-    await cb.message.answer(reply)
-
-
-@dp.callback_query(F.data.startswith("photo_"))
-async def cb_photo_type(cb: CallbackQuery):
-    uid         = cb.from_user.id
-    lang        = get_lang(uid)
-    mode        = cb.data.replace("photo_","")
-    photo_bytes = pending_photo.pop(uid, None)
-    if not photo_bytes:
-        await cb.answer("No photo found, send again.")
-        return
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(t("photo_analyzing", lang))
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await analyze_photo(uid, photo_bytes, mode)
-    await cb.message.answer(reply)
-
-
-@dp.callback_query(F.data.startswith("water_"))
-async def cb_water(cb: CallbackQuery):
+@dp.callback_query(F.data.startswith("level_"))
+async def cb_level(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = get_lang(uid)
-    data = cb.data
-    if data in ("water_1","water_2"):
-        n = int(data.split("_")[1])
-        add_water(uid, n)
-        cups = get_water_today(uid)
-        await cb.answer(t("water_added",lang,n=n,cups=cups))
-        await cb.message.edit_text(f"💧 {cups}", reply_markup=water_kb(lang))
-    elif data == "water_status":
-        cups = get_water_today(uid)
-        user = get_user(uid)
-        goal = (user.get("water_goal") or 8) if user else 8
-        pct  = min(int(cups/goal*100),100)
-        bar  = "🟦"*(pct//10)+"⬜"*(10-pct//10)
-        await cb.answer()
-        await cb.message.edit_text(t("water_title",lang)+"\n\n"+bar+"\n"+t("water_of",lang,cups=cups,goal=goal,pct=pct), reply_markup=water_kb(lang))
-    elif data == "water_goal":
-        await cb.answer()
-        await cb.message.answer(t("water_goal_prompt",lang))
-        waiting[uid] = "water_goal"
+    data = cb.data.replace("level_","")
 
+    if data == "test":
+        # Запускаем тест определения уровня
+        await cb.answer()
+        await cb.message.edit_reply_markup(reply_markup=None)
+        await bot.send_chat_action(cb.message.chat.id, "typing")
+        reply = await ask_alex(uid, TEST_PROMPTS["test_placement"], mode="test")
+        await cb.message.answer(reply)
+        waiting[uid] = "placement_test"
+        log_session(uid, "placement_test")
+        return
 
-@dp.callback_query(F.data.startswith("timer_"))
-async def cb_timer(cb: CallbackQuery):
-    uid     = cb.from_user.id
-    lang    = get_lang(uid)
-    seconds = int(cb.data.split("_")[1])
-    mins    = seconds//60; secs = seconds%60
-    label   = f"{seconds}s" if seconds<60 else (f"{mins}m" if secs==0 else f"{mins}m {secs}s")
-    await cb.answer(f"⏱ {label}")
+    update_user(uid, level=data)
+    await cb.answer(f"✅ Level: {data}")
     await cb.message.edit_reply_markup(reply_markup=None)
-    msg = await cb.message.answer(t("timer_started",lang,label=label))
-    await asyncio.sleep(seconds)
-    try:
-        await msg.edit_text(t("timer_done",lang))
-        await bot.send_message(uid, "🔔", reply_markup=timer_kb(lang))
-    except Exception: pass
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid,
+        f"My English level is {data}. Give me a brief welcome message, tell me what we'll focus on at this level, and suggest what to start with today.",
+        mode="general"
+    )
+    await cb.message.answer(reply)
+    log_session(uid, "level_set")
+
+
+@dp.callback_query(F.data.startswith("lesson_"))
+async def cb_lesson(cb: CallbackQuery):
+    uid    = cb.from_user.id
+    prompt = LESSON_PROMPTS.get(cb.data, "")
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode="general")
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+    waiting[uid] = "lesson_active"
+
+
+@dp.callback_query(F.data.startswith("talk_"))
+async def cb_talk(cb: CallbackQuery):
+    uid    = cb.from_user.id
+    prompt = TALK_PROMPTS.get(cb.data, "")
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode="speaking")
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+    waiting[uid] = "speaking_active"
+
+
+@dp.callback_query(F.data.startswith("test_"))
+async def cb_test(cb: CallbackQuery):
+    uid    = cb.from_user.id
+    prompt = TEST_PROMPTS.get(cb.data, "")
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode="test")
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+    waiting[uid] = "test_active"
+
+
+@dp.callback_query(F.data.startswith("toefl_"))
+async def cb_toefl(cb: CallbackQuery):
+    uid    = cb.from_user.id
+    lang   = get_lang(uid)
+
+    if cb.data == "toefl_score":
+        # Показываем баллы
+        await cb.answer()
+        rows = db("SELECT section, AVG(score) as avg, MAX(score) as best, COUNT(*) as cnt FROM toefl_scores WHERE uid=? GROUP BY section", (uid,), fetch=True)
+        if not rows:
+            msg = "🎓 No TOEFL scores yet. Start practicing!" if lang=="en" else "🎓 Баллов TOEFL пока нет. Начни практиковаться!"
+            await cb.message.answer(msg)
+            return
+        text = "🎓 <b>TOEFL Progress:</b>\n\n"
+        for r in rows:
+            text += f"📌 <b>{r['section']}</b>: best {r['best']}, avg {r['avg']:.0f} ({r['cnt']} sessions)\n"
+        await cb.message.answer(text)
+        return
+
+    prompt = TOEFL_PROMPTS.get(cb.data, "")
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode="toefl")
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+    waiting[uid] = "toefl_active"
+
+
+@dp.callback_query(F.data.startswith("vocab_"))
+async def cb_vocab(cb: CallbackQuery):
+    uid    = cb.from_user.id
+    prompt = VOCAB_TOPIC_PROMPTS.get(cb.data, "")
+    await cb.message.edit_reply_markup(reply_markup=None)
+    await cb.answer()
+    await bot.send_chat_action(cb.message.chat.id, "typing")
+    reply = await ask_alex(uid, prompt, mode="vocab")
+    await cb.message.answer(reply)
+    log_session(uid, cb.data)
+    waiting[uid] = "vocab_active"
 
 
 @dp.callback_query(F.data.startswith("remind_"))
 async def cb_remind(cb: CallbackQuery):
     uid  = cb.from_user.id
-    lang = get_lang(uid)
     data = cb.data.replace("remind_","")
     if data == "off":
         update_user(uid, remind_time="off")
-        for jid in [f"remind_{uid}",f"water_{uid}"]:
-            if scheduler.get_job(jid): scheduler.remove_job(jid)
-        await cb.answer()
-        await cb.message.edit_text(t("remind_off_msg",lang))
+        if scheduler.get_job(f"remind_{uid}"): scheduler.remove_job(f"remind_{uid}")
+        await cb.answer("Disabled")
+        await cb.message.edit_text("❌ Reminders disabled.")
     else:
         update_user(uid, remind_time=data)
         try:
             h, m = map(int, data.split(":"))
             scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[uid],id=f"remind_{uid}",replace_existing=True)
-            scheduler.add_job(lambda: None,"cron",hour=(h+2)%24,args=[],id=f"water_{uid}",replace_existing=True)
         except Exception as e: logger.warning(e)
         await cb.answer(f"✅ {data}")
-        await cb.message.edit_text(t("remind_saved",lang,t=data))
+        await cb.message.edit_text(f"✅ <b>Reminder set: {data}</b>\n\nI'll message you every day! 📚")
 
-
-@dp.callback_query(F.data.startswith("diary_"))
-async def cb_diary(cb: CallbackQuery):
-    uid  = cb.from_user.id
-    lang = get_lang(uid)
-    data = cb.data
-    if data == "diary_add":
-        await cb.answer()
-        await cb.message.answer(t("workout_prompt",lang))
-        waiting[uid] = "workout_add"
-    elif data == "diary_list":
-        await cb.answer()
-        rows = db("SELECT date, notes FROM workouts WHERE uid=? ORDER BY date DESC LIMIT 5",(uid,),fetch=True)
-        if not rows:
-            await cb.message.answer(t("diary_empty",lang)); return
-        text = t("diary_recent",lang)
-        for r in rows: text += f"📅 <b>{r['date']}</b>\n{r['notes'][:80]}\n\n"
-        await cb.message.answer(text)
-    elif data == "diary_generate":
-        await cb.answer()
-        await cmd_generate(cb.message)
-    elif data == "diary_pr":
-        await cb.answer()
-        await cmd_pr(cb.message)
-    elif data == "diary_report":
-        await cb.answer()
-        await cmd_report(cb.message)
 
 # ══════════════════════════════════════════════════════════════════
 #  ФОТО
@@ -936,19 +896,15 @@ async def handle_photo(message: Message):
     file_info   = await bot.get_file(photo.file_id)
     file_bytes  = await bot.download_file(file_info.file_path)
     photo_bytes = file_bytes.read() if hasattr(file_bytes,"read") else bytes(file_bytes)
+    await message.answer(t("photo_received", lang))
+    await bot.send_chat_action(message.chat.id, "typing")
+    reply = await analyze_photo_text(uid, photo_bytes)
+    await message.answer(reply)
+    log_session(uid, "photo_analysis")
 
-    state = waiting.pop(uid, None)
-    if state == "photo_food":
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await analyze_photo(uid, photo_bytes, "food")
-        await message.answer(reply)
-        return
-
-    pending_photo[uid] = photo_bytes
-    await message.answer(t("photo_received",lang), reply_markup=photo_kb(lang))
 
 # ══════════════════════════════════════════════════════════════════
-#  МЕНЮ КНОПКИ И СВОБОДНЫЙ ТЕКСТ
+#  СВОБОДНЫЙ ТЕКСТ
 # ══════════════════════════════════════════════════════════════════
 
 @dp.message(F.text)
@@ -956,105 +912,91 @@ async def handle_text(message: Message):
     uid   = message.from_user.id
     lang  = get_lang(uid)
     text  = message.text.strip()
-    state = waiting.pop(uid, None)
+    state = waiting.get(uid, "")
 
-    # ── Профиль ───────────────────────────────────────────────────
-    if state == "profile":
-        parts = [p.strip() for p in text.split(",")]
-        if len(parts) >= 5:
-            try:
-                update_user(uid, gender=parts[0], age=int(parts[1]), height=int(parts[2]), weight=float(parts[3]), activity=parts[4])
-                await message.answer(t("profile_saved",lang,gender=parts[0],age=parts[1],height=parts[2],weight=parts[3],activity=parts[4]))
-                return
-            except Exception: pass
-        await message.answer(t("profile_error",lang))
-        waiting[uid] = "profile"
-        return
-
-    # ── Тренировка ────────────────────────────────────────────────
-    if state == "workout_add":
-        add_workout(uid, text)
-        streak = get_streak(uid)
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_max(uid, f"I just finished a workout:\n\n{text}\n\nAnalyze it and give me feedback.")
-        streak_msg = "\n\n" + t("streak_msg",lang,n=streak) if streak > 1 else ""
-        await message.answer(t("workout_saved",lang) + streak_msg + "\n\n" + reply)
-        return
-
-    # ── Цель по воде ──────────────────────────────────────────────
-    if state == "water_goal":
-        try:
-            goal = int(text)
-            update_user(uid, water_goal=goal)
-            await message.answer(t("water_goal_saved",lang,goal=goal))
-        except Exception:
-            await message.answer(t("water_goal_prompt",lang))
-            waiting[uid] = "water_goal"
-        return
-
-    # ── Личный рекорд: "рекорд: жим 100 кг x 3" или "pr: bench 100 kg x 3" ──
-    lower = text.lower()
-    if lower.startswith(("рекорд:","пр:","pr:","record:")):
-        try:
-            body = text.split(":",1)[1].strip()
-            m = re.search(r"([\w\s]+?)\s+(\d+[\.,]?\d*)\s*(?:кг|kg)?\s*[xхXХ×]\s*(\d+)", body, re.I)
-            if m:
-                ex = m.group(1).strip(); w = float(m.group(2).replace(",",".")); r = int(m.group(3))
-                db("INSERT INTO personal_records (uid,exercise,weight_kg,reps,date) VALUES (?,?,?,?,?)", (uid,ex,w,r,datetime.now().strftime("%Y-%m-%d")))
-                await message.answer(t("pr_saved",lang,ex=ex,w=w,r=r))
-                return
-        except Exception: pass
-
-    # ── Таймер по тексту ──────────────────────────────────────────
-    if any(w in lower for w in ["таймер","timer","отдых","rest","подход","set done","ferdig"]):
-        await message.answer(t("timer_title",lang), reply_markup=timer_kb(lang))
-        return
-
-    # ── Кнопки главного меню ──────────────────────────────────────
-    # Строим словарь кнопок динамически по текущему языку
+    # ── Кнопки меню ───────────────────────────────────────────────
     menu_map = {
-        t("btn_workout",lang):     "workout",
-        t("btn_nutrition",lang):   "nutrition",
-        t("btn_progress",lang):    "progress",
-        t("btn_recovery",lang):    "recovery",
-        t("btn_motivation",lang):  "motivation",
-        t("btn_supplements",lang): "supplements",
-        t("btn_technique",lang):   "technique",
-        t("btn_kbju",lang):        "calc",
-        t("btn_water",lang):       "water",
-        t("btn_diary",lang):       "diary",
+        t("btn_lesson",lang):    "lesson",
+        t("btn_vocab",lang):     "vocab",
+        t("btn_talk",lang):      "talk",
+        t("btn_test",lang):      "test",
+        t("btn_toefl",lang):     "toefl",
+        t("btn_writing",lang):   "writing",
+        t("btn_idioms",lang):    "idioms",
+        t("btn_dictation",lang): "dictation",
+        t("btn_mistakes",lang):  "mistakes",
+        t("btn_stats",lang):     "stats",
     }
     action = menu_map.get(text)
     if action:
-        if action == "workout":
-            await message.answer(t("choose_level",lang), reply_markup=workouts_kb(lang))
-        elif action == "nutrition":
-            await message.answer(t("nutrition_menu",lang), reply_markup=nutrition_kb(lang))
-        elif action == "progress":
-            await message.answer(t("progress_menu",lang), reply_markup=progress_kb(lang))
-        elif action == "recovery":
-            await message.answer(t("recovery_menu",lang), reply_markup=recovery_kb(lang))
-        elif action == "supplements":
-            await message.answer(t("supplements_menu",lang), reply_markup=supplements_kb(lang))
-        elif action == "technique":
-            await message.answer(t("technique_menu",lang), reply_markup=technique_kb(lang))
-        elif action == "calc":
-            await cmd_calc(message)
-        elif action == "water":
-            await cmd_water(message)
-        elif action == "diary":
-            await message.answer(t("diary_menu",lang), reply_markup=diary_kb(lang))
-        elif action == "motivation":
-            await bot.send_chat_action(message.chat.id, "typing")
-            reply = await ask_max(uid, SECTION_PROMPTS["motivation"])
-            await message.answer(reply)
+        if action == "lesson":    await cmd_lesson(message)
+        elif action == "vocab":   await cmd_vocab(message)
+        elif action == "talk":    await cmd_talk(message)
+        elif action == "test":    await cmd_test(message)
+        elif action == "toefl":   await cmd_toefl(message)
+        elif action == "writing": await cmd_writing(message)
+        elif action == "idioms":  await cmd_idioms(message)
+        elif action == "dictation": await cmd_dictation(message)
+        elif action == "mistakes": await cmd_mistakes(message)
+        elif action == "stats":   await cmd_stats(message)
         return
 
-    # ── Обычный чат ───────────────────────────────────────────────
-    await bot.send_chat_action(message.chat.id, "typing")
-    reply = await ask_max(uid, text)
-    for i in range(0, len(reply), 4000):
-        await message.answer(reply[i:i+4000])
+    # ── Режим написания/проверки ───────────────────────────────────
+    if state == "writing":
+        waiting.pop(uid, None)
+        await bot.send_chat_action(message.chat.id, "typing")
+        # Сначала исправляем, потом логируем
+        reply = await ask_alex(uid,
+            f"Please correct and analyze this text:\n\n{text}",
+            mode="correction",
+            extra="Be thorough: find ALL errors, explain each one clearly, show the corrected version."
+        )
+        await message.answer(reply)
+        log_session(uid, "writing_check")
+        # Логируем как ошибки если текст содержит английский
+        if len(text) > 20:
+            log_mistake(uid, text[:100], "See correction above", "writing exercise", "mixed")
+        return
+
+    # ── Активные сессии (тест, разговор, TOEFL и т.д.) ────────────
+    if state in ("test_active","lesson_active","speaking_active","toefl_active","vocab_active","placement_test","dictation"):
+        # Продолжаем текущую сессию
+        mode_map = {
+            "test_active": "test", "lesson_active": "general",
+            "speaking_active": "speaking", "toefl_active": "toefl",
+            "vocab_active": "vocab", "placement_test": "test", "dictation": "general",
+        }
+        mode = mode_map.get(state, "general")
+        await bot.send_chat_action(message.chat.id, "typing")
+        reply = await ask_alex(uid, text, mode=mode)
+        await message.answer(reply)
+
+        # Если текст на английском — автопроверка на ошибки в фоне
+        english_ratio = sum(1 for c in text if c.isalpha() and ord(c) < 128) / max(len(text),1)
+        if english_ratio > 0.5 and len(text) > 15 and state == "speaking_active":
+            log_session(uid, "speaking_practice")
+        return
+
+    # ── Автоопределение: пользователь пишет по-английски ──────────
+    english_ratio = sum(1 for c in text if c.isalpha() and ord(c) < 128) / max(len(text), 1)
+
+    if english_ratio > 0.6 and len(text) > 10:
+        # Текст явно на английском — исправляем ошибки + отвечаем
+        await bot.send_chat_action(message.chat.id, "typing")
+        reply = await ask_alex(uid,
+            text,
+            mode="correction",
+            extra="The student wrote something in English. First, correct any errors if there are any (if perfect, compliment them). Then respond naturally to what they said or asked."
+        )
+        await message.answer(reply)
+        log_session(uid, "free_writing")
+    else:
+        # Вопрос на родном языке — просто отвечаем как репетитор
+        await bot.send_chat_action(message.chat.id, "typing")
+        reply = await ask_alex(uid, text, mode="general")
+        await message.answer(reply)
+        log_session(uid, "chat")
+
 
 # ══════════════════════════════════════════════════════════════════
 #  ЗАПУСК
@@ -1064,7 +1006,7 @@ async def main():
     db_init()
     schedule_all()
     scheduler.start()
-    logger.info("💪 FitNova MAX Multilang — запущен!")
+    logger.info("🎓 LinguaMax ALEX — запущен!")
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
