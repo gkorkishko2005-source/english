@@ -23,18 +23,19 @@ async def handle_index(request: web.Request) -> web.Response:
 
     html = html_path.read_text(encoding="utf-8")
 
-    # Подставляем Railway URL в HTML чтобы WebApp знал куда слать запросы
+    # Подставляем Railway URL и имя бота
+    bot_name = os.getenv("BOT_NAME", "PolyGlotty_bot")
     if RAILWAY_URL:
         html = html.replace(
             "window.API_URL || ''",
             f"window.API_URL || 'https://{RAILWAY_URL}'"
         )
-
-    return web.Response(
-        text=html,
-        content_type="text/html",
-        charset="utf-8"
+    html = html.replace(
+        "window.BOT_NAME || 'PolyGlotty_bot'",
+        f"window.BOT_NAME || '{bot_name}'"
     )
+
+    return web.Response(text=html, content_type="text/html", charset="utf-8")
 
 
 async def handle_user_api(request: web.Request) -> web.Response:
