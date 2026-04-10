@@ -268,7 +268,105 @@ async def handle_test(request: web.Request) -> web.Response:
 #  FLASHCARD RATE
 # ══════════════════════════════════════════════════════════════════
 
-async def handle_rate(request: web.Request) -> web.Response:
+async def handle_set_profession(request: web.Request) -> web.Response:
+    from database import update_user, save_interest
+    try:
+        body = await request.json()
+        uid  = int(body.get("uid", 0))
+        prof = str(body.get("profession","")).strip()[:100]
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400)
+    if uid and prof:
+        await update_user(uid, profession=prof)
+        await save_interest(uid, prof, source="profession")
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin":"*"})
+
+
+async def handle_set_reminder(request: web.Request) -> web.Response:
+    from database import update_user
+    try:
+        body = await request.json()
+        uid  = int(body.get("uid", 0))
+        t    = str(body.get("remind_time","off")).strip()
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400)
+    if uid:
+        await update_user(uid, remind_time=t)
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin":"*"})
+
+
+async def handle_audio_task(request: web.Request) -> web.Response:
+    """Генерирует TOEFL-style listening задание с транскриптом и вопросами."""
+    import re as _re, json as _json
+    from database import get_level, get_lang as get_db_lang
+    try:
+        body = await request.json()
+        uid  = int(body.get("uid", 0))
+        lang = str(body.get("lang","en"))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400)
+
+    level = await get_level(uid) if uid else "B1"
+
+    system = f"""You generate TOEFL Listening practice content.
+Return ONLY valid JSON, no other text.
+Generate a short academic lecture or conversation (120-180 words, {level} level).
+Format:
+{{
+  "topic": "short topic name",
+  "transcript": "the full text with natural speech markers",
+  "questions": [
+    {{"q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 0}},
+    {{"q": "question text", "options": ["option A", "option B", "option C", "option D"], "correct": 2}}
+  ]
+}}
+Generate 3 questions. correct is 0-indexed. Topics: history, science, biology, technology, environment."""
+
+    try:
+        async with httpx.AsyncClient(timeout=40) as client:
+            r = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": ANT_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+                json={"model": MODEL, "max_tokens": 1000, "system": system,
+                      "messages": [{"role":"user","content":"Generate a TOEFL listening task."}]},
+            )
+            data = r.json()
+            if "error" in data:
+                return web.json_response({"error": data["error"].get("message","")}, status=500)
+            raw = data["content"][0]["text"].strip()
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+    try:
+        m = _re.search(r'\{.*\}', raw, _re.DOTALL)
+        task = _json.loads(m.group())
+    except Exception:
+        return web.json_response({"error": "parse error", "raw": raw[:200]}, status=500)
+
+    # Try TTS for audio
+    audio_url = None
+    try:
+        from tts import text_to_speech
+        audio_bytes = await text_to_speech(task.get("transcript",""))
+        if audio_bytes:
+            # Save to temp file and serve it
+            import tempfile, os
+            fname = f"audio_{uid}_{int(__import__('time').time())}.mp3"
+            fpath = Path(__file__).parent / "webapp" / fname
+            fpath.write_bytes(audio_bytes)
+            domain = os.getenv("RAILWAY_PUBLIC_DOMAIN","")
+            if domain:
+                audio_url = f"https://{domain}/{fname}"
+    except Exception as e:
+        logger.warning(f"TTS for audio task failed: {e}")
+
+    if audio_url:
+        task["audio_url"] = audio_url
+
+    return web.json_response(task, headers={"Access-Control-Allow-Origin":"*"})
+
+
+
     from database import update_word_review, add_xp
     try:
         body    = await request.json()
@@ -308,7 +406,12 @@ def create_app() -> web.Application:
     app.router.add_post("/api/lesson",          handle_lesson)
     app.router.add_post("/api/test",            handle_test)
     app.router.add_post("/api/rate_card",       handle_rate)
+    app.router.add_post("/api/set_profession",  handle_set_profession)
+    app.router.add_post("/api/set_reminder",    handle_set_reminder)
+    app.router.add_post("/api/audio_task",      handle_audio_task)
     app.router.add_get("/health",               handle_health)
+    # Serve static audio files from webapp dir
+    app.router.add_static("/", WEBAPP_DIR, show_index=False)
     app.router.add_route("OPTIONS", "/{tail:.*}", handle_options)
     return app
 
