@@ -268,6 +268,20 @@ async def handle_test(request: web.Request) -> web.Response:
 #  FLASHCARD RATE
 # ══════════════════════════════════════════════════════════════════
 
+async def handle_rate(request: web.Request) -> web.Response:
+    from database import update_word_review, add_xp
+    try:
+        body    = await request.json()
+        word_id = int(body["word_id"])
+        quality = int(body["quality"])
+        uid     = int(body.get("uid", 0))
+    except Exception:
+        return web.json_response({"error": "bad body"}, status=400)
+    await update_word_review(word_id, quality)
+    if uid: await add_xp(uid, 3)
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin": "*"})
+
+
 async def handle_set_profession(request: web.Request) -> web.Response:
     from database import update_user, save_interest
     try:
