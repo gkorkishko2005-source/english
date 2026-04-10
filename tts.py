@@ -78,10 +78,17 @@ async def _elevenlabs_tts(text: str) -> bytes | None:
 # ══════════════════════════════════════════════════════════════════
 
 async def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg") -> str | None:
-    """Транскрибирует аудио через OpenAI Whisper API."""
-    if not OPENAI_KEY:
-        logger.warning("OPENAI_API_KEY not set — Whisper unavailable")
-        return None
+    """
+    Транскрибирует аудио.
+    Приоритет: OpenAI Whisper (если есть ключ) → Google STT (бесплатно)
+    """
+    if OPENAI_KEY:
+        result = await _whisper_transcribe(audio_bytes, filename)
+        if result: return result
+    return await _google_stt(audio_bytes)
+
+
+async def _whisper_transcribe(audio_bytes: bytes, filename: str) -> str | None:
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(
@@ -92,10 +99,42 @@ async def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg") -> s
             )
             if r.status_code == 200:
                 return r.json().get("text","").strip()
-            logger.error(f"Whisper error: {r.status_code} {r.text[:200]}")
             return None
     except Exception as e:
-        logger.error(f"Whisper exception: {e}")
+        logger.error(f"Whisper: {e}")
+        return None
+
+
+async def _google_stt(audio_bytes: bytes) -> str | None:
+    """Google Speech Recognition — бесплатно, без API ключа."""
+    try:
+        import asyncio
+        import io
+        import speech_recognition as sr
+
+        def _recognize():
+            recognizer = sr.Recognizer()
+            # Конвертируем OGG в WAV через pydub
+            try:
+                from pydub import AudioSegment
+                audio_segment = AudioSegment.from_ogg(io.BytesIO(audio_bytes))
+                wav_buf = io.BytesIO()
+                audio_segment.export(wav_buf, format="wav")
+                wav_buf.seek(0)
+                with sr.AudioFile(wav_buf) as source:
+                    audio = recognizer.record(source)
+            except Exception:
+                # Fallback: пробуем напрямую
+                with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
+                    audio = recognizer.record(source)
+            return recognizer.recognize_google(audio, language="en-US")
+
+        return await asyncio.to_thread(_recognize)
+    except ImportError:
+        logger.warning("speech_recognition or pydub not installed")
+        return None
+    except Exception as e:
+        logger.warning(f"Google STT: {e}")
         return None
 
 

@@ -1285,6 +1285,80 @@ async def handle_text(message: Message):
         await message.answer(reply)
         log_session(uid, "chat")
 
+@dp.message(Command("app"))
+async def cmd_app(m: Message):
+    """Открывает WebApp."""
+    uid  = m.from_user.id
+    lang = await get_lang(uid)
+    domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
+    if not domain:
+        await m.answer("⚠️ WebApp URL not configured." if lang=="en" else "⚠️ WebApp ещё не настроен.")
+        return
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+    await m.answer(
+        "📱 <b>LinguaMax App</b>\n\n"
+        + ("Открывай приложение — там твой прогресс, флэш-карточки и статистика!" if lang=="ru"
+           else "Open the app — your progress, flashcards and stats!"),
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(
+                text="🚀 Открыть приложение" if lang=="ru" else "🚀 Open App",
+                web_app=WebAppInfo(url=f"https://{domain}")
+            )
+        ]])
+    )
+
+
+@dp.message(F.web_app_data)
+async def handle_webapp_data(message: Message):
+    """Получает данные от WebApp и выполняет действие."""
+    uid  = message.from_user.id
+    lang = await get_lang(uid)
+    try:
+        data   = json.loads(message.web_app_data.data)
+        action = data.get("action", "")
+    except Exception:
+        return
+
+    action_map = {
+        "lesson":     cmd_lesson,
+        "vocab":      cmd_vocab,
+        "toefl":      cmd_toefl,
+        "roleplay":   cmd_roleplay,
+        "remind":     cmd_remind,
+        "mistakes":   cmd_mistakes,
+        "interests":  cmd_interests,
+        "profession": cmd_profession,
+        "reset":      cmd_reset,
+    }
+
+    if action == "set_lang":
+        new_lang = data.get("lang", "ru")
+        await update_user(uid, lang=new_lang)
+        await message.answer("✅ Language updated!" if new_lang=="en" else "✅ Язык обновлён!")
+        return
+
+    if action == "rate_card":
+        word_id = data.get("word_id")
+        quality = data.get("quality", 3)
+        if word_id:
+            from database import update_word_review, add_xp
+            await update_word_review(word_id, quality)
+            await add_xp(uid, 3)
+        return
+
+    if action == "add_word":
+        await message.answer(
+            "📝 Напиши слово которое хочешь добавить:" if lang=="ru"
+            else "📝 Write the word you want to add:"
+        )
+        waiting[uid] = "vocab_active"
+        return
+
+    handler = action_map.get(action)
+    if handler:
+        await handler(message)
+
+
 # ══════════════════════════════════════════════════════════════════
 #  ЗАПУСК
 # ══════════════════════════════════════════════════════════════════
@@ -1294,8 +1368,17 @@ async def main():
     await schedule_all()
     scheduler.start()
     logger.info("🎓 LinguaMax ALEX v4 Ultimate — запущен!")
+
+    # Запускаем веб-сервер (для WebApp)
+    from server import start_server
+    web_runner = await start_server()
+
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await web_runner.cleanup()
 
 if __name__ == "__main__":
     asyncio.run(main())
