@@ -3,199 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>LinguaMax · ALEX</title>
+<title>LinguaMax</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:      #080b14;
-  --bg2:     #0e1420;
-  --card:    #111827;
-  --border:  rgba(255,255,255,0.07);
-  --accent:  #4f8aff;
-  --green:   #00d4aa;
-  --gold:    #ffd166;
-  --red:     #ff6b6b;
-  --text:    #f0f4ff;
-  --text2:   #8892a4;
-  --text3:   #4a5568;
-  --r:       14px;
-  --r2:      10px;
-  --nav-h:   64px;
-  --safe:    env(safe-area-inset-bottom, 0px);
+:root{
+  --bg:#080b14;--card:#111827;--border:rgba(255,255,255,.07);
+  --accent:#4f8aff;--green:#00d4aa;--gold:#ffd166;--red:#ff6b6b;--orange:#ff9500;
+  --text:#f0f4ff;--t2:#8892a4;--t3:#4a5568;
+  --r:14px;--r2:10px;--nav:64px;--safe:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:15px;
-  -webkit-font-smoothing:antialiased;
-}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:15px;-webkit-font-smoothing:antialiased}
 
-/* ── SCREENS ── */
-#app{height:100vh;display:flex;flex-direction:column;position:relative}
+/* ══ LAYOUT ══ */
+#app{height:100vh;display:flex;flex-direction:column}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{
   position:absolute;inset:0;
   overflow-y:auto;overflow-x:hidden;
-  padding:16px 16px calc(var(--nav-h) + var(--safe) + 16px);
+  padding:16px 16px calc(var(--nav) + var(--safe) + 16px);
   display:none;
-  -webkit-overflow-scrolling:touch;
 }
-.screen.active{display:block;animation:fadeUp .25s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{width:0}
 
-/* ── NAV ── */
+/* ══ ANIMATIONS ══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes ringPop{0%{transform:scale(0) rotate(-90deg);opacity:0}
+  70%{transform:scale(1.08) rotate(-90deg)}100%{transform:scale(1) rotate(-90deg);opacity:1}}
+@keyframes barGrow{from{height:0}to{}}
+@keyframes streakPop{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes xpGlow{0%,100%{box-shadow:0 0 8px rgba(79,138,255,.3)}50%{box-shadow:0 0 20px rgba(79,138,255,.7)}}
+@keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes dotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Stagger helpers */
+.s1{animation-delay:.05s!important}
+.s2{animation-delay:.1s!important}
+.s3{animation-delay:.15s!important}
+.s4d{animation-delay:.2s!important}
+.s5{animation-delay:.25s!important}
+.s6{animation-delay:.3s!important}
+
+/* ══ ANIMATED ELEMENTS ══ */
+.anim-up{animation:fadeUp .4s ease both}
+.anim-scale{animation:scaleIn .35s cubic-bezier(.34,1.56,.64,1) both}
+.anim-slide{animation:slideIn .35s ease both}
+.anim-fade{animation:fadeIn .4s ease both}
+
+/* ══ NAV ══ */
 nav{
   position:relative;z-index:100;
-  height:calc(var(--nav-h) + var(--safe));
-  padding-bottom:var(--safe);
-  background:rgba(8,11,20,.95);
-  backdrop-filter:blur(20px);
+  height:calc(var(--nav) + var(--safe));padding-bottom:var(--safe);
+  background:rgba(8,11,20,.96);backdrop-filter:blur(24px);
   border-top:1px solid var(--border);
-  display:grid;grid-template-columns:repeat(4,1fr);
-  flex-shrink:0;
+  display:grid;grid-template-columns:repeat(4,1fr);flex-shrink:0;
 }
-.nav-item{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;cursor:pointer;transition:.15s;padding:8px 0;
-  position:relative;
-}
-.nav-item .ni{font-size:20px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
-.nav-item .nl{font-size:10px;color:var(--text3);font-weight:500;letter-spacing:.3px}
-.nav-item.active .ni{transform:scale(1.15)}
-.nav-item.active .nl{color:var(--accent)}
-.nav-item.active::before{
-  content:'';position:absolute;top:0;left:20%;right:20%;
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;padding:8px 0;position:relative;transition:.15s}
+.ni .ic{font-size:20px;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.ni .lb{font-size:10px;color:var(--t3);font-weight:500;letter-spacing:.3px;transition:color .2s}
+.ni.on .ic{transform:scale(1.18)}
+.ni.on .lb{color:var(--accent)}
+.ni.on::before{content:'';position:absolute;top:0;left:22%;right:22%;
   height:2px;background:var(--accent);border-radius:0 0 3px 3px;
-}
+  animation:scaleIn .3s cubic-bezier(.34,1.56,.64,1)}
 
-/* ── CARDS & UTILS ── */
+/* ══ CARDS ══ */
 .card{
   background:var(--card);border:1px solid var(--border);
   border-radius:var(--r);padding:18px;position:relative;overflow:hidden;
   margin-bottom:12px;
 }
-.card::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(135deg,rgba(79,138,255,.04) 0%,transparent 60%);
-}
-.sec{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.2px;
+.card::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,rgba(79,138,255,.04),transparent 60%)}
+.sec{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:1.2px;
   text-transform:uppercase;margin:16px 0 10px}
-.btn{
-  width:100%;padding:13px 16px;border-radius:var(--r2);border:none;
+.btn{width:100%;padding:13px 16px;border-radius:var(--r2);border:none;
   cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  transition:.18s;
-}
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
 .btn:active{transform:scale(.97)}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--t2)}
+.btn-ghost:active{background:rgba(255,255,255,.04)}
 
-/* ── HOME ── */
+/* ══ HOME ══ */
 .hero{padding:20px 0 14px;position:relative;overflow:hidden}
-.hero-label{font-size:11px;font-weight:600;color:var(--text3);
+.hero-orb{
+  position:absolute;right:-20px;top:-10px;width:120px;height:120px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(79,138,255,.18) 0%,transparent 70%);
+  animation:floatY 4s ease-in-out infinite;
+}
+.hero-orb2{
+  position:absolute;right:60px;top:30px;width:60px;height:60px;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(0,212,170,.12) 0%,transparent 70%);
+  animation:floatY 3s ease-in-out infinite;animation-delay:.8s;
+}
+.h-label{font-size:11px;font-weight:600;color:var(--t3);
   letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px}
-.hero-name{
-  font-family:'Syne',sans-serif;font-size:clamp(24px,7vw,34px);
+.h-name{
+  font-family:'Syne',sans-serif;font-size:clamp(22px,6.5vw,32px);
   font-weight:800;line-height:1.1;
   background:linear-gradient(120deg,#f0f4ff 30%,var(--accent));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   word-break:break-word;
 }
-.hero-orb{
-  position:absolute;right:-30px;top:-10px;
-  width:110px;height:110px;border-radius:50%;
-  background:radial-gradient(circle,rgba(79,138,255,.2) 0%,transparent 70%);
-  pointer-events:none;
-}
 
-/* XP */
+/* XP card */
 .xp-card{
   background:linear-gradient(135deg,#0e1a3a,#0d1f2d);
   border-color:rgba(79,138,255,.2);
+  animation:xpGlow 3s ease-in-out infinite;
 }
 .xp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .xp-rank{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
-.xp-badge{
-  font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;
-  background:rgba(79,138,255,.15);border:1px solid rgba(79,138,255,.3);color:var(--accent)
-}
-.xp-track{background:rgba(255,255,255,.06);border-radius:100px;height:7px;overflow:hidden;margin-bottom:6px}
-.xp-fill{
-  height:100%;border-radius:100px;
+.xp-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;
+  background:rgba(79,138,255,.15);border:1px solid rgba(79,138,255,.3);color:var(--accent)}
+.xp-track{background:rgba(255,255,255,.06);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px}
+.xp-fill{height:100%;border-radius:100px;
   background:linear-gradient(90deg,var(--accent),var(--green));
-  box-shadow:0 0 10px rgba(79,138,255,.4);
-  transition:width 1s cubic-bezier(.4,0,.2,1);
-}
-.xp-nums{display:flex;justify-content:space-between;font-size:12px;color:var(--text2)}
+  box-shadow:0 0 12px rgba(79,138,255,.4);
+  transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.xp-nums{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
 
 /* Streak */
-.streak-row{
+.stk{
   display:flex;align-items:center;gap:14px;padding:14px 18px;
   background:linear-gradient(135deg,rgba(255,149,0,.1),rgba(255,107,107,.07));
   border:1px solid rgba(255,149,0,.2);border-radius:var(--r);margin-bottom:12px;
+  cursor:pointer;transition:.2s;
 }
-.streak-n{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#ff9500;line-height:1}
-.streak-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
-.streak-s{font-size:12px;color:var(--text2);margin-top:2px}
+.stk:active{transform:scale(.98)}
+.stk-n{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;
+  color:var(--orange);line-height:1;animation:streakPop 2s ease-in-out infinite}
+.stk-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:700}
+.stk-s{font-size:12px;color:var(--t2);margin-top:2px}
 
-/* Stats grid */
-.stats-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.sc{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
-  padding:12px;text-align:center;cursor:pointer;transition:.15s;
-}
-.sc:active{transform:scale(.96)}
+/* Stats 3 */
+.s3g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:12px;text-align:center;cursor:pointer;transition:.2s;overflow:hidden;position:relative}
+.sc::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.06),transparent 60%);
+  opacity:0;transition:.2s}
+.sc:hover::after{opacity:1}
+.sc:active{transform:scale(.95)}
 .sc-n{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;line-height:1;margin-bottom:3px}
-.sc-l{font-size:11px;color:var(--text2)}
-.sc-streak .sc-n{color:#ff9500}
-.sc-words  .sc-n{color:var(--green)}
-.sc-tests  .sc-n{color:var(--accent)}
+.sc-l{font-size:10px;color:var(--t2)}
 
 /* Quick grid */
 .qg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .qb{
   background:var(--card);border:1px solid var(--border);border-radius:var(--r);
-  padding:16px 14px;cursor:pointer;transition:.2s;
+  padding:16px 14px;cursor:pointer;transition:.2s;position:relative;overflow:hidden;
+  animation:cardFloat 4s ease-in-out infinite;
 }
-.qb:active{transform:scale(.96)}
-.qb-icon{font-size:26px;margin-bottom:8px}
+.qb:nth-child(2){animation-delay:.5s}
+.qb:nth-child(3){animation-delay:1s}
+.qb:nth-child(4){animation-delay:1.5s}
+.qb:active{transform:scale(.95)!important;animation:none}
+.qb-ripple{position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,.08),transparent 60%);
+  opacity:0;transition:opacity .3s}
+.qb:active .qb-ripple{opacity:1}
+.qb-icon{font-size:26px;margin-bottom:8px;display:block}
 .qb-t{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:2px}
-.qb-s{font-size:11px;color:var(--text2)}
-.qb-blue {border-color:rgba(79,138,255,.25);background:linear-gradient(135deg,rgba(79,138,255,.07),var(--card))}
-.qb-green{border-color:rgba(0,212,170,.25);background:linear-gradient(135deg,rgba(0,212,170,.07),var(--card))}
-.qb-gold {border-color:rgba(255,209,102,.25);background:linear-gradient(135deg,rgba(255,209,102,.07),var(--card))}
-.qb-red  {border-color:rgba(255,107,107,.25);background:linear-gradient(135deg,rgba(255,107,107,.07),var(--card))}
+.qb-s{font-size:11px;color:var(--t2)}
+.qb-blue {border-color:rgba(79,138,255,.25);background:linear-gradient(135deg,rgba(79,138,255,.08),var(--card))}
+.qb-green{border-color:rgba(0,212,170,.25);background:linear-gradient(135deg,rgba(0,212,170,.08),var(--card))}
+.qb-gold {border-color:rgba(255,209,102,.25);background:linear-gradient(135deg,rgba(255,209,102,.08),var(--card))}
+.qb-red  {border-color:rgba(255,107,107,.25);background:linear-gradient(135deg,rgba(255,107,107,.08),var(--card))}
 
-/* ── LEARN ── */
-.learn-hdr{display:flex;align-items:center;justify-content:space-between;
+/* ══ LEARN ══ */
+.lhdr{display:flex;align-items:center;justify-content:space-between;
   padding-top:12px;margin-bottom:14px}
-.learn-ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
-.ctr{font-size:13px;color:var(--text2);font-weight:500}
-
-/* Progress line */
+.lttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.ctr{font-size:13px;color:var(--t2);font-weight:500}
 .cline{background:rgba(255,255,255,.06);border-radius:100px;height:3px;
   overflow:hidden;margin-bottom:14px}
-.cline-fill{height:100%;background:var(--green);border-radius:100px;transition:.4s ease}
+.cline-fill{height:100%;background:var(--green);border-radius:100px;transition:.5s ease}
 
-/* 3D Flashcard */
-.fc-scene{perspective:1000px;height:220px;cursor:pointer;margin-bottom:14px;
-  /* FIX: не выходит за пределы */
-  overflow:hidden;
-}
+/* Flashcard 3D */
+.fc-scene{perspective:1000px;height:220px;cursor:pointer;margin-bottom:14px;overflow:hidden}
 .fc-inner{
   position:relative;width:100%;height:100%;
   transform-style:preserve-3d;
-  transition:transform .45s cubic-bezier(.4,0,.2,1);
+  transition:transform .5s cubic-bezier(.4,0,.2,1);
 }
 .fc-inner.flipped{transform:rotateY(180deg)}
 .fc-face{
   position:absolute;inset:0;backface-visibility:hidden;
   border-radius:var(--r);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:20px 24px;text-align:center;
+  padding:20px 22px;text-align:center;
 }
 .fc-front{
   background:linear-gradient(145deg,#111d35,#0d1728);
@@ -207,179 +215,187 @@ nav{
   transform:rotateY(180deg);
 }
 .fc-lang{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--text3);margin-bottom:12px;font-weight:600}
-
-/* FIX: слово не вылезает за карточку */
+  color:var(--t3);margin-bottom:12px;font-weight:600}
 .fc-word{
   font-family:'Syne',sans-serif;
-  font-size:clamp(18px,6vw,30px);  /* адаптивный размер */
-  font-weight:800;color:var(--text);line-height:1.15;
-  margin-bottom:8px;
-  word-break:break-word;
-  max-width:100%;
+  font-size:clamp(18px,5.5vw,28px);
+  font-weight:800;color:var(--text);line-height:1.2;
+  margin-bottom:8px;word-break:break-word;max-width:100%;
 }
-.fc-ph{font-size:14px;color:var(--accent);margin-bottom:10px}
-.fc-tr{
-  font-family:'Syne',sans-serif;font-size:24px;font-weight:700;
-  color:var(--green);margin-bottom:10px
-}
-.fc-ex{font-size:13px;color:var(--text2);font-style:italic;line-height:1.5}
-.fc-hint{
-  position:absolute;bottom:12px;
-  font-size:10px;color:var(--text3);letter-spacing:.4px
-}
+.fc-ph{font-size:13px;color:var(--accent);margin-bottom:8px}
+.fc-tr{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;
+  color:var(--green);margin-bottom:10px}
+.fc-ex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.5}
+.fc-hint{position:absolute;bottom:12px;font-size:10px;color:var(--t3);
+  letter-spacing:.4px;animation:pulse 2s ease-in-out infinite}
 
-/* Rating row — FIX: всегда видна */
-.rate-row{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
-  margin-bottom:12px;
-  transition:opacity .3s,transform .3s;
+/* Rating */
+.rrow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin-bottom:12px;transition:opacity .35s,transform .35s;
 }
-.rate-row.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
-.rb{
-  padding:10px 6px;border-radius:var(--r2);border:1px solid var(--border);
+.rrow.hidden{opacity:0;pointer-events:none;transform:translateY(10px)}
+.rb{padding:10px 6px;border-radius:var(--r2);border:1px solid var(--border);
   font-size:11px;font-weight:600;cursor:pointer;text-align:center;
-  background:var(--card);transition:.15s;
+  background:var(--card);transition:.2s;
   display:flex;flex-direction:column;align-items:center;gap:3px;
 }
-.rb:active{transform:scale(.94)}
+.rb:active{transform:scale(.92)}
 .rb .ri{font-size:18px}
 .rb1{border-color:rgba(255,107,107,.35);color:var(--red)}
-.rb2{border-color:rgba(255,149,0,.35);color:#ff9500}
+.rb2{border-color:rgba(255,149,0,.35);color:var(--orange)}
 .rb3{border-color:rgba(79,138,255,.35);color:var(--accent)}
 .rb4{border-color:rgba(0,212,170,.35);color:var(--green)}
 
 /* No words */
-.no-words{text-align:center;padding:50px 20px}
-.nw-ico{font-size:52px;margin-bottom:14px}
+.no-words{text-align:center;padding:50px 20px;animation:fadeUp .4s ease}
+.nw-ico{font-size:52px;margin-bottom:14px;animation:floatY 3s ease-in-out infinite}
 .nw-t{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px}
-.nw-s{color:var(--text2);font-size:14px;line-height:1.5}
+.nw-s{color:var(--t2);font-size:14px;line-height:1.5}
 
-/* ── PROGRESS ── */
-.prog-hdr{padding-top:12px;margin-bottom:16px}
-.prog-t{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:2px}
-.prog-s{color:var(--text2);font-size:13px}
+/* ══ PROGRESS ══ */
+.phdr{padding-top:12px;margin-bottom:16px}
+.pttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;margin-bottom:2px}
+.psub{color:var(--t2);font-size:13px}
 
 /* Ring */
-.ring-wrap{display:flex;align-items:center;gap:18px;margin-bottom:14px}
-.ring-svg{width:84px;height:84px;flex-shrink:0}
-.ring-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:8}
-.ring-fill{
-  fill:none;stroke:url(#rg);stroke-width:8;stroke-linecap:round;
+.ring-wrap{display:flex;align-items:center;gap:18px;margin-bottom:6px}
+.rsvg{width:84px;height:84px;flex-shrink:0}
+.rtrack{fill:none;stroke:rgba(255,255,255,.06);stroke-width:8}
+.rfill{fill:none;stroke:url(#rg);stroke-width:8;stroke-linecap:round;
   stroke-dasharray:220;stroke-dashoffset:220;
   transform:rotate(-90deg);transform-origin:50% 50%;
-  transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);
+  transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .3s;
 }
-.ring-txt{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;fill:var(--text)}
-.ring-sub{font-size:9px;fill:var(--text3)}
-.li-lv{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:2px}
-.li-rk{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:13px}
-.li-xp{font-size:13px;color:var(--text2)}
+.rtxt{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;fill:var(--text)}
+.rsub{font-size:9px;fill:var(--t3)}
+.rl-lv{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:2px}
+.rl-rk{color:var(--accent);font-weight:600;margin-bottom:4px;font-size:13px}
+.rl-xp{font-size:13px;color:var(--t2)}
 
 /* Stats 2x2 */
-.s4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.s4c{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:var(--r2);padding:14px;cursor:pointer;transition:.15s;
-}
-.s4c:active{transform:scale(.96)}
+.s4g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.s4c{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px;cursor:pointer;transition:.2s;overflow:hidden;position:relative}
+.s4c::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  opacity:0;transition:.3s}
+.s4c:hover::before{opacity:1}
+.s4c:active{transform:scale(.95)}
 .s4-ico{font-size:20px;margin-bottom:6px}
-.s4-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
-.s4-l{font-size:11px;color:var(--text2)}
+.s4-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;margin-bottom:3px;
+  transition:transform .2s}
+.s4c:active .s4-n{transform:scale(.95)}
+.s4-l{font-size:11px;color:var(--t2)}
 
 /* Chart */
-.chart-wrap{padding:4px 0}
-.bars{display:flex;align-items:flex-end;gap:5px;height:70px;margin-bottom:6px}
-.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.bars{display:flex;align-items:flex-end;gap:5px;height:72px;margin-bottom:6px}
+.bw{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  height:100%;justify-content:flex-end}
 .bar{width:100%;border-radius:3px 3px 0 0;
-  background:linear-gradient(180deg,var(--accent),rgba(79,138,255,.25));
-  transition:height .7s cubic-bezier(.4,0,.2,1);min-height:3px}
-.bar.today{background:linear-gradient(180deg,var(--green),rgba(0,212,170,.25))}
-.bday{font-size:10px;color:var(--text3);letter-spacing:.2px}
+  background:linear-gradient(180deg,var(--accent),rgba(79,138,255,.2));
+  transition:height .8s cubic-bezier(.4,0,.2,1);min-height:3px;
+  cursor:pointer;
+}
+.bar:hover{filter:brightness(1.2)}
+.bar.today{background:linear-gradient(180deg,var(--green),rgba(0,212,170,.2))}
+.bday{font-size:10px;color:var(--t3);letter-spacing:.2px}
+.today-lbl{color:var(--green)!important}
 
 /* TOEFL */
-.toefl-row{display:flex;align-items:center;padding:10px 0;
+.tr{display:flex;align-items:center;padding:10px 0;
   border-bottom:1px solid var(--border);gap:10px}
-.toefl-row:last-child{border-bottom:none}
-.t-sec{flex:1;font-weight:500;font-size:14px}
+.tr:last-child{border-bottom:none}
+.t-s{flex:1;font-weight:500;font-size:14px}
 .t-bar{flex:2;background:rgba(255,255,255,.06);border-radius:100px;height:5px;overflow:hidden}
-.t-fill{height:100%;border-radius:100px;background:var(--accent);transition:width 1s ease}
-.t-sc{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.t-fill{height:100%;border-radius:100px;background:var(--accent);
+  transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.t-sc{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;width:32px;text-align:right}
 
-/* ── SETTINGS ── */
-.set-hdr{padding-top:12px;margin-bottom:16px}
-.set-t{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
-
-.lang-tgl{display:flex;background:rgba(255,255,255,.05);border-radius:var(--r2);
+/* ══ SETTINGS ══ */
+.shdr{padding-top:12px;margin-bottom:16px}
+.sttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:800}
+.ltgl{display:flex;background:rgba(255,255,255,.05);border-radius:var(--r2);
   padding:3px;gap:3px;margin-bottom:14px}
 .lo{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:13px;
-  font-weight:600;cursor:pointer;transition:.2s;color:var(--text2)}
-.lo.active{background:var(--accent);color:#fff}
-
+  font-weight:600;cursor:pointer;transition:.2s;color:var(--t2)}
+.lo.on{background:var(--accent);color:#fff;animation:scaleIn .2s cubic-bezier(.34,1.56,.64,1)}
 .slist{background:var(--card);border:1px solid var(--border);
   border-radius:var(--r);overflow:hidden;margin-bottom:14px}
-.si{
-  display:flex;align-items:center;padding:15px 16px;gap:12px;
-  border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;
-}
+.si{display:flex;align-items:center;padding:15px 16px;gap:12px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;position:relative}
 .si:last-child{border-bottom:none}
-.si:active{background:rgba(255,255,255,.03)}
-.si-ico{font-size:18px;width:26px;text-align:center}
+.si:active{background:rgba(255,255,255,.04)}
+.si-ico{font-size:18px;width:26px;text-align:center;flex-shrink:0}
 .si-body{flex:1;min-width:0}
 .si-t{font-weight:500;font-size:14px}
-.si-s{font-size:12px;color:var(--text2);margin-top:1px}
+.si-s{font-size:12px;color:var(--t2);margin-top:1px}
 .si-val{font-size:13px;color:var(--accent);font-weight:600;flex-shrink:0}
-.si-arr{color:var(--text3);font-size:14px;flex-shrink:0}
-
+.si-arr{color:var(--t3);font-size:16px;flex-shrink:0}
 .itags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.itag{
-  padding:5px 11px;background:rgba(79,138,255,.1);
+.itag{padding:5px 11px;background:rgba(79,138,255,.1);
   border:1px solid rgba(79,138,255,.2);border-radius:100px;
-  font-size:12px;color:var(--accent);cursor:pointer;
-  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--accent);
+  animation:scaleIn .3s cubic-bezier(.34,1.56,.64,1) both;
 }
-.itag-x{color:var(--text3);font-size:10px}
 
-/* ── TOAST ── */
+/* ══ LOADING SKELETON ══ */
+.skel{
+  background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:6px;
+}
+
+/* ══ TOAST ══ */
 .toast{
-  position:fixed;bottom:calc(var(--nav-h) + var(--safe) + 12px);
+  position:fixed;bottom:calc(var(--nav) + var(--safe) + 12px);
   left:12px;right:12px;max-width:calc(480px - 24px);margin:0 auto;
-  background:var(--accent);color:#fff;padding:12px 16px;
+  background:rgba(20,30,50,.95);backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  color:var(--text);padding:12px 16px;
   border-radius:var(--r2);font-weight:500;z-index:200;
-  transform:translateY(16px);opacity:0;
-  transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
-  font-size:14px;
+  transform:translateY(20px);opacity:0;
+  transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;
+  font-size:14px;display:flex;align-items:center;gap:10px;
 }
 .toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:18px;flex-shrink:0}
 
-/* ── LOADER ── */
+/* ══ LOADER ══ */
 #loader{
   position:fixed;inset:0;background:var(--bg);z-index:999;
   display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:18px;transition:opacity .4s;
+  justify-content:center;gap:20px;transition:opacity .5s;
 }
 #loader.gone{opacity:0;pointer-events:none}
-.l-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;
+.ll{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;
   background:linear-gradient(120deg,var(--text),var(--accent));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.l-dots{display:flex;gap:7px}
-.l-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);
-  opacity:.3;animation:lp 1.1s ease-in-out infinite}
-.l-dot:nth-child(2){animation-delay:.18s}
-.l-dot:nth-child(3){animation-delay:.36s}
-@keyframes lp{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.2)}}
+.ldots{display:flex;gap:8px}
+.ld{width:8px;height:8px;border-radius:50%;background:var(--accent);
+  opacity:.3;animation:dotBounce 1s ease-in-out infinite}
+.ld:nth-child(2){animation-delay:.15s}
+.ld:nth-child(3){animation-delay:.3s}
+.lsub{font-size:13px;color:var(--t3)}
 
-/* scrollbar */
-.screen::-webkit-scrollbar{width:3px}
-.screen::-webkit-scrollbar-track{background:transparent}
-.screen::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+/* ══ SYNC INDICATOR ══ */
+.sync-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  display:inline-block;margin-left:6px;
+  animation:pulse 2s ease-in-out infinite;
+}
+.sync-dot.syncing{background:var(--orange);animation:pulse .5s ease-in-out infinite}
+.sync-dot.error{background:var(--red);animation:none}
 </style>
 </head>
 <body>
 
 <div id="loader">
-  <div class="l-logo">LinguaMax</div>
-  <div class="l-dots"><div class="l-dot"></div><div class="l-dot"></div><div class="l-dot"></div></div>
+  <div class="ll">LinguaMax</div>
+  <div class="ldots">
+    <div class="ld"></div><div class="ld"></div><div class="ld"></div>
+  </div>
+  <div class="lsub">Syncing your data...</div>
 </div>
 
 <div id="app">
@@ -387,95 +403,96 @@ nav{
 
     <!-- ══ HOME ══ -->
     <div class="screen active" id="s-home">
-
-      <div class="hero">
+      <div class="hero anim-up">
         <div class="hero-orb"></div>
-        <div class="hero-label" id="greeting-label">Good day,</div>
-        <div class="hero-name" id="hero-name">Loading...</div>
+        <div class="hero-orb2"></div>
+        <div class="h-label" id="greet-lbl">Good day,</div>
+        <div class="h-name" id="hero-name">—</div>
       </div>
 
-      <!-- XP -->
-      <div class="card xp-card">
+      <div class="card xp-card anim-up s1">
         <div class="xp-top">
-          <div class="xp-rank" id="xp-rank">📘 Elementary</div>
-          <div class="xp-badge" id="xp-badge">B1</div>
+          <div class="xp-rank" id="xp-rank">—</div>
+          <div class="xp-badge" id="xp-badge">—
+            <span class="sync-dot" id="sync-dot"></span>
+          </div>
         </div>
         <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0"></div></div>
         <div class="xp-nums">
-          <span id="xp-cur">0 XP</span>
-          <span id="xp-nxt">Next: 0 XP</span>
+          <span id="xp-cur">—</span>
+          <span id="xp-nxt">—</span>
         </div>
       </div>
 
-      <!-- Streak -->
-      <div class="streak-row">
-        <div class="streak-n" id="h-streak">0</div>
+      <div class="stk anim-up s2" onclick="openBot('stats')">
+        <div class="stk-n" id="h-stk">0</div>
         <div>
-          <div class="streak-t">🔥 Day streak</div>
-          <div class="streak-s" id="streak-sub">Start today!</div>
+          <div class="stk-t">🔥 Day streak</div>
+          <div class="stk-s" id="stk-sub">—</div>
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="stats-3">
-        <div class="sc sc-streak" onclick="goTab('progress')">
-          <div class="sc-n" id="hs-streak">0</div>
-          <div class="sc-l">Streak</div>
+      <div class="s3g anim-up s3">
+        <div class="sc" onclick="openBot('stats')" style="border-color:rgba(255,149,0,.2)">
+          <div class="sc-n" id="hs-stk" style="color:var(--orange)">—</div>
+          <div class="sc-l">Streak days</div>
         </div>
-        <div class="sc sc-words" onclick="goTab('progress')">
-          <div class="sc-n" id="hs-words">0</div>
+        <div class="sc" onclick="openBot('vocab')" style="border-color:rgba(0,212,170,.2)">
+          <div class="sc-n" id="hs-words" style="color:var(--green)">—</div>
           <div class="sc-l">Words learned</div>
         </div>
-        <div class="sc sc-tests" onclick="goTab('progress')">
-          <div class="sc-n" id="hs-tests">0</div>
+        <div class="sc" onclick="openBot('test')" style="border-color:rgba(79,138,255,.2)">
+          <div class="sc-n" id="hs-tests" style="color:var(--accent)">—</div>
           <div class="sc-l">Tests done</div>
         </div>
       </div>
 
-      <!-- Quick start -->
-      <div class="sec">Quick start</div>
+      <div class="sec anim-fade s4d">Quick start</div>
       <div class="qg">
-        <div class="qb qb-blue" onclick="act('lesson')">
-          <div class="qb-icon">📚</div>
+        <div class="qb qb-blue anim-scale s4d" onclick="openBot('lesson')">
+          <div class="qb-ripple"></div>
+          <span class="qb-icon">📚</span>
           <div class="qb-t">Grammar</div>
           <div class="qb-s">Start a lesson</div>
         </div>
-        <div class="qb qb-green" onclick="goTab('learn')">
-          <div class="qb-icon">🃏</div>
+        <div class="qb qb-green anim-scale s5" onclick="goTab('learn')">
+          <div class="qb-ripple"></div>
+          <span class="qb-icon">🃏</span>
           <div class="qb-t">Flashcards</div>
           <div class="qb-s">Review words</div>
         </div>
-        <div class="qb qb-gold" onclick="act('toefl')">
-          <div class="qb-icon">🎓</div>
+        <div class="qb qb-gold anim-scale s5" onclick="openBot('toefl')">
+          <div class="qb-ripple"></div>
+          <span class="qb-icon">🎓</span>
           <div class="qb-t">TOEFL</div>
           <div class="qb-s">Practice now</div>
         </div>
-        <div class="qb qb-red" onclick="act('roleplay')">
-          <div class="qb-icon">🎭</div>
+        <div class="qb qb-red anim-scale s6" onclick="openBot('roleplay')">
+          <div class="qb-ripple"></div>
+          <span class="qb-icon">🎭</span>
           <div class="qb-t">Roleplay</div>
           <div class="qb-s">Real scenarios</div>
         </div>
       </div>
-
-    </div><!-- /home -->
+    </div>
 
     <!-- ══ LEARN ══ -->
     <div class="screen" id="s-learn">
-      <div class="learn-hdr">
-        <div class="learn-ttl">Flashcards</div>
+      <div class="lhdr">
+        <div class="lttl">Flashcards</div>
         <div class="ctr" id="fc-ctr">0 / 0</div>
       </div>
 
-      <div id="learn-content">
-        <div class="cline"><div class="cline-fill" id="cl-fill" style="width:0"></div></div>
+      <div id="learn-cards">
+        <div class="cline"><div class="cline-fill" id="clf" style="width:0"></div></div>
 
-        <div class="fc-scene" id="fc-scene" onclick="flip()">
-          <div class="fc-inner" id="fc-inner">
+        <div class="fc-scene" id="fcs" onclick="flipCard()">
+          <div class="fc-inner" id="fci">
             <div class="fc-face fc-front">
               <div class="fc-lang">ENGLISH</div>
               <div class="fc-word" id="fc-word">—</div>
               <div class="fc-ph"   id="fc-ph"></div>
-              <div class="fc-hint">Tap to reveal →</div>
+              <div class="fc-hint">Tap to flip ↕</div>
             </div>
             <div class="fc-face fc-back">
               <div class="fc-lang">TRANSLATION</div>
@@ -485,533 +502,494 @@ nav{
           </div>
         </div>
 
-        <!-- Rating — всегда в DOM, скрыта классом -->
-        <div class="rate-row hidden" id="rate-row">
-          <div class="rb rb1" onclick="rate(1)"><span class="ri">😕</span>Again</div>
-          <div class="rb rb2" onclick="rate(2)"><span class="ri">🤔</span>Hard</div>
-          <div class="rb rb3" onclick="rate(3)"><span class="ri">😊</span>Good</div>
-          <div class="rb rb4" onclick="rate(4)"><span class="ri">✅</span>Easy</div>
+        <div class="rrow hidden" id="rrow">
+          <div class="rb rb1" onclick="rateCard(1)"><span class="ri">😕</span>Again</div>
+          <div class="rb rb2" onclick="rateCard(2)"><span class="ri">🤔</span>Hard</div>
+          <div class="rb rb3" onclick="rateCard(3)"><span class="ri">😊</span>Good</div>
+          <div class="rb rb4" onclick="rateCard(4)"><span class="ri">✅</span>Easy</div>
         </div>
 
-        <button class="btn btn-ghost" onclick="act('add_word')">+ Add words in bot</button>
+        <button class="btn btn-ghost" onclick="openBot('vocab')">+ Add words in bot</button>
       </div>
 
       <div class="no-words" id="no-words" style="display:none">
         <div class="nw-ico">🎉</div>
         <div class="nw-t">All caught up!</div>
-        <div class="nw-s">No words due for review.<br>Come back tomorrow or add new words in the bot.</div>
+        <div class="nw-s">No words due for review today.<br>Come back tomorrow or add words in the bot.</div>
+        <br>
+        <button class="btn btn-ghost" onclick="openBot('vocab')" style="max-width:240px;margin:0 auto">
+          + Add new words
+        </button>
       </div>
-    </div><!-- /learn -->
+    </div>
 
     <!-- ══ PROGRESS ══ -->
     <div class="screen" id="s-progress">
-      <div class="prog-hdr">
-        <div class="prog-t">Progress</div>
-        <div class="prog-s">Your learning journey</div>
+      <div class="phdr anim-up">
+        <div class="pttl">Progress</div>
+        <div class="psub">Your learning journey</div>
       </div>
 
-      <!-- Ring -->
-      <div class="card">
+      <div class="card anim-up s1">
         <div class="ring-wrap">
-          <svg class="ring-svg" viewBox="0 0 84 84">
+          <svg class="rsvg" viewBox="0 0 84 84">
             <defs>
-              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#4f8aff"/>
                 <stop offset="100%" stop-color="#00d4aa"/>
               </linearGradient>
             </defs>
-            <circle class="ring-track" cx="42" cy="42" r="35"/>
-            <circle class="ring-fill" id="ring-fill" cx="42" cy="42" r="35"/>
-            <text class="ring-txt" x="42" y="46" text-anchor="middle" id="ring-lv">B1</text>
+            <circle class="rtrack" cx="42" cy="42" r="35"/>
+            <circle class="rfill"  id="rfill"  cx="42" cy="42" r="35"/>
+            <text class="rtxt" x="42" y="46" text-anchor="middle" id="rlv">B1</text>
           </svg>
           <div>
-            <div class="li-lv" id="p-lv">B1</div>
-            <div class="li-rk" id="p-rk">⭐ Intermediate</div>
-            <div class="li-xp" id="p-xp">0 XP total</div>
+            <div class="rl-lv" id="p-lv">—</div>
+            <div class="rl-rk" id="p-rk">—</div>
+            <div class="rl-xp" id="p-xp">—</div>
           </div>
         </div>
       </div>
 
-      <div class="sec">Statistics</div>
-      <div class="s4">
-        <div class="s4c" onclick="act('sessions_detail')">
+      <div class="sec anim-fade s2">Statistics</div>
+      <div class="s4g">
+        <div class="s4c anim-scale s2" onclick="openBot('stats')">
           <div class="s4-ico">📅</div>
-          <div class="s4-n" id="p-sessions" style="color:var(--accent)">0</div>
+          <div class="s4-n" id="p-sess" style="color:var(--accent)">—</div>
           <div class="s4-l">Total sessions</div>
         </div>
-        <div class="s4c" onclick="act('words_list')">
+        <div class="s4c anim-scale s3" onclick="openBot('vocab')">
           <div class="s4-ico">📝</div>
-          <div class="s4-n" id="p-words" style="color:var(--green)">0</div>
+          <div class="s4-n" id="p-words" style="color:var(--green)">—</div>
           <div class="s4-l">Words learned</div>
         </div>
-        <div class="s4c" onclick="act('tests_history')">
+        <div class="s4c anim-scale s4d" onclick="openBot('test')">
           <div class="s4-ico">✅</div>
-          <div class="s4-n" id="p-tests" style="color:var(--gold)">0</div>
+          <div class="s4-n" id="p-tests" style="color:var(--gold)">—</div>
           <div class="s4-l">Tests done</div>
         </div>
-        <div class="s4c" onclick="act('mistakes')">
+        <div class="s4c anim-scale s5" onclick="openBot('mistakes')">
           <div class="s4-ico">❌</div>
-          <div class="s4-n" id="p-errors" style="color:var(--red)">0</div>
+          <div class="s4-n" id="p-err" style="color:var(--red)">—</div>
           <div class="s4-l">Errors fixed</div>
         </div>
       </div>
 
-      <div class="sec">This week</div>
-      <div class="card">
-        <div class="chart-wrap">
-          <div class="bars" id="bars"></div>
-          <div style="display:flex;gap:5px" id="bdays"></div>
-        </div>
+      <div class="sec anim-fade s3">This week</div>
+      <div class="card anim-up s3">
+        <div class="bars" id="bars"></div>
+        <div style="display:flex;gap:5px" id="bdays"></div>
       </div>
 
-      <div class="sec">TOEFL Scores</div>
-      <div class="card" id="toefl-card">
-        <div id="toefl-list" style="color:var(--text2);font-size:13px;text-align:center;padding:12px 0">
+      <div class="sec anim-fade s4d">TOEFL Scores</div>
+      <div class="card anim-up s4d" id="toefl-card">
+        <div id="toefl-list" style="color:var(--t2);font-size:13px;text-align:center;padding:10px 0">
           No TOEFL sessions yet
         </div>
       </div>
-
-    </div><!-- /progress -->
+    </div>
 
     <!-- ══ SETTINGS ══ -->
     <div class="screen" id="s-settings">
-      <div class="set-hdr">
-        <div class="set-t">Settings</div>
+      <div class="shdr anim-up">
+        <div class="sttl">Settings</div>
       </div>
 
-      <div class="sec">Interface language</div>
-      <div class="lang-tgl">
+      <div class="sec anim-fade s1">Interface language</div>
+      <div class="ltgl anim-up s1">
         <div class="lo" id="lo-ru" onclick="setLang('ru')">🇷🇺 Русский</div>
         <div class="lo" id="lo-en" onclick="setLang('en')">🇬🇧 English</div>
       </div>
 
-      <div class="sec">My profile</div>
-      <div class="slist">
-        <div class="si" onclick="act('level')">
+      <div class="sec anim-fade s2">My profile</div>
+      <div class="slist anim-up s2">
+        <div class="si" onclick="openBot('level')">
           <div class="si-ico">🎯</div>
           <div class="si-body">
             <div class="si-t">Current level</div>
-            <div class="si-s">Tap to change</div>
+            <div class="si-s">Tap to change in bot</div>
           </div>
-          <div class="si-val" id="si-lv">B1</div>
+          <div class="si-val" id="si-lv">—</div>
         </div>
-        <div class="si" onclick="act('profession')">
+        <div class="si" onclick="openBot('profession')">
           <div class="si-ico">💼</div>
           <div class="si-body">
             <div class="si-t">Profession</div>
-            <div class="si-s" id="si-prof">Not set — tap to set</div>
+            <div class="si-s" id="si-prof">Tap to set</div>
           </div>
           <div class="si-arr">›</div>
         </div>
-        <div class="si" onclick="act('remind')">
+        <div class="si" onclick="openBot('remind')">
           <div class="si-ico">⏰</div>
           <div class="si-body">
             <div class="si-t">Daily reminder</div>
-            <div class="si-s" id="si-rem">Not set — tap to set</div>
+            <div class="si-s" id="si-rem">Tap to set</div>
           </div>
           <div class="si-arr">›</div>
         </div>
       </div>
 
-      <div class="sec" style="display:flex;align-items:center;justify-content:space-between">
+      <div class="sec anim-fade s3" style="display:flex;align-items:center;justify-content:space-between">
         <span>Interests</span>
-        <span style="color:var(--accent);font-size:12px;cursor:pointer;font-weight:600;letter-spacing:normal;text-transform:none" onclick="act('interests')">Edit in bot</span>
+        <span style="color:var(--accent);font-size:12px;cursor:pointer;font-weight:600;
+          text-transform:none;letter-spacing:normal" onclick="openBot('interests')">Edit in bot ›</span>
       </div>
-      <div class="itags" id="itags">
-        <span style="color:var(--text3);font-size:13px">Not set yet</span>
+      <div class="itags anim-up s3" id="itags">
+        <span style="color:var(--t3);font-size:13px">Not set yet — just chat with ALEX!</span>
       </div>
 
-      <div class="sec">Actions</div>
-      <div class="slist">
-        <div class="si" onclick="act('mistakes')">
+      <div class="sec anim-fade s4d">Actions</div>
+      <div class="slist anim-up s4d">
+        <div class="si" onclick="openBot('mistakes')">
           <div class="si-ico">❌</div>
           <div class="si-body"><div class="si-t">Review my mistakes</div></div>
           <div class="si-arr">›</div>
         </div>
-        <div class="si" onclick="act('stats')">
+        <div class="si" onclick="openBot('stats')">
           <div class="si-ico">📊</div>
           <div class="si-body"><div class="si-t">Full statistics</div></div>
           <div class="si-arr">›</div>
         </div>
-        <div class="si" onclick="act('reset')" style="color:var(--red)">
+        <div class="si" onclick="openBot('reset')" style="color:var(--red)">
           <div class="si-ico">🔄</div>
-          <div class="si-body"><div class="si-t">Reset dialogue</div></div>
-          <div class="si-arr">›</div>
+          <div class="si-body"><div class="si-t" style="color:var(--red)">Reset dialogue</div></div>
+          <div class="si-arr" style="color:var(--red)">›</div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /settings -->
+  </div>
 
-  </div><!-- /screens -->
-
-  <!-- NAV -->
   <nav>
-    <div class="nav-item active" id="nav-home" onclick="goTab('home')">
-      <span class="ni">🏠</span><span class="nl">Home</span>
+    <div class="ni on" id="nav-home"     onclick="goTab('home')">
+      <span class="ic">🏠</span><span class="lb">Home</span>
     </div>
-    <div class="nav-item" id="nav-learn" onclick="goTab('learn')">
-      <span class="ni">🃏</span><span class="nl">Learn</span>
+    <div class="ni" id="nav-learn"    onclick="goTab('learn')">
+      <span class="ic">🃏</span><span class="lb">Learn</span>
     </div>
-    <div class="nav-item" id="nav-progress" onclick="goTab('progress')">
-      <span class="ni">📊</span><span class="nl">Progress</span>
+    <div class="ni" id="nav-progress" onclick="goTab('progress')">
+      <span class="ic">📊</span><span class="lb">Progress</span>
     </div>
-    <div class="nav-item" id="nav-settings" onclick="goTab('settings')">
-      <span class="ni">⚙️</span><span class="nl">Settings</span>
+    <div class="ni" id="nav-settings" onclick="goTab('settings')">
+      <span class="ic">⚙️</span><span class="lb">Settings</span>
     </div>
   </nav>
-</div><!-- /app -->
+</div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span id="toast-msg">—</span>
+</div>
 
 <script>
-/* ════════════════════════════
-   TELEGRAM INIT
-════════════════════════════ */
+/* ════ TELEGRAM ════ */
 const tg = window.Telegram?.WebApp;
-if(tg){
-  tg.ready(); tg.expand();
-  tg.setHeaderColor('#080b14');
-  tg.setBackgroundColor('#080b14');
-}
+if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#080b14'); tg.setBackgroundColor('#080b14'); }
 
-const API = window.API_URL || '';
+const API      = window.API_URL || '';
+const BOT_NAME = window.BOT_NAME || 'PolyGlotty_bot'; // подставляется из server.py
 
-/* ════════════════════════════
-   NAVIGATION
-════════════════════════════ */
-let currentTab = 'home';
-function goTab(name){
+/* ════ NAV ════ */
+let curTab = 'home';
+function goTab(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('s-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
-  currentTab = name;
-  if(name==='progress') drawProgress();
-  if(name==='learn')    drawLearn();
+  document.querySelectorAll('.ni').forEach(i=>i.classList.remove('on'));
+  document.getElementById('s-'+n).classList.add('active');
+  document.getElementById('nav-'+n).classList.add('on');
+  curTab = n;
+  if(n==='progress') animProgress();
+  if(n==='learn')    initLearn();
 }
 
-/* ════════════════════════════
-   GREETING
-════════════════════════════ */
-function greeting(){
-  const h = new Date().getHours();
-  if(h>=5&&h<12)  return 'Good morning,';
-  if(h>=12&&h<17) return 'Good afternoon,';
-  if(h>=17&&h<22) return 'Good evening,';
-  return 'Good night,';
-}
-
-/* ════════════════════════════
-   XP LOGIC — FIXED
-════════════════════════════ */
-const XP_THRESHOLDS = [
-  {rank:'🌱 Seedling',      min:0,    max:100},
-  {rank:'📗 Beginner',      min:100,  max:300},
-  {rank:'📘 Elementary',    min:300,  max:600},
-  {rank:'📙 Pre-Intermediate',min:600,max:1000},
-  {rank:'⭐ Intermediate',  min:1000, max:1500},
-  {rank:'🌟 Upper-Inter.',  min:1500, max:2500},
-  {rank:'💫 Advanced',      min:2500, max:4000},
-  {rank:'🏆 Master',        min:4000, max:5000},
-];
-function getRankInfo(xp){
-  for(let i=XP_THRESHOLDS.length-1;i>=0;i--){
-    if(xp>=XP_THRESHOLDS[i].min) return XP_THRESHOLDS[i];
+/* ════ OPEN BOT — рабочие кнопки ════ */
+const CMD_MAP = {
+  lesson:    '/lesson',
+  vocab:     '/vocab',
+  toefl:     '/toefl',
+  roleplay:  '/roleplay',
+  mistakes:  '/mistakes',
+  interests: '/interests',
+  remind:    '/remind',
+  profession:'/profession',
+  reset:     '/reset',
+  stats:     '/stats',
+  test:      '/test',
+  level:     '/level',
+};
+function openBot(action){
+  const cmd = CMD_MAP[action] || '';
+  if(tg){
+    // Закрываем WebApp и отправляем команду боту
+    tg.close();
+    // Небольшая задержка чтобы закрытие отработало
+    setTimeout(()=>{
+      tg.openTelegramLink(`https://t.me/${BOT_NAME}?start=${action}`);
+    }, 100);
   }
-  return XP_THRESHOLDS[0];
+  showToast('Opening bot...','🤖');
 }
 
-/* ════════════════════════════
-   RENDER HOME
-════════════════════════════ */
+/* ════ GREETING ════ */
+function greet(){
+  const h=new Date().getHours();
+  if(h>=5&&h<12) return'Good morning,';
+  if(h>=12&&h<18) return'Good afternoon,';
+  if(h>=18&&h<23) return'Good evening,';
+  return'Good night,';
+}
+
+/* ════ XP LOGIC ════ */
+const XP=[
+  {r:'🌱 Seedling',      min:0,   max:100},
+  {r:'📗 Beginner',      min:100, max:300},
+  {r:'📘 Elementary',    min:300, max:600},
+  {r:'📙 Pre-Inter.',    min:600, max:1000},
+  {r:'⭐ Intermediate',  min:1000,max:1500},
+  {r:'🌟 Upper-Inter.',  min:1500,max:2500},
+  {r:'💫 Advanced',      min:2500,max:4000},
+  {r:'🏆 Master',        min:4000,max:9999},
+];
+function rankOf(xp){ return XP.find((_,i)=>xp<(XP[i+1]?.min??9999))||XP[XP.length-1]; }
+
+/* ════ RENDER HOME ════ */
 function renderHome(d){
-  document.getElementById('greeting-label').textContent = greeting();
+  document.getElementById('greet-lbl').textContent = greet();
+  document.getElementById('hero-name').textContent = d.name||'Student';
 
-  // Никнейм как есть — без изменений
-  document.getElementById('hero-name').textContent = d.name || 'Student';
+  const info = rankOf(d.xp||0);
+  const pct  = Math.max(0,Math.round((d.xp-info.min)/(info.max-info.min)*100));
 
-  // XP — исправленная логика
-  const info = getRankInfo(d.xp||0);
-  const pct  = Math.round((d.xp - info.min) / (info.max - info.min) * 100);
-  const left  = info.max - (d.xp||0);
+  document.getElementById('xp-rank').textContent  = info.r;
+  document.getElementById('xp-badge').innerHTML   = (d.level||'B1')+'<span class="sync-dot" id="sync-dot"></span>';
+  setTimeout(()=>document.getElementById('xp-fill').style.width=pct+'%', 300);
+  document.getElementById('xp-cur').textContent   = `${d.xp||0} XP`;
+  document.getElementById('xp-nxt').textContent   = info.max<9999 ? `${d.xp||0} / ${info.max} XP` : '🏆 Max!';
 
-  document.getElementById('xp-rank').textContent  = info.rank;
-  document.getElementById('xp-badge').textContent = d.level||'B1';
-  setTimeout(()=>document.getElementById('xp-fill').style.width = pct+'%', 200);
-  document.getElementById('xp-cur').textContent = (d.xp||0)+' XP';
-  document.getElementById('xp-nxt').textContent = left > 0
-    ? `${d.xp} / ${info.max} XP`
-    : '🏆 Max rank!';
-
-  // Streak
-  const s = d.streak||0;
-  document.getElementById('h-streak').textContent   = s;
-  document.getElementById('hs-streak').textContent  = s;
-  document.getElementById('streak-sub').textContent = s>1
-    ? `${s} days in a row! 🔥`
-    : 'Study today to start!';
-
+  const s=d.streak||0;
+  document.getElementById('h-stk').textContent    = s;
+  document.getElementById('hs-stk').textContent   = s;
+  document.getElementById('stk-sub').textContent  = s>1?`${s} days in a row! Keep it up 🔥`:'Start your streak today!';
   document.getElementById('hs-words').textContent = d.words||0;
   document.getElementById('hs-tests').textContent = d.tests||0;
 }
 
-/* ════════════════════════════
-   RENDER PROGRESS
-════════════════════════════ */
+/* ════ RENDER PROGRESS ════ */
 function renderProgress(d){
-  document.getElementById('p-lv').textContent  = d.level||'B1';
-  document.getElementById('p-rk').textContent  = getRankInfo(d.xp||0).rank;
-  document.getElementById('p-xp').textContent  = (d.xp||0)+' XP total';
-  document.getElementById('ring-lv').textContent = d.level||'B1';
-  document.getElementById('p-sessions').textContent = d.sessions||0;
-  document.getElementById('p-words').textContent    = d.words||0;
-  document.getElementById('p-tests').textContent    = d.tests||0;
-  document.getElementById('p-errors').textContent   = d.errors||0;
-  document.getElementById('si-lv').textContent      = d.level||'B1';
+  const info = rankOf(d.xp||0);
+  document.getElementById('p-lv').textContent   = d.level||'B1';
+  document.getElementById('p-rk').textContent   = info.r;
+  document.getElementById('p-xp').textContent   = `${d.xp||0} XP total`;
+  document.getElementById('rlv').textContent     = d.level||'B1';
+  document.getElementById('p-sess').textContent  = d.sessions||0;
+  document.getElementById('p-words').textContent = d.words||0;
+  document.getElementById('p-tests').textContent = d.tests||0;
+  document.getElementById('p-err').textContent   = d.errors||0;
 }
 
-function drawProgress(){
-  const d = window._data||{};
+function animProgress(){
+  const d=window._d||{};
+  const info=rankOf(d.xp||0);
+  const pct=(d.xp-info.min)/(info.max-info.min);
+  setTimeout(()=>document.getElementById('rfill').style.strokeDashoffset=220-pct*220, 150);
 
-  // Ring
-  const info = getRankInfo(d.xp||0);
-  const pct  = (d.xp - info.min)/(info.max-info.min);
-  const circ = 220;
-  setTimeout(()=>{
-    document.getElementById('ring-fill').style.strokeDashoffset = circ - pct*circ;
-  },100);
-
-  // Weekly chart
-  const days = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-  const today = ((new Date().getDay()||7)-1); // 0=Mon
-  const weekly = d.weekly||[0,0,0,0,0,0,0];
-  const maxV   = Math.max(...weekly,1);
-
-  const barsEl = document.getElementById('bars');
-  const daysEl = document.getElementById('bdays');
-  barsEl.innerHTML=''; daysEl.innerHTML='';
-
+  // Chart
+  const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const today=((new Date().getDay()||7)-1);
+  const weekly=d.weekly||Array(7).fill(0);
+  const maxV=Math.max(...weekly,1);
+  const bEl=document.getElementById('bars');
+  const dEl=document.getElementById('bdays');
+  bEl.innerHTML=''; dEl.innerHTML='';
   weekly.forEach((v,i)=>{
-    const pct = v/maxV;
-    const bw = document.createElement('div'); bw.className='bw';
-    const bar= document.createElement('div');
+    const pct=v/maxV;
+    const bw=document.createElement('div'); bw.className='bw';
+    const bar=document.createElement('div');
     bar.className='bar'+(i===today?' today':'');
     bar.style.height='0px';
-    bw.appendChild(bar); barsEl.appendChild(bw);
-    setTimeout(()=>bar.style.height=(pct*65)+'px', 80+i*50);
+    bw.appendChild(bar); bEl.appendChild(bw);
+    setTimeout(()=>bar.style.height=(pct*68)+'px', 100+i*60);
 
     const dl=document.createElement('div');
-    dl.style.flex='1';dl.style.textAlign='center';
-    dl.className='bday';
+    dl.style.cssText='flex:1;text-align:center';
+    dl.className='bday'+(i===today?' today-lbl':'');
     dl.textContent=days[i];
-    if(i===today)dl.style.color='var(--green)';
-    daysEl.appendChild(dl);
+    dEl.appendChild(dl);
   });
 
   // TOEFL
-  const scores = d.toefl_scores||[];
-  const list   = document.getElementById('toefl-list');
+  const scores=d.toefl_scores||[];
+  const list=document.getElementById('toefl-list');
   if(scores.length){
-    list.innerHTML = scores.map(s=>`
-      <div class="toefl-row">
-        <div class="t-sec">${s.section}</div>
-        <div class="t-bar"><div class="t-fill" style="width:${s.score/s.max*100}%"></div></div>
+    list.innerHTML=scores.map((s,i)=>`
+      <div class="tr" style="animation:slideIn .35s ease ${i*.07}s both">
+        <div class="t-s">${s.section}</div>
+        <div class="t-bar"><div class="t-fill" style="width:0" data-w="${s.score/s.max*100}"></div></div>
         <div class="t-sc">${s.score}/${s.max}</div>
       </div>`).join('');
+    setTimeout(()=>{
+      list.querySelectorAll('.t-fill').forEach(el=>{
+        el.style.width=el.dataset.w+'%';
+      });
+    },200);
   }
 }
 
-/* ════════════════════════════
-   RENDER SETTINGS
-════════════════════════════ */
+/* ════ RENDER SETTINGS ════ */
 function renderSettings(d){
-  document.getElementById('si-prof').textContent = d.profession||'Not set — tap to set';
-  document.getElementById('si-rem').textContent  = d.remind_time||'Not set — tap to set';
+  document.getElementById('si-lv').textContent   = d.level||'—';
+  document.getElementById('si-prof').textContent = d.profession||'Tap to set in bot';
+  document.getElementById('si-rem').textContent  = d.remind_time||'Tap to set in bot';
 
-  // Lang toggle
-  const lang = d.lang||'ru';
-  document.getElementById('lo-ru').classList.toggle('active',lang==='ru');
-  document.getElementById('lo-en').classList.toggle('active',lang==='en');
+  const lang=d.lang||'ru';
+  document.getElementById('lo-ru').classList.toggle('on',lang==='ru');
+  document.getElementById('lo-en').classList.toggle('on',lang==='en');
 
-  // Interests
-  const tags = document.getElementById('itags');
-  const interests = d.interests||[];
-  if(interests.length){
-    tags.innerHTML = interests.map(i=>
-      `<div class="itag">${i}<span class="itag-x" onclick="removeInterest('${i}')">✕</span></div>`
-    ).join('');
-  }
+  const tags=document.getElementById('itags');
+  const ints=d.interests||[];
+  tags.innerHTML = ints.length
+    ? ints.map((x,i)=>`<div class="itag" style="animation-delay:${i*.06}s">${x}</div>`).join('')
+    : '<span style="color:var(--t3);font-size:13px">Not set yet — just chat with ALEX!</span>';
 }
 
-function removeInterest(name){
-  act('remove_interest_'+name);
-  // Убираем тег из UI
-  const tags = document.getElementById('itags');
-  tags.querySelectorAll('.itag').forEach(t=>{
-    if(t.textContent.includes(name)) t.remove();
-  });
+function setLang(l){
+  document.getElementById('lo-ru').classList.toggle('on',l==='ru');
+  document.getElementById('lo-en').classList.toggle('on',l==='en');
+  // Отправляем в бот через start параметр
+  if(tg) tg.openTelegramLink(`https://t.me/${BOT_NAME}?start=setlang_${l}`);
+  showToast(l==='ru'?'Язык: Русский 🇷🇺':'Language: English 🇬🇧','✅');
 }
 
-/* ════════════════════════════
-   FLASHCARDS
-════════════════════════════ */
-let cards=[], cardIdx=0, flipped=false;
+/* ════ FLASHCARDS ════ */
+let cards=[], cIdx=0, flipped=false;
 
-function drawLearn(){
-  const d = window._data||{};
-  cards = d.due_words||[];
-  cardIdx=0; flipped=false;
-  document.getElementById('fc-inner').classList.remove('flipped');
-
+function initLearn(){
+  const d=window._d||{};
+  cards=d.due_words||[];
+  cIdx=0; flipped=false;
+  document.getElementById('fci').classList.remove('flipped');
+  document.getElementById('rrow').classList.add('hidden');
   if(!cards.length){
-    document.getElementById('learn-content').style.display='none';
+    document.getElementById('learn-cards').style.display='none';
     document.getElementById('no-words').style.display='block';
-    return;
+  } else {
+    document.getElementById('learn-cards').style.display='block';
+    document.getElementById('no-words').style.display='none';
+    showCard(0);
   }
-  document.getElementById('learn-content').style.display='block';
-  document.getElementById('no-words').style.display='none';
-  showCard(0);
 }
 
-function showCard(idx){
-  if(idx>=cards.length){
-    showToast('🎉 All reviewed!');
-    document.getElementById('learn-content').style.display='none';
+function showCard(i){
+  if(i>=cards.length){
+    showToast('🎉 All reviewed! Great job!','✅');
+    document.getElementById('learn-cards').style.display='none';
     document.getElementById('no-words').style.display='block';
     return;
   }
-  const c=cards[idx];
+  const c=cards[i];
   flipped=false;
-  document.getElementById('fc-inner').classList.remove('flipped');
+  const inner=document.getElementById('fci');
+  inner.style.transition='none';
+  inner.classList.remove('flipped');
+  // Force reflow
+  inner.offsetHeight;
+  inner.style.transition='';
+
   document.getElementById('fc-word').textContent = c.word||'';
   document.getElementById('fc-ph').textContent   = c.phonetic||'';
   document.getElementById('fc-tr').textContent   = c.translation||'';
   document.getElementById('fc-ex').textContent   = c.example||'';
-  document.getElementById('fc-ctr').textContent  = `${idx+1} / ${cards.length}`;
-  document.getElementById('cl-fill').style.width = (idx/cards.length*100)+'%';
-  // Скрываем рейтинг до флипа
-  document.getElementById('rate-row').classList.add('hidden');
+  document.getElementById('fc-ctr').textContent  = `${i+1} / ${cards.length}`;
+  document.getElementById('clf').style.width     = (i/cards.length*100)+'%';
+  document.getElementById('rrow').classList.add('hidden');
 }
 
-function flip(){
+function flipCard(){
   flipped=!flipped;
-  document.getElementById('fc-inner').classList.toggle('flipped',flipped);
-  if(flipped){
-    document.getElementById('rate-row').classList.remove('hidden');
+  document.getElementById('fci').classList.toggle('flipped',flipped);
+  if(flipped) document.getElementById('rrow').classList.remove('hidden');
+}
+
+async function rateCard(q){
+  const c=cards[cIdx];
+  const labels=[null,'Again 😕','Hard 🤔','Good 😊','Easy ✅'];
+  showToast(labels[q],'🃏');
+
+  // POST напрямую в API — не нужен sendData
+  if(API && window._uid){
+    try{
+      await fetch(`${API}/api/rate_card`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({word_id:c.id, quality:q, uid:window._uid})
+      });
+    }catch(e){ console.warn('rate_card failed',e); }
   }
+  cIdx++;
+  showCard(cIdx);
 }
 
-function rate(q){
-  const card=cards[cardIdx];
-  if(tg){
-    tg.sendData(JSON.stringify({action:'rate_card',word_id:card.id,quality:q}));
-  }
-  const labels=['Again 😕','Hard 🤔','Good 😊','Easy ✅'];
-  showToast(labels[q-1]);
-  cardIdx++;
-  showCard(cardIdx);
-}
-
-/* ════════════════════════════
-   ACTIONS
-════════════════════════════ */
-function act(action){
-  if(tg){
-    tg.sendData(JSON.stringify({action}));
-    const msgs={
-      lesson:'Opening Grammar lesson...',
-      toefl:'Opening TOEFL practice...',
-      roleplay:'Opening Roleplay...',
-      mistakes:'Opening your mistakes...',
-      interests:'Opening interests editor...',
-      remind:'Set reminder in bot...',
-      profession:'Set profession in bot...',
-      reset:'Resetting dialogue...',
-      add_word:'Add words in bot...',
-      stats:'Opening full stats...',
-    };
-    showToast(msgs[action]||'Opening in bot...');
-  } else {
-    showToast('Open in Telegram to use this');
-  }
-}
-
-function setLang(lang){
-  document.getElementById('lo-ru').classList.toggle('active',lang==='ru');
-  document.getElementById('lo-en').classList.toggle('active',lang==='en');
-  if(tg) tg.sendData(JSON.stringify({action:'set_lang',lang}));
-  showToast(lang==='ru'?'Язык: Русский':'Language: English');
-}
-
-/* ════════════════════════════
-   TOAST
-════════════════════════════ */
+/* ════ TOAST ════ */
 let _tt;
-function showToast(msg){
+function showToast(msg, icon='✅'){
   const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
+  document.getElementById('toast-icon').textContent=icon;
+  document.getElementById('toast-msg').textContent=msg;
+  el.classList.add('show');
   clearTimeout(_tt);
-  _tt=setTimeout(()=>el.classList.remove('show'),2000);
+  _tt=setTimeout(()=>el.classList.remove('show'),2200);
 }
 
-/* ════════════════════════════
-   FETCH DATA
-════════════════════════════ */
-async function fetchData(){
-  const uid = tg?.initDataUnsafe?.user?.id;
+/* ════ SYNC DATA ════ */
+async function fetchData(uid){
   if(!uid||!API) return null;
+  const dot=document.getElementById('sync-dot');
+  if(dot) dot.classList.add('syncing');
   try{
     const r=await fetch(`${API}/api/user/${uid}`,{
-      headers:{'X-Telegram-Init-Data':tg?.initData||''}
+      headers:{'X-Telegram-Init-Data':tg?.initData||''},
+      signal:AbortSignal.timeout(8000)
     });
-    return r.ok?r.json():null;
-  }catch{return null}
+    if(!r.ok) throw new Error(r.status);
+    const data=await r.json();
+    if(dot){dot.classList.remove('syncing');dot.style.background='var(--green)'}
+    return data;
+  }catch(e){
+    console.warn('fetch failed:',e);
+    if(dot){dot.classList.remove('syncing');dot.classList.add('error')}
+    return null;
+  }
 }
 
-/* ════════════════════════════
-   DEMO DATA
-════════════════════════════ */
-const DEMO = {
-  name:      tg?.initDataUnsafe?.user?.username || tg?.initDataUnsafe?.user?.first_name || 'Student',
-  level:     'B1',
-  xp:        620,
-  streak:    7,
-  sessions:  24,
-  words:     143,
-  tests:     8,
-  errors:    31,
-  toefl:     2,
-  lang:      'ru',
-  profession:'',
-  remind_time:'',
-  interests: ['gaming','tech','music'],
-  weekly:    [2,5,3,7,4,6,1],
-  toefl_scores:[
-    {section:'Reading',  score:4,max:6},
-    {section:'Listening',score:3,max:4},
-    {section:'Speaking', score:3,max:4},
-    {section:'Writing',  score:4,max:5},
-  ],
-  due_words:[
-    {id:1,word:'Perseverance', phonetic:'/ˌpɜːsɪˈvɪərəns/',translation:'Настойчивость',example:'Success requires perseverance.'},
-    {id:2,word:'Eloquent',     phonetic:'/ˈeləkwənt/',      translation:'Красноречивый', example:'She gave an eloquent speech.'},
-    {id:3,word:'Ambiguous',    phonetic:'/æmˈbɪɡjuəs/',     translation:'Неоднозначный', example:'The message was ambiguous.'},
-  ],
-};
-
-/* ════════════════════════════
-   INIT
-════════════════════════════ */
+/* ════ INIT ════ */
 async function init(){
-  const server = await fetchData();
-  const d = server ? {...DEMO,...server,name:server.name||DEMO.name} : DEMO;
-  window._data = d;
+  const user = tg?.initDataUnsafe?.user;
+  const uid  = user?.id;
+  window._uid = uid;
+
+  // Имя — берём username или first_name как есть из Telegram
+  const name = user?.username
+    ? '@'+user.username
+    : (user?.first_name||'Student');
+
+  // Пробуем получить реальные данные
+  const server = await fetchData(uid);
+
+  const d = server
+    ? {...server, name: server.name||name}
+    : {
+        name, level:'B1', xp:0, streak:0,
+        sessions:0, words:0, tests:0, errors:0, toefl:0,
+        lang:'ru', profession:'', remind_time:'',
+        interests:[], weekly:Array(7).fill(0), toefl_scores:[], due_words:[],
+      };
+
+  window._d = d;
 
   renderHome(d);
   renderProgress(d);
   renderSettings(d);
 
-  setTimeout(()=>document.getElementById('loader').classList.add('gone'),700);
+  setTimeout(()=>document.getElementById('loader').classList.add('gone'), 600);
 }
 
 init();
