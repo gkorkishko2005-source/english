@@ -9,11 +9,16 @@ from aiohttp import web
 import httpx
 
 logger     = logging.getLogger(__name__)
-WEBAPP_DIR = Path(__file__).parent / "webapp"
+WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 MODEL       = "claude-haiku-4-5"
+
+if not ANT_KEY:
+    logger.error("❌ ANTHROPIC_API_KEY is not set!")
+else:
+    logger.info(f"✅ ANTHROPIC_API_KEY loaded (starts with {ANT_KEY[:8]}...)")
 
 # ══════════════════════════════════════════════════════════════════
 #  STATIC
@@ -99,44 +104,79 @@ def _add_msg(uid: int, role: str, text: str):
         _histories[uid] = h[-30:]
 
 async def handle_chat(request: web.Request) -> web.Response:
-    from database import get_user, get_level, get_lang, get_interests, get_profession
-    from prompts import build_system
     try:
         body    = await request.json()
         uid     = int(body.get("uid", 0))
         message = str(body.get("message", "")).strip()
         if not message:
             return web.json_response({"error": "empty message"}, status=400)
-    except Exception:
-        return web.json_response({"error": "bad request"}, status=400)
+    except Exception as e:
+        return web.json_response({"error": f"bad request: {e}"}, status=400)
 
-    level      = await get_level(uid)
-    lang       = await get_lang(uid)
-    interests  = await get_interests(uid)
-    profession = await get_profession(uid)
-    system     = build_system(level, lang, interests, profession, "correction")
+    # Получаем данные пользователя если uid известен
+    level = "B1"; lang = "ru"; interests = ""; profession = ""
+    if uid:
+        try:
+            from database import get_level, get_lang, get_interests, get_profession
+            level      = await get_level(uid)
+            lang       = await get_lang(uid)
+            interests  = await get_interests(uid)
+            profession = await get_profession(uid)
+        except Exception as e:
+            logger.warning(f"Could not get user data for {uid}: {e}")
 
-    _add_msg(uid, "user", message)
-    from database import log_session, log_mistake
+    try:
+        from prompts import build_system
+        system = build_system(level, lang, interests, profession, "correction")
+    except Exception as e:
+        logger.error(f"build_system failed: {e}")
+        system = "You are ALEX, a friendly English tutor. Help the student with English. Explain in Russian."
+
+    # История в памяти
+    h = _histories.setdefault(uid, [])
+    h.append({"role": "user", "content": message})
+    if len(h) > 30: _histories[uid] = h[-30:]
 
     try:
         async with httpx.AsyncClient(timeout=45) as client:
             r = await client.post(
                 "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key": ANT_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-                json={"model": MODEL, "max_tokens": 1024, "system": system, "messages": _get_history(uid)},
+                headers={
+                    "x-api-key": ANT_KEY,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json"
+                },
+                json={
+                    "model": MODEL,
+                    "max_tokens": 1024,
+                    "system": system,
+                    "messages": _histories[uid]
+                },
             )
             data = r.json()
             if "error" in data:
-                return web.json_response({"error": data["error"].get("message","API error")[:200]}, status=500)
+                logger.error(f"Anthropic error: {data['error']}")
+                return web.json_response(
+                    {"error": data["error"].get("message", "API error")[:200]},
+                    status=500
+                )
             reply = data["content"][0]["text"].strip()
     except Exception as e:
+        logger.error(f"Chat request failed: {e}")
         return web.json_response({"error": str(e)[:150]}, status=500)
 
-    _add_msg(uid, "assistant", reply)
-    await log_session(uid, "webapp_chat")
+    _histories[uid].append({"role": "assistant", "content": reply})
 
-    return web.json_response({"reply": reply}, headers={"Access-Control-Allow-Origin":"*"})
+    if uid:
+        try:
+            from database import log_session
+            await log_session(uid, "webapp_chat")
+        except Exception: pass
+
+    return web.json_response(
+        {"reply": reply},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
 
 async def handle_chat_reset(request: web.Request) -> web.Response:
     try:
