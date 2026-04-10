@@ -613,7 +613,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 <script>
 /* ══ INIT ══ */
 const tg  = window.Telegram?.WebApp;
-const API = window.API_URL||'';
+const API = window.API_URL||window.location.origin;
 const BOT = window.BOT_NAME||'PolyGlotty_bot';
 if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
 
