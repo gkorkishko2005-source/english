@@ -7,352 +7,373 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ════════════════════════════════════════════
-   DESIGN TOKENS — elevation-based dark theme
-════════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   THEMES
+══════════════════════════════════════════ */
+
+/* Default — Deep Blue */
 :root {
-  /* Elevation layers */
-  --e0: #0d1117;   /* page bg */
-  --e1: #161b27;   /* cards */
-  --e2: #1c2333;   /* nested elements */
-  --e3: #242b3d;   /* inputs, tags */
-  --e4: #2d3650;   /* hover */
-
-  /* Accent colors */
-  --blue:   #4f8aff;
-  --green:  #00d4aa;
-  --gold:   #ffb830;
-  --red:    #ff6b6b;
-  --orange: #ff9500;
-
-  /* Text hierarchy */
-  --t1: #eef2ff;
-  --t2: #94a3b8;
-  --t3: #4b5675;
-
-  /* Borders */
-  --b1: rgba(255,255,255,.06);
-  --b2: rgba(255,255,255,.10);
-
-  /* Spacing — multiples of 8px */
-  --sp1:  4px;
-  --sp2:  8px;
-  --sp3: 12px;
-  --sp4: 16px;
-  --sp5: 20px;
-  --sp6: 24px;
-
-  /* Radius */
-  --r:  16px;
-  --r2: 12px;
-  --r3:  8px;
-
-  --nav:  60px;
-  --safe: env(safe-area-inset-bottom, 0px);
-  --font: 'Inter', -apple-system, sans-serif;
+  --e0: #0d1117; --e1: #161b27; --e2: #1c2333; --e3: #242b3d; --e4: #2d3650;
+  --accent: #4f8aff; --accent2: #00d4aa;
+  --accent-rgb: 79,138,255;
+  --grad: linear-gradient(135deg,#131f3e,#0f1c2d);
+  --grad-bar: linear-gradient(90deg,#4f8aff,#00d4aa);
+  --t1: #eef2ff; --t2: #94a3b8; --t3: #4b5675;
+  --b1: rgba(255,255,255,.06); --b2: rgba(255,255,255,.10);
+  --gold: #ffb830; --red: #ff6b6b; --orange: #ff9500;
 }
 
-/* ════ RESET ════ */
+/* Gold & Brown — matches bot avatar */
+[data-theme="gold"] {
+  --e0: #120e08; --e1: #1e1610; --e2: #261d12; --e3: #30250.16; --e4: #3d2e1a;
+  --e2: #261d12; --e3: #302515; --e4: #3d2e1a;
+  --accent: #d4a843; --accent2: #e8c876;
+  --accent-rgb: 212,168,67;
+  --grad: linear-gradient(135deg,#1e160a,#150f06);
+  --grad-bar: linear-gradient(90deg,#d4a843,#e8c876);
+  --t1: #f5ead8; --t2: #a08060; --t3: #5a3e20;
+  --b1: rgba(212,168,67,.08); --b2: rgba(212,168,67,.14);
+  --gold: #d4a843; --red: #e05555; --orange: #cc7722;
+}
+
+/* Forest — dark green */
+[data-theme="forest"] {
+  --e0: #0a110d; --e1: #111a14; --e2: #17231a; --e3: #1e2e22; --e4: #25382a;
+  --accent: #2ecc71; --accent2: #1abc9c;
+  --accent-rgb: 46,204,113;
+  --grad: linear-gradient(135deg,#0d1f12,#0a1a0f);
+  --grad-bar: linear-gradient(90deg,#2ecc71,#1abc9c);
+  --t1: #e8f5e9; --t2: #81c784; --t3: #2e5733;
+  --b1: rgba(46,204,113,.08); --b2: rgba(46,204,113,.14);
+  --gold: #f9a825; --red: #e53935; --orange: #fb8c00;
+}
+
+/* Midnight Purple */
+[data-theme="purple"] {
+  --e0: #0d0a1a; --e1: #160f2a; --e2: #1d1536; --e3: #261d44; --e4: #302555;
+  --accent: #9b59b6; --accent2: #8e44ad;
+  --accent-rgb: 155,89,182;
+  --grad: linear-gradient(135deg,#160d2a,#0f0a1f);
+  --grad-bar: linear-gradient(90deg,#9b59b6,#c39bd3);
+  --t1: #f0e8ff; --t2: #a889cc; --t3: #5a3d7a;
+  --b1: rgba(155,89,182,.08); --b2: rgba(155,89,182,.14);
+  --gold: #f1c40f; --red: #e74c3c; --orange: #e67e22;
+}
+
+/* Arctic — light/white */
+[data-theme="arctic"] {
+  --e0: #f0f4f8; --e1: #ffffff; --e2: #e8edf3; --e3: #dde3ec; --e4: #cfd8e3;
+  --accent: #2563eb; --accent2: #0891b2;
+  --accent-rgb: 37,99,235;
+  --grad: linear-gradient(135deg,#dbeafe,#e0f2fe);
+  --grad-bar: linear-gradient(90deg,#2563eb,#0891b2);
+  --t1: #1e293b; --t2: #64748b; --t3: #94a3b8;
+  --b1: rgba(0,0,0,.06); --b2: rgba(0,0,0,.10);
+  --gold: #d97706; --red: #dc2626; --orange: #ea580c;
+}
+
+/* ══════════════════════════════════════════
+   BASE
+══════════════════════════════════════════ */
+:root {
+  --r: 16px; --r2: 12px; --r3: 8px;
+  --nav: 60px; --safe: env(safe-area-inset-bottom,0px);
+  --font: 'Inter', -apple-system, sans-serif;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; }
-body { background: var(--e0); color: var(--t1); font-family: var(--font); font-size: 15px; -webkit-font-smoothing: antialiased; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+body { background: var(--e0); color: var(--t1); font-family: var(--font); font-size: 15px; -webkit-font-smoothing: antialiased; display: flex; align-items: center; justify-content: center; min-height: 100vh; transition: background .3s, color .3s; }
 
-/* ════ APP SHELL ════ */
-#app { width: 100%; max-width: 420px; height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+/* ══ APP SHELL ══ */
+#app { width: 100%; max-width: 420px; height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; background: var(--e0); transition: background .3s; }
 .screens { flex: 1; overflow: hidden; position: relative; }
-.screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: var(--sp5) var(--sp4) calc(var(--nav) + var(--safe) + var(--sp4)); display: none; }
+.screen { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 24px 18px calc(var(--nav) + var(--safe) + 20px); display: none; }
 .screen.active { display: block; animation: pg .28s ease; }
 .screen::-webkit-scrollbar { width: 3px; }
 .screen::-webkit-scrollbar-thumb { background: var(--e3); border-radius: 3px; }
 #s-chat { padding: 0; }
 #s-chat.active { display: flex; flex-direction: column; }
-@keyframes pg { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pg { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-/* ════ NAVIGATION ════ */
-nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: var(--safe); background: var(--e1); border-top: 1px solid var(--b1); display: grid; grid-template-columns: repeat(4, 1fr); z-index: 100; }
+/* ══ NAV ══ */
+nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: var(--safe); background: var(--e1); border-top: 1px solid var(--b1); display: grid; grid-template-columns: repeat(4,1fr); z-index: 100; transition: background .3s; }
 .ni { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; padding: 8px 0; position: relative; }
 .ni-wrap { width: 36px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all .22s cubic-bezier(.34,1.56,.64,1); }
-.ni svg { width: 20px; height: 20px; transition: all .22s cubic-bezier(.34,1.56,.64,1); }
+.ni svg { width: 20px; height: 20px; transition: all .22s cubic-bezier(.34,1.56,.64,1); stroke: var(--t3); }
 .ni-label { font-size: 10px; font-weight: 600; color: var(--t3); transition: color .2s; letter-spacing: .2px; }
-.ni.on .ni-wrap { background: rgba(79,138,255,.15); transform: scale(1.08); }
-.ni.on .ni-wrap svg { stroke: var(--blue); }
-.ni.on .ni-label { color: var(--blue); }
-.ni:not(.on) .ni-wrap svg { stroke: var(--t3); }
+.ni.on .ni-wrap { background: rgba(var(--accent-rgb),.15); transform: scale(1.08); }
+.ni.on .ni-wrap svg { stroke: var(--accent); }
+.ni.on .ni-label { color: var(--accent); }
 
-/* ════ CARD ════ */
-.card { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); padding: var(--sp5); margin-bottom: var(--sp3); position: relative; overflow: hidden; }
-.card + .card { margin-top: var(--sp2); }
-
-/* ════ SECTION LABEL ════ */
-.slabel { font-size: 11px; font-weight: 700; color: var(--t3); letter-spacing: 1.1px; text-transform: uppercase; margin: var(--sp5) 0 var(--sp3); }
-
-/* ════ BUTTON ════ */
+/* ══ COMPONENTS ══ */
+.card { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); padding: 20px; margin-bottom: 14px; position: relative; overflow: hidden; transition: background .3s, border-color .3s; }
+.slabel { font-size: 11px; font-weight: 700; color: var(--t3); letter-spacing: 1.1px; text-transform: uppercase; margin: 22px 0 10px; }
 .btn { width: 100%; padding: 14px; border-radius: var(--r2); border: none; cursor: pointer; font-family: var(--font); font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: .18s; }
 .btn:active { transform: scale(.97); }
-.btn-primary { background: var(--blue); color: #fff; }
+.btn-primary { background: var(--accent); color: #fff; }
 .btn-ghost { background: transparent; border: 1px solid var(--b2); color: var(--t2); }
-.btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ════ ANIMATIONS ════ */
-@keyframes float    { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-4px)} }
-@keyframes flicker  { 0%,100%{opacity:1}                50%{opacity:.75} }
-@keyframes flip-in  { from{transform:rotateY(180deg);opacity:0} to{transform:rotateY(0);opacity:1} }
-@keyframes pop      { 0%{transform:scale(1)} 35%{transform:scale(1.22) rotate(-6deg)} 65%{transform:scale(.93)} 100%{transform:scale(1)} }
-@keyframes slide-up { from{opacity:0;transform:translateY(18px) scale(.95)} to{opacity:1;transform:none} }
-@keyframes slide-dn { from{opacity:1;transform:none} to{opacity:0;transform:translateY(14px) scale(.95)} }
-@keyframes bounce   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-@keyframes msg-in   { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
-@keyframes xp-in    { from{width:0} }
-@keyframes ring-in  { from{stroke-dashoffset:220} }
-@keyframes bar-in   { from{height:0} }
+/* ══ ANIMATIONS ══ */
+@keyframes float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes flicker { 0%,100%{opacity:1} 50%{opacity:.75} }
+@keyframes pop     { 0%{transform:scale(1)} 35%{transform:scale(1.22) rotate(-6deg)} 65%{transform:scale(.93)} 100%{transform:scale(1)} }
+@keyframes sldn    { from{opacity:1;transform:none} to{opacity:0;transform:translateY(14px) scale(.95)} }
+@keyframes sldup   { from{opacity:0;transform:translateY(18px) scale(.95)} to{opacity:1;transform:none} }
+@keyframes bounce  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes msgin   { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-/* ════ HOME ════ */
-.hero { padding: 4px 0 var(--sp5); position: relative; }
-.hero-bg { position: absolute; right: -16px; top: -8px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(79,138,255,.1) 0%, transparent 70%); pointer-events: none; animation: float 5s ease-in-out infinite; }
+/* ══ HOME ══ */
+.hero { padding: 4px 0 24px; position: relative; overflow: hidden; }
+.hero-bg { position: absolute; right: -16px; top: -8px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle,rgba(var(--accent-rgb),.12),transparent 70%); pointer-events: none; animation: float 5s ease-in-out infinite; }
 .hero-time { font-size: 12px; font-weight: 600; color: var(--t3); text-transform: uppercase; letter-spacing: .9px; margin-bottom: 6px; }
-.hero-name { font-size: clamp(20px, 5.5vw, 28px); font-weight: 800; line-height: 1.15; color: var(--t1); word-break: break-word; }
-.hero-sub  { font-size: 13px; color: var(--t2); margin-top: 5px; }
+.hero-name { font-size: clamp(20px,5.5vw,28px); font-weight: 800; line-height: 1.15; color: var(--t1); word-break: break-word; }
+.hero-sub  { font-size: 13px; color: var(--t2); margin-top: 6px; }
 
 /* XP Card */
-.xp-card { background: linear-gradient(135deg, #131f3e 0%, #0f1c2d 100%); border-color: rgba(79,138,255,.18); margin-bottom: var(--sp4); }
-.xp-row   { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--sp4); }
-.xp-rank  { font-size: 14px; font-weight: 700; }
-.xp-pill  { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; background: rgba(79,138,255,.15); border: 1px solid rgba(79,138,255,.25); color: var(--blue); }
-.xp-track { background: rgba(255,255,255,.06); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: var(--sp2); position: relative; }
-.xp-fill  { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--blue) 0%, var(--green) 100%); box-shadow: 0 0 14px rgba(79,138,255,.5); transition: width 1.3s cubic-bezier(.4,0,.2,1); }
-.xp-fill::after { content: ''; position: absolute; right: 0; top: 0; width: 18px; height: 100%; background: rgba(255,255,255,.25); border-radius: 100px; filter: blur(4px); }
-.xp-meta  { display: flex; justify-content: space-between; font-size: 12px; color: var(--t2); }
+.xp-card { background: var(--grad); border-color: rgba(var(--accent-rgb),.2); margin-bottom: 14px; }
+.xp-row  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.xp-rank { font-size: 14px; font-weight: 700; }
+.xp-pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; background: rgba(var(--accent-rgb),.15); border: 1px solid rgba(var(--accent-rgb),.25); color: var(--accent); }
+.xp-track { background: rgba(255,255,255,.06); border-radius: 100px; height: 8px; overflow: hidden; margin-bottom: 8px; position: relative; }
+.xp-fill  { height: 100%; border-radius: 100px; background: var(--grad-bar); box-shadow: 0 0 12px rgba(var(--accent-rgb),.4); transition: width 1.3s cubic-bezier(.4,0,.2,1); }
+.xp-fill::after { content:''; position:absolute; right:0; top:0; width:18px; height:100%; background:rgba(255,255,255,.22); border-radius:100px; filter:blur(4px); }
+.xp-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--t2); }
 
 /* Streak */
-.streak-card { display: flex; align-items: center; gap: var(--sp4); padding: var(--sp4) var(--sp5); background: linear-gradient(135deg, rgba(255,149,0,.09), rgba(255,107,107,.06)); border: 1px solid rgba(255,149,0,.16); border-radius: var(--r); margin-bottom: var(--sp4); }
-.streak-num { font-size: 42px; font-weight: 800; color: var(--orange); line-height: 1; animation: flicker 2.8s ease-in-out infinite; }
+.streak-card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.06)); border: 1px solid rgba(255,149,0,.16); border-radius: var(--r); margin-bottom: 14px; }
+.streak-num { font-size: 42px; font-weight: 800; color: var(--orange); line-height: 1; animation: flicker 2.8s ease-in-out infinite; min-width: 52px; }
 .s-title { font-size: 15px; font-weight: 700; }
 .s-sub   { font-size: 12px; color: var(--t2); margin-top: 3px; }
 
 /* Stats row */
-.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--sp2); margin-bottom: var(--sp5); }
-.stat-box { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r2); padding: var(--sp4) var(--sp3); text-align: center; cursor: pointer; transition: .2s; }
+.stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
+.stat-box { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r2); padding: 16px 12px; text-align: center; cursor: pointer; transition: .2s; }
 .stat-box:active { transform: scale(.94); background: var(--e2); }
-.stat-box:hover  { border-color: var(--b2); }
 .stat-val { font-size: 22px; font-weight: 800; line-height: 1; margin-bottom: 5px; }
 .stat-lbl { font-size: 11px; color: var(--t2); font-weight: 500; }
 
 /* Quick grid */
-.quick-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--sp3); }
-.qb { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); padding: var(--sp4); cursor: pointer; transition: .2s; animation: float 4s ease-in-out infinite; }
+.quick-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.qb { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); padding: 18px 16px; cursor: pointer; transition: .2s; animation: float 4s ease-in-out infinite; }
 .qb:nth-child(2){animation-delay:.5s}.qb:nth-child(3){animation-delay:1s}.qb:nth-child(4){animation-delay:1.5s}
 .qb:active { transform: scale(.95) !important; animation: none; }
-.qb:hover  { border-color: var(--b2); }
-.qb-icon  { font-size: 26px; margin-bottom: var(--sp3); display: block; }
-.qb-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.qb-icon  { font-size: 26px; margin-bottom: 10px; display: block; }
+.qb-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
 .qb-sub   { font-size: 11px; color: var(--t2); }
-.qb-blue  { border-color: rgba(79,138,255,.2);  background: linear-gradient(140deg,rgba(79,138,255,.07),var(--e1)); }
-.qb-green { border-color: rgba(0,212,170,.2);   background: linear-gradient(140deg,rgba(0,212,170,.07),var(--e1)); }
-.qb-gold  { border-color: rgba(255,184,48,.2);  background: linear-gradient(140deg,rgba(255,184,48,.07),var(--e1)); }
-.qb-red   { border-color: rgba(255,107,107,.2); background: linear-gradient(140deg,rgba(255,107,107,.07),var(--e1)); }
+.qb-a { border-color: rgba(var(--accent-rgb),.2); background: linear-gradient(140deg,rgba(var(--accent-rgb),.07),var(--e1)); }
+.qb-b { border-color: rgba(0,212,170,.2);   background: linear-gradient(140deg,rgba(0,212,170,.07),var(--e1)); }
+.qb-c { border-color: rgba(255,184,48,.2);  background: linear-gradient(140deg,rgba(255,184,48,.07),var(--e1)); }
+.qb-d { border-color: rgba(255,107,107,.2); background: linear-gradient(140deg,rgba(255,107,107,.07),var(--e1)); }
 
-/* ════ CHAT ════ */
-.chat-header { padding: var(--sp3) var(--sp4) var(--sp3); background: var(--e1); border-bottom: 1px solid var(--b1); display: flex; align-items: center; gap: var(--sp3); flex-shrink: 0; }
-.chat-av { width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0; background: linear-gradient(135deg, var(--blue), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+/* ══ CHAT ══ */
+.chat-header { padding: 14px 18px; background: var(--e1); border-bottom: 1px solid var(--b1); display: flex; align-items: center; gap: 14px; flex-shrink: 0; transition: background .3s; }
+.chat-av { width: 40px; height: 40px; border-radius: 13px; flex-shrink: 0; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 19px; }
 .chat-hname  { font-size: 15px; font-weight: 700; }
-.chat-status { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 4px; margin-top: 1px; }
-.online-dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: bounce .9s ease-in-out infinite; }
+.chat-status { font-size: 11px; color: var(--accent2); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.online-dot  { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); animation: bounce .9s ease-in-out infinite; }
 .chat-clr    { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--t3); font-size: 17px; padding: 5px; border-radius: 8px; transition: .15s; }
 .chat-clr:hover { color: var(--t2); background: var(--e2); }
 
-.chat-msgs { flex: 1; overflow-y: auto; padding: var(--sp4); display: flex; flex-direction: column; gap: var(--sp3); }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 16px 18px 10px; display: flex; flex-direction: column; gap: 12px; }
 .chat-msgs::-webkit-scrollbar { width: 3px; }
 .chat-msgs::-webkit-scrollbar-thumb { background: var(--e3); border-radius: 3px; }
 
-.msg { display: flex; gap: var(--sp2); animation: msg-in .22s ease; }
+.msg { display: flex; gap: 10px; animation: msgin .22s ease; }
 .msg.user { flex-direction: row-reverse; }
-.msg-av { width: 28px; height: 28px; border-radius: 9px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.msg.bot  .msg-av { background: linear-gradient(135deg,var(--blue),var(--green)); }
+.msg-av { width: 30px; height: 30px; border-radius: 10px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.msg.bot  .msg-av { background: linear-gradient(135deg,var(--accent),var(--accent2)); }
 .msg.user .msg-av { background: var(--e3); border: 1px solid var(--b1); }
-.msg-bub { max-width: 78%; padding: 10px 13px; font-size: 14px; line-height: 1.6; border-radius: 14px; }
-.msg.user .msg-bub { background: var(--blue); color: #fff; border-radius: 14px 14px 4px 14px; }
+.msg-bub { max-width: 78%; padding: 11px 14px; font-size: 14px; line-height: 1.6; border-radius: 14px; }
+.msg.user .msg-bub { background: var(--accent); color: #fff; border-radius: 14px 14px 4px 14px; }
 .msg.bot  .msg-bub { background: var(--e1); border: 1px solid var(--b1); border-radius: 14px 14px 14px 4px; }
 .msg-bub b { font-weight: 700; }
 .msg-bub i { font-style: italic; color: var(--t2); }
-.msg-bub code { font-family: monospace; font-size: 13px; background: rgba(79,138,255,.12); padding: 2px 5px; border-radius: 4px; color: var(--blue); }
+.msg-bub code { font-family: monospace; font-size: 13px; background: rgba(var(--accent-rgb),.12); padding: 2px 5px; border-radius: 4px; color: var(--accent); }
 
-.typing-wrap { display: flex; align-items: center; gap: 4px; padding: 11px 13px; background: var(--e1); border: 1px solid var(--b1); border-radius: 14px 14px 14px 4px; width: fit-content; }
+.typing-wrap { display: flex; align-items: center; gap: 4px; padding: 12px 14px; background: var(--e1); border: 1px solid var(--b1); border-radius: 14px 14px 14px 4px; width: fit-content; }
 .typing-wrap span { width: 6px; height: 6px; border-radius: 50%; background: var(--t2); animation: bounce .9s ease-in-out infinite; }
 .typing-wrap span:nth-child(2){animation-delay:.18s}.typing-wrap span:nth-child(3){animation-delay:.36s}
 
-.chips-row { display: flex; gap: 7px; overflow-x: auto; padding: var(--sp2) var(--sp4) var(--sp1); flex-shrink: 0; }
+.chips-row { display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px 6px; flex-shrink: 0; }
 .chips-row::-webkit-scrollbar { display: none; }
-.chip { flex-shrink: 0; padding: 7px 13px; border-radius: 100px; border: 1px solid var(--b2); background: var(--e2); font-size: 13px; font-weight: 500; color: var(--t2); cursor: pointer; transition: .15s; white-space: nowrap; }
-.chip:active { border-color: var(--blue); color: var(--blue); transform: scale(.96); }
+.chip { flex-shrink: 0; padding: 8px 14px; border-radius: 100px; border: 1px solid var(--b2); background: var(--e2); font-size: 13px; font-weight: 500; color: var(--t2); cursor: pointer; transition: .15s; white-space: nowrap; }
+.chip:active { border-color: var(--accent); color: var(--accent); transform: scale(.96); }
 
-.input-area { padding: var(--sp2) var(--sp3); padding-bottom: calc(var(--sp2) + var(--safe)); background: var(--e1); border-top: 1px solid var(--b1); display: flex; align-items: flex-end; gap: var(--sp2); flex-shrink: 0; }
-.chat-input { flex: 1; background: var(--e2); border: 1px solid var(--b1); border-radius: 18px; padding: 10px 14px; color: var(--t1); font-family: var(--font); font-size: 14px; outline: none; resize: none; max-height: 96px; line-height: 1.4; transition: border-color .2s; }
-.chat-input:focus { border-color: rgba(79,138,255,.4); }
+.input-area { padding: 10px 14px; padding-bottom: calc(10px + var(--safe)); background: var(--e1); border-top: 1px solid var(--b1); display: flex; align-items: flex-end; gap: 10px; flex-shrink: 0; transition: background .3s; }
+.chat-input { flex: 1; background: var(--e2); border: 1px solid var(--b1); border-radius: 18px; padding: 11px 15px; color: var(--t1); font-family: var(--font); font-size: 14px; outline: none; resize: none; max-height: 96px; line-height: 1.4; transition: border-color .2s; }
+.chat-input:focus { border-color: rgba(var(--accent-rgb),.4); }
 .chat-input::placeholder { color: var(--t3); }
-.send-btn { width: 38px; height: 38px; border-radius: 11px; border: none; cursor: pointer; background: var(--blue); color: #fff; font-size: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: .18s; }
+.send-btn { width: 40px; height: 40px; border-radius: 12px; border: none; cursor: pointer; background: var(--accent); color: #fff; font-size: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: .18s; }
 .send-btn:active { transform: scale(.88); }
 .send-btn:disabled { background: var(--e3); cursor: default; }
 
-/* ════ LEARN ════ */
-.learn-hdr { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; margin-bottom: var(--sp4); }
-.learn-title  { font-size: 22px; font-weight: 800; }
-.card-counter { font-size: 13px; color: var(--t2); font-weight: 600; }
-.prog-line  { background: var(--e2); border-radius: 100px; height: 3px; overflow: hidden; margin-bottom: var(--sp4); }
-.prog-fill  { height: 100%; background: var(--green); border-radius: 100px; transition: width .4s ease; }
+/* ══ LEARN ══ */
+.learn-hdr { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; margin-bottom: 18px; }
+.learn-title { font-size: 22px; font-weight: 800; }
+.card-ctr    { font-size: 13px; color: var(--t2); font-weight: 600; }
+.prog-line { background: var(--e2); border-radius: 100px; height: 3px; overflow: hidden; margin-bottom: 18px; }
+.prog-fill { height: 100%; background: var(--grad-bar); border-radius: 100px; transition: width .4s ease; }
 
-.fc-scene { perspective: 900px; height: 218px; cursor: pointer; margin-bottom: var(--sp4); overflow: hidden; user-select: none; }
+.fc-scene { perspective: 900px; height: 222px; cursor: pointer; margin-bottom: 16px; overflow: hidden; user-select: none; }
 .fc-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.4,0,.2,1); }
 .fc-inner.flipped { transform: rotateY(180deg); }
-.fc-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--r); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--sp5); text-align: center; }
+.fc-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: var(--r); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
 .fc-front { background: var(--e1); border: 1px solid var(--b2); }
-.fc-back  { background: linear-gradient(145deg, #0d2420, #091c18); border: 1px solid rgba(0,212,170,.2); transform: rotateY(180deg); }
-.fc-badge       { font-size: 10px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: var(--t3); margin-bottom: var(--sp3); }
-.fc-word        { font-size: clamp(18px, 5.5vw, 26px); font-weight: 800; color: var(--t1); line-height: 1.2; margin-bottom: var(--sp2); word-break: break-word; max-width: 100%; }
-.fc-phonetic    { font-size: 14px; color: var(--blue); margin-bottom: var(--sp2); }
-.fc-translation { font-size: 24px; font-weight: 700; color: var(--green); margin-bottom: var(--sp3); }
-.fc-example     { font-size: 13px; color: var(--t2); font-style: italic; line-height: 1.55; }
-.fc-hint        { position: absolute; bottom: 12px; font-size: 11px; color: var(--t3); }
+.fc-back  { background: var(--grad); border: 1px solid rgba(var(--accent-rgb),.2); transform: rotateY(180deg); }
+.fc-badge { font-size: 10px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: var(--t3); margin-bottom: 14px; }
+.fc-word  { font-size: clamp(18px,5.5vw,26px); font-weight: 800; color: var(--t1); line-height: 1.2; margin-bottom: 10px; word-break: break-word; max-width: 100%; }
+.fc-ph    { font-size: 14px; color: var(--accent); margin-bottom: 8px; }
+.fc-tr    { font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 10px; }
+.fc-ex    { font-size: 13px; color: var(--t2); font-style: italic; line-height: 1.55; }
+.fc-hint  { position: absolute; bottom: 12px; font-size: 11px; color: var(--t3); }
 
-/* Rating */
-.rate-row { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--sp2); margin-bottom: var(--sp3); transition: opacity .3s, transform .3s; }
+.rate-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; transition: opacity .3s,transform .3s; }
 .rate-row.hidden { opacity: 0; pointer-events: none; transform: translateY(8px); }
-.rb { padding: 10px 4px; border-radius: var(--r2); border: 1px solid var(--b1); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; background: var(--e1); transition: .18s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.rb { padding: 11px 4px; border-radius: var(--r2); border: 1px solid var(--b1); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; background: var(--e1); transition: .18s; display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .rb:active { transform: scale(.92); }
 .rb-i { font-size: 18px; }
-.rb1 { border-color: rgba(255,107,107,.3); color: var(--red); }
-.rb2 { border-color: rgba(255,149,0,.3);  color: var(--orange); }
-.rb3 { border-color: rgba(79,138,255,.3); color: var(--blue); }
-.rb4 { border-color: rgba(0,212,170,.3);  color: var(--green); }
+.rb1{border-color:rgba(255,107,107,.3);color:var(--red)}
+.rb2{border-color:rgba(255,149,0,.3); color:var(--orange)}
+.rb3{border-color:rgba(var(--accent-rgb),.3);color:var(--accent)}
+.rb4{border-color:rgba(0,212,170,.3); color:var(--accent2)}
 
-.empty-state { text-align: center; padding: 52px 20px; animation: pg .4s ease; }
-.empty-ico   { font-size: 52px; margin-bottom: var(--sp4); display: block; animation: float 3s ease-in-out infinite; }
-.empty-t     { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.empty-s     { color: var(--t2); font-size: 14px; line-height: 1.55; }
+.empty-state { text-align: center; padding: 56px 20px; animation: pg .4s ease; }
+.empty-ico { font-size: 52px; margin-bottom: 16px; display: block; animation: float 3s ease-in-out infinite; }
+.empty-t { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.empty-s { color: var(--t2); font-size: 14px; line-height: 1.55; }
 
-/* ════ PROGRESS ════ */
-.prog-hdr  { padding-top: 4px; margin-bottom: var(--sp5); }
-.prog-t    { font-size: 22px; font-weight: 800; margin-bottom: 3px; }
-.prog-sub  { color: var(--t2); font-size: 13px; }
+/* ══ PROGRESS ══ */
+.prog-hdr { padding-top: 4px; margin-bottom: 20px; }
+.prog-t   { font-size: 22px; font-weight: 800; margin-bottom: 3px; }
+.prog-sub { color: var(--t2); font-size: 13px; }
 
-.ring-row  { display: flex; align-items: center; gap: var(--sp5); }
-.ring-svg  { width: 82px; height: 82px; flex-shrink: 0; }
-.ring-trk  { fill: none; stroke: var(--e3); stroke-width: 8; }
-.ring-fill { fill: none; stroke: url(#rg); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 220; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .25s; }
-.ring-lbl  { font-size: 15px; font-weight: 800; fill: var(--t1); }
-.li-name  { font-size: 24px; font-weight: 800; margin-bottom: 2px; }
-.li-rank  { font-size: 13px; color: var(--blue); font-weight: 600; margin-bottom: 5px; }
-.li-xp    { font-size: 12px; color: var(--t2); }
+.ring-row { display: flex; align-items: center; gap: 20px; }
+.ring-svg { width: 84px; height: 84px; flex-shrink: 0; }
+.ring-trk { fill: none; stroke: var(--e3); stroke-width: 8; }
+.ring-fill{ fill: none; stroke: url(#rg); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 220; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .25s; }
+.ring-lbl { font-size: 15px; font-weight: 800; fill: var(--t1); }
+.li-name { font-size: 24px; font-weight: 800; margin-bottom: 3px; }
+.li-rank { font-size: 13px; color: var(--accent); font-weight: 600; margin-bottom: 5px; }
+.li-xp   { font-size: 12px; color: var(--t2); }
 
-.s4g { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp2); margin-bottom: var(--sp2); }
-.sc4 { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r2); padding: var(--sp4); cursor: pointer; transition: .2s; position: relative; }
+/* Progress bar in card */
+.prog-bar-wrap { margin-top: 16px; }
+.prog-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--t2); margin-bottom: 6px; }
+.prog-bar-track { background: var(--e3); border-radius: 100px; height: 6px; overflow: hidden; }
+.prog-bar-fill  { height: 100%; border-radius: 100px; background: var(--grad-bar); transition: width 1.3s cubic-bezier(.4,0,.2,1) .3s; }
+
+.s4g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.sc4 { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r2); padding: 18px; cursor: pointer; transition: .2s; position: relative; }
 .sc4:active { transform: scale(.95); }
 .sc4:hover  { border-color: var(--b2); }
-.sc4-arrow  { position: absolute; top: 13px; right: 13px; font-size: 14px; color: var(--t3); }
-.sc4-ico    { font-size: 20px; margin-bottom: var(--sp2); }
-.sc4-val    { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
-.sc4-lbl    { font-size: 11px; color: var(--t2); }
+.sc4-arrow { position: absolute; top: 14px; right: 14px; font-size: 14px; color: var(--t3); }
+.sc4-ico { font-size: 22px; margin-bottom: 10px; }
+.sc4-val { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.sc4-lbl { font-size: 11px; color: var(--t2); }
 
-/* Chart — rounded tops, gradient, day labels */
-.chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 68px; margin-bottom: 8px; }
+.chart-bars { display: flex; align-items: flex-end; gap: 5px; height: 72px; margin-bottom: 8px; }
 .bar-col  { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-.bar-body { width: 100%; border-radius: 4px 4px 0 0; min-height: 3px; background: linear-gradient(180deg, var(--blue) 0%, rgba(79,138,255,.2) 100%); transition: height .75s cubic-bezier(.4,0,.2,1); }
-.bar-body.today-b { background: linear-gradient(180deg, var(--green) 0%, rgba(0,212,170,.2) 100%); }
-.bar-lbl  { font-size: 10px; color: var(--t3); letter-spacing: .2px; }
-.bar-lbl.today-l { color: var(--green); font-weight: 600; }
+.bar-body { width: 100%; border-radius: 4px 4px 0 0; min-height: 3px; background: linear-gradient(180deg,var(--accent),rgba(var(--accent-rgb),.2)); transition: height .75s cubic-bezier(.4,0,.2,1); }
+.bar-body.today-b { background: linear-gradient(180deg,var(--accent2),rgba(0,212,170,.2)); }
+.bar-lbl { font-size: 10px; color: var(--t3); letter-spacing: .2px; }
+.bar-lbl.today-l { color: var(--accent2); font-weight: 600; }
 
-.toefl-r { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--b1); }
+.toefl-r { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--b1); }
 .toefl-r:last-child { border-bottom: none; }
-.tr-name { flex: 1; font-weight: 500; font-size: 14px; }
+.tr-name  { flex: 1; font-weight: 500; font-size: 14px; }
 .tr-track { flex: 2; background: var(--e3); border-radius: 100px; height: 5px; overflow: hidden; }
-.tr-fill  { height: 100%; border-radius: 100px; background: var(--blue); transition: width 1.2s ease; }
+.tr-fill  { height: 100%; border-radius: 100px; background: var(--accent); transition: width 1.2s ease; }
 .tr-score { font-weight: 700; font-size: 13px; width: 32px; text-align: right; color: var(--t2); }
 
-/* ════ SETTINGS ════ */
-.set-hdr { padding-top: 4px; margin-bottom: var(--sp5); }
+/* ══ SETTINGS ══ */
+.set-hdr { padding-top: 4px; margin-bottom: 20px; }
 .set-t   { font-size: 22px; font-weight: 800; }
 
-.ltgl { display: flex; background: var(--e2); border-radius: var(--r2); padding: 3px; gap: 3px; margin-bottom: var(--sp2); }
-.lo   { flex: 1; padding: 9px; text-align: center; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; transition: .2s; color: var(--t2); }
-.lo.on { background: var(--blue); color: #fff; }
+/* Language toggle */
+.ltgl { display: flex; background: var(--e2); border-radius: var(--r2); padding: 3px; gap: 3px; margin-bottom: 4px; }
+.lo { flex: 1; padding: 10px; text-align: center; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; transition: .2s; color: var(--t2); }
+.lo.on { background: var(--accent); color: #fff; }
 
-.slist { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); overflow: hidden; margin-bottom: var(--sp2); }
-.srow  { display: flex; align-items: center; padding: 15px var(--sp4); gap: var(--sp3); border-bottom: 1px solid var(--b1); cursor: pointer; transition: .15s; }
+/* Theme picker */
+.themes-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 4px; }
+.theme-btn { aspect-ratio: 1; border-radius: 12px; cursor: pointer; border: 2px solid transparent; transition: .2s; position: relative; overflow: hidden; }
+.theme-btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(var(--accent-rgb),.3); }
+.theme-btn:active { transform: scale(.92); }
+.theme-check { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; opacity: 0; }
+.theme-btn.active .theme-check { opacity: 1; }
+
+/* Settings list */
+.slist { background: var(--e1); border: 1px solid var(--b1); border-radius: var(--r); overflow: hidden; margin-bottom: 4px; transition: background .3s; }
+.srow  { display: flex; align-items: center; padding: 16px 18px; gap: 14px; border-bottom: 1px solid var(--b1); cursor: pointer; transition: .15s; }
 .srow:last-child { border-bottom: none; }
 .srow:active { background: var(--e2); }
-.srow:hover  { background: rgba(255,255,255,.02); }
-.sr-ico  { flex-shrink: 0; width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.sr-ico  { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; background: var(--e2); }
 .sr-body { flex: 1; min-width: 0; }
 .sr-t    { font-weight: 600; font-size: 14px; }
 .sr-s    { font-size: 12px; color: var(--t2); margin-top: 2px; }
-.sr-val  { font-size: 12px; color: var(--blue); font-weight: 700; flex-shrink: 0; }
-.sr-arr  { color: var(--t3); font-size: 16px; flex-shrink: 0; flex-shrink: 0; }
+.sr-val  { font-size: 12px; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+.sr-arr  { color: var(--t3); font-size: 16px; flex-shrink: 0; }
 
-.itags-wrap { display: flex; flex-wrap: wrap; gap: var(--sp2); margin-bottom: var(--sp2); }
-.itag { padding: 5px 10px 5px 12px; background: rgba(79,138,255,.09); border: 1px solid rgba(79,138,255,.18); border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--blue); display: flex; align-items: center; gap: 6px; animation: pg .3s cubic-bezier(.34,1.56,.64,1) both; }
-.itag-x { color: var(--t3); cursor: pointer; font-size: 12px; transition: color .15s; line-height: 1; }
-.itag-x:hover { color: var(--red); }
+.itags-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; padding: 2px 0; }
+.itag { padding: 6px 12px; background: rgba(var(--accent-rgb),.09); border: 1px solid rgba(var(--accent-rgb),.18); border-radius: 100px; font-size: 12px; font-weight: 600; color: var(--accent); }
 
-/* ════ NOTIFICATION ════ */
-.alex-notif { position: fixed; bottom: calc(var(--nav) + var(--safe) + 14px); left: 14px; right: 14px; max-width: calc(420px - 28px); margin: 0 auto; background: var(--e1); border: 1px solid rgba(79,138,255,.2); border-radius: var(--r); padding: var(--sp4); box-shadow: 0 8px 30px rgba(0,0,0,.4), 0 0 0 1px var(--b1); z-index: 150; display: flex; align-items: flex-start; gap: var(--sp3); cursor: pointer; animation: slide-up .42s cubic-bezier(.34,1.56,.64,1); }
-.alex-notif.dismiss { animation: slide-dn .3s ease forwards; }
-.an-av { width: 42px; height: 42px; border-radius: 13px; flex-shrink: 0; background: linear-gradient(135deg, var(--blue), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: .18s; box-shadow: 0 0 16px rgba(79,138,255,.3); }
+/* ══ NOTIFICATION ══ */
+.alex-notif { position: fixed; bottom: calc(var(--nav) + var(--safe) + 14px); left: 14px; right: 14px; max-width: calc(420px - 28px); margin: 0 auto; background: var(--e1); border: 1px solid rgba(var(--accent-rgb),.2); border-radius: var(--r); padding: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.4); z-index: 150; display: flex; align-items: flex-start; gap: 14px; cursor: pointer; animation: sldup .42s cubic-bezier(.34,1.56,.64,1); }
+.alex-notif.dismiss { animation: sldn .3s ease forwards; }
+.an-av { width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 21px; cursor: pointer; transition: .18s; }
 .an-av:active { transform: scale(.86); }
 .an-av.pop { animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
 .an-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
-.an-odot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: bounce .9s ease-in-out infinite; }
+.an-odot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); animation: bounce .9s ease-in-out infinite; }
 .an-text { font-size: 13px; color: var(--t2); line-height: 1.45; }
-.an-cta  { font-size: 12px; color: var(--blue); font-weight: 700; margin-top: 4px; }
-.an-x    { position: absolute; top: 10px; right: 12px; color: var(--t3); font-size: 14px; cursor: pointer; padding: 3px 5px; border-radius: 6px; transition: .15s; }
+.an-cta  { font-size: 12px; color: var(--accent); font-weight: 700; margin-top: 5px; }
+.an-x    { position: absolute; top: 10px; right: 12px; color: var(--t3); font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: .15s; }
 .an-x:hover { color: var(--t2); background: var(--e2); }
 
-/* ════ TOAST ════ */
-.toast { position: fixed; bottom: calc(var(--nav) + var(--safe) + 12px); left: 12px; right: 12px; max-width: calc(420px - 24px); margin: 0 auto; background: var(--e2); border: 1px solid var(--b2); color: var(--t1); padding: 11px 14px; border-radius: var(--r2); font-weight: 500; font-size: 14px; z-index: 200; transform: translateY(20px); opacity: 0; transition: all .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; display: flex; align-items: center; gap: 9px; }
+/* ══ TOAST ══ */
+.toast { position: fixed; bottom: calc(var(--nav) + var(--safe) + 12px); left: 12px; right: 12px; max-width: calc(420px - 24px); margin: 0 auto; background: var(--e2); border: 1px solid var(--b2); color: var(--t1); padding: 12px 16px; border-radius: var(--r2); font-weight: 500; font-size: 14px; z-index: 200; transform: translateY(20px); opacity: 0; transition: all .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; display: flex; align-items: center; gap: 9px; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-/* ════ LOADER ════ */
+/* ══ LOADER ══ */
 #loader { position: fixed; inset: 0; background: var(--e0); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; transition: opacity .4s; }
 #loader.gone { opacity: 0; pointer-events: none; }
-.ll { font-size: 24px; font-weight: 800; color: var(--t1); }
-.ll span { color: var(--blue); }
+.ll { font-size: 26px; font-weight: 800; color: var(--t1); }
+.ll span { color: var(--accent); }
 .ldots { display: flex; gap: 7px; }
-.ld { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); opacity: .3; animation: bounce 1s ease-in-out infinite; }
+.ld { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); opacity: .3; animation: bounce 1s ease-in-out infinite; }
 .ld:nth-child(2){animation-delay:.15s}.ld:nth-child(3){animation-delay:.3s}
-.lsub { font-size: 13px; color: var(--t3); }
 
-/* ════ RESPONSIVE ════ */
+/* ══ RESPONSIVE ══ */
 @media (max-width: 420px) {
   body { display: block; }
   #app { max-width: 100%; height: 100vh; border-radius: 0; box-shadow: none; }
   .alex-notif, .toast { position: fixed; }
 }
 @media (min-width: 420px) {
-  body { background: #070a11; background-image: radial-gradient(ellipse at 15% 20%, rgba(79,138,255,.07), transparent 50%), radial-gradient(ellipse at 85% 80%, rgba(0,212,170,.05), transparent 50%); }
-  #app { height: min(820px, 94vh); border-radius: 22px; box-shadow: 0 0 0 1px var(--b1), 0 28px 70px rgba(0,0,0,.55), 0 0 50px rgba(79,138,255,.05); }
+  body { background: #05070d; }
+  #app { height: min(820px,94vh); border-radius: 22px; box-shadow: 0 0 0 1px var(--b1),0 28px 70px rgba(0,0,0,.55); }
   .alex-notif, .toast { position: absolute; }
   .qb:hover { transform: translateY(-2px); animation: none !important; }
-  .rb:hover, .stat-box:hover { background: var(--e2); }
 }
 @media (min-width: 900px) {
   body { gap: 28px; }
   .dp { display: flex !important; flex-direction: column; gap: 12px; width: 196px; flex-shrink: 0; }
 }
 .dp { display: none; }
-.dp-card { background: rgba(22,27,39,.9); border: 1px solid var(--b1); border-radius: var(--r); padding: var(--sp4); }
-.dp-title { font-size: 12px; font-weight: 700; color: var(--t1); letter-spacing: .3px; margin-bottom: 10px; }
+.dp-card { background: rgba(22,27,39,.9); border: 1px solid var(--b1); border-radius: var(--r); padding: 18px; }
+.dp-title { font-size: 12px; font-weight: 700; color: var(--t1); margin-bottom: 10px; }
 .dp-body  { font-size: 12px; color: var(--t2); line-height: 1.7; }
-.dp-cmd   { display: inline-block; padding: 2px 6px; background: rgba(79,138,255,.1); border: 1px solid rgba(79,138,255,.2); border-radius: 5px; font-family: monospace; font-size: 11px; color: var(--blue); margin: 1px; }
+.dp-cmd   { display: inline-block; padding: 2px 6px; background: rgba(var(--accent-rgb),.1); border: 1px solid rgba(var(--accent-rgb),.2); border-radius: 5px; font-family: monospace; font-size: 11px; color: var(--accent); margin: 1px; }
 </style>
 </head>
 <body>
 
-<!-- Loader -->
 <div id="loader">
   <div class="ll">Lingua<span>Max</span></div>
   <div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
-  <div class="lsub" id="lsub">Loading...</div>
 </div>
 
-<!-- Desktop panel -->
 <div class="dp">
   <div class="dp-card">
     <div class="dp-title">Bot Commands</div>
@@ -366,13 +387,8 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
       <span class="dp-cmd">/stats</span> Statistics
     </div>
   </div>
-  <div class="dp-card">
-    <div class="dp-title">Tips</div>
-    <div class="dp-body">Write in English in Chat — ALEX corrects you instantly.<br><br>Send a photo to the bot for visual text analysis.</div>
-  </div>
 </div>
 
-<!-- App -->
 <div id="app">
 <div class="screens">
 
@@ -397,32 +413,32 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
   <div class="streak-card">
     <div class="streak-num" id="h-stk">0</div>
     <div>
-      <div class="s-title">🔥 Day streak</div>
-      <div class="s-sub" id="stk-sub">Start your streak today!</div>
+      <div class="s-title">🔥 <span data-i18n="streak_title">Day streak</span></div>
+      <div class="s-sub" id="stk-sub">—</div>
     </div>
   </div>
 
   <div class="stats-row">
     <div class="stat-box" onclick="goTab('progress')">
       <div class="stat-val" id="hs-stk" style="color:var(--orange)">0</div>
-      <div class="stat-lbl">Streak</div>
+      <div class="stat-lbl" data-i18n="streak">Streak</div>
     </div>
     <div class="stat-box" onclick="goTab('learn')">
-      <div class="stat-val" id="hs-words" style="color:var(--green)">0</div>
-      <div class="stat-lbl">Words</div>
+      <div class="stat-val" id="hs-words" style="color:var(--accent2)">0</div>
+      <div class="stat-lbl" data-i18n="words">Words</div>
     </div>
     <div class="stat-box" onclick="goTab('progress')">
-      <div class="stat-val" id="hs-tests" style="color:var(--blue)">0</div>
-      <div class="stat-lbl">Tests</div>
+      <div class="stat-val" id="hs-tests" style="color:var(--accent)">0</div>
+      <div class="stat-lbl" data-i18n="tests">Tests</div>
     </div>
   </div>
 
-  <div class="slabel">Quick start</div>
+  <div class="slabel" data-i18n="quick_start">Quick start</div>
   <div class="quick-grid">
-    <div class="qb qb-blue"  onclick="openChat('lesson')">  <span class="qb-icon">📚</span><div class="qb-title">Grammar</div><div class="qb-sub">Learn a rule</div></div>
-    <div class="qb qb-green" onclick="goTab('learn')">       <span class="qb-icon">🃏</span><div class="qb-title">Flashcards</div><div class="qb-sub">Review words</div></div>
-    <div class="qb qb-gold"  onclick="openChat('toefl')">    <span class="qb-icon">🎓</span><div class="qb-title">TOEFL</div><div class="qb-sub">Practice now</div></div>
-    <div class="qb qb-red"   onclick="openChat('speaking')"> <span class="qb-icon">💬</span><div class="qb-title">Speaking</div><div class="qb-sub">Free chat</div></div>
+    <div class="qb qb-a" onclick="openChat('lesson')">  <span class="qb-icon">📚</span><div class="qb-title" data-i18n="grammar">Grammar</div><div class="qb-sub" data-i18n="grammar_sub">Learn a rule</div></div>
+    <div class="qb qb-b" onclick="goTab('learn')">       <span class="qb-icon">🃏</span><div class="qb-title" data-i18n="flashcards">Flashcards</div><div class="qb-sub" data-i18n="flashcards_sub">Review words</div></div>
+    <div class="qb qb-c" onclick="openChat('toefl')">    <span class="qb-icon">🎓</span><div class="qb-title">TOEFL</div><div class="qb-sub" data-i18n="toefl_sub">Practice now</div></div>
+    <div class="qb qb-d" onclick="openChat('speaking')"> <span class="qb-icon">💬</span><div class="qb-title" data-i18n="speaking">Speaking</div><div class="qb-sub" data-i18n="speaking_sub">Free chat</div></div>
   </div>
 </div>
 
@@ -432,21 +448,22 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
     <div class="chat-av">🤖</div>
     <div>
       <div class="chat-hname">ALEX</div>
-      <div class="chat-status"><span class="online-dot"></span>Online</div>
+      <div class="chat-status"><span class="online-dot"></span><span data-i18n="online">Online</span></div>
     </div>
-    <button class="chat-clr" onclick="clearChat()">🗑</button>
+    <button class="chat-clr" onclick="clearChat()" title="Clear">🗑</button>
   </div>
   <div class="chat-msgs" id="chat-msgs"></div>
   <div class="chips-row">
-    <div class="chip" onclick="sendChip('Correct my English please')">✍️ Correct me</div>
-    <div class="chip" onclick="sendChip('Give me a grammar lesson')">📚 Grammar</div>
-    <div class="chip" onclick="sendChip('Let\'s practice speaking')">💬 Speaking</div>
-    <div class="chip" onclick="sendChip('Give me a vocabulary test')">📝 Vocab test</div>
-    <div class="chip" onclick="sendChip('TOEFL reading practice')">🎓 TOEFL</div>
-    <div class="chip" onclick="sendChip('Teach me useful idioms')">🗣 Idioms</div>
+    <div class="chip" onclick="sendChip(T.chip_correct)">✍️ <span data-i18n="chip_correct">Correct me</span></div>
+    <div class="chip" onclick="sendChip(T.chip_grammar)">📚 <span data-i18n="chip_grammar">Grammar</span></div>
+    <div class="chip" onclick="sendChip(T.chip_speaking)">💬 <span data-i18n="chip_speaking">Speaking</span></div>
+    <div class="chip" onclick="sendChip(T.chip_vocab)">📝 <span data-i18n="chip_vocab">Vocab test</span></div>
+    <div class="chip" onclick="sendChip(T.chip_toefl)">🎓 TOEFL</div>
+    <div class="chip" onclick="sendChip(T.chip_idioms)">🗣 <span data-i18n="chip_idioms">Idioms</span></div>
   </div>
   <div class="input-area">
-    <textarea class="chat-input" id="chat-input" placeholder="Write in English — ALEX will help..." rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
+    <textarea class="chat-input" id="chat-input" rows="1"
+      onkeydown="onKey(event)" oninput="grow(this)"></textarea>
     <button class="send-btn" id="send-btn" onclick="sendMsg()">➤</button>
   </div>
 </div>
@@ -454,8 +471,8 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 <!-- LEARN -->
 <div class="screen" id="s-learn">
   <div class="learn-hdr">
-    <div class="learn-title">Flashcards</div>
-    <div class="card-counter" id="fc-ctr">—</div>
+    <div class="learn-title" data-i18n="flashcards">Flashcards</div>
+    <div class="card-ctr" id="fc-ctr">—</div>
   </div>
   <div id="learn-main">
     <div class="prog-line"><div class="prog-fill" id="pfill" style="width:0"></div></div>
@@ -463,88 +480,99 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
       <div class="fc-inner" id="fc-inner">
         <div class="fc-face fc-front">
           <div class="fc-badge">ENGLISH</div>
-          <div class="fc-word"     id="fc-word">—</div>
-          <div class="fc-phonetic" id="fc-ph"></div>
-          <div class="fc-hint">Tap to flip ↕</div>
+          <div class="fc-word" id="fc-word">—</div>
+          <div class="fc-ph"   id="fc-ph"></div>
+          <div class="fc-hint" data-i18n="tap_flip">Tap to flip ↕</div>
         </div>
         <div class="fc-face fc-back">
-          <div class="fc-badge">TRANSLATION</div>
-          <div class="fc-translation" id="fc-tr">—</div>
-          <div class="fc-example"     id="fc-ex"></div>
+          <div class="fc-badge" data-i18n="translation">TRANSLATION</div>
+          <div class="fc-tr" id="fc-tr">—</div>
+          <div class="fc-ex" id="fc-ex"></div>
         </div>
       </div>
     </div>
     <div class="rate-row hidden" id="rate-row">
-      <div class="rb rb1" onclick="rate(1)"><span class="rb-i">😕</span>Again</div>
-      <div class="rb rb2" onclick="rate(2)"><span class="rb-i">🤔</span>Hard</div>
-      <div class="rb rb3" onclick="rate(3)"><span class="rb-i">😊</span>Good</div>
-      <div class="rb rb4" onclick="rate(4)"><span class="rb-i">✅</span>Easy</div>
+      <div class="rb rb1" onclick="rate(1)"><span class="rb-i">😕</span><span data-i18n="again">Again</span></div>
+      <div class="rb rb2" onclick="rate(2)"><span class="rb-i">🤔</span><span data-i18n="hard">Hard</span></div>
+      <div class="rb rb3" onclick="rate(3)"><span class="rb-i">😊</span><span data-i18n="good">Good</span></div>
+      <div class="rb rb4" onclick="rate(4)"><span class="rb-i">✅</span><span data-i18n="easy">Easy</span></div>
     </div>
-    <button class="btn btn-ghost" onclick="openChat('words')" style="margin-top:4px">+ Add words via chat</button>
+    <button class="btn btn-ghost" onclick="openChat('words')" style="margin-top:4px">
+      + <span data-i18n="add_words">Add words via chat</span>
+    </button>
   </div>
   <div class="empty-state" id="learn-empty" style="display:none">
     <span class="empty-ico">🎉</span>
-    <div class="empty-t">All caught up!</div>
-    <div class="empty-s">No words due today.<br>Chat with ALEX to learn more words.</div>
+    <div class="empty-t" data-i18n="all_done">All caught up!</div>
+    <div class="empty-s" data-i18n="all_done_sub">No words due today.<br>Chat with ALEX to learn more.</div>
   </div>
 </div>
 
 <!-- PROGRESS -->
 <div class="screen" id="s-progress">
   <div class="prog-hdr">
-    <div class="prog-t">Progress</div>
-    <div class="prog-sub">Your learning journey</div>
+    <div class="prog-t" data-i18n="progress">Progress</div>
+    <div class="prog-sub" data-i18n="prog_sub">Your learning journey</div>
   </div>
+
   <div class="card">
     <div class="ring-row">
-      <svg class="ring-svg" viewBox="0 0 82 82">
+      <svg class="ring-svg" viewBox="0 0 84 84">
         <defs>
           <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#4f8aff"/>
-            <stop offset="100%" stop-color="#00d4aa"/>
+            <stop offset="0%" stop-color="var(--accent)"/>
+            <stop offset="100%" stop-color="var(--accent2)"/>
           </linearGradient>
         </defs>
-        <circle class="ring-trk"  cx="41" cy="41" r="34"/>
-        <circle class="ring-fill" id="ring-fill" cx="41" cy="41" r="34"/>
-        <text class="ring-lbl" x="41" y="46" text-anchor="middle" id="ring-lv">B1</text>
+        <circle class="ring-trk" cx="42" cy="42" r="34"/>
+        <circle class="ring-fill" id="ring-fill" cx="42" cy="42" r="34"/>
+        <text class="ring-lbl" x="42" y="47" text-anchor="middle" id="ring-lv">B1</text>
       </svg>
-      <div>
+      <div style="flex:1">
         <div class="li-name" id="p-lv">—</div>
         <div class="li-rank" id="p-rk">—</div>
         <div class="li-xp"   id="p-xp">—</div>
+        <!-- XP progress bar in card -->
+        <div class="prog-bar-wrap">
+          <div class="prog-bar-label">
+            <span id="pb-cur">0 XP</span>
+            <span id="pb-max">—</span>
+          </div>
+          <div class="prog-bar-track"><div class="prog-bar-fill" id="pb-fill" style="width:0"></div></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="slabel">Statistics</div>
+  <div class="slabel" data-i18n="statistics">Statistics</div>
   <div class="s4g">
-    <div class="sc4" onclick="openChat('stats')">
+    <div class="sc4">
       <div class="sc4-arrow">›</div>
       <div class="sc4-ico">📅</div>
-      <div class="sc4-val" id="p-sess" style="color:var(--blue)">—</div>
-      <div class="sc4-lbl">Sessions</div>
+      <div class="sc4-val" id="p-sess" style="color:var(--accent)">—</div>
+      <div class="sc4-lbl" data-i18n="sessions">Sessions</div>
     </div>
     <div class="sc4" onclick="goTab('learn')">
       <div class="sc4-arrow">›</div>
       <div class="sc4-ico">📝</div>
-      <div class="sc4-val" id="p-words" style="color:var(--green)">—</div>
-      <div class="sc4-lbl">Words learned</div>
+      <div class="sc4-val" id="p-words" style="color:var(--accent2)">—</div>
+      <div class="sc4-lbl" data-i18n="words_learned">Words learned</div>
     </div>
-    <div class="sc4" onclick="openChat('tests')">
+    <div class="sc4">
       <div class="sc4-arrow">›</div>
       <div class="sc4-ico">✅</div>
       <div class="sc4-val" id="p-tests" style="color:var(--gold)">—</div>
-      <div class="sc4-lbl">Tests done</div>
+      <div class="sc4-lbl" data-i18n="tests_done">Tests done</div>
     </div>
-    <div class="sc4" onclick="openChat('mistakes')">
+    <div class="sc4">
       <div class="sc4-arrow">›</div>
       <div class="sc4-ico">❌</div>
       <div class="sc4-val" id="p-errors" style="color:var(--red)">—</div>
-      <div class="sc4-lbl">Errors fixed</div>
+      <div class="sc4-lbl" data-i18n="errors_fixed">Errors fixed</div>
     </div>
   </div>
 
-  <div class="slabel">This week</div>
+  <div class="slabel" data-i18n="this_week">This week</div>
   <div class="card">
     <div class="chart-bars" id="chart-bars"></div>
     <div style="display:flex;gap:5px" id="chart-days"></div>
@@ -552,13 +580,102 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 
   <div class="slabel">TOEFL</div>
   <div class="card">
-    <div id="toefl-list" style="text-align:center;color:var(--t2);font-size:13px;padding:10px 0">No TOEFL sessions yet</div>
+    <div id="toefl-list" style="text-align:center;color:var(--t2);font-size:13px;padding:10px 0" data-i18n="no_toefl">No TOEFL sessions yet</div>
   </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="s-settings">
+  <div class="set-hdr">
+    <div class="set-t" data-i18n="settings">Settings</div>
+  </div>
+
+  <!-- Language -->
+  <div class="slabel" data-i18n="language">Language</div>
+  <div class="ltgl">
+    <div class="lo" id="lo-ru" onclick="setLang('ru')">🇷🇺 Русский</div>
+    <div class="lo" id="lo-en" onclick="setLang('en')">🇬🇧 English</div>
+  </div>
+
+  <!-- Themes -->
+  <div class="slabel" data-i18n="theme">Theme</div>
+  <div class="themes-grid">
+    <div class="theme-btn active" id="th-default" data-theme="" onclick="setTheme('')"
+      style="background:linear-gradient(135deg,#0d1117,#4f8aff)">
+      <span class="theme-check">✓</span>
+    </div>
+    <div class="theme-btn" id="th-gold" data-theme="gold" onclick="setTheme('gold')"
+      style="background:linear-gradient(135deg,#120e08,#d4a843)">
+      <span class="theme-check">✓</span>
+    </div>
+    <div class="theme-btn" id="th-forest" data-theme="forest" onclick="setTheme('forest')"
+      style="background:linear-gradient(135deg,#0a110d,#2ecc71)">
+      <span class="theme-check">✓</span>
+    </div>
+    <div class="theme-btn" id="th-purple" data-theme="purple" onclick="setTheme('purple')"
+      style="background:linear-gradient(135deg,#0d0a1a,#9b59b6)">
+      <span class="theme-check">✓</span>
+    </div>
+    <div class="theme-btn" id="th-arctic" data-theme="arctic" onclick="setTheme('arctic')"
+      style="background:linear-gradient(135deg,#e0e7ff,#2563eb)">
+      <span class="theme-check">✓</span>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--t3);margin-bottom:4px;text-align:center" id="theme-names">
+    Blue · Gold · Forest · Purple · Arctic
+  </div>
+
+  <!-- Profile -->
+  <div class="slabel" data-i18n="my_profile">My profile</div>
+  <div class="slist">
+    <div class="srow">
+      <div class="sr-ico">🎯</div>
+      <div class="sr-body">
+        <div class="sr-t" data-i18n="level">Level</div>
+        <div class="sr-s" data-i18n="level_sub">Ask ALEX to change it</div>
+      </div>
+      <div class="sr-val" id="si-lv">—</div>
+    </div>
+    <div class="srow">
+      <div class="sr-ico">💼</div>
+      <div class="sr-body">
+        <div class="sr-t" data-i18n="profession">Profession</div>
+        <div class="sr-s" id="si-prof">—</div>
+      </div>
+      <div class="sr-arr">›</div>
+    </div>
+    <div class="srow">
+      <div class="sr-ico">⏰</div>
+      <div class="sr-body">
+        <div class="sr-t" data-i18n="reminder">Reminder</div>
+        <div class="sr-s" id="si-rem">—</div>
+      </div>
+      <div class="sr-arr">›</div>
+    </div>
+  </div>
+
+  <!-- Interests -->
+  <div class="slabel" data-i18n="interests">Interests</div>
+  <div class="itags-wrap" id="itags">
+    <span style="color:var(--t3);font-size:13px" data-i18n="no_interests">Chat with ALEX — he'll remember!</span>
+  </div>
+
+  <!-- Actions -->
+  <div class="slabel" data-i18n="actions">Actions</div>
+  <div class="slist">
+    <div class="srow" onclick="clearChat();goTab('chat')">
+      <div class="sr-ico">🔄</div>
+      <div class="sr-body"><div class="sr-t" data-i18n="clear_chat">Clear conversation</div></div>
+      <div class="sr-arr">›</div>
+    </div>
+  </div>
+
+  <div style="height:8px"></div>
 </div>
 
 </div><!-- /screens -->
 
-<!-- NAV — SVG icons, consistent style -->
+<!-- NAV -->
 <nav>
   <div class="ni on" id="nav-home" onclick="goTab('home')">
     <div class="ni-wrap">
@@ -566,7 +683,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
         <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
       </svg>
     </div>
-    <div class="ni-label">Home</div>
+    <div class="ni-label" data-i18n="nav_home">Home</div>
   </div>
   <div class="ni" id="nav-chat" onclick="goTab('chat')">
     <div class="ni-wrap">
@@ -574,7 +691,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
       </svg>
     </div>
-    <div class="ni-label">Chat</div>
+    <div class="ni-label" data-i18n="nav_chat">Chat</div>
   </div>
   <div class="ni" id="nav-learn" onclick="goTab('learn')">
     <div class="ni-wrap">
@@ -582,7 +699,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
         <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
       </svg>
     </div>
-    <div class="ni-label">Learn</div>
+    <div class="ni-label" data-i18n="nav_learn">Learn</div>
   </div>
   <div class="ni" id="nav-progress" onclick="goTab('progress')">
     <div class="ni-wrap">
@@ -590,32 +707,161 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
         <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
       </svg>
     </div>
-    <div class="ni-label">Progress</div>
+    <div class="ni-label" data-i18n="nav_progress">Progress</div>
+  </div>
+  <div class="ni" id="nav-settings" onclick="goTab('settings')">
+    <div class="ni-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </div>
+    <div class="ni-label" data-i18n="nav_settings">Settings</div>
   </div>
 </nav>
+
+<!-- Update nav grid for 5 items -->
+<style>nav{grid-template-columns:repeat(5,1fr)}</style>
 
 <!-- Notification -->
 <div class="alex-notif" id="alex-notif" onclick="notifTap()" style="display:none">
   <div class="an-av" id="an-av" onclick="notifAvTap(event)">🤖</div>
   <div style="flex:1;min-width:0">
     <div class="an-name">ALEX <span class="an-odot"></span></div>
-    <div class="an-text">Hey! Write anything in English — I'll correct it 👋</div>
-    <div class="an-cta">Tap to open chat →</div>
+    <div class="an-text" data-i18n="notif_text">Hey! Write in English and I'll correct you instantly 👋</div>
+    <div class="an-cta" data-i18n="notif_cta">Tap to open chat →</div>
   </div>
   <span class="an-x" onclick="dismissNotif(event)">✕</span>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"><span id="t-ico">✅</span><span id="t-msg">—</span></div>
 
 </div><!-- /app -->
 
 <script>
-/* ══ INIT ══ */
+/* ══ SETUP ══ */
 const tg  = window.Telegram?.WebApp;
 const API = 'https://english-production-f7af.up.railway.app';
-const BOT = window.BOT_NAME||'PolyGlotty_bot';
 if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
+
+/* ══ I18N ══ */
+const TRANSLATIONS = {
+  ru: {
+    streak_title:'Дней подряд', streak:'Стрик', words:'Слова', tests:'Тесты',
+    quick_start:'Быстрый старт', grammar:'Грамматика', grammar_sub:'Изучить правило',
+    flashcards:'Карточки', flashcards_sub:'Повторить слова',
+    toefl_sub:'Практика', speaking:'Разговор', speaking_sub:'Свободный чат',
+    online:'Онлайн', tap_flip:'Нажми чтобы перевернуть ↕',
+    translation:'ПЕРЕВОД', again:'Снова', hard:'Сложно', good:'Хорошо', easy:'Легко',
+    add_words:'Добавить слова через чат', all_done:'Всё повторено!',
+    all_done_sub:'Слов на сегодня нет.\nСпроси ALEX о новых словах.',
+    progress:'Прогресс', prog_sub:'Твой путь в обучении',
+    statistics:'Статистика', sessions:'Сессии', words_learned:'Слов изучено',
+    tests_done:'Тестов пройдено', errors_fixed:'Ошибок исправлено',
+    this_week:'На этой неделе', no_toefl:'TOEFL сессий пока нет',
+    settings:'Настройки', language:'Язык интерфейса', theme:'Тема оформления',
+    my_profile:'Мой профиль', level:'Уровень', level_sub:'Скажи ALEX чтобы изменить',
+    profession:'Профессия', reminder:'Напоминание', interests:'Интересы',
+    no_interests:'Общайся с ALEX — он запомнит!', actions:'Действия',
+    clear_chat:'Очистить диалог',
+    nav_home:'Главная', nav_chat:'Чат', nav_learn:'Учёба',
+    nav_progress:'Прогресс', nav_settings:'Настройки',
+    notif_text:'Пиши по-английски — исправлю сразу 👋',
+    notif_cta:'Нажми чтобы открыть чат →',
+    chip_correct:'Проверь мой английский',
+    chip_grammar:'Дай урок грамматики',
+    chip_speaking:'Давай поговорим по-английски',
+    chip_vocab:'Дай тест по словарю',
+    chip_toefl:'Практика TOEFL',
+    chip_idioms:'Научи меня идиомам',
+    welcome_msg:'Привет! Я ALEX, твой персональный репетитор английского. 👋\n\nПиши по-английски — исправлю ошибки, или задай любой вопрос о грамматике, словах или TOEFL.',
+    error_conn:'Ошибка соединения. Попробуй снова.',
+    chat_cleared:'Диалог очищен',
+    all_reviewed:'Все карточки пройдены! 🎉',
+  },
+  en: {
+    streak_title:'Day streak', streak:'Streak', words:'Words', tests:'Tests',
+    quick_start:'Quick start', grammar:'Grammar', grammar_sub:'Learn a rule',
+    flashcards:'Flashcards', flashcards_sub:'Review words',
+    toefl_sub:'Practice now', speaking:'Speaking', speaking_sub:'Free chat',
+    online:'Online', tap_flip:'Tap to flip ↕',
+    translation:'TRANSLATION', again:'Again', hard:'Hard', good:'Good', easy:'Easy',
+    add_words:'Add words via chat', all_done:'All caught up!',
+    all_done_sub:'No words due today.\nChat with ALEX to learn more.',
+    progress:'Progress', prog_sub:'Your learning journey',
+    statistics:'Statistics', sessions:'Sessions', words_learned:'Words learned',
+    tests_done:'Tests done', errors_fixed:'Errors fixed',
+    this_week:'This week', no_toefl:'No TOEFL sessions yet',
+    settings:'Settings', language:'Interface language', theme:'App theme',
+    my_profile:'My profile', level:'Level', level_sub:'Ask ALEX to change it',
+    profession:'Profession', reminder:'Reminder', interests:'Interests',
+    no_interests:'Chat with ALEX — he\'ll remember!', actions:'Actions',
+    clear_chat:'Clear conversation',
+    nav_home:'Home', nav_chat:'Chat', nav_learn:'Learn',
+    nav_progress:'Progress', nav_settings:'Settings',
+    notif_text:'Hey! Write in English and I\'ll correct you instantly 👋',
+    notif_cta:'Tap to open chat →',
+    chip_correct:'Correct my English please',
+    chip_grammar:'Give me a grammar lesson',
+    chip_speaking:'Let\'s practice speaking English',
+    chip_vocab:'Give me a vocabulary test',
+    chip_toefl:'TOEFL reading practice',
+    chip_idioms:'Teach me useful idioms',
+    welcome_msg:'Hi! I\'m ALEX, your personal English tutor. 👋\n\nWrite anything in English — I\'ll correct it, or ask me anything about grammar, vocabulary, or TOEFL.',
+    error_conn:'Connection error. Please try again.',
+    chat_cleared:'Chat cleared',
+    all_reviewed:'All cards reviewed! 🎉',
+  }
+};
+
+let lang = localStorage.getItem('app_lang') || 'ru';
+let T = TRANSLATIONS[lang];
+
+function applyLang(){
+  T = TRANSLATIONS[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if(T[key]) el.textContent = T[key];
+  });
+  // Chat placeholder
+  const inp = document.getElementById('chat-input');
+  if(inp) inp.placeholder = lang==='ru' ? 'Пиши по-английски — ALEX поможет...' : 'Write in English — ALEX will help...';
+  // Lang toggle
+  document.getElementById('lo-ru').classList.toggle('on', lang==='ru');
+  document.getElementById('lo-en').classList.toggle('on', lang==='en');
+  // Refresh streak sub
+  refreshStreakSub();
+}
+
+function setLang(l){
+  lang = l; localStorage.setItem('app_lang', l);
+  applyLang();
+  toast(l==='ru' ? '🇷🇺 Язык: Русский' : '🇬🇧 Language: English');
+}
+
+function refreshStreakSub(){
+  const s = window._d?.streak || 0;
+  document.getElementById('stk-sub').textContent = s > 1
+    ? `${s} ${lang==='ru'?'дней подряд! 🔥':'days in a row! 🔥'}`
+    : (lang==='ru'?'Начни стрик сегодня!':'Start your streak today!');
+}
+
+/* ══ THEMES ══ */
+const THEME_NAMES = {
+  '':'Blue', gold:'Gold', forest:'Forest', purple:'Purple', arctic:'Arctic'
+};
+
+function setTheme(name){
+  document.documentElement.setAttribute('data-theme', name);
+  localStorage.setItem('app_theme', name);
+  // Update active button
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.theme === name);
+  });
+  // Update TG header color
+  const colors = {'':'#0d1117',gold:'#120e08',forest:'#0a110d',purple:'#0d0a1a',arctic:'#f0f4f8'};
+  if(tg){ tg.setHeaderColor(colors[name]||'#0d1117'); tg.setBackgroundColor(colors[name]||'#0d1117'); }
+  toast((lang==='ru'?'Тема: ':'Theme: ') + (THEME_NAMES[name]||'Blue'));
+}
 
 /* ══ NAV ══ */
 let tab = 'home';
@@ -631,14 +877,22 @@ function goTab(n){
 }
 
 /* ══ GREETING ══ */
-function greet(){ const h=new Date().getHours(); return h<12?'Good morning,':h<18?'Good afternoon,':h<23?'Good evening,':'Good night,'; }
+function greet(){
+  const h=new Date().getHours();
+  if(lang==='ru'){
+    if(h<12) return'Доброе утро,'; if(h<18) return'Добрый день,';
+    if(h<23) return'Добрый вечер,'; return'Доброй ночи,';
+  }
+  if(h<12) return'Good morning,'; if(h<18) return'Good afternoon,';
+  if(h<23) return'Good evening,'; return'Good night,';
+}
 
 /* ══ XP ══ */
 const RANKS=[
-  {r:'🌱 Seedling',min:0,max:100},{r:'📗 Beginner',min:100,max:300},
-  {r:'📘 Elementary',min:300,max:600},{r:'📙 Pre-Inter.',min:600,max:1000},
+  {r:'🌱 Seedling',   min:0,   max:100},{r:'📗 Beginner',   min:100, max:300},
+  {r:'📘 Elementary', min:300, max:600},{r:'📙 Pre-Inter.',  min:600, max:1000},
   {r:'⭐ Intermediate',min:1000,max:1500},{r:'🌟 Upper-Inter.',min:1500,max:2500},
-  {r:'💫 Advanced',min:2500,max:4000},{r:'🏆 Master',min:4000,max:9999},
+  {r:'💫 Advanced',   min:2500,max:4000},{r:'🏆 Master',     min:4000,max:9999},
 ];
 function rankOf(xp){ return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[RANKS.length-1]; }
 
@@ -646,7 +900,7 @@ function rankOf(xp){ return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS
 function renderHome(d){
   document.getElementById('greet').textContent = greet();
   document.getElementById('hname').textContent = d.name||'Student';
-  document.getElementById('hsub').textContent  = d.streak>1?`${d.streak}-day streak! Keep going 🔥`:'Keep learning every day 🎯';
+  refreshStreakSub();
 
   const info=rankOf(d.xp||0);
   const pct=Math.max(0,Math.round((d.xp-info.min)/(info.max-info.min)*100));
@@ -654,12 +908,10 @@ function renderHome(d){
   document.getElementById('xp-lv').textContent=d.level||'B1';
   setTimeout(()=>document.getElementById('xp-fill').style.width=pct+'%',300);
   document.getElementById('xp-cur').textContent=`${d.xp||0} XP`;
-  document.getElementById('xp-max').textContent=info.max<9999?`${d.xp||0} / ${info.max}`:'🏆 Max!';
+  document.getElementById('xp-max').textContent=info.max<9999?`${d.xp||0} / ${info.max} XP`:'🏆 Max!';
 
-  const s=d.streak||0;
-  document.getElementById('h-stk').textContent=s;
-  document.getElementById('hs-stk').textContent=s;
-  document.getElementById('stk-sub').textContent=s>1?`${s} days in a row! 🔥`:'Start your streak today!';
+  document.getElementById('h-stk').textContent=d.streak||0;
+  document.getElementById('hs-stk').textContent=d.streak||0;
   document.getElementById('hs-words').textContent=d.words||0;
   document.getElementById('hs-tests').textContent=d.tests||0;
 }
@@ -667,14 +919,33 @@ function renderHome(d){
 /* ══ RENDER PROGRESS ══ */
 function renderProgress(d){
   const info=rankOf(d.xp||0);
+  const pct=Math.max(0,Math.round((d.xp-info.min)/(info.max-info.min)*100));
   document.getElementById('p-lv').textContent=d.level||'B1';
   document.getElementById('p-rk').textContent=info.r;
-  document.getElementById('p-xp').textContent=`${d.xp||0} XP total`;
+  document.getElementById('p-xp').textContent=`${d.xp||0} XP`;
   document.getElementById('ring-lv').textContent=d.level||'B1';
   document.getElementById('p-sess').textContent=d.sessions||0;
   document.getElementById('p-words').textContent=d.words||0;
   document.getElementById('p-tests').textContent=d.tests||0;
   document.getElementById('p-errors').textContent=d.errors||0;
+  document.getElementById('si-lv').textContent=d.level||'—';
+  document.getElementById('si-prof').textContent=d.profession||(lang==='ru'?'Не задана':'Not set');
+  document.getElementById('si-rem').textContent=d.remind_time||(lang==='ru'?'Не задано':'Not set');
+
+  // XP bar in progress card
+  document.getElementById('pb-cur').textContent=`${d.xp||0} XP`;
+  document.getElementById('pb-max').textContent=info.max<9999?`/ ${info.max} XP`:'Max!';
+  setTimeout(()=>document.getElementById('pb-fill').style.width=pct+'%',400);
+
+  // Interests
+  const itags=document.getElementById('itags');
+  const ints=d.interests||[];
+  itags.innerHTML=ints.length
+    ? ints.map(x=>`<div class="itag">${x}</div>`).join('')
+    : `<span style="color:var(--t3);font-size:13px">${T.no_interests}</span>`;
+
+  // No TOEFL placeholder
+  document.getElementById('toefl-list').textContent = T.no_toefl;
 }
 
 function drawProgress(){
@@ -683,7 +954,9 @@ function drawProgress(){
   const pct=(d.xp-info.min)/(info.max-info.min);
   setTimeout(()=>document.getElementById('ring-fill').style.strokeDashoffset=220-pct*220,100);
 
-  const days=['Mo','Tu','We','Th','Fr','Sa','Su'];
+  const days=lang==='ru'
+    ?['Пн','Вт','Ср','Чт','Пт','Сб','Вс']
+    :['Mo','Tu','We','Th','Fr','Sa','Su'];
   const today=((new Date().getDay()||7)-1);
   const w=d.weekly||Array(7).fill(0);
   const mx=Math.max(...w,1);
@@ -695,7 +968,7 @@ function drawProgress(){
     bar.className='bar-body'+(i===today?' today-b':'');
     bar.style.height='0';
     bc.appendChild(bar); bR.appendChild(bc);
-    setTimeout(()=>bar.style.height=(v/mx*64)+'px', 80+i*55);
+    setTimeout(()=>bar.style.height=(v/mx*68)+'px',80+i*55);
     const dl=document.createElement('div');
     dl.style.cssText='flex:1;text-align:center';
     dl.className='bar-lbl'+(i===today?' today-l':'');
@@ -733,7 +1006,7 @@ function initLearn(){
   }
 }
 function showCard(i){
-  if(i>=cards.length){ toast('🎉 All reviewed!','✅'); initLearn(); return; }
+  if(i>=cards.length){ toast(T.all_reviewed,'🎉'); initLearn(); return; }
   const c=cards[i]; flipped=false;
   const inn=document.getElementById('fc-inner');
   inn.style.transition='none'; inn.classList.remove('flipped'); inn.offsetHeight; inn.style.transition='';
@@ -752,7 +1025,8 @@ function flipCard(){
 }
 async function rate(q){
   const c=cards[cIdx];
-  toast(['Again 😕','Hard 🤔','Good 😊','Easy ✅'][q-1],'🃏');
+  const labels={1:T.again+' 😕',2:T.hard+' 🤔',3:T.good+' 😊',4:T.easy+' ✅'};
+  toast(labels[q],'🃏');
   if(API&&window._uid){
     try{ await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})}); }catch(e){}
   }
@@ -793,21 +1067,30 @@ async function sendChip(text){ if(busy)return; addMsg('user',text); goTab('chat'
 async function doChat(text){
   busy=true; document.getElementById('send-btn').disabled=true; addTyping();
   try{
-    const r=await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid||0,message:text}),signal:AbortSignal.timeout(45000)});
+    const r=await fetch(`${API}/api/chat`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:window._uid||0,message:text}),
+      signal:AbortSignal.timeout(45000)
+    });
     rmTyping();
     if(!r.ok){ const e=await r.json(); addMsg('bot','⚠️ Error: '+(e.error||r.status)); return; }
     addMsg('bot',(await r.json()).reply||'...');
-  }catch(e){ rmTyping(); addMsg('bot','⚠️ Connection error. Please try again.'); }
+  }catch(e){ rmTyping(); addMsg('bot',T.error_conn); }
   finally{ busy=false; document.getElementById('send-btn').disabled=false; }
 }
 function clearChat(){
   document.getElementById('chat-msgs').innerHTML='';
   if(API&&window._uid) fetch(`${API}/api/chat/${window._uid}`,{method:'DELETE'}).catch(()=>{});
-  toast('Chat cleared','🔄');
-  setTimeout(()=>addMsg('bot',"Hi again! I'm ALEX 👋\n\nWrite in English and I'll help you improve."),80);
+  toast(T.chat_cleared,'🔄');
+  setTimeout(()=>addMsg('bot',T.welcome_msg),80);
 }
 function openChat(topic){
-  const P={lesson:'Teach me a grammar lesson.',toefl:'Give me a TOEFL exercise.',speaking:"Let's practice speaking English.",words:'Help me add new vocabulary words.',mistakes:'Show me my recent mistakes.',stats:'Give me a summary of my progress.',tests:'Give me a grammar test.'};
+  const P={
+    lesson:  lang==='ru'?'Дай мне урок грамматики.':'Teach me a grammar lesson.',
+    toefl:   lang==='ru'?'Дай упражнение TOEFL.':'Give me a TOEFL exercise.',
+    speaking:lang==='ru'?"Давай практиковать разговорный английский.":"Let's practice speaking English.",
+    words:   lang==='ru'?'Помоги добавить новые слова.':'Help me add new vocabulary words.',
+  };
   goTab('chat'); if(P[topic]&&!busy) setTimeout(()=>sendChip(P[topic]),150);
 }
 function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } }
@@ -815,7 +1098,7 @@ function grow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHei
 
 /* ══ NOTIFICATION ══ */
 let notifShown=false;
-function showNotif(){ if(notifShown)return; notifShown=true; const el=document.getElementById('alex-notif'); el.style.display='flex'; }
+function showNotif(){ if(notifShown)return; notifShown=true; document.getElementById('alex-notif').style.display='flex'; }
 function dismissNotif(e){ if(e)e.stopPropagation(); const el=document.getElementById('alex-notif'); el.classList.add('dismiss'); setTimeout(()=>{el.style.display='none';el.classList.remove('dismiss');},320); }
 function notifTap(){ dismissNotif(); goTab('chat'); }
 function notifAvTap(e){ e.stopPropagation(); const av=document.getElementById('an-av'); av.classList.remove('pop'); av.offsetHeight; av.classList.add('pop'); setTimeout(()=>{dismissNotif();goTab('chat');},320); }
@@ -826,23 +1109,49 @@ function toast(msg,icon='✅'){ const el=document.getElementById('toast'); docum
 
 /* ══ FETCH ══ */
 async function fetchData(uid){
-  if(!uid||!API)return null;
-  try{ const r=await fetch(`${API}/api/user/${uid}`,{headers:{'X-Telegram-Init-Data':tg?.initData||''},signal:AbortSignal.timeout(8000)}); return r.ok?r.json():null; }catch{return null;}
+  if(!uid&&!API) return null;
+  try{
+    const url = uid ? `${API}/api/user/${uid}` : `${API}/api/user/0`;
+    const r=await fetch(url,{headers:{'X-Telegram-Init-Data':tg?.initData||''},signal:AbortSignal.timeout(8000)});
+    return r.ok?r.json():null;
+  }catch{ return null; }
 }
 
 /* ══ MAIN ══ */
-async function main(){
-  const user=tg?.initDataUnsafe?.user; const uid=user?.id; window._uid=uid;
+async function init(){
+  // Restore theme & lang
+  const savedTheme = localStorage.getItem('app_theme')||'';
+  const savedLang  = localStorage.getItem('app_lang')||'ru';
+  lang = savedLang; T = TRANSLATIONS[lang];
+  setTheme(savedTheme);
+
+  const user=tg?.initDataUnsafe?.user;
+  const uid=user?.id; window._uid=uid;
   const fallback=user?.username?('@'+user.username):(user?.first_name||'Student');
+
   const srv=await fetchData(uid);
-  const d=srv?{...srv,name:srv.name||fallback}:{name:fallback,level:'B1',xp:0,streak:0,sessions:0,words:0,tests:0,errors:0,lang:'ru',profession:'',remind_time:'',interests:[],weekly:Array(7).fill(0),toefl_scores:[],due_words:[]};
+  const d=srv?{...srv,name:srv.name||fallback}:{
+    name:fallback,level:'B1',xp:0,streak:0,sessions:0,words:0,tests:0,errors:0,
+    lang:savedLang,profession:'',remind_time:'',interests:[],
+    weekly:Array(7).fill(0),toefl_scores:[],due_words:[],
+  };
   window._d=d;
-  renderHome(d); renderProgress(d);
-  addMsg('bot',"Hi! I'm ALEX, your personal English tutor. 👋\n\nWrite anything in English — I'll correct it, or ask me anything about grammar, vocabulary, or TOEFL.");
+
+  // Apply lang (after data loaded)
+  applyLang();
+  renderHome(d);
+  renderProgress(d);
+
+  // Welcome message
+  addMsg('bot', T.welcome_msg);
+
+  // Show notif after delay
   setTimeout(showNotif,1400);
+
   setTimeout(()=>document.getElementById('loader').classList.add('gone'),600);
 }
-main();
+
+init();
 </script>
 </body>
 </html>
