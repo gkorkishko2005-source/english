@@ -195,10 +195,74 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 .typing-wrap span { width: 6px; height: 6px; border-radius: 50%; background: var(--t2); animation: bounce .9s ease-in-out infinite; }
 .typing-wrap span:nth-child(2){animation-delay:.18s}.typing-wrap span:nth-child(3){animation-delay:.36s}
 
-.chips-row { display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px 6px; flex-shrink: 0; }
+.chips-row {
+  display: flex; gap: 8px; overflow-x: auto; padding: 10px 18px 6px;
+  flex-shrink: 0; scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; cursor: grab;
+}
+.chips-row:active { cursor: grabbing; }
 .chips-row::-webkit-scrollbar { display: none; }
 .chip { flex-shrink: 0; padding: 8px 14px; border-radius: 100px; border: 1px solid var(--b2); background: var(--e2); font-size: 13px; font-weight: 500; color: var(--t2); cursor: pointer; transition: .15s; white-space: nowrap; }
 .chip:active { border-color: var(--accent); color: var(--accent); transform: scale(.96); }
+
+/* ══ MODAL ══ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 300; display: flex; align-items: flex-end; justify-content: center; animation: mfade-in .2s ease; }
+.modal-overlay.closing { animation: mfade-out .25s ease forwards; }
+@keyframes mfade-in  { from{opacity:0} to{opacity:1} }
+@keyframes mfade-out { from{opacity:1} to{opacity:0} }
+.modal-sheet { background: var(--e1); border-radius: 22px 22px 0 0; width: 100%; max-width: 420px; padding: 0 0 calc(24px + var(--safe)); animation: msheet-up .3s cubic-bezier(.34,1.2,.64,1); max-height: 78vh; overflow-y: auto; }
+.modal-sheet.closing { animation: msheet-dn .25s ease forwards; }
+@keyframes msheet-up { from{transform:translateY(100%)} to{transform:translateY(0)} }
+@keyframes msheet-dn { from{transform:translateY(0)}   to{transform:translateY(100%)} }
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--e3); margin: 14px auto 6px; }
+.modal-title  { font-size: 17px; font-weight: 700; padding: 10px 20px 16px; border-bottom: 1px solid var(--b1); }
+.modal-body   { padding: 18px 20px; }
+.modal-save { margin-top: 14px; padding: 14px; background: var(--accent); border: none; border-radius: var(--r2); width: 100%; font-family: var(--font); font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; transition: .18s; }
+.modal-save:active { transform: scale(.97); }
+.modal-off  { margin-top: 8px; padding: 12px; background: transparent; border: 1px solid var(--b2); border-radius: var(--r2); width: 100%; font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--t2); cursor: pointer; }
+
+/* Profession grid */
+.prof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.prof-btn  { padding: 14px 10px; border-radius: var(--r2); border: 1px solid var(--b1); background: var(--e2); cursor: pointer; text-align: center; transition: .2s; font-size: 13px; font-weight: 500; color: var(--t1); }
+.prof-btn:active { transform: scale(.94); }
+.prof-btn.sel { border-color: var(--accent); background: rgba(var(--accent-rgb),.1); color: var(--accent); }
+.pf-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+.modal-input { width: 100%; background: var(--e2); border: 1px solid var(--b1); border-radius: var(--r2); padding: 12px 14px; color: var(--t1); font-family: var(--font); font-size: 14px; outline: none; margin-top: 10px; transition: border-color .2s; }
+.modal-input:focus { border-color: rgba(var(--accent-rgb),.4); }
+.modal-input::placeholder { color: var(--t3); }
+
+/* Time picker */
+.time-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.time-btn  { padding: 14px 8px; border-radius: var(--r2); border: 1px solid var(--b1); background: var(--e2); cursor: pointer; text-align: center; transition: .2s; font-size: 14px; font-weight: 600; color: var(--t1); }
+.time-btn:active { transform: scale(.94); }
+.time-btn.sel { border-color: var(--accent); background: rgba(var(--accent-rgb),.1); color: var(--accent); }
+.tm-icon { font-size: 16px; display: block; margin-bottom: 4px; }
+
+/* ══ AUDIO PLAYER ══ */
+.audio-card { background: var(--e2); border: 1px solid var(--b2); border-radius: 14px; padding: 14px; margin-top: 2px; max-width: 90%; }
+.audio-label { font-size: 10px; font-weight: 700; color: var(--t3); letter-spacing: .9px; text-transform: uppercase; margin-bottom: 10px; }
+.audio-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.audio-play { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 17px; color: #fff; transition: .18s; flex-shrink: 0; }
+.audio-play:active { transform: scale(.88); }
+.audio-progress { flex: 1; }
+.audio-bar { background: var(--e3); border-radius: 100px; height: 4px; overflow: hidden; margin-bottom: 5px; cursor: pointer; }
+.audio-fill { height: 100%; background: var(--accent); border-radius: 100px; transition: width .15s linear; width: 0; }
+.audio-time { font-size: 11px; color: var(--t3); }
+.audio-topic { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 8px; }
+.show-script-btn { width: 100%; padding: 9px; border-radius: var(--r3); border: 1px solid var(--b1); background: transparent; font-family: var(--font); font-size: 13px; color: var(--t2); cursor: pointer; transition: .15s; margin-bottom: 8px; }
+.show-script-btn:active { background: var(--e3); }
+.transcript-box { font-size: 13px; color: var(--t2); line-height: 1.6; padding: 10px 12px; background: var(--e1); border-radius: var(--r3); border: 1px solid var(--b1); display: none; margin-bottom: 8px; }
+.transcript-box.open { display: block; }
+.audio-sep { font-size: 11px; font-weight: 700; color: var(--t3); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 8px; }
+.aq-list { display: flex; flex-direction: column; gap: 6px; }
+.aq-btn { padding: 10px 12px; border-radius: var(--r2); border: 1px solid var(--b1); background: var(--e1); font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--t1); cursor: pointer; text-align: left; transition: .15s; display: flex; align-items: center; gap: 9px; }
+.aq-btn:active { background: var(--e2); }
+.aq-btn.correct { border-color: rgba(0,212,170,.4); background: rgba(0,212,170,.08); color: var(--accent2); }
+.aq-btn.wrong   { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.08); color: var(--red); }
+.aq-letter { width: 22px; height: 22px; border-radius: 6px; background: var(--e3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.audio-gen { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--e1); border: 1px solid var(--b1); border-radius: 14px 14px 14px 4px; }
+.audio-gen-spin { width: 20px; height: 20px; border: 2px solid var(--b2); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
 .input-area { padding: 10px 14px; padding-bottom: calc(10px + var(--safe)); background: var(--e1); border-top: 1px solid var(--b1); display: flex; align-items: flex-end; gap: 10px; flex-shrink: 0; transition: background .3s; }
 .chat-input { flex: 1; background: var(--e2); border: 1px solid var(--b1); border-radius: 18px; padding: 11px 15px; color: var(--t1); font-family: var(--font); font-size: 14px; outline: none; resize: none; max-height: 96px; line-height: 1.4; transition: border-color .2s; }
@@ -459,6 +523,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
     <div class="chip" onclick="sendChip(T.chip_speaking)">💬 <span data-i18n="chip_speaking">Speaking</span></div>
     <div class="chip" onclick="sendChip(T.chip_vocab)">📝 <span data-i18n="chip_vocab">Vocab test</span></div>
     <div class="chip" onclick="sendChip(T.chip_toefl)">🎓 TOEFL</div>
+    <div class="chip audio-chip" onclick="startAudioTask()">🎧 <span data-i18n="chip_audio">Listening</span></div>
     <div class="chip" onclick="sendChip(T.chip_idioms)">🗣 <span data-i18n="chip_idioms">Idioms</span></div>
   </div>
   <div class="input-area">
@@ -636,7 +701,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
       </div>
       <div class="sr-val" id="si-lv">—</div>
     </div>
-    <div class="srow">
+    <div class="srow" onclick="openProfModal()">
       <div class="sr-ico">💼</div>
       <div class="sr-body">
         <div class="sr-t" data-i18n="profession">Profession</div>
@@ -644,7 +709,7 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
       </div>
       <div class="sr-arr">›</div>
     </div>
-    <div class="srow">
+    <div class="srow" onclick="openRemindModal()">
       <div class="sr-ico">⏰</div>
       <div class="sr-body">
         <div class="sr-t" data-i18n="reminder">Reminder</div>
@@ -735,6 +800,53 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 
 <div class="toast" id="toast"><span id="t-ico">✅</span><span id="t-msg">—</span></div>
 
+<!-- PROFESSION MODAL -->
+<div class="modal-overlay" id="prof-modal" style="display:none" onclick="closeProfModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" data-i18n="profession">Profession</div>
+    <div class="modal-body">
+      <div class="prof-grid" id="prof-grid">
+        <div class="prof-btn" data-val="Developer" onclick="selectProf(this)"><span class="pf-icon">💻</span>Developer</div>
+        <div class="prof-btn" data-val="Designer"  onclick="selectProf(this)"><span class="pf-icon">🎨</span>Designer</div>
+        <div class="prof-btn" data-val="Marketing" onclick="selectProf(this)"><span class="pf-icon">📈</span>Marketing</div>
+        <div class="prof-btn" data-val="Finance"   onclick="selectProf(this)"><span class="pf-icon">💼</span>Finance</div>
+        <div class="prof-btn" data-val="Medicine"  onclick="selectProf(this)"><span class="pf-icon">🏥</span>Medicine</div>
+        <div class="prof-btn" data-val="Education" onclick="selectProf(this)"><span class="pf-icon">📚</span>Education</div>
+        <div class="prof-btn" data-val="Engineering" onclick="selectProf(this)"><span class="pf-icon">⚙️</span>Engineering</div>
+        <div class="prof-btn" data-val="Student"   onclick="selectProf(this)"><span class="pf-icon">🎓</span>Student</div>
+      </div>
+      <input class="modal-input" id="prof-custom" placeholder="Or type your own..." oninput="deselectProfBtns()">
+      <button class="modal-save" onclick="saveProfession()">Save</button>
+      <button class="modal-off" onclick="closeProfModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- REMINDER MODAL -->
+<div class="modal-overlay" id="remind-modal" style="display:none" onclick="closeRemindModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" data-i18n="reminder">Daily Reminder</div>
+    <div class="modal-body">
+      <div class="time-grid" id="time-grid">
+        <div class="time-btn" data-val="08:00" onclick="selectTime(this)"><span class="tm-icon">🌅</span>08:00</div>
+        <div class="time-btn" data-val="09:00" onclick="selectTime(this)"><span class="tm-icon">☀️</span>09:00</div>
+        <div class="time-btn" data-val="10:00" onclick="selectTime(this)"><span class="tm-icon">🌤</span>10:00</div>
+        <div class="time-btn" data-val="12:00" onclick="selectTime(this)"><span class="tm-icon">🌞</span>12:00</div>
+        <div class="time-btn" data-val="18:00" onclick="selectTime(this)"><span class="tm-icon">🌇</span>18:00</div>
+        <div class="time-btn" data-val="19:00" onclick="selectTime(this)"><span class="tm-icon">🌆</span>19:00</div>
+        <div class="time-btn" data-val="20:00" onclick="selectTime(this)"><span class="tm-icon">🌃</span>20:00</div>
+        <div class="time-btn" data-val="21:00" onclick="selectTime(this)"><span class="tm-icon">🌙</span>21:00</div>
+        <div class="time-btn" data-val="22:00" onclick="selectTime(this)"><span class="tm-icon">✨</span>22:00</div>
+      </div>
+      <button class="modal-save" onclick="saveReminder()" style="margin-top:16px">Save</button>
+      <button class="modal-off" onclick="disableReminder()">🔕 Disable reminders</button>
+      <button class="modal-off" onclick="closeRemindModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <script>
@@ -742,6 +854,275 @@ nav { flex-shrink: 0; height: calc(var(--nav) + var(--safe)); padding-bottom: va
 const tg  = window.Telegram?.WebApp;
 const API = 'https://english-production-f7af.up.railway.app';
 if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
+
+/* ══ MOUSE WHEEL → HORIZONTAL SCROLL for chips ══ */
+document.addEventListener('DOMContentLoaded', () => {
+  const chips = document.querySelector('.chips-row');
+  if(chips){
+    chips.addEventListener('wheel', e => {
+      e.preventDefault();
+      chips.scrollLeft += e.deltaY;
+    }, {passive: false});
+  }
+});
+
+/* ══ PROFESSION MODAL ══ */
+let selectedProf = '';
+function openProfModal(){
+  const m = document.getElementById('prof-modal');
+  m.style.display = 'flex';
+  m.classList.remove('closing');
+  // Pre-select current
+  const cur = window._d?.profession || '';
+  document.getElementById('prof-custom').value = '';
+  document.querySelectorAll('.prof-btn').forEach(b => {
+    b.classList.toggle('sel', b.dataset.val === cur);
+  });
+  selectedProf = cur;
+}
+function closeProfModal(){
+  const m = document.getElementById('prof-modal');
+  m.classList.add('closing');
+  setTimeout(() => m.style.display='none', 240);
+}
+function selectProf(el){
+  document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedProf = el.dataset.val;
+  document.getElementById('prof-custom').value = '';
+}
+function deselectProfBtns(){
+  document.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('sel'));
+  selectedProf = '';
+}
+async function saveProfession(){
+  const custom = document.getElementById('prof-custom').value.trim();
+  const val = custom || selectedProf;
+  if(!val){ toast(lang==='ru'?'Выбери профессию':'Choose a profession','⚠️'); return; }
+  // Save via bot API call
+  if(API && window._uid){
+    try{
+      await fetch(`${API}/api/set_profession`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({uid: window._uid, profession: val})
+      });
+    }catch(e){}
+  }
+  // Update UI
+  if(window._d) window._d.profession = val;
+  document.getElementById('si-prof').textContent = val;
+  closeProfModal();
+  toast((lang==='ru'?'Профессия сохранена: ':'Profession saved: ') + val, '✅');
+  // Tell ALEX
+  setTimeout(()=>sendChip(lang==='ru'?`Моя профессия: ${val}. Запомни это и используй в примерах.`:`My profession is ${val}. Remember this and use it in examples.`), 300);
+}
+
+/* ══ REMINDER MODAL ══ */
+let selectedTime = '';
+function openRemindModal(){
+  const m = document.getElementById('remind-modal');
+  m.style.display = 'flex'; m.classList.remove('closing');
+  const cur = window._d?.remind_time || '';
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.toggle('sel', b.dataset.val === cur));
+  selectedTime = cur;
+}
+function closeRemindModal(){
+  const m = document.getElementById('remind-modal');
+  m.classList.add('closing');
+  setTimeout(() => m.style.display='none', 240);
+}
+function selectTime(el){
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel'); selectedTime = el.dataset.val;
+}
+async function saveReminder(){
+  if(!selectedTime){ toast(lang==='ru'?'Выбери время':'Choose a time','⚠️'); return; }
+  if(API && window._uid){
+    try{
+      await fetch(`${API}/api/set_reminder`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({uid: window._uid, remind_time: selectedTime})
+      });
+    }catch(e){}
+  }
+  if(window._d) window._d.remind_time = selectedTime;
+  document.getElementById('si-rem').textContent = selectedTime;
+  closeRemindModal();
+  toast((lang==='ru'?'Напоминание: ':'Reminder: ') + selectedTime, '⏰');
+}
+async function disableReminder(){
+  if(API && window._uid){
+    try{
+      await fetch(`${API}/api/set_reminder`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({uid: window._uid, remind_time: 'off'})
+      });
+    }catch(e){}
+  }
+  if(window._d) window._d.remind_time = '';
+  document.getElementById('si-rem').textContent = lang==='ru'?'Не задано':'Not set';
+  document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));
+  closeRemindModal();
+  toast(lang==='ru'?'Напоминания отключены':'Reminders disabled','🔕');
+}
+
+/* ══ AUDIO LISTENING TASK ══ */
+let currentAudio = null;
+
+async function startAudioTask(){
+  if(busy) return;
+  goTab('chat');
+  // Show generating indicator
+  const genDiv = document.createElement('div');
+  genDiv.className = 'msg bot'; genDiv.id = 'audio-gen-msg';
+  const av = document.createElement('div'); av.className='msg-av'; av.textContent='🤖';
+  const bub = document.createElement('div');
+  bub.className='audio-gen';
+  bub.innerHTML=`<div class="audio-gen-spin"></div><span style="font-size:14px;color:var(--t2)">${lang==='ru'?'Генерирую аудио-задание...':'Generating audio task...'}</span>`;
+  genDiv.appendChild(av); genDiv.appendChild(bub);
+  document.getElementById('chat-msgs').appendChild(genDiv);
+  scrollMsgs();
+
+  try{
+    const r = await fetch(`${API}/api/audio_task`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({uid: window._uid||0, lang}),
+      signal: AbortSignal.timeout(45000)
+    });
+    document.getElementById('audio-gen-msg')?.remove();
+    if(!r.ok){ addMsg('bot', lang==='ru'?'Ошибка генерации задания.':'Failed to generate task.'); return; }
+    const data = await r.json();
+    renderAudioTask(data);
+  }catch(e){
+    document.getElementById('audio-gen-msg')?.remove();
+    addMsg('bot', T.error_conn);
+  }
+}
+
+function renderAudioTask(data){
+  // data: { topic, transcript, audio_url?, questions:[{q, options:[A,B,C,D], correct}] }
+  const wrap = document.getElementById('chat-msgs');
+  const msgDiv = document.createElement('div'); msgDiv.className='msg bot';
+  const av = document.createElement('div'); av.className='msg-av'; av.textContent='🤖';
+
+  const card = document.createElement('div'); card.className='audio-card';
+
+  // Label
+  const lbl = document.createElement('div'); lbl.className='audio-label';
+  lbl.textContent = lang==='ru'?'🎧 АУДИРОВАНИЕ':'🎧 LISTENING TASK';
+  card.appendChild(lbl);
+
+  // Topic
+  const topic = document.createElement('div'); topic.className='audio-topic';
+  topic.textContent = data.topic || 'Academic Lecture';
+  card.appendChild(topic);
+
+  // Player controls
+  const controls = document.createElement('div'); controls.className='audio-controls';
+  const playBtn = document.createElement('button'); playBtn.className='audio-play'; playBtn.textContent='▶';
+
+  const progWrap = document.createElement('div'); progWrap.className='audio-progress';
+  const bar = document.createElement('div'); bar.className='audio-bar';
+  const fill = document.createElement('div'); fill.className='audio-fill';
+  bar.appendChild(fill); progWrap.appendChild(bar);
+  const timeEl = document.createElement('div'); timeEl.className='audio-time'; timeEl.textContent='0:00';
+  progWrap.appendChild(timeEl);
+
+  controls.appendChild(playBtn); controls.appendChild(progWrap);
+  card.appendChild(controls);
+
+  // Audio element (if URL provided)
+  let audio = null;
+  if(data.audio_url){
+    audio = new Audio(data.audio_url);
+    audio.addEventListener('timeupdate', ()=>{
+      const pct = audio.currentTime / audio.duration * 100;
+      fill.style.width = pct + '%';
+      const m = Math.floor(audio.currentTime/60);
+      const s = Math.floor(audio.currentTime%60).toString().padStart(2,'0');
+      timeEl.textContent = `${m}:${s}`;
+    });
+    audio.addEventListener('ended', ()=>{ playBtn.textContent='▶'; fill.style.width='100%'; });
+    playBtn.onclick = () => {
+      if(audio.paused){ audio.play(); playBtn.textContent='⏸'; }
+      else { audio.pause(); playBtn.textContent='▶'; }
+    };
+  } else {
+    // No audio — TTS fallback via browser
+    playBtn.onclick = () => {
+      if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(data.transcript);
+        utt.lang = 'en-US'; utt.rate = 0.88;
+        playBtn.textContent='⏸';
+        utt.onend = ()=>{ playBtn.textContent='▶'; };
+        window.speechSynthesis.speak(utt);
+      }
+    };
+    // Show "using browser TTS" note
+    const note = document.createElement('div');
+    note.style.cssText='font-size:11px;color:var(--t3);margin-bottom:6px';
+    note.textContent = lang==='ru'?'🔊 Встроенный голос браузера':'🔊 Browser speech synthesis';
+    card.appendChild(note);
+  }
+
+  // Show transcript button
+  const scrBtn = document.createElement('button'); scrBtn.className='show-script-btn';
+  scrBtn.textContent = lang==='ru'?'📄 Показать транскрипт':'📄 Show transcript';
+  const scrBox = document.createElement('div'); scrBox.className='transcript-box';
+  scrBox.textContent = data.transcript;
+  scrBtn.onclick = () => {
+    scrBox.classList.toggle('open');
+    scrBtn.textContent = scrBox.classList.contains('open')
+      ? (lang==='ru'?'📄 Скрыть транскрипт':'📄 Hide transcript')
+      : (lang==='ru'?'📄 Показать транскрипт':'📄 Show transcript');
+  };
+  card.appendChild(scrBtn); card.appendChild(scrBox);
+
+  // Questions
+  if(data.questions?.length){
+    const sep = document.createElement('div'); sep.className='audio-sep';
+    sep.textContent = lang==='ru'?'Вопросы:':'Questions:';
+    card.appendChild(sep);
+
+    data.questions.forEach((q, qi) => {
+      const qLabel = document.createElement('div');
+      qLabel.style.cssText = 'font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px';
+      qLabel.textContent = `${qi+1}. ${q.q}`;
+      card.appendChild(qLabel);
+
+      const aqList = document.createElement('div'); aqList.className='aq-list';
+      q.options.forEach((opt, oi) => {
+        const letters = ['A','B','C','D'];
+        const btn = document.createElement('button'); btn.className='aq-btn';
+        btn.innerHTML = `<span class="aq-letter">${letters[oi]}</span>${opt}`;
+        btn.onclick = () => {
+          // Disable all buttons in this question
+          aqList.querySelectorAll('.aq-btn').forEach(b=>b.style.pointerEvents='none');
+          if(oi === q.correct){
+            btn.classList.add('correct');
+            toast(lang==='ru'?'Правильно! ✅':'Correct! ✅','✅');
+          } else {
+            btn.classList.add('wrong');
+            // Show correct
+            aqList.querySelectorAll('.aq-btn')[q.correct]?.classList.add('correct');
+            toast(lang==='ru'?'Неверно 😕':'Wrong 😕','❌');
+          }
+        };
+        aqList.appendChild(btn);
+      });
+      card.appendChild(aqList);
+      if(qi < data.questions.length-1){
+        const div = document.createElement('div'); div.style.height='12px';
+        card.appendChild(div);
+      }
+    });
+  }
+
+  msgDiv.appendChild(av); msgDiv.appendChild(card);
+  wrap.appendChild(msgDiv);
+  scrollMsgs();
+}
 
 /* ══ I18N ══ */
 const TRANSLATIONS = {
