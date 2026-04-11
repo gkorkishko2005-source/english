@@ -55,7 +55,7 @@
 }
 
 /* ══ BASE ══ */
-:root{--r:18px;--r2:14px;--r3:9px;--nav:68px;--safe:env(safe-area-inset-bottom,0px);--font:'Inter',-apple-system,sans-serif}
+:root{--r:16px;--r2:12px;--r3:8px;--nav:60px;--safe:env(safe-area-inset-bottom,0px);--font:'Inter',-apple-system,sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--e0);color:var(--t1);font-family:var(--font);font-size:15px;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;min-height:100vh;transition:background .3s,color .3s}
@@ -63,7 +63,7 @@ body{background:var(--e0);color:var(--t1);font-family:var(--font);font-size:15px
 /* ══ APP SHELL ══ */
 #app{width:100%;max-width:420px;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--e0);transition:background .3s}
 .screens{flex:1;overflow:hidden;position:relative}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:24px 18px calc(var(--nav)+var(--safe)+24px);display:none}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:20px 16px calc(var(--nav)+var(--safe)+20px);display:none}
 .screen.active{display:block;animation:pg .28s ease}
 .screen::-webkit-scrollbar{width:3px}
 .screen::-webkit-scrollbar-thumb{background:var(--e3);border-radius:3px}
@@ -72,19 +72,19 @@ body{background:var(--e0);color:var(--t1);font-family:var(--font);font-size:15px
 @keyframes pg{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
 /* ══ NAV ══ */
-nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--safe) + 4px);background:var(--e1);border-top:1px solid var(--b1);display:grid;grid-template-columns:repeat(5,1fr);z-index:100;transition:background .3s}
-.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:10px 0;position:relative}
-.ni-wrap{width:38px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:all .22s cubic-bezier(.34,1.56,.64,1)}
-.ni svg{width:21px;height:21px;transition:all .22s cubic-bezier(.34,1.56,.64,1);stroke:var(--t3)}
+nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:var(--safe);background:var(--e1);border-top:1px solid var(--b1);display:grid;grid-template-columns:repeat(5,1fr);z-index:100;transition:background .3s}
+.ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:8px 0;position:relative}
+.ni-wrap{width:36px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .22s cubic-bezier(.34,1.56,.64,1)}
+.ni svg{width:20px;height:20px;transition:all .22s cubic-bezier(.34,1.56,.64,1);stroke:var(--t3)}
 .ni-label{font-size:10px;font-weight:600;color:var(--t3);transition:color .2s;letter-spacing:.2px}
-.ni.on .ni-wrap{background:rgba(var(--accent-rgb),.18);transform:scale(1.1)}
+.ni.on .ni-wrap{background:rgba(var(--accent-rgb),.15);transform:scale(1.08)}
 .ni.on .ni-wrap svg{stroke:var(--accent)}
 .ni.on .ni-label{color:var(--accent)}
 
 /* ══ CARD / BTN ══ */
-.card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:22px;margin-bottom:16px;position:relative;overflow:hidden;transition:background .3s,border-color .3s}
-.slabel{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1.1px;text-transform:uppercase;margin:26px 0 12px}
-.btn{width:100%;padding:15px;border-radius:var(--r2);border:none;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
+.card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;transition:background .3s,border-color .3s}
+.slabel{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1.1px;text-transform:uppercase;margin:20px 0 10px}
+.btn{width:100%;padding:14px;border-radius:var(--r2);border:none;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
 .btn:active{transform:scale(.97)}
 .btn-primary{background:var(--accent);color:#fff}
 .btn-ghost{background:transparent;border:1px solid var(--b2);color:var(--t2)}
@@ -302,53 +302,27 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .theme-btn.active .theme-check{opacity:1}
 
 /* Persona grid */
-.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.persona-btn{
-  padding:16px 12px;border-radius:var(--r);
-  border:1.5px solid var(--b1);background:var(--e2);
-  cursor:pointer;text-align:center;transition:.25s;
-  position:relative;overflow:hidden;
-}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.persona-btn{padding:12px 10px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:.2s;font-size:12px;font-weight:600;color:var(--t2)}
 .persona-btn:active{transform:scale(.94)}
-.persona-btn.sel{
-  border-color:var(--accent);
-  background:linear-gradient(135deg,rgba(var(--accent-rgb),.12),var(--e2));
-  box-shadow:0 0 18px rgba(var(--accent-rgb),.25),inset 0 0 0 1px rgba(var(--accent-rgb),.1);
-}
-.persona-btn.sel::after{
-  content:'✓';position:absolute;top:8px;right:10px;
-  font-size:13px;font-weight:800;color:var(--accent);
-}
-.pa-svg{width:36px;height:36px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}
-.pa-svg svg{width:36px;height:36px}
-.pa-name{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:3px}
-.pa-sub{font-size:10px;color:var(--t3);line-height:1.3}
-.persona-btn.sel .pa-name{color:var(--accent)}
-.persona-btn.sel .pa-sub{color:rgba(var(--accent-rgb),.6)}
+.persona-btn.sel{border-color:var(--accent);background:rgba(var(--accent-rgb),.1);color:var(--accent)}
+.persona-btn .pa-icon{font-size:20px;display:block;margin-bottom:5px}
+.persona-btn .pa-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.persona-btn .pa-sub{font-size:10px;color:var(--t3)}
+.persona-btn.sel .pa-sub{color:rgba(var(--accent-rgb),0.7)}
 
 .slist{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:4px;transition:background .3s}
-.srow{display:flex;align-items:center;padding:17px 18px;gap:14px;border-bottom:1px solid var(--b1);cursor:pointer;transition:.15s;position:relative}
+.srow{display:flex;align-items:center;padding:16px 18px;gap:14px;border-bottom:1px solid var(--b1);cursor:pointer;transition:.15s}
 .srow:last-child{border-bottom:none}
 .srow:active{background:var(--e2)}
-.srow::after{content:'›';position:absolute;right:18px;font-size:18px;color:var(--t3)}
-.srow.no-arrow::after{display:none}
-.sr-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--e2)}
-.sr-body{flex:1;min-width:0;padding-right:20px}
+.sr-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--e2)}
+.sr-body{flex:1;min-width:0}
 .sr-t{font-weight:600;font-size:14px}
-.sr-s{font-size:12px;color:var(--t2);margin-top:3px;display:flex;align-items:center;gap:5px}
-.sr-val{font-size:13px;color:var(--accent);font-weight:700;flex-shrink:0;display:flex;align-items:center;gap:4px}
-.sr-edit{font-size:11px;opacity:.6}
-.itags-wrap{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0 4px}
-.itag{padding:7px 14px;background:rgba(var(--accent-rgb),.09);border:1px solid rgba(var(--accent-rgb),.18);border-radius:100px;font-size:13px;font-weight:600;color:var(--accent)}
-.interests-empty{
-  display:flex;flex-direction:column;align-items:center;padding:24px 16px;
-  background:var(--e1);border:1.5px dashed var(--b2);border-radius:var(--r);
-  cursor:pointer;transition:.2s;text-align:center;
-}
-.interests-empty:active{background:var(--e2)}
-.interests-empty-icon{font-size:32px;margin-bottom:10px}
-.interests-empty-t{font-size:14px;font-weight:600;color:var(--t2);margin-bottom:4px}
-.interests-empty-s{font-size:12px;color:var(--t3);line-height:1.4}
+.sr-s{font-size:12px;color:var(--t2);margin-top:2px}
+.sr-val{font-size:12px;color:var(--accent);font-weight:700;flex-shrink:0}
+.sr-arr{color:var(--t3);font-size:16px;flex-shrink:0}
+.itags-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;padding:2px 0}
+.itag{padding:5px 12px;background:rgba(var(--accent-rgb),.09);border:1px solid rgba(var(--accent-rgb),.18);border-radius:100px;font-size:12px;font-weight:600;color:var(--accent)}
 
 /* ══ MODALS ══ */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;display:flex;align-items:flex-end;justify-content:center;animation:mfadein .2s ease}
@@ -660,61 +634,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
   <div class="slabel" data-i18n="alex_persona">ALEX Personality</div>
   <div class="persona-grid" id="persona-grid">
-    <div class="persona-btn sel" data-persona="default" onclick="selectPersona(this)">
-      <div class="pa-svg"><svg viewBox="0 0 36 36" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><rect x="10" y="8" width="16" height="14" rx="5"/><circle cx="14" cy="13" r="1.5" fill="var(--accent)"/><circle cx="22" cy="13" r="1.5" fill="var(--accent)"/><path d="M14 18.5c1.1 1.5 6.9 1.5 8 0"/><path d="M18 22v4M14 28h8"/><path d="M6 15h4M26 15h4"/></svg></div>
-      <div class="pa-name" data-i18n="persona_default">Friendly tutor</div>
-      <div class="pa-sub" data-i18n="persona_default_sub">Warm & encouraging</div>
-    </div>
-    <div class="persona-btn" data-persona="professor" onclick="selectPersona(this)">
-      <div class="pa-svg"><svg viewBox="0 0 36 36" fill="none" stroke="var(--t2)" stroke-width="1.8" stroke-linecap="round"><path d="M8 24l10-6 10 6"/><path d="M5 20l13-8 13 8"/><rect x="16" y="24" width="4" height="6" rx="1"/><path d="M12 28h12"/><path d="M27 20v5"/><circle cx="27.5" cy="26.5" r="1.5" fill="var(--t2)"/></svg></div>
-      <div class="pa-name" data-i18n="persona_prof">Strict professor</div>
-      <div class="pa-sub" data-i18n="persona_prof_sub">Formal & precise</div>
-    </div>
-    <div class="persona-btn" data-persona="gamer" onclick="selectPersona(this)">
-      <div class="pa-svg"><svg viewBox="0 0 36 36" fill="none" stroke="var(--t2)" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="12" width="26" height="16" rx="5"/><line x1="18" y1="16" x2="18" y2="24"/><line x1="14" y1="20" x2="22" y2="20"/><circle cx="26" cy="17" r="1.5" fill="var(--t2)"/><circle cx="29" cy="20" r="1.5" fill="var(--t2)"/><path d="M5 18c-2 0-2 4 0 4M31 18c2 0 2 4 0 4"/></svg></div>
-      <div class="pa-name" data-i18n="persona_gamer">Gamer friend</div>
-      <div class="pa-sub" data-i18n="persona_gamer_sub">Chill & uses slang</div>
-    </div>
-    <div class="persona-btn" data-persona="brit" onclick="selectPersona(this)">
-      <div class="pa-svg"><svg viewBox="0 0 36 36" fill="none" stroke="var(--t2)" stroke-width="1.8" stroke-linecap="round"><ellipse cx="18" cy="22" rx="10" ry="6"/><path d="M8 22c0-3 4.5-6 10-6s10 3 10 6"/><path d="M10 18c1-5 14-5 16 0"/><rect x="6" y="15" width="24" height="3" rx="1.5"/></svg></div>
-      <div class="pa-name" data-i18n="persona_brit">Sarcastic Brit</div>
-      <div class="pa-sub" data-i18n="persona_brit_sub">Witty & British</div>
-    </div>
+    <div class="persona-btn sel" data-persona="default" onclick="selectPersona(this)"><span class="pa-icon">🤖</span><div class="pa-name" data-i18n="persona_default">Friendly tutor</div><div class="pa-sub" data-i18n="persona_default_sub">Warm & encouraging</div></div>
+    <div class="persona-btn" data-persona="professor" onclick="selectPersona(this)"><span class="pa-icon">🎓</span><div class="pa-name" data-i18n="persona_prof">Strict professor</div><div class="pa-sub" data-i18n="persona_prof_sub">Formal & precise</div></div>
+    <div class="persona-btn" data-persona="gamer" onclick="selectPersona(this)"><span class="pa-icon">🎮</span><div class="pa-name" data-i18n="persona_gamer">Gamer friend</div><div class="pa-sub" data-i18n="persona_gamer_sub">Chill & uses slang</div></div>
+    <div class="persona-btn" data-persona="brit" onclick="selectPersona(this)"><span class="pa-icon">🇬🇧</span><div class="pa-name" data-i18n="persona_brit">Sarcastic Brit</div><div class="pa-sub" data-i18n="persona_brit_sub">Witty & British</div></div>
   </div>
 
   <div class="slabel" data-i18n="my_profile">My profile</div>
   <div class="slist">
-    <div class="srow no-arrow">
-      <div class="sr-ico">🎯</div>
-      <div class="sr-body">
-        <div class="sr-t" data-i18n="level">Level</div>
-        <div class="sr-s" data-i18n="level_sub">Ask ALEX to change it</div>
-      </div>
-      <div class="sr-val" id="si-lv">—</div>
-    </div>
-    <div class="srow" onclick="openProfModal()">
-      <div class="sr-ico">💼</div>
-      <div class="sr-body">
-        <div class="sr-t" data-i18n="profession">Profession</div>
-        <div class="sr-s"><span id="si-prof">—</span></div>
-      </div>
-      <div class="sr-val"><span id="si-prof-val"></span><span class="sr-edit">✏️</span></div>
-    </div>
-    <div class="srow" onclick="openRemindModal()">
-      <div class="sr-ico">⏰</div>
-      <div class="sr-body">
-        <div class="sr-t" data-i18n="reminder">Reminder</div>
-        <div class="sr-s"><span id="si-rem">—</span></div>
-      </div>
-      <div class="sr-val"><span id="si-rem-val"></span><span class="sr-edit">✏️</span></div>
-    </div>
+    <div class="srow"><div class="sr-ico">🎯</div><div class="sr-body"><div class="sr-t" data-i18n="level">Level</div><div class="sr-s" data-i18n="level_sub">Ask ALEX to change it</div></div><div class="sr-val" id="si-lv">—</div></div>
+    <div class="srow" onclick="openProfModal()"><div class="sr-ico">💼</div><div class="sr-body"><div class="sr-t" data-i18n="profession">Profession</div><div class="sr-s" id="si-prof">—</div></div><div class="sr-arr">›</div></div>
+    <div class="srow" onclick="openRemindModal()"><div class="sr-ico">⏰</div><div class="sr-body"><div class="sr-t" data-i18n="reminder">Reminder</div><div class="sr-s" id="si-rem">—</div></div><div class="sr-arr">›</div></div>
   </div>
-
-  <div class="slabel" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-    <span data-i18n="interests">Interests</span>
-    <span style="color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:normal" onclick="openChat('interests_add')">+ <span data-i18n="add_in_chat">Add in chat</span></span>
-  </div>
-  <div id="interests-wrap"></div>
+  <div class="slabel" data-i18n="interests">Interests</div>
+  <div class="itags-wrap" id="itags"><span style="color:var(--t3);font-size:13px" data-i18n="no_interests">Chat with ALEX — he'll remember!</span></div>
+  <div style="height:8px"></div>
 </div>
 
 </div><!-- /screens -->
@@ -1031,7 +965,8 @@ function renderProgress(d){
   // Interests
   renderInterests(d.interests||[]);
   updateProfileUI(d);
-  document.getElementById('toefl-list').textContent=T.no_toefl;
+  const tl=document.getElementById('toefl-list');
+  if(tl) tl.textContent=T.no_toefl;
 }
 
 function drawProgress(){
@@ -1191,28 +1126,32 @@ async function doChat(text){
 }
 function renderInterests(ints){
   const wrap=document.getElementById('interests-wrap');
-  if(!wrap)return;
-  if(ints&&ints.length){
+  if(!wrap) return;
+  if(ints && ints.length){
     wrap.innerHTML=`<div class="itags-wrap">${ints.map(x=>`<div class="itag">${x}</div>`).join('')}</div>`;
   } else {
     wrap.innerHTML=`<div class="interests-empty" onclick="openChat('interests_add')">
       <div class="interests-empty-icon">💡</div>
-      <div class="interests-empty-t" data-i18n="add_interests">Add your interests</div>
-      <div class="interests-empty-s" data-i18n="no_interests">Chat with ALEX — he'll remember your hobbies and use them in examples</div>
+      <div class="interests-empty-t">${lang==='ru'?'Добавить интересы':'Add your interests'}</div>
+      <div class="interests-empty-s">${lang==='ru'?'Общайся с ALEX — он запомнит твои увлечения':'Chat with ALEX — he\'ll remember your hobbies'}</div>
     </div>`;
-    applyLang();
   }
 }
 
 function updateProfileUI(d){
-  const prof=d.profession||(lang==='ru'?'Не задана':'Not set');
-  const rem=d.remind_time||(lang==='ru'?'Не задано':'Not set');
-  const el=document.getElementById('si-prof'); if(el) el.textContent=prof;
-  const pv=document.getElementById('si-prof-val'); if(pv) pv.textContent=d.profession?d.profession:'';
-  const re=document.getElementById('si-rem'); if(re) re.textContent=rem;
-  const rv=document.getElementById('si-rem-val'); if(rv) rv.textContent=d.remind_time?d.remind_time:'';
-  const lv=document.getElementById('si-lv'); if(lv) lv.textContent=d.level||'—';
+  const prof = d.profession || '';
+  const rem  = d.remind_time || '';
+  const noProf = lang==='ru'?'Не задана':'Not set';
+  const noRem  = lang==='ru'?'Не задано':'Not set';
+  const el1=document.getElementById('si-prof');    if(el1) el1.textContent = prof||noProf;
+  const el2=document.getElementById('si-prof-val');if(el2) el2.textContent = prof;
+  const el3=document.getElementById('si-rem');     if(el3) el3.textContent = rem||noRem;
+  const el4=document.getElementById('si-rem-val'); if(el4) el4.textContent = rem;
+  const el5=document.getElementById('si-lv');      if(el5) el5.textContent = d.level||'—';
 }
+
+function markMission(m){
+  const today=new Date().toDateString();
   const saved=LS.getObj('missions')||{date:today,done:{}};
   if(!saved.done[m]){saved.done[m]=true;LS.setObj('missions',saved);loadMissions();}
 }
@@ -1225,7 +1164,7 @@ function openChat(topic){
     words:lang==='ru'?'Помоги добавить новые слова.':'Help me add new vocabulary words.',
     words_new:lang==='ru'?'Научи меня 5 новым словам.':'Teach me 5 new useful words.',
     fun_fact:lang==='ru'?'Расскажи интересный факт об английском языке.':'Tell me an interesting fact about the English language.',
-    interests_add:lang==='ru'?'Я хочу рассказать тебе о своих интересах и хобби.':'I want to tell you about my interests and hobbies.',
+    mistakes:lang==='ru'?'Покажи мои типичные ошибки и объясни как их исправить.':'Show me my common mistakes and explain how to fix them.',
   };
   goTab('chat');if(P[topic]&&!busy) setTimeout(()=>sendChip(P[topic]),150);
 }
@@ -1295,7 +1234,7 @@ async function saveProfession(){
   // Save to localStorage FIRST (reliable)
   LS.set('app_profession',val);
   if(window._d) window._d.profession=val;
-  updateProfileUI(window._d||{profession:val,remind_time:LS.get('app_remind')||''});
+  document.getElementById('si-prof').textContent=val;
   // Also save to API (best effort)
   if(API&&window._uid){try{await fetch(`${API}/api/set_profession`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,profession:val})});}catch{}}
   closeProfModal();
@@ -1317,15 +1256,14 @@ async function saveReminder(){
   if(!selTime){toast(lang==='ru'?'Выбери время':'Choose a time','⚠️');return;}
   LS.set('app_remind',selTime);
   if(window._d) window._d.remind_time=selTime;
-  updateProfileUI(window._d||{profession:LS.get('app_profession')||'',remind_time:selTime});
+  document.getElementById('si-rem').textContent=selTime;
   if(API&&window._uid){try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch{}}
   closeRemindModal();
   toast((lang==='ru'?'Напоминание: ':'Reminder: ')+selTime,'⏰');
 }
 async function disableReminder(){
   LS.set('app_remind','');
-  if(window._d) window._d.remind_time='';
-  updateProfileUI(window._d||{});
+  document.getElementById('si-rem').textContent=lang==='ru'?'Не задано':'Not set';
   if(API&&window._uid){try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:'off'})});}catch{}}
   document.querySelectorAll('.time-btn').forEach(b=>b.classList.remove('sel'));
   closeRemindModal();toast(lang==='ru'?'Напоминания отключены':'Reminders disabled','🔕');
@@ -1432,14 +1370,19 @@ function restoreLocalSettings(d){
   const persona=LS.get('app_persona')||'default';
   if(prof){ d.profession=prof; }
   if(rem){ d.remind_time=rem; }
-  updateProfileUI(d);
+  // Update UI
+  document.getElementById('si-prof').textContent=d.profession||(lang==='ru'?'Не задана':'Not set');
+  document.getElementById('si-rem').textContent=d.remind_time||(lang==='ru'?'Не задано':'Not set');
   // Restore persona
   currentPersona=persona;
   document.getElementById('chat-av').textContent=PERSONAS[persona].icon;
   document.querySelectorAll('.persona-btn').forEach(b=>b.classList.toggle('sel',b.dataset.persona===persona));
   const personaEl=document.querySelector(`.persona-btn[data-persona="${persona}"]`);
   const lbl=document.getElementById('chat-persona-label');
-  if(personaEl&&persona!=='default') lbl.textContent=(lang==='ru'?'Режим: ':'Mode: ')+personaEl.querySelector('.pa-name').textContent;
+  if(personaEl&&persona!=='default'){
+    const nameEl=personaEl.querySelector('.pa-name');
+    lbl.textContent=(lang==='ru'?'Режим: ':'Mode: ')+(nameEl?nameEl.textContent:persona);
+  }
   return d;
 }
 
@@ -1460,6 +1403,7 @@ async function init(){
   renderHome(d);
   renderProgress(d);
   renderInterests(d.interests||[]);
+  updateProfileUI(d);
   addMsg('bot',T.welcome_msg);
   setTimeout(showNotif,1400);
   setTimeout(()=>document.getElementById('loader').classList.add('gone'),600);
