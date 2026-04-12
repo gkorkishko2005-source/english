@@ -154,7 +154,70 @@
 .chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--t1);pointer-events:none;transform:translateX(-50%);white-space:nowrap;z-index:10;opacity:0;transition:opacity .15s}
 .chart-tooltip.show{opacity:1}
 
-/* ══ SESSIONS sections ══ */
+/* ══ iOS TIME DRUM PICKER ══ */
+.time-drum-wrap{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;padding:0 17px;margin-bottom:4px;
+  position:relative;user-select:none;
+}
+.time-drum-wrap::before,.time-drum-wrap::after{
+  content:'';position:absolute;left:17px;right:17px;height:44px;
+  pointer-events:none;z-index:2;
+}
+.time-drum-wrap::before{
+  top:0;
+  background:linear-gradient(to bottom, var(--e1) 0%, transparent 100%);
+}
+.time-drum-wrap::after{
+  bottom:0;
+  background:linear-gradient(to top, var(--e1) 0%, transparent 100%);
+}
+.time-drum-sel{
+  position:absolute;left:17px;right:17px;
+  top:50%;transform:translateY(-50%);
+  height:44px;border-radius:10px;
+  background:rgba(var(--ar),.1);
+  border:1px solid rgba(var(--ar),.2);
+  pointer-events:none;z-index:1;
+}
+.time-drum-col{
+  flex:1;height:220px;overflow:hidden;
+  position:relative;cursor:pointer;
+}
+.time-drum-inner{
+  display:flex;flex-direction:column;
+  transition:transform .1s ease;
+}
+.time-drum-item{
+  height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:600;color:var(--t2);
+  flex-shrink:0;transition:color .15s,font-size .15s,font-weight .15s;
+}
+.time-drum-item.selected{
+  color:var(--t1);font-size:22px;font-weight:700;
+}
+.time-drum-item.near{color:var(--t2);opacity:.7}
+.time-drum-item.far{color:var(--t3);opacity:.35;font-size:17px}
+.time-drum-sep{
+  font-size:26px;font-weight:800;color:var(--t1);
+  padding:0 4px;align-self:center;position:relative;z-index:3;
+  margin-bottom:2px;
+}
+.time-drum-label{
+  font-size:11px;color:var(--t3);text-align:center;
+  font-weight:600;letter-spacing:.5px;padding:0 8px;
+  flex:1;
+}
+.time-drum-labels{
+  display:flex;padding:0 17px;margin-bottom:8px;
+}
+.time-selected-display{
+  text-align:center;font-size:32px;font-weight:800;color:var(--t1);
+  padding:12px 0 6px;letter-spacing:2px;
+}
+.time-selected-sub{
+  text-align:center;font-size:12px;color:var(--t3);margin-bottom:14px;
+}
 .s-section-header{padding:10px 15px 6px;font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.8px;text-transform:uppercase}
 .s-section-empty{padding:12px 15px;font-size:13px;color:var(--t3);font-style:italic}
 .sitem.starred-item .sit::before{content:'';}
@@ -946,23 +1009,34 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- REMINDER MODAL -->
 <div class="mov" id="remm" style="display:none" onclick="closeRemModal()">
-  <div class="msh" onclick="e=>e.stopPropagation()"><div class="mhnd"></div>
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rem-mtit">Reminder</div>
-    <div class="mbdy">
-      <div class="mtg">
-        <div class="mtb" data-t="07:00" onclick="pickTime(this)"><span class="mtic">🌄</span>07:00</div>
-        <div class="mtb" data-t="08:00" onclick="pickTime(this)"><span class="mtic">🌅</span>08:00</div>
-        <div class="mtb" data-t="09:00" onclick="pickTime(this)"><span class="mtic">☀️</span>09:00</div>
-        <div class="mtb" data-t="10:00" onclick="pickTime(this)"><span class="mtic">🌤</span>10:00</div>
-        <div class="mtb" data-t="12:00" onclick="pickTime(this)"><span class="mtic">🌞</span>12:00</div>
-        <div class="mtb" data-t="15:00" onclick="pickTime(this)"><span class="mtic">🌻</span>15:00</div>
-        <div class="mtb" data-t="18:00" onclick="pickTime(this)"><span class="mtic">🌇</span>18:00</div>
-        <div class="mtb" data-t="20:00" onclick="pickTime(this)"><span class="mtic">🌃</span>20:00</div>
-        <div class="mtb" data-t="21:00" onclick="pickTime(this)"><span class="mtic">🌙</span>21:00</div>
+    <div class="mbdy" style="padding-bottom:8px">
+      <!-- Display selected time -->
+      <div class="time-selected-display" id="time-display">08:00</div>
+      <div class="time-selected-sub" id="time-sub"></div>
+      <!-- Drum labels -->
+      <div class="time-drum-labels">
+        <div class="time-drum-label" id="rem-lbl-h">Hour</div>
+        <div style="width:24px"></div>
+        <div class="time-drum-label" id="rem-lbl-m">Minute</div>
       </div>
-      <button class="msav" onclick="saveRem()" id="rem-sav" style="margin-top:14px">Save</button>
-      <button class="moff"  onclick="disableRem()" id="rem-dis">🔕 Disable</button>
-      <button class="moff"  onclick="closeRemModal()" id="rem-can">Cancel</button>
+      <!-- Drum picker -->
+      <div class="time-drum-wrap">
+        <div class="time-drum-sel"></div>
+        <!-- Hours -->
+        <div class="time-drum-col" id="drum-h">
+          <div class="time-drum-inner" id="drum-h-inner"></div>
+        </div>
+        <div class="time-drum-sep">:</div>
+        <!-- Minutes -->
+        <div class="time-drum-col" id="drum-m">
+          <div class="time-drum-inner" id="drum-m-inner"></div>
+        </div>
+      </div>
+      <button class="msav" onclick="saveRem()" id="rem-sav" style="margin-top:16px">Save</button>
+      <button class="moff" onclick="disableRem()" id="rem-dis">🔕 Disable</button>
+      <button class="moff" onclick="closeRemModal()" id="rem-can">Cancel</button>
     </div>
   </div>
 </div>
@@ -2297,32 +2371,160 @@ async function saveProf(){
 }
 
 // Reminder
-let selTime='';
+/* ══ iOS DRUM PICKER LOGIC ══ */
+let drumH=8,drumM=0,selTime='';
+
 function openRemModal(){
   openMod('remm');
-  const cur=LS.get('app_remind')||window._d?.remind_time||'';
-  document.querySelectorAll('.mtb').forEach(b=>b.classList.toggle('on',b.dataset.t===cur));
-  selTime=cur;
+  const lh=document.getElementById('rem-lbl-h');
+  const lm=document.getElementById('rem-lbl-m');
+  if(lh)lh.textContent=lang==='ru'?'Часы':'Hour';
+  if(lm)lm.textContent=lang==='ru'?'Минуты':'Minute';
+  // Parse saved time
+  const cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
+  const p=cur.split(':');
+  drumH=Math.max(0,Math.min(23,parseInt(p[0]||'8',10)));
+  const mRaw=parseInt(p[1]||'0',10);
+  drumM=Math.round(mRaw/5)%12; // index into 5-min steps
+  setTimeout(()=>{buildDrumH();buildDrumM();updateTimeDisplay();},60);
 }
 function closeRemModal(){closeMod('remm');}
-function pickTime(el){document.querySelectorAll('.mtb').forEach(b=>b.classList.remove('on'));el.classList.add('on');selTime=el.dataset.t;}
+function pickTime(){}// legacy stub — unused
+
+function buildDrumH(){
+  buildDrum('drum-h','drum-h-inner',24,true,drumH,'h');
+}
+function buildDrumM(){
+  // 12 steps × 5 min = 0..55
+  buildDrum('drum-m','drum-m-inner',12,false,drumM,'m');
+}
+
+function buildDrum(colId,innerId,count,numeric,selIdx,type){
+  const col=document.getElementById(colId);
+  const inner=document.getElementById(innerId);
+  if(!col||!inner)return;
+  inner.innerHTML='';
+  const PAD=3;
+  for(let i=-PAD;i<count+PAD;i++){
+    const v=((i%count)+count)%count;
+    const div=document.createElement('div');
+    div.className='time-drum-item';
+    div.textContent=numeric?String(v).padStart(2,'0'):String(v*5).padStart(2,'0');
+    inner.appendChild(div);
+  }
+  const activeAbsIdx=PAD+selIdx;
+  applyDrumTransform(inner,activeAbsIdx);
+  highlightDrum(inner,activeAbsIdx);
+  attachDrumGestures(col,inner,count,type);
+}
+
+function getDrumOffset(absIdx){return -(absIdx*44)+88;}
+function applyDrumTransform(inner,absIdx){inner.style.transform=`translateY(${getDrumOffset(absIdx)}px)`;}
+
+function highlightDrum(inner,absIdx){
+  inner.querySelectorAll('.time-drum-item').forEach((item,i)=>{
+    const d=Math.abs(i-absIdx);
+    item.classList.remove('selected','near','far');
+    if(d===0)item.classList.add('selected');
+    else if(d<=1)item.classList.add('near');
+    else item.classList.add('far');
+  });
+  updateTimeDisplay();
+}
+
+function attachDrumGestures(col,inner,count,type){
+  const PAD=3;
+  let startY=0,lastY=0,velY=0,dragging=false;
+  let baseAbsIdx=PAD+(type==='h'?drumH:drumM);
+
+  function absToVal(abs){return((abs%count)+count)%count;}
+  function snap(absIdx){
+    const clamped=Math.round(absIdx);
+    const val=absToVal(clamped);
+    const normalized=PAD+val;
+    if(type==='h')drumH=val; else drumM=val;
+    baseAbsIdx=normalized;
+    inner.style.transition='transform .25s cubic-bezier(.34,1.2,.64,1)';
+    applyDrumTransform(inner,normalized);
+    highlightDrum(inner,normalized);
+    setTimeout(()=>{inner.style.transition='';},280);
+  }
+  function fromY(dy){return baseAbsIdx-dy/44;}
+
+  // Touch
+  col.addEventListener('touchstart',e=>{
+    inner.style.transition='none';
+    startY=e.touches[0].clientY;lastY=startY;velY=0;dragging=true;
+    baseAbsIdx=PAD+(type==='h'?drumH:drumM);
+  },{passive:true});
+  col.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const dy=e.touches[0].clientY-startY;
+    velY=e.touches[0].clientY-lastY;lastY=e.touches[0].clientY;
+    const abs=fromY(dy);
+    applyDrumTransform(inner,abs);
+    highlightDrum(inner,Math.round(abs));
+  },{passive:true});
+  col.addEventListener('touchend',e=>{
+    if(!dragging)return;dragging=false;
+    const dy=e.changedTouches[0].clientY-startY;
+    let abs=fromY(dy)-velY*4;
+    snap(abs);
+  });
+
+  // Mouse
+  col.addEventListener('mousedown',e=>{
+    inner.style.transition='none';
+    startY=e.clientY;lastY=startY;velY=0;dragging=true;
+    baseAbsIdx=PAD+(type==='h'?drumH:drumM);
+    e.preventDefault();
+  });
+  const mm=e=>{if(!dragging)return;velY=e.clientY-lastY;lastY=e.clientY;const abs=fromY(e.clientY-startY);applyDrumTransform(inner,abs);highlightDrum(inner,Math.round(abs));};
+  const mu=e=>{if(!dragging)return;dragging=false;snap(fromY(e.clientY-startY)-velY*4);};
+  window.addEventListener('mousemove',mm);
+  window.addEventListener('mouseup',mu);
+
+  // Wheel
+  col.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const cur=type==='h'?drumH:drumM;
+    snap(PAD+cur+(e.deltaY>0?1:-1));
+  },{passive:false});
+}
+
+function updateTimeDisplay(){
+  const hh=String(drumH).padStart(2,'0');
+  const mSteps=[0,5,10,15,20,25,30,35,40,45,50,55];
+  const mm=String(mSteps[drumM%12]||0).padStart(2,'0');
+  const disp=document.getElementById('time-display');
+  if(disp)disp.textContent=`${hh}:${mm}`;
+  const sub=document.getElementById('time-sub');
+  if(sub){
+    const h=drumH;
+    const period=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
+    const label={ru:h<6?'Ночь':h<12?'Утро':h<17?'День':h<21?'Вечер':'Ночь',en:h<6?'Night':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Night',es:h<12?'Mañana':h<18?'Tarde':'Noche',de:h<12?'Morgen':h<18?'Nachmittag':'Abend',fr:h<12?'Matin':h<18?'Après-midi':'Soirée'}[lang]||'';
+    sub.textContent=`${period} ${label}`;
+  }
+}
+
 async function saveRem(){
-  if(!selTime){toast({ru:'Выбери время',en:'Choose a time',es:'Elige una hora',de:'Zeit wählen',fr:'Choisissez une heure',pt:'Escolha um horário',uk:'Обери час',tr:'Saat seç',zh:'选择时间',ar:'اختر وقتاً'}[lang]||'Choose a time','⚠️');return;}
-  LS.set('app_remind',selTime);
-  LS.set('remind_time_str',selTime);
+  const mSteps=[0,5,10,15,20,25,30,35,40,45,50,55];
+  const hh=String(drumH).padStart(2,'0');
+  const mm=String(mSteps[drumM%12]||0).padStart(2,'0');
+  selTime=`${hh}:${mm}`;
+  LS.set('app_remind',selTime);LS.set('remind_time_str',selTime);
   if(window._d)window._d.remind_time=selTime;
   updateProfileUI(window._d||{});
   scheduleReminder(selTime);
   if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch{}
-  closeRemModal();toast(L.remsav+selTime,'⏰');
+  closeRemModal();toast((L.remsav||'Reminder: ')+selTime,'⏰');
 }
 async function disableRem(){
-  LS.set('app_remind','');
+  LS.set('app_remind','');LS.set('remind_time_str','');
   if(window._d)window._d.remind_time='';
   updateProfileUI(window._d||{});
-  document.querySelectorAll('.mtb').forEach(b=>b.classList.remove('on'));
   if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:'off'})});}catch{}
-  closeRemModal();toast(L.remoff,'🔕');
+  closeRemModal();toast(L.remoff||'Reminders disabled','🔕');
 }
 
 function closeCfm(){closeMod('cfmm');}
