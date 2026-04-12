@@ -13,7 +13,7 @@ WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL       = "claude-haiku-4-5"
+MODEL       = "claude-haiku-4-5-20251001"
 
 if not ANT_KEY:
     logger.error("❌ ANTHROPIC_API_KEY is not set!")
