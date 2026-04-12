@@ -64,11 +64,14 @@
 @keyframes lw{0%,100%{height:8px;opacity:.4}50%{height:28px;opacity:1}}
 
 /* Theme picker modal */
-.theme-scroll-outer{overflow:hidden;padding-bottom:4px}
+.theme-scroll-outer{padding-bottom:4px;width:100%;}
 .theme-scroll-wrap{
-  display:flex;gap:12px;overflow-x:scroll;padding:16px 15px 20px;
-  -webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;
-  cursor:grab;user-select:none;
+  display:flex;gap:12px;
+  overflow-x:scroll;overflow-y:visible;
+  padding:16px 15px 20px;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;
+  cursor:grab;
 }
 .theme-scroll-wrap:active{cursor:grabbing}
 .theme-scroll-wrap::-webkit-scrollbar{height:3px}
@@ -86,7 +89,22 @@
 .theme-card.on .theme-card-chk{opacity:1}
 .theme-card-name{font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);letter-spacing:.3px;text-align:center;padding:0 6px}
 
-/* ══ LANG PICKER (same iOS style) ══ */
+/* ══ THEME PICKER iOS-style ══ */
+.theme-picker-btn{
+  display:flex;align-items:center;gap:14px;padding:12px 15px;
+  background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);
+  cursor:pointer;transition:.2s;width:100%;
+}
+.theme-picker-btn:active{transform:scale(.98)}
+.theme-swatch{
+  width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.25);
+  box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.theme-picker-info{flex:1}
+.theme-picker-label{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.theme-picker-name{font-size:14px;font-weight:700;color:var(--t1)}
+.theme-picker-arr{color:var(--t3);font-size:18px;font-weight:300}
 .lang-picker-btn{
   display:flex;align-items:center;gap:11px;padding:12px 14px;
   background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);
@@ -482,7 +500,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .msh{background:var(--e1);border-radius:19px 19px 0 0;width:100%;max-width:420px;padding:0 0 calc(22px + var(--safe));animation:msu .3s cubic-bezier(.34,1.2,.64,1);max-height:80vh;overflow-y:auto;overflow-x:hidden}
 .msh.cls{animation:msd .25s ease forwards}
 /* Theme modal needs overflow visible for horizontal scroll */
-#themem .msh{overflow:hidden;}
+#themem .msh{overflow-y:auto;}
 @keyframes msu{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes msd{from{transform:translateY(0)}to{transform:translateY(100%)}}
 .mhnd{width:32px;height:4px;border-radius:2px;background:var(--e3);margin:11px auto 4px}
 .mtit{font-size:16px;font-weight:700;padding:8px 17px 13px;border-bottom:1px solid var(--b1)}
@@ -733,8 +751,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Themes iOS-style -->
   <div class="sec"><span id="theme-lbl"></span></div>
   <div class="theme-picker-btn" onclick="openThemePicker()">
-    <div class="theme-preview-circle" id="theme-preview-circle" style="background:linear-gradient(135deg,#0d1117,#4f8aff)"></div>
-    <div class="theme-picker-name" id="theme-picker-name">Blue</div>
+    <div class="theme-swatch" id="theme-swatch" style="background:linear-gradient(135deg,#0d1117,#4f8aff)"></div>
+    <div class="theme-picker-info">
+      <div class="theme-picker-label" id="theme-picker-label">Тема</div>
+      <div class="theme-picker-name" id="theme-picker-name">Blue</div>
+    </div>
     <span class="theme-picker-arr">›</span>
   </div>
 
@@ -1260,6 +1281,13 @@ function applyLang(){
   document.getElementById('ntxt').textContent=L.notift;document.getElementById('ncta').textContent=L.notifcta;
   // Update lang picker buttons (replaces old grid toggles)
   updateLangPickerBtns();
+  // Refresh theme button label in new language
+  const tl2=document.getElementById('theme-picker-label');
+  if(tl2)tl2.textContent=L.theme||'Theme';
+  const curTheme=LS.get('app_theme')||'';
+  const curTh=THEMES.find(x=>x.t===curTheme)||THEMES[0];
+  const tn=document.getElementById('theme-picker-name');
+  if(tn)tn.textContent=curTh.n[lang]||curTh.n.en;
   // Profile UI
   if(window._d) updateProfileUI(window._d);
 }
@@ -1368,14 +1396,22 @@ function buildChips(){
 
 /* ══ THEMES ══ */
 function setTheme(t){
-  document.documentElement.setAttribute('data-theme',t);LS.set('app_theme',t);
-  // Update iOS picker button
+  document.documentElement.setAttribute('data-theme',t);
+  LS.set('app_theme',t);
+  // Find theme data
   const th=THEMES.find(x=>x.t===t)||THEMES[0];
-  const circle=document.getElementById('theme-preview-circle');
-  const name=document.getElementById('theme-picker-name');
-  if(circle)circle.style.background=th.grad;
-  if(name)name.textContent=th.n[lang]||th.n.en;
-  if(tg){tg.setHeaderColor(th.bg||'#0d1117');tg.setBackgroundColor(th.bg||'#0d1117');}
+  const nm=th.n[lang]||th.n.en||th.n.ru||t||'Blue';
+  // Update button swatch
+  const sw=document.getElementById('theme-swatch');
+  if(sw)sw.style.background=th.grad;
+  const tn=document.getElementById('theme-picker-name');
+  if(tn)tn.textContent=nm;
+  // Update label with current lang
+  const tl2=document.getElementById('theme-picker-label');
+  if(tl2)tl2.textContent=L?.theme||'Theme';
+  // Telegram colors
+  const bgColor=th.bg||'#0d1117';
+  if(tg){tg.setHeaderColor(bgColor);tg.setBackgroundColor(bgColor);}
 }
 
 /* ══ THEME PICKER (iOS-style) ══ */
@@ -1391,6 +1427,7 @@ function openThemePicker(){
     card.style.background=th.grad;
     card.innerHTML=`<div class="theme-card-chk">✓</div><div class="theme-card-name">${th.n[lang]||th.n.en||th.n.ru}</div>`;
     card.addEventListener('click',()=>{
+      if(moved)return; // don't select if user was dragging
       document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('on'));
       card.classList.add('on');
       setTheme(th.t);
@@ -1398,12 +1435,19 @@ function openThemePicker(){
     wrap.appendChild(card);
   });
 
-  // Mouse drag scroll
-  let isDown=false,startX=0,sl=0;
-  wrap.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX-wrap.offsetLeft;sl=wrap.scrollLeft;wrap.style.cursor='grabbing';});
+  // Mouse drag scroll - track movement to distinguish click vs drag
+  let isDown=false,startX=0,sl=0,moved=false;
+  wrap.addEventListener('mousedown',e=>{isDown=true;moved=false;startX=e.pageX-wrap.offsetLeft;sl=wrap.scrollLeft;wrap.style.cursor='grabbing';});
   wrap.addEventListener('mouseleave',()=>{isDown=false;wrap.style.cursor='grab';});
   wrap.addEventListener('mouseup',()=>{isDown=false;wrap.style.cursor='grab';});
-  wrap.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-wrap.offsetLeft;wrap.scrollLeft=sl-(x-startX);});
+  wrap.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    e.preventDefault();
+    const x=e.pageX-wrap.offsetLeft;
+    const delta=x-startX;
+    if(Math.abs(delta)>5)moved=true;
+    wrap.scrollLeft=sl-delta;
+  });
 
   // Scroll to current active card
   setTimeout(()=>{
