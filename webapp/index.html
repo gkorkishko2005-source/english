@@ -670,7 +670,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
         <div class="mpb" data-v="Education"   onclick="pickProf(this)"><span class="mpi">📚</span>Education</div>
         <div class="mpb" data-v="Student"     onclick="pickProf(this)"><span class="mpi">🎓</span>Student</div>
       </div>
-      <input class="minp" id="profinp" oninput="deselectProf()" id="prof-inp">
+      <input class="minp" id="profinp" oninput="deselectProf()" placeholder="Or type your own...">
       <button class="msav" onclick="saveProf()" id="prof-sav">Save</button>
       <button class="moff"  onclick="closeProfModal()" id="prof-can">Cancel</button>
     </div>
@@ -992,7 +992,6 @@ function applyLang(){
   // Home
   refreshSub();
   document.getElementById('msec-lbl').textContent = L.missions;
-  ['mc1','mc2','mc3','mc4'].forEach((id,i)=>document.getElementById(id.replace('c','t'+(i+1))||'mt'+(i+1)).textContent=[L.m1,L.m2,L.m3,L.m4][i]);
   document.getElementById('mt1').textContent=L.m1;document.getElementById('mt2').textContent=L.m2;document.getElementById('mt3').textContent=L.m3;document.getElementById('mt4').textContent=L.m4;
   document.getElementById('qs-lbl').textContent=L.qs;
   document.getElementById('qb1t').textContent=L.gr;document.getElementById('qb1s').textContent=L.grs;
@@ -1639,6 +1638,7 @@ async function fetchData(uid){
 
 /* ══ MAIN ══ */
 async function init(){
+  try{
   // Restore prefs first
   lang   =LS.get('app_lang')   ||'ru';
   botLang=LS.get('bot_lang')   ||'ru';
@@ -1672,7 +1672,13 @@ async function init(){
   }
 
   setTimeout(showNotif,1500);
-  setTimeout(()=>document.getElementById('loader').classList.add('gone'),600);
+  }catch(err){
+    console.error('Init error:',err);
+    // Show basic welcome even on error
+    try{addMsg('bot',L.welcome||'Hi! I am ALEX.');}catch{}
+  }finally{
+    setTimeout(()=>document.getElementById('loader').classList.add('gone'),600);
+  }
 }
 init();
 </script>
