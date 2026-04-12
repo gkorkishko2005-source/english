@@ -134,6 +134,13 @@
 /* ══ STATS SVG icons ══ */
 .s4ci-svg{width:28px;height:28px;margin-bottom:9px;flex-shrink:0}
 .s4ci-svg svg{width:28px;height:28px}
+/* Stat card value colors - use CSS vars for text */
+.s4c:nth-child(1) .s4cv{color:var(--a)}
+.s4c:nth-child(2) .s4cv{color:var(--a2)}
+.s4c:nth-child(3) .s4cv{color:var(--gd)}
+.s4c:nth-child(4) .s4cv{color:var(--rd)}
+/* Stat SVGs — colors adapt with theme via filter/currentColor */
+.stat-svg{transition:opacity .2s}
 
 /* ══ WEEKLY CHART improved ══ */
 .chart-wrap{padding:4px 0}
@@ -228,8 +235,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* XP */
 .xpc{background:var(--g);border-color:rgba(var(--ar),.2);margin-bottom:13px;animation:glow 3s ease-in-out infinite}
 .xpt{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.xptr{display:flex;align-items:center;gap:7px}
-.xtree{font-size:17px;animation:float 3s ease-in-out infinite}
+.xptr{display:flex;align-items:center;gap:8px}
+.xtree{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0}
+.xtree svg{width:28px;height:28px}
 .xrnk{font-size:13px;font-weight:700}
 .xpill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;background:rgba(var(--ar),.15);border:1px solid rgba(var(--ar),.25);color:var(--a)}
 .xbar{background:rgba(0,0,0,.3);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px;position:relative}
@@ -239,7 +247,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Streak */
 .stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:13px}
-.stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px}
+.stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0}
+.stk-flame svg{width:28px;height:28px}
+.stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px;text-align:center}
 .stkt{font-size:14px;font-weight:700}.stks{font-size:12px;color:var(--t2);margin-top:2px}
 
 /* Stats 3 */
@@ -517,7 +527,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mpb:active{transform:scale(.93)}
 .mpb.on{border-color:var(--a);background:rgba(var(--ar),.1);color:var(--a)}
 .mpi{width:26px;height:26px;display:flex;align-items:center;justify-content:center}
-.mpi svg{width:22px;height:22px;stroke:var(--t2)}
+.mpi svg{width:22px;height:22px;fill:none;stroke:var(--t2);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .mpb.on .mpi svg{stroke:var(--a)}
 .minp{width:100%;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;margin-top:8px;transition:border-color .2s}
 .minp:focus{border-color:rgba(var(--ar),.4)}
@@ -613,10 +623,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ EMPTY STATE — better ══ */
 .emico-wrap{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,rgba(var(--ar),.15),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .emico-wrap svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;stroke-linecap:round}
-
-/* ══ XP TREE — inline SVG ══ */
-.xtree{display:flex;align-items:center;justify-content:center;width:28px;height:28px}
-.xtree svg{width:24px;height:24px}
 @media(max-width:420px){body{display:block}#app{max-width:100%;height:100vh;border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
 @media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px);animation:none!important}}
 </style>
@@ -653,9 +659,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="stk">
     <div class="stk-flame">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2c0 0-5 4-5 9a5 5 0 0010 0c0-3-2-5-2-5s0 3-3 3c0-4 0-7 0-7z" stroke="var(--or)" fill="rgba(255,149,0,.25)"/>
-        <path d="M12 2c1 2 3 5 3 8a3 3 0 01-6 0c0-2 1-4 3-8z" stroke="var(--rd)" fill="rgba(255,107,107,.15)"/>
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 3 C14 3 8 9 8 15 A6 6 0 0 0 20 15 C20 11 17 8 17 8 C17 8 16 12 13 12 C13 6 14 3 14 3Z" fill="rgba(255,149,0,.35)" stroke="#ff9500" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M14 8 C14 8 11 13 11 16 A3 3 0 0 0 17 16 C17 13.5 15.5 11 15.5 11 C15.5 11 15 13.5 13.5 13.5 C13.5 10 14 8 14 8Z" fill="rgba(255,107,107,.5)" stroke="#ff6b6b" stroke-width="1" stroke-linejoin="round"/>
       </svg>
     </div>
     <div class="stkn" id="hstk">0</div>
@@ -786,23 +792,23 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="s4">
     <div class="s4c">
       <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--a)" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="22" height="18" rx="3"/><path d="M3 11h22M8 3v6M20 3v6"/></svg></div>
-      <div class="s4cv" id="psess" style="color:var(--a)">—</div><div class="s4cl" id="psl1"></div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#4f8aff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><rect x="3" y="6" width="22" height="18" rx="3"/><path d="M3 11h22M8 3v6M20 3v6"/></svg></div>
+      <div class="s4cv" id="psess">—</div><div class="s4cl" id="psl1"></div>
     </div>
     <div class="s4c" onclick="goTab('learn')">
       <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--a2)" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M26 7l-8 4v10l8-4V7z"/><path d="M18 5l8 4"/></svg></div>
-      <div class="s4cv" id="pwrds" style="color:var(--a2)">—</div><div class="s4cl" id="psl2"></div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M4 5h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M26 7l-8 4v10l8-4V7z"/><path d="M18 5l8 4"/></svg></div>
+      <div class="s4cv" id="pwrds">—</div><div class="s4cl" id="psl2"></div>
     </div>
     <div class="s4c">
       <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--gd)" stroke-width="1.8" stroke-linecap="round"><path d="M14 2l3.09 6.26L24 9.27l-5 4.87 1.18 6.88L14 17.77l-6.18 3.35L9 14.14 4 9.27l6.91-1.01L14 2z"/></svg></div>
-      <div class="s4cv" id="ptsts" style="color:var(--gd)">—</div><div class="s4cl" id="psl3"></div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M14 2l3.09 6.26L24 9.27l-5 4.87 1.18 6.88L14 17.77l-6.18 3.35L9 14.14 4 9.27l6.91-1.01L14 2z" fill="rgba(255,184,48,.15)"/></svg></div>
+      <div class="s4cv" id="ptsts">—</div><div class="s4cl" id="psl3"></div>
     </div>
     <div class="s4c" onclick="openChat('mistakes')">
       <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--rd)" stroke-width="1.8" stroke-linecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 9v5M14 18.5v.5"/></svg></div>
-      <div class="s4cv" id="perrs" style="color:var(--rd)">—</div><div class="s4cl" id="psl4"></div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#ff6b6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><circle cx="14" cy="14" r="11" fill="rgba(255,107,107,.1)"/><path d="M14 9v5.5"/><circle cx="14" cy="19" r="1" fill="#ff6b6b"/></svg></div>
+      <div class="s4cv" id="perrs">—</div><div class="s4cl" id="psl4"></div>
     </div>
   </div>
   <div class="sec"><span id="tw-lbl"></span></div>
@@ -1563,25 +1569,18 @@ function openThemePicker(){
 }
 function closeThemePicker(){closeMod('themem');}
 
-/* ══ XP TREE SVGs (level-based) ══ */
-const TREE_SVGS=[
-  // 0 - Seedling
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V12" stroke="#2ecc71"/><path d="M12 12C12 12 7 10 7 5a5 5 0 0110 0c0 5-5 7-5 7z" fill="rgba(46,204,113,.2)" stroke="#2ecc71"/></svg>`,
-  // 100 - Sprout
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V10" stroke="#27ae60"/><path d="M12 10C12 10 6 8 6 3a6 6 0 0112 0c0 5-6 7-6 7z" fill="rgba(39,174,96,.2)" stroke="#27ae60"/><path d="M12 14c-2-1-4-3-3-6" stroke="#27ae60"/></svg>`,
-  // 300 - Sapling
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V8" stroke="#1abc9c"/><ellipse cx="12" cy="6" rx="5" ry="4" fill="rgba(26,188,156,.2)" stroke="#1abc9c"/><ellipse cx="9" cy="12" rx="3" ry="2.5" fill="rgba(26,188,156,.15)" stroke="#1abc9c"/><ellipse cx="15" cy="13" rx="3" ry="2.5" fill="rgba(26,188,156,.15)" stroke="#1abc9c"/></svg>`,
-  // 600 - Tree
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="11" y="17" width="2" height="5" fill="#8b5e3c" rx="1"/><ellipse cx="12" cy="10" rx="7" ry="8" fill="rgba(46,204,113,.2)" stroke="#2ecc71"/><ellipse cx="12" cy="7" rx="5" ry="5" fill="rgba(46,204,113,.25)" stroke="#27ae60"/></svg>`,
-  // 1000 - Oak
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="11" y="16" width="2" height="6" fill="#7a4f2e" rx="1"/><ellipse cx="12" cy="9" rx="8" ry="9" fill="rgba(46,204,113,.18)" stroke="#2ecc71"/><ellipse cx="8"  cy="8" rx="5" ry="5" fill="rgba(39,174,96,.2)" stroke="#27ae60"/><ellipse cx="16" cy="7" rx="5" ry="5" fill="rgba(26,188,156,.2)" stroke="#1abc9c"/></svg>`,
-  // 1500 - Star
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,184,48,.2)" stroke="#ffb830"/></svg>`,
-  // 2500 - Galaxy
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(167,139,250,.25)" stroke="#a78bfa"/><circle cx="12" cy="12" r="2" fill="#a78bfa"/></svg>`,
-  // 4000 - Legend
-  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 1l2.8 8.6H23l-7.4 5.4 2.8 8.6L12 19l-6.4 4.6 2.8-8.6L1 9.6h8.2z" fill="rgba(255,184,48,.3)" stroke="#ffb830"/><path d="M12 6l1.5 4.6H18l-4 2.9 1.5 4.6L12 15.5l-3.5 2.6 1.5-4.6-4-2.9h4.5z" fill="rgba(255,149,0,.5)" stroke="#ff9500"/></svg>`,
-];
+/* ══ XP TREE SVGs ══ */
+function getTreeSvg(xp){
+  const S={lc:'stroke-linecap="round" stroke-linejoin="round"'};
+  if(xp>=4000) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,2 17,10 26,10.5 20,16 22,24.5 14,20 6,24.5 8,16 2,10.5 11,10" fill="rgba(255,184,48,.4)" stroke="#ffb830" stroke-width="1.5" ${S.lc}/><polygon points="14,6 16.5,12 22.5,12.5 18,16.5 19.5,22 14,19 8.5,22 10,16.5 5.5,12.5 11.5,12" fill="#ffb830" opacity=".6" stroke="#ff9500" stroke-width="1" ${S.lc}/></svg>`;
+  if(xp>=2500) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,2 16.5,10 25,10.5 19,16 21,24 14,19.5 7,24 9,16 3,10.5 11.5,10" fill="rgba(167,139,250,.35)" stroke="#a78bfa" stroke-width="1.5" ${S.lc}/><circle cx="14" cy="14" r="2.5" fill="#a78bfa"/></svg>`;
+  if(xp>=1500) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,3 16.5,10.5 24.5,11 19,16 21,23.5 14,19.5 7,23.5 9,16 3.5,11 11.5,10.5" fill="rgba(255,184,48,.3)" stroke="#ffb830" stroke-width="1.5" ${S.lc}/></svg>`;
+  if(xp>=1000) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="19" width="3" height="7" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="12" rx="8" ry="9" fill="rgba(46,204,113,.25)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><ellipse cx="10" cy="9"  rx="5" ry="5" fill="rgba(39,174,96,.3)"  stroke="#27ae60" stroke-width="1.3" ${S.lc}/><ellipse cx="18" cy="8"  rx="5" ry="5" fill="rgba(26,188,156,.3)" stroke="#1abc9c" stroke-width="1.3" ${S.lc}/></svg>`;
+  if(xp>=600)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="20" width="3" height="6" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="12" rx="7" ry="8.5" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><ellipse cx="14" cy="8.5" rx="5.5" ry="5" fill="rgba(39,174,96,.28)" stroke="#27ae60" stroke-width="1.3" ${S.lc}/></svg>`;
+  if(xp>=300)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="21" width="3" height="5" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="13" rx="6" ry="8" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><path d="M11 18 C8 17 6 14 8 10" stroke="#2ecc71" stroke-width="1.3" ${S.lc}/><path d="M17 18 C20 17 22 14 20 10" stroke="#1abc9c" stroke-width="1.3" ${S.lc}/></svg>`;
+  if(xp>=100)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="26" x2="14" y2="16" stroke="#8b6f47" stroke-width="2" stroke-linecap="round"/><ellipse cx="14" cy="11" rx="5.5" ry="7" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><path d="M11 17 C8 15 7 11 10 9" stroke="#27ae60" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="26" x2="14" y2="17" stroke="#8b6f47" stroke-width="2" stroke-linecap="round"/><path d="M14 17 C14 17 8.5 14 8.5 8.5 A5.5 5.5 0 0 1 19.5 8.5 C19.5 14 14 17 14 17Z" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+}
 
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
 const RANKS=[{r:'Seedling',min:0,max:100},{r:'Beginner',min:100,max:300},{r:'Elementary',min:300,max:600},{r:'Pre-Inter.',min:600,max:1000},{r:'Intermediate',min:1000,max:1500},{r:'Upper-Inter.',min:1500,max:2500},{r:'Advanced',min:2500,max:4000},{r:'Master',min:4000,max:9999}];
@@ -1605,7 +1604,7 @@ function goTab(n){
 function refreshSub(){
   const h=new Date().getHours();
   const el=document.getElementById('greet');if(el)el.textContent=L.greet(h);
-  document.getElementById('stkt-lbl').textContent='🔥 '+L.streak_t;
+  document.getElementById('stkt-lbl').textContent=L.streak_t;
   document.getElementById('hs1l').textContent=L.streak;
   document.getElementById('hs2l').textContent=L.words;
   document.getElementById('hs3l').textContent=L.tests;
@@ -1664,9 +1663,9 @@ function drawProgress(){
   const words=Math.max(d.words||0,    savedStats.words||0);
   const tests=Math.max(d.tests||0,    savedStats.tests||0);
   const errors=Math.max(d.errors||0,  savedStats.errors||0);
-  const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  const safe=(id,v,color)=>{const el=document.getElementById(id);if(el){el.textContent=v;if(color)el.style.color=color;}};
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
-  // Sync home stat boxes too
+  // Sync home stat boxes
   safe('hs1', d.streak||0); safe('hs2', words); safe('hs3', tests);
 
   // Weekly chart
@@ -2310,8 +2309,10 @@ function pickTime(el){document.querySelectorAll('.mtb').forEach(b=>b.classList.r
 async function saveRem(){
   if(!selTime){toast({ru:'Выбери время',en:'Choose a time',es:'Elige una hora',de:'Zeit wählen',fr:'Choisissez une heure',pt:'Escolha um horário',uk:'Обери час',tr:'Saat seç',zh:'选择时间',ar:'اختر وقتاً'}[lang]||'Choose a time','⚠️');return;}
   LS.set('app_remind',selTime);
+  LS.set('remind_time_str',selTime);
   if(window._d)window._d.remind_time=selTime;
   updateProfileUI(window._d||{});
+  scheduleReminder(selTime);
   if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch{}
   closeRemModal();toast(L.remsav+selTime,'⏰');
 }
@@ -2337,7 +2338,61 @@ document.getElementById('botlangm')?.addEventListener('click',function(e){if(e.t
 // Rename on Enter
 document.getElementById('rename-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')doRename();});
 
-/* ══ NOTIFICATION (smart — max 1x per 24h) ══ */
+/* ══ REAL REMINDERS ══ */
+function scheduleReminder(timeStr){
+  if(!timeStr||timeStr==='off')return;
+  LS.set('app_remind',timeStr);
+  // Request notification permission
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+  // Store next reminder time
+  const [h,m]=timeStr.split(':').map(Number);
+  const now=new Date();
+  const next=new Date();
+  next.setHours(h,m,0,0);
+  if(next<=now)next.setDate(next.getDate()+1);
+  LS.set('remind_next',String(next.getTime()));
+  LS.set('remind_time_str',timeStr);
+  startReminderTimer();
+}
+
+function startReminderTimer(){
+  const nextMs=parseInt(LS.get('remind_next')||'0',10);
+  if(!nextMs)return;
+  const delay=nextMs-Date.now();
+  if(delay<0||delay>24*60*60*1000)return;
+  setTimeout(()=>{
+    fireReminder();
+    // Reschedule for next day
+    const ts=LS.get('remind_time_str');
+    if(ts)scheduleReminder(ts);
+  },delay);
+}
+
+function fireReminder(){
+  const msg=lang==='ru'?'Время учить английский! 📚 Открой LinguaMax':'Time to learn English! 📚 Open LinguaMax';
+  // Telegram WebApp notification (vibrate)
+  if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+  // Browser notification
+  if('Notification' in window&&Notification.permission==='granted'){
+    new Notification('LinguaMax · ALEX',{
+      body:msg,
+      icon:'https://english-production-f7af.up.railway.app/icon.png',
+      badge:'https://english-production-f7af.up.railway.app/icon.png',
+      silent:false,
+    });
+  }
+  // In-app toast notification
+  toast(msg,'⏰');
+  showNotif();
+}
+
+// Restore reminder on load
+(function checkReminder(){
+  const ts=LS.get('remind_time_str')||LS.get('app_remind');
+  if(ts&&ts!=='off'){startReminderTimer();}
+})();
 let notifShown=false;
 function showNotif(){
   if(notifShown)return;
