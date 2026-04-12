@@ -1449,11 +1449,11 @@ function openThemePicker(){
     wrap.scrollLeft=sl-delta;
   });
 
+  // Wheel scroll (horizontal)
+  wrap.addEventListener('wheel',e=>{e.preventDefault();wrap.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
+
   // Scroll to current active card
-  setTimeout(()=>{
-    const on=wrap.querySelector('.on');
-    if(on){on.scrollIntoView({inline:'center',behavior:'smooth'});}
-  },80);
+  setTimeout(()=>{const on=wrap.querySelector('.on');if(on)on.scrollIntoView({inline:'center',behavior:'smooth'});},80);
 }
 function closeThemePicker(){closeMod('themem');}
 
