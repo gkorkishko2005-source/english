@@ -1184,6 +1184,17 @@ function updateProfileUI(d){
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
 }
 
+/* ══ UPDATE XP BAR (live) ══ */
+function updateXPBar(xp){
+  const inf=rankOf(xp||0),tr=treeOf(xp||0);
+  const pct=Math.max(0,Math.round((xp-inf.min)/(inf.max-inf.min)*100));
+  const xt=document.getElementById('xtree');if(xt)xt.textContent=tr.t;
+  const xr=document.getElementById('xrnk');if(xr)xr.textContent=inf.r;
+  const xf=document.getElementById('xfill');if(xf)xf.style.width=pct+'%';
+  const xc=document.getElementById('xcur');if(xc)xc.textContent=`${xp} XP`;
+  const xm=document.getElementById('xmax');if(xm)xm.textContent=inf.max<9999?`${xp} / ${inf.max} XP`:'🏆 Max!';
+}
+
 /* ══ MISSIONS ══ */
 const MK=['1','2','3','4'];
 function loadMissions(){
@@ -1204,12 +1215,27 @@ function trackM(key,delta=1){
   if(sv.date!==today){sv={date:today,done:{},cnt:{c:0,w:0}};}
   if(!sv.cnt)sv.cnt={c:0,w:0};
   let earned=false;
+  const xpMap={chat:20,words:25,listen:35,dwords:30};
   if(key==='chat'){sv.cnt.c=(sv.cnt.c||0)+delta;if(sv.cnt.c>=3&&!sv.done['1']){sv.done['1']=true;earned=true;}}
   if(key==='words'){sv.cnt.w=(sv.cnt.w||0)+delta;if(sv.cnt.w>=5&&!sv.done['2']){sv.done['2']=true;earned=true;}}
   if(key==='listen'&&!sv.done['3']){sv.done['3']=true;earned=true;}
   if(key==='dwords'&&!sv.done['4']){sv.done['4']=true;earned=true;}
   LS.setJ('missions',sv);
-  if(earned)toast({1:'+20 XP',2:'+25 XP',3:'+35 XP',4:'+30 XP'}[{chat:'1',words:'2',listen:'3',dwords:'4'}[key]]||'+XP 🎉','⭐');
+  if(earned){
+    const xpGain=xpMap[key]||20;
+    const k2m={chat:'1',words:'2',listen:'3',dwords:'4'};
+    toast(`+${xpGain} XP 🎉`,'⭐');
+    // Optimistically add XP to local data
+    if(window._d){
+      window._d.xp=(window._d.xp||0)+xpGain;
+      updateXPBar(window._d.xp);
+    }
+    // Send to API
+    if(API&&window._uid){
+      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({uid:window._uid,xp:xpGain})}).catch(()=>{});
+    }
+  }
   loadMissions();
 }
 
@@ -1282,18 +1308,44 @@ function pickPersona(el){
 
 /* ══ MESSAGE FORMATTING ══ */
 function fmtMsg(text){
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/^###\s*(.+)$/gm,'<span class="mh">$1</span>')
-    .replace(/^##\s*(.+)$/gm, '<span class="mh">$1</span>')
+  // The bot may return Telegram HTML (<b>, <i>, <code>) or markdown (**bold**)
+  // We allow safe HTML tags through, convert markdown, handle newlines
+
+  // 1. Temporarily protect safe HTML tags
+  const TAGS = {'<b>':'§B§','</b>':'§/B§','<i>':'§I§','</i>':'§/I§','<code>':'§C§','</code>':'§/C§','<br>':'§BR§','<br/>':'§BR§'};
+  let t = text;
+  for(const [tag, tok] of Object.entries(TAGS)) t=t.split(tag).join(tok);
+
+  // 2. Escape remaining HTML (security)
+  t = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // 3. Restore safe tags
+  const RESTORE = {'§B§':'<b>','§/B§':'</b>','§I§':'<i>','§/I§':'</i>','§C§':'<code>','§/C§':'</code>','§BR§':'<br>'};
+  for(const [tok, tag] of Object.entries(RESTORE)) t=t.split(tok).join(tag);
+
+  // 4. Convert markdown (in case bot uses it)
+  t = t
     .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
-    .replace(/\*(.*?)\*/g,    '<i>$1</i>')
-    .replace(/`([^`\n]+)`/g,  '<code>$1</code>')
-    .replace(/^(💡[^\n]+)$/gm,'<div class="tip">$1</div>')
-    .replace(/^(✅[^\n]+)$/gm,'<div class="corr">$1</div>')
-    .replace(/^(?:\d+\.|[-•])\s(.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>.*?<\/li>\n?)+/gs,m=>`<ul>${m}</ul>`)
-    .replace(/\n/g,'<br>');
+    .replace(/__(.*?)__/g,'<b>$1</b>')
+    .replace(/\*(.*?)\*/g,'<i>$1</i>')
+    .replace(/`([^`\n]+)`/g,'<code>$1</code>');
+
+  // 5. Headers ## and ###
+  t = t.replace(/^###\s*(.+)$/gm,'<span class="mh">$1</span>');
+  t = t.replace(/^##\s*(.+)$/gm,'<span class="mh">$1</span>');
+
+  // 6. Tip boxes
+  t = t.replace(/^(💡[^\n]+)$/gm,'<div class="tip">$1</div>');
+  t = t.replace(/^(✅[^\n]+)$/gm,'<div class="corr">$1</div>');
+
+  // 7. Lists
+  t = t.replace(/^(?:\d+\.|[-•])\s(.+)$/gm,'<li>$1</li>');
+  t = t.replace(/(<li>.*?<\/li>\n?)+/gs, m=>`<ul>${m}</ul>`);
+
+  // 8. Newlines
+  t = t.replace(/\n/g,'<br>');
+
+  return t;
 }
 
 /* ══ ANTI-SPAM ══ */
