@@ -239,7 +239,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Streak */
 .stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:13px}
-.stkn{font-size:38px;font-weight:800;color:var(--or);line-height:1;animation:flicker 2.8s ease-in-out infinite;min-width:48px}
+.stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px}
 .stkt{font-size:14px;font-weight:700}.stks{font-size:12px;color:var(--t2);margin-top:2px}
 
 /* Stats 3 */
@@ -572,7 +572,43 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .ld{width:7px;height:7px;border-radius:50%;background:var(--a);opacity:.3;animation:bounce 1s ease-in-out infinite}
 .ld:nth-child(2){animation-delay:.15s}.ld:nth-child(3){animation-delay:.3s}
 
-/* Responsive */
+/* ══ QUICK START — icon backgrounds ══ */
+.qbi{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;margin-bottom:11px}
+.qbi svg{width:26px;height:26px}
+.qa .qbi{background:rgba(var(--ar),.15)} .qa .qbi svg{stroke:var(--a)}
+.qb2 .qbi{background:rgba(0,212,170,.14)} .qb2 .qbi svg{stroke:var(--a2)}
+.qc .qbi{background:rgba(255,184,48,.14)}  .qc .qbi svg{stroke:var(--gd)}
+.qd .qbi{background:rgba(255,107,107,.14)} .qd .qbi svg{stroke:var(--rd)}
+
+/* ══ MISSION check better design ══ */
+.mchk{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--b2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:.22s;background:transparent}
+.mchk svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.2s}
+.mchk.done{background:var(--a);border-color:var(--a)}
+.mchk.done svg{opacity:1;transform:scale(1)}
+
+/* ══ RATE BUTTONS — SVG ══ */
+.rbi{display:flex;align-items:center;justify-content:center;margin-bottom:2px;width:28px;height:28px}
+.rbi svg{width:22px;height:22px}
+
+/* ══ STREAK — flame SVG ══ */
+.stk-flame{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,107,107,.15));flex-shrink:0}
+.stk-flame svg{width:28px;height:28px}
+
+/* ══ PROFILE ROW ICONS — colored background ══ */
+.sric{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sric svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sric-blue{background:linear-gradient(135deg,#3b82f6,#6366f1)}
+.sric-green{background:linear-gradient(135deg,#10b981,#059669)}
+.sric-orange{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.sric-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa)}
+
+/* ══ EMPTY STATE — better ══ */
+.emico-wrap{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,rgba(var(--ar),.15),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.emico-wrap svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;stroke-linecap:round}
+
+/* ══ XP TREE — inline SVG ══ */
+.xtree{display:flex;align-items:center;justify-content:center;width:28px;height:28px}
+.xtree svg{width:24px;height:24px}
 @media(max-width:420px){body{display:block}#app{max-width:100%;height:100vh;border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
 @media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px);animation:none!important}}
 </style>
@@ -597,11 +633,26 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="hsb" id="hsub"></div>
   </div>
   <div class="card xpc">
-    <div class="xpt"><div class="xptr"><span class="xtree" id="xtree">🌱</span><div class="xrnk" id="xrnk">—</div></div><div class="xpill" id="xpill">—</div></div>
+    <div class="xpt">
+      <div class="xptr">
+        <div class="xtree" id="xtree"></div>
+        <div class="xrnk" id="xrnk">—</div>
+      </div>
+      <div class="xpill" id="xpill">—</div>
+    </div>
     <div class="xbar"><div class="xfill" id="xfill" style="width:0"></div></div>
     <div class="xnms"><span id="xcur">0 XP</span><span id="xmax">—</span></div>
   </div>
-  <div class="stk"><div class="stkn" id="hstk">0</div><div><div class="stkt">🔥 <span id="stkt-lbl"></span></div><div class="stks" id="stks"></div></div></div>
+  <div class="stk">
+    <div class="stk-flame">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2c0 0-5 4-5 9a5 5 0 0010 0c0-3-2-5-2-5s0 3-3 3c0-4 0-7 0-7z" stroke="var(--or)" fill="rgba(255,149,0,.25)"/>
+        <path d="M12 2c1 2 3 5 3 8a3 3 0 01-6 0c0-2 1-4 3-8z" stroke="var(--rd)" fill="rgba(255,107,107,.15)"/>
+      </svg>
+    </div>
+    <div class="stkn" id="hstk">0</div>
+    <div><div class="stkt"><span id="stkt-lbl"></span></div><div class="stks" id="stks"></div></div>
+  </div>
   <div class="s3">
     <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs1" style="color:var(--or)">0</div><div class="sbl" id="hs1l"></div></div>
     <div class="sb" onclick="goTab('learn')">   <div class="sbv" id="hs2" style="color:var(--a2)">0</div><div class="sbl" id="hs2l"></div></div>
@@ -609,17 +660,29 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
-    <div class="mrow"><div class="mchk" id="mc1">✓</div><div class="mtxt" id="mt1"></div><div class="mxp">+20 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc2">✓</div><div class="mtxt" id="mt2"></div><div class="mxp">+25 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc3">✓</div><div class="mtxt" id="mt3"></div><div class="mxp">+35 XP</div></div>
-    <div class="mrow" style="border-bottom:none"><div class="mchk" id="mc4">✓</div><div class="mtxt" id="mt4"></div><div class="mxp">+30 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp">+20 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc2"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt2"></div><div class="mxp">+25 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc3"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt3"></div><div class="mxp">+35 XP</div></div>
+    <div class="mrow" style="border-bottom:none"><div class="mchk" id="mc4"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt4"></div><div class="mxp">+30 XP</div></div>
   </div>
   <div class="sec"><span id="qs-lbl"></span></div>
   <div class="qg">
-    <div class="qb qa"  onclick="openChat('lesson')">   <span class="qbi">📚</span><div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div></div>
-    <div class="qb qb2" onclick="goTab('learn')">       <span class="qbi">🃏</span><div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div></div>
-    <div class="qb qc"  onclick="startAudio()">          <span class="qbi">🎧</span><div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div></div>
-    <div class="qb qd"  onclick="openChat('speaking')">  <span class="qbi">💬</span><div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div></div>
+    <div class="qb qa"  onclick="openChat('lesson')">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></div>
+      <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
+    </div>
+    <div class="qb qb2" onclick="goTab('learn')">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M12 5v14M2 12h20"/></svg></div>
+      <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
+    </div>
+    <div class="qb qc"  onclick="startAudio()">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+      <div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div>
+    </div>
+    <div class="qb qd"  onclick="openChat('speaking')">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="12" y2="14"/></svg></div>
+      <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
+    </div>
   </div>
 </div>
 
@@ -662,14 +725,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       </div>
     </div>
     <div class="rrow hid" id="rrow">
-      <div class="rb rb1" onclick="rate(1)"><span class="rbi">😕</span><span id="rb1l"></span></div>
-      <div class="rb rb2" onclick="rate(2)"><span class="rbi">🤔</span><span id="rb2l"></span></div>
-      <div class="rb rb3" onclick="rate(3)"><span class="rbi">😊</span><span id="rb3l"></span></div>
-      <div class="rb rb4" onclick="rate(4)"><span class="rbi">✅</span><span id="rb4l"></span></div>
+      <div class="rb rb1" onclick="rate(1)">
+        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span id="rb1l"></span>
+      </div>
+      <div class="rb rb2" onclick="rate(2)">
+        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span id="rb2l"></span>
+      </div>
+      <div class="rb rb3" onclick="rate(3)">
+        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span id="rb3l"></span>
+      </div>
+      <div class="rb rb4" onclick="rate(4)">
+        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+        <span id="rb4l"></span>
+      </div>
     </div>
   </div>
   <div class="emst" id="lempty" style="display:none">
-    <span class="emico">🎉</span>
+    <div class="emico-wrap">
+      <svg viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 4l4.5 9.5 10 1.5-7.5 7 1.5 10.5L20 28l-8.5 4.5 1.5-10.5L5.5 15l10-1.5z" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.12)"/>
+      </svg>
+    </div>
     <div class="emtit" id="em-t"></div><div class="emsub" id="em-s"></div>
     <div class="embtns">
       <button class="btn bp" onclick="openChat('words_new')"><span id="em-b1"></span></button>
@@ -783,9 +862,19 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Profile -->
   <div class="sec"><span id="prof-sec-lbl"></span></div>
   <div class="slist">
-    <div class="srow na"><div class="sric">🎯</div><div class="srbd"><div class="srt" id="slvt"></div><div class="srs" id="slvs"></div></div><div class="srv" id="silv">—</div></div>
-    <div class="srow"    onclick="openProfModal()"><div class="sric">💼</div><div class="srbd"><div class="srt" id="sproft"></div><div class="srs" id="siprof">—</div></div></div>
-    <div class="srow"    onclick="openRemModal()"> <div class="sric">⏰</div><div class="srbd"><div class="srt" id="sremt"></div><div class="srs" id="sirem">—</div></div></div>
+    <div class="srow na">
+      <div class="sric sric-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/></svg></div>
+      <div class="srbd"><div class="srt" id="slvt"></div><div class="srs" id="slvs"></div></div>
+      <div class="srv" id="silv">—</div>
+    </div>
+    <div class="srow" onclick="openProfModal()">
+      <div class="sric sric-green"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+      <div class="srbd"><div class="srt" id="sproft"></div><div class="srs" id="siprof">—</div></div>
+    </div>
+    <div class="srow" onclick="openRemModal()">
+      <div class="sric sric-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="srbd"><div class="srt" id="sremt"></div><div class="srs" id="sirem">—</div></div>
+    </div>
   </div>
 
   <!-- Interests -->
@@ -1457,9 +1546,28 @@ function openThemePicker(){
 }
 function closeThemePicker(){closeMod('themem');}
 
-/* ══ LEVEL TREES & RANKS ══ */
+/* ══ XP TREE SVGs (level-based) ══ */
+const TREE_SVGS=[
+  // 0 - Seedling
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V12" stroke="#2ecc71"/><path d="M12 12C12 12 7 10 7 5a5 5 0 0110 0c0 5-5 7-5 7z" fill="rgba(46,204,113,.2)" stroke="#2ecc71"/></svg>`,
+  // 100 - Sprout
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V10" stroke="#27ae60"/><path d="M12 10C12 10 6 8 6 3a6 6 0 0112 0c0 5-6 7-6 7z" fill="rgba(39,174,96,.2)" stroke="#27ae60"/><path d="M12 14c-2-1-4-3-3-6" stroke="#27ae60"/></svg>`,
+  // 300 - Sapling
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M12 22V8" stroke="#1abc9c"/><ellipse cx="12" cy="6" rx="5" ry="4" fill="rgba(26,188,156,.2)" stroke="#1abc9c"/><ellipse cx="9" cy="12" rx="3" ry="2.5" fill="rgba(26,188,156,.15)" stroke="#1abc9c"/><ellipse cx="15" cy="13" rx="3" ry="2.5" fill="rgba(26,188,156,.15)" stroke="#1abc9c"/></svg>`,
+  // 600 - Tree
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="11" y="17" width="2" height="5" fill="#8b5e3c" rx="1"/><ellipse cx="12" cy="10" rx="7" ry="8" fill="rgba(46,204,113,.2)" stroke="#2ecc71"/><ellipse cx="12" cy="7" rx="5" ry="5" fill="rgba(46,204,113,.25)" stroke="#27ae60"/></svg>`,
+  // 1000 - Oak
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="11" y="16" width="2" height="6" fill="#7a4f2e" rx="1"/><ellipse cx="12" cy="9" rx="8" ry="9" fill="rgba(46,204,113,.18)" stroke="#2ecc71"/><ellipse cx="8"  cy="8" rx="5" ry="5" fill="rgba(39,174,96,.2)" stroke="#27ae60"/><ellipse cx="16" cy="7" rx="5" ry="5" fill="rgba(26,188,156,.2)" stroke="#1abc9c"/></svg>`,
+  // 1500 - Star
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,184,48,.2)" stroke="#ffb830"/></svg>`,
+  // 2500 - Galaxy
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(167,139,250,.25)" stroke="#a78bfa"/><circle cx="12" cy="12" r="2" fill="#a78bfa"/></svg>`,
+  // 4000 - Legend
+  `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 1l2.8 8.6H23l-7.4 5.4 2.8 8.6L12 19l-6.4 4.6 2.8-8.6L1 9.6h8.2z" fill="rgba(255,184,48,.3)" stroke="#ffb830"/><path d="M12 6l1.5 4.6H18l-4 2.9 1.5 4.6L12 15.5l-3.5 2.6 1.5-4.6-4-2.9h4.5z" fill="rgba(255,149,0,.5)" stroke="#ff9500"/></svg>`,
+];
+
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
-const RANKS=[{r:'🌱 Seedling',min:0,max:100},{r:'📗 Beginner',min:100,max:300},{r:'📘 Elementary',min:300,max:600},{r:'📙 Pre-Inter.',min:600,max:1000},{r:'⭐ Intermediate',min:1000,max:1500},{r:'🌟 Upper-Inter.',min:1500,max:2500},{r:'💫 Advanced',min:2500,max:4000},{r:'🏆 Master',min:4000,max:9999}];
+const RANKS=[{r:'Seedling',min:0,max:100},{r:'Beginner',min:100,max:300},{r:'Elementary',min:300,max:600},{r:'Pre-Inter.',min:600,max:1000},{r:'Intermediate',min:1000,max:1500},{r:'Upper-Inter.',min:1500,max:2500},{r:'Advanced',min:2500,max:4000},{r:'Master',min:4000,max:9999}];
 function treeOf(xp){return[...TREES].reverse().find(t=>xp>=t.min)||TREES[0];}
 function rankOf(xp){return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[RANKS.length-1];}
 
@@ -1496,7 +1604,7 @@ function renderHome(d){
   document.getElementById('hsub').textContent=d.streak>1?`${d.streak} ${lang==='ru'?'дней подряд 🔥':'days in a row! 🔥'}`:{ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
   const inf=rankOf(d.xp||0),tr=treeOf(d.xp||0);
   const pct=Math.max(0,Math.round((d.xp-inf.min)/(inf.max-inf.min)*100));
-  document.getElementById('xtree').textContent=tr.t;
+  const xtEl=document.getElementById('xtree');if(xtEl)xtEl.innerHTML=getTreeSvg(d.xp||0);
   document.getElementById('xrnk').textContent=inf.r;
   document.getElementById('xpill').textContent=d.level||'B1';
   setTimeout(()=>document.getElementById('xfill').style.width=pct+'%',300);
@@ -1630,14 +1738,17 @@ function loadXP(){return parseInt(LS.get('saved_xp')||'0',10);}
 /* ══ UPDATE XP BAR (live, both Home and Progress) ══ */
 function updateXPBar(xp){
   if(typeof xp!=='number'||isNaN(xp))return;
-  saveXP(xp); // always persist
+  saveXP(xp);
   const inf=rankOf(xp),tr=treeOf(xp);
   const pct=Math.max(0,Math.min(100,Math.round((xp-inf.min)/(inf.max-inf.min)*100)));
-  const xt=document.getElementById('xtree');   if(xt)xt.textContent=tr.t;
+  // Tree SVG
+  const xtEl=document.getElementById('xtree');if(xtEl)xtEl.innerHTML=getTreeSvg(xp);
+  // Text
   const xr=document.getElementById('xrnk');    if(xr)xr.textContent=inf.r;
   const xf=document.getElementById('xfill');   if(xf)xf.style.width=pct+'%';
   const xc=document.getElementById('xcur');    if(xc)xc.textContent=xp+' XP';
   const xm=document.getElementById('xmax');    if(xm)xm.textContent=inf.max<9999?`${xp} / ${inf.max} XP`:'🏆 Max!';
+  // Progress screen
   const pbf=document.getElementById('pbfi');   if(pbf)pbf.style.width=pct+'%';
   const pbc=document.getElementById('pbc');    if(pbc)pbc.textContent=xp+' XP';
   const pbm=document.getElementById('pbm');    if(pbm)pbm.textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
