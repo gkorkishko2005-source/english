@@ -2380,115 +2380,153 @@ function openRemModal(){
   const lm=document.getElementById('rem-lbl-m');
   if(lh)lh.textContent=lang==='ru'?'Часы':'Hour';
   if(lm)lm.textContent=lang==='ru'?'Минуты':'Minute';
-  // Parse saved time
   const cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
   const p=cur.split(':');
   drumH=Math.max(0,Math.min(23,parseInt(p[0]||'8',10)));
   const mRaw=parseInt(p[1]||'0',10);
-  drumM=Math.round(mRaw/5)%12; // index into 5-min steps
-  setTimeout(()=>{buildDrumH();buildDrumM();updateTimeDisplay();},60);
+  drumM=Math.min(11,Math.round(mRaw/5));
+  setTimeout(()=>{
+    initDrumCol('drum-h','drum-h-inner',drumH,24,true);
+    initDrumCol('drum-m','drum-m-inner',drumM,12,false);
+    updateTimeDisplay();
+  },80);
 }
 function closeRemModal(){closeMod('remm');}
-function pickTime(){}// legacy stub — unused
+function pickTime(){}
 
-function buildDrumH(){
-  buildDrum('drum-h','drum-h-inner',24,true,drumH,'h');
-}
-function buildDrumM(){
-  // 12 steps × 5 min = 0..55
-  buildDrum('drum-m','drum-m-inner',12,false,drumM,'m');
-}
-
-function buildDrum(colId,innerId,count,numeric,selIdx,type){
+/* ─── Single drum column implementation ─── */
+const ITEM_H=44; // px per item
+// Infinite scroll: render 3 full cycles (prev, current, next) so user can scroll freely
+function initDrumCol(colId,innerId,val,total,numeric){
   const col=document.getElementById(colId);
   const inner=document.getElementById(innerId);
   if(!col||!inner)return;
+
+  // Render 3 full sets of items
+  const SETS=3;
   inner.innerHTML='';
-  const PAD=3;
-  for(let i=-PAD;i<count+PAD;i++){
-    const v=((i%count)+count)%count;
-    const div=document.createElement('div');
-    div.className='time-drum-item';
-    div.textContent=numeric?String(v).padStart(2,'0'):String(v*5).padStart(2,'0');
-    inner.appendChild(div);
+  for(let set=0;set<SETS;set++){
+    for(let i=0;i<total;i++){
+      const div=document.createElement('div');
+      div.className='time-drum-item';
+      div.textContent=numeric?String(i).padStart(2,'0'):String(i*5).padStart(2,'0');
+      inner.appendChild(div);
+    }
   }
-  const activeAbsIdx=PAD+selIdx;
-  applyDrumTransform(inner,activeAbsIdx);
-  highlightDrum(inner,activeAbsIdx);
-  attachDrumGestures(col,inner,count,type);
+  inner.style.transition='none';
+
+  // Position: middle set (set index 1) + val
+  // Offset so that center of col (height/2) aligns to center of item (ITEM_H/2)
+  // col height = 220px, center = 110px
+  // item center at position p = p*ITEM_H + ITEM_H/2
+  // we want item at (total+val) to be at center: translateY = 110 - (total+val)*ITEM_H - ITEM_H/2
+  const colH=220;
+  const center=colH/2 - ITEM_H/2;
+  const startPos=center - (total+val)*ITEM_H;
+  inner.style.transform=`translateY(${startPos}px)`;
+  inner._total=total;inner._numeric=numeric;inner._sets=SETS;inner._startY=startPos;inner._curVal=val;
+
+  applyHighlight(inner,total+val,total);
+  addGestures(col,inner,total,innerId==='drum-h-inner'?'h':'m');
 }
 
-function getDrumOffset(absIdx){return -(absIdx*44)+88;}
-function applyDrumTransform(inner,absIdx){inner.style.transform=`translateY(${getDrumOffset(absIdx)}px)`;}
+function getValFromTranslate(inner){
+  const total=inner._total;
+  const colH=220,center=colH/2-ITEM_H/2;
+  const mat=new DOMMatrix(inner.style.transform);
+  const ty=mat.m42;
+  // Which index is at center?
+  const idx=Math.round((center-ty)/ITEM_H);
+  return((idx%total)+total)%total;
+}
 
-function highlightDrum(inner,absIdx){
-  inner.querySelectorAll('.time-drum-item').forEach((item,i)=>{
-    const d=Math.abs(i-absIdx);
-    item.classList.remove('selected','near','far');
-    if(d===0)item.classList.add('selected');
-    else if(d<=1)item.classList.add('near');
-    else item.classList.add('far');
-  });
+function snapToVal(inner,val,type,animate){
+  const total=inner._total;
+  const colH=220,center=colH/2-ITEM_H/2;
+  // Use middle set as reference
+  const targetIdx=total+val;
+  const targetY=center-targetIdx*ITEM_H;
+  inner.style.transition=animate?'transform .22s cubic-bezier(.25,.46,.45,.94)':'none';
+  inner.style.transform=`translateY(${targetY}px)`;
+  inner._curVal=val;
+  if(type==='h')drumH=val; else drumM=val;
+  applyHighlight(inner,targetIdx,total);
+  if(animate)setTimeout(()=>{inner.style.transition='';},240);
   updateTimeDisplay();
 }
 
-function attachDrumGestures(col,inner,count,type){
-  const PAD=3;
-  let startY=0,lastY=0,velY=0,dragging=false;
-  let baseAbsIdx=PAD+(type==='h'?drumH:drumM);
+function applyHighlight(inner,centerIdx,total){
+  const items=inner.querySelectorAll('.time-drum-item');
+  items.forEach((item,i)=>{
+    const d=Math.abs(i-centerIdx);
+    item.classList.remove('selected','near','far');
+    if(d===0)item.classList.add('selected');
+    else if(d===1)item.classList.add('near');
+    else item.classList.add('far');
+  });
+}
 
-  function absToVal(abs){return((abs%count)+count)%count;}
-  function snap(absIdx){
-    const clamped=Math.round(absIdx);
-    const val=absToVal(clamped);
-    const normalized=PAD+val;
-    if(type==='h')drumH=val; else drumM=val;
-    baseAbsIdx=normalized;
-    inner.style.transition='transform .25s cubic-bezier(.34,1.2,.64,1)';
-    applyDrumTransform(inner,normalized);
-    highlightDrum(inner,normalized);
-    setTimeout(()=>{inner.style.transition='';},280);
+function addGestures(col,inner,total,type){
+  const colH=220,center=colH/2-ITEM_H/2;
+  let startY=0,startTY=0,lastY=0,vel=0,dragging=false,raf=0;
+
+  function getTY(){const m=new DOMMatrix(inner.style.transform);return m.m42;}
+
+  function onStart(y){
+    cancelAnimationFrame(raf);
+    inner.style.transition='none';
+    startY=y;lastY=y;vel=0;dragging=true;
+    startTY=getTY();
+    if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();
   }
-  function fromY(dy){return baseAbsIdx-dy/44;}
+
+  function onMove(y){
+    if(!dragging)return;
+    const dy=y-startY;
+    vel=y-lastY;lastY=y;
+    let newTY=startTY+dy;
+    inner.style.transform=`translateY(${newTY}px)`;
+    // Live highlight
+    const liveIdx=Math.round((center-newTY)/ITEM_H);
+    applyHighlight(inner,liveIdx,total);
+    updateTimeDisplay();
+  }
+
+  function onEnd(y){
+    if(!dragging)return;dragging=false;
+    const dy=y-startY;
+    let finalTY=startTY+dy+vel*8; // small momentum
+    // Snap to nearest item
+    const rawIdx=Math.round((center-finalTY)/ITEM_H);
+    const val=((rawIdx%total)+total)%total;
+    snapToVal(inner,val,type,true);
+    if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();
+  }
 
   // Touch
-  col.addEventListener('touchstart',e=>{
-    inner.style.transition='none';
-    startY=e.touches[0].clientY;lastY=startY;velY=0;dragging=true;
-    baseAbsIdx=PAD+(type==='h'?drumH:drumM);
-  },{passive:true});
-  col.addEventListener('touchmove',e=>{
-    if(!dragging)return;
-    const dy=e.touches[0].clientY-startY;
-    velY=e.touches[0].clientY-lastY;lastY=e.touches[0].clientY;
-    const abs=fromY(dy);
-    applyDrumTransform(inner,abs);
-    highlightDrum(inner,Math.round(abs));
-  },{passive:true});
-  col.addEventListener('touchend',e=>{
-    if(!dragging)return;dragging=false;
-    const dy=e.changedTouches[0].clientY-startY;
-    let abs=fromY(dy)-velY*4;
-    snap(abs);
-  });
+  col.addEventListener('touchstart',e=>{onStart(e.touches[0].clientY);},{passive:true});
+  col.addEventListener('touchmove', e=>{onMove(e.touches[0].clientY);},{passive:true});
+  col.addEventListener('touchend',  e=>{onEnd(e.changedTouches[0].clientY);});
 
   // Mouse
-  col.addEventListener('mousedown',e=>{
-    inner.style.transition='none';
-    startY=e.clientY;lastY=startY;velY=0;dragging=true;
-    baseAbsIdx=PAD+(type==='h'?drumH:drumM);
-    e.preventDefault();
-  });
-  const mm=e=>{if(!dragging)return;velY=e.clientY-lastY;lastY=e.clientY;const abs=fromY(e.clientY-startY);applyDrumTransform(inner,abs);highlightDrum(inner,Math.round(abs));};
-  const mu=e=>{if(!dragging)return;dragging=false;snap(fromY(e.clientY-startY)-velY*4);};
-  window.addEventListener('mousemove',mm);
+  col.addEventListener('mousedown',e=>{onStart(e.clientY);e.preventDefault();});
+  const mv=e=>{onMove(e.clientY);};
+  const mu=e=>{onEnd(e.clientY);};
+  window.addEventListener('mousemove',mv);
   window.addEventListener('mouseup',mu);
 
-  // Wheel
+  // Wheel — one step at a time
+  let wheelDebounce=null;
   col.addEventListener('wheel',e=>{
-    e.preventDefault();
-    const cur=type==='h'?drumH:drumM;
-    snap(PAD+cur+(e.deltaY>0?1:-1));
+    e.preventDefault();e.stopPropagation();
+    clearTimeout(wheelDebounce);
+    wheelDebounce=setTimeout(()=>{
+      const cur=type==='h'?drumH:drumM;
+      const dir=e.deltaY>0?1:-1;
+      const next=((cur+dir)%total+total)%total;
+      const innerEl=document.getElementById(type==='h'?'drum-h-inner':'drum-m-inner');
+      if(innerEl)snapToVal(innerEl,next,type,true);
+    },16);
   },{passive:false});
 }
 
@@ -2501,9 +2539,9 @@ function updateTimeDisplay(){
   const sub=document.getElementById('time-sub');
   if(sub){
     const h=drumH;
-    const period=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
-    const label={ru:h<6?'Ночь':h<12?'Утро':h<17?'День':h<21?'Вечер':'Ночь',en:h<6?'Night':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Night',es:h<12?'Mañana':h<18?'Tarde':'Noche',de:h<12?'Morgen':h<18?'Nachmittag':'Abend',fr:h<12?'Matin':h<18?'Après-midi':'Soirée'}[lang]||'';
-    sub.textContent=`${period} ${label}`;
+    const p=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
+    const lbl={ru:h<6?'Ночь':h<12?'Утро':h<17?'День':h<21?'Вечер':'Ночь',en:h<6?'Night':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Night'}[lang]||'';
+    sub.textContent=`${p} ${lbl}`;
   }
 }
 
@@ -2526,6 +2564,10 @@ async function disableRem(){
   if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:'off'})});}catch{}
   closeRemModal();toast(L.remoff||'Reminders disabled','🔕');
 }
+
+// legacy stubs
+function buildDrum(){}function buildDrumH(){}function buildDrumM(){}
+function attachDrumGestures(){}function highlightDrum(){}function applyHighlight2(){}
 
 function closeCfm(){closeMod('cfmm');}
 
