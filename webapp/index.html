@@ -63,37 +63,76 @@
 .lwave:nth-child(1){animation-delay:0s}.lwave:nth-child(2){animation-delay:.12s}.lwave:nth-child(3){animation-delay:.24s}.lwave:nth-child(4){animation-delay:.36s}.lwave:nth-child(5){animation-delay:.48s}
 @keyframes lw{0%,100%{height:8px;opacity:.4}50%{height:28px;opacity:1}}
 
-/* ══ THEME PICKER iOS-style ══ */
-.theme-picker-btn{
-  display:flex;align-items:center;gap:12px;padding:13px 15px;
+/* Theme picker modal */
+.theme-scroll-outer{overflow:hidden;padding-bottom:4px}
+.theme-scroll-wrap{
+  display:flex;gap:12px;overflow-x:scroll;padding:16px 15px 20px;
+  -webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;
+  cursor:grab;user-select:none;
+}
+.theme-scroll-wrap:active{cursor:grabbing}
+.theme-scroll-wrap::-webkit-scrollbar{height:3px}
+.theme-scroll-wrap::-webkit-scrollbar-thumb{background:var(--e3);border-radius:3px}
+.theme-card{
+  flex-shrink:0;width:100px;height:148px;border-radius:14px;
+  cursor:pointer;border:2.5px solid transparent;transition:.22s;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  padding-bottom:12px;position:relative;overflow:hidden;
+  scroll-snap-align:start;
+}
+.theme-card.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.22)}
+.theme-card:active{transform:scale(.94)}
+.theme-card-chk{position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transition:.2s}
+.theme-card.on .theme-card-chk{opacity:1}
+.theme-card-name{font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);letter-spacing:.3px;text-align:center;padding:0 6px}
+
+/* ══ LANG PICKER (same iOS style) ══ */
+.lang-picker-btn{
+  display:flex;align-items:center;gap:11px;padding:12px 14px;
   background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);
   cursor:pointer;transition:.2s;width:100%;
 }
-.theme-picker-btn:active{background:var(--e2)}
-.theme-preview-circle{
-  width:32px;height:32px;border-radius:50%;flex-shrink:0;
-  border:2px solid rgba(255,255,255,.2);
+.lang-picker-btn:active{background:var(--e2)}
+.lang-flag-big{font-size:22px;flex-shrink:0;line-height:1}
+.lang-picker-name{font-size:14px;font-weight:600;flex:1}
+.lang-picker-arr{color:var(--t3);font-size:16px}
+/* Lang scroll in modal */
+.lang-scroll-wrap{
+  display:flex;flex-direction:column;gap:2px;padding:8px 15px 16px;
+  max-height:60vh;overflow-y:auto;
 }
-.theme-picker-name{font-size:14px;font-weight:600;flex:1}
-.theme-picker-arr{color:var(--t3);font-size:16px}
-/* Theme picker modal */
-.theme-scroll-wrap{
-  display:flex;gap:14px;overflow-x:auto;padding:18px 17px 6px;
-  -webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;
+.lang-scroll-wrap::-webkit-scrollbar{width:0}
+.lang-opt-row{
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  border-radius:var(--r2);cursor:pointer;transition:.15s;
 }
-.theme-scroll-wrap::-webkit-scrollbar{display:none}
-.theme-card{
-  flex-shrink:0;width:110px;height:160px;border-radius:16px;
-  cursor:pointer;border:2.5px solid transparent;transition:.2s;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  padding-bottom:14px;position:relative;overflow:hidden;
-  scroll-snap-align:start;
-}
-.theme-card.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
-.theme-card:active{transform:scale(.95)}
-.theme-card-chk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0;transition:.2s}
-.theme-card.on .theme-card-chk{opacity:1}
-.theme-card-name{font-size:11px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);letter-spacing:.3px}
+.lang-opt-row:active{background:var(--e2)}
+.lang-opt-row.on{background:rgba(var(--ar),.1)}
+.lang-opt-flag{font-size:20px;flex-shrink:0}
+.lang-opt-name{font-size:14px;font-weight:500;flex:1;color:var(--t1)}
+.lang-opt-chk{font-size:14px;color:var(--a);opacity:0;transition:.15s}
+.lang-opt-row.on .lang-opt-chk{opacity:1}
+
+/* ══ STATS SVG icons ══ */
+.s4ci-svg{width:28px;height:28px;margin-bottom:9px;flex-shrink:0}
+.s4ci-svg svg{width:28px;height:28px}
+
+/* ══ WEEKLY CHART improved ══ */
+.chart-wrap{padding:4px 0}
+.chart{display:flex;align-items:flex-end;gap:5px;height:72px;margin-bottom:8px}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;cursor:pointer}
+.bb{width:100%;border-radius:5px 5px 0 0;min-height:3px;background:linear-gradient(180deg,var(--a),rgba(var(--ar),.18));transition:height .75s cubic-bezier(.4,0,.2,1),opacity .2s}
+.bb:hover{opacity:.85}
+.bb.td{background:linear-gradient(180deg,var(--a2),rgba(0,212,170,.18))}
+.bb.zero{background:var(--e3);min-height:4px}
+.bd{font-size:10px;color:var(--t3)}.bd.td{color:var(--a2);font-weight:700}
+.chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--t1);pointer-events:none;transform:translateX(-50%);white-space:nowrap;z-index:10;opacity:0;transition:opacity .15s}
+.chart-tooltip.show{opacity:1}
+
+/* ══ SESSIONS sections ══ */
+.s-section-header{padding:10px 15px 6px;font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.8px;text-transform:uppercase}
+.s-section-empty{padding:12px 15px;font-size:13px;color:var(--t3);font-style:italic}
+.sitem.starred-item .sit::before{content:'';}
 
 /* ══ SESSIONS context menu ══ */
 .sitem{padding:14px 15px;border-bottom:1px solid var(--b1);cursor:pointer;transition:.15s;position:relative}
@@ -440,8 +479,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;display:flex;align-items:flex-end;justify-content:center;animation:mfi .2s ease}
 .mov.cls{animation:mfo .25s ease forwards}
 @keyframes mfi{from{opacity:0}to{opacity:1}}@keyframes mfo{from{opacity:1}to{opacity:0}}
-.msh{background:var(--e1);border-radius:19px 19px 0 0;width:100%;max-width:420px;padding:0 0 calc(22px + var(--safe));animation:msu .3s cubic-bezier(.34,1.2,.64,1);max-height:80vh;overflow-y:auto}
+.msh{background:var(--e1);border-radius:19px 19px 0 0;width:100%;max-width:420px;padding:0 0 calc(22px + var(--safe));animation:msu .3s cubic-bezier(.34,1.2,.64,1);max-height:80vh;overflow-y:auto;overflow-x:hidden}
 .msh.cls{animation:msd .25s ease forwards}
+/* Theme modal needs overflow visible for horizontal scroll */
+#themem .msh{overflow:hidden;}
 @keyframes msu{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes msd{from{transform:translateY(0)}to{transform:translateY(100%)}}
 .mhnd{width:32px;height:4px;border-radius:2px;background:var(--e3);margin:11px auto 4px}
 .mtit{font-size:16px;font-weight:700;padding:8px 17px 13px;border-bottom:1px solid var(--b1)}
@@ -638,13 +679,33 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="sec"><span id="stat-lbl"></span></div>
   <div class="s4">
-    <div class="s4c"><div class="s4ca">›</div><div class="s4ci">📅</div><div class="s4cv" id="psess" style="color:var(--a)">—</div><div class="s4cl" id="psl1"></div></div>
-    <div class="s4c" onclick="goTab('learn')"><div class="s4ca">›</div><div class="s4ci">📝</div><div class="s4cv" id="pwrds" style="color:var(--a2)">—</div><div class="s4cl" id="psl2"></div></div>
-    <div class="s4c"><div class="s4ca">›</div><div class="s4ci">✅</div><div class="s4cv" id="ptsts" style="color:var(--gd)">—</div><div class="s4cl" id="psl3"></div></div>
-    <div class="s4c" onclick="openChat('mistakes')"><div class="s4ca">›</div><div class="s4ci">❌</div><div class="s4cv" id="perrs" style="color:var(--rd)">—</div><div class="s4cl" id="psl4"></div></div>
+    <div class="s4c">
+      <div class="s4ca">›</div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--a)" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="22" height="18" rx="3"/><path d="M3 11h22M8 3v6M20 3v6"/></svg></div>
+      <div class="s4cv" id="psess" style="color:var(--a)">—</div><div class="s4cl" id="psl1"></div>
+    </div>
+    <div class="s4c" onclick="goTab('learn')">
+      <div class="s4ca">›</div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--a2)" stroke-width="1.8" stroke-linecap="round"><path d="M4 5h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M26 7l-8 4v10l8-4V7z"/><path d="M18 5l8 4"/></svg></div>
+      <div class="s4cv" id="pwrds" style="color:var(--a2)">—</div><div class="s4cl" id="psl2"></div>
+    </div>
+    <div class="s4c">
+      <div class="s4ca">›</div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--gd)" stroke-width="1.8" stroke-linecap="round"><path d="M14 2l3.09 6.26L24 9.27l-5 4.87 1.18 6.88L14 17.77l-6.18 3.35L9 14.14 4 9.27l6.91-1.01L14 2z"/></svg></div>
+      <div class="s4cv" id="ptsts" style="color:var(--gd)">—</div><div class="s4cl" id="psl3"></div>
+    </div>
+    <div class="s4c" onclick="openChat('mistakes')">
+      <div class="s4ca">›</div>
+      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="var(--rd)" stroke-width="1.8" stroke-linecap="round"><circle cx="14" cy="14" r="11"/><path d="M14 9v5M14 18.5v.5"/></svg></div>
+      <div class="s4cv" id="perrs" style="color:var(--rd)">—</div><div class="s4cl" id="psl4"></div>
+    </div>
   </div>
   <div class="sec"><span id="tw-lbl"></span></div>
-  <div class="card"><div class="chart" id="chart"></div><div style="display:flex;gap:4px" id="chartdays"></div></div>
+  <div class="card chart-wrap" style="position:relative">
+    <div class="chart" id="chart"></div>
+    <div style="display:flex;gap:5px" id="chartdays"></div>
+    <div class="chart-tooltip" id="chart-tooltip"></div>
+  </div>
   <div class="sec"><span>TOEFL</span></div>
   <div class="card"><div id="toefll" style="text-align:center;color:var(--t2);font-size:13px;padding:8px 0"></div></div>
 </div>
@@ -653,36 +714,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="screen" id="s-settings">
   <div class="shdr"><div class="stit" id="set-tit"></div></div>
 
-  <!-- Interface language (10 languages) -->
+  <!-- Interface language picker -->
   <div class="sec"><span id="uilang-lbl"></span></div>
-  <div class="lgrid">
-    <div class="lopt" data-l="ru"    onclick="setLang('ru')"   ><span class="flag">🇷🇺</span>Русский</div>
-    <div class="lopt" data-l="en"    onclick="setLang('en')"   ><span class="flag">🇬🇧</span>English</div>
-    <div class="lopt" data-l="es"    onclick="setLang('es')"   ><span class="flag">🇪🇸</span>Español</div>
-    <div class="lopt" data-l="de"    onclick="setLang('de')"   ><span class="flag">🇩🇪</span>Deutsch</div>
-    <div class="lopt" data-l="fr"    onclick="setLang('fr')"   ><span class="flag">🇫🇷</span>Français</div>
-    <div class="lopt" data-l="pt"    onclick="setLang('pt')"   ><span class="flag">🇧🇷</span>Português</div>
-    <div class="lopt" data-l="uk"    onclick="setLang('uk')"   ><span class="flag">🇺🇦</span>Українська</div>
-    <div class="lopt" data-l="tr"    onclick="setLang('tr')"   ><span class="flag">🇹🇷</span>Türkçe</div>
-    <div class="lopt" data-l="zh"    onclick="setLang('zh')"   ><span class="flag">🇨🇳</span>中文</div>
-    <div class="lopt" data-l="ar"    onclick="setLang('ar')"   ><span class="flag">🇸🇦</span>العربية</div>
+  <div class="lang-picker-btn" onclick="openLangPicker('ui')">
+    <span class="lang-flag-big" id="ui-lang-flag">🇷🇺</span>
+    <div class="lang-picker-name" id="ui-lang-name">Русский</div>
+    <span class="lang-picker-arr">›</span>
   </div>
 
-  <!-- Bot response language -->
+  <!-- Bot response language picker -->
   <div class="sec"><span id="botlang-lbl"></span></div>
-  <div class="blgrid">
-    <div class="blo" data-bl="ru" onclick="setBotLang('ru')"><span class="flag">🇷🇺</span>Русский</div>
-    <div class="blo" data-bl="en" onclick="setBotLang('en')"><span class="flag">🇬🇧</span>English</div>
-    <div class="blo" data-bl="es" onclick="setBotLang('es')"><span class="flag">🇪🇸</span>Español</div>
-    <div class="blo" data-bl="de" onclick="setBotLang('de')"><span class="flag">🇩🇪</span>Deutsch</div>
-    <div class="blo" data-bl="fr" onclick="setBotLang('fr')"><span class="flag">🇫🇷</span>Français</div>
-    <div class="blo" data-bl="pt" onclick="setBotLang('pt')"><span class="flag">🇧🇷</span>Português</div>
-    <div class="blo" data-bl="uk" onclick="setBotLang('uk')"><span class="flag">🇺🇦</span>Українська</div>
-    <div class="blo" data-bl="tr" onclick="setBotLang('tr')"><span class="flag">🇹🇷</span>Türkçe</div>
-    <div class="blo" data-bl="zh" onclick="setBotLang('zh')"><span class="flag">🇨🇳</span>中文</div>
-    <div class="blo" data-bl="ar" onclick="setBotLang('ar')"><span class="flag">🇸🇦</span>العربية</div>
-    <div class="blo" data-bl="ja" onclick="setBotLang('ja')"><span class="flag">🇯🇵</span>日本語</div>
-    <div class="blo" data-bl="ko" onclick="setBotLang('ko')"><span class="flag">🇰🇷</span>한국어</div>
+  <div class="lang-picker-btn" onclick="openLangPicker('bot')">
+    <span class="lang-flag-big" id="bot-lang-flag">🇷🇺</span>
+    <div class="lang-picker-name" id="bot-lang-name">Русский</div>
+    <span class="lang-picker-arr">›</span>
   </div>
 
   <!-- Themes iOS-style -->
@@ -810,10 +855,28 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- THEME PICKER MODAL -->
 <div class="mov" id="themem" style="display:none" onclick="closeThemePicker()">
-  <div class="msh" onclick="event.stopPropagation()" style="max-height:90vh"><div class="mhnd"></div>
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow:hidden"><div class="mhnd"></div>
     <div class="mtit" id="theme-mtit">Theme</div>
-    <div class="theme-scroll-wrap" id="theme-scroll"></div>
-    <div style="height:12px"></div>
+    <div class="theme-scroll-outer">
+      <div class="theme-scroll-wrap" id="theme-scroll"></div>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- UI LANGUAGE PICKER MODAL -->
+<div class="mov" id="uilangm" style="display:none" onclick="closeModal('uilangm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="mtit" id="uilang-mtit">Interface language</div>
+    <div class="lang-scroll-wrap" id="uilang-scroll"></div>
+  </div>
+</div>
+
+<!-- BOT LANGUAGE PICKER MODAL -->
+<div class="mov" id="botlangm" style="display:none" onclick="closeModal('botlangm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="mtit" id="botlang-mtit">Bot language</div>
+    <div class="lang-scroll-wrap" id="botlang-scroll"></div>
   </div>
 </div>
 
@@ -1195,15 +1258,76 @@ function applyLang(){
   document.getElementById('cfmd').textContent=L.yescl;document.getElementById('cfmc').textContent=L.cancel;
   // Notif
   document.getElementById('ntxt').textContent=L.notift;document.getElementById('ncta').textContent=L.notifcta;
-  // Active lang indicator
-  document.querySelectorAll('.lopt').forEach(o=>o.classList.toggle('on',o.dataset.l===lang));
-  document.querySelectorAll('.blo').forEach(o=>o.classList.toggle('on',o.dataset.bl===botLang));
+  // Update lang picker buttons (replaces old grid toggles)
+  updateLangPickerBtns();
   // Profile UI
   if(window._d) updateProfileUI(window._d);
 }
 
-function setLang(l){lang=l;LS.set('app_lang',l);applyLang();toast({ru:'🇷🇺 Русский',en:'🇬🇧 English',es:'🇪🇸 Español',de:'🇩🇪 Deutsch',fr:'🇫🇷 Français',pt:'🇧🇷 Português',uk:'🇺🇦 Українська',tr:'🇹🇷 Türkçe',zh:'🇨🇳 中文',ar:'🇸🇦 العربية'}[l]||l);}
-function setBotLang(l){botLang=l;LS.set('bot_lang',l);document.querySelectorAll('.blo').forEach(o=>o.classList.toggle('on',o.dataset.bl===l));toast(L.blsav+l);}
+/* ══ LANGUAGE DATA ══ */
+const UI_LANGS=[
+  {code:'ru',flag:'🇷🇺',name:'Русский'},{code:'en',flag:'🇬🇧',name:'English'},
+  {code:'es',flag:'🇪🇸',name:'Español'},{code:'de',flag:'🇩🇪',name:'Deutsch'},
+  {code:'fr',flag:'🇫🇷',name:'Français'},{code:'pt',flag:'🇧🇷',name:'Português'},
+  {code:'uk',flag:'🇺🇦',name:'Українська'},{code:'tr',flag:'🇹🇷',name:'Türkçe'},
+  {code:'zh',flag:'🇨🇳',name:'中文'},{code:'ar',flag:'🇸🇦',name:'العربية'},
+];
+const BOT_LANGS=[
+  {code:'ru',flag:'🇷🇺',name:'Русский'},{code:'en',flag:'🇬🇧',name:'English'},
+  {code:'es',flag:'🇪🇸',name:'Español'},{code:'de',flag:'🇩🇪',name:'Deutsch'},
+  {code:'fr',flag:'🇫🇷',name:'Français'},{code:'pt',flag:'🇧🇷',name:'Português'},
+  {code:'uk',flag:'🇺🇦',name:'Українська'},{code:'tr',flag:'🇹🇷',name:'Türkçe'},
+  {code:'zh',flag:'🇨🇳',name:'中文'},{code:'ar',flag:'🇸🇦',name:'العربية'},
+  {code:'ja',flag:'🇯🇵',name:'日本語'},{code:'ko',flag:'🇰🇷',name:'한국어'},
+];
+
+function updateLangPickerBtns(){
+  const ul=UI_LANGS.find(x=>x.code===lang)||UI_LANGS[0];
+  const bl=BOT_LANGS.find(x=>x.code===botLang)||BOT_LANGS[0];
+  const uf=document.getElementById('ui-lang-flag');  if(uf)uf.textContent=ul.flag;
+  const un=document.getElementById('ui-lang-name');  if(un)un.textContent=ul.name;
+  const bf=document.getElementById('bot-lang-flag'); if(bf)bf.textContent=bl.flag;
+  const bn=document.getElementById('bot-lang-name'); if(bn)bn.textContent=bl.name;
+  // Also update modal titles
+  const um=document.getElementById('uilang-mtit');  if(um)um.textContent=L.uilang||'Interface language';
+  const bm=document.getElementById('botlang-mtit'); if(bm)bm.textContent=L.botlang||'Bot language';
+}
+
+function openLangPicker(type){
+  const isUI=type==='ui';
+  const modalId=isUI?'uilangm':'botlangm';
+  const scrollId=isUI?'uilang-scroll':'botlang-scroll';
+  const langs=isUI?UI_LANGS:BOT_LANGS;
+  const cur=isUI?lang:botLang;
+  const wrap=document.getElementById(scrollId);
+  if(!wrap)return;
+  wrap.innerHTML='';
+  langs.forEach(l=>{
+    const row=document.createElement('div');
+    row.className='lang-opt-row'+(l.code===cur?' on':'');
+    row.innerHTML=`<span class="lang-opt-flag">${l.flag}</span><span class="lang-opt-name">${l.name}</span><span class="lang-opt-chk">✓</span>`;
+    row.onclick=()=>{
+      wrap.querySelectorAll('.lang-opt-row').forEach(r=>r.classList.remove('on'));
+      row.classList.add('on');
+      if(isUI)setLang(l.code);else setBotLang(l.code);
+      setTimeout(()=>closeMod(modalId),280);
+    };
+    wrap.appendChild(row);
+  });
+  openMod(modalId);
+  setTimeout(()=>{const on=wrap.querySelector('.on');if(on)on.scrollIntoView({block:'center',behavior:'smooth'});},80);
+}
+
+function setLang(l){
+  lang=l;LS.set('app_lang',l);L=LANGS[l]||LANGS.en;
+  applyLang();updateLangPickerBtns();
+  toast((UI_LANGS.find(x=>x.code===l)?.flag||'')+(UI_LANGS.find(x=>x.code===l)?.name||l));
+}
+function setBotLang(l){
+  botLang=l;LS.set('bot_lang',l);
+  updateLangPickerBtns();
+  toast((BOT_LANGS.find(x=>x.code===l)?.flag||'')+' '+(BOT_LANGS.find(x=>x.code===l)?.name||l));
+}
 
 /* ══ CHIP COOLDOWN ══ */
 let chipCooldown = false;
@@ -1265,16 +1389,27 @@ function openThemePicker(){
     const card=document.createElement('div');
     card.className='theme-card'+(th.t===cur?' on':'');
     card.style.background=th.grad;
-    card.innerHTML=`<div class="theme-card-chk">✓</div><div class="theme-card-name">${th.n[lang]||th.n.en}</div>`;
-    card.onclick=()=>{
+    card.innerHTML=`<div class="theme-card-chk">✓</div><div class="theme-card-name">${th.n[lang]||th.n.en||th.n.ru}</div>`;
+    card.addEventListener('click',()=>{
       document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('on'));
       card.classList.add('on');
       setTheme(th.t);
-    };
+    });
     wrap.appendChild(card);
   });
-  // Scroll to active
-  setTimeout(()=>{const on=wrap.querySelector('.on');if(on)on.scrollIntoView({inline:'center',behavior:'smooth'});},50);
+
+  // Mouse drag scroll
+  let isDown=false,startX=0,sl=0;
+  wrap.addEventListener('mousedown',e=>{isDown=true;startX=e.pageX-wrap.offsetLeft;sl=wrap.scrollLeft;wrap.style.cursor='grabbing';});
+  wrap.addEventListener('mouseleave',()=>{isDown=false;wrap.style.cursor='grab';});
+  wrap.addEventListener('mouseup',()=>{isDown=false;wrap.style.cursor='grab';});
+  wrap.addEventListener('mousemove',e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-wrap.offsetLeft;wrap.scrollLeft=sl-(x-startX);});
+
+  // Scroll to current active card
+  setTimeout(()=>{
+    const on=wrap.querySelector('.on');
+    if(on){on.scrollIntoView({inline:'center',behavior:'smooth'});}
+  },80);
 }
 function closeThemePicker(){closeMod('themem');}
 
@@ -1352,23 +1487,60 @@ function renderProgress(d){
 function drawProgress(){
   const d=window._d||{};
   const inf=rankOf(d.xp||0),pct=(d.xp-inf.min)/(inf.max-inf.min);
-  setTimeout(()=>document.getElementById('rfil').style.strokeDashoffset=220-Math.max(0,pct)*220,80);
+  setTimeout(()=>document.getElementById('rfil').style.strokeDashoffset=220-Math.max(0,Math.min(1,pct))*220,80);
+
+  // Stats - track locally if server returns 0
+  const savedStats=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
+  const sess =Math.max(d.sessions||0, savedStats.sessions||0);
+  const words=Math.max(d.words||0,    savedStats.words||0);
+  const tests=Math.max(d.tests||0,    savedStats.tests||0);
+  const errors=Math.max(d.errors||0,  savedStats.errors||0);
+  const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
+  // Sync home stat boxes too
+  safe('hs1', d.streak||0); safe('hs2', words); safe('hs3', tests);
+
+  // Weekly chart
   const days={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],uk:['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],en:['Mo','Tu','We','Th','Fr','Sa','Su'],es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],de:['Mo','Di','Mi','Do','Fr','Sa','So'],fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],tr:['Pt','Sa','Ça','Pe','Cu','Ct','Pz'],zh:['一','二','三','四','五','六','日'],ar:['إث','ثل','أر','خم','جم','سب','أح']}[lang]||['Mo','Tu','We','Th','Fr','Sa','Su'];
   const today=((new Date().getDay()||7)-1);
-  const w=d.weekly||Array(7).fill(0),mx=Math.max(...w,1);
+  const rawW=d.weekly||Array(7).fill(0);
+  // Merge with local daily XP tracking
+  const localW=LS.getJ('weekly_xp')||Array(7).fill(0);
+  const w=rawW.map((v,i)=>Math.max(v,localW[i]||0));
+  const mx=Math.max(...w,1);
   const cEl=document.getElementById('chart'),dEl=document.getElementById('chartdays');
+  const tip=document.getElementById('chart-tooltip');
+  if(!cEl||!dEl)return;
   cEl.innerHTML='';dEl.innerHTML='';
   w.forEach((v,i)=>{
     const bc=document.createElement('div');bc.className='bc';
-    const bb=document.createElement('div');bb.className='bb'+(i===today?' td':'');bb.style.height='0';
+    const isToday=i===today;
+    const bb=document.createElement('div');
+    bb.className='bb'+(isToday?' td':'')+(v===0?' zero':'');
+    bb.style.height='0';
     bc.appendChild(bb);cEl.appendChild(bc);
-    setTimeout(()=>bb.style.height=(v/mx*60)+'px',70+i*50);
+    // Tooltip on click
+    if(v>0){
+      bb.onclick=(e)=>{
+        const rect=e.target.getBoundingClientRect();
+        const cardRect=cEl.parentElement.getBoundingClientRect();
+        if(tip){
+          tip.textContent=v+' XP';
+          tip.style.left=(rect.left-cardRect.left+rect.width/2)+'px';
+          tip.style.top=(rect.top-cardRect.top-32)+'px';
+          tip.classList.add('show');
+          setTimeout(()=>tip.classList.remove('show'),1500);
+        }
+      };
+    }
+    setTimeout(()=>bb.style.height=(v/mx*68)+'px',70+i*45);
     const dl=document.createElement('div');dl.style.cssText='flex:1;text-align:center';
-    dl.className='bd'+(i===today?' td':'');dl.textContent=days[i];dEl.appendChild(dl);
+    dl.className='bd'+(isToday?' td':'');dl.textContent=days[i];dEl.appendChild(dl);
   });
+  // TOEFL
   const sc=d.toefl_scores||[],tl=document.getElementById('toefll');
-  if(sc.length)tl.innerHTML=sc.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b1);animation:pg .3s ease ${i*.07}s both"><span style="flex:1;font-size:13px">${s.section}</span><div style="flex:2;background:var(--e3);border-radius:100px;height:4px;overflow:hidden"><div style="height:100%;background:var(--a);width:${s.score/s.max*100}%;border-radius:100px;transition:width 1.2s ease"></div></div><span style="font-size:11px;color:var(--t2);width:28px;text-align:right">${s.score}/${s.max}</span></div>`).join('');
-  else tl.textContent=L.notoefl;
+  if(tl){if(sc.length)tl.innerHTML=sc.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b1);animation:pg .3s ease ${i*.07}s both"><span style="flex:1;font-size:13px">${s.section}</span><div style="flex:2;background:var(--e3);border-radius:100px;height:4px;overflow:hidden"><div style="height:100%;background:var(--a);width:${s.score/s.max*100}%;border-radius:100px;transition:width 1.2s ease"></div></div><span style="font-size:11px;color:var(--t2);width:28px;text-align:right">${s.score}/${s.max}</span></div>`).join('');
+  else tl.textContent=L.notoefl;}
 }
 
 function renderInterests(ints){
@@ -1385,8 +1557,30 @@ function updateProfileUI(d){
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
 }
 
-/* ══ XP PERSISTENCE ══ */
-function saveXP(xp){LS.set('saved_xp',String(xp));}
+/* ══ XP PERSISTENCE + WEEKLY TRACKING ══ */
+function saveXP(xp){
+  LS.set('saved_xp',String(xp));
+  // Also update today's weekly bucket
+  const today=((new Date().getDay()||7)-1);
+  const w=LS.getJ('weekly_xp')||Array(7).fill(0);
+  // Reset if last update was a different week
+  const lastDay=parseInt(LS.get('weekly_day')||'-1',10);
+  const todayNum=new Date().getDay();
+  if(lastDay===-1){w.fill(0);}
+  LS.set('weekly_day',String(todayNum));
+  if(!w[today])w[today]=0;
+  LS.setJ('weekly_xp',w);
+}
+function addWeeklyXP(amount){
+  const today=((new Date().getDay()||7)-1);
+  const w=LS.getJ('weekly_xp')||Array(7).fill(0);
+  w[today]=(w[today]||0)+amount;
+  LS.setJ('weekly_xp',w);
+  // Also update stats count
+  const s=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
+  s.sessions=(s.sessions||0)+1;
+  LS.setJ('local_stats',s);
+}
 function loadXP(){return parseInt(LS.get('saved_xp')||'0',10);}
 
 /* ══ UPDATE XP BAR (live, both Home and Progress) ══ */
@@ -1437,15 +1631,13 @@ function trackM(key,delta=1){
   if(earned){
     const xpGain = xpMap[key] || 20;
     toast(`+${xpGain} XP 🎉`, '⭐');
-    // Update local XP immediately
     if(!window._d) window._d = {xp:0};
     window._d.xp = (window._d.xp || 0) + xpGain;
     updateXPBar(window._d.xp);
-    // Save to server
+    addWeeklyXP(xpGain); // track in weekly chart
     if(API && window._uid){
       fetch(`${API}/api/add_xp`, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
+        method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({uid: window._uid, xp: xpGain})
       }).catch(()=>{});
     }
@@ -1468,17 +1660,39 @@ function newSession(sid){
 }
 
 function renderSList(){
-  const ul=document.getElementById('slist');ul.innerHTML='';
-  // Starred first, then by date
-  const sorted=[...sessions].sort((a,b)=>(b.starred?1:0)-(a.starred?1:0));
-  sorted.forEach(s=>{
+  const ul=document.getElementById('slist');
+  if(!ul)return;
+  ul.innerHTML='';
+  const starred=sessions.filter(s=>s.starred);
+  const recents=sessions.filter(s=>!s.starred);
+
+  function makeItem(s){
     const d=document.createElement('div');
-    d.className='sitem'+(s.id===curSid?' act':'')+(s.starred?' starred':'');
+    d.className='sitem'+(s.id===curSid?' act':'');
     const dt=new Date(s.created).toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{month:'short',day:'numeric'});
-    d.innerHTML=`<div class="sit">${s.title}</div><div class="sid">${dt}</div><button class="smore" onclick="openSCtx(${s.id},event)">···</button>`;
-    d.onclick=(e)=>{if(!e.target.closest('.smore'))switchSes(s.id);};
-    ul.appendChild(d);
-  });
+    d.innerHTML=`<div class="sit">${s.title}</div><div class="sid">${dt}</div><button class="smore" data-id="${s.id}">···</button>`;
+    d.querySelector('.smore').addEventListener('click',e=>{e.stopPropagation();openSCtx(s.id,e);});
+    d.addEventListener('click',e=>{if(!e.target.closest('.smore'))switchSes(s.id);});
+    return d;
+  }
+
+  if(starred.length){
+    const h=document.createElement('div');h.className='s-section-header';
+    h.textContent=lang==='ru'?'⭐ Избранные':'⭐ Starred';
+    ul.appendChild(h);
+    starred.forEach(s=>ul.appendChild(makeItem(s)));
+  }
+  if(recents.length){
+    const h=document.createElement('div');h.className='s-section-header';
+    h.textContent=lang==='ru'?'Недавние':'Recents';
+    ul.appendChild(h);
+    recents.forEach(s=>ul.appendChild(makeItem(s)));
+  }
+  if(!sessions.length){
+    const e=document.createElement('div');e.className='s-section-empty';
+    e.textContent=lang==='ru'?'Нет бесед. Нажми + чтобы начать.':'No chats yet. Tap + to start.';
+    ul.appendChild(e);
+  }
 }
 
 /* ══ SESSION CONTEXT MENU ══ */
@@ -1707,6 +1921,10 @@ async function doChat(text){
     addMsg('bot',(await r.json()).reply||'...');
     resetChipCooldown();
     saveCurSes();
+    // Track session locally for stats
+    const stats=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
+    stats.sessions=Math.max(stats.sessions||0,(window._d?.sessions||0));
+    LS.setJ('local_stats',stats);
   }catch(e){rmTyping();addMsg('bot',L.errconn);}
   finally{busy=false;document.getElementById('sndb').disabled=false;resetChipCooldown();}
 }
@@ -1939,6 +2157,8 @@ document.getElementById('remm').onclick=function(e){if(e.target===this)closeRemM
 document.getElementById('cfmm').onclick=function(e){if(e.target===this)closeCfm();};
 document.getElementById('themem').onclick=function(e){if(e.target===this)closeThemePicker();};
 document.getElementById('renamem').onclick=function(e){if(e.target===this)closeRenameModal();};
+document.getElementById('uilangm')?.addEventListener('click',function(e){if(e.target===this)closeMod('uilangm');});
+document.getElementById('botlangm')?.addEventListener('click',function(e){if(e.target===this)closeMod('botlangm');});
 // Rename on Enter
 document.getElementById('rename-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')doRename();});
 
@@ -1981,6 +2201,8 @@ function restoreSettings(d){
   updateProfileUI(d);
   // Update theme picker button
   setTheme(LS.get('app_theme')||'');
+  // Update lang picker buttons
+  updateLangPickerBtns();
   return d;
 }
 
