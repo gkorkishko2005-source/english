@@ -125,12 +125,29 @@ async def handle_chat(request: web.Request) -> web.Response:
         except Exception as e:
             logger.warning(f"Could not get user data for {uid}: {e}")
 
+    # Строим системный промпт
     try:
         from prompts import build_system
         system = build_system(level, lang, interests, profession, "correction")
     except Exception as e:
         logger.error(f"build_system failed: {e}")
-        system = "You are ALEX, a friendly English tutor. Help the student with English. Explain in Russian."
+        system = "You are ALEX, a friendly English tutor. Help the student with English."
+
+    # Язык ответа и форматирование — только markdown, без HTML тегов
+    persona_prompt = str(body.get("persona_prompt", ""))
+    bl = str(body.get("bot_lang", "Respond in Russian."))
+    formatting_instruction = (
+        "\n\nFORMATTING RULES (mandatory):\n"
+        "- Use **bold** for emphasis (NOT <b> tags)\n"
+        "- Use *italic* for examples (NOT <i> tags)\n"
+        "- Use `code` for words/phrases (NOT <code> tags)\n"
+        "- Bullet points with • or -\n"
+        "- 💡 prefix for tips, ✅ prefix for corrections\n"
+        "- NEVER output HTML tags like <b>, </b>, <i>, </i>, <br>\n"
+    )
+    if persona_prompt:
+        system = persona_prompt + "\n\n" + system
+    system = system + formatting_instruction + "\n" + bl
 
     # История в памяти
     h = _histories.setdefault(uid, [])
@@ -267,6 +284,20 @@ async def handle_test(request: web.Request) -> web.Response:
 # ══════════════════════════════════════════════════════════════════
 #  FLASHCARD RATE
 # ══════════════════════════════════════════════════════════════════
+
+async def handle_add_xp(request: web.Request) -> web.Response:
+    """Добавляет XP пользователю из WebApp."""
+    from database import add_xp
+    try:
+        body = await request.json()
+        uid  = int(body.get("uid", 0))
+        xp   = int(body.get("xp", 0))
+    except Exception:
+        return web.json_response({"error": "bad request"}, status=400)
+    if uid and xp > 0:
+        await add_xp(uid, min(xp, 100))  # cap at 100 per call
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin": "*"})
+
 
 async def handle_rate(request: web.Request) -> web.Response:
     from database import update_word_review, add_xp
@@ -420,6 +451,7 @@ def create_app() -> web.Application:
     app.router.add_post("/api/lesson",          handle_lesson)
     app.router.add_post("/api/test",            handle_test)
     app.router.add_post("/api/rate_card",       handle_rate)
+    app.router.add_post("/api/add_xp",          handle_add_xp)
     app.router.add_post("/api/set_profession",  handle_set_profession)
     app.router.add_post("/api/set_reminder",    handle_set_reminder)
     app.router.add_post("/api/audio_task",      handle_audio_task)
