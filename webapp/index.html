@@ -1058,15 +1058,41 @@ function applyLang(){
 function setLang(l){lang=l;LS.set('app_lang',l);applyLang();toast({ru:'🇷🇺 Русский',en:'🇬🇧 English',es:'🇪🇸 Español',de:'🇩🇪 Deutsch',fr:'🇫🇷 Français',pt:'🇧🇷 Português',uk:'🇺🇦 Українська',tr:'🇹🇷 Türkçe',zh:'🇨🇳 中文',ar:'🇸🇦 العربية'}[l]||l);}
 function setBotLang(l){botLang=l;LS.set('bot_lang',l);document.querySelectorAll('.blo').forEach(o=>o.classList.toggle('on',o.dataset.bl===l));toast(L.blsav+l);}
 
+/* ══ CHIP COOLDOWN ══ */
+let chipCooldown = false;
+function chipAction(fn){
+  if(chipCooldown || busy) return;
+  chipCooldown = true;
+  fn();
+  // Re-enable after message is processed (max 30s)
+  setTimeout(()=>chipCooldown=false, 30000);
+}
+// Called after bot replies to reset cooldown immediately
+function resetChipCooldown(){ chipCooldown = false; }
+
 /* ══ CHIPS ══ */
 function buildChips(){
-  const el=document.getElementById('chips');
-  el.innerHTML=[L.c_corr,L.c_gr,L.c_sp,L.c_vc,L.c_au,L.c_id,L.c_er].map((t,i)=>{
-    const fn=i===4?'startAudio()':'sendChip('+JSON.stringify(t)+')';
-    return`<div class="chip" onclick="${fn}">${['✍️','📚','💬','📝','🎧','🗣','❌'][i]} ${t}</div>`;
-  }).join('');
+  const el = document.getElementById('chips');
+  if(!el) return;
+  el.innerHTML = '';
+  const items = [
+    {icon:'✍️', text: L.c_corr,  fn: ()=>chipAction(()=>sendChip(L.c_corr))},
+    {icon:'📚', text: L.c_gr,    fn: ()=>chipAction(()=>sendChip(L.c_gr))},
+    {icon:'💬', text: L.c_sp,    fn: ()=>chipAction(()=>sendChip(L.c_sp))},
+    {icon:'📝', text: L.c_vc,    fn: ()=>chipAction(()=>sendChip(L.c_vc))},
+    {icon:'🎧', text: L.c_au,    fn: ()=>chipAction(startAudio)},
+    {icon:'🗣', text: L.c_id,    fn: ()=>chipAction(()=>sendChip(L.c_id))},
+    {icon:'❌', text: L.c_er,    fn: ()=>chipAction(()=>sendChip(L.c_er))},
+  ];
+  items.forEach(item=>{
+    const div = document.createElement('div');
+    div.className = 'chip';
+    div.textContent = item.icon + ' ' + item.text;
+    div.addEventListener('click', item.fn);
+    el.appendChild(div);
+  });
   // Wheel scroll
-  el.onwheel=e=>{e.preventDefault();el.scrollLeft+=e.deltaY;};
+  el.onwheel = e=>{ e.preventDefault(); el.scrollLeft += e.deltaY; };
 }
 
 /* ══ THEMES ══ */
@@ -1184,15 +1210,27 @@ function updateProfileUI(d){
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
 }
 
-/* ══ UPDATE XP BAR (live) ══ */
+/* ══ UPDATE XP BAR (live, both Home and Progress) ══ */
 function updateXPBar(xp){
-  const inf=rankOf(xp||0),tr=treeOf(xp||0);
-  const pct=Math.max(0,Math.round((xp-inf.min)/(inf.max-inf.min)*100));
-  const xt=document.getElementById('xtree');if(xt)xt.textContent=tr.t;
-  const xr=document.getElementById('xrnk');if(xr)xr.textContent=inf.r;
-  const xf=document.getElementById('xfill');if(xf)xf.style.width=pct+'%';
-  const xc=document.getElementById('xcur');if(xc)xc.textContent=`${xp} XP`;
-  const xm=document.getElementById('xmax');if(xm)xm.textContent=inf.max<9999?`${xp} / ${inf.max} XP`:'🏆 Max!';
+  if(typeof xp !== 'number') return;
+  const inf = rankOf(xp), tr = treeOf(xp);
+  const pct = Math.max(0, Math.min(100, Math.round((xp - inf.min)/(inf.max - inf.min)*100)));
+  // Home screen
+  const xt=document.getElementById('xtree');   if(xt)  xt.textContent  = tr.t;
+  const xr=document.getElementById('xrnk');    if(xr)  xr.textContent  = inf.r;
+  const xf=document.getElementById('xfill');   if(xf)  xf.style.width  = pct+'%';
+  const xc=document.getElementById('xcur');    if(xc)  xc.textContent  = xp+' XP';
+  const xm=document.getElementById('xmax');    if(xm)  xm.textContent  = inf.max<9999?`${xp} / ${inf.max} XP`:'🏆 Max!';
+  // Progress screen
+  const rlv=document.getElementById('rlvtxt'); if(rlv) rlv.textContent = window._d?.level||'B1';
+  const pbf=document.getElementById('pbfi');   if(pbf) pbf.style.width = pct+'%';
+  const pbc=document.getElementById('pbc');    if(pbc) pbc.textContent = xp+' XP';
+  const pbm=document.getElementById('pbm');    if(pbm) pbm.textContent = inf.max<9999?`/ ${inf.max} XP`:'Max!';
+  const prk=document.getElementById('prk');    if(prk) prk.textContent = inf.r+' '+tr.t;
+  const pxp=document.getElementById('pxp');    if(pxp) pxp.textContent = xp+' XP total';
+  // Animate ring
+  const rfil=document.getElementById('rfil');
+  if(rfil) rfil.style.strokeDashoffset = 220 - (pct/100)*220;
 }
 
 /* ══ MISSIONS ══ */
@@ -1222,18 +1260,19 @@ function trackM(key,delta=1){
   if(key==='dwords'&&!sv.done['4']){sv.done['4']=true;earned=true;}
   LS.setJ('missions',sv);
   if(earned){
-    const xpGain=xpMap[key]||20;
-    const k2m={chat:'1',words:'2',listen:'3',dwords:'4'};
-    toast(`+${xpGain} XP 🎉`,'⭐');
-    // Optimistically add XP to local data
-    if(window._d){
-      window._d.xp=(window._d.xp||0)+xpGain;
-      updateXPBar(window._d.xp);
-    }
-    // Send to API
-    if(API&&window._uid){
-      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({uid:window._uid,xp:xpGain})}).catch(()=>{});
+    const xpGain = xpMap[key] || 20;
+    toast(`+${xpGain} XP 🎉`, '⭐');
+    // Update local XP immediately
+    if(!window._d) window._d = {xp:0};
+    window._d.xp = (window._d.xp || 0) + xpGain;
+    updateXPBar(window._d.xp);
+    // Save to server
+    if(API && window._uid){
+      fetch(`${API}/api/add_xp`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({uid: window._uid, xp: xpGain})
+      }).catch(()=>{});
     }
   }
   loadMissions();
@@ -1426,9 +1465,10 @@ async function doChat(text){
     rmTyping();
     if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
     addMsg('bot',(await r.json()).reply||'...');
+    resetChipCooldown();
     saveCurSes();
   }catch(e){rmTyping();addMsg('bot',L.errconn);}
-  finally{busy=false;document.getElementById('sndb').disabled=false;}
+  finally{busy=false;document.getElementById('sndb').disabled=false;resetChipCooldown();}
 }
 
 function confirmClear(){openMod('cfmm');}
