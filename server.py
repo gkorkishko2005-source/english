@@ -365,29 +365,25 @@ async def handle_health(request):
 
 # ── CHECK PREMIUM ─────────────────────────────────────────────────────────────
 async def handle_check_premium(request):
-    """Returns premium status for a user. Admin whitelist is checked here."""
+    """Returns detailed premium status for a user."""
     try:
         uid = int(request.match_info["uid"])
     except Exception:
         return web.json_response({"error":"invalid uid"},status=400)
 
-    # Check whitelist first (free premium for admins)
+    # Check whitelist first (free lifetime premium for admins)
     if uid in ADMIN_IDS:
-        return web.json_response({"is_premium":True,"source":"admin_whitelist"},
-                                  headers={"Access-Control-Allow-Origin":"*"})
+        return web.json_response({
+            "is_premium":True,"tier":"ultimate","until":None,"lifetime":True,"source":"admin"
+        }, headers={"Access-Control-Allow-Origin":"*"})
 
     try:
-        from database import check_premium, get_user
-        user = await get_user(uid)
-        username = (user or {}).get("name","")
-        if any(u.lower() in username.lower() for u in ADMIN_USERNAMES if u):
-            return web.json_response({"is_premium":True,"source":"admin_whitelist"},
-                                      headers={"Access-Control-Allow-Origin":"*"})
-        active = await check_premium(uid)
-        return web.json_response({"is_premium":active,"source":"database"},
-                                  headers={"Access-Control-Allow-Origin":"*"})
+        from database import get_premium_info
+        info = await get_premium_info(uid)
+        info["source"] = "database"
+        return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
-        return web.json_response({"is_premium":False,"error":str(e)},
+        return web.json_response({"is_premium":False,"tier":"","error":str(e)},
                                   headers={"Access-Control-Allow-Origin":"*"})
 
 # ── GRANT PREMIUM (called by bot after successful payment) ────────────────────
@@ -397,19 +393,19 @@ async def handle_grant_premium(request):
         body = await request.json()
         uid = int(body.get("uid",0))
         months = int(body.get("months",1))
+        tier = str(body.get("tier","pro"))
         secret = body.get("secret","")
     except Exception:
         return web.json_response({"error":"bad request"},status=400)
 
-    # Simple shared secret between bot and server
     BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
     if secret != BOT_SECRET:
         return web.json_response({"error":"unauthorized"},status=403)
 
     try:
         from database import set_premium
-        await set_premium(uid, months)
-        return web.json_response({"ok":True,"uid":uid,"months":months},
+        await set_premium(uid, months, tier)
+        return web.json_response({"ok":True,"uid":uid,"months":months,"tier":tier},
                                   headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
