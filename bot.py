@@ -588,44 +588,76 @@ async def cmd_start(message: Message):
     name = message.from_user.first_name or "Student"
     await upsert_user(uid, name)
 
-    # Handle deep links: /start premium, /start ref_XXXXX
+    # Handle deep links
     args = message.text.split(maxsplit=1)[1] if len(message.text.split()) > 1 else ""
     if args == "premium":
-        # Route to premium command
         await cmd_premium(message)
         return
     if args.startswith("ref_"):
-        # Referral — grant bonus XP to referrer
         try:
             ref_uid = int(args.replace("ref_",""))
             await add_xp(ref_uid, 500)
             lang_ref = await get_lang(ref_uid)
             ru_ref = lang_ref == "ru"
             await bot.send_message(ref_uid,
-                f"🎉 {'Твой друг зарегистрировался по ссылке! +500 XP тебе!' if ru_ref else 'Your friend joined via your link! +500 XP for you!'}")
+                f"🎉 {'Твой друг зарегистрировался! +500 XP!' if ru_ref else 'Your friend joined! +500 XP!'}")
         except Exception:
             pass
 
-    scheduler.add_job(send_weekly_report,"cron",day_of_week="sun",hour=19,args=[uid],id=f"weekly_{uid}",replace_existing=True)
-
     # Grant free premium if admin
     if await is_admin(uid):
-        await grant_premium_via_server(uid, 999)
+        await grant_premium_via_server(uid, 999, "ultimate")
 
-    user = await get_user(uid)
-    if not user or not user.get("lang"):
-        await message.answer("🌍 Choose language / Выбери язык:", reply_markup=lang_kb())
-        return
-    lang = await get_lang(uid)
-    interests = await get_interests(uid)
-    ctx_msg = f"\n\n💡 {'Продолжим работу над' if lang=='ru' else 'Continuing with'} <b>{interests.split(',')[0].strip()}</b>!" if interests else ""
-    await message.answer(
-        f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b> 👋\n\n"
-        f"Я <b>ALEX</b> — {'твой AI-репетитор английского.' if lang=='ru' else 'your AI English tutor.'}{ctx_msg}\n\n"
-        f"<i>{'Выбери с чего начать 👇' if lang=='ru' else 'Choose where to start 👇'}</i>",
-        reply_markup=main_kb(lang)
+    lang = await get_lang(uid) or "ru"
+    ru = lang == "ru"
+
+    # WebApp button
+    from aiogram.types import WebAppInfo
+    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+
+    kb_buttons = []
+    if app_url:
+        kb_buttons.append([InlineKeyboardButton(
+            text="📱 Открыть приложение" if ru else "📱 Open App",
+            web_app=WebAppInfo(url=app_url)
+        )])
+    kb_buttons.append([InlineKeyboardButton(
+        text="💎 Premium" if ru else "💎 Premium",
+        callback_data="open_premium"
+    )])
+
+    welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
+
+    is_prem = await is_admin(uid) or await check_premium(uid)
+    badge = " · 👑 Premium" if is_prem else ""
+
+    text = (
+        f"👋 <b>Привет, {name}!</b>{badge}\n\n"
+        f"Я <b>ALEX</b> — твой AI-репетитор английского.\n\n"
+        f"📱 <b>Открой приложение</b> для обучения:\n"
+        f"• Чат с AI-репетитором\n"
+        f"• Карточки и повторение слов\n"
+        f"• Grammar games\n"
+        f"• TOEFL тренировка\n"
+        f"• Прогресс и статистика\n\n"
+        f"👇 Нажми кнопку ниже"
+    ) if ru else (
+        f"👋 <b>Hey, {name}!</b>{badge}\n\n"
+        f"I'm <b>ALEX</b> — your AI English tutor.\n\n"
+        f"📱 <b>Open the app</b> to start learning:\n"
+        f"• Chat with AI tutor\n"
+        f"• Flashcards & vocabulary\n"
+        f"• Grammar games\n"
+        f"• TOEFL practice\n"
+        f"• Progress tracking\n\n"
+        f"👇 Tap the button below"
     )
-    await message.answer("🎯 <b>Level:</b>", reply_markup=level_kb())
+    await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+
+@dp.callback_query(F.data == "open_premium")
+async def cb_open_premium(cb: CallbackQuery):
+    await cb.answer()
+    await cmd_premium(cb.message)
 
 @dp.message(Command("lang"))
 async def cmd_lang(m: Message):
@@ -1434,13 +1466,13 @@ async def is_admin(uid: int) -> bool:
     """Check if user is admin (free premium)."""
     return uid in ADMIN_IDS
 
-async def grant_premium_via_server(uid: int, months: int):
+async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate"):
     """Call server API to grant premium."""
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             await client.post(
                 f"http://localhost:8080/api/premium/grant",
-                json={"uid": uid, "months": months, "secret": BOT_SECRET}
+                json={"uid": uid, "months": months, "tier": tier, "secret": BOT_SECRET}
             )
     except Exception as e:
         logger.error(f"grant_premium_via_server error: {e}")
@@ -1592,7 +1624,7 @@ async def on_payment_success(msg: Message):
         tier_emoji = {"basic":"🟢","pro":"🔵","ultimate":"💎"}.get(tier,"🟢")
 
         # Grant premium in database via server
-        await grant_premium_via_server(uid, months)
+        await grant_premium_via_server(uid, months, tier)
 
         # Confirm to user
         text = (
