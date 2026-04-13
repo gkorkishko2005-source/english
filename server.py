@@ -17,11 +17,9 @@ MODEL       = "claude-haiku-4-5-20251001"   # ← FIXED model name
 # Add your Telegram user IDs here — they get lifetime free premium
 # To find your ID: message @userinfobot in Telegram
 ADMIN_IDS = {
-    5399839500,
-    1738695057,
-    725259177,
-    1241890707,
-    1428437531,
+    # Добавь свои ID сюда:
+    # 123456789,   # Гордей
+    # 987654321,   # Семья
 }
 # Any username in this set also gets free premium
 ADMIN_USERNAMES = {
@@ -414,6 +412,35 @@ async def handle_grant_premium(request):
     except Exception as e:
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── TTS ──────────────────────────────────────────────────────────────────────
+async def handle_tts(request):
+    """Text-to-speech endpoint. Returns MP3 audio bytes."""
+    try:
+        body = await request.json()
+        text = str(body.get("text","")).strip()[:500]  # limit 500 chars
+        tts_lang = str(body.get("lang","en"))[:5]
+        if not text:
+            return web.json_response({"error":"empty text"},status=400)
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400)
+
+    try:
+        from tts import text_to_speech
+        audio = await text_to_speech(text, lang=tts_lang)
+        if audio:
+            return web.Response(
+                body=audio,
+                content_type="audio/mpeg",
+                headers={
+                    "Access-Control-Allow-Origin":"*",
+                    "Cache-Control":"public, max-age=86400",
+                }
+            )
+        return web.json_response({"error":"TTS failed"},status=500,headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"TTS error: {e}")
+        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
 async def handle_options(request):
     return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data"})
@@ -434,6 +461,7 @@ def create_app():
     app.router.add_post("/api/audio_task",handle_audio_task)
     app.router.add_get("/api/premium/{uid}",handle_check_premium)
     app.router.add_post("/api/premium/grant",handle_grant_premium)
+    app.router.add_post("/api/tts",handle_tts)
     app.router.add_get("/health",handle_health)
     app.router.add_route("OPTIONS","/{tail:.*}",handle_options)
     app.router.add_static("/",WEBAPP_DIR,show_index=False)
