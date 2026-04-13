@@ -34,6 +34,7 @@ else:
     logger.info(f"✅ ANTHROPIC_API_KEY loaded (starts with {ANT_KEY[:8]}...)")
 
 _histories: dict = {}
+_msg_counts: dict = {}  # daily message counts per user
 
 # ── STATIC ──────────────────────────────────────────────────────────────────
 async def handle_index(request):
@@ -128,9 +129,13 @@ async def handle_chat(request):
         uid     = int(body.get("uid", 0))
         message = str(body.get("message", "")).strip()
         if not message:
-            return web.json_response({"error": "empty"}, status=400)
+            return web.json_response({"error": "empty"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
-        return web.json_response({"error": str(e)}, status=400)
+        return web.json_response({"error": str(e)}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+
+    if not ANT_KEY:
+        logger.error("ANTHROPIC_API_KEY is not set!")
+        return web.json_response({"error": "API key not configured. Add ANTHROPIC_API_KEY to Railway variables."}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
     level="B1"; lang="ru"; interests=""; profession=""
     if uid:
@@ -166,21 +171,65 @@ async def handle_chat(request):
         system = persona_prompt + "\n\n" + system
     system = system + fmt + "\n" + bl
 
-    # Check premium for longer responses
+    # Check premium for model selection and limits
     user_premium = False
+    user_tier = ""
     if uid in ADMIN_IDS:
         user_premium = True
+        user_tier = "ultimate"
     elif uid:
         try:
-            from database import check_premium
-            user_premium = await check_premium(uid)
+            from database import check_premium, get_premium_info
+            info = await get_premium_info(uid)
+            user_premium = info.get("is_premium", False)
+            user_tier = info.get("tier", "")
         except Exception:
             pass
 
+    # Model routing by tier:
+    # Free = Haiku (10 msgs/day)
+    # Basic = Haiku (30 msgs/day)
+    # Pro = Haiku default + Sonnet for complex tasks (60 msgs/day)
+    # Ultimate = Sonnet default (80 msgs/day)
+    chat_model = MODEL  # default Haiku
+    max_tokens = 600
+    msg_limit = 10  # free users
+    if user_tier == "basic":
+        chat_model = MODEL  # Haiku
+        max_tokens = 800
+        msg_limit = 30
+    elif user_tier == "pro":
+        # Pro: use Sonnet for grammar/correction, Haiku for casual chat
+        is_complex = any(kw in message.lower() for kw in [
+            'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
+            'toefl','test','тест','анализ','разбор','why','почему','правило'
+        ])
+        chat_model = "claude-sonnet-4-6-20250514" if is_complex else MODEL
+        max_tokens = 1200
+        msg_limit = 60
+    elif user_tier == "ultimate":
+        chat_model = "claude-sonnet-4-6-20250514"
+        max_tokens = 1500
+        msg_limit = 80
+
+    # Check daily message limit (skip for admins)
+    if uid not in ADMIN_IDS:
+        today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
+        msg_count = _msg_counts.get(today_key, 0)
+        if msg_count >= msg_limit:
+            limit_msg = ("Лимит сообщений на сегодня исчерпан. " if lang=="ru" else "Daily message limit reached. ")
+            if not user_premium:
+                limit_msg += "Оформи Premium для большего лимита! /premium" if lang=="ru" else "Get Premium for more! /premium"
+            else:
+                limit_msg += "Приходи завтра! 😊" if lang=="ru" else "Come back tomorrow! 😊"
+            return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
+        _msg_counts[today_key] = msg_count + 1
+
     h = _histories.setdefault(uid, [])
     h.append({"role": "user", "content": message})
-    if len(h) > (40 if user_premium else 20):
-        _histories[uid] = h[-(40 if user_premium else 20):]
+    history_limit = 20 if not user_premium else (30 if user_tier=="basic" else 50 if user_tier=="pro" else 80)
+    if len(h) > history_limit:
+        _histories[uid] = h[-history_limit:]
 
     try:
         async with httpx.AsyncClient(timeout=45) as client:
@@ -192,8 +241,8 @@ async def handle_chat(request):
                     "content-type": "application/json",
                 },
                 json={
-                    "model": MODEL,
-                    "max_tokens": 1200 if user_premium else 800,
+                    "model": chat_model,
+                    "max_tokens": max_tokens,
                     "system": system,
                     "messages": _histories[uid],
                 },
@@ -439,6 +488,28 @@ async def handle_tts(request):
         logger.error(f"TTS error: {e}")
         return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── SYNC STATS ────────────────────────────────────────────────────────────────
+async def handle_sync_stats(request):
+    """Sync local stats from webapp to server — updates XP and streak."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0))
+        stats = body.get("stats",{})
+        if not uid:
+            return web.json_response({"error":"no uid"},status=400)
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400)
+    try:
+        from database import db, update_streak
+        xp = int(stats.get("xp",0))
+        if xp > 0:
+            await db("UPDATE users SET xp=GREATEST(xp,?) WHERE uid=?", xp, uid)
+        await update_streak(uid)
+        return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"sync_stats error: {e}")
+        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
 async def handle_options(request):
     return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data"})
@@ -460,6 +531,7 @@ def create_app():
     app.router.add_get("/api/premium/{uid}",handle_check_premium)
     app.router.add_post("/api/premium/grant",handle_grant_premium)
     app.router.add_post("/api/tts",handle_tts)
+    app.router.add_post("/api/sync_stats",handle_sync_stats)
     app.router.add_get("/health",handle_health)
     app.router.add_route("OPTIONS","/{tail:.*}",handle_options)
     app.router.add_static("/",WEBAPP_DIR,show_index=False)
