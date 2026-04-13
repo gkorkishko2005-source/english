@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS users (
     complex_streak  INTEGER DEFAULT 0,
     simple_streak   INTEGER DEFAULT 0,
     auto_level      BOOLEAN DEFAULT TRUE,
+    is_premium      BOOLEAN DEFAULT FALSE,
+    premium_until   TIMESTAMPTZ,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -289,6 +291,28 @@ async def upsert_user(uid: int, name: str):
 async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
+
+async def set_premium(uid: int, months: int = 1):
+    """Grant premium access for given months. 0 = revoke."""
+    from datetime import datetime, timedelta
+    if months <= 0:
+        await db("UPDATE users SET is_premium=FALSE, premium_until=NULL WHERE uid=?", uid)
+    else:
+        until = datetime.now() + timedelta(days=30 * months)
+        await db("UPDATE users SET is_premium=TRUE, premium_until=? WHERE uid=?", until.isoformat(), uid)
+
+async def check_premium(uid: int) -> bool:
+    """Returns True if user has active premium."""
+    from datetime import datetime
+    user = await get_user(uid)
+    if not user: return False
+    if not user.get("is_premium"): return False
+    until = user.get("premium_until")
+    if until is None: return True  # Lifetime
+    try:
+        return datetime.fromisoformat(str(until)) > datetime.now()
+    except Exception:
+        return False
 
 async def add_xp(uid: int, amount: int):
     await db("UPDATE users SET xp=xp+? WHERE uid=?", amount, uid)
