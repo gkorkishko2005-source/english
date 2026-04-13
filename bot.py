@@ -1,16 +1,5 @@
 """
-╔══════════════════════════════════════════════════════════════════╗
-   LinguaMax · ALEX v4 — Ultimate Edition
-   
-   НОВОЕ в v4:
-   ✅ PostgreSQL (Railway) + SQLite fallback
-   ✅ Tone Editor — 5 стилей переписывания фразы
-   ✅ Whisper STT — анализ произношения из голосовых
-   ✅ Cultural Idioms — сценарии с идиомами + SM-2
-   ✅ Smart Roleplay — персонализация по профессии
-   ✅ Vision Learning — учёба по фото
-   ✅ TOEFL Listening — лекции И диалоги (чередуются)
-╚══════════════════════════════════════════════════════════════════╝
+LinguaMax ALEX v4
 """
 
 import asyncio
