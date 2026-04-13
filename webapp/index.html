@@ -731,7 +731,18 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-feat-sub{font-size:11px;color:var(--t2)}
 .prem-btn{margin:0 17px 10px;padding:15px;background:linear-gradient(135deg,#d4a843,#ffb830);border:none;border-radius:var(--r2);width:calc(100% - 34px);font-family:var(--f);font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:.18s;box-shadow:0 4px 18px rgba(212,168,67,.3)}
 .prem-btn:active{transform:scale(.97)}
-.prem-free{text-align:center;font-size:12px;color:var(--t3);padding-bottom:14px;cursor:pointer}
+.prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
+/* Premium plan cards */
+.prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
+.prem-plan{background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);padding:14px;cursor:pointer;transition:.2s;position:relative}
+.prem-plan:active{transform:scale(.97)}
+.prem-plan.pp-pop{border-color:rgba(var(--ar),.4);background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(0,212,170,.04))}
+.pp-popular{position:absolute;top:-9px;right:14px;font-size:10px;font-weight:700;color:#fff;background:var(--a);padding:2px 10px;border-radius:100px;letter-spacing:.3px}
+.pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pp-badge{font-size:12px;font-weight:800;color:#fff;padding:3px 10px;border-radius:6px}
+.pp-price{font-size:16px;font-weight:800;color:var(--t1)}
+.pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
+.pp-buffs{font-size:12px;color:var(--t2);line-height:1.7}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -1272,14 +1283,27 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- PREMIUM MODAL -->
 <div class="mov" id="premiumm" style="display:none" onclick="closeModal('premiumm')">
-  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0"><div class="mhnd"></div>
+  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="prem-hero">
       <div class="prem-crown"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg></div>
       <div class="prem-title" id="prem-title">ALEX Premium</div>
       <div class="prem-sub" id="prem-sub">Unlock the full power of your AI tutor</div>
     </div>
-    <div class="prem-feats" id="prem-feats"></div>
-    <button class="prem-btn" onclick="activatePremium()" id="prem-btn">Get Premium — 399 ⭐</button>
+    <div class="prem-plans" id="prem-plans">
+      <div class="prem-plan" onclick="selectPlan('basic')">
+        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">99 ⭐<small>/мес</small></span></div>
+        <div class="pp-buffs" id="pp-basic-buffs"></div>
+      </div>
+      <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
+        <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro</span><span class="pp-price">249 ⭐<small>/3 мес</small></span></div>
+        <div class="pp-buffs" id="pp-pro-buffs"></div>
+      </div>
+      <div class="prem-plan" onclick="selectPlan('ultimate')">
+        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate</span><span class="pp-price">499 ⭐<small>/год</small></span></div>
+        <div class="pp-buffs" id="pp-ult-buffs"></div>
+      </div>
+    </div>
     <div class="prem-free" onclick="closeModal('premiumm')" id="prem-free">Continue free</div>
   </div>
 </div>
@@ -3388,29 +3412,32 @@ const PREMIUM_FEATURES=[
 function openPremium(highlightFeature){
   const title=document.getElementById('prem-title');
   const sub=document.getElementById('prem-sub');
-  const btn=document.getElementById('prem-btn');
   const free=document.getElementById('prem-free');
-  const feats=document.getElementById('prem-feats');
 
   if(title)title.textContent='ALEX Premium';
-  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power of your AI tutor';
-  if(btn)btn.textContent={ru:'Купить Premium — от 149 ⭐',en:'Get Premium — from 149 ⭐'}[lang]||'Get Premium — from 149 ⭐';
+  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power';
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free'}[lang]||'Continue free';
+  const pop=document.getElementById('pp-popular-lbl');
+  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',de:'Beliebt',fr:'Populaire'}[lang]||'Popular';
 
-  if(feats){
-    feats.innerHTML='';
-    PREMIUM_FEATURES.forEach(f=>{
-      const fl=f[lang]||f.en;
-      const el=document.createElement('div');el.className='prem-feat';
-      el.innerHTML=`<div class="prem-feat-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="${f.icon}"/></svg></div><div><div class="prem-feat-title">${fl.title}</div><div class="prem-feat-sub">${fl.sub}</div></div>`;
-      feats.appendChild(el);
-    });
+  // Fill plan buffs
+  const basicB=document.getElementById('pp-basic-buffs');
+  const proB=document.getElementById('pp-pro-buffs');
+  const ultB=document.getElementById('pp-ult-buffs');
+  if(lang==='ru'){
+    if(basicB)basicB.innerHTML='✅ 40 сообщений/день<br>✅ Голосовые ответы<br>✅ 5 grammar games';
+    if(proB)proB.innerHTML='✅ Безлимит сообщений<br>✅ Голос + все сценки<br>✅ Анализ ошибок<br>✅ 🎭 VIP личности';
+    if(ultB)ultB.innerHTML='✅ Всё из Pro<br>✅ TOEFL Mock Exams<br>✅ Персональный план<br>✅ 💎 Эксклюзивные темы';
+  } else {
+    if(basicB)basicB.innerHTML='✅ 40 messages/day<br>✅ Voice replies<br>✅ 5 grammar games';
+    if(proB)proB.innerHTML='✅ Unlimited messages<br>✅ Voice + all scenarios<br>✅ Error analysis<br>✅ 🎭 VIP personas';
+    if(ultB)ultB.innerHTML='✅ Everything in Pro<br>✅ TOEFL Mock Exams<br>✅ Personal study plan<br>✅ 💎 Exclusive themes';
   }
   openMod('premiumm');
 }
 
-function activatePremium(){
-  // Open bot chat to handle Telegram Stars payment
+function selectPlan(plan){
+  haptic('medium');
   const botName=window.BOT_NAME||'PolyGlotty_bot';
   if(tg?.openTelegramLink){
     tg.openTelegramLink(`https://t.me/${botName}?start=premium`);
@@ -3419,7 +3446,6 @@ function activatePremium(){
   }
   closeMod('premiumm');
   toast({ru:'Открываю бот для оплаты...',en:'Opening bot for payment...'}[lang]||'Opening bot...','💎');
-  // Poll for premium status every 5s for 60s after payment flow starts
   let polls=0;
   const poll=setInterval(async()=>{
     polls++;
@@ -3433,6 +3459,8 @@ function activatePremium(){
     }
   },5000);
 }
+
+function activatePremium(){ selectPlan('pro'); }
 
 /* ══ Update applyLang for new labels ══ */
 function updateNewLabels(){
