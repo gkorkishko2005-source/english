@@ -1,5 +1,5 @@
 """
-LinguaMax · База данных v4 — PostgreSQL + SQLite fallback
+LinguaMax DB v4
 """
 
 import os
