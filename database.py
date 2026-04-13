@@ -92,6 +92,7 @@ CREATE TABLE IF NOT EXISTS users (
     auto_level      BOOLEAN DEFAULT TRUE,
     is_premium      BOOLEAN DEFAULT FALSE,
     premium_until   TIMESTAMPTZ,
+    premium_tier    TEXT DEFAULT '',
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -292,14 +293,55 @@ async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
 
-async def set_premium(uid: int, months: int = 1):
-    """Grant premium access for given months. 0 = revoke."""
+async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
+    """Grant premium access for given months with tier. 0 = revoke."""
     from datetime import datetime, timedelta
     if months <= 0:
-        await db("UPDATE users SET is_premium=FALSE, premium_until=NULL WHERE uid=?", uid)
+        await db("UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='' WHERE uid=?", uid)
+    elif months >= 900:
+        # Lifetime (admin)
+        await db("UPDATE users SET is_premium=TRUE, premium_until=NULL, premium_tier=? WHERE uid=?", tier, uid)
     else:
-        until = datetime.now() + timedelta(days=30 * months)
-        await db("UPDATE users SET is_premium=TRUE, premium_until=? WHERE uid=?", until.isoformat(), uid)
+        # Check if user already has active premium — extend from end date
+        user = await get_user(uid)
+        now = datetime.now()
+        current_until = None
+        if user and user.get("premium_until"):
+            try:
+                current_until = datetime.fromisoformat(str(user["premium_until"]))
+            except: pass
+        # If current premium is still active, extend from its end
+        base = current_until if (current_until and current_until > now) else now
+        until = base + timedelta(days=30 * months)
+        await db("UPDATE users SET is_premium=TRUE, premium_until=?, premium_tier=? WHERE uid=?", until.isoformat(), tier, uid)
+
+async def get_premium_info(uid: int) -> dict:
+    """Returns detailed premium info for UI display."""
+    from datetime import datetime
+    user = await get_user(uid)
+    if not user:
+        return {"is_premium": False, "tier": "", "until": None, "lifetime": False}
+    is_prem = bool(user.get("is_premium"))
+    until_str = user.get("premium_until")
+    tier = user.get("premium_tier", "") or ""
+    lifetime = is_prem and until_str is None
+    until = None
+    active = False
+    if is_prem:
+        if lifetime:
+            active = True
+        elif until_str:
+            try:
+                until = datetime.fromisoformat(str(until_str))
+                active = until > datetime.now()
+            except:
+                active = False
+    return {
+        "is_premium": active,
+        "tier": tier if active else "",
+        "until": until.isoformat() if until else None,
+        "lifetime": lifetime,
+    }
 
 async def check_premium(uid: int) -> bool:
     """Returns True if user has active premium."""
