@@ -222,6 +222,70 @@
 .s-section-empty{padding:12px 15px;font-size:13px;color:var(--t3);font-style:italic}
 .sitem.starred-item .sit::before{content:'';}
 
+/* ══ LEADERBOARD ══ */
+.lboard{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:13px;overflow:hidden}
+.lboard-hdr{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--b1)}
+.lboard-title{font-size:14px;font-weight:700;flex:1}
+.lboard-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px}
+.badge-gold{background:rgba(255,184,48,.15);color:#ffb830;border:1px solid rgba(255,184,48,.25)}
+.badge-silver{background:rgba(148,163,184,.12);color:#94a3b8;border:1px solid rgba(148,163,184,.2)}
+.badge-bronze{background:rgba(180,120,60,.12);color:#b4783c;border:1px solid rgba(180,120,60,.2)}
+.lboard-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--b1);transition:.15s}
+.lboard-row:last-child{border-bottom:none}
+.lboard-row.lme{background:rgba(var(--ar),.06)}
+.lboard-pos{font-size:13px;font-weight:700;color:var(--t3);width:20px;text-align:center;flex-shrink:0}
+.lboard-pos.top1{color:#ffb830}.lboard-pos.top2{color:#94a3b8}.lboard-pos.top3{color:#b4783c}
+.lboard-av{width:30px;height:30px;border-radius:9px;flex-shrink:0;background:var(--e3);display:flex;align-items:center;justify-content:center;font-size:14px}
+.lboard-av.me-av{background:linear-gradient(135deg,var(--a),var(--a2))}
+.lboard-av.me-av svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.lboard-info{flex:1;min-width:0}
+.lboard-name{font-size:13px;font-weight:600;color:var(--t1)}
+.lboard-bar{height:2px;background:var(--e3);border-radius:100px;margin-top:4px;max-width:80px;overflow:hidden}
+.lboard-fill{height:100%;background:var(--gb);border-radius:100px;transition:width .8s ease .1s}
+.lboard-xp{font-size:12px;font-weight:700;color:var(--a);flex-shrink:0}
+.lboard-invite{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:.15s;border-top:1px solid var(--b1);background:rgba(var(--ar),.03)}
+.lboard-invite:active{background:var(--e2)}
+.li-icon{width:30px;height:30px;border-radius:9px;background:rgba(var(--ar),.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.li-icon svg{width:15px;height:15px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round}
+.li-text{font-size:13px;font-weight:600;color:var(--a);flex:1}
+
+/* ══ STAT EMPTY ACTION ══ */
+.stat-cta{display:flex;align-items:center;gap:7px;padding:7px 11px;background:rgba(var(--ar),.07);border:1px solid rgba(var(--ar),.15);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s;width:100%;background:none;font-family:var(--f);text-align:left}
+.stat-cta svg{width:13px;height:13px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.stat-cta-txt{font-size:11px;font-weight:600;color:var(--a)}
+
+/* ══ ONBOARDING ══ */
+.onboard{position:fixed;inset:0;background:var(--e0);z-index:600;display:flex;flex-direction:column;padding:44px 20px 28px;overflow-y:auto}
+.onboard.exit{animation:sld .3s ease forwards}
+.ob-dots{display:flex;gap:5px;margin-bottom:28px}
+.ob-dot{height:3px;flex:1;background:var(--e3);border-radius:100px;transition:.35s}
+.ob-dot.on{background:var(--a)}
+.ob-step{font-size:11px;font-weight:700;color:var(--a);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
+.ob-title{font-size:22px;font-weight:800;line-height:1.25;margin-bottom:8px}
+.ob-sub{font-size:14px;color:var(--t2);line-height:1.55;margin-bottom:22px}
+.ob-opts{display:flex;flex-direction:column;gap:8px}
+.ob-opt{padding:14px 16px;border-radius:var(--r);border:1.5px solid var(--b2);background:var(--e1);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:11px}
+.ob-opt:active{transform:scale(.97)}
+.ob-opt.sel{border-color:var(--a);background:rgba(var(--ar),.1)}
+.ob-ltr{width:26px;height:26px;border-radius:7px;background:var(--e3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:var(--t2)}
+.ob-opt.sel .ob-ltr{background:var(--a);color:#fff}
+.ob-txt{font-size:14px;font-weight:500;color:var(--t1)}
+.ob-next{margin-top:18px;padding:15px;background:var(--a);border:none;border-radius:var(--r2);width:100%;font-family:var(--f);font-size:15px;font-weight:700;color:#fff;cursor:pointer;transition:.18s}
+.ob-next:active{transform:scale(.97)}
+.ob-next:disabled{opacity:.35;cursor:default}
+.ob-result{text-align:center;padding:20px 0;display:flex;flex-direction:column;align-items:center}
+.ob-res-tree{font-size:72px;margin-bottom:14px;animation:float 3s ease-in-out infinite}
+.ob-res-level{font-size:36px;font-weight:800;margin-bottom:8px}
+.ob-res-sub{font-size:15px;color:var(--t2);line-height:1.55;max-width:280px;margin:0 auto 28px}
+
+/* ══ SHARE & REFERRAL ══ */
+.share-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;border:1px solid rgba(var(--ar),.2);background:rgba(var(--ar),.08);cursor:pointer;font-family:var(--f);font-size:11px;font-weight:600;color:var(--a);transition:.15s}
+.ref-card{display:flex;align-items:center;gap:13px;padding:14px 16px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.05));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);cursor:pointer;transition:.18s;margin-bottom:13px}
+.ref-card:active{transform:scale(.98)}
+.ref-ico{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ref-ico svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.ref-title{font-size:14px;font-weight:700;margin-bottom:2px}.ref-sub{font-size:12px;color:var(--t2)}
+
 /* ══ SESSIONS context menu ══ */
 .sitem{padding:14px 15px;border-bottom:1px solid var(--b1);cursor:pointer;transition:.15s;position:relative}
 .sitem:active{background:var(--e2)}
@@ -761,6 +825,35 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
   </div>
+
+  <!-- Weekly Leaderboard -->
+  <div class="sec"><span id="lb-sec-lbl">Weekly League</span></div>
+  <div class="lboard" id="lboard-wrap">
+    <div class="lboard-hdr">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb830" stroke-width="2" stroke-linecap="round"><path d="M8 21V13a4 4 0 018 0v8"/><path d="M2 21h20"/><rect x="10" y="5" width="4" height="8" rx="1"/><path d="M5 9V5h14v4"/></svg>
+      <div class="lboard-title" id="lb-title">Weekly Race</div>
+      <div class="lboard-badge badge-gold" id="lb-badge">Gold</div>
+    </div>
+    <div id="lboard-rows"></div>
+    <div class="lboard-invite" onclick="inviteFriend()">
+      <div class="li-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+      <div><div class="li-text" id="lb-invite-txt">Invite a friend → +500 XP</div><div style="font-size:11px;color:var(--t3)" id="lb-invite-sub">Both get bonus XP</div></div>
+      <span style="color:var(--t3);font-size:16px">›</span>
+    </div>
+  </div>
+
+  <!-- Referral card -->
+  <div class="ref-card" onclick="inviteFriend()">
+    <div class="ref-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+    <div style="flex:1"><div class="ref-title" id="ref-title">Invite friends</div><div class="ref-sub" id="ref-sub">You both get +500 XP</div></div>
+    <span style="color:var(--t3);font-size:16px">›</span>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboard" id="onboard" style="display:none">
+  <div class="ob-dots" id="ob-dots"></div>
+  <div id="ob-content"></div>
 </div>
 
 <!-- CHAT -->
@@ -857,16 +950,19 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="s4ca">›</div>
       <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#4f8aff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><rect x="3" y="6" width="22" height="18" rx="3"/><path d="M3 11h22M8 3v6M20 3v6"/></svg></div>
       <div class="s4cv" id="psess">—</div><div class="s4cl" id="psl1"></div>
+      <button class="stat-cta" id="sess-cta" onclick="goTab('chat')" style="display:none"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span class="stat-cta-txt" id="sess-cta-txt"></span></button>
     </div>
     <div class="s4c" onclick="goTab('learn')">
       <div class="s4ca">›</div>
       <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M4 5h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M26 7l-8 4v10l8-4V7z"/><path d="M18 5l8 4"/></svg></div>
       <div class="s4cv" id="pwrds">—</div><div class="s4cl" id="psl2"></div>
+      <div class="stat-cta" id="words-cta" style="display:none"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span class="stat-cta-txt" id="words-cta-txt"></span></div>
     </div>
     <div class="s4c">
       <div class="s4ca">›</div>
       <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M14 2l3.09 6.26L24 9.27l-5 4.87 1.18 6.88L14 17.77l-6.18 3.35L9 14.14 4 9.27l6.91-1.01L14 2z" fill="rgba(255,184,48,.15)"/></svg></div>
       <div class="s4cv" id="ptsts">—</div><div class="s4cl" id="psl3"></div>
+      <button class="stat-cta" id="tests-cta" onclick="openChat('toefl')" style="display:none"><svg viewBox="0 0 24 24"><path d="M22 10l-11-5L0 10l11 5z"/><path d="M6 12v5c3 3 7 3 10 0v-5"/></svg><span class="stat-cta-txt" id="tests-cta-txt"></span></button>
     </div>
     <div class="s4c" onclick="openChat('mistakes')">
       <div class="s4ca">›</div>
@@ -1705,6 +1801,7 @@ function renderHome(d){
   document.getElementById('hs2').textContent=d.words||0;
   document.getElementById('hs3').textContent=d.tests||0;
   loadMissions();
+  renderLeaderboard(d.xp||0);
 }
 
 /* ══ RENDER PROGRESS ══ */
@@ -1741,6 +1838,8 @@ function drawProgress(){
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
   // Sync home stat boxes
   safe('hs1', d.streak||0); safe('hs2', words); safe('hs3', tests);
+  // Show empty state CTAs
+  showEmptyStateCTAs(sess,words,tests);
 
   // Weekly chart
   const days={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],uk:['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],en:['Mo','Tu','We','Th','Fr','Sa','Su'],es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],de:['Mo','Di','Mi','Do','Fr','Sa','So'],fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],tr:['Pt','Sa','Ça','Pe','Cu','Ct','Pz'],zh:['一','二','三','四','五','六','日'],ar:['إث','ثل','أر','خم','جم','سب','أح']}[lang]||['Mo','Tu','We','Th','Fr','Sa','Su'];
@@ -2705,7 +2804,275 @@ async function fetchData(uid){
 }
 
 /* ══ MAIN ══ */
-async function init(){
+/* ══════════════════════════════════════════
+   LEADERBOARD
+══════════════════════════════════════════ */
+const LB_BOTS={
+  ru:['Анна_М','Дмитрий_К','Ольга_С','Максим_П','Екатерина_В','Иван_Т','Мария_Р','Артём_З'],
+  en:['Alex_W','Maria_K','David_L','Sophie_B','James_T','Emma_R','Chris_M','Lily_Z'],
+};
+function getLeague(xp){
+  if(xp>=1000)return{name:{ru:'Золото',en:'Gold'},cls:'badge-gold'};
+  if(xp>=300) return{name:{ru:'Серебро',en:'Silver'},cls:'badge-silver'};
+  return{name:{ru:'Бронза',en:'Bronze'},cls:'badge-bronze'};
+}
+function renderLeaderboard(myXP){
+  const rows=document.getElementById('lboard-rows');
+  if(!rows)return;
+  const bots=LB_BOTS[lang]||LB_BOTS.en;
+  const week=LS.getJ('weekly_xp')||Array(7).fill(0);
+  const myWeekXP=Math.max(myXP>0?Math.min(myXP,500):0, week.reduce((a,b)=>a+b,0));
+  // Generate competitors
+  const league=getLeague(myWeekXP);
+  const spread=myWeekXP>50?myWeekXP*0.4:30;
+  const entries=[{name:lang==='ru'?'Ты':'You',xp:myWeekXP,me:true}];
+  bots.slice(0,5).forEach((name,i)=>{
+    const xp=Math.max(5,Math.round(myWeekXP+(Math.random()*spread*2-spread)*(0.5+i*0.15)));
+    entries.push({name,xp,me:false});
+  });
+  entries.sort((a,b)=>b.xp-a.xp);
+  const maxXP=Math.max(...entries.map(e=>e.xp),1);
+  rows.innerHTML='';
+  entries.forEach((e,i)=>{
+    const row=document.createElement('div');
+    row.className='lboard-row'+(e.me?' lme':'');
+    const posClass=i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1);
+    row.innerHTML=`
+      <div class="lboard-pos ${posClass}">${medal}</div>
+      <div class="lboard-av ${e.me?'me-av':''}">
+        ${e.me?`<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/></svg>`:e.name[0]}
+      </div>
+      <div class="lboard-info">
+        <div class="lboard-name">${e.name}</div>
+        <div class="lboard-bar"><div class="lboard-fill" style="width:0" data-w="${Math.round(e.xp/maxXP*100)}"></div></div>
+      </div>
+      <div class="lboard-xp">${e.xp} XP</div>`;
+    rows.appendChild(row);
+  });
+  // Animate bars
+  setTimeout(()=>{rows.querySelectorAll('.lboard-fill').forEach(f=>{f.style.width=f.dataset.w+'%';});},80);
+  // Badge and title
+  const lb=document.getElementById('lb-badge');
+  const lt=document.getElementById('lb-title');
+  if(lb){lb.textContent=league.name[lang]||league.name.en;lb.className='lboard-badge '+league.cls;}
+  if(lt)lt.textContent={ru:'Рейтинг недели',en:'Weekly Race',es:'Liga semanal',de:'Wochenliga',fr:'Classement hebdo'}[lang]||'Weekly Race';
+  const ls=document.getElementById('lb-sec-lbl');
+  if(ls)ls.textContent={ru:'Лига недели',en:'Weekly League',es:'Liga semanal',de:'Wochenliga',fr:'Ligue semaine'}[lang]||'Weekly League';
+  const inv=document.getElementById('lb-invite-txt');
+  if(inv)inv.textContent={ru:'Пригласи друга → +500 XP',en:'Invite friend → +500 XP',es:'Invitar amigo → +500 XP',de:'Freund einladen → +500 XP',fr:'Inviter un ami → +500 XP'}[lang]||'Invite friend → +500 XP';
+  const isub=document.getElementById('lb-invite-sub');
+  if(isub)isub.textContent={ru:'Оба получат бонусный XP',en:'Both get bonus XP',es:'Ambos reciben XP extra'}[lang]||'Both get bonus XP';
+  // Ref card
+  const rt=document.getElementById('ref-title');if(rt)rt.textContent={ru:'Пригласи друзей',en:'Invite Friends'}[lang]||'Invite Friends';
+  const rs=document.getElementById('ref-sub');if(rs)rs.textContent={ru:'Оба получают +500 XP',en:'Both get +500 XP'}[lang]||'Both get +500 XP';
+}
+
+function inviteFriend(){
+  const user=tg?.initDataUnsafe?.user;
+  const name=user?.first_name||'Friend';
+  const botName=window.BOT_NAME||'PolyGlotty_bot';
+  const text={ru:`🎓 Привет! Я учу английский с PolyGlotty — крутым AI-репетитором в Telegram. Присоединяйся, оба получим +500 XP!`,en:`🎓 Hey! I'm learning English with PolyGlotty — an awesome AI tutor in Telegram. Join us, we both get +500 XP!`}[lang]||`Join me on PolyGlotty!`;
+  const url=`https://t.me/${botName}?start=ref_${window._uid||'0'}`;
+  if(tg?.openTelegramLink){
+    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+  } else {
+    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+  }
+}
+
+/* ══════════════════════════════════════════
+   ONBOARDING PLACEMENT TEST
+══════════════════════════════════════════ */
+const OB_QUESTIONS=[
+  {
+    step:{ru:'Вопрос 1 из 4',en:'Question 1 of 4'},
+    title:{ru:'Как ты оцениваешь свой английский?',en:'How would you rate your English?'},
+    sub:{ru:'Честно — чтобы ALEX мог тебе помочь',en:'Be honest — so ALEX can help you best'},
+    opts:[
+      {ru:'Почти ничего не знаю',en:'I know very little (A1)',score:0},
+      {ru:'Знаю базу, говорю с трудом',en:'I know basics, struggle speaking (A2)',score:1},
+      {ru:'Общаюсь, но делаю ошибки',en:'I can communicate but make errors (B1)',score:2},
+      {ru:'Уверенно разговариваю',en:'I speak confidently (B2)',score:3},
+    ]
+  },
+  {
+    step:{ru:'Вопрос 2 из 4',en:'Question 2 of 4'},
+    title:{ru:'Выбери правильный вариант:',en:'Choose the correct option:'},
+    sub:{ru:'"Yesterday I ___ to the store."',en:'"Yesterday I ___ to the store."'},
+    opts:[
+      {ru:'go',en:'go',score:0},
+      {ru:'goes',en:'goes',score:0},
+      {ru:'went',en:'went',score:2},
+      {ru:'will go',en:'will go',score:0},
+    ]
+  },
+  {
+    step:{ru:'Вопрос 3 из 4',en:'Question 3 of 4'},
+    title:{ru:'Что означает слово "elaborate"?',en:'What does "elaborate" mean?'},
+    sub:{ru:'Выбери ближайший перевод',en:'Choose the closest translation'},
+    opts:[
+      {ru:'Простой',en:'Simple',score:0},
+      {ru:'Подробный, развёрнутый',en:'Detailed, thorough',score:2},
+      {ru:'Быстрый',en:'Quick',score:0},
+      {ru:'Дорогой',en:'Expensive',score:0},
+    ]
+  },
+  {
+    step:{ru:'Вопрос 4 из 4',en:'Question 4 of 4'},
+    title:{ru:'Зачем тебе английский?',en:'Why do you want English?'},
+    sub:{ru:'Это поможет ALEX подстроиться',en:'This helps ALEX personalize for you'},
+    opts:[
+      {ru:'Работа и карьера',en:'Work & career',score:1},
+      {ru:'Путешествия',en:'Travel & lifestyle',score:1},
+      {ru:'Учёба / переезд',en:'Studies / relocation',score:1},
+      {ru:'Просто интересно',en:'Just for fun',score:1},
+    ]
+  },
+];
+
+let obStep=0,obScores=0,obSelected=-1;
+
+function startOnboarding(){
+  if(LS.get('onboarded')==='1')return;
+  obStep=0;obScores=0;
+  const el=document.getElementById('onboard');
+  if(!el)return;
+  el.style.display='flex';
+  renderObStep();
+}
+
+function renderObStep(){
+  const el=document.getElementById('onboard');
+  const dots=document.getElementById('ob-dots');
+  const content=document.getElementById('ob-content');
+  if(!el||!dots||!content)return;
+  if(obStep>=OB_QUESTIONS.length){renderObResult();return;}
+  const q=OB_QUESTIONS[obStep];
+  dots.innerHTML=OB_QUESTIONS.map((_,i)=>`<div class="ob-dot${i<=obStep?' on':''}"></div>`).join('');
+  obSelected=-1;
+  const optLtrs=['A','B','C','D'];
+  content.innerHTML=`
+    <div class="ob-step">${q.step[lang]||q.step.en}</div>
+    <div class="ob-title">${q.title[lang]||q.title.en}</div>
+    <div class="ob-sub">${q.sub[lang]||q.sub.en}</div>
+    <div class="ob-opts" id="ob-opts">
+      ${q.opts.map((o,i)=>`
+        <div class="ob-opt" onclick="selectOb(${i},${o.score})">
+          <div class="ob-ltr">${optLtrs[i]}</div>
+          <div class="ob-txt">${o[lang]||o.en}</div>
+        </div>`).join('')}
+    </div>
+    <button class="ob-next" id="ob-next" disabled onclick="nextObStep()">
+      ${obStep===OB_QUESTIONS.length-1?(lang==='ru'?'Узнать уровень →':'See my level →'):(lang==='ru'?'Далее →':'Next →')}
+    </button>`;
+}
+
+function selectOb(idx,score){
+  obSelected=idx;obScores+=score;
+  document.querySelectorAll('.ob-opt').forEach((o,i)=>o.classList.toggle('sel',i===idx));
+  const btn=document.getElementById('ob-next');if(btn)btn.disabled=false;
+  if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();
+}
+
+function nextObStep(){
+  if(obSelected<0)return;
+  obStep++;
+  if(obStep>=OB_QUESTIONS.length){renderObResult();}
+  else{obSelected=-1;renderObStep();}
+}
+
+function renderObResult(){
+  // Determine level from scores
+  const levels=[
+    {min:0, level:'A1', tree:'🌱', ru:'Начинающий',    en:'Beginner'},
+    {min:2, level:'A2', tree:'🌿', ru:'Элементарный',  en:'Elementary'},
+    {min:4, level:'B1', tree:'🌳', ru:'Средний',       en:'Intermediate'},
+    {min:6, level:'B2', tree:'🌲', ru:'Выше среднего', en:'Upper-Intermediate'},
+    {min:8, level:'C1', tree:'⭐', ru:'Продвинутый',   en:'Advanced'},
+  ];
+  const det=levels.filter(l=>obScores>=l.min).pop()||levels[0];
+  const el=document.getElementById('ob-content');
+  const dots=document.getElementById('ob-dots');
+  if(dots)dots.innerHTML=OB_QUESTIONS.map(()=>`<div class="ob-dot on"></div>`).join('');
+  if(el)el.innerHTML=`
+    <div class="ob-result">
+      <div class="ob-res-tree">${det.tree}</div>
+      <div class="ob-res-level">${det.level}</div>
+      <div class="ob-res-sub">${lang==='ru'
+        ?`Отлично! Твой уровень — <strong>${det.ru}</strong>.<br>ALEX уже готовит персональный план для тебя.`
+        :`Great! Your level is <strong>${det.en}</strong>.<br>ALEX is preparing your personal plan now.`}</div>
+      <button class="ob-next" onclick="finishOnboarding('${det.level}')">${lang==='ru'?'Начать учиться 🚀':'Start learning 🚀'}</button>
+    </div>`;
+}
+
+async function finishOnboarding(level){
+  LS.set('onboarded','1');
+  LS.set('ob_level',level);
+  const ob=document.getElementById('onboard');
+  if(ob){ob.classList.add('exit');setTimeout(()=>ob.style.display='none',300);}
+  if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+  toast(`${lang==='ru'?'Уровень определён:':'Level set:'} ${level} 🎉`,'🎉');
+  // Update server
+  if(API&&window._uid){
+    try{await fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:window._uid,message:`My level is ${level}. Remember this and adjust your teaching.`,bot_lang:botLang})});}catch{}
+  }
+}
+
+/* ══════════════════════════════════════════
+   EMPTY STATE CTAs
+══════════════════════════════════════════ */
+function showEmptyStateCTAs(sess,words,tests){
+  const sc=document.getElementById('sess-cta'),sct=document.getElementById('sess-cta-txt');
+  const wc=document.getElementById('words-cta'),wct=document.getElementById('words-cta-txt');
+  const tc=document.getElementById('tests-cta'),tct=document.getElementById('tests-cta-txt');
+  if(sc){sc.style.display=sess===0?'flex':'none';if(sct)sct.textContent={ru:'Начать первую беседу →',en:'Start first chat →'}[lang]||'Start first chat →';}
+  if(wc){wc.style.display=words===0?'flex':'none';if(wct)wct.textContent={ru:'Учить слова →',en:'Learn words →'}[lang]||'Learn words →';}
+  if(tc){tc.style.display=tests===0?'flex':'none';if(tct)tct.textContent={ru:'Пройти тест →',en:'Take a test →'}[lang]||'Take a test →';}
+}
+
+/* ══════════════════════════════════════════
+   DYNAMIC CHIPS
+══════════════════════════════════════════ */
+let lastActivity='';
+function setLastActivity(act){lastActivity=act;}
+
+const DYNAMIC_CHIP_SETS={
+  cards:[
+    {icon:0,text:()=>({ru:'Сценка: ресторан',en:'Scene: restaurant'}[lang]||'Restaurant scene'),fn:()=>chipAction(()=>sendChip('Let\'s roleplay a restaurant scene in English'))},
+    {icon:2,text:()=>({ru:'Поговорим о еде',en:'Talk about food'}[lang]||'Talk about food'),fn:()=>chipAction(()=>sendChip('Let\'s have a conversation about food'))},
+  ],
+  lesson:[
+    {icon:0,text:()=>({ru:'Ещё примеры',en:'More examples'}[lang]||'More examples'),fn:()=>chipAction(()=>sendChip('Give me more examples of this grammar rule'))},
+    {icon:6,text:()=>({ru:'Проверь меня',en:'Test me'}[lang]||'Test me'),fn:()=>chipAction(()=>sendChip('Test me on this grammar topic'))},
+  ],
+  audio:[
+    {icon:4,text:()=>({ru:'Ещё аудио',en:'More listening'}[lang]||'More listening'),fn:()=>chipAction(startAudio)},
+    {icon:2,text:()=>({ru:'Обсудим текст',en:'Discuss text'}[lang]||'Discuss text'),fn:()=>chipAction(()=>sendChip('Let\'s discuss the audio transcript we just worked on'))},
+  ],
+};
+
+const CHIP_SVGS_LIST=[
+  `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+  `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`,
+  `<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
+  `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`,
+  `<svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>`,
+  `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+];
+
+/* ══ SHARE ACHIEVEMENT ══ */
+function shareAchievement(xp,level){
+  const user=tg?.initDataUnsafe?.user;
+  const name=user?.first_name||'Student';
+  const botName=window.BOT_NAME||'PolyGlotty_bot';
+  const msg={ru:`🌱 Я только что достиг уровня ${level} в PolyGlotty!\n${xp} XP заработано. Учи английский со мной → @${botName}`,en:`🌱 I just reached ${level} in PolyGlotty!\n${xp} XP earned. Learn English with me → @${botName}`}[lang]||`Level ${level} reached in PolyGlotty!`;
+  if(tg?.openTelegramLink){
+    tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/${botName}&text=${encodeURIComponent(msg)}`);
+  }
+}
   try{
   // Restore prefs first
   lang   =LS.get('app_lang')   ||'ru';
@@ -2726,7 +3093,6 @@ async function init(){
   // Init sessions
   loadSessions();
   if(!sessions.length){
-    // First launch
     const s={id:Date.now(),title:L.nosessiont,msgs:[],created:new Date().toISOString()};
     sessions.unshift(s);saveSessions();curSid=s.id;
     applyLang();renderHome(d);renderProgress(d);
@@ -2739,7 +3105,12 @@ async function init(){
     else addMsg('bot',L.welcome);
   }
 
-  setTimeout(showNotif,1500);
+  // Onboarding for new users (no XP and not onboarded yet)
+  if(!LS.get('onboarded')&&!(d.xp>0)){
+    setTimeout(()=>startOnboarding(),1200);
+  }
+
+  setTimeout(showNotif,2000);
   }catch(err){
     console.error('Init error:',err);
     // Show basic welcome even on error
@@ -2747,7 +3118,6 @@ async function init(){
   }finally{
     setTimeout(()=>document.getElementById('loader').classList.add('gone'),600);
   }
-}
 init();
 </script>
 </body>
