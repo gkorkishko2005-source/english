@@ -926,30 +926,38 @@ async def cmd_remind(m: Message):
 
 @dp.message(Command("help"))
 async def cmd_help(m: Message):
-    lang = await get_lang(m.from_user.id)
+    lang = await get_lang(m.from_user.id) or "ru"
+    from aiogram.types import WebAppInfo
+    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    kb = None
+    if app_url:
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📱 Открыть приложение" if lang=="ru" else "📱 Open App",
+                                  web_app=WebAppInfo(url=app_url))],
+            [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
+        ])
     await m.answer(
-        "<b>LinguaMax ALEX v4</b>\n\n"
-        "/lesson — грамматика\n/vocab — словарь\n/roleplay — ролевые диалоги\n"
-        "/story — Story Quest RPG\n/debate — дебаты\n/test — тесты\n"
-        "/toefl — TOEFL (лекции + диалоги)\n/shadow — shadowing + произношение\n"
-        "/tone — редактор тона фразы\n/writing — проверка текста\n"
-        "/sentence — конструктор предложений\n/idioms — идиомы\n"
-        "/talk — разговорная практика\n/stats — прогресс\n"
-        "/mistakes — мои ошибки\n/interests — интересы\n"
-        "/profession — профессия (для ролеплей)\n"
-        "/remind — напоминания\n/reset — сброс\n\n"
-        "📸 Фото → анализ текста и учёба\n"
-        "🎤 Голосовое → анализ произношения\n"
-        "🔤 @бот слово → перевод в любом чате"
-        if lang=="ru" else
-        "<b>LinguaMax ALEX v4</b>\n\n"
-        "/lesson · /vocab · /roleplay · /story · /debate\n"
-        "/test · /toefl · /shadow · /tone · /writing\n"
-        "/sentence · /idioms · /talk · /stats · /mistakes\n"
-        "/interests · /profession · /remind · /reset\n\n"
-        "📸 Photo → visual learning\n"
-        "🎤 Voice → pronunciation analysis\n"
-        "🔤 @bot word → translate in any chat"
+        ("<b>ALEX — AI-репетитор английского</b>\n\n"
+         "📱 Всё обучение в приложении:\n"
+         "• Чат с ALEX\n"
+         "• Карточки и повторение\n"
+         "• Grammar games\n"
+         "• Story Mode\n"
+         "• TOEFL практика\n\n"
+         "/premium — подписка\n"
+         "/start — главное меню\n\n"
+         "👇 Открой приложение") if lang=="ru" else
+        ("<b>ALEX — AI English Tutor</b>\n\n"
+         "📱 All learning happens in the app:\n"
+         "• Chat with ALEX\n"
+         "• Flashcards & review\n"
+         "• Grammar games\n"
+         "• Story Mode\n"
+         "• TOEFL practice\n\n"
+         "/premium — subscription\n"
+         "/start — main menu\n\n"
+         "👇 Open the app"),
+        reply_markup=kb
     )
 
 @dp.message(Command("reset"))
@@ -1245,76 +1253,19 @@ async def cb_remind(cb: CallbackQuery):
 
 @dp.message(F.photo)
 async def handle_photo(message: Message):
-    uid  = message.from_user.id
-    lang = await get_lang(uid)
-    photo = message.photo[-1]
-    fi = await bot.get_file(photo.file_id)
-    fb = await bot.download_file(fi.file_path)
-    pb = fb.read() if hasattr(fb,"read") else bytes(fb)
-    await message.answer("📸 Analyzing..." if lang=="en" else "📸 Анализирую...")
-    await bot.send_chat_action(message.chat.id, "typing")
-    reply = await analyze_photo_vision(uid, pb)
-    await message.answer(reply)
-    log_session(uid, "photo_vision")
-
-# ══════════════════════════════════════════════════════════════════
-#  ГОЛОСОВЫЕ — STT + произношение
-# ══════════════════════════════════════════════════════════════════
+    lang = await get_lang(message.from_user.id) or "ru"
+    await message.answer(
+        "📸 Фото-анализ доступен в приложении! Нажми 📱 App внизу." if lang=="ru"
+        else "📸 Photo analysis is available in the app! Tap 📱 App below."
+    )
 
 @dp.message(F.voice)
 async def handle_voice(message: Message):
-    uid   = message.from_user.id
-    lang  = await get_lang(uid)
-    state = waiting.get(uid,"")
-
-    voice: Voice = message.voice
-    fi = await bot.get_file(voice.file_id)
-    fb = await bot.download_file(fi.file_path)
-    audio_bytes = fb.read() if hasattr(fb,"read") else bytes(fb)
-
-    await bot.send_chat_action(message.chat.id, "typing")
-
-    # Если в режиме shadowing — анализируем произношение
-    if state == "shadowing":
-        phrase = get_ctx(uid).get("shadow_phrase","")
-        transcribed = await transcribe_audio(audio_bytes, "voice.ogg")
-
-        if transcribed and phrase:
-            waiting.pop(uid, None)
-            analysis = analyze_pronunciation(phrase, transcribed)
-            report   = format_pronunciation_report(analysis, lang)
-            await message.answer(report, reply_markup=shadowing_kb(lang))
-            await add_xp(uid, 15)
-        elif transcribed:
-            # Нет фразы для сравнения — просто транскрибируем
-            waiting.pop(uid, None)
-            reply = await ask_alex(uid, transcribed, mode="correction",
-                extra="The student sent a voice message. Transcription: correct any errors and respond.")
-            await message.answer(f"🎤 <i>{transcribed}</i>\n\n{reply}")
-        else:
-            await message.answer(
-                "⚠️ Не смог распознать речь. Проверь OPENAI_API_KEY в Railway Variables." if lang=="ru"
-                else "⚠️ Couldn't transcribe. Check OPENAI_API_KEY in Railway Variables."
-            )
-        return
-
-    # Обычное голосовое — транскрибируем и обрабатываем как текст
-    transcribed = await transcribe_audio(audio_bytes, "voice.ogg")
-    if transcribed:
-        await message.answer(f"🎤 <i>{transcribed}</i>")
-        await bot.send_chat_action(message.chat.id, "typing")
-        # Определяем режим из состояния
-        mode_map = {"lesson_active":"grammar","speaking_active":"speaking","toefl_active":"toefl",
-                    "roleplay_active":"roleplay","story_active":"story","debate_active":"debate"}
-        mode = mode_map.get(state, "correction")
-        reply = await ask_alex(uid, transcribed, mode=mode)
-        await message.answer(reply)
-        log_session(uid, "voice_message")
-    else:
-        await message.answer(
-            "🎤 Голосовые без Whisper не работают. Добавь OPENAI_API_KEY в Railway Variables." if lang=="ru"
-            else "🎤 Voice messages need Whisper. Add OPENAI_API_KEY in Railway Variables."
-        )
+    lang = await get_lang(message.from_user.id) or "ru"
+    await message.answer(
+        "🎤 Голосовые сообщения обрабатываются в приложении! Нажми 📱 App внизу." if lang=="ru"
+        else "🎤 Voice messages are processed in the app! Tap 📱 App below."
+    )
 
 # ══════════════════════════════════════════════════════════════════
 #  ТЕКСТ
@@ -1333,27 +1284,15 @@ MENU_EN = {
     "💬 Speaking":"talk","⚔️ Debate":"debate","🗣 Idioms":"idioms","❌ My Mistakes":"mistakes","📊 Progress":"stats",
 }
 
-@dp.message(F.text)
+@dp.message(F.text & ~F.text.startswith("/"))
 async def handle_text(message: Message):
+    """Lightweight handler - redirect to WebApp, no AI calls."""
     uid   = message.from_user.id
-    lang  = await get_lang(uid)
+    lang  = await get_lang(uid) or "ru"
     text  = message.text.strip()
     state = waiting.get(uid,"")
 
-    # Кнопки меню
-    menu   = MENU_RU if lang=="ru" else MENU_EN
-    action = menu.get(text)
-    if action:
-        handlers = {
-            "lesson":cmd_lesson,"vocab":cmd_vocab,"roleplay":cmd_roleplay,"story":cmd_story,
-            "test":cmd_test,"toefl":cmd_toefl,"writing":cmd_writing,"tone":cmd_tone,
-            "talk":cmd_talk,"debate":cmd_debate,"idioms":cmd_idioms,"mistakes":cmd_mistakes,"stats":cmd_stats,
-        }
-        h = handlers.get(action)
-        if h: await h(message)
-        return
-
-    # Состояния
+    # Handle pending states (no AI, just data saving)
     if state == "set_interests":
         waiting.pop(uid, None)
         for interest in [i.strip() for i in text.split(",") if i.strip()]:
@@ -1366,99 +1305,35 @@ async def handle_text(message: Message):
         waiting.pop(uid, None)
         await update_user(uid, profession=text[:100])
         await save_interest(uid, text[:50], source="profession")
-        await message.answer(
-            f"💼 {'Профессия сохранена:' if lang=='ru' else 'Profession saved:'} <b>{text}</b>\n\n"
-            f"{'Теперь /roleplay → По моей профессии даст персональный сценарий!' if lang=='ru' else 'Now /roleplay → My Profession gives a personalized scenario!'}"
-        )
+        await message.answer(f"💼 {'Профессия сохранена:' if lang=='ru' else 'Profession saved:'} <b>{text}</b>")
         return
 
-    if state == "rp_custom":
-        waiting.pop(uid, None); clear_history(uid)
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, f"Start roleplay: {text}. Begin immediately in character.", mode="roleplay")
-        await message.answer(reply)
-        log_session(uid, "roleplay_custom"); waiting[uid] = "roleplay_active"; return
+    # Menu buttons → redirect to app
+    menu = MENU_RU if lang=="ru" else MENU_EN
+    if text in menu:
+        pass  # fall through to redirect
 
-    if state == "writing":
+    # Any active state → clear it and redirect
+    if state:
         waiting.pop(uid, None)
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, f"3-layer analysis:\n\n{text}", mode="correction")
-        await message.answer(reply)
-        log_session(uid, "writing_check")
-        if len(text) > 20: log_mistake(uid, text[:100], "See correction", "writing", "mixed")
-        return
 
-    if state == "tone_editor":
-        waiting.pop(uid, None)
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, f"Analyze and rewrite in 5 tones:\n\n\"{text}\"", mode="tone_editor")
-        await message.answer(reply)
-        log_tone(uid, text, reply)
-        log_session(uid, "tone_editor"); return
-
-    if state == "shadowing":
-        phrase = get_ctx(uid).get("shadow_phrase","")
-        if phrase:
-            match = sum(1 for a,b in zip(text.lower().split(), phrase.lower().split()) if a==b)
-            total = len(phrase.split())
-            pct   = int(match/total*100) if total else 0
-            if pct >= 90:   icon, grade = "🏆", "Excellent!" if lang=="en" else "Отлично!"
-            elif pct >= 75: icon, grade = "👍", "Good!" if lang=="en" else "Хорошо!"
-            elif pct >= 55: icon, grade = "💪", "Almost!" if lang=="en" else "Почти!"
-            else:           icon, grade = "🔄", "Try again" if lang=="en" else "Попробуй снова"
-            await message.answer(
-                f"🎙 {icon} <b>{grade}</b> — {pct}%\n"
-                f"✅ <i>{phrase}</i>",
-                reply_markup=shadowing_kb(lang)
-            )
-            await add_xp(uid, 10)
-        waiting.pop(uid, None); clear_ctx(uid); return
-
-    if state == "story_active":
-        ctx  = get_ctx(uid)
-        hp   = ctx.get("story_hp",100)
-        score = ctx.get("story_score",0)
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, text, mode="story", extra=f"HP: {hp}/100, Score: {score}")
-        if "HP:" in reply:
-            try:
-                new_hp = int(re.search(r'HP:\s*(\d+)', reply).group(1))
-                set_ctx(uid, story_hp=new_hp)
-                await update_story(uid, hp=new_hp)
-            except Exception: pass
-        await message.answer(reply); return
-
-    if state in ("test_active","lesson_active","speaking_active","toefl_active",
-                 "vocab_active","debate_active","roleplay_active","toefl_listening_answers"):
-        mode_map = {
-            "test_active":"test","lesson_active":"grammar","speaking_active":"speaking",
-            "toefl_active":"toefl","vocab_active":"vocab","debate_active":"debate",
-            "roleplay_active":"roleplay","toefl_listening_answers":"general",
-        }
-        mode = mode_map.get(state,"general")
-        lower = text.lower()
-        if any(p in lower for p in ["объясни иначе","explain differently","i don't get it","другой пример","new analogy"]):
-            await bot.send_chat_action(message.chat.id, "typing")
-            reply = await ask_alex(uid, "Explain using a completely different analogy or approach.", mode=mode)
-            await message.answer(reply); return
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, text, mode=mode)
-        await message.answer(reply); return
-
-    # Автокоррекция английского
-    en_ratio = sum(1 for c in text if c.isalpha() and ord(c)<128)/max(len(text),1)
-    if en_ratio > 0.6 and len(text) > 8:
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, text, mode="correction",
-            extra="If errors exist: correct them. If perfect: compliment + continue naturally.")
-        await message.answer(reply)
-        log_session(uid, "free_writing")
-        if len(text) > 15: log_mistake(uid, text[:100], "See correction", "free writing", "mixed")
-    else:
-        await bot.send_chat_action(message.chat.id, "typing")
-        reply = await ask_alex(uid, text, mode="general")
-        await message.answer(reply)
-        log_session(uid, "chat")
+    # Redirect to WebApp
+    from aiogram.types import WebAppInfo
+    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    kb = None
+    if app_url:
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📱 Открыть приложение" if lang=="ru" else "📱 Open App",
+                                  web_app=WebAppInfo(url=app_url))],
+            [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
+        ])
+    await message.answer(
+        ("📱 Учись в приложении — там чат с ALEX, карточки, игры и всё остальное!\n\n"
+         "👇 Нажми кнопку ниже") if lang=="ru" else
+        ("📱 Learn in the app — chat with ALEX, flashcards, games and more!\n\n"
+         "👇 Tap the button below"),
+        reply_markup=kb
+    )
 
 @dp.message(Command("app"))
 async def cmd_app(m: Message):
