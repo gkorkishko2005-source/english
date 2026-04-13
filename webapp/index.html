@@ -429,6 +429,36 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ GRAMMAR GAME ══ */
 .gg-wrap{padding:4px 0}
 .gg-title{font-size:16px;font-weight:700;margin-bottom:4px}
+
+/* ══ ACHIEVEMENTS ══ */
+.ach-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;transition:.2s;opacity:.6}
+.ach-card.done{opacity:1;border-color:rgba(var(--ar),.2);background:linear-gradient(135deg,rgba(var(--ar),.04),transparent)}
+.ach-icon{font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ach-info{flex:1;min-width:0}
+.ach-title{font-size:13px;font-weight:700;margin-bottom:1px}
+.ach-desc{font-size:11px;color:var(--t2)}
+.ach-check{width:22px;height:22px;border-radius:50%;background:var(--a2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ach-check svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.ach-lock{font-size:14px;flex-shrink:0;opacity:.4}
+
+/* ══ STORY MODE ══ */
+.story-grid-wrap{padding:4px 0}
+.story-grid{display:flex;gap:8px;flex-wrap:wrap}
+.story-card{flex:1;min-width:90px;padding:16px 12px;background:var(--e2);border:1px solid var(--b2);border-radius:var(--r2);cursor:pointer;text-align:center;transition:.2s}
+.story-card:active{transform:scale(.95)}
+.story-emoji{font-size:28px;margin-bottom:6px}
+.story-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.story-scenes{font-size:10px;color:var(--t3)}
+.story-scene{padding:4px 0}
+.story-opts{display:flex;flex-direction:column;gap:6px}
+.story-opt{padding:10px 12px;background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);font-size:13px;cursor:pointer;transition:.2s;line-height:1.4}
+.story-opt:active{transform:scale(.97)}
+.story-opt.correct{border-color:var(--a2);background:rgba(0,212,170,.1);color:var(--a2)}
+.story-opt.wrong{border-color:var(--rd);background:rgba(255,107,107,.08);color:var(--rd)}
+.story-fb{margin-top:8px}
+.story-fb-ok{font-size:13px;color:var(--a2);font-weight:500}
+.story-fb-fix{font-size:13px;color:var(--or);font-weight:500}
+.story-end{text-align:center;padding:16px 0}
 .gg-hint{font-size:12px;color:var(--a);font-weight:600;margin-bottom:12px;background:rgba(var(--ar),.08);display:inline-block;padding:2px 8px;border-radius:100px}
 .gg-slots{min-height:44px;background:var(--e2);border:1.5px dashed var(--b2);border-radius:var(--r2);padding:8px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:5px;transition:.2s}
 .gg-slots:empty::after{content:'⬆ tap words below';color:var(--t3);font-size:12px;display:flex;align-items:center;height:28px}
@@ -1026,6 +1056,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
+  <!-- Achievements -->
+  <div class="sec"><span id="ach-lbl">Achievements</span></div>
+  <div id="achievements-wrap"></div>
 </div>
 
 <!-- SETTINGS -->
@@ -1291,16 +1324,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">99 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">250 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro</span><span class="pp-price">249 ⭐<small>/3 мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro 🧠</span><span class="pp-price">600 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate</span><span class="pp-price">499 ⭐<small>/год</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate 🧠</span><span class="pp-price">1000 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -1593,7 +1626,7 @@ const LANGS = {
 
 /* ══ CORE SETUP ══ */
 const tg  = window.Telegram?.WebApp;
-const API = 'https://english-production-f7af.up.railway.app';
+const API = window.API_URL || window.location.origin || 'https://english-production-f7af.up.railway.app';
 if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
 
 const LS = {
@@ -1768,6 +1801,7 @@ const CHIP_SVGS=[
   `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`, // explain
   `<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`, // roleplay
   `<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>`, // grammar game
+  `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8M8 11h5"/></svg>`, // stories
 ];
 
 function buildChips(){
@@ -1778,6 +1812,7 @@ function buildChips(){
     {ru:'Объясни проще',en:'Explain simply'}[lang]||'Explain simply',
     {ru:'Сценки',en:'Roleplay'}[lang]||'Roleplay',
     {ru:'🧩 Собери фразу',en:'🧩 Build phrase'}[lang]||'🧩 Build phrase',
+    {ru:'📖 Истории',en:'📖 Stories'}[lang]||'📖 Stories',
   ];
   const fns=[
     ()=>chipAction(()=>sendChip(L.c_corr)),
@@ -1790,6 +1825,7 @@ function buildChips(){
     ()=>chipAction(()=>openChat('explain_simple')),
     ()=>openRoleplay(),
     ()=>openGrammarGame(),
+    ()=>openStoryMode(),
   ];
   texts.forEach((text,i)=>{
     const div=document.createElement('div');
@@ -1962,16 +1998,21 @@ function drawProgress(){
   const inf=rankOf(d.xp||0),pct=(d.xp-inf.min)/(inf.max-inf.min);
   setTimeout(()=>document.getElementById('rfil').style.strokeDashoffset=220-Math.max(0,Math.min(1,pct))*220,80);
 
-  // Stats - track locally if server returns 0
+  // Stats - track locally
   const savedStats=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
   const sess =Math.max(d.sessions||0, savedStats.sessions||0);
   const words=Math.max(d.words||0,    savedStats.words||0);
   const tests=Math.max(d.tests||0,    savedStats.tests||0);
   const errors=Math.max(d.errors||0,  savedStats.errors||0);
-  const safe=(id,v,color)=>{const el=document.getElementById(id);if(el){el.textContent=v;if(color)el.style.color=color;}};
+  const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
-  // Sync home stat boxes
   safe('hs1', d.streak||0); safe('hs2', words); safe('hs3', tests);
+
+  // Achievements
+  try{renderAchievements();}catch(e){}
+  // Achievement label
+  const al=document.getElementById('ach-lbl');
+  if(al)al.textContent={ru:'Достижения',en:'Achievements',es:'Logros',de:'Erfolge',fr:'Succès'}[lang]||'Achievements';
 
   // Weekly chart
   const days={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],uk:['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],en:['Mo','Tu','We','Th','Fr','Sa','Su'],es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],de:['Mo','Di','Mi','Do','Fr','Sa','So'],fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],tr:['Pt','Sa','Ça','Pe','Cu','Ct','Pz'],zh:['一','二','三','四','五','六','日'],ar:['إث','ثل','أر','خم','جم','سب','أح']}[lang]||['Mo','Tu','We','Th','Fr','Sa','Su'];
@@ -2049,10 +2090,18 @@ function addWeeklyXP(amount){
   const w=LS.getJ('weekly_xp')||Array(7).fill(0);
   w[today]=(w[today]||0)+amount;
   LS.setJ('weekly_xp',w);
-  // Also update stats count
+}
+function bumpStat(key,delta=1){
   const s=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
-  s.sessions=(s.sessions||0)+1;
+  s[key]=(s[key]||0)+delta;
   LS.setJ('local_stats',s);
+  // Live-update progress UI
+  const idMap={sessions:'psess',words:'pwrds',tests:'ptsts',errors:'perrs'};
+  const el=document.getElementById(idMap[key]);
+  if(el)el.textContent=s[key];
+  // Also update home stats
+  if(key==='words'){const h=document.getElementById('hs2');if(h)h.textContent=s[key];}
+  if(key==='tests'){const h=document.getElementById('hs3');if(h)h.textContent=s[key];}
 }
 function loadXP(){return parseInt(LS.get('saved_xp')||'0',10);}
 
@@ -2410,16 +2459,20 @@ async function doChat(text){
     addMsg('bot',(await r.json()).reply||'...');
     resetChipCooldown();
     saveCurSes();
-    // Track session locally for stats
-    const stats=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
-    stats.sessions=Math.max(stats.sessions||0,(window._d?.sessions||0));
-    LS.setJ('local_stats',stats);
+    bumpStat('sessions');
     // Extract errors from ALEX reply
     const replyText=document.querySelector('#cmsgs .msg.bot:last-child .mbub')?.innerText||'';
     try{extractErrorsFromReply(replyText);}catch(e){}
     // Increment challenge counter
     try{incrementChallenge();}catch(e){}
-  }catch(e){rmTyping();addMsg('bot',L.errconn);}
+  }catch(e){
+    rmTyping();
+    console.error('doChat error:',e);
+    const errMsg=e.name==='TimeoutError'
+      ?{ru:'⏱ Таймаут — ALEX думает слишком долго. Попробуй ещё раз.',en:'⏱ Timeout — try again.'}[lang]||L.errconn
+      :L.errconn+' ('+e.message+')';
+    addMsg('bot',errMsg);
+  }
   finally{busy=false;document.getElementById('sndb').disabled=false;resetChipCooldown();}
 }
 
@@ -2535,6 +2588,7 @@ async function rate(q){
   const c=cards[cIdx];
   toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
   trackM('words');
+  bumpStat('words');
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
   cIdx++;showCard(cIdx);
 }
@@ -3237,6 +3291,7 @@ function extractErrorsFromReply(reply){
     }
   });
   corrections.forEach(c=>saveError(c.wrong,c.right,c.explanation));
+  if(corrections.length)bumpStat('errors',corrections.length);
 }
 
 /* ══════════════════════════════════════════════════
@@ -3396,7 +3451,7 @@ function updatePremiumUI(){
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 99 ⭐ · Голос · Безлимит · VIP',en:'from 99 ⭐ · Voice · Unlimited · VIP'}[lang]||'from 99 ⭐'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 250 ⭐/мес · Голос · Sonnet · VIP',en:'from 250 ⭐/mo · Voice · Sonnet · VIP'}[lang]||'from 250 ⭐'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -3442,13 +3497,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='✅ 40 сообщений/день<br>✅ Голосовые ответы<br>✅ 5 grammar games';
-    if(proB)proB.innerHTML='✅ Безлимит сообщений<br>✅ Голос + все сценки<br>✅ Анализ ошибок<br>✅ 🎭 VIP личности';
-    if(ultB)ultB.innerHTML='✅ Всё из Pro<br>✅ TOEFL Mock Exams<br>✅ Персональный план<br>✅ 💎 Эксклюзивные темы';
+    if(basicB)basicB.innerHTML='✅ 30 сообщений/день<br>✅ Голосовые ответы<br>✅ Story Mode + games<br>⚡ Модель Haiku';
+    if(proB)proB.innerHTML='✅ 60 сообщений/день<br>✅ 🧠 <b>Модель Sonnet (3× умнее)</b><br>✅ Все сценки + анализ<br>✅ 🎭 VIP личности';
+    if(ultB)ultB.innerHTML='✅ 80 сообщений/день<br>✅ 🧠 <b>Модель Sonnet</b><br>✅ TOEFL + план обучения<br>✅ 💎 Эксклюзивные темы';
   } else {
-    if(basicB)basicB.innerHTML='✅ 40 messages/day<br>✅ Voice replies<br>✅ 5 grammar games';
-    if(proB)proB.innerHTML='✅ Unlimited messages<br>✅ Voice + all scenarios<br>✅ Error analysis<br>✅ 🎭 VIP personas';
-    if(ultB)ultB.innerHTML='✅ Everything in Pro<br>✅ TOEFL Mock Exams<br>✅ Personal study plan<br>✅ 💎 Exclusive themes';
+    if(basicB)basicB.innerHTML='✅ 30 messages/day<br>✅ Voice replies<br>✅ Story Mode + games<br>⚡ Haiku model';
+    if(proB)proB.innerHTML='✅ 60 messages/day<br>✅ 🧠 <b>Sonnet model (3× smarter)</b><br>✅ All scenarios + analysis<br>✅ 🎭 VIP personas';
+    if(ultB)ultB.innerHTML='✅ 80 messages/day<br>✅ 🧠 <b>Sonnet model</b><br>✅ TOEFL + study plan<br>✅ 💎 Exclusive themes';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -3670,11 +3725,170 @@ function ggCheck(gid){
   if(answer===correct){
     haptic('success');
     res.innerHTML=`<span class="gg-ok">✅ ${lang==='ru'?'Правильно!':'Correct!'} +15 XP</span>`;
-    addLocalXP(15);trackM('tests');toast('+15 XP','✅');
+    addLocalXP(15);trackM('tests');bumpStat('tests');toast('+15 XP','✅');
   }else{
     haptic('error');
     res.innerHTML=`<span class="gg-fail">❌ ${lang==='ru'?'Правильный ответ':'Correct answer'}:<br><b>${correct}</b></span>`;
   }
+}
+
+/* ══ ACHIEVEMENTS ══ */
+const ACHIEVEMENTS=[
+  {id:'first_msg',   icon:'💬',title:{ru:'Первый шаг',en:'First step'},     desc:{ru:'Отправь первое сообщение ALEX',en:'Send your first message to ALEX'},  check:s=>(s.sessions||0)>=1},
+  {id:'words_10',    icon:'📗',title:{ru:'Начинающий',en:'Word collector'},  desc:{ru:'Выучи 10 слов',en:'Learn 10 words'},                                    check:s=>(s.words||0)>=10},
+  {id:'words_50',    icon:'📘',title:{ru:'Словарный запас',en:'Bookworm'},   desc:{ru:'Выучи 50 слов',en:'Learn 50 words'},                                    check:s=>(s.words||0)>=50},
+  {id:'words_100',   icon:'📙',title:{ru:'Полиглот',en:'Polyglot'},         desc:{ru:'Выучи 100 слов',en:'Learn 100 words'},                                  check:s=>(s.words||0)>=100},
+  {id:'streak_3',    icon:'🔥',title:{ru:'На огне',en:'On fire'},           desc:{ru:'3 дня подряд',en:'3-day streak'},                                       check:s=>(s.streak||0)>=3},
+  {id:'streak_7',    icon:'⚡',title:{ru:'Неделя!',en:'Week warrior'},      desc:{ru:'7 дней подряд',en:'7-day streak'},                                       check:s=>(s.streak||0)>=7},
+  {id:'streak_30',   icon:'👑',title:{ru:'Месяц!',en:'Monthly legend'},     desc:{ru:'30 дней подряд',en:'30-day streak'},                                    check:s=>(s.streak||0)>=30},
+  {id:'sessions_10', icon:'🎯',title:{ru:'Активист',en:'Active learner'},   desc:{ru:'10 сессий с ALEX',en:'10 sessions with ALEX'},                          check:s=>(s.sessions||0)>=10},
+  {id:'sessions_50', icon:'🏆',title:{ru:'Ветеран',en:'Veteran'},           desc:{ru:'50 сессий с ALEX',en:'50 sessions with ALEX'},                          check:s=>(s.sessions||0)>=50},
+  {id:'tests_5',     icon:'✅',title:{ru:'Тестер',en:'Quiz master'},        desc:{ru:'Пройди 5 тестов',en:'Complete 5 tests'},                                check:s=>(s.tests||0)>=5},
+  {id:'xp_500',      icon:'⭐',title:{ru:'500 XP',en:'500 XP milestone'},  desc:{ru:'Набери 500 XP',en:'Earn 500 XP'},                                       check:s=>(s.xp||0)>=500},
+  {id:'xp_2000',     icon:'🌟',title:{ru:'2000 XP',en:'Star student'},     desc:{ru:'Набери 2000 XP',en:'Earn 2000 XP'},                                     check:s=>(s.xp||0)>=2000},
+];
+function getAchievements(){
+  const stats=LS.getJ('local_stats')||{};
+  stats.xp=loadXP();stats.streak=window._d?.streak||0;
+  const unlocked=LS.getJ('achievements_unlocked')||{};
+  const results=[];
+  ACHIEVEMENTS.forEach(a=>{
+    const done=a.check(stats);
+    if(done&&!unlocked[a.id]){unlocked[a.id]=Date.now();haptic('success');toast(`🏅 ${a.title[lang]||a.title.en}`,'🎉');}
+    results.push({...a,done});
+  });
+  LS.setJ('achievements_unlocked',unlocked);
+  return results;
+}
+function renderAchievements(){
+  const wrap=document.getElementById('achievements-wrap');
+  if(!wrap)return;
+  const list=getAchievements();
+  const unlocked=LS.getJ('achievements_unlocked')||{};
+  wrap.innerHTML=list.map(a=>{
+    const done=!!unlocked[a.id];
+    const t=a.title[lang]||a.title.en;
+    const d=a.desc[lang]||a.desc.en;
+    return `<div class="ach-card${done?' done':''}">
+      <div class="ach-icon">${a.icon}</div>
+      <div class="ach-info"><div class="ach-title">${t}</div><div class="ach-desc">${d}</div></div>
+      ${done?'<div class="ach-check"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div>':'<div class="ach-lock">🔒</div>'}
+    </div>`;
+  }).join('');
+}
+
+/* ══ STORY MODE ══ */
+const STORIES=[
+  {id:'cafe',title:{ru:'В кафе',en:'At the café'},
+   scenes:[
+     {text:{ru:'Ты заходишь в кафе в Лондоне. Бариста улыбается.',en:'You walk into a London café. The barista smiles.'},
+      prompt:'Barista: "Good morning! What can I get you today?"',
+      options:['I\'d like a latte, please.','Give me coffee.','Um... what do you have?'],
+      best:0,feedback:{0:{ru:'Отлично! Вежливо и чётко.',en:'Great! Polite and clear.'},1:{ru:'Работает, но грубовато. Лучше добавить "please".',en:'Works but a bit rude. Add "please".'},2:{ru:'Нормально для начала, но покажите уверенность!',en:'Fine to start, but show confidence!'}}},
+     {text:{ru:'Бариста спрашивает размер.',en:'The barista asks about size.'},
+      prompt:'"Sure! Would you like a small, medium, or large?"',
+      options:['A medium one, please.','Large. And a muffin too.','What size is the medium?'],
+      best:0,feedback:{0:{ru:'Идеально!',en:'Perfect!'},1:{ru:'Уверенно! Хороший английский.',en:'Confident! Good English.'},2:{ru:'Хороший вопрос — это нормально уточнять.',en:'Good question — it\'s normal to clarify.'}}},
+     {text:{ru:'Ты платишь и бариста говорит...',en:'You pay and the barista says...'},
+      prompt:'"That\'ll be £4.50. Would you like anything else?"',
+      options:['No, that\'s all. Thank you!','Nothing else, thanks.','Can I also get the WiFi password?'],
+      best:2,feedback:{0:{ru:'Классика! Вежливо.',en:'Classic! Polite.'},1:{ru:'Коротко и ясно.',en:'Short and clear.'},2:{ru:'Практично! Хороший разговорный ход.',en:'Practical! Smart conversational move.'}}},
+   ]},
+  {id:'interview',title:{ru:'Собеседование',en:'Job interview'},
+   scenes:[
+     {text:{ru:'Ты пришёл на собеседование. HR менеджер встаёт навстречу.',en:'You arrive at a job interview. The HR manager stands up.'},
+      prompt:'"Hi! Thanks for coming in. Can you tell me a little about yourself?"',
+      options:['Sure! I\'m a software developer with 3 years of experience.','I am very good worker.','Well, I like coding and stuff...'],
+      best:0,feedback:{0:{ru:'Профессионально и структурировано!',en:'Professional and structured!'},1:{ru:'Слишком просто. Добавь деталей.',en:'Too simple. Add details.'},2:{ru:'Слишком неформально для собеседования.',en:'Too casual for an interview.'}}},
+     {text:{ru:'HR спрашивает о твоих сильных сторонах.',en:'HR asks about your strengths.'},
+      prompt:'"What would you say is your greatest strength?"',
+      options:['I\'m a fast learner and I adapt quickly to new technologies.','I am perfect at everything.','I think I work hard.'],
+      best:0,feedback:{0:{ru:'Конкретно и убедительно!',en:'Specific and convincing!'},1:{ru:'Звучит неискренне. Будь конкретнее.',en:'Sounds insincere. Be specific.'},2:{ru:'Слабовато. Добавь примеры.',en:'Weak. Add examples.'}}},
+     {text:{ru:'Финальный вопрос.',en:'Final question.'},
+      prompt:'"Do you have any questions for us?"',
+      options:['Yes! Could you tell me about the team culture?','What is the salary?','No, I think I\'m good.'],
+      best:0,feedback:{0:{ru:'Показывает интерес! Отличный вопрос.',en:'Shows interest! Excellent question.'},1:{ru:'Важно, но лучше спрашивать позже.',en:'Important but better to ask later.'},2:{ru:'Всегда задавай вопросы — это показывает интерес.',en:'Always ask questions — it shows interest.'}}},
+   ]},
+  {id:'airport',title:{ru:'В аэропорту',en:'At the airport'},
+   scenes:[
+     {text:{ru:'Ты на паспортном контроле в Хитроу.',en:'You\'re at passport control at Heathrow.'},
+      prompt:'Officer: "Good afternoon. What is the purpose of your visit?"',
+      options:['I\'m here on holiday for two weeks.','Tourism.','I want to visit your beautiful country!'],
+      best:0,feedback:{0:{ru:'Чётко и информативно!',en:'Clear and informative!'},1:{ru:'Работает, но слишком коротко.',en:'Works but too short.'},2:{ru:'Мило, но офицеру нужны факты.',en:'Sweet but the officer needs facts.'}}},
+     {text:{ru:'Офицер спрашивает про жильё.',en:'The officer asks about accommodation.'},
+      prompt:'"Where will you be staying?"',
+      options:['At the Hilton Hotel in central London.','With my friend.','I haven\'t decided yet.'],
+      best:0,feedback:{0:{ru:'Конкретный адрес — идеально.',en:'Specific address — perfect.'},1:{ru:'Ок, но могут попросить адрес друга.',en:'Ok but they may ask for friend\'s address.'},2:{ru:'Не лучший ответ на границе!',en:'Not the best answer at the border!'}}},
+   ]},
+];
+let storyState=null;
+function openStoryMode(){
+  haptic('light');
+  const grid=STORIES.map(s=>{
+    const t=s.title[lang]||s.title.en;
+    return `<div class="story-card" onclick="startStory('${s.id}')">
+      <div class="story-emoji">${s.id==='cafe'?'☕':s.id==='interview'?'💼':'✈️'}</div>
+      <div class="story-title">${t}</div>
+      <div class="story-scenes">${s.scenes.length} ${lang==='ru'?'сцен':'scenes'}</div>
+    </div>`;
+  }).join('');
+  const title=lang==='ru'?'📖 Выбери историю':'📖 Choose a story';
+  addMsg('bot',`<div class="story-grid-wrap"><div class="gg-title">${title}</div><div class="story-grid">${grid}</div></div>`);
+}
+function startStory(id){
+  const story=STORIES.find(s=>s.id===id);
+  if(!story)return;
+  storyState={story,scene:0,score:0};
+  showScene();
+}
+function showScene(){
+  if(!storyState)return;
+  const {story,scene}=storyState;
+  if(scene>=story.scenes.length){
+    const total=story.scenes.length;
+    const pct=Math.round(storyState.score/total*100);
+    const xp=storyState.score*10;
+    addLocalXP(xp);bumpStat('tests');
+    addMsg('bot',`<div class="story-end">
+      <div class="gg-title">${lang==='ru'?'📖 История завершена!':'📖 Story complete!'}</div>
+      <div style="font-size:32px;margin:12px 0">${pct>=80?'🏆':pct>=50?'👍':'💪'}</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">${storyState.score}/${total} ${lang==='ru'?'лучших ответов':'best answers'}</div>
+      <div style="font-size:13px;color:var(--a)">+${xp} XP</div>
+    </div>`);
+    storyState=null;
+    toast(`+${xp} XP`,'🎉');
+    return;
+  }
+  const sc=story.scenes[scene];
+  const sid='ss-'+Date.now();
+  const optHtml=sc.options.map((o,i)=>`<div class="story-opt" onclick="pickStoryOption('${sid}',${i})">${o}</div>`).join('');
+  const desc=sc.text[lang]||sc.text.en;
+  addMsg('bot',`<div class="story-scene" id="${sid}">
+    <div style="font-size:13px;color:var(--t2);margin-bottom:8px">${desc}</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;line-height:1.5">${sc.prompt}</div>
+    <div class="story-opts" id="${sid}-opts">${optHtml}</div>
+    <div class="story-fb" id="${sid}-fb"></div>
+  </div>`);
+}
+function pickStoryOption(sid,idx){
+  if(!storyState)return;
+  haptic('light');
+  const sc=storyState.story.scenes[storyState.scene];
+  const fb=sc.feedback[idx]||{};
+  const fbText=fb[lang]||fb.en||'';
+  const isBest=idx===sc.best;
+  if(isBest)storyState.score++;
+  // Disable options
+  document.querySelectorAll(`#${sid}-opts .story-opt`).forEach((o,i)=>{
+    o.style.pointerEvents='none';
+    if(i===idx)o.classList.add(isBest?'correct':'wrong');
+    if(i===sc.best&&!isBest)o.classList.add('correct');
+  });
+  const fbEl=document.getElementById(sid+'-fb');
+  if(fbEl)fbEl.innerHTML=`<div class="${isBest?'story-fb-ok':'story-fb-fix'}">${isBest?'✅':'💡'} ${fbText}</div>`;
+  // Next scene after delay
+  storyState.scene++;
+  setTimeout(showScene,2000);
 }
 
 function hideLoader(){
@@ -3756,6 +3970,18 @@ async function init(){
     }
 
     setTimeout(()=>{try{showNotif();}catch{}},3000);
+
+    // Sync stats to server every 60s and on close
+    if(uid&&API){
+      const syncStats=()=>{
+        const s=LS.getJ('local_stats')||{};
+        s.xp=loadXP();
+        fetch(`${API}/api/sync_stats`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,stats:s})}).catch(()=>{});
+      };
+      setInterval(syncStats,60000);
+      document.addEventListener('visibilitychange',()=>{if(document.hidden)syncStats();});
+      if(tg)try{tg.onEvent('viewportChanged',(e)=>{if(!e.isStateStable)syncStats();});}catch(e){}
+    }
 
   }catch(err){
     console.error('Init error:',err);
