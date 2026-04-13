@@ -681,6 +681,105 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .emico-wrap svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;stroke-linecap:round}
 @media(max-width:420px){body{display:block}#app{max-width:100%;height:100vh;border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
 @media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px);animation:none!important}}
+
+/* ══ PREMIUM ══ */
+.premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#d4a843,#ffb830);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
+.prem-hero{text-align:center;padding:28px 20px 16px}
+.prem-crown{width:72px;height:72px;margin:0 auto 14px;background:linear-gradient(135deg,#d4a843,#ffb830);border-radius:22px;display:flex;align-items:center;justify-content:center}
+.prem-crown svg{width:36px;height:36px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.prem-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.prem-sub{font-size:14px;color:var(--t2);line-height:1.55;margin-bottom:18px}
+.prem-feats{display:flex;flex-direction:column;gap:8px;padding:0 17px 16px}
+.prem-feat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e2);border-radius:var(--r2)}
+.prem-feat-ico{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prem-feat-ico svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.prem-feat-title{font-size:13px;font-weight:700;margin-bottom:1px}
+.prem-feat-sub{font-size:11px;color:var(--t2)}
+.prem-btn{margin:0 17px 10px;padding:15px;background:linear-gradient(135deg,#d4a843,#ffb830);border:none;border-radius:var(--r2);width:calc(100% - 34px);font-family:var(--f);font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:.18s;box-shadow:0 4px 18px rgba(212,168,67,.3)}
+.prem-btn:active{transform:scale(.97)}
+.prem-free{text-align:center;font-size:12px;color:var(--t3);padding-bottom:14px;cursor:pointer}
+.prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
+.prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
+
+/* ══ ROLEPLAY ══ */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:10px 17px 18px}
+.scenario-card{padding:16px 12px;border-radius:var(--r);border:1.5px solid var(--b1);background:var(--e1);cursor:pointer;transition:.2s;text-align:center}
+.scenario-card:active{transform:scale(.94);background:var(--e2)}
+.scenario-ico{font-size:30px;display:block;margin-bottom:8px}
+.scenario-title{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--t1)}
+.scenario-sub{font-size:11px;color:var(--t3);line-height:1.4}
+.rp-banner{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(135deg,rgba(var(--ar),.1),rgba(0,212,170,.06));border-bottom:1px solid rgba(var(--ar),.15);flex-shrink:0}
+.rp-dot{width:8px;height:8px;border-radius:50%;background:var(--a2);animation:pulse 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.rp-title{font-size:12px;font-weight:700;flex:1}
+.rp-end{font-size:11px;font-weight:600;color:var(--rd);cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,107,107,.25);background:rgba(255,107,107,.08)}
+
+/* ══ GRAMMAR ROADMAP ══ */
+.learn-tabs{display:flex;gap:4px;padding:0 0 14px;background:transparent}
+.learn-tab{flex:1;padding:9px 8px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:.18s;text-align:center;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1)}
+.learn-tab.on{background:rgba(var(--ar),.12);color:var(--a);border-color:rgba(var(--ar),.25)}
+.roadmap-wrap{display:flex;flex-direction:column}
+.rm-level{margin-bottom:4px}
+.rm-level-hdr{display:flex;align-items:center;gap:8px;padding:12px 0 6px}
+.rm-level-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rm-level-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t2)}
+.rm-lesson{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;cursor:pointer;transition:.2s}
+.rm-lesson:active{transform:scale(.97)}
+.rm-lesson.done{border-color:rgba(0,212,170,.25);background:rgba(0,212,170,.04)}
+.rm-lesson.active-lesson{border-color:var(--a);background:rgba(var(--ar),.06)}
+.rm-lesson.locked{opacity:.45;cursor:default}
+.rm-lesson-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm-lesson-ico svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.rm-info{flex:1;min-width:0}
+.rm-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.rm-prog{font-size:11px;color:var(--t3)}
+.rm-bar{height:2px;background:var(--e3);border-radius:100px;margin-top:5px;overflow:hidden;max-width:80px}
+.rm-fill{height:100%;background:var(--gb);border-radius:100px;transition:width .8s ease}
+.rm-status{font-size:16px;flex-shrink:0}
+
+/* ══ TEXT CHECKER ══ */
+.tc-inp{width:100%;min-height:110px;background:var(--e1);border:1px solid var(--b2);border-radius:var(--r);padding:13px;color:var(--t1);font-family:var(--f);font-size:14px;line-height:1.6;resize:none;outline:none;transition:.2s}
+.tc-inp:focus{border-color:var(--a)}
+.tc-inp::placeholder{color:var(--t3)}
+.tc-modes{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tc-mode{padding:6px 12px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);font-family:var(--f);font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:.15s}
+.tc-mode.on{border-color:var(--a);background:rgba(var(--ar),.1);color:var(--a)}
+
+/* ══ ERROR DIARY ══ */
+.ed-week{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.ed-week-hdr{display:flex;align-items:center;gap:10px;padding:12px 15px;cursor:pointer}
+.ed-week-title{font-size:13px;font-weight:700;flex:1}
+.ed-count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(255,107,107,.12);color:var(--rd)}
+.ed-row{display:flex;flex-direction:column;gap:2px;padding:10px 15px;border-top:1px solid var(--b1)}
+.ed-wrong{font-size:13px;font-weight:600;color:var(--rd);text-decoration:line-through}
+.ed-right{font-size:13px;font-weight:600;color:var(--a2)}
+.ed-exp{font-size:11px;color:var(--t3);margin-top:2px}
+.ed-empty{text-align:center;padding:24px;color:var(--t3);font-size:13px}
+
+/* ══ WEEKLY CHALLENGE ══ */
+.challenge-card{background:linear-gradient(135deg,rgba(var(--ar),.1),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.2);border-radius:var(--r);padding:15px;margin-bottom:13px;cursor:pointer;transition:.18s}
+.challenge-card:active{transform:scale(.98)}
+.ch-label{font-size:10px;font-weight:700;color:var(--a);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.ch-dot{width:6px;height:6px;border-radius:50%;background:var(--a);animation:pulse 1.5s ease-in-out infinite}
+.ch-title{font-size:15px;font-weight:700;margin-bottom:3px}
+.ch-sub{font-size:12px;color:var(--t2);margin-bottom:11px}
+.ch-progress{height:4px;background:var(--e3);border-radius:100px;overflow:hidden;margin-bottom:5px}
+.ch-fill{height:100%;background:var(--gb);border-radius:100px;transition:width .8s ease}
+.ch-footer{display:flex;justify-content:space-between;font-size:11px}
+.ch-days{color:var(--t3)}
+.ch-reward{font-weight:700;color:var(--gd)}
+
+/* ══ PRONUNCIATION ══ */
+.pron-btn{position:relative}
+.pron-badge{position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:var(--a2);border:2px solid var(--e0);display:flex;align-items:center;justify-content:center}
+.pron-badge svg{width:7px;height:7px;stroke:#fff;fill:none;stroke-width:2.5}
+.pron-result{background:var(--e2);border:1px solid var(--b2);border-radius:var(--r2);padding:12px 14px;margin:6px 0;font-size:13px;line-height:1.55}
+.pron-score{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pron-score-num{font-size:24px;font-weight:800}
+.pron-score-lbl{font-size:11px;color:var(--t2)}
+.pron-bar{height:5px;background:var(--e3);border-radius:100px;overflow:hidden;flex:1}
+.pron-bar-fill{height:100%;border-radius:100px;transition:width 1s ease}
 </style>
 </head>
 <body>
@@ -741,18 +840,26 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></div>
       <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
     </div>
-    <div class="qb qb2" onclick="goTab('learn')">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M12 5v14M2 12h20"/></svg></div>
+    <div class="qb qb2" onclick="openRoleplay()">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
       <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
     </div>
     <div class="qb qc"  onclick="startAudio()">
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
       <div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div>
     </div>
-    <div class="qb qd"  onclick="openChat('speaking')">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="12" y2="14"/></svg></div>
+    <div class="qb qd"  onclick="openTextChecker()">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
+  </div>
+  <!-- Weekly Challenge -->
+  <div class="challenge-card" id="challenge-card" onclick="joinChallenge()">
+    <div class="ch-label"><div class="ch-dot"></div><span id="ch-label-txt">Weekly Challenge</span></div>
+    <div class="ch-title" id="ch-title">—</div>
+    <div class="ch-sub" id="ch-sub">—</div>
+    <div class="ch-progress"><div class="ch-fill" id="ch-fill" style="width:20%"></div></div>
+    <div class="ch-footer"><span class="ch-days" id="ch-days">—</span><span class="ch-reward" id="ch-reward">—</span></div>
   </div>
 </div>
 
@@ -778,52 +885,45 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- LEARN -->
 <div class="screen" id="s-learn">
   <div class="lhdr"><div class="ltit" id="ltit-lbl"></div><div class="lctr" id="fctr">—</div></div>
-  <div class="sec"><span id="dw-sec-lbl"></span><span class="seca" onclick="openChat('words_new')" id="dw-add-lbl"></span></div>
-  <div class="card" id="dwcard">
-    <div class="dwbadge" id="dwbadge">WORD 1/5</div>
-    <div class="dwword" id="dwword">—</div><div class="dwph" id="dwph"></div>
-    <div class="dwtr"   id="dwtr">—</div><div class="dwex" id="dwex"></div>
-    <div class="dwnav"><button class="dwarr" id="dwprv" onclick="dwNav(-1)">‹</button><div class="dwdots" id="dwdots"></div><button class="dwarr" id="dwnxt" onclick="dwNav(1)">›</button></div>
+  <!-- Tabs -->
+  <div class="learn-tabs">
+    <div class="learn-tab on" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
+    <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Roadmap</span></div>
   </div>
-  <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
-  <div id="lmain">
-    <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
-    <div class="fcs" id="fcs" onclick="flipCard()">
-      <div class="fci" id="fci">
-        <div class="fcf fcfr"><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint"></div></div>
-        <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div></div>
+  <!-- CARDS panel -->
+  <div id="learn-cards-panel">
+    <div class="sec"><span id="dw-sec-lbl"></span><span class="seca" onclick="openChat('words_new')" id="dw-add-lbl"></span></div>
+    <div class="card" id="dwcard">
+      <div class="dwbadge" id="dwbadge">WORD 1/5</div>
+      <div class="dwword" id="dwword">—</div><div class="dwph" id="dwph"></div>
+      <div class="dwtr"   id="dwtr">—</div><div class="dwex" id="dwex"></div>
+      <div class="dwnav"><button class="dwarr" id="dwprv" onclick="dwNav(-1)">‹</button><div class="dwdots" id="dwdots"></div><button class="dwarr" id="dwnxt" onclick="dwNav(1)">›</button></div>
+    </div>
+    <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
+    <div id="lmain">
+      <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
+      <div class="fcs" id="fcs" onclick="flipCard()">
+        <div class="fci" id="fci">
+          <div class="fcf fcfr"><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint"></div></div>
+          <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div></div>
+        </div>
+      </div>
+      <div class="rrow hid" id="rrow">
+        <div class="rb rb1" onclick="rate(1)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb1l"></span></div>
+        <div class="rb rb2" onclick="rate(2)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb2l"></span></div>
+        <div class="rb rb3" onclick="rate(3)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb3l"></span></div>
+        <div class="rb rb4" onclick="rate(4)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb4l"></span></div>
       </div>
     </div>
-    <div class="rrow hid" id="rrow">
-      <div class="rb rb1" onclick="rate(1)">
-        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-        <span id="rb1l"></span>
-      </div>
-      <div class="rb rb2" onclick="rate(2)">
-        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-        <span id="rb2l"></span>
-      </div>
-      <div class="rb rb3" onclick="rate(3)">
-        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-        <span id="rb3l"></span>
-      </div>
-      <div class="rb rb4" onclick="rate(4)">
-        <div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-        <span id="rb4l"></span>
-      </div>
+    <div class="emst" id="lempty" style="display:none">
+      <div class="emico-wrap"><svg viewBox="0 0 40 40" fill="none" stroke-linecap="round"><path d="M20 4l4.5 9.5 10 1.5-7.5 7 1.5 10.5L20 28l-8.5 4.5 1.5-10.5L5.5 15l10-1.5z" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.12)"/></svg></div>
+      <div class="emtit" id="em-t"></div><div class="emsub" id="em-s"></div>
+      <div class="embtns"><button class="btn bp" onclick="openChat('words_new')"><span id="em-b1"></span></button><button class="btn bg" onclick="openChat('fun_fact')"><span id="em-b2"></span></button></div>
     </div>
   </div>
-  <div class="emst" id="lempty" style="display:none">
-    <div class="emico-wrap">
-      <svg viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 4l4.5 9.5 10 1.5-7.5 7 1.5 10.5L20 28l-8.5 4.5 1.5-10.5L5.5 15l10-1.5z" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.12)"/>
-      </svg>
-    </div>
-    <div class="emtit" id="em-t"></div><div class="emsub" id="em-s"></div>
-    <div class="embtns">
-      <button class="btn bp" onclick="openChat('words_new')"><span id="em-b1"></span></button>
-      <button class="btn bg"  onclick="openChat('fun_fact')"><span id="em-b2"></span></button>
-    </div>
+  <!-- ROADMAP panel -->
+  <div id="learn-road-panel" style="display:none">
+    <div class="roadmap-wrap" id="roadmap-wrap"></div>
   </div>
 </div>
 
@@ -875,6 +975,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="sec"><span>TOEFL</span></div>
   <div class="card"><div id="toefll" style="text-align:center;color:var(--t2);font-size:13px;padding:8px 0"></div></div>
+  <!-- Error Diary -->
+  <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
+  <div id="errdiary-wrap"></div>
 </div>
 
 <!-- SETTINGS -->
@@ -1091,6 +1194,42 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- SESSION CONTEXT MENU (rendered dynamically) -->
 <div id="sctx-overlay" style="display:none;position:fixed;inset:0;z-index:399" onclick="closeSCtx()"></div>
 <div id="sctx" class="sctx" style="display:none"></div>
+
+<!-- ROLEPLAY SCENARIO MODAL -->
+<div class="mov" id="roleplaym" style="display:none" onclick="closeModal('roleplaym')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="mtit" id="rp-modal-title">Choose a scenario</div>
+    <div class="scenario-grid" id="scenario-grid"></div>
+  </div>
+</div>
+
+<!-- TEXT CHECKER MODAL -->
+<div class="mov" id="textcheckm" style="display:none" onclick="closeModal('textcheckm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="mtit" id="tc-modal-title">Check my text</div>
+    <div class="mbdy">
+      <div class="tc-modes" id="tc-modes"></div>
+      <textarea class="tc-inp" id="tc-inp" rows="5" id="tc-inp"></textarea>
+      <div class="text-check-count"><span id="tc-count">0</span> / 500</div>
+      <button class="msav" onclick="submitTextCheck()" id="tc-btn">Analyze →</button>
+      <button class="moff" onclick="closeModal('textcheckm')" id="tc-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREMIUM MODAL -->
+<div class="mov" id="premiumm" style="display:none" onclick="closeModal('premiumm')">
+  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0"><div class="mhnd"></div>
+    <div class="prem-hero">
+      <div class="prem-crown"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg></div>
+      <div class="prem-title" id="prem-title">ALEX Premium</div>
+      <div class="prem-sub" id="prem-sub">Unlock the full power of your AI tutor</div>
+    </div>
+    <div class="prem-feats" id="prem-feats"></div>
+    <button class="prem-btn" onclick="activatePremium()" id="prem-btn">Get Premium — 399 ⭐</button>
+    <div class="prem-free" onclick="closeModal('premiumm')" id="prem-free">Continue free</div>
+  </div>
+</div>
 
 </div><!-- /app -->
 <script>
@@ -1457,15 +1596,17 @@ function applyLang(){
   document.getElementById('cfmd').textContent=L.yescl;document.getElementById('cfmc').textContent=L.cancel;
   // Notif
   document.getElementById('ntxt').textContent=L.notift;document.getElementById('ncta').textContent=L.notifcta;
-  // Update lang picker buttons (replaces old grid toggles)
+  // Update lang picker buttons
   updateLangPickerBtns();
-  // Refresh theme button label in new language
+  // Refresh theme button
   const tl2=document.getElementById('theme-picker-label');
   if(tl2)tl2.textContent=L.theme||'Theme';
   const curTheme=LS.get('app_theme')||'';
   const curTh=THEMES.find(x=>x.t===curTheme)||THEMES[0];
   const tn=document.getElementById('theme-picker-name');
   if(tn)tn.textContent=curTh.n[lang]||curTh.n.en;
+  // Update new feature labels
+  try{updateNewLabels();}catch(e){}
   // Profile UI
   if(window._d) updateProfileUI(window._d);
 }
@@ -1550,7 +1691,10 @@ function buildChips(){
   const el = document.getElementById('chips');
   if(!el) return;
   el.innerHTML = '';
-  const texts=[L.c_corr,L.c_gr,L.c_sp,L.c_vc,L.c_au,L.c_id,L.c_er];
+  const texts=[L.c_corr,L.c_gr,L.c_sp,L.c_vc,L.c_au,L.c_id,L.c_er,
+    {ru:'Объясни проще',en:'Explain simply'}[lang]||'Explain simply',
+    {ru:'Сценки',en:'Roleplay'}[lang]||'Roleplay',
+  ];
   const fns=[
     ()=>chipAction(()=>sendChip(L.c_corr)),
     ()=>chipAction(()=>sendChip(L.c_gr)),
@@ -1559,6 +1703,8 @@ function buildChips(){
     ()=>chipAction(startAudio),
     ()=>chipAction(()=>sendChip(L.c_id)),
     ()=>chipAction(()=>sendChip(L.c_er)),
+    ()=>chipAction(()=>openChat('explain_simple')),
+    ()=>openRoleplay(),
   ];
   texts.forEach((text,i)=>{
     const div=document.createElement('div');
@@ -1665,8 +1811,8 @@ function goTab(n){
   document.getElementById('s-'+n).classList.add('active');
   document.getElementById('nav-'+n).classList.add('on');
   tab=n;
-  if(n==='progress')drawProgress();
-  if(n==='learn')initLearn();
+  if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
+  if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='chat')scrollMsgs();
 }
 
@@ -1701,6 +1847,9 @@ function renderHome(d){
   document.getElementById('hs2').textContent=d.words||0;
   document.getElementById('hs3').textContent=d.tests||0;
   loadMissions();
+  try{renderChallenge();}catch(e){}
+  try{renderLeaderboard(d.xp||0);}catch(e){}
+  try{updateNewLabels();}catch(e){}
 }
 
 /* ══ RENDER PROGRESS ══ */
@@ -2169,6 +2318,11 @@ async function doChat(text){
     const stats=LS.getJ('local_stats')||{sessions:0,words:0,tests:0,errors:0};
     stats.sessions=Math.max(stats.sessions||0,(window._d?.sessions||0));
     LS.setJ('local_stats',stats);
+    // Extract errors from ALEX reply
+    const replyText=document.querySelector('#cmsgs .msg.bot:last-child .mbub')?.innerText||'';
+    try{extractErrorsFromReply(replyText);}catch(e){}
+    // Increment challenge counter
+    try{incrementChallenge();}catch(e){}
   }catch(e){rmTyping();addMsg('bot',L.errconn);}
   finally{busy=false;document.getElementById('sndb').disabled=false;resetChipCooldown();}
 }
@@ -2188,8 +2342,9 @@ function openChat(topic){
     speaking:  lang==='ru'?'Давай практиковать разговор.':"Let's practice speaking English.",
     words_new: lang==='ru'?'Научи меня 5 новым словам.':'Teach me 5 new useful words.',
     fun_fact:  lang==='ru'?'Интересный факт об английском.':'Tell me an interesting English fact.',
-    mistakes:  lang==='ru'?'Покажи мои типичные ошибки.':'Show my common mistakes.',
+    mistakes:  lang==='ru'?'Разбери мои типичные ошибки и дай упражнение для исправления.':'Analyze my common mistakes and give me a targeted exercise to fix them.',
     interests_add: lang==='ru'?'Хочу рассказать о своих интересах.':'I want to tell you about my interests.',
+    explain_simple: lang==='ru'?'Объясни мне как ребёнку последнее правило грамматики. Используй простые примеры.':'Explain the last grammar topic to me like I\'m 5 years old. Use very simple examples.',
   };
   goTab('chat');if(P[topic]&&!busy)setTimeout(()=>sendChip(P[topic]),150);
 }
@@ -2701,6 +2856,420 @@ async function fetchData(uid){
 }
 
 /* ══ MAIN ══ */
+/* ══════════════════════════════════════════════════
+   🗺️  GRAMMAR ROADMAP
+══════════════════════════════════════════════════ */
+const ROADMAP_DATA=[
+  {level:'A1',color:'#2ecc71',lessons:[
+    {id:'a1-1',title:{ru:'Present Simple',en:'Present Simple'},sub:{ru:'Настоящее время',en:'Basic statements'},icon:'M12 20h9M4 6l2 2 4-4'},
+    {id:'a1-2',title:{ru:'Артикли a/an/the',en:'Articles a/an/the'},sub:{ru:'Неопределённый и определённый',en:'Definite & indefinite'},icon:'M4 6h16M4 12h16M4 18h7'},
+    {id:'a1-3',title:{ru:'Местоимения',en:'Pronouns'},sub:{ru:'I, you, he, she...',en:'I, you, he, she...'},icon:'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2'},
+    {id:'a1-4',title:{ru:'Числа и время',en:'Numbers & Time'},sub:{ru:'Считаем и говорим о времени',en:'Count and tell time'},icon:'M12 2a10 10 0 100 20A10 10 0 0012 2zM12 6v6l4 2'},
+  ]},
+  {level:'A2',color:'#3498db',lessons:[
+    {id:'a2-1',title:{ru:'Past Simple',en:'Past Simple'},sub:{ru:'Прошедшее время',en:'Regular & irregular verbs'},icon:'M3 3h18v4H3zM3 11h18M3 19h18'},
+    {id:'a2-2',title:{ru:'Future: will / going to',en:'Future: will / going to'},sub:{ru:'Планы и предсказания',en:'Plans & predictions'},icon:'M5 12h14M12 5l7 7-7 7'},
+    {id:'a2-3',title:{ru:'Сравнительные',en:'Comparatives'},sub:{ru:'bigger, better, faster',en:'bigger, better, faster'},icon:'M18 15l-6-6-6 6'},
+    {id:'a2-4',title:{ru:'Предлоги',en:'Prepositions'},sub:{ru:'in, on, at, by...',en:'in, on, at, by...'},icon:'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z'},
+  ]},
+  {level:'B1',color:'#9b59b6',lessons:[
+    {id:'b1-1',title:{ru:'Present Perfect',en:'Present Perfect'},sub:{ru:'Опыт и результаты',en:'Experience & results'},icon:'M22 11.08V12a10 10 0 11-5.93-9.14M22 4L12 14.01l-3-3'},
+    {id:'b1-2',title:{ru:'Условные (Conditionals)',en:'Conditionals'},sub:{ru:'if... then... would',en:'if... then... would'},icon:'M9 18V5l12-2v13M9 12l12-2'},
+    {id:'b1-3',title:{ru:'Модальные глаголы',en:'Modal Verbs'},sub:{ru:'can, must, should, might',en:'can, must, should, might'},icon:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'},
+    {id:'b1-4',title:{ru:'Пассивный залог',en:'Passive Voice'},sub:{ru:'is made, was done',en:'is made, was done'},icon:'M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z'},
+  ]},
+  {level:'B2',color:'#e67e22',lessons:[
+    {id:'b2-1',title:{ru:'Reported Speech',en:'Reported Speech'},sub:{ru:'Косвенная речь',en:'He said that...'},icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z'},
+    {id:'b2-2',title:{ru:'Инфинитив vs Герундий',en:'Infinitive vs Gerund'},sub:{ru:'to do vs doing',en:'to do vs doing'},icon:'M4 19.5A2.5 2.5 0 016.5 17H20'},
+    {id:'b2-3',title:{ru:'Фразовые глаголы',en:'Phrasal Verbs'},sub:{ru:'look up, give up, go on',en:'look up, give up, go on'},icon:'M13 2L3 14h9l-1 8 10-12h-9l1-8z'},
+    {id:'b2-4',title:{ru:'Смешанные условные',en:'Mixed Conditionals'},sub:{ru:'Сложные конструкции',en:'Complex structures'},icon:'M9 18V5l12-2v13'},
+  ]},
+];
+
+let learnTab='cards';
+function switchLearnTab(tab){
+  learnTab=tab;
+  document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';
+  document.getElementById('learn-road-panel').style.display=tab==='road'?'':'none';
+  document.querySelectorAll('.learn-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('lt-'+tab)?.classList.add('on');
+  if(tab==='road')renderRoadmap();
+}
+
+function renderRoadmap(){
+  const wrap=document.getElementById('roadmap-wrap');
+  if(!wrap)return;
+  const progress=LS.getJ('rm_progress')||{};
+  const userLevel=LS.get('ob_level')||window._d?.level||'A1';
+  const levelOrder=['A1','A2','B1','B2','C1'];
+  const userLvlIdx=levelOrder.indexOf(userLevel.replace(/\+/,''));
+  wrap.innerHTML='';
+
+  ROADMAP_DATA.forEach((lvlData,li)=>{
+    const div=document.createElement('div');div.className='rm-level';
+    const lvlIdx=levelOrder.indexOf(lvlData.level);
+    const isUnlocked=lvlIdx<=userLvlIdx+1;
+    const hdr=document.createElement('div');hdr.className='rm-level-hdr';
+    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}</div>`;
+    div.appendChild(hdr);
+    lvlData.lessons.forEach((ls,idx)=>{
+      const done=progress[ls.id]>=3;
+      const isActive=!done&&isUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=1);
+      const locked=!isUnlocked&&!done&&!isActive;
+      const prog=progress[ls.id]||0;
+      const card=document.createElement('div');
+      card.className='rm-lesson'+(done?' done':isActive?' active-lesson':locked?' locked':'');
+      const icoColor=done?'#2ecc71':isActive?'var(--a)':lvlData.color;
+      card.innerHTML=`
+        <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="${ls.icon||'M4 6h16M4 12h16M4 18h7'}"/></svg></div>
+        <div class="rm-info">
+          <div class="rm-title">${ls.title[lang]||ls.title.en}</div>
+          <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'уроков':'lessons'}</div>
+          <div class="rm-bar"><div class="rm-fill" style="width:${done?100:prog*20}%"></div></div>
+        </div>
+        <div class="rm-status">${locked?'🔒':done?'✅':isActive?'▶️':''}</div>`;
+      if(!locked){
+        card.onclick=()=>{
+          const topic=`Teach me about: ${ls.title.en}. Level: ${lvlData.level}. Give explanation + 3 examples + mini exercise.`;
+          const p=LS.getJ('rm_progress')||{};
+          p[ls.id]=(p[ls.id]||0)+1;
+          LS.setJ('rm_progress',p);
+          goTab('chat');setTimeout(()=>sendChip(topic),150);
+        };
+      }
+      div.appendChild(card);
+    });
+    wrap.appendChild(div);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   🎭  ROLEPLAY SCENARIOS
+══════════════════════════════════════════════════ */
+const SCENARIOS=[
+  {id:'job',icon:'💼',title:{ru:'Собеседование',en:'Job Interview'},sub:{ru:'Apple / Google',en:'Tech company interview'},prompt:{ru:'Давай сыграем собеседование в крупной компании. Ты — HR менеджер, я — кандидат. Начни с "Tell me about yourself."',en:"Let's roleplay a job interview. You are the HR manager, I am the candidate. Start with 'Tell me about yourself.'"}},
+  {id:'restaurant',icon:'🍽️',title:{ru:'Ресторан',en:'Restaurant'},sub:{ru:'Заказ и общение',en:'Order & small talk'},prompt:{ru:'Давай сыграем сценку в ресторане в Лондоне. Ты — официант, я — гость. Начни с приветствия.',en:"Let's roleplay at a London restaurant. You are the waiter, I am the guest. Start with a greeting."}},
+  {id:'airport',icon:'✈️',title:{ru:'Аэропорт',en:'Airport'},sub:{ru:'Регистрация и таможня',en:'Check-in & customs'},prompt:{ru:'Давай сыграем сцену в аэропорту. Ты — сотрудник авиакомпании, я — пассажир. Начни с проверки документов.',en:"Let's roleplay at an airport. You are the airline staff, I am the passenger. Start checking my documents."}},
+  {id:'negotiation',icon:'🤝',title:{ru:'Переговоры',en:'Business Deal'},sub:{ru:'Деловая встреча',en:'Negotiating a contract'},prompt:{ru:'Давай сыграем деловые переговоры. Ты — потенциальный партнёр, я — предлагаю сотрудничество. Будь немного скептичным.',en:"Let's roleplay business negotiations. You are a potential partner, I am pitching a deal. Be slightly skeptical."}},
+  {id:'doctor',icon:'🏥',title:{ru:'У врача',en:'At the Doctor'},sub:{ru:'Описание симптомов',en:'Describe symptoms'},prompt:{ru:'Давай сыграем визит к врачу. Ты — врач, я — пациент. Начни с "What brings you in today?"',en:"Let's roleplay a doctor visit. You are the doctor, I am the patient. Start with 'What brings you in today?'"}},
+  {id:'date',icon:'☕',title:{ru:'Знакомство',en:'First Date'},sub:{ru:'Кафе в Лондоне',en:'Coffee in London'},prompt:{ru:'Давай сыграем первое свидание в кафе. Ты — собеседник, я — только познакомился(ась). Будь дружелюбным и любопытным.',en:"Let's roleplay a first date at a coffee shop. You just met me. Be friendly and curious."}},
+  {id:'hotel',icon:'🏨',title:{ru:'В отеле',en:'Hotel Check-in'},sub:{ru:'Заселение и проблемы',en:'Check-in & complaints'},prompt:{ru:'Давай сыграем заселение в отель. Ты — ресепшионист, я — гость. У меня есть проблема с бронированием.',en:"Let's roleplay a hotel check-in. You are the receptionist, I am the guest. I have a problem with my reservation."}},
+  {id:'debate',icon:'🎤',title:{ru:'Дебаты',en:'Debate'},sub:{ru:'Аргументы и мнения',en:'Argue your point'},prompt:{ru:'Давай проведём дебаты на английском. Тема: "Работа из дома лучше, чем в офисе." Ты — против, я — за. Начни со своего аргумента.',en:"Let's debate in English. Topic: 'Remote work is better than office.' You argue against it, I argue for it. Start with your argument."}},
+];
+
+let activeRoleplay=null;
+function openRoleplay(){
+  const grid=document.getElementById('scenario-grid');
+  const title=document.getElementById('rp-modal-title');
+  if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario'}[lang]||'Choose a scenario';
+  if(!grid)return;
+  grid.innerHTML='';
+  SCENARIOS.forEach(sc=>{
+    const card=document.createElement('div');
+    card.className='scenario-card';
+    card.innerHTML=`<span class="scenario-ico">${sc.icon}</span><div class="scenario-title">${sc.title[lang]||sc.title.en}</div><div class="scenario-sub">${sc.sub[lang]||sc.sub.en}</div>`;
+    card.onclick=()=>{
+      closeMod('roleplaym');
+      startRoleplay(sc);
+    };
+    grid.appendChild(card);
+  });
+  openMod('roleplaym');
+}
+
+function startRoleplay(sc){
+  activeRoleplay=sc;
+  // Show roleplay banner in chat
+  const chdr=document.querySelector('.chdr');
+  const existBanner=document.getElementById('rp-banner');
+  if(existBanner)existBanner.remove();
+  if(chdr){
+    const banner=document.createElement('div');
+    banner.className='rp-banner';banner.id='rp-banner';
+    banner.innerHTML=`<div class="rp-dot"></div><div class="rp-title">${sc.icon} ${sc.title[lang]||sc.title.en}</div><div class="rp-end" onclick="endRoleplay()">${lang==='ru'?'Завершить':'End'}</div>`;
+    chdr.parentNode.insertBefore(banner,chdr.nextSibling);
+  }
+  goTab('chat');
+  if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
+  setTimeout(()=>sendChip(sc.prompt[lang]||sc.prompt.en),150);
+  toast(sc.title[lang]||sc.title.en,'🎭');
+}
+
+function endRoleplay(){
+  activeRoleplay=null;
+  const banner=document.getElementById('rp-banner');
+  if(banner)banner.remove();
+  const endMsg=lang==='ru'?'Сценка завершена! Хочешь разбор ошибок?':'Roleplay done! Want me to review your mistakes?';
+  setTimeout(()=>addMsg('bot',endMsg),200);
+}
+
+/* ══════════════════════════════════════════════════
+   📝  TEXT CHECKER
+══════════════════════════════════════════════════ */
+const TC_MODES=[
+  {id:'grammar',ru:'Грамматика',en:'Grammar'},
+  {id:'style',  ru:'Стиль',    en:'Style'},
+  {id:'vocab',  ru:'Словарь',  en:'Vocabulary'},
+  {id:'tone',   ru:'Тон',      en:'Tone'},
+];
+let tcMode='grammar';
+
+function openTextChecker(){
+  const title=document.getElementById('tc-modal-title');
+  const btn=document.getElementById('tc-btn');
+  const cancel=document.getElementById('tc-cancel');
+  const inp=document.getElementById('tc-inp');
+  if(title)title.textContent={ru:'Проверь мой текст',en:'Check my text'}[lang]||'Check my text';
+  if(btn)btn.textContent={ru:'Анализировать →',en:'Analyze →'}[lang]||'Analyze →';
+  if(cancel)cancel.textContent=L.cancel||'Cancel';
+  if(inp){
+    inp.placeholder={ru:'Вставь свой текст: email, эссе, резюме...',en:'Paste your text: email, essay, resume...'}[lang]||'Paste your text...';
+    inp.value='';
+    inp.oninput=()=>{
+      const count=document.getElementById('tc-count');
+      if(count)count.textContent=inp.value.length;
+    };
+  }
+  // Render mode buttons
+  const modes=document.getElementById('tc-modes');
+  if(modes){
+    modes.innerHTML='';
+    TC_MODES.forEach(m=>{
+      const btn=document.createElement('button');
+      btn.className='tc-mode'+(m.id===tcMode?' on':'');
+      btn.textContent=m[lang]||m.en;
+      btn.onclick=()=>{
+        tcMode=m.id;
+        modes.querySelectorAll('.tc-mode').forEach(b=>b.classList.remove('on'));
+        btn.classList.add('on');
+      };
+      modes.appendChild(btn);
+    });
+  }
+  openMod('textcheckm');
+}
+
+async function submitTextCheck(){
+  const inp=document.getElementById('tc-inp');
+  const text=inp?.value?.trim();
+  if(!text||text.length<10){toast(lang==='ru'?'Введи текст':'Enter some text','⚠️');return;}
+  closeMod('textcheckm');
+  goTab('chat');
+  const modeLabel={grammar:{ru:'грамматику',en:'grammar'},style:{ru:'стиль',en:'style'},vocab:{ru:'словарь',en:'vocabulary'},tone:{ru:'тон',en:'tone'}}[tcMode];
+  const prompt=lang==='ru'
+    ?`Проверь мой текст на ${modeLabel.ru}. Выдели все ошибки, объясни почему это ошибка и дай исправленную версию. Мой текст:\n\n${text}`
+    :`Please check this text for ${modeLabel.en}. Highlight ALL errors, explain why each is wrong, then provide the corrected version.\n\nMy text:\n\n${text}`;
+  setTimeout(()=>sendChip(prompt),150);
+}
+
+/* ══════════════════════════════════════════════════
+   📚  SMART ERROR DIARY
+══════════════════════════════════════════════════ */
+function saveError(wrong,right,explanation){
+  const errors=LS.getJ('error_diary')||[];
+  const today=new Date().toISOString().slice(0,10);
+  errors.unshift({wrong,right,explanation,date:today,id:Date.now()});
+  if(errors.length>100)errors.splice(100);
+  LS.setJ('error_diary',errors);
+}
+
+function renderErrorDiary(){
+  const wrap=document.getElementById('errdiary-wrap');
+  const lbl=document.getElementById('errdiary-lbl');
+  const cta=document.getElementById('errdiary-cta');
+  if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary'}[lang]||'Error Diary';
+  if(cta)cta.textContent={ru:'Спросить ALEX →',en:'Ask ALEX →'}[lang]||'Ask ALEX →';
+  if(!wrap)return;
+  const errors=LS.getJ('error_diary')||[];
+  if(!errors.length){
+    wrap.innerHTML=`<div class="ed-empty">${lang==='ru'?'Ошибок пока нет — начни общаться с ALEX! 🎉':'No errors yet — start chatting with ALEX! 🎉'}</div>`;
+    return;
+  }
+  // Group by week
+  const weeks={};
+  errors.forEach(e=>{
+    const d=new Date(e.date);
+    const ws=new Date(d);ws.setDate(d.getDate()-d.getDay());
+    const wk=ws.toISOString().slice(0,10);
+    if(!weeks[wk])weeks[wk]=[];
+    weeks[wk].push(e);
+  });
+  wrap.innerHTML='';
+  Object.entries(weeks).slice(0,4).forEach(([wk,errs])=>{
+    const wDate=new Date(wk);
+    const label=wDate.toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{month:'long',day:'numeric'});
+    const block=document.createElement('div');block.className='ed-week';
+    block.innerHTML=`<div class="ed-week-hdr"><div class="ed-week-title">${lang==='ru'?'Неделя от':'Week of'} ${label}</div><div class="ed-count">${errs.length} ${lang==='ru'?'ошибок':'errors'}</div></div>`;
+    errs.slice(0,5).forEach(e=>{
+      const row=document.createElement('div');row.className='ed-row';
+      row.innerHTML=`<div class="ed-wrong">${e.wrong}</div><div class="ed-right">✓ ${e.right}</div><div class="ed-exp">${e.explanation||''}</div>`;
+      row.onclick=()=>sendChip(lang==='ru'?`Объясни разницу между "${e.wrong}" и "${e.right}"`:`Explain the difference between "${e.wrong}" and "${e.right}"`);
+      block.appendChild(row);
+    });
+    if(errs.length>5){
+      const more=document.createElement('div');more.style.cssText='padding:8px 15px;font-size:12px;color:var(--t3)';
+      more.textContent=`+${errs.length-5} ${lang==='ru'?'ещё':'more'}`;
+      block.appendChild(more);
+    }
+    wrap.appendChild(block);
+  });
+}
+
+/* Auto-extract errors from ALEX responses */
+function extractErrorsFromReply(reply){
+  // Look for correction patterns: ✅ word → word, or "should be X" patterns
+  const corrections=[];
+  const lines=reply.split('\n');
+  lines.forEach(line=>{
+    // Pattern: ~~wrong~~ → correct or wrong → ✅ correct
+    const m=line.match(/[~~](.+?)[~~].*?[→:]\s*(.+)/);
+    if(m)corrections.push({wrong:m[1].trim(),right:m[2].trim(),explanation:'Grammar correction'});
+    // Pattern: ✅ "correct" instead of "wrong"
+    const m2=line.match(/instead of [""'](.+?)[""']/i);
+    if(m2&&line.includes('✅')){
+      const correct=line.match(/✅\s*[""'](.+?)[""']/)?.[1];
+      if(correct)corrections.push({wrong:m2[1].trim(),right:correct.trim(),explanation:line.slice(0,80)});
+    }
+  });
+  corrections.forEach(c=>saveError(c.wrong,c.right,c.explanation));
+}
+
+/* ══════════════════════════════════════════════════
+   🏆  WEEKLY CHALLENGE
+══════════════════════════════════════════════════ */
+const CHALLENGES=[
+  {
+    title:{ru:'Напиши 10 сообщений ALEX',en:'Send 10 messages to ALEX'},
+    sub:{ru:'Практикуй разговорный английский',en:'Practice conversational English'},
+    goal:10,unit:'messages',metric:'sess',reward:'+300 XP'
+  },
+  {
+    title:{ru:'Повтори 20 карточек',en:'Review 20 flashcards'},
+    sub:{ru:'Укрепи словарный запас',en:'Strengthen your vocabulary'},
+    goal:20,unit:'cards',metric:'cards',reward:'+250 XP'
+  },
+  {
+    title:{ru:'Сыграй 3 сценария',en:'Play 3 roleplay scenarios'},
+    sub:{ru:'Прокачай разговорные навыки',en:'Level up your speaking skills'},
+    goal:3,unit:'scenarios',metric:'rp',reward:'+400 XP + 🎭 Badge'
+  },
+  {
+    title:{ru:'Проверь 3 своих текста',en:'Check 3 of your texts'},
+    sub:{ru:'Улучши письменный английский',en:'Improve your written English'},
+    goal:3,unit:'texts',metric:'tc',reward:'+350 XP'
+  },
+];
+
+function renderChallenge(){
+  // Pick challenge for this week (deterministic by week number)
+  const week=Math.floor(Date.now()/(7*24*60*60*1000));
+  const ch=CHALLENGES[week%CHALLENGES.length];
+  const prog=LS.getJ('ch_progress')||{week:0,count:0};
+  if(prog.week!==week){LS.setJ('ch_progress',{week,count:0});prog.count=0;}
+  const pct=Math.min(100,Math.round(prog.count/ch.goal*100));
+  const daysLeft=7-new Date().getDay()||7;
+  const title=document.getElementById('ch-title');
+  const sub=document.getElementById('ch-sub');
+  const fill=document.getElementById('ch-fill');
+  const days=document.getElementById('ch-days');
+  const reward=document.getElementById('ch-reward');
+  const label=document.getElementById('ch-label-txt');
+  if(title)title.textContent=ch.title[lang]||ch.title.en;
+  if(sub)sub.textContent=ch.sub[lang]||ch.sub.en;
+  if(fill)setTimeout(()=>fill.style.width=pct+'%',200);
+  if(days)days.textContent=`${prog.count}/${ch.goal} · ${daysLeft} ${lang==='ru'?'дн. осталось':'days left'}`;
+  if(reward)reward.textContent=ch.reward;
+  if(label)label.textContent={ru:'Испытание недели',en:'Weekly Challenge'}[lang]||'Weekly Challenge';
+}
+
+function joinChallenge(){
+  const week=Math.floor(Date.now()/(7*24*60*60*1000));
+  const ch=CHALLENGES[week%CHALLENGES.length];
+  const msg=lang==='ru'
+    ?`Принимаю испытание! Моя цель: ${ch.title.ru}. Давай начнём!`
+    :`I accept the challenge! My goal: ${ch.title.en}. Let's go!`;
+  goTab('chat');setTimeout(()=>sendChip(msg),150);
+}
+
+function incrementChallenge(){
+  const week=Math.floor(Date.now()/(7*24*60*60*1000));
+  const prog=LS.getJ('ch_progress')||{week:0,count:0};
+  if(prog.week!==week){LS.setJ('ch_progress',{week,count:1});return;}
+  const ch=CHALLENGES[week%CHALLENGES.length];
+  prog.count=Math.min(ch.goal,(prog.count||0)+1);
+  LS.setJ('ch_progress',prog);
+  if(prog.count>=ch.goal){
+    toast(lang==='ru'?'🏆 Испытание выполнено!':'🏆 Challenge complete!','⭐');
+    addWeeklyXP(300);
+  }
+  renderChallenge();
+}
+
+/* ══════════════════════════════════════════════════
+   💎  PREMIUM SYSTEM
+══════════════════════════════════════════════════ */
+let isPremium=LS.get('premium')==='1';
+const PREMIUM_FEATURES=[
+  {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX responds with voice like a real tutor'}},
+  {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Безлимитные сообщения',sub:'Общайся с ALEX без ограничений'},en:{title:'Unlimited Messages',sub:'Chat with ALEX without limits'}},
+  {icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75',ru:{title:'Эксклюзивные личности ALEX',sub:'Harvard Professor, BBC Anchor, Gordon Ramsay'},en:{title:'Exclusive ALEX Personas',sub:'Harvard Professor, BBC Anchor, Gordon Ramsay'}},
+  {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Ежедневный отчёт о твоих ошибках'},en:{title:'Detailed Error Analysis',sub:'Daily report on your specific mistakes'}},
+];
+
+function openPremium(){
+  const title=document.getElementById('prem-title');
+  const sub=document.getElementById('prem-sub');
+  const btn=document.getElementById('prem-btn');
+  const free=document.getElementById('prem-free');
+  const feats=document.getElementById('prem-feats');
+  if(title)title.textContent='ALEX Premium';
+  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power of your AI tutor';
+  if(btn)btn.textContent={ru:'Получить Premium — 399 ⭐',en:'Get Premium — 399 ⭐'}[lang]||'Get Premium — 399 ⭐';
+  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free'}[lang]||'Continue free';
+  if(feats){
+    feats.innerHTML='';
+    PREMIUM_FEATURES.forEach(f=>{
+      const fl=f[lang]||f.en;
+      const el=document.createElement('div');el.className='prem-feat';
+      el.innerHTML=`<div class="prem-feat-ico"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="${f.icon}"/></svg></div><div><div class="prem-feat-title">${fl.title}</div><div class="prem-feat-sub">${fl.sub}</div></div>`;
+      feats.appendChild(el);
+    });
+  }
+  openMod('premiumm');
+}
+
+function activatePremium(){
+  // Telegram Stars payment or mock activation
+  if(tg?.openInvoice){
+    // Would open real Telegram payment
+    closeMod('premiumm');
+    toast(lang==='ru'?'Открываю оплату...':'Opening payment...','💎');
+  } else {
+    // Dev/test mode — activate free
+    isPremium=true;LS.set('premium','1');
+    closeMod('premiumm');
+    toast(lang==='ru'?'Premium активирован! 🎉':'Premium activated! 🎉','⭐');
+  }
+}
+
+/* ══ Update applyLang for new labels ══ */
+function updateNewLabels(){
+  // Learn tabs
+  const ltc=document.getElementById('lt-cards-lbl');
+  const ltr=document.getElementById('lt-road-lbl');
+  if(ltc)ltc.textContent={ru:'Карточки',en:'Flashcards',es:'Tarjetas',de:'Karten',fr:'Cartes'}[lang]||'Flashcards';
+  if(ltr)ltr.textContent={ru:'Путь',en:'Roadmap',es:'Camino',de:'Weg',fr:'Parcours'}[lang]||'Roadmap';
+  // Quick start buttons
+  const qb2=document.getElementById('qb2t');if(qb2)qb2.textContent={ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes'}[lang]||'Roleplay';
+  const qb2s=document.getElementById('qb2s');if(qb2s)qb2s.textContent={ru:'Живые диалоги',en:'Live dialogues'}[lang]||'Live dialogues';
+  const qb4=document.getElementById('qb4t');if(qb4)qb4.textContent={ru:'Проверка',en:'Text Check',es:'Revisar',de:'Prüfen',fr:'Vérifier'}[lang]||'Text Check';
+  const qb4s=document.getElementById('qb4s');if(qb4s)qb4s.textContent={ru:'Ошибки в тексте',en:'Find text errors'}[lang]||'Find text errors';
+  // Error diary labels
+  renderErrorDiary();
+}
+
+/* ══ Hook into doChat to extract errors & increment challenge ══ */
+
 function hideLoader(){
   try{
     var el=document.getElementById('loader');
