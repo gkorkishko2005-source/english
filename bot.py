@@ -69,15 +69,40 @@ RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 # Добавь сюда свои Telegram UID — они получат бесплатный Premium навсегда
 # Узнать свой UID: написать @userinfobot
 ADMIN_IDS: set = {
-    # 123456789,   # Гордей (добавь свой реальный Telegram ID)
-    # 987654321,   # Член семьи
+    1738695057,
+    5399839500,
+    725259177,
+    1241890707,
+    1428437531,
 }
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
+# 3 плана с разными баффами
 PREMIUM_PLANS = {
-    "1m": {"stars": 149, "months": 1,  "label_ru": "1 месяц",  "label_en": "1 month"},
-    "3m": {"stars": 349, "months": 3,  "label_ru": "3 месяца", "label_en": "3 months"},
-    "12m":{"stars": 999, "months": 12, "label_ru": "1 год",    "label_en": "1 year"},
+    "basic": {
+        "stars": 99, "months": 1,
+        "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
+        "tier": "basic",
+        "buffs_ru": "✅ 40 сообщений в день\n✅ Голосовые ответы ALEX\n✅ 5 grammar games в день",
+        "buffs_en": "✅ 40 messages/day\n✅ Voice replies from ALEX\n✅ 5 grammar games/day",
+        "msg_limit": 40, "history": 30, "max_tokens": 1000,
+    },
+    "pro": {
+        "stars": 249, "months": 3,
+        "label_ru": "Pro · 3 мес", "label_en": "Pro · 3 mo",
+        "tier": "pro",
+        "buffs_ru": "✅ Безлимит сообщений\n✅ Голосовые ответы ALEX\n✅ Безлимит grammar games\n✅ Все сценки и roleplay\n✅ Подробный анализ ошибок\n✅ 🎭 VIP личности (Harvard, BBC)",
+        "buffs_en": "✅ Unlimited messages\n✅ Voice replies from ALEX\n✅ Unlimited grammar games\n✅ All scenarios & roleplay\n✅ Detailed error analysis\n✅ 🎭 VIP personas (Harvard, BBC)",
+        "msg_limit": 9999, "history": 50, "max_tokens": 1500,
+    },
+    "ultimate": {
+        "stars": 499, "months": 12,
+        "label_ru": "Ultimate · 1 год", "label_en": "Ultimate · 1 yr",
+        "tier": "ultimate",
+        "buffs_ru": "✅ Всё из Pro\n✅ Приоритет ответа (быстрее)\n✅ TOEFL Mock Exams\n✅ Персональный план обучения\n✅ Ранний доступ к новым фичам\n✅ 💎 Эксклюзивные темы",
+        "buffs_en": "✅ Everything in Pro\n✅ Priority response (faster)\n✅ TOEFL Mock Exams\n✅ Personal study plan\n✅ Early access to new features\n✅ 💎 Exclusive themes",
+        "msg_limit": 9999, "history": 80, "max_tokens": 2000,
+    },
 }
 MODEL         = "claude-haiku-4-5"
 
@@ -1431,58 +1456,80 @@ async def cmd_premium(msg: Message):
     if await is_admin(uid):
         await grant_premium_via_server(uid, 999)  # 999 months ≈ lifetime
         text = (
-            "👑 <b>Premium активирован!</b>\n\n"
-            "Ты в списке VIP — Premium у тебя бесплатно навсегда 🎉\n\n"
-            "Все функции разблокированы:\n"
-            "• 🎤 Голосовые ответы ALEX\n"
-            "• 💬 Безлимитные сообщения\n"
-            "• 🎭 Все сценки и ролевые игры\n"
-            "• 📊 Подробная аналитика ошибок\n"
-            "• 👑 Эксклюзивные личности ALEX"
+            "👑 <b>Premium Ultimate активирован!</b>\n\n"
+            "Ты в VIP-списке — всё бесплатно навсегда 🎉\n\n"
+            "🎤 Голосовые ответы · 💬 Безлимит\n"
+            "🎭 Все сценки · 📊 Анализ ошибок\n"
+            "👑 VIP личности · 💎 Все темы"
         ) if ru else (
-            "👑 <b>Premium activated!</b>\n\n"
-            "You're on the VIP list — Premium is free for you forever 🎉\n\n"
-            "All features unlocked!"
+            "👑 <b>Premium Ultimate activated!</b>\n\n"
+            "You're on the VIP list — everything is free forever 🎉\n\n"
+            "🎤 Voice · 💬 Unlimited · 🎭 Roleplay\n"
+            "📊 Error analysis · 👑 VIP personas · 💎 All themes"
         )
         await msg.answer(text, parse_mode="HTML")
         return
 
-    # Show plans keyboard
+    # Check if already premium
+    is_prem = await check_premium(uid)
+    prem_badge = ""
+    if is_prem:
+        prem_badge = ("\n\n✅ <i>У тебя уже есть Premium. Можешь продлить!</i>" if ru
+                      else "\n\n✅ <i>You already have Premium. You can extend!</i>")
+
     plans_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text=f"{'1 месяц' if ru else '1 month'} — 149 ⭐",
-            callback_data="prem_buy:1m"
+            text=f"🟢 Basic — 99 ⭐/мес" if ru else f"🟢 Basic — 99 ⭐/mo",
+            callback_data="prem_buy:basic"
         )],
         [InlineKeyboardButton(
-            text=f"{'3 месяца' if ru else '3 months'} — 349 ⭐ (-22%)",
-            callback_data="prem_buy:3m"
+            text=f"🔵 Pro — 249 ⭐/3 мес (-17%)" if ru else f"🔵 Pro — 249 ⭐/3mo (-17%)",
+            callback_data="prem_buy:pro"
         )],
         [InlineKeyboardButton(
-            text=f"{'1 год' if ru else '1 year'} — 999 ⭐ (-44%)",
-            callback_data="prem_buy:12m"
+            text=f"💎 Ultimate — 499 ⭐/год (-58%)" if ru else f"💎 Ultimate — 499 ⭐/yr (-58%)",
+            callback_data="prem_buy:ultimate"
         )],
     ])
 
     text = (
-        "💎 <b>ALEX Premium</b>\n\n"
-        "Разблокируй полную мощь AI-репетитора:\n\n"
-        "🎤 <b>Голосовые ответы</b> — ALEX отвечает голосом\n"
-        "💬 <b>Безлимит</b> — без ограничений в день\n"
-        "🎭 <b>Все сценки</b> — 8 ролевых ситуаций\n"
-        "📊 <b>Анализ ошибок</b> — детальный разбор каждой\n"
-        "👑 <b>VIP личности</b> — Harvard Prof, BBC Anchor\n\n"
-        "Оплата через <b>Telegram Stars</b> ⭐\n"
-        "Выбери план:"
+        "💎 <b>ALEX Premium</b>\n"
+        "━━━━━━━━━━━━━━━━━\n\n"
+        "🟢 <b>Basic</b> — 99 ⭐/мес\n"
+        "├ 40 сообщений в день\n"
+        "├ Голосовые ответы ALEX\n"
+        "└ 5 grammar games в день\n\n"
+        "🔵 <b>Pro</b> — 249 ⭐/3 мес\n"
+        "├ Безлимит сообщений\n"
+        "├ Голос + все сценки\n"
+        "├ Подробный анализ ошибок\n"
+        "└ 🎭 VIP личности\n\n"
+        "💎 <b>Ultimate</b> — 499 ⭐/год\n"
+        "├ Всё из Pro\n"
+        "├ TOEFL Mock Exams\n"
+        "├ Персональный план\n"
+        "└ 💎 Эксклюзивные темы\n"
+        f"{prem_badge}\n\n"
+        "⭐ Оплата через Telegram Stars"
     ) if ru else (
-        "💎 <b>ALEX Premium</b>\n\n"
-        "Unlock the full power of your AI tutor:\n\n"
-        "🎤 <b>Voice replies</b> — ALEX speaks back\n"
-        "💬 <b>Unlimited</b> — no daily limits\n"
-        "🎭 <b>All scenarios</b> — 8 roleplay situations\n"
-        "📊 <b>Error analysis</b> — detailed breakdown\n"
-        "👑 <b>VIP personas</b> — Harvard Prof, BBC Anchor\n\n"
-        "Payment via <b>Telegram Stars</b> ⭐\n"
-        "Choose a plan:"
+        "💎 <b>ALEX Premium</b>\n"
+        "━━━━━━━━━━━━━━━━━\n\n"
+        "🟢 <b>Basic</b> — 99 ⭐/mo\n"
+        "├ 40 messages/day\n"
+        "├ Voice replies from ALEX\n"
+        "└ 5 grammar games/day\n\n"
+        "🔵 <b>Pro</b> — 249 ⭐/3mo\n"
+        "├ Unlimited messages\n"
+        "├ Voice + all scenarios\n"
+        "├ Detailed error analysis\n"
+        "└ 🎭 VIP personas\n\n"
+        "💎 <b>Ultimate</b> — 499 ⭐/yr\n"
+        "├ Everything in Pro\n"
+        "├ TOEFL Mock Exams\n"
+        "├ Personal study plan\n"
+        "└ 💎 Exclusive themes\n"
+        f"{prem_badge}\n\n"
+        "⭐ Payment via Telegram Stars"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
@@ -1501,13 +1548,9 @@ async def cb_prem_buy(cb: CallbackQuery):
     ru = user_lang == "ru"
 
     label = plan["label_ru"] if ru else plan["label_en"]
-    desc = (
-        f"ALEX Premium — {label}\n"
-        f"Безлимит · Голос · Сценки · Анализ ошибок"
-    ) if ru else (
-        f"ALEX Premium — {label}\n"
-        f"Unlimited · Voice · Roleplay · Error Analysis"
-    )
+    buffs = plan.get("buffs_ru","") if ru else plan.get("buffs_en","")
+    desc_short = buffs.replace("✅ ","").replace("\n"," · ")[:240]
+    desc = f"ALEX Premium — {label}\n{desc_short}"
 
     await cb.answer()
     try:
@@ -1541,10 +1584,12 @@ async def on_payment_success(msg: Message):
 
     try:
         parts = payload.split(":")
-        plan_id = parts[1] if len(parts) > 1 else "1m"
-        plan = PREMIUM_PLANS.get(plan_id, PREMIUM_PLANS["1m"])
+        plan_id = parts[1] if len(parts) > 1 else "basic"
+        plan = PREMIUM_PLANS.get(plan_id, PREMIUM_PLANS["basic"])
         months = plan["months"]
         label = plan["label_ru"] if ru else plan["label_en"]
+        tier = plan.get("tier", "basic")
+        tier_emoji = {"basic":"🟢","pro":"🔵","ultimate":"💎"}.get(tier,"🟢")
 
         # Grant premium in database via server
         await grant_premium_via_server(uid, months)
@@ -1552,13 +1597,13 @@ async def on_payment_success(msg: Message):
         # Confirm to user
         text = (
             f"🎉 <b>Оплата прошла!</b>\n\n"
-            f"💎 ALEX Premium активирован на <b>{label}</b>\n\n"
-            f"Открой приложение — все функции уже разблокированы!\n\n"
+            f"{tier_emoji} ALEX Premium <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
+            f"Открой приложение — все функции разблокированы!\n\n"
             f"Спасибо за поддержку! 🙏"
         ) if ru else (
             f"🎉 <b>Payment successful!</b>\n\n"
-            f"💎 ALEX Premium activated for <b>{label}</b>\n\n"
-            f"Open the app — all features are now unlocked!\n\n"
+            f"{tier_emoji} ALEX Premium <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
+            f"Open the app — all features unlocked!\n\n"
             f"Thank you for your support! 🙏"
         )
         await msg.answer(text, parse_mode="HTML")
