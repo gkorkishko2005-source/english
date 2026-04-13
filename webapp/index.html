@@ -64,31 +64,23 @@
 .lwave:nth-child(1){animation-delay:0s}.lwave:nth-child(2){animation-delay:.12s}.lwave:nth-child(3){animation-delay:.24s}.lwave:nth-child(4){animation-delay:.36s}.lwave:nth-child(5){animation-delay:.48s}
 @keyframes lw{0%,100%{height:8px;opacity:.4}50%{height:28px;opacity:1}}
 
-/* Theme picker modal */
+/* Theme picker — circle grid */
 .theme-scroll-outer{padding-bottom:4px;width:100%;}
-.theme-scroll-wrap{
-  display:flex;gap:12px;
-  overflow-x:scroll;overflow-y:visible;
-  padding:16px 15px 20px;
-  -webkit-overflow-scrolling:touch;
-  scroll-snap-type:x mandatory;
-  cursor:grab;
+.theme-circle-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+  padding:16px 20px 20px;justify-items:center;
 }
-.theme-scroll-wrap:active{cursor:grabbing}
-.theme-scroll-wrap::-webkit-scrollbar{height:3px}
-.theme-scroll-wrap::-webkit-scrollbar-thumb{background:var(--e3);border-radius:3px}
-.theme-card{
-  flex-shrink:0;width:100px;height:148px;border-radius:14px;
-  cursor:pointer;border:2.5px solid transparent;transition:.22s;
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-  padding-bottom:12px;position:relative;overflow:hidden;
-  scroll-snap-align:start;
+.theme-circle{
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:.2s;
 }
-.theme-card.on{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.22)}
-.theme-card:active{transform:scale(.94)}
-.theme-card-chk{position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transition:.2s}
-.theme-card.on .theme-card-chk{opacity:1}
-.theme-card-name{font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);letter-spacing:.3px;text-align:center;padding:0 6px}
+.theme-circle:active{transform:scale(.88)}
+.theme-dot{
+  width:44px;height:44px;border-radius:50%;
+  border:2.5px solid transparent;transition:.22s;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
+}
+.theme-circle.on .theme-dot{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.2),0 2px 8px rgba(0,0,0,.3)}
+.theme-dot-name{font-size:9px;font-weight:600;color:var(--t2);text-align:center;max-width:52px;line-height:1.2}
 
 /* ══ THEME PICKER iOS-style ══ */
 .theme-picker-btn{
@@ -270,8 +262,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .ni.on .nlb{color:var(--a)}
 
 /* ══ CARD / BTN ══ */
-.card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:18px;margin-bottom:13px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s}
-.sec{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin:22px 0 9px;display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:18px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s}
+.sec{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin:26px 0 11px;display:flex;align-items:center;justify-content:space-between}
 .seca{font-size:11px;font-weight:600;color:var(--a);text-transform:none;letter-spacing:normal;cursor:pointer}
 .btn{width:100%;padding:13px;border-radius:var(--r2);border:none;cursor:pointer;font-family:var(--f);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:.18s}
 .btn:active{transform:scale(.97)}
@@ -300,8 +292,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .xpc{background:var(--g);border-color:rgba(var(--ar),.2);margin-bottom:13px;animation:glow 3s ease-in-out infinite}
 .xpt{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .xptr{display:flex;align-items:center;gap:8px}
-.xtree{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0}
-.xtree svg{width:28px;height:28px}
+.xtree{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex-shrink:0}
+.xtree svg{width:34px;height:34px}
 .xrnk{font-size:13px;font-weight:700}
 .xpill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;background:rgba(var(--ar),.15);border:1px solid rgba(var(--ar),.25);color:var(--a)}
 .xbar{background:rgba(0,0,0,.3);border-radius:100px;height:8px;overflow:hidden;margin-bottom:6px;position:relative}
@@ -426,9 +418,36 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .typw span{width:6px;height:6px;border-radius:50%;background:var(--t2);animation:bounce .9s ease-in-out infinite}
 .typw span:nth-child(2){animation-delay:.18s}.typw span:nth-child(3){animation-delay:.36s}
 
+/* ══ LEVEL TEST ══ */
+.lt-header{padding:4px 0;text-align:center}
+.lt-q{padding:4px 0}
+.lt-num{font-size:11px;font-weight:700;color:var(--a);margin-bottom:6px}
+.lt-text{font-size:14px;font-weight:600;margin-bottom:10px;line-height:1.5}
+.lt-opts{display:flex;flex-direction:column;gap:6px}
+.lt-opt{padding:10px 12px;background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);font-size:13px;cursor:pointer;transition:.2s}
+.lt-opt:active{transform:scale(.97)}
+.lt-correct{border-color:var(--a2)!important;background:rgba(0,212,170,.12)!important;color:var(--a2)!important;font-weight:600}
+.lt-wrong{border-color:var(--rd)!important;background:rgba(255,107,107,.1)!important;color:var(--rd)!important}
+.lt-result{text-align:center;padding:20px 0}
+.lt-pass{background:rgba(0,212,170,.05);border-radius:var(--r);padding:24px 16px}
+.lt-fail{background:rgba(255,149,0,.05);border-radius:var(--r);padding:24px 16px}
+/* Roadmap test button */
+.rm-test-btn{display:flex;align-items:center;gap:10px;padding:14px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));border:1.5px dashed rgba(var(--ar),.3);border-radius:var(--r2);margin:4px 0 10px;cursor:pointer;transition:.2s}
+.rm-test-btn:active{transform:scale(.97)}
+.rm-test-ico{width:36px;height:36px;border-radius:10px;background:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm-test-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.rm-test-title{font-size:13px;font-weight:700;color:var(--t1)}
+.rm-test-sub{font-size:11px;color:var(--t2);margin-top:1px}
+
 /* ══ GRAMMAR GAME ══ */
 .gg-wrap{padding:4px 0}
 .gg-title{font-size:16px;font-weight:700;margin-bottom:4px}
+
+/* ══ ACHIEVEMENTS home button ══ */
+.ach-home-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(0,212,170,.04));border:1px solid rgba(var(--ar),.15);border-radius:var(--r);cursor:pointer;transition:.2s;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.ach-home-btn:active{transform:scale(.97)}
+.ach-home-btn svg{width:18px;height:18px;stroke:var(--gd);flex-shrink:0}
+.ach-home-cnt{margin-left:auto;font-size:12px;color:var(--a);font-weight:700}
 
 /* ══ ACHIEVEMENTS ══ */
 .ach-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;transition:.2s;opacity:.6}
@@ -904,6 +923,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="sb" onclick="goTab('learn')">   <div class="sbv" id="hs2" style="color:var(--a2)">0</div><div class="sbl" id="hs2l"></div></div>
     <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs3" style="color:var(--a)">0</div><div class="sbl" id="hs3l"></div></div>
   </div>
+  <button class="ach-home-btn" onclick="goTab('progress');setTimeout(()=>{document.getElementById('achievements-wrap')?.scrollIntoView({behavior:'smooth'})},300)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span id="ach-btn-lbl">Достижения</span>
+    <span class="ach-home-cnt" id="ach-cnt">0/12</span>
+  </button>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
     <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp">+20 XP</div></div>
@@ -1863,60 +1887,40 @@ function setTheme(t){
   if(tg){tg.setHeaderColor(bgColor);tg.setBackgroundColor(bgColor);}
 }
 
-/* ══ THEME PICKER (iOS-style) ══ */
+/* ══ THEME PICKER (circle grid) ══ */
 function openThemePicker(){
   openMod('themem');
   const wrap=document.getElementById('theme-scroll');
   if(!wrap)return;
+  wrap.className='theme-circle-grid';
   const cur=LS.get('app_theme')||'';
   wrap.innerHTML='';
   THEMES.forEach(th=>{
-    const card=document.createElement('div');
-    card.className='theme-card'+(th.t===cur?' on':'');
-    card.style.background=th.grad;
-    card.innerHTML=`<div class="theme-card-chk">✓</div><div class="theme-card-name">${th.n[lang]||th.n.en||th.n.ru}</div>`;
-    card.addEventListener('click',()=>{
-      if(moved)return; // don't select if user was dragging
-      document.querySelectorAll('.theme-card').forEach(c=>c.classList.remove('on'));
-      card.classList.add('on');
+    const circle=document.createElement('div');
+    circle.className='theme-circle'+(th.t===cur?' on':'');
+    circle.innerHTML=`<div class="theme-dot" style="background:${th.grad}"></div><div class="theme-dot-name">${th.n[lang]||th.n.en||th.n.ru}</div>`;
+    circle.addEventListener('click',()=>{
+      document.querySelectorAll('.theme-circle').forEach(c=>c.classList.remove('on'));
+      circle.classList.add('on');
       setTheme(th.t);
     });
-    wrap.appendChild(card);
+    wrap.appendChild(circle);
   });
-
-  // Mouse drag scroll - track movement to distinguish click vs drag
-  let isDown=false,startX=0,sl=0,moved=false;
-  wrap.addEventListener('mousedown',e=>{isDown=true;moved=false;startX=e.pageX-wrap.offsetLeft;sl=wrap.scrollLeft;wrap.style.cursor='grabbing';});
-  wrap.addEventListener('mouseleave',()=>{isDown=false;wrap.style.cursor='grab';});
-  wrap.addEventListener('mouseup',()=>{isDown=false;wrap.style.cursor='grab';});
-  wrap.addEventListener('mousemove',e=>{
-    if(!isDown)return;
-    e.preventDefault();
-    const x=e.pageX-wrap.offsetLeft;
-    const delta=x-startX;
-    if(Math.abs(delta)>5)moved=true;
-    wrap.scrollLeft=sl-delta;
-  });
-
-  // Wheel scroll (horizontal)
-  wrap.addEventListener('wheel',e=>{e.preventDefault();wrap.scrollLeft+=e.deltaY+e.deltaX;},{passive:false});
-
-  // Scroll to current active card
-  setTimeout(()=>{const on=wrap.querySelector('.on');if(on)on.scrollIntoView({inline:'center',behavior:'smooth'});},80);
 }
 function closeThemePicker(){closeMod('themem');}
 
 /* ══ XP TREE SVGs ══ */
 function getTreeSvg(xp){
-  const S={lc:'stroke-linecap="round" stroke-linejoin="round"'};
-  if(xp>=4000) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,2 17,10 26,10.5 20,16 22,24.5 14,20 6,24.5 8,16 2,10.5 11,10" fill="rgba(255,184,48,.4)" stroke="#ffb830" stroke-width="1.5" ${S.lc}/><polygon points="14,6 16.5,12 22.5,12.5 18,16.5 19.5,22 14,19 8.5,22 10,16.5 5.5,12.5 11.5,12" fill="#ffb830" opacity=".6" stroke="#ff9500" stroke-width="1" ${S.lc}/></svg>`;
-  if(xp>=2500) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,2 16.5,10 25,10.5 19,16 21,24 14,19.5 7,24 9,16 3,10.5 11.5,10" fill="rgba(167,139,250,.35)" stroke="#a78bfa" stroke-width="1.5" ${S.lc}/><circle cx="14" cy="14" r="2.5" fill="#a78bfa"/></svg>`;
-  if(xp>=1500) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="14,3 16.5,10.5 24.5,11 19,16 21,23.5 14,19.5 7,23.5 9,16 3.5,11 11.5,10.5" fill="rgba(255,184,48,.3)" stroke="#ffb830" stroke-width="1.5" ${S.lc}/></svg>`;
-  if(xp>=1000) return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="19" width="3" height="7" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="12" rx="8" ry="9" fill="rgba(46,204,113,.25)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><ellipse cx="10" cy="9"  rx="5" ry="5" fill="rgba(39,174,96,.3)"  stroke="#27ae60" stroke-width="1.3" ${S.lc}/><ellipse cx="18" cy="8"  rx="5" ry="5" fill="rgba(26,188,156,.3)" stroke="#1abc9c" stroke-width="1.3" ${S.lc}/></svg>`;
-  if(xp>=600)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="20" width="3" height="6" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="12" rx="7" ry="8.5" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><ellipse cx="14" cy="8.5" rx="5.5" ry="5" fill="rgba(39,174,96,.28)" stroke="#27ae60" stroke-width="1.3" ${S.lc}/></svg>`;
-  if(xp>=300)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12.5" y="21" width="3" height="5" rx="1.5" fill="#8b6f47"/><ellipse cx="14" cy="13" rx="6" ry="8" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><path d="M11 18 C8 17 6 14 8 10" stroke="#2ecc71" stroke-width="1.3" ${S.lc}/><path d="M17 18 C20 17 22 14 20 10" stroke="#1abc9c" stroke-width="1.3" ${S.lc}/></svg>`;
-  if(xp>=100)  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="26" x2="14" y2="16" stroke="#8b6f47" stroke-width="2" stroke-linecap="round"/><ellipse cx="14" cy="11" rx="5.5" ry="7" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" ${S.lc}/><path d="M11 17 C8 15 7 11 10 9" stroke="#27ae60" stroke-width="1.2" stroke-linecap="round"/></svg>`;
-  return`<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="14" y1="26" x2="14" y2="17" stroke="#8b6f47" stroke-width="2" stroke-linecap="round"/><path d="M14 17 C14 17 8.5 14 8.5 8.5 A5.5 5.5 0 0 1 19.5 8.5 C19.5 14 14 17 14 17Z" fill="rgba(46,204,113,.22)" stroke="#2ecc71" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+  const a='stroke-linecap="round" stroke-linejoin="round"';
+  if(xp>=4000) return`<svg viewBox="0 0 32 32" fill="none"><style>.tw{animation:tway 3s ease-in-out infinite}.tg{animation:tglow 2s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-1px)}}@keyframes tglow{0%,100%{opacity:.6}50%{opacity:1}}</style><g class="tw" transform-origin="16 16"><polygon points="16,1 19,10 28,10.5 22,17 24,26 16,21 8,26 10,17 4,10.5 13,10" fill="rgba(255,184,48,.35)" stroke="#ffb830" stroke-width="1.5" ${a}/><polygon points="16,5 18,11 24,11.5 20,16 21.5,22 16,19 10.5,22 12,16 8,11.5 14,11" fill="#ffb830" opacity=".5" stroke="#ff9500" stroke-width="1" ${a}/><circle cx="16" cy="13" r="2" fill="#fff" opacity=".4" class="tg"/></g></svg>`;
+  if(xp>=2500) return`<svg viewBox="0 0 32 32" fill="none"><style>.sp{animation:spin2 4s linear infinite}@keyframes spin2{to{transform:rotate(360deg)}}</style><g class="sp" transform-origin="16 16"><polygon points="16,2 18.5,11 27,11.5 21,17 23,25 16,20.5 9,25 11,17 5,11.5 13.5,11" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="1.5" ${a}/><circle cx="16" cy="14" r="3" fill="rgba(167,139,250,.5)" stroke="#a78bfa" stroke-width="1"/></g></svg>`;
+  if(xp>=1500) return`<svg viewBox="0 0 32 32" fill="none"><style>.st{animation:tway 2.5s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}</style><g class="st" transform-origin="16 16"><polygon points="16,3 18.5,11 26,11.5 21,17 23,25 16,20.5 9,25 11,17 6,11.5 13.5,11" fill="rgba(255,184,48,.25)" stroke="#ffb830" stroke-width="1.5" ${a}/></g></svg>`;
+  if(xp>=1000) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-2deg)}}</style><g class="bt" transform-origin="16 28"><rect x="14" y="22" width="4" height="8" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="13" rx="10" ry="11" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="11" cy="9" rx="6" ry="5.5" fill="rgba(39,174,96,.25)" stroke="#27ae60" stroke-width="1.2" ${a}/><ellipse cx="21" cy="8" rx="6" ry="5.5" fill="rgba(26,188,156,.25)" stroke="#1abc9c" stroke-width="1.2" ${a}/><circle cx="10" cy="7" r="1.5" fill="rgba(255,107,107,.5)"/><circle cx="19" cy="6" r="1" fill="rgba(255,184,48,.5)"/></g></svg>`;
+  if(xp>=600) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3.5s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-3deg)}}</style><g class="bt" transform-origin="16 28"><rect x="14" y="23" width="4" height="7" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="14" rx="9" ry="10" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="16" cy="9" rx="7" ry="6" fill="rgba(39,174,96,.22)" stroke="#27ae60" stroke-width="1.2" ${a}/></g></svg>`;
+  if(xp>=300) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.8s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(0)}30%{transform:rotate(3deg)}70%{transform:rotate(-3deg)}}</style><g class="sw" transform-origin="16 30"><rect x="14.5" y="24" width="3" height="6" rx="1.5" fill="#8b6f47"/><ellipse cx="16" cy="15" rx="7.5" ry="9.5" fill="rgba(46,204,113,.16)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M12 21 C9 19 7 15 9 11" stroke="#2ecc71" stroke-width="1.2" ${a} fill="none"/><path d="M20 21 C23 19 25 15 23 11" stroke="#1abc9c" stroke-width="1.2" ${a} fill="none"/></g></svg>`;
+  if(xp>=100) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.5s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}</style><g class="sw" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="18" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="16" cy="12" rx="7" ry="8" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M13 19 C10 17 9 13 11 10" stroke="#27ae60" stroke-width="1.2" stroke-linecap="round" fill="none"/></g></svg>`;
+  // Seedling — detailed with animation
+  return`<svg viewBox="0 0 32 32" fill="none"><style>.sprout{animation:grow 2s ease-in-out infinite}@keyframes grow{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.05) rotate(2deg)}}</style><g class="sprout" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="19" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><path d="M16 19 C16 19 9 16 9 10 A7 7 0 0 1 23 10 C23 16 16 19 16 19Z" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 16 C14 14 13 12 14 10" stroke="#27ae60" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><path d="M16 16 C18 14 19 12 18 10" stroke="#1abc9c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><circle cx="16" cy="10" r="1.5" fill="rgba(0,212,170,.4)"/></g></svg>`;
 }
 
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
@@ -3043,7 +3047,178 @@ const ROADMAP_DATA=[
     {id:'b2-3',title:{ru:'Фразовые глаголы',en:'Phrasal Verbs'},sub:{ru:'look up, give up, go on',en:'look up, give up, go on'},icon:'M13 2L3 14h9l-1 8 10-12h-9l1-8z'},
     {id:'b2-4',title:{ru:'Смешанные условные',en:'Mixed Conditionals'},sub:{ru:'Сложные конструкции',en:'Complex structures'},icon:'M9 18V5l12-2v13'},
   ]},
+  {level:'C1',color:'#e74c3c',lessons:[
+    {id:'c1-1',title:{ru:'Инверсия',en:'Inversion'},sub:{ru:'Not only did he...',en:'Not only did he...'},icon:'M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4'},
+    {id:'c1-2',title:{ru:'Subjunctive Mood',en:'Subjunctive Mood'},sub:{ru:'I wish I were...',en:'I wish I were...'},icon:'M12 2a10 10 0 100 20 10 10 0 000-20zM8 14s1.5 2 4 2 4-2 4-2'},
+    {id:'c1-3',title:{ru:'Cleft Sentences',en:'Cleft Sentences'},sub:{ru:'It was John who...',en:'It was John who...'},icon:'M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5z'},
+    {id:'c1-4',title:{ru:'Discourse Markers',en:'Discourse Markers'},sub:{ru:'Nevertheless, Furthermore...',en:'Nevertheless, Furthermore...'},icon:'M4 6h16M4 12h8M4 18h16'},
+    {id:'c1-5',title:{ru:'Nominalisation',en:'Nominalisation'},sub:{ru:'decide → decision',en:'decide → decision'},icon:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18 2l4 4-10 10H8v-4L18 2z'},
+  ]},
+  {level:'C2',color:'#f1c40f',lessons:[
+    {id:'c2-1',title:{ru:'Стилистика',en:'Stylistics'},sub:{ru:'Метафоры, ирония',en:'Metaphors, irony'},icon:'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'},
+    {id:'c2-2',title:{ru:'Ellipsis & Substitution',en:'Ellipsis & Substitution'},sub:{ru:'Omission for elegance',en:'Omission for elegance'},icon:'M5 12h14'},
+    {id:'c2-3',title:{ru:'Hedging Language',en:'Hedging Language'},sub:{ru:'It seems, apparently...',en:'It seems, apparently...'},icon:'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 8v4M12 16h.01'},
+    {id:'c2-4',title:{ru:'Academic Writing',en:'Academic Writing'},sub:{ru:'Эссе, аргументация',en:'Essays, argumentation'},icon:'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8M16 17H8M10 9H8'},
+    {id:'c2-5',title:{ru:'Native Idioms & Slang',en:'Native Idioms & Slang'},sub:{ru:'Звучи как носитель',en:'Sound like a native'},icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'},
+  ]},
 ];
+
+// Level test questions for upgrading
+const LEVEL_TESTS={
+  A2:{title:{ru:'Тест перехода на A2',en:'A2 Level-Up Test'},questions:[
+    {q:'Choose: She ___ to school every day.',o:['go','goes','going','gone'],a:1},
+    {q:'Choose: I ___ my homework yesterday.',o:['do','does','did','done'],a:2},
+    {q:'Choose: There ___ many people at the party.',o:['was','were','is','be'],a:1},
+    {q:'Choose: He is ___ than his brother.',o:['tall','taller','tallest','more tall'],a:1},
+    {q:'Choose: We ___ going to the cinema tonight.',o:['is','am','are','be'],a:2},
+    {q:'Fill: I have ___ (live) here for 5 years.',o:['live','lived','living','lives'],a:1},
+    {q:'Choose: ___ you like some coffee?',o:['Do','Would','Are','Is'],a:1},
+    {q:'Choose: She ___ TV when I called.',o:['watches','watched','was watching','is watching'],a:2},
+    {q:'Choose: This is ___ book I have ever read.',o:['good','better','best','the best'],a:3},
+    {q:'Choose: If it rains, I ___ stay home.',o:['will','would','am','was'],a:0},
+  ]},
+  B1:{title:{ru:'Тест перехода на B1',en:'B1 Level-Up Test'},questions:[
+    {q:'Choose: I wish I ___ more time.',o:['have','had','has','having'],a:1},
+    {q:'Choose: The report ___ by the manager.',o:['wrote','was wrote','was written','written'],a:2},
+    {q:'Choose: If I ___ you, I would apologize.',o:['am','was','were','be'],a:2},
+    {q:'Choose: She asked me where I ___.',o:['live','lived','am living','lives'],a:1},
+    {q:'Choose: By next year, I ___ here for 10 years.',o:['work','will work','will have worked','worked'],a:2},
+    {q:'Choose: He denied ___ the window.',o:['to break','breaking','break','broke'],a:1},
+    {q:'Choose: ___ having dinner, we went for a walk.',o:['After','Before','During','While'],a:0},
+    {q:'Choose: The more you practice, the ___ you get.',o:['good','best','better','well'],a:2},
+    {q:'Choose: She ___ have left already — her car is gone.',o:['must','can','should','would'],a:0},
+    {q:'Choose: Not only ___ he late, but he also forgot his keys.',o:['is','was','did','had'],a:1},
+    {q:'Choose: I look forward to ___ from you.',o:['hear','hearing','heard','hears'],a:1},
+    {q:'Choose: The project ___ if we had more funding.',o:['will succeed','would succeed','succeeds','succeeded'],a:1},
+  ]},
+  B2:{title:{ru:'Тест перехода на B2',en:'B2 Level-Up Test'},questions:[
+    {q:'Choose: Had I known earlier, I ___ differently.',o:['would act','would have acted','acted','will act'],a:1},
+    {q:'Choose: She suggested that he ___ a doctor.',o:['sees','see','saw','seeing'],a:1},
+    {q:'Choose: It\'s time we ___ about this seriously.',o:['think','thought','to think','thinking'],a:1},
+    {q:'Choose: No sooner ___ he arrived than it started raining.',o:['did','had','has','was'],a:1},
+    {q:'Choose: The report, ___ was submitted late, contained errors.',o:['which','that','what','where'],a:0},
+    {q:'Choose: He\'s used to ___ under pressure.',o:['work','working','worked','works'],a:1},
+    {q:'Choose: ___ the weather, we went hiking.',o:['Despite','Although','However','Nevertheless'],a:0},
+    {q:'Choose: She can\'t have ___ — she was with me.',o:['done it','do it','doing it','did it'],a:0},
+    {q:'Choose: Were it not ___ his help, we would have failed.',o:['for','to','by','with'],a:0},
+    {q:'Choose: The film is well worth ___.',o:['to see','seeing','see','seen'],a:1},
+    {q:'Choose: Scarcely had she ___ when the phone rang.',o:['sat down','sitting down','sits down','sit down'],a:0},
+    {q:'Choose: I\'d rather you ___ smoke in here.',o:['don\'t','didn\'t','won\'t','wouldn\'t'],a:1},
+    {q:'Choose: ___ be the consequences, I will proceed.',o:['Whatever may','What may','However may','Whichever may'],a:0},
+    {q:'Choose: Not until I got home ___ I realize my mistake.',o:['do','did','had','was'],a:1},
+    {q:'Choose: She is thought ___ the country.',o:['to leave','to have left','leaving','left'],a:1},
+  ]},
+  C1:{title:{ru:'Тест перехода на C1',en:'C1 Level-Up Test'},questions:[
+    {q:'Choose: Little ___ she know what awaited her.',o:['did','does','was','had'],a:0},
+    {q:'Choose: It is imperative that he ___ on time.',o:['arrives','arrive','arrived','arriving'],a:1},
+    {q:'Choose: ___ as it may seem, the theory holds.',o:['Paradoxical','Paradoxically','Paradox','Paradoxing'],a:0},
+    {q:'Choose: The hypothesis, ___ unproven, merits further study.',o:['although','while','albeit','despite'],a:2},
+    {q:'Choose: Under no circumstances ___ this be tolerated.',o:['should','shall','can','would'],a:0},
+    {q:'Choose: She speaks as though she ___ a native.',o:['is','were','was','be'],a:1},
+    {q:'Choose: Notwithstanding the risks, the team ___ ahead.',o:['pressed','pressing','press','to press'],a:0},
+    {q:'Choose: Only after the results were published ___ the extent of the problem become clear.',o:['did','had','was','does'],a:0},
+    {q:'Choose: The argument, ___ cogent, failed to persuade the jury.',o:['however','while','albeit','despite being'],a:2},
+    {q:'Choose: So ___ was the performance that the audience gave a standing ovation.',o:['remarkable','remarkably','remarked','remarking'],a:0},
+    {q:'Choose: He spoke in such ___ terms that even experts were confused.',o:['abstruse','abstract','absurd','absolute'],a:0},
+    {q:'Choose: Were she to ___ the findings, the implications would be profound.',o:['publish','published','publishing','publishes'],a:0},
+    {q:'Choose: Not for one moment ___ I doubt his sincerity.',o:['do','did','have','am'],a:1},
+    {q:'Choose: The phenomenon, ___ to date, warrants systematic investigation.',o:['hitherto unexamined','examining hitherto','hitherto examining','unexamined hitherto'],a:0},
+    {q:'Choose: It is ___ that the policy be reconsidered.',o:['essential','essentially','essence','essentials'],a:0},
+  ]},
+  C2:{title:{ru:'Тест перехода на C2',en:'C2 Level-Up Test'},questions:[
+    {q:'Choose the most natural: The discovery ___ new avenues of research.',o:['opened up','opened','has opened up','was opening up'],a:0},
+    {q:'Choose: Her prose style is characterised by a ___ elegance.',o:['studied','studying','studious','study'],a:0},
+    {q:'Choose: The legislation, ___ contentious, was passed unanimously.',o:['far from being','far from','being far','from far being'],a:0},
+    {q:'Choose: He has a(n) ___ for getting into trouble.',o:['knack','trick','habit','ability'],a:0},
+    {q:'Choose: The report ___ the notion that economic growth is linear.',o:['debunks','debunk','debunking','debunked'],a:0},
+    {q:'Choose: ___ the evidence, the conclusion is inescapable.',o:['In light of','In the light','By light of','With light to'],a:0},
+    {q:'Choose: Her argument, ___ elegant, contains a fundamental flaw.',o:['however','notwithstanding','albeit','whilst'],a:0},
+    {q:'Choose: The ___ of events was such that no single factor could be isolated.',o:['concatenation','congregation','conflagration','configuration'],a:0},
+    {q:'Choose: He evinced a(n) ___ disregard for convention.',o:['studied','student','studying','studiously'],a:0},
+    {q:'Choose: The manuscript, long thought ___, was discovered in an attic.',o:['to have been lost','lost','to be lost','being lost'],a:0},
+    {q:'Choose: ___ unprecedented, such occurrences are exceedingly rare.',o:['While not','Whilst not being','Although not','Not being'],a:0},
+    {q:'Choose: The nuances of the argument were lost on all ___ the most attentive readers.',o:['but','except','save','besides'],a:0},
+    {q:'Choose: She spoke with a ___ that belied her years.',o:['gravitas','gravity','grave','graving'],a:0},
+    {q:'Choose: The results, taken ___, paint a compelling picture.',o:['in toto','in total','totally','as total'],a:0},
+    {q:'Choose: His ___ of the subject is second to none.',o:['command','commanding','commandment','commanded'],a:0},
+  ]},
+};
+
+// Level test state
+let levelTestState=null;
+
+function startLevelTest(targetLevel){
+  const test=LEVEL_TESTS[targetLevel];
+  if(!test){toast('Test not available','⚠️');return;}
+  haptic('medium');
+  levelTestState={target:targetLevel,questions:[...test.questions].sort(()=>Math.random()-.5),current:0,correct:0,total:test.questions.length};
+  goTab('chat');
+  const title=test.title[lang]||test.title.en;
+  addMsg('bot',`<div class="lt-header">📝 <b>${title}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов · нужно 80% правильных':'questions · need 80% correct'}</span></div>`);
+  setTimeout(showLevelQuestion,500);
+}
+
+function showLevelQuestion(){
+  if(!levelTestState)return;
+  const {questions,current,total}=levelTestState;
+  if(current>=total){finishLevelTest();return;}
+  const q=questions[current];
+  const qid='lq-'+Date.now();
+  const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i},${q.a})">${String.fromCharCode(65+i)}) ${o}</div>`).join('');
+  addMsg('bot',`<div class="lt-q" id="${qid}">
+    <div class="lt-num">${current+1}/${total}</div>
+    <div class="lt-text">${q.q}</div>
+    <div class="lt-opts">${opts}</div>
+  </div>`);
+}
+
+function answerLevelQ(qid,picked,correct){
+  if(!levelTestState)return;
+  const isRight=picked===correct;
+  if(isRight)levelTestState.correct++;
+  haptic(isRight?'success':'error');
+  // Highlight answers
+  document.querySelectorAll(`#${qid} .lt-opt`).forEach((o,i)=>{
+    o.style.pointerEvents='none';
+    if(i===correct)o.classList.add('lt-correct');
+    if(i===picked&&!isRight)o.classList.add('lt-wrong');
+  });
+  levelTestState.current++;
+  setTimeout(showLevelQuestion,1200);
+}
+
+function finishLevelTest(){
+  const {target,correct,total}=levelTestState;
+  const pct=Math.round(correct/total*100);
+  const passed=pct>=80;
+  if(passed){
+    haptic('success');
+    LS.set('ob_level',target);
+    if(window._d)window._d.level=target;
+    // Save passed test
+    const pt=LS.getJ('passed_level_tests')||{};
+    pt[target]=Date.now();
+    LS.setJ('passed_level_tests',pt);
+    // Sync to server
+    if(API&&window._uid)fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,message:`/setlevel ${target}`})}).catch(()=>{});
+    addMsg('bot',`<div class="lt-result lt-pass">
+      <div style="font-size:36px;margin-bottom:8px">🏆</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Тест пройден!':'Test passed!'}</div>
+      <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%)</div>
+      <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>`:`Your new level: <b>${target}</b>`}</div>
+    </div>`);
+    addLocalXP(100);bumpStat('tests');toast(`+100 XP · Level ${target}`,'🏆');
+  } else {
+    haptic('error');
+    addMsg('bot',`<div class="lt-result lt-fail">
+      <div style="font-size:36px;margin-bottom:8px">💪</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Пока не прошёл':'Not yet'}</div>
+      <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${lang==='ru'?'нужно 80%':'need 80%'}</div>
+      <div style="font-size:13px;color:var(--t2)">${lang==='ru'?'Продолжай практиковать и попробуй снова!':'Keep practicing and try again!'}</div>
+    </div>`);
+  }
+  levelTestState=null;
+}
 
 let learnTab='cards';
 function switchLearnTab(tab){
@@ -3060,21 +3235,36 @@ function renderRoadmap(){
   if(!wrap)return;
   const progress=LS.getJ('rm_progress')||{};
   const userLevel=LS.get('ob_level')||window._d?.level||'A1';
-  const levelOrder=['A1','A2','B1','B2','C1'];
+  const levelOrder=['A1','A2','B1','B2','C1','C2'];
   const userLvlIdx=levelOrder.indexOf(userLevel.replace(/\+/,''));
+  const passedTests=LS.getJ('passed_level_tests')||{};
   wrap.innerHTML='';
 
   ROADMAP_DATA.forEach((lvlData,li)=>{
     const div=document.createElement('div');div.className='rm-level';
     const lvlIdx=levelOrder.indexOf(lvlData.level);
-    const isUnlocked=lvlIdx<=userLvlIdx+1;
+    const isUnlocked=lvlIdx<=userLvlIdx;
+    const isNext=lvlIdx===userLvlIdx+1;
     const hdr=document.createElement('div');hdr.className='rm-level-hdr';
-    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}</div>`;
+    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}${isUnlocked?' ✓':isNext?' ⬆':''}</div>`;
     div.appendChild(hdr);
+
+    // Add level-up test button at start of next level
+    if(isNext&&!passedTests[lvlData.level]){
+      const testBtn=document.createElement('div');testBtn.className='rm-test-btn';
+      testBtn.innerHTML=`
+        <div class="rm-test-ico"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 14l2 2 4-4"/></svg></div>
+        <div><div class="rm-test-title">${lang==='ru'?'📝 Тест перехода на':'📝 Level-up test for'} ${lvlData.level}</div>
+        <div class="rm-test-sub">${lang==='ru'?'Пройди тест чтобы разблокировать':'Pass the test to unlock'}</div></div>`;
+      testBtn.onclick=()=>startLevelTest(lvlData.level);
+      div.appendChild(testBtn);
+    }
+
     lvlData.lessons.forEach((ls,idx)=>{
       const done=progress[ls.id]>=3;
-      const isActive=!done&&isUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=1);
-      const locked=!isUnlocked&&!done&&!isActive;
+      const lessonUnlocked=isUnlocked||(isNext&&passedTests[lvlData.level]);
+      const isActive=!done&&lessonUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=1);
+      const locked=!lessonUnlocked&&!done;
       const prog=progress[ls.id]||0;
       const card=document.createElement('div');
       card.className='rm-lesson'+(done?' done':isActive?' active-lesson':locked?' locked':'');
@@ -3095,6 +3285,7 @@ function renderRoadmap(){
           LS.setJ('rm_progress',p);
           goTab('chat');setTimeout(()=>sendChip(topic),150);
         };
+      }
       }
       div.appendChild(card);
     });
@@ -3765,6 +3956,7 @@ function renderAchievements(){
   if(!wrap)return;
   const list=getAchievements();
   const unlocked=LS.getJ('achievements_unlocked')||{};
+  const doneCount=list.filter(a=>!!unlocked[a.id]).length;
   wrap.innerHTML=list.map(a=>{
     const done=!!unlocked[a.id];
     const t=a.title[lang]||a.title.en;
@@ -3775,6 +3967,11 @@ function renderAchievements(){
       ${done?'<div class="ach-check"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div>':'<div class="ach-lock">🔒</div>'}
     </div>`;
   }).join('');
+  // Update home button counter
+  const cnt=document.getElementById('ach-cnt');
+  if(cnt)cnt.textContent=`${doneCount}/${list.length}`;
+  const lbl=document.getElementById('ach-btn-lbl');
+  if(lbl)lbl.textContent={ru:'Достижения',en:'Achievements',es:'Logros',de:'Erfolge',fr:'Succès'}[lang]||'Achievements';
 }
 
 /* ══ STORY MODE ══ */
