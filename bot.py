@@ -80,30 +80,27 @@ ADMIN_IDS: set = {
 # 3 плана с разными баффами
 PREMIUM_PLANS = {
     "basic": {
-        "stars": 99, "months": 1,
+        "stars": 250, "months": 1, "price_usd": 500,  # cents for Stripe
         "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
         "tier": "basic",
-        "buffs_ru": "✅ 40 сообщений в день\n✅ Голосовые ответы ALEX\n✅ 5 grammar games в день",
-        "buffs_en": "✅ 40 messages/day\n✅ Voice replies from ALEX\n✅ 5 grammar games/day",
-        "msg_limit": 40, "history": 30, "max_tokens": 1000,
+        "model": "haiku", "msg_limit": 30, "history": 30, "max_tokens": 800,
     },
     "pro": {
-        "stars": 249, "months": 3,
-        "label_ru": "Pro · 3 мес", "label_en": "Pro · 3 mo",
+        "stars": 600, "months": 1, "price_usd": 1200,
+        "label_ru": "Pro · 1 мес", "label_en": "Pro · 1 mo",
         "tier": "pro",
-        "buffs_ru": "✅ Безлимит сообщений\n✅ Голосовые ответы ALEX\n✅ Безлимит grammar games\n✅ Все сценки и roleplay\n✅ Подробный анализ ошибок\n✅ 🎭 VIP личности (Harvard, BBC)",
-        "buffs_en": "✅ Unlimited messages\n✅ Voice replies from ALEX\n✅ Unlimited grammar games\n✅ All scenarios & roleplay\n✅ Detailed error analysis\n✅ 🎭 VIP personas (Harvard, BBC)",
-        "msg_limit": 9999, "history": 50, "max_tokens": 1500,
+        "model": "sonnet", "msg_limit": 60, "history": 50, "max_tokens": 1200,
     },
     "ultimate": {
-        "stars": 499, "months": 12,
-        "label_ru": "Ultimate · 1 год", "label_en": "Ultimate · 1 yr",
+        "stars": 1000, "months": 1, "price_usd": 2000,
+        "label_ru": "Ultimate · 1 мес", "label_en": "Ultimate · 1 mo",
         "tier": "ultimate",
-        "buffs_ru": "✅ Всё из Pro\n✅ Приоритет ответа (быстрее)\n✅ TOEFL Mock Exams\n✅ Персональный план обучения\n✅ Ранний доступ к новым фичам\n✅ 💎 Эксклюзивные темы",
-        "buffs_en": "✅ Everything in Pro\n✅ Priority response (faster)\n✅ TOEFL Mock Exams\n✅ Personal study plan\n✅ Early access to new features\n✅ 💎 Exclusive themes",
-        "msg_limit": 9999, "history": 80, "max_tokens": 2000,
+        "model": "sonnet", "msg_limit": 80, "history": 80, "max_tokens": 1500,
     },
 }
+# First-time discount: 10% off
+FIRST_TIME_DISCOUNT = 0.10
+STRIPE_TOKEN = os.getenv("STRIPE_PROVIDER_TOKEN", "")
 MODEL         = "claude-haiku-4-5"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -535,6 +532,68 @@ async def send_weekly_report(uid: int):
         )
     except Exception: pass
 
+# ══ DAILY WORD PUSH ══════════════════════════════════════════════════════════
+DAILY_WORDS = [
+    {"word":"Perseverance","ph":"/ˌpɜːsɪˈvɪərəns/","tr":"Настойчивость","ex":"Success requires perseverance."},
+    {"word":"Eloquent","ph":"/ˈeləkwənt/","tr":"Красноречивый","ex":"She gave an eloquent speech."},
+    {"word":"Ambiguous","ph":"/æmˈbɪɡjuəs/","tr":"Двусмысленный","ex":"The instructions were ambiguous."},
+    {"word":"Resilient","ph":"/rɪˈzɪliənt/","tr":"Устойчивый","ex":"Children are remarkably resilient."},
+    {"word":"Procrastinate","ph":"/prəˈkræstɪneɪt/","tr":"Откладывать","ex":"Stop procrastinating and start working."},
+    {"word":"Inevitable","ph":"/ɪnˈevɪtəbl/","tr":"Неизбежный","ex":"Change is inevitable in life."},
+    {"word":"Comprehensive","ph":"/ˌkɒmprɪˈhensɪv/","tr":"Всесторонний","ex":"We need a comprehensive plan."},
+    {"word":"Deteriorate","ph":"/dɪˈtɪəriəreɪt/","tr":"Ухудшаться","ex":"The weather began to deteriorate."},
+    {"word":"Spontaneous","ph":"/spɒnˈteɪniəs/","tr":"Спонтанный","ex":"It was a spontaneous decision."},
+    {"word":"Ubiquitous","ph":"/juːˈbɪkwɪtəs/","tr":"Повсеместный","ex":"Smartphones are now ubiquitous."},
+    {"word":"Pragmatic","ph":"/præɡˈmætɪk/","tr":"Прагматичный","ex":"We need a pragmatic approach."},
+    {"word":"Empathy","ph":"/ˈempəθi/","tr":"Эмпатия","ex":"Show empathy towards others."},
+    {"word":"Hypothesis","ph":"/haɪˈpɒθəsɪs/","tr":"Гипотеза","ex":"We tested the hypothesis carefully."},
+    {"word":"Notorious","ph":"/nəˈtɔːriəs/","tr":"Печально известный","ex":"The city is notorious for traffic."},
+    {"word":"Meticulous","ph":"/mɪˈtɪkjʊləs/","tr":"Скрупулёзный","ex":"She is meticulous about details."},
+    {"word":"Serendipity","ph":"/ˌserənˈdɪpɪti/","tr":"Счастливая случайность","ex":"Finding this book was pure serendipity."},
+    {"word":"Juxtapose","ph":"/ˈdʒʌkstəpəʊz/","tr":"Сопоставлять","ex":"The artist juxtaposed light and dark."},
+    {"word":"Epitome","ph":"/ɪˈpɪtəmi/","tr":"Воплощение","ex":"She is the epitome of elegance."},
+    {"word":"Conundrum","ph":"/kəˈnʌndrəm/","tr":"Головоломка","ex":"This presents a real conundrum."},
+    {"word":"Ephemeral","ph":"/ɪˈfemərəl/","tr":"Мимолётный","ex":"Fame can be ephemeral."},
+    {"word":"Paradigm","ph":"/ˈpærədaɪm/","tr":"Парадигма","ex":"A paradigm shift in thinking."},
+    {"word":"Aesthetic","ph":"/iːsˈθetɪk/","tr":"Эстетический","ex":"The room has a minimalist aesthetic."},
+    {"word":"Dichotomy","ph":"/daɪˈkɒtəmi/","tr":"Дихотомия","ex":"The dichotomy between rich and poor."},
+    {"word":"Candid","ph":"/ˈkændɪd/","tr":"Откровенный","ex":"Let me be candid with you."},
+    {"word":"Tenacious","ph":"/tɪˈneɪʃəs/","tr":"Цепкий","ex":"She is tenacious in her pursuit."},
+    {"word":"Anomaly","ph":"/əˈnɒməli/","tr":"Аномалия","ex":"The data showed an anomaly."},
+    {"word":"Versatile","ph":"/ˈvɜːsətaɪl/","tr":"Универсальный","ex":"He is a versatile musician."},
+    {"word":"Mundane","ph":"/mʌnˈdeɪn/","tr":"Обыденный","ex":"Escape from the mundane routine."},
+    {"word":"Nuance","ph":"/ˈnjuːɑːns/","tr":"Нюанс","ex":"Appreciate the nuance of language."},
+    {"word":"Catalyst","ph":"/ˈkætəlɪst/","tr":"Катализатор","ex":"The event was a catalyst for change."},
+    {"word":"Idiosyncratic","ph":"/ˌɪdiəsɪŋˈkrætɪk/","tr":"Своеобразный","ex":"He has an idiosyncratic style."},
+]
+
+async def send_daily_word(uid: int):
+    """Send daily word of the day to user."""
+    import random
+    lang = await get_lang(uid) or "ru"
+    ru = lang == "ru"
+    w = random.choice(DAILY_WORDS)
+    try:
+        from aiogram.types import WebAppInfo
+        app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+        kb = None
+        if app_url:
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="📱 Учить в приложении" if ru else "📱 Learn in app",
+                                      web_app=WebAppInfo(url=app_url))]
+            ])
+        await bot.send_message(uid,
+            f"📚 <b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
+            f"🔤 <b>{w['word']}</b>\n"
+            f"🔊 {w['ph']}\n"
+            f"🇷🇺 {w['tr']}\n\n"
+            f"📝 <i>{w['ex']}</i>\n\n"
+            f"💡 {'Попробуй использовать в предложении!' if ru else 'Try using it in a sentence!'}",
+            parse_mode="HTML", reply_markup=kb
+        )
+    except Exception as e:
+        logger.warning(f"daily_word to {uid}: {e}")
+
 async def schedule_all():
     rows = await db("SELECT uid, remind_time FROM users WHERE remind_time IS NOT NULL AND remind_time != 'off'", fetch="all")
     if rows:
@@ -547,6 +606,8 @@ async def schedule_all():
     if all_users:
         for r in all_users:
             scheduler.add_job(send_weekly_report,"cron",day_of_week="sun",hour=19,args=[r["uid"]],id=f"weekly_{r['uid']}",replace_existing=True)
+            # Daily word at 9:00 AM
+            scheduler.add_job(send_daily_word,"cron",hour=9,minute=0,args=[r["uid"]],id=f"daily_{r['uid']}",replace_existing=True)
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
@@ -586,29 +647,40 @@ async def handle_inline(query: InlineQuery):
 async def cmd_start(message: Message):
     uid  = message.from_user.id
     name = message.from_user.first_name or "Student"
-    await upsert_user(uid, name)
+
+    try:
+        await upsert_user(uid, name)
+    except Exception as e:
+        logger.error(f"upsert_user error: {e}")
 
     # Handle deep links
     args = message.text.split(maxsplit=1)[1] if len(message.text.split()) > 1 else ""
     if args == "premium":
-        await cmd_premium(message)
+        try:
+            await cmd_premium(message)
+        except Exception as e:
+            logger.error(f"cmd_premium from start error: {e}")
+            await message.answer("⚠️ Error loading premium. Try /premium")
         return
     if args.startswith("ref_"):
         try:
             ref_uid = int(args.replace("ref_",""))
             await add_xp(ref_uid, 500)
-            lang_ref = await get_lang(ref_uid)
-            ru_ref = lang_ref == "ru"
-            await bot.send_message(ref_uid,
-                f"🎉 {'Твой друг зарегистрировался! +500 XP!' if ru_ref else 'Your friend joined! +500 XP!'}")
         except Exception:
             pass
 
-    # Grant free premium if admin
-    if await is_admin(uid):
-        await grant_premium_via_server(uid, 999, "ultimate")
+    # Grant free premium if admin (non-blocking)
+    try:
+        if await is_admin(uid):
+            await grant_premium_via_server(uid, 999, "ultimate")
+    except Exception as e:
+        logger.warning(f"grant_premium for admin failed: {e}")
 
-    lang = await get_lang(uid) or "ru"
+    lang = "ru"
+    try:
+        lang = await get_lang(uid) or "ru"
+    except Exception:
+        pass
     ru = lang == "ru"
 
     # WebApp button
@@ -622,13 +694,17 @@ async def cmd_start(message: Message):
             web_app=WebAppInfo(url=app_url)
         )])
     kb_buttons.append([InlineKeyboardButton(
-        text="💎 Premium" if ru else "💎 Premium",
+        text="💎 Premium",
         callback_data="open_premium"
     )])
 
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
 
-    is_prem = await is_admin(uid) or await check_premium(uid)
+    is_prem = False
+    try:
+        is_prem = await is_admin(uid) or await check_premium(uid)
+    except Exception:
+        pass
     badge = " · 👑 Premium" if is_prem else ""
 
     text = (
@@ -1509,67 +1585,98 @@ async def cmd_premium(msg: Message):
         prem_badge = ("\n\n✅ <i>У тебя уже есть Premium. Можешь продлить!</i>" if ru
                       else "\n\n✅ <i>You already have Premium. You can extend!</i>")
 
-    plans_kb = InlineKeyboardMarkup(inline_keyboard=[
+    # Check if first-time buyer for discount
+    is_first = True
+    try:
+        from database import get_premium_info
+        info = await get_premium_info(uid)
+        if info.get("tier"):  # has or had premium before
+            is_first = False
+    except Exception:
+        pass
+
+    discount_text = ""
+    if is_first:
+        discount_text = "\n\n🎁 <b>-10% на первую покупку!</b>" if ru else "\n\n🎁 <b>10% off your first purchase!</b>"
+
+    # Prices with discount
+    b_stars = int(250 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 250
+    p_stars = int(600 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 600
+    u_stars = int(1000 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 1000
+
+    kb_rows = [
         [InlineKeyboardButton(
-            text=f"🟢 Basic — 99 ⭐/мес" if ru else f"🟢 Basic — 99 ⭐/mo",
-            callback_data="prem_buy:basic"
+            text=f"🟢 Basic — {b_stars} ⭐/мес (~$5)" if ru else f"🟢 Basic — {b_stars} ⭐/mo (~$5)",
+            callback_data=f"prem_buy:basic:{'d' if is_first else 'n'}"
         )],
         [InlineKeyboardButton(
-            text=f"🔵 Pro — 249 ⭐/3 мес (-17%)" if ru else f"🔵 Pro — 249 ⭐/3mo (-17%)",
-            callback_data="prem_buy:pro"
+            text=f"🔵 Pro — {p_stars} ⭐/мес (~$12) 🧠" if ru else f"🔵 Pro — {p_stars} ⭐/mo (~$12) 🧠",
+            callback_data=f"prem_buy:pro:{'d' if is_first else 'n'}"
         )],
         [InlineKeyboardButton(
-            text=f"💎 Ultimate — 499 ⭐/год (-58%)" if ru else f"💎 Ultimate — 499 ⭐/yr (-58%)",
-            callback_data="prem_buy:ultimate"
+            text=f"💎 Ultimate — {u_stars} ⭐/мес (~$20) 🧠" if ru else f"💎 Ultimate — {u_stars} ⭐/mo (~$20) 🧠",
+            callback_data=f"prem_buy:ultimate:{'d' if is_first else 'n'}"
         )],
-    ])
+    ]
+    # Add card payment option if Stripe is configured
+    if STRIPE_TOKEN:
+        kb_rows.append([InlineKeyboardButton(
+            text="💳 Оплатить картой" if ru else "💳 Pay by card",
+            callback_data="prem_card_menu"
+        )])
+
+    plans_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
 
     text = (
         "💎 <b>ALEX Premium</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
-        "🟢 <b>Basic</b> — 99 ⭐/мес\n"
-        "├ 40 сообщений в день\n"
+        f"🟢 <b>Basic</b> — {b_stars} ⭐/мес\n"
+        "├ 30 сообщений/день\n"
         "├ Голосовые ответы ALEX\n"
-        "└ 5 grammar games в день\n\n"
-        "🔵 <b>Pro</b> — 249 ⭐/3 мес\n"
-        "├ Безлимит сообщений\n"
-        "├ Голос + все сценки\n"
-        "├ Подробный анализ ошибок\n"
+        "└ Story Mode + grammar games\n\n"
+        f"🔵 <b>Pro</b> — {p_stars} ⭐/мес 🧠\n"
+        "├ 60 сообщений/день\n"
+        "├ <b>Умная модель Sonnet</b>\n"
+        "├ Все сценки + анализ ошибок\n"
         "└ 🎭 VIP личности\n\n"
-        "💎 <b>Ultimate</b> — 499 ⭐/год\n"
-        "├ Всё из Pro\n"
-        "├ TOEFL Mock Exams\n"
-        "├ Персональный план\n"
-        "└ 💎 Эксклюзивные темы\n"
+        f"💎 <b>Ultimate</b> — {u_stars} ⭐/мес 🧠\n"
+        "├ 80 сообщений/день\n"
+        "├ <b>Умная модель Sonnet</b>\n"
+        "├ TOEFL + персональный план\n"
+        "└ 💎 Эксклюзивные темы"
+        f"{discount_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Оплата через Telegram Stars"
+        "⭐ Stars или 💳 карта"
     ) if ru else (
         "💎 <b>ALEX Premium</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
-        "🟢 <b>Basic</b> — 99 ⭐/mo\n"
-        "├ 40 messages/day\n"
+        f"🟢 <b>Basic</b> — {b_stars} ⭐/mo\n"
+        "├ 30 messages/day\n"
         "├ Voice replies from ALEX\n"
-        "└ 5 grammar games/day\n\n"
-        "🔵 <b>Pro</b> — 249 ⭐/3mo\n"
-        "├ Unlimited messages\n"
-        "├ Voice + all scenarios\n"
-        "├ Detailed error analysis\n"
+        "└ Story Mode + grammar games\n\n"
+        f"🔵 <b>Pro</b> — {p_stars} ⭐/mo 🧠\n"
+        "├ 60 messages/day\n"
+        "├ <b>Smart Sonnet model</b>\n"
+        "├ All scenarios + error analysis\n"
         "└ 🎭 VIP personas\n\n"
-        "💎 <b>Ultimate</b> — 499 ⭐/yr\n"
-        "├ Everything in Pro\n"
-        "├ TOEFL Mock Exams\n"
-        "├ Personal study plan\n"
-        "└ 💎 Exclusive themes\n"
+        f"💎 <b>Ultimate</b> — {u_stars} ⭐/mo 🧠\n"
+        "├ 80 messages/day\n"
+        "├ <b>Smart Sonnet model</b>\n"
+        "├ TOEFL + personal study plan\n"
+        "└ 💎 Exclusive themes"
+        f"{discount_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Payment via Telegram Stars"
+        "⭐ Stars or 💳 card"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
-# ══ PREMIUM BUY CALLBACK ═══════════════════════════════════════════════════
+# ══ PREMIUM BUY CALLBACK (Stars) ══════════════════════════════════════════
 @dp.callback_query(F.data.startswith("prem_buy:"))
 async def cb_prem_buy(cb: CallbackQuery):
     from aiogram.types import LabeledPrice
-    plan_id = cb.data.split(":")[1]
+    parts = cb.data.split(":")
+    plan_id = parts[1] if len(parts) > 1 else "basic"
+    has_discount = (parts[2] == "d") if len(parts) > 2 else False
     plan = PREMIUM_PLANS.get(plan_id)
     if not plan:
         await cb.answer("Invalid plan", show_alert=True)
@@ -1578,11 +1685,13 @@ async def cb_prem_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-
     label = plan["label_ru"] if ru else plan["label_en"]
-    buffs = plan.get("buffs_ru","") if ru else plan.get("buffs_en","")
-    desc_short = buffs.replace("✅ ","").replace("\n"," · ")[:240]
-    desc = f"ALEX Premium — {label}\n{desc_short}"
+
+    stars = plan["stars"]
+    if has_discount:
+        stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
+
+    desc = f"ALEX Premium {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}"
 
     await cb.answer()
     try:
@@ -1591,8 +1700,8 @@ async def cb_prem_buy(cb: CallbackQuery):
             title=f"ALEX Premium {label}",
             description=desc,
             payload=f"premium:{plan_id}:{uid}",
-            currency="XTR",  # Telegram Stars
-            prices=[LabeledPrice(label=f"Premium {label}", amount=plan["stars"])],
+            currency="XTR",
+            prices=[LabeledPrice(label=f"Premium {label}", amount=stars)],
             protect_content=False,
         )
     except Exception as e:
@@ -1600,10 +1709,54 @@ async def cb_prem_buy(cb: CallbackQuery):
         err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
         await bot.send_message(uid, err)
 
+# ══ CARD PAYMENT MENU ════════════════════════════════════════════════════
+@dp.callback_query(F.data == "prem_card_menu")
+async def cb_card_menu(cb: CallbackQuery):
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    await cb.answer()
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"🟢 Basic — $5/мес" if ru else "🟢 Basic — $5/mo", callback_data="prem_card:basic")],
+        [InlineKeyboardButton(text=f"🔵 Pro — $12/мес 🧠" if ru else "🔵 Pro — $12/mo 🧠", callback_data="prem_card:pro")],
+        [InlineKeyboardButton(text=f"💎 Ultimate — $20/мес 🧠" if ru else "💎 Ultimate — $20/mo 🧠", callback_data="prem_card:ultimate")],
+    ])
+    await cb.message.answer("💳 " + ("Выбери план для оплаты картой:" if ru else "Choose a plan to pay by card:"), reply_markup=kb)
+
+@dp.callback_query(F.data.startswith("prem_card:"))
+async def cb_card_buy(cb: CallbackQuery):
+    from aiogram.types import LabeledPrice
+    plan_id = cb.data.split(":")[1]
+    plan = PREMIUM_PLANS.get(plan_id)
+    if not plan or not STRIPE_TOKEN:
+        await cb.answer("Card payments not configured" if not STRIPE_TOKEN else "Invalid plan", show_alert=True)
+        return
+
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    label = plan["label_ru"] if ru else plan["label_en"]
+    price_usd = plan["price_usd"]  # in cents
+
+    await cb.answer()
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title=f"ALEX Premium {label}",
+            description=f"ALEX Premium {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}",
+            payload=f"premium:{plan_id}:{uid}",
+            provider_token=STRIPE_TOKEN,
+            currency="USD",
+            prices=[LabeledPrice(label=f"Premium {label}", amount=price_usd)],
+            protect_content=False,
+        )
+    except Exception as e:
+        logger.error(f"card invoice error: {e}")
+        await bot.send_message(uid, "⚠️ " + ("Ошибка. Попробуй оплату через Stars." if ru else "Error. Try Stars payment."))
+
 # ══ PRE-CHECKOUT ══════════════════════════════════════════════════════════
 @dp.pre_checkout_query()
 async def pre_checkout(pcq):
-    """Always approve — Telegram Stars payments are instant."""
     await bot.answer_pre_checkout_query(pcq.id, ok=True)
 
 # ══ SUCCESSFUL PAYMENT ════════════════════════════════════════════════════
