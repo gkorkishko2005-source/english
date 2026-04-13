@@ -13,6 +13,19 @@ BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 MODEL       = "claude-haiku-4-5-20251001"   # ← FIXED model name
 
+# ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
+# Add your Telegram user IDs here — they get lifetime free premium
+# To find your ID: message @userinfobot in Telegram
+ADMIN_IDS = {
+    # Добавь свои ID сюда:
+    # 123456789,   # Гордей
+    # 987654321,   # Семья
+}
+# Any username in this set also gets free premium
+ADMIN_USERNAMES = {
+    # "utiqo",
+}
+
 if not ANT_KEY:
     logger.error("❌ ANTHROPIC_API_KEY is not set!")
 else:
@@ -99,6 +112,8 @@ async def handle_user(request):
             "weekly": weekly,
             "toefl_scores": toefl_scores,
             "due_words": [{"id": w["id"], "word": w["word"], "translation": w["translation"], "phonetic": w.get("phonetic",""), "example": w.get("example","")} for w in (due_words or [])],
+            "is_premium": bool(user.get("is_premium")),
+            "premium_until": str(user.get("premium_until","")) if user.get("premium_until") else None,
         }, headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
         logger.error(f"handle_user error: {e}")
@@ -149,10 +164,21 @@ async def handle_chat(request):
         system = persona_prompt + "\n\n" + system
     system = system + fmt + "\n" + bl
 
+    # Check premium for longer responses
+    user_premium = False
+    if uid in ADMIN_IDS:
+        user_premium = True
+    elif uid:
+        try:
+            from database import check_premium
+            user_premium = await check_premium(uid)
+        except Exception:
+            pass
+
     h = _histories.setdefault(uid, [])
     h.append({"role": "user", "content": message})
-    if len(h) > 20:
-        _histories[uid] = h[-20:]
+    if len(h) > (40 if user_premium else 20):
+        _histories[uid] = h[-(40 if user_premium else 20):]
 
     try:
         async with httpx.AsyncClient(timeout=45) as client:
@@ -165,7 +191,7 @@ async def handle_chat(request):
                 },
                 json={
                     "model": MODEL,
-                    "max_tokens": 800,
+                    "max_tokens": 1200 if user_premium else 800,
                     "system": system,
                     "messages": _histories[uid],
                 },
@@ -335,6 +361,57 @@ async def handle_audio_task(request):
 async def handle_health(request):
     return web.json_response({"status":"ok","model":MODEL},headers={"Access-Control-Allow-Origin":"*"})
 
+# ── CHECK PREMIUM ─────────────────────────────────────────────────────────────
+async def handle_check_premium(request):
+    """Returns premium status for a user. Admin whitelist is checked here."""
+    try:
+        uid = int(request.match_info["uid"])
+    except Exception:
+        return web.json_response({"error":"invalid uid"},status=400)
+
+    # Check whitelist first (free premium for admins)
+    if uid in ADMIN_IDS:
+        return web.json_response({"is_premium":True,"source":"admin_whitelist"},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+
+    try:
+        from database import check_premium, get_user
+        user = await get_user(uid)
+        username = (user or {}).get("name","")
+        if any(u.lower() in username.lower() for u in ADMIN_USERNAMES if u):
+            return web.json_response({"is_premium":True,"source":"admin_whitelist"},
+                                      headers={"Access-Control-Allow-Origin":"*"})
+        active = await check_premium(uid)
+        return web.json_response({"is_premium":active,"source":"database"},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        return web.json_response({"is_premium":False,"error":str(e)},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+
+# ── GRANT PREMIUM (called by bot after successful payment) ────────────────────
+async def handle_grant_premium(request):
+    """Called internally by bot after Telegram Stars payment confirmed."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0))
+        months = int(body.get("months",1))
+        secret = body.get("secret","")
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400)
+
+    # Simple shared secret between bot and server
+    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
+    if secret != BOT_SECRET:
+        return web.json_response({"error":"unauthorized"},status=403)
+
+    try:
+        from database import set_premium
+        await set_premium(uid, months)
+        return web.json_response({"ok":True,"uid":uid,"months":months},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
 async def handle_options(request):
     return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data"})
@@ -353,6 +430,8 @@ def create_app():
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)
     app.router.add_post("/api/audio_task",handle_audio_task)
+    app.router.add_get("/api/premium/{uid}",handle_check_premium)
+    app.router.add_post("/api/premium/grant",handle_grant_premium)
     app.router.add_get("/health",handle_health)
     app.router.add_route("OPTIONS","/{tail:.*}",handle_options)
     app.router.add_static("/",WEBAPP_DIR,show_index=False)
