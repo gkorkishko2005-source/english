@@ -984,6 +984,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="screen" id="s-settings">
   <div class="shdr"><div class="stit" id="set-tit"></div></div>
 
+  <!-- Premium banner in settings -->
+  <div id="premium-settings-banner" style="margin-bottom:14px">
+    <!-- Rendered by JS based on premium status -->
+  </div>
+
   <!-- Interface language picker -->
   <div class="sec"><span id="uilang-lbl"></span></div>
   <div class="lang-picker-btn" onclick="openLangPicker('ui')">
@@ -1029,6 +1034,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="pbtn" data-p="brit" onclick="pickPersona(this)">
       <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><ellipse cx="16" cy="20" rx="10" ry="6"/><path d="M6 20c0-3.5 4.5-7 10-7s10 3.5 10 7"/><path d="M7 17c2-5 16-5 18 0"/><rect x="4" y="14" width="24" height="3" rx="1.5"/></svg></div>
       <div class="pbn" id="pb4n"></div><div class="pbs" id="pb4s"></div>
+    </div>
+    <!-- PREMIUM personas -->
+    <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
+      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M16 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/><path d="M8 22h16v4H8z"/><path d="M12 22v-6M20 22v-6"/><path d="M8 16h16"/></svg></div>
+      <div class="pbn">Harvard Prof</div><div class="pbs">Академический стиль</div>
+      <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
+    </div>
+    <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
+      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="8" width="24" height="16" rx="3"/><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="2"/><line x1="4" y1="12" x2="28" y2="12"/></svg></div>
+      <div class="pbn">BBC Anchor</div><div class="pbs">Британский акцент</div>
+      <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
     </div>
   </div>
 
@@ -1813,6 +1829,7 @@ function goTab(n){
   tab=n;
   if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
+  if(n==='settings'){try{updatePremiumUI();}catch(e){}}
   if(n==='chat')scrollMsgs();
 }
 
@@ -2174,10 +2191,13 @@ function closeSpanel(){document.getElementById('spanel').classList.remove('open'
 
 /* ══ PERSONA ══ */
 const PERSONAS={
-  default:{prompt:''},
-  professor:{prompt:'You are a strict, formal English professor. Be precise, academic, correct every error carefully. Use formal language.'},
-  gamer:{prompt:'You are a chill gamer friend from London. Use gaming analogies, casual slang, be fun and energetic.'},
-  brit:{prompt:'You are a witty, slightly sarcastic British English tutor. Use British idioms and expressions, be charming and clever.'},
+  default:  {prompt:''},
+  professor:{prompt:'You are a strict, formal English professor. Be precise, academic, correct every error carefully. Use formal language. Start each lesson with "Today we shall examine..."'},
+  gamer:    {prompt:'You are a chill gamer friend from London. Use gaming analogies, casual slang (GG, noob, respawn, level up), be fun and energetic. Say "Let\'s grind this vocab!" type things.'},
+  brit:     {prompt:'You are a witty, slightly sarcastic British English tutor. Use British idioms and expressions, be charming and clever. Occasionally say "Brilliant!", "Crikey!", "Spot on!"'},
+  // PREMIUM PERSONAS
+  harvard:  {prompt:'You are a Harvard linguistics professor — brilliant, demanding, but inspiring. Reference academic research, use sophisticated vocabulary, push the student to think deeper. Say things like "According to Chomsky\'s theory..." and "Let me challenge that assumption."'},
+  bbc:      {prompt:'You are a seasoned BBC World Service presenter teaching English. Speak with impeccable RP (Received Pronunciation) style. Use proper broadcast English, reference news events, be authoritative yet warm. Occasionally use BBC-style phrasing like "And now, turning to your English..."'},
 };
 let persona='default';
 
@@ -3206,26 +3226,116 @@ function incrementChallenge(){
 }
 
 /* ══════════════════════════════════════════════════
-   💎  PREMIUM SYSTEM
+   💎  PREMIUM SYSTEM (server-backed)
 ══════════════════════════════════════════════════ */
-let isPremium=LS.get('premium')==='1';
+let isPremium = false;
+
+// Check premium from server (called after init)
+async function checkPremiumStatus(uid){
+  // Admin bypass — set your UID here in the client too
+  const ADMIN_IDS_CLIENT = [
+    // 123456789,   // Добавь свой реальный Telegram UID
+  ];
+  if(ADMIN_IDS_CLIENT.includes(uid)){
+    setPremium(true,'admin');return;
+  }
+  if(!uid||!API)return;
+  try{
+    const r=await fetch(`${API}/api/premium/${uid}`,{signal:AbortSignal.timeout(5000)});
+    if(r.ok){
+      const d=await r.json();
+      setPremium(d.is_premium===true,d.source||'database');
+    }
+  }catch(e){
+    // If server unreachable, check local cache
+    if(LS.get('premium')==='1')setPremium(true,'cache');
+  }
+}
+
+function setPremium(active, source){
+  isPremium=active;
+  LS.set('premium',active?'1':'0');
+  // Update UI
+  updatePremiumUI();
+  if(active&&source!=='cache'){
+    // Add premium badge to settings header
+    const shdr=document.querySelector('.shdr .stit');
+    if(shdr&&!shdr.querySelector('.premium-badge')){
+      const badge=document.createElement('span');
+      badge.className='premium-badge';badge.textContent='PRO';badge.style.marginLeft='8px';
+      shdr.appendChild(badge);
+    }
+  }
+}
+
+function updatePremiumUI(){
+  // Update settings premium banner
+  const banner=document.getElementById('premium-settings-banner');
+  if(banner){
+    if(isPremium){
+      banner.innerHTML=`
+        <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(255,184,48,.08));border:1px solid rgba(212,168,67,.3);border-radius:var(--r)">
+          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${{ru:'ALEX Premium активен 👑',en:'ALEX Premium active 👑'}[lang]||'Premium active'}</div>
+            <div style="font-size:12px;color:var(--t2)">${{ru:'Все функции разблокированы',en:'All features unlocked'}[lang]||'All features unlocked'}</div>
+          </div>
+          <span class="premium-badge">PRO</span>
+        </div>`;
+    } else {
+      banner.innerHTML=`
+        <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
+          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
+            <div style="font-size:12px;color:var(--t2)">${{ru:'от 149 ⭐ · Голос · Безлимит · VIP',en:'from 149 ⭐ · Voice · Unlimited · VIP'}[lang]||'from 149 ⭐'}</div>
+          </div>
+          <span style="color:var(--t3);font-size:18px">›</span>
+        </div>`;
+    }
+  }
+  // Show/hide premium lock overlays
+  document.querySelectorAll('[data-premium]').forEach(el=>{
+    el.style.display=isPremium?'none':'flex';
+  });
+}
+
+// Gate check — shows premium modal if not premium
+function requirePremium(featureName, fn){
+  if(isPremium){fn();return;}
+  const msg={
+    voice:{ru:'Голосовые ответы ALEX',en:'Voice replies from ALEX'},
+    unlimited:{ru:'Безлимитные сообщения',en:'Unlimited messages'},
+    personas:{ru:'Эксклюзивные личности',en:'Exclusive personas'},
+    analysis:{ru:'Детальный анализ ошибок',en:'Detailed error analysis'},
+  };
+  openPremium(msg[featureName]);
+}
+
 const PREMIUM_FEATURES=[
-  {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX responds with voice like a real tutor'}},
-  {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Безлимитные сообщения',sub:'Общайся с ALEX без ограничений'},en:{title:'Unlimited Messages',sub:'Chat with ALEX without limits'}},
-  {icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75',ru:{title:'Эксклюзивные личности ALEX',sub:'Harvard Professor, BBC Anchor, Gordon Ramsay'},en:{title:'Exclusive ALEX Personas',sub:'Harvard Professor, BBC Anchor, Gordon Ramsay'}},
-  {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Ежедневный отчёт о твоих ошибках'},en:{title:'Detailed Error Analysis',sub:'Daily report on your specific mistakes'}},
+  {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX speaks back like a real tutor'}},
+  {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Безлимитные сообщения',sub:'Общайся с ALEX без ограничений'},en:{title:'Unlimited Messages',sub:'Chat with ALEX without any limits'}},
+  {icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75',ru:{title:'Эксклюзивные личности ALEX',sub:'Harvard Prof · BBC Anchor · Gordon Ramsay'},en:{title:'Exclusive ALEX Personas',sub:'Harvard Prof · BBC Anchor · Gordon Ramsay'}},
+  {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Анализ произношения',sub:'ALEX разбирает твоё произношение по голосу'},en:{title:'Pronunciation Analysis',sub:'ALEX analyzes your pronunciation from voice'}},
+  {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Еженедельный отчёт и персональные упражнения'},en:{title:'Detailed Error Analysis',sub:'Weekly report + targeted exercises'}},
 ];
 
-function openPremium(){
+function openPremium(highlightFeature){
   const title=document.getElementById('prem-title');
   const sub=document.getElementById('prem-sub');
   const btn=document.getElementById('prem-btn');
   const free=document.getElementById('prem-free');
   const feats=document.getElementById('prem-feats');
+
   if(title)title.textContent='ALEX Premium';
   if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power of your AI tutor';
-  if(btn)btn.textContent={ru:'Получить Premium — 399 ⭐',en:'Get Premium — 399 ⭐'}[lang]||'Get Premium — 399 ⭐';
+  if(btn)btn.textContent={ru:'Купить Premium — от 149 ⭐',en:'Get Premium — from 149 ⭐'}[lang]||'Get Premium — from 149 ⭐';
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free'}[lang]||'Continue free';
+
   if(feats){
     feats.innerHTML='';
     PREMIUM_FEATURES.forEach(f=>{
@@ -3239,17 +3349,28 @@ function openPremium(){
 }
 
 function activatePremium(){
-  // Telegram Stars payment or mock activation
-  if(tg?.openInvoice){
-    // Would open real Telegram payment
-    closeMod('premiumm');
-    toast(lang==='ru'?'Открываю оплату...':'Opening payment...','💎');
+  // Open bot chat to handle Telegram Stars payment
+  const botName=window.BOT_NAME||'PolyGlotty_bot';
+  if(tg?.openTelegramLink){
+    tg.openTelegramLink(`https://t.me/${botName}?start=premium`);
   } else {
-    // Dev/test mode — activate free
-    isPremium=true;LS.set('premium','1');
-    closeMod('premiumm');
-    toast(lang==='ru'?'Premium активирован! 🎉':'Premium activated! 🎉','⭐');
+    window.open(`https://t.me/${botName}?start=premium`);
   }
+  closeMod('premiumm');
+  toast({ru:'Открываю бот для оплаты...',en:'Opening bot for payment...'}[lang]||'Opening bot...','💎');
+  // Poll for premium status every 5s for 60s after payment flow starts
+  let polls=0;
+  const poll=setInterval(async()=>{
+    polls++;
+    if(polls>12){clearInterval(poll);return;}
+    if(window._uid){
+      await checkPremiumStatus(window._uid);
+      if(isPremium){
+        clearInterval(poll);
+        toast({ru:'Premium активирован! 🎉',en:'Premium activated! 🎉'}[lang]||'Premium activated!','⭐');
+      }
+    }
+  },5000);
 }
 
 /* ══ Update applyLang for new labels ══ */
@@ -3334,9 +3455,13 @@ async function init(){
         if(!srv)return;
         const merged={...d,...srv,name:srv.name||d.name,xp:Math.max(srv.xp||0,localXP)};
         window._d=merged;
+        // Apply server premium status
+        if(srv.is_premium)setPremium(true,'server');
         try{renderHome(merged);}catch{}
         try{renderProgress(merged);}catch{}
       }).catch(()=>{});
+      // Check premium status separately (whitelist + database)
+      checkPremiumStatus(uid);
     }
 
     // Onboarding for truly new users
