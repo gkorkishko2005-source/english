@@ -1912,15 +1912,15 @@ function closeThemePicker(){closeMod('themem');}
 /* ══ XP TREE SVGs ══ */
 function getTreeSvg(xp){
   const a='stroke-linecap="round" stroke-linejoin="round"';
-  if(xp>=4000) return`<svg viewBox="0 0 32 32" fill="none"><style>.tw{animation:tway 3s ease-in-out infinite}.tg{animation:tglow 2s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-1px)}}@keyframes tglow{0%,100%{opacity:.6}50%{opacity:1}}</style><g class="tw" transform-origin="16 16"><polygon points="16,1 19,10 28,10.5 22,17 24,26 16,21 8,26 10,17 4,10.5 13,10" fill="rgba(255,184,48,.35)" stroke="#ffb830" stroke-width="1.5" ${a}/><polygon points="16,5 18,11 24,11.5 20,16 21.5,22 16,19 10.5,22 12,16 8,11.5 14,11" fill="#ffb830" opacity=".5" stroke="#ff9500" stroke-width="1" ${a}/><circle cx="16" cy="13" r="2" fill="#fff" opacity=".4" class="tg"/></g></svg>`;
-  if(xp>=2500) return`<svg viewBox="0 0 32 32" fill="none"><style>.sp{animation:spin2 4s linear infinite}@keyframes spin2{to{transform:rotate(360deg)}}</style><g class="sp" transform-origin="16 16"><polygon points="16,2 18.5,11 27,11.5 21,17 23,25 16,20.5 9,25 11,17 5,11.5 13.5,11" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="1.5" ${a}/><circle cx="16" cy="14" r="3" fill="rgba(167,139,250,.5)" stroke="#a78bfa" stroke-width="1"/></g></svg>`;
-  if(xp>=1500) return`<svg viewBox="0 0 32 32" fill="none"><style>.st{animation:tway 2.5s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}</style><g class="st" transform-origin="16 16"><polygon points="16,3 18.5,11 26,11.5 21,17 23,25 16,20.5 9,25 11,17 6,11.5 13.5,11" fill="rgba(255,184,48,.25)" stroke="#ffb830" stroke-width="1.5" ${a}/></g></svg>`;
-  if(xp>=1000) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-2deg)}}</style><g class="bt" transform-origin="16 28"><rect x="14" y="22" width="4" height="8" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="13" rx="10" ry="11" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="11" cy="9" rx="6" ry="5.5" fill="rgba(39,174,96,.25)" stroke="#27ae60" stroke-width="1.2" ${a}/><ellipse cx="21" cy="8" rx="6" ry="5.5" fill="rgba(26,188,156,.25)" stroke="#1abc9c" stroke-width="1.2" ${a}/><circle cx="10" cy="7" r="1.5" fill="rgba(255,107,107,.5)"/><circle cx="19" cy="6" r="1" fill="rgba(255,184,48,.5)"/></g></svg>`;
-  if(xp>=600) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3.5s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-3deg)}}</style><g class="bt" transform-origin="16 28"><rect x="14" y="23" width="4" height="7" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="14" rx="9" ry="10" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="16" cy="9" rx="7" ry="6" fill="rgba(39,174,96,.22)" stroke="#27ae60" stroke-width="1.2" ${a}/></g></svg>`;
-  if(xp>=300) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.8s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(0)}30%{transform:rotate(3deg)}70%{transform:rotate(-3deg)}}</style><g class="sw" transform-origin="16 30"><rect x="14.5" y="24" width="3" height="6" rx="1.5" fill="#8b6f47"/><ellipse cx="16" cy="15" rx="7.5" ry="9.5" fill="rgba(46,204,113,.16)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M12 21 C9 19 7 15 9 11" stroke="#2ecc71" stroke-width="1.2" ${a} fill="none"/><path d="M20 21 C23 19 25 15 23 11" stroke="#1abc9c" stroke-width="1.2" ${a} fill="none"/></g></svg>`;
-  if(xp>=100) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.5s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}</style><g class="sw" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="18" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="16" cy="12" rx="7" ry="8" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M13 19 C10 17 9 13 11 10" stroke="#27ae60" stroke-width="1.2" stroke-linecap="round" fill="none"/></g></svg>`;
+  if(xp>=4000) return`<svg viewBox="0 0 32 32" fill="none"><style>.tw{animation:tway 3s ease-in-out infinite}.tg{animation:tglow 2s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-1px)}}@keyframes tglow{0%,100%{opacity:.6}50%{opacity:1}}<\/style><g class="tw" transform-origin="16 16"><polygon points="16,1 19,10 28,10.5 22,17 24,26 16,21 8,26 10,17 4,10.5 13,10" fill="rgba(255,184,48,.35)" stroke="#ffb830" stroke-width="1.5" ${a}/><polygon points="16,5 18,11 24,11.5 20,16 21.5,22 16,19 10.5,22 12,16 8,11.5 14,11" fill="#ffb830" opacity=".5" stroke="#ff9500" stroke-width="1" ${a}/><circle cx="16" cy="13" r="2" fill="#fff" opacity=".4" class="tg"/></g></svg>`;
+  if(xp>=2500) return`<svg viewBox="0 0 32 32" fill="none"><style>.sp{animation:spin2 4s linear infinite}@keyframes spin2{to{transform:rotate(360deg)}}<\/style><g class="sp" transform-origin="16 16"><polygon points="16,2 18.5,11 27,11.5 21,17 23,25 16,20.5 9,25 11,17 5,11.5 13.5,11" fill="rgba(167,139,250,.3)" stroke="#a78bfa" stroke-width="1.5" ${a}/><circle cx="16" cy="14" r="3" fill="rgba(167,139,250,.5)" stroke="#a78bfa" stroke-width="1"/></g></svg>`;
+  if(xp>=1500) return`<svg viewBox="0 0 32 32" fill="none"><style>.st{animation:tway 2.5s ease-in-out infinite}@keyframes tway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}<\/style><g class="st" transform-origin="16 16"><polygon points="16,3 18.5,11 26,11.5 21,17 23,25 16,20.5 9,25 11,17 6,11.5 13.5,11" fill="rgba(255,184,48,.25)" stroke="#ffb830" stroke-width="1.5" ${a}/></g></svg>`;
+  if(xp>=1000) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-2deg)}}<\/style><g class="bt" transform-origin="16 28"><rect x="14" y="22" width="4" height="8" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="13" rx="10" ry="11" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="11" cy="9" rx="6" ry="5.5" fill="rgba(39,174,96,.25)" stroke="#27ae60" stroke-width="1.2" ${a}/><ellipse cx="21" cy="8" rx="6" ry="5.5" fill="rgba(26,188,156,.25)" stroke="#1abc9c" stroke-width="1.2" ${a}/><circle cx="10" cy="7" r="1.5" fill="rgba(255,107,107,.5)"/><circle cx="19" cy="6" r="1" fill="rgba(255,184,48,.5)"/></g></svg>`;
+  if(xp>=600) return`<svg viewBox="0 0 32 32" fill="none"><style>.bt{animation:breeze 3.5s ease-in-out infinite}@keyframes breeze{0%,100%{transform:skewX(0)}50%{transform:skewX(-3deg)}}<\/style><g class="bt" transform-origin="16 28"><rect x="14" y="23" width="4" height="7" rx="2" fill="#8b6f47"/><ellipse cx="16" cy="14" rx="9" ry="10" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><ellipse cx="16" cy="9" rx="7" ry="6" fill="rgba(39,174,96,.22)" stroke="#27ae60" stroke-width="1.2" ${a}/></g></svg>`;
+  if(xp>=300) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.8s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(0)}30%{transform:rotate(3deg)}70%{transform:rotate(-3deg)}}<\/style><g class="sw" transform-origin="16 30"><rect x="14.5" y="24" width="3" height="6" rx="1.5" fill="#8b6f47"/><ellipse cx="16" cy="15" rx="7.5" ry="9.5" fill="rgba(46,204,113,.16)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M12 21 C9 19 7 15 9 11" stroke="#2ecc71" stroke-width="1.2" ${a} fill="none"/><path d="M20 21 C23 19 25 15 23 11" stroke="#1abc9c" stroke-width="1.2" ${a} fill="none"/></g></svg>`;
+  if(xp>=100) return`<svg viewBox="0 0 32 32" fill="none"><style>.sw{animation:sway 2.5s ease-in-out infinite}@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(3deg)}}<\/style><g class="sw" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="18" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="16" cy="12" rx="7" ry="8" fill="rgba(46,204,113,.18)" stroke="#2ecc71" stroke-width="1.5" ${a}/><path d="M13 19 C10 17 9 13 11 10" stroke="#27ae60" stroke-width="1.2" stroke-linecap="round" fill="none"/></g></svg>`;
   // Seedling — detailed with animation
-  return`<svg viewBox="0 0 32 32" fill="none"><style>.sprout{animation:grow 2s ease-in-out infinite}@keyframes grow{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.05) rotate(2deg)}}</style><g class="sprout" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="19" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><path d="M16 19 C16 19 9 16 9 10 A7 7 0 0 1 23 10 C23 16 16 19 16 19Z" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 16 C14 14 13 12 14 10" stroke="#27ae60" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><path d="M16 16 C18 14 19 12 18 10" stroke="#1abc9c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><circle cx="16" cy="10" r="1.5" fill="rgba(0,212,170,.4)"/></g></svg>`;
+  return`<svg viewBox="0 0 32 32" fill="none"><style>.sprout{animation:grow 2s ease-in-out infinite}@keyframes grow{0%,100%{transform:scaleY(1) rotate(0)}50%{transform:scaleY(1.05) rotate(2deg)}}<\/style><g class="sprout" transform-origin="16 30"><line x1="16" y1="30" x2="16" y2="19" stroke="#8b6f47" stroke-width="2.5" stroke-linecap="round"/><path d="M16 19 C16 19 9 16 9 10 A7 7 0 0 1 23 10 C23 16 16 19 16 19Z" fill="rgba(46,204,113,.2)" stroke="#2ecc71" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 16 C14 14 13 12 14 10" stroke="#27ae60" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><path d="M16 16 C18 14 19 12 18 10" stroke="#1abc9c" stroke-width="1" stroke-linecap="round" fill="none" opacity=".6"/><circle cx="16" cy="10" r="1.5" fill="rgba(0,212,170,.4)"/></g></svg>`;
 }
 
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
@@ -2880,12 +2880,14 @@ function attachDrumGestures(){}function highlightDrum(){}function applyHighlight
 
 function closeCfm(){closeMod('cfmm');}
 
-// Close modals on overlay click
-document.getElementById('profm').onclick=function(e){if(e.target===this)closeProfModal();};
-document.getElementById('remm').onclick=function(e){if(e.target===this)closeRemModal();};
-document.getElementById('cfmm').onclick=function(e){if(e.target===this)closeCfm();};
-document.getElementById('themem').onclick=function(e){if(e.target===this)closeThemePicker();};
-document.getElementById('renamem').onclick=function(e){if(e.target===this)closeRenameModal();};
+// Close modals on overlay click (with null checks)
+try{
+document.getElementById('profm')&&(document.getElementById('profm').onclick=function(e){if(e.target===this)closeProfModal();});
+document.getElementById('remm')&&(document.getElementById('remm').onclick=function(e){if(e.target===this)closeRemModal();});
+document.getElementById('cfmm')&&(document.getElementById('cfmm').onclick=function(e){if(e.target===this)closeCfm();});
+document.getElementById('themem')&&(document.getElementById('themem').onclick=function(e){if(e.target===this)closeThemePicker();});
+document.getElementById('renamem')&&(document.getElementById('renamem').onclick=function(e){if(e.target===this)closeRenameModal();});
+}catch(e){console.warn('modal init',e);}
 document.getElementById('uilangm')?.addEventListener('click',function(e){if(e.target===this)closeMod('uilangm');});
 document.getElementById('botlangm')?.addEventListener('click',function(e){if(e.target===this)closeMod('botlangm');});
 // Rename on Enter
@@ -3285,7 +3287,6 @@ function renderRoadmap(){
           LS.setJ('rm_progress',p);
           goTab('chat');setTimeout(()=>sendChip(topic),150);
         };
-      }
       }
       div.appendChild(card);
     });
@@ -4100,17 +4101,16 @@ function hideLoader(){
 }
 
 async function init(){
-  // Hide loader IMMEDIATELY — don't wait for data
   hideLoader();
-
-  const loaderTimeout=null; // already hidden above
-
   try{
     lang   =LS.get('app_lang')   ||'ru';
     botLang=LS.get('bot_lang')   ||'ru';
     L=LANGS[lang]||LANGS.en;
+  }catch(e){lang='ru';botLang='ru';L=LANGS.ru;}
 
-    try{setTheme(LS.get('app_theme')||'');}catch(e){}
+  try{setTheme(LS.get('app_theme')||'');}catch(e){console.warn('theme',e);}
+
+  try{
 
     const user=tg?.initDataUnsafe?.user;
     const uid=user?.id; window._uid=uid;
