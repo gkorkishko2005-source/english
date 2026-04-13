@@ -17,9 +17,11 @@ MODEL       = "claude-haiku-4-5-20251001"   # ← FIXED model name
 # Add your Telegram user IDs here — they get lifetime free premium
 # To find your ID: message @userinfobot in Telegram
 ADMIN_IDS = {
-    # Добавь свои ID сюда:
-    # 123456789,   # Гордей
-    # 987654321,   # Семья
+    5399839500,
+    1738695057,
+    725259177,
+    1241890707,
+    1428437531,
 }
 # Any username in this set also gets free premium
 ADMIN_USERNAMES = {
