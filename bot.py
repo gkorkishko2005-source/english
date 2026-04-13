@@ -49,6 +49,7 @@ from database import (
     track_complexity,
     start_story, get_active_story, update_story,
     log_tone,
+    set_premium, check_premium,
 )
 from prompts import (
     build_system, INTEREST_TAG,
@@ -61,6 +62,23 @@ from tts import text_to_speech, transcribe_audio, analyze_pronunciation, format_
 load_dotenv()
 BOT_TOKEN     = os.getenv("BOT_TOKEN")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
+BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
+RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
+
+# ══ ADMIN WHITELIST (free lifetime premium) ══════════════════════════════════
+# Добавь сюда свои Telegram UID — они получат бесплатный Premium навсегда
+# Узнать свой UID: написать @userinfobot
+ADMIN_IDS: set = {
+    # 123456789,   # Гордей (добавь свой реальный Telegram ID)
+    # 987654321,   # Член семьи
+}
+
+# ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
+PREMIUM_PLANS = {
+    "1m": {"stars": 149, "months": 1,  "label_ru": "1 месяц",  "label_en": "1 month"},
+    "3m": {"stars": 349, "months": 3,  "label_ru": "3 месяца", "label_en": "3 months"},
+    "12m":{"stars": 999, "months": 12, "label_ru": "1 год",    "label_en": "1 year"},
+}
 MODEL         = "claude-haiku-4-5"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -544,7 +562,31 @@ async def cmd_start(message: Message):
     uid  = message.from_user.id
     name = message.from_user.first_name or "Student"
     await upsert_user(uid, name)
+
+    # Handle deep links: /start premium, /start ref_XXXXX
+    args = message.text.split(maxsplit=1)[1] if len(message.text.split()) > 1 else ""
+    if args == "premium":
+        # Route to premium command
+        await cmd_premium(message)
+        return
+    if args.startswith("ref_"):
+        # Referral — grant bonus XP to referrer
+        try:
+            ref_uid = int(args.replace("ref_",""))
+            await add_xp(ref_uid, 500)
+            lang_ref = await get_lang(ref_uid)
+            ru_ref = lang_ref == "ru"
+            await bot.send_message(ref_uid,
+                f"🎉 {'Твой друг зарегистрировался по ссылке! +500 XP тебе!' if ru_ref else 'Your friend joined via your link! +500 XP for you!'}")
+        except Exception:
+            pass
+
     scheduler.add_job(send_weekly_report,"cron",day_of_week="sun",hour=19,args=[uid],id=f"weekly_{uid}",replace_existing=True)
+
+    # Grant free premium if admin
+    if await is_admin(uid):
+        await grant_premium_via_server(uid, 999)
+
     user = await get_user(uid)
     if not user or not user.get("lang"):
         await message.answer("🌍 Choose language / Выбери язык:", reply_markup=lang_kb())
@@ -1362,6 +1404,189 @@ async def handle_webapp_data(message: Message):
 # ══════════════════════════════════════════════════════════════════
 #  ЗАПУСК
 # ══════════════════════════════════════════════════════════════════
+
+async def is_admin(uid: int) -> bool:
+    """Check if user is admin (free premium)."""
+    return uid in ADMIN_IDS
+
+async def grant_premium_via_server(uid: int, months: int):
+    """Call server API to grant premium."""
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            await client.post(
+                f"http://localhost:8080/api/premium/grant",
+                json={"uid": uid, "months": months, "secret": BOT_SECRET}
+            )
+    except Exception as e:
+        logger.error(f"grant_premium_via_server error: {e}")
+
+# ══ /premium COMMAND ══════════════════════════════════════════════════════════
+@dp.message(Command("premium"))
+async def cmd_premium(msg: Message):
+    uid = msg.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+
+    # Admins get free premium automatically
+    if await is_admin(uid):
+        await grant_premium_via_server(uid, 999)  # 999 months ≈ lifetime
+        text = (
+            "👑 <b>Premium активирован!</b>\n\n"
+            "Ты в списке VIP — Premium у тебя бесплатно навсегда 🎉\n\n"
+            "Все функции разблокированы:\n"
+            "• 🎤 Голосовые ответы ALEX\n"
+            "• 💬 Безлимитные сообщения\n"
+            "• 🎭 Все сценки и ролевые игры\n"
+            "• 📊 Подробная аналитика ошибок\n"
+            "• 👑 Эксклюзивные личности ALEX"
+        ) if ru else (
+            "👑 <b>Premium activated!</b>\n\n"
+            "You're on the VIP list — Premium is free for you forever 🎉\n\n"
+            "All features unlocked!"
+        )
+        await msg.answer(text, parse_mode="HTML")
+        return
+
+    # Show plans keyboard
+    plans_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text=f"{'1 месяц' if ru else '1 month'} — 149 ⭐",
+            callback_data="prem_buy:1m"
+        )],
+        [InlineKeyboardButton(
+            text=f"{'3 месяца' if ru else '3 months'} — 349 ⭐ (-22%)",
+            callback_data="prem_buy:3m"
+        )],
+        [InlineKeyboardButton(
+            text=f"{'1 год' if ru else '1 year'} — 999 ⭐ (-44%)",
+            callback_data="prem_buy:12m"
+        )],
+    ])
+
+    text = (
+        "💎 <b>ALEX Premium</b>\n\n"
+        "Разблокируй полную мощь AI-репетитора:\n\n"
+        "🎤 <b>Голосовые ответы</b> — ALEX отвечает голосом\n"
+        "💬 <b>Безлимит</b> — без ограничений в день\n"
+        "🎭 <b>Все сценки</b> — 8 ролевых ситуаций\n"
+        "📊 <b>Анализ ошибок</b> — детальный разбор каждой\n"
+        "👑 <b>VIP личности</b> — Harvard Prof, BBC Anchor\n\n"
+        "Оплата через <b>Telegram Stars</b> ⭐\n"
+        "Выбери план:"
+    ) if ru else (
+        "💎 <b>ALEX Premium</b>\n\n"
+        "Unlock the full power of your AI tutor:\n\n"
+        "🎤 <b>Voice replies</b> — ALEX speaks back\n"
+        "💬 <b>Unlimited</b> — no daily limits\n"
+        "🎭 <b>All scenarios</b> — 8 roleplay situations\n"
+        "📊 <b>Error analysis</b> — detailed breakdown\n"
+        "👑 <b>VIP personas</b> — Harvard Prof, BBC Anchor\n\n"
+        "Payment via <b>Telegram Stars</b> ⭐\n"
+        "Choose a plan:"
+    )
+    await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
+
+# ══ PREMIUM BUY CALLBACK ═══════════════════════════════════════════════════
+@dp.callback_query(F.data.startswith("prem_buy:"))
+async def cb_prem_buy(cb: CallbackQuery):
+    from aiogram.types import LabeledPrice
+    plan_id = cb.data.split(":")[1]
+    plan = PREMIUM_PLANS.get(plan_id)
+    if not plan:
+        await cb.answer("Invalid plan", show_alert=True)
+        return
+
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+
+    label = plan["label_ru"] if ru else plan["label_en"]
+    desc = (
+        f"ALEX Premium — {label}\n"
+        f"Безлимит · Голос · Сценки · Анализ ошибок"
+    ) if ru else (
+        f"ALEX Premium — {label}\n"
+        f"Unlimited · Voice · Roleplay · Error Analysis"
+    )
+
+    await cb.answer()
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title=f"ALEX Premium {label}",
+            description=desc,
+            payload=f"premium:{plan_id}:{uid}",
+            currency="XTR",  # Telegram Stars
+            prices=[LabeledPrice(label=f"Premium {label}", amount=plan["stars"])],
+            protect_content=False,
+        )
+    except Exception as e:
+        logger.error(f"send_invoice error: {e}")
+        err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
+        await bot.send_message(uid, err)
+
+# ══ PRE-CHECKOUT ══════════════════════════════════════════════════════════
+@dp.pre_checkout_query()
+async def pre_checkout(pcq):
+    """Always approve — Telegram Stars payments are instant."""
+    await bot.answer_pre_checkout_query(pcq.id, ok=True)
+
+# ══ SUCCESSFUL PAYMENT ════════════════════════════════════════════════════
+@dp.message(F.successful_payment)
+async def on_payment_success(msg: Message):
+    payload = msg.successful_payment.invoice_payload
+    uid = msg.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+
+    try:
+        parts = payload.split(":")
+        plan_id = parts[1] if len(parts) > 1 else "1m"
+        plan = PREMIUM_PLANS.get(plan_id, PREMIUM_PLANS["1m"])
+        months = plan["months"]
+        label = plan["label_ru"] if ru else plan["label_en"]
+
+        # Grant premium in database via server
+        await grant_premium_via_server(uid, months)
+
+        # Confirm to user
+        text = (
+            f"🎉 <b>Оплата прошла!</b>\n\n"
+            f"💎 ALEX Premium активирован на <b>{label}</b>\n\n"
+            f"Открой приложение — все функции уже разблокированы!\n\n"
+            f"Спасибо за поддержку! 🙏"
+        ) if ru else (
+            f"🎉 <b>Payment successful!</b>\n\n"
+            f"💎 ALEX Premium activated for <b>{label}</b>\n\n"
+            f"Open the app — all features are now unlocked!\n\n"
+            f"Thank you for your support! 🙏"
+        )
+        await msg.answer(text, parse_mode="HTML")
+        logger.info(f"✅ Premium granted: uid={uid} plan={plan_id} months={months}")
+
+    except Exception as e:
+        logger.error(f"Payment success handler error: {e}")
+        await msg.answer("✅ Payment received! Premium activated." if not ru else "✅ Оплата получена! Premium активирован.")
+
+# ══ /admin COMMAND (grant free premium to anyone) ═════════════════════════
+@dp.message(Command("admin_grant"))
+async def cmd_admin_grant(msg: Message):
+    """Only admins can use this to grant free premium to someone."""
+    if msg.from_user.id not in ADMIN_IDS:
+        return  # Silently ignore
+
+    parts = msg.text.split()
+    if len(parts) < 2:
+        await msg.answer("Usage: /admin_grant <uid> [months]\nExample: /admin_grant 123456789 12")
+        return
+
+    try:
+        target_uid = int(parts[1])
+        months = int(parts[2]) if len(parts) > 2 else 1
+        await grant_premium_via_server(target_uid, months)
+        await msg.answer(f"✅ Granted {months} months of Premium to uid {target_uid}")
+    except Exception as e:
+        await msg.answer(f"❌ Error: {e}")
 
 async def main():
     await db_init()
