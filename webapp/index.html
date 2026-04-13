@@ -3314,14 +3314,14 @@ function incrementChallenge(){
    💎  PREMIUM SYSTEM (server-backed)
 ══════════════════════════════════════════════════ */
 let isPremium = false;
+let premiumTier = '';
+let premiumUntil = null;
+let premiumLifetime = false;
 
-// Check premium from server (called after init)
 async function checkPremiumStatus(uid){
-  // Admin bypass — set your UID here in the client too
-  const ADMIN_IDS_CLIENT = [
-    // 123456789,   // Добавь свой реальный Telegram UID
-  ];
+  const ADMIN_IDS_CLIENT = [1738695057,5399839500,725259177,1241890707,1428437531];
   if(ADMIN_IDS_CLIENT.includes(uid)){
+    premiumTier='ultimate';premiumLifetime=true;
     setPremium(true,'admin');return;
   }
   if(!uid||!API)return;
@@ -3329,61 +3329,78 @@ async function checkPremiumStatus(uid){
     const r=await fetch(`${API}/api/premium/${uid}`,{signal:AbortSignal.timeout(5000)});
     if(r.ok){
       const d=await r.json();
+      premiumTier=d.tier||'';
+      premiumUntil=d.until||null;
+      premiumLifetime=!!d.lifetime;
       setPremium(d.is_premium===true,d.source||'database');
     }
   }catch(e){
-    // If server unreachable, check local cache
-    if(LS.get('premium')==='1')setPremium(true,'cache');
+    if(LS.get('premium')==='1'){premiumTier=LS.get('premium_tier')||'';setPremium(true,'cache');}
   }
 }
 
 function setPremium(active, source){
   isPremium=active;
   LS.set('premium',active?'1':'0');
-  // Update UI
+  if(premiumTier)LS.set('premium_tier',premiumTier);
   updatePremiumUI();
   if(active&&source!=='cache'){
-    // Add premium badge to settings header
     const shdr=document.querySelector('.shdr .stit');
-    if(shdr&&!shdr.querySelector('.premium-badge')){
+    if(shdr){
+      const old=shdr.querySelector('.premium-badge');if(old)old.remove();
       const badge=document.createElement('span');
-      badge.className='premium-badge';badge.textContent='PRO';badge.style.marginLeft='8px';
+      badge.className='premium-badge';
+      badge.textContent=premiumTier?premiumTier.toUpperCase():'PRO';
+      badge.style.marginLeft='8px';
       shdr.appendChild(badge);
     }
   }
 }
 
 function updatePremiumUI(){
-  // Update settings premium banner
   const banner=document.getElementById('premium-settings-banner');
-  if(banner){
-    if(isPremium){
-      banner.innerHTML=`
-        <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(255,184,48,.08));border:1px solid rgba(212,168,67,.3);border-radius:var(--r)">
-          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${{ru:'ALEX Premium активен 👑',en:'ALEX Premium active 👑'}[lang]||'Premium active'}</div>
-            <div style="font-size:12px;color:var(--t2)">${{ru:'Все функции разблокированы',en:'All features unlocked'}[lang]||'All features unlocked'}</div>
-          </div>
-          <span class="premium-badge">PRO</span>
-        </div>`;
-    } else {
-      banner.innerHTML=`
-        <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
-          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
-          </div>
-          <div style="flex:1">
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
-            <div style="font-size:12px;color:var(--t2)">${{ru:'от 149 ⭐ · Голос · Безлимит · VIP',en:'from 149 ⭐ · Voice · Unlimited · VIP'}[lang]||'from 149 ⭐'}</div>
-          </div>
-          <span style="color:var(--t3);font-size:18px">›</span>
-        </div>`;
+  if(!banner)return;
+  const tierNames={basic:'🟢 Basic',pro:'🔵 Pro',ultimate:'💎 Ultimate'};
+  const tierName=tierNames[premiumTier]||premiumTier||'Premium';
+
+  if(isPremium){
+    let untilText='';
+    if(premiumLifetime){
+      untilText={ru:'Навсегда ∞',en:'Lifetime ∞'}[lang]||'Lifetime ∞';
+    } else if(premiumUntil){
+      try{
+        const d=new Date(premiumUntil);
+        const days=Math.max(0,Math.ceil((d-Date.now())/(1000*60*60*24)));
+        untilText={ru:`Осталось ${days} дн · до ${d.toLocaleDateString('ru')}`,en:`${days} days left · until ${d.toLocaleDateString('en')}`}[lang]||`${days} days left`;
+      }catch(e){untilText='';}
     }
+    banner.innerHTML=`
+      <div style="padding:14px 16px;background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(255,184,48,.08));border:1px solid rgba(212,168,67,.3);border-radius:var(--r)">
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:${untilText?'10':'0'}px">
+          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName} 👑</div>
+            <div style="font-size:12px;color:var(--t2)">${untilText}</div>
+          </div>
+          <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
+        </div>
+        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.06);color:var(--gd);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan'}[lang]||'⬆ Upgrade'}</button>`:''}
+      </div>`;
+  } else {
+    banner.innerHTML=`
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 99 ⭐ · Голос · Безлимит · VIP',en:'from 99 ⭐ · Voice · Unlimited · VIP'}[lang]||'from 99 ⭐'}</div>
+        </div>
+        <span style="color:var(--t3);font-size:18px">›</span>
+      </div>`;
   }
-  // Show/hide premium lock overlays
   document.querySelectorAll('[data-premium]').forEach(el=>{
     el.style.display=isPremium?'none':'flex';
   });
@@ -3418,7 +3435,7 @@ function openPremium(highlightFeature){
   if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power';
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
-  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',de:'Beliebt',fr:'Populaire'}[lang]||'Popular';
+  if(pop)pop.textContent={ru:'Популярный',en:'Popular'}[lang]||'Popular';
 
   // Fill plan buffs
   const basicB=document.getElementById('pp-basic-buffs');
@@ -3433,6 +3450,34 @@ function openPremium(highlightFeature){
     if(proB)proB.innerHTML='✅ Unlimited messages<br>✅ Voice + all scenarios<br>✅ Error analysis<br>✅ 🎭 VIP personas';
     if(ultB)ultB.innerHTML='✅ Everything in Pro<br>✅ TOEFL Mock Exams<br>✅ Personal study plan<br>✅ 💎 Exclusive themes';
   }
+
+  // Hide plans that are lower or equal to current tier
+  const tierOrder={basic:1,pro:2,ultimate:3};
+  const currentLevel=tierOrder[premiumTier]||0;
+  const plans=document.querySelectorAll('.prem-plan');
+  const tiers=['basic','pro','ultimate'];
+  plans.forEach((p,i)=>{
+    const planLevel=tierOrder[tiers[i]]||0;
+    if(isPremium&&planLevel<=currentLevel){
+      p.style.opacity='.35';p.style.pointerEvents='none';
+      // Add "current" label
+      if(planLevel===currentLevel&&!p.querySelector('.pp-current')){
+        const lbl=document.createElement('div');lbl.className='pp-current';
+        lbl.style.cssText='position:absolute;top:10px;left:14px;font-size:9px;font-weight:700;color:var(--a2);text-transform:uppercase;letter-spacing:.5px';
+        lbl.textContent={ru:'Текущий план',en:'Current plan'}[lang]||'Current';
+        p.appendChild(lbl);
+      }
+    } else {
+      p.style.opacity='1';p.style.pointerEvents='auto';
+      const cur=p.querySelector('.pp-current');if(cur)cur.remove();
+    }
+  });
+
+  // If ultimate, hide free button and show "you have max"
+  if(isPremium&&premiumTier==='ultimate'){
+    if(sub)sub.textContent={ru:'У тебя максимальный план 👑',en:'You have the highest plan 👑'}[lang]||'Max plan';
+  }
+
   openMod('premiumm');
 }
 
