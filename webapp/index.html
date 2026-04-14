@@ -1301,12 +1301,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <!-- PREMIUM personas -->
     <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
       <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M16 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/><path d="M8 22h16v4H8z"/><path d="M12 22v-6M20 22v-6"/><path d="M8 16h16"/></svg></div>
-      <div class="pbn">Harvard Prof</div><div class="pbs">Академический стиль</div>
+      <div class="pbn" id="pb5n">Harvard Prof</div><div class="pbs" id="pb5s">Academic style</div>
       <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
     </div>
     <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
       <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="8" width="24" height="16" rx="3"/><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="2"/><line x1="4" y1="12" x2="28" y2="12"/></svg></div>
-      <div class="pbn">BBC Anchor</div><div class="pbs">Британский акцент</div>
+      <div class="pbn" id="pb6n">BBC Anchor</div><div class="pbs" id="pb6s">British accent</div>
       <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
     </div>
   </div>
@@ -1873,7 +1873,7 @@ function applyLang(){
   document.getElementById('sp-new').textContent=L.new_chat;
   // Learn
   document.getElementById('ltit-lbl').textContent=L.fc;
-  try{var lsub=document.getElementById('learn-sub');if(lsub){var rc=getReviewCount();lsub.textContent=rc>0?({ru:rc+' карточек на повторение',en:rc+' cards due for review'}[lang]||rc+' cards due'):({ru:'Изучай слова и проходи уроки',en:'Study words and complete lessons'}[lang]||'');}}catch(e){}
+  try{var lsub=document.getElementById('learn-sub');if(lsub){var rc=getReviewCount();lsub.textContent=rc>0?({ru:rc+' карточек на повторение',en:rc+' cards due for review'}[lang]||rc+' cards due'):({ru:'Изучай слова и проходи уроки',en:'Study words and complete lessons',es:'Estudia palabras y completa lecciones',de:'Wörter lernen und Lektionen abschließen',fr:'Étudie les mots et termine les leçons',pt:'Estude palavras e complete lições',uk:'Вивчай слова та проходь уроки',tr:'Kelime öğren ve dersleri tamamla',zh:'学习单词和完成课程',ar:'ادرس الكلمات وأكمل الدروس'}[lang]||'');}}catch(e){}
   document.getElementById('dw-sec-lbl').textContent=L.dw;
   document.getElementById('dw-add-lbl').textContent=L.dwa;
   document.getElementById('rev-lbl').textContent=L.rev;
@@ -1899,6 +1899,11 @@ function applyLang(){
   document.getElementById('pb2n').textContent=L.p2n;document.getElementById('pb2s').textContent=L.p2s;
   document.getElementById('pb3n').textContent=L.p3n;document.getElementById('pb3s').textContent=L.p3s;
   document.getElementById('pb4n').textContent=L.p4n;document.getElementById('pb4s').textContent=L.p4s;
+  // PRO personas
+  var pb5n=document.getElementById('pb5n');if(pb5n)pb5n.textContent='Harvard Prof';
+  var pb5s=document.getElementById('pb5s');if(pb5s)pb5s.textContent={ru:'Академический стиль',en:'Academic style',es:'Estilo académico',de:'Akademischer Stil',fr:'Style académique',pt:'Estilo acadêmico',uk:'Академічний стиль',tr:'Akademik stil',zh:'学术风格',ar:'أسلوب أكاديمي'}[lang]||'Academic style';
+  var pb6n=document.getElementById('pb6n');if(pb6n)pb6n.textContent='BBC Anchor';
+  var pb6s=document.getElementById('pb6s');if(pb6s)pb6s.textContent={ru:'Британский акцент',en:'British accent',es:'Acento británico',de:'Britischer Akzent',fr:'Accent britannique',pt:'Sotaque britânico',uk:'Британський акцент',tr:'İngiliz aksanı',zh:'英式口音',ar:'لهجة بريطانية'}[lang]||'British accent';
   document.getElementById('prof-sec-lbl').textContent=L.myprof;
   document.getElementById('slvt').textContent=L.lvt;document.getElementById('slvs').textContent=L.lvs;
   document.getElementById('sproft').textContent=L.proft;document.getElementById('sremt').textContent=L.remt;
@@ -3502,7 +3507,7 @@ let activeRoleplay=null;
 function openRoleplay(){
   const grid=document.getElementById('scenario-grid');
   const title=document.getElementById('rp-modal-title');
-  if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario'}[lang]||'Choose a scenario';
+  if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario',es:'Elige un escenario',de:'Szenario wählen',fr:'Choisir un scénario',pt:'Escolher cenário',uk:'Обери сценарій',tr:'Senaryo seç',zh:'选择场景',ar:'اختر سيناريو'}[lang]||'Choose a scenario';
   if(!grid)return;
   grid.innerHTML='';
   SCENARIOS.forEach(sc=>{
@@ -3560,11 +3565,11 @@ function openTextChecker(){
   const btn=document.getElementById('tc-btn');
   const cancel=document.getElementById('tc-cancel');
   const inp=document.getElementById('tc-inp');
-  if(title)title.textContent={ru:'Проверь мой текст',en:'Check my text'}[lang]||'Check my text';
-  if(btn)btn.textContent={ru:'Анализировать →',en:'Analyze →'}[lang]||'Analyze →';
+  if(title)title.textContent={ru:'Проверь мой текст',en:'Check my text',es:'Revisa mi texto',de:'Meinen Text prüfen',fr:'Vérifier mon texte',pt:'Verificar meu texto',uk:'Перевір мій текст',tr:'Metnimi kontrol et',zh:'检查我的文本',ar:'تحقق من نصي'}[lang]||'Check my text';
+  if(btn)btn.textContent={ru:'Анализировать →',en:'Analyze →',es:'Analizar →',de:'Analysieren →',fr:'Analyser →',pt:'Analisar →',uk:'Аналізувати →',tr:'Analiz et →',zh:'分析 →',ar:'تحليل →'}[lang]||'Analyze →';
   if(cancel)cancel.textContent=L.cancel||'Cancel';
   if(inp){
-    inp.placeholder={ru:'Вставь свой текст: email, эссе, резюме...',en:'Paste your text: email, essay, resume...'}[lang]||'Paste your text...';
+    inp.placeholder={ru:'Вставь свой текст: email, эссе, резюме...',en:'Paste your text: email, essay, resume...',es:'Pega tu texto: email, ensayo...',de:'Text einfügen: E-Mail, Aufsatz...',fr:'Colle ton texte: email, essai...',pt:'Cole seu texto: email, ensaio...',uk:'Встав свій текст: email, есе...',tr:'Metninizi yapıştırın...',zh:'粘贴你的文本...',ar:'الصق نصك هنا...'}[lang]||'Paste your text...';
     inp.value='';
     inp.oninput=()=>{
       const count=document.getElementById('tc-count');
@@ -3618,8 +3623,8 @@ function renderErrorDiary(){
   const wrap=document.getElementById('errdiary-wrap');
   const lbl=document.getElementById('errdiary-lbl');
   const cta=document.getElementById('errdiary-cta');
-  if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary'}[lang]||'Error Diary';
-  if(cta)cta.textContent={ru:'Спросить ALEX →',en:'Ask ALEX →'}[lang]||'Ask ALEX →';
+  if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary',es:'Diario de errores',de:'Fehlertagebuch',fr:'Journal des erreurs',pt:'Diário de erros',uk:'Щоденник помилок',tr:'Hata günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Error Diary';
+  if(cta)cta.textContent={ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →';
   if(!wrap)return;
   const errors=LS.getJ('error_diary')||[];
   if(!errors.length){
@@ -3721,7 +3726,7 @@ function renderChallenge(){
   if(fill)setTimeout(()=>fill.style.width=pct+'%',200);
   if(days)days.textContent=`${prog.count}/${ch.goal} · ${daysLeft} ${lang==='ru'?'дн. осталось':'days left'}`;
   if(reward)reward.textContent=ch.reward;
-  if(label)label.textContent={ru:'Испытание недели',en:'Weekly Challenge'}[lang]||'Weekly Challenge';
+  if(label)label.textContent={ru:'Испытание недели',en:'Weekly Challenge',es:'Desafío semanal',de:'Wöchentliche Herausforderung',fr:'Défi de la semaine',pt:'Desafio semanal',uk:'Випробування тижня',tr:'Haftalık meydan okuma',zh:'每周挑战',ar:'تحدي الأسبوع'}[lang]||'Weekly Challenge';
 }
 
 function joinChallenge(){
@@ -3803,7 +3808,7 @@ function updatePremiumUI(){
   if(isPremium){
     let untilText='';
     if(premiumLifetime){
-      untilText={ru:'Навсегда ∞',en:'Lifetime ∞'}[lang]||'Lifetime ∞';
+      untilText={ru:'Навсегда ∞',en:'Lifetime ∞',es:'Para siempre ∞',de:'Für immer ∞',fr:'À vie ∞',pt:'Para sempre ∞',uk:'Назавжди ∞',tr:'Ömür boyu ∞',zh:'永久 ∞',ar:'مدى الحياة ∞'}[lang]||'Lifetime ∞';
     } else if(premiumUntil){
       try{
         const d=new Date(premiumUntil);
@@ -3823,7 +3828,7 @@ function updatePremiumUI(){
           </div>
           <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
         </div>
-        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.06);color:var(--gd);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan'}[lang]||'⬆ Upgrade'}</button>`:''}
+        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.06);color:var(--gd);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan',es:'⬆ Mejorar plan',de:'⬆ Plan upgraden',fr:'⬆ Améliorer le plan',pt:'⬆ Melhorar plano',uk:'⬆ Покращити план',tr:'⬆ Planı yükselt',zh:'⬆ 升级计划',ar:'⬆ ترقية الخطة'}[lang]||'⬆ Upgrade'}</button>`:''}
       </div>`;
   } else {
     banner.innerHTML=`
@@ -3833,7 +3838,7 @@ function updatePremiumUI(){
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 250 ⭐/мес · Голос · Sonnet · VIP',en:'from 250 ⭐/mo · Voice · Sonnet · VIP'}[lang]||'from 250 ⭐'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 250 ⭐/мес · Голос · Sonnet · VIP',en:'from 250 ⭐/mo · Voice · Sonnet · VIP',es:'desde 250 ⭐/mes',de:'ab 250 ⭐/Mo',fr:'à partir de 250 ⭐/mois',pt:'a partir de 250 ⭐/mês',uk:'від 250 ⭐/міс',tr:'250 ⭐/ay',zh:'250⭐/月起',ar:'من 250 ⭐/شهر'}[lang]||'from 250 ⭐'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -3869,10 +3874,10 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Premium';
-  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor'}[lang]||'Unlock the full power';
-  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free'}[lang]||'Continue free';
+  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor',es:'Desbloquea todo el poder del tutor AI',de:'Schalte die volle Kraft des AI-Tutors frei',fr:'Libère toute la puissance du tuteur IA',pt:'Desbloqueie todo o poder do tutor IA',uk:'Розблокуй повну потужність AI-репетитора',tr:'AI öğretmenin tam gücünü aç',zh:'解锁AI导师的全部功能',ar:'افتح القوة الكاملة لمعلم AI'}[lang]||'Unlock the full power';
+  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',de:'Kostenlos fortfahren',fr:'Continuer gratuitement',pt:'Continuar grátis',uk:'Продовжити безкоштовно',tr:'Ücretsiz devam et',zh:'继续免费',ar:'متابعة مجانية'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
-  if(pop)pop.textContent={ru:'Популярный',en:'Popular'}[lang]||'Popular';
+  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',de:'Beliebt',fr:'Populaire',pt:'Popular',uk:'Популярний',tr:'Popüler',zh:'热门',ar:'شائع'}[lang]||'Popular';
 
   // Fill plan buffs
   const basicB=document.getElementById('pp-basic-buffs');
@@ -3901,7 +3906,7 @@ function openPremium(highlightFeature){
       if(planLevel===currentLevel&&!p.querySelector('.pp-current')){
         const lbl=document.createElement('div');lbl.className='pp-current';
         lbl.style.cssText='position:absolute;top:10px;left:14px;font-size:9px;font-weight:700;color:var(--a2);text-transform:uppercase;letter-spacing:.5px';
-        lbl.textContent={ru:'Текущий план',en:'Current plan'}[lang]||'Current';
+        lbl.textContent={ru:'Текущий план',en:'Current plan',es:'Plan actual',de:'Aktueller Plan',fr:'Plan actuel',pt:'Plano atual',uk:'Поточний план',tr:'Mevcut plan',zh:'当前计划',ar:'الخطة الحالية'}[lang]||'Current';
         p.appendChild(lbl);
       }
     } else {
@@ -3912,7 +3917,7 @@ function openPremium(highlightFeature){
 
   // If ultimate, hide free button and show "you have max"
   if(isPremium&&premiumTier==='ultimate'){
-    if(sub)sub.textContent={ru:'У тебя максимальный план 👑',en:'You have the highest plan 👑'}[lang]||'Max plan';
+    if(sub)sub.textContent={ru:'У тебя максимальный план 👑',en:'You have the highest plan 👑',es:'Tienes el plan máximo 👑',de:'Du hast den besten Plan 👑',fr:'Tu as le meilleur plan 👑',pt:'Você tem o plano máximo 👑',uk:'У тебе максимальний план 👑',tr:'En üst plandasın 👑',zh:'你已拥有最高计划 👑',ar:'لديك أفضل خطة 👑'}[lang]||'Max plan';
   }
 
   openMod('premiumm');
@@ -3927,7 +3932,7 @@ function selectPlan(plan){
     window.open(`https://t.me/${botName}?start=premium`);
   }
   closeMod('premiumm');
-  toast({ru:'Открываю бот для оплаты...',en:'Opening bot for payment...'}[lang]||'Opening bot...','💎');
+  toast({ru:'Открываю бот для оплаты...',en:'Opening bot for payment...',es:'Abriendo bot para pagar...',de:'Bot für Zahlung öffnen...',fr:'Ouverture du bot pour payer...',pt:'Abrindo bot para pagamento...',uk:'Відкриваю бот для оплати...',tr:'Ödeme botu açılıyor...',zh:'打开支付机器人...',ar:'جاري فتح بوت الدفع...'}[lang]||'Opening bot...','💎');
   let polls=0;
   const poll=setInterval(async()=>{
     polls++;
@@ -3936,7 +3941,7 @@ function selectPlan(plan){
       await checkPremiumStatus(window._uid);
       if(isPremium){
         clearInterval(poll);
-        toast({ru:'Premium активирован! 🎉',en:'Premium activated! 🎉'}[lang]||'Premium activated!','⭐');
+        toast({ru:'Premium активирован! 🎉',en:'Premium activated! 🎉',es:'¡Premium activado! 🎉',de:'Premium aktiviert! 🎉',fr:'Premium activé ! 🎉',pt:'Premium ativado! 🎉',uk:'Premium активовано! 🎉',tr:'Premium aktif! 🎉',zh:'Premium已激活！🎉',ar:'تم تفعيل Premium! 🎉'}[lang]||'Premium activated!','⭐');
       }
     }
   },5000);
@@ -3953,9 +3958,9 @@ function updateNewLabels(){
   if(ltr)ltr.textContent={ru:'Путь',en:'Roadmap',es:'Camino',de:'Weg',fr:'Parcours'}[lang]||'Roadmap';
   // Quick start buttons
   const qb2=document.getElementById('qb2t');if(qb2)qb2.textContent={ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes'}[lang]||'Roleplay';
-  const qb2s=document.getElementById('qb2s');if(qb2s)qb2s.textContent={ru:'Живые диалоги',en:'Live dialogues'}[lang]||'Live dialogues';
+  const qb2s=document.getElementById('qb2s');if(qb2s)qb2s.textContent={ru:'Живые диалоги',en:'Live dialogues',es:'Diálogos vivos',de:'Live-Dialoge',fr:'Dialogues vivants',pt:'Diálogos ao vivo',uk:'Живі діалоги',tr:'Canlı diyaloglar',zh:'实时对话',ar:'حوارات حية'}[lang]||'Live dialogues';
   const qb4=document.getElementById('qb4t');if(qb4)qb4.textContent={ru:'Проверка',en:'Text Check',es:'Revisar',de:'Prüfen',fr:'Vérifier'}[lang]||'Text Check';
-  const qb4s=document.getElementById('qb4s');if(qb4s)qb4s.textContent={ru:'Ошибки в тексте',en:'Find text errors'}[lang]||'Find text errors';
+  const qb4s=document.getElementById('qb4s');if(qb4s)qb4s.textContent={ru:'Ошибки в тексте',en:'Find text errors',es:'Errores en texto',de:'Textfehler finden',fr:'Erreurs dans le texte',pt:'Erros no texto',uk:'Помилки в тексті',tr:'Metin hataları',zh:'查找文本错误',ar:'أخطاء النص'}[lang]||'Find text errors';
   // Error diary labels
   renderErrorDiary();
   // Share streak label
@@ -4660,7 +4665,12 @@ function generateCertificate(){
   var level=LS.get('ob_level')||'A1';var uid=window._uid||0;
   var date=new Date().toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{year:'numeric',month:'long',day:'numeric'});
   var certId='PG-'+level+'-'+uid+'-'+Date.now().toString(36).toUpperCase();
-  addMsg('bot','<div class="cert-wrap"><div class="cert-title">Certificate of Achievement</div><div class="cert-seal">🏅</div><div class="cert-desc">This certifies that</div><div class="cert-name">'+name+'</div><div class="cert-desc">has completed the</div><div class="cert-level">'+level+' Level</div><div class="cert-desc">English Proficiency Program<br>PolyGlotty AI Academy</div><div class="cert-date">'+date+'</div><div class="cert-date" style="margin-top:4px;font-size:9px">ID: '+certId+'</div></div><button class="share-btn" onclick="doShareTg()" style="background:#d4a843">'+(lang==='ru'?'📤 Поделиться':'📤 Share')+'</button>');
+  var certTitle={ru:'Сертификат достижения',en:'Certificate of Achievement',es:'Certificado de Logro',de:'Leistungszertifikat',fr:'Certificat de Réussite',pt:'Certificado de Conquista',uk:'Сертифікат досягнення',tr:'Başarı Sertifikası',zh:'成就证书',ar:'شهادة إنجاز'}[lang]||'Certificate of Achievement';
+  var certThis={ru:'Настоящим подтверждается, что',en:'This certifies that',es:'Se certifica que',de:'Hiermit wird bestätigt, dass',fr:'Ceci certifie que',pt:'Certifica-se que',uk:'Цим засвідчується, що',tr:'Bu belge şunu onaylar:',zh:'特此证明',ar:'يشهد بأن'}[lang]||'This certifies that';
+  var certCompleted={ru:'успешно завершил программу',en:'has completed the',es:'ha completado el',de:'hat abgeschlossen',fr:'a terminé le',pt:'completou o',uk:'успішно завершив програму',tr:'programı tamamladı',zh:'已完成',ar:'أتم بنجاح'}[lang]||'has completed the';
+  var certProgram={ru:'Программа изучения английского языка<br>PolyGlotty AI Academy',en:'English Proficiency Program<br>PolyGlotty AI Academy',es:'Programa de Inglés<br>PolyGlotty AI Academy',de:'Englischprogramm<br>PolyGlotty AI Academy',fr:'Programme d\'anglais<br>PolyGlotty AI Academy',pt:'Programa de Inglês<br>PolyGlotty AI Academy',uk:'Програма вивчення англійської<br>PolyGlotty AI Academy',tr:'İngilizce Programı<br>PolyGlotty AI Academy',zh:'英语能力课程<br>PolyGlotty AI Academy',ar:'برنامج إتقان الإنجليزية<br>PolyGlotty AI Academy'}[lang]||'English Proficiency Program<br>PolyGlotty AI Academy';
+  var shareBtn={ru:'📤 Поделиться',en:'📤 Share',es:'📤 Compartir',de:'📤 Teilen',fr:'📤 Partager',pt:'📤 Compartilhar',uk:'📤 Поділитись',tr:'📤 Paylaş',zh:'📤 分享',ar:'📤 مشاركة'}[lang]||'📤 Share';
+  addMsg('bot','<div class="cert-wrap"><div class="cert-title">'+certTitle+'</div><div class="cert-seal">🏅</div><div class="cert-desc">'+certThis+'</div><div class="cert-name">'+name+'</div><div class="cert-desc">'+certCompleted+'</div><div class="cert-level">'+level+' Level</div><div class="cert-desc">'+certProgram+'</div><div class="cert-date">'+date+'</div><div class="cert-date" style="margin-top:4px;font-size:9px">ID: '+certId+'</div></div><button class="share-btn" onclick="doShareTg()" style="background:#d4a843">'+shareBtn+'</button>');
   haptic('success');try{fireConfetti();}catch(e){}
 }
 
