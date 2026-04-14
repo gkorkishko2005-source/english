@@ -243,14 +243,20 @@ async def handle_chat(request):
                     "Лимит на сегодня исчерпан, но ты молодец! 💪 Premium откроет ещё больше",
                     "10 сообщений пролетели! Завтра будет ещё 10, или бери Premium 🚀",
                     "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
-                    "Сегодня ты уже выполнил норму! 📚 Premium = безлимитное обучение",
+                    "Сегодня ты уже выполнил норму! 📚 Premium = больше обучения",
+                    "Каждый день по 10 сообщений — уже прогресс! 🔥 Premium = в 3 раза больше",
+                    "ALEX скучает когда ты уходишь 😢 С Premium он будет рядом дольше!",
+                    "Знаешь, что 30 минут в день = B2 за 6 месяцев? Premium поможет 📈",
                 ]
                 grace_en = [
                     "Great work today! 🎉 Want more? Premium = 30 messages/day",
                     "Daily limit reached, but you did amazing! 💪 Premium unlocks more",
                     "10 messages flew by! Come back tomorrow or get Premium 🚀",
                     "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
-                    "You've hit today's limit! 📚 Premium = unlimited learning",
+                    "You've hit today's limit! 📚 Premium = more learning",
+                    "10 messages a day = real progress! 🔥 Premium = 3x more",
+                    "ALEX misses you when you leave 😢 Premium keeps him longer!",
+                    "Did you know? 30 min/day = B2 in 6 months! Premium helps 📈",
                 ]
                 limit_msg = random.choice(grace_ru if lang=="ru" else grace_en)
             else:
@@ -258,11 +264,15 @@ async def handle_chat(request):
                     "Ты сегодня выжал максимум! Отдохни и приходи завтра 💪",
                     "Лимит на сегодня — но какой продуктивный день! 🌟 До завтра!",
                     "ALEX тоже нужен сон 😴 Продолжим завтра!",
+                    "Мозгу нужен отдых чтобы запомнить всё новое 🧠 До завтра!",
+                    "Ты среди самых активных учеников! 🏆 Увидимся завтра!",
                 ]
                 grace_prem_en = [
                     "You maxed out today! Rest up, see you tomorrow 💪",
                     "Today's limit reached — what a productive day! 🌟",
                     "Even ALEX needs sleep 😴 See you tomorrow!",
+                    "Your brain needs rest to absorb everything 🧠 See you tomorrow!",
+                    "You're among the most active students! 🏆 See you tomorrow!",
                 ]
                 limit_msg = random.choice(grace_prem_ru if lang=="ru" else grace_prem_en)
             return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
