@@ -1121,7 +1121,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- CHAT -->
 <div class="screen" id="s-chat">
   <div class="chdr">
-    <div class="cav"><img src="alex-avatar.jpg" alt="ALEX" style="width:36px;height:36px;border-radius:50%;object-fit:cover"></div>
+    <div class="cav"><img src="alex-avatar.png" alt="ALEX" style="width:36px;height:36px;border-radius:50%;object-fit:cover"></div>
     <div><div class="chnm">ALEX</div><div class="chst"><span class="odot"></span><span id="online-lbl"></span></div><div class="cplbl" id="cplbl"></div></div>
     <div class="hbtns">
       <button class="hbtn" onclick="openSpanel()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
@@ -1349,7 +1349,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- NOTIFICATION -->
 <div class="notif" id="notif" onclick="notifTap()" style="display:none">
-  <div class="navic" id="navic" onclick="notifAvTap(event)"><img src="alex-avatar.jpg" alt="A" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
+  <div class="navic" id="navic" onclick="notifAvTap(event)"><img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
   <div style="flex:1;min-width:0"><div class="nnm">ALEX <span class="ndot"></span></div><div class="ntxt" id="ntxt"></div><div class="ncta" id="ncta"></div></div>
   <button class="nx" onclick="dismissNotif(event)" aria-label="Close">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
@@ -2589,7 +2589,7 @@ function renderMsg(role,text,save=true){
   const av=document.createElement('div');av.className='mav';
   av.innerHTML=role==='user'
     ?'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>'
-    :'<img src="alex-avatar.jpg" alt="A" style="width:28px;height:28px;border-radius:9px;object-fit:cover">';
+    :'<img src="alex-avatar.png" alt="A" style="width:28px;height:28px;border-radius:9px;object-fit:cover">';
   const mw=document.createElement('div');mw.className='mwrap';
   const bub=document.createElement('div');bub.className='mbub';
   if(role==='user')bub.textContent=text;else bub.innerHTML=fmtMsg(text);
@@ -2622,7 +2622,7 @@ function addTyping(){
   const w=document.getElementById('cmsgs');
   const d=document.createElement('div');d.className='msg bot';d.id='typing';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.jpg" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
   const mw=document.createElement('div');mw.className='mwrap';
   const tw=document.createElement('div');tw.className='typw';
   tw.innerHTML='<span></span><span></span><span></span>';
@@ -2798,7 +2798,7 @@ async function startAudio(){
   if(busy)return;goTab('chat');
   const gd=document.createElement('div');gd.className='msg bot';gd.id='audgen';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.jpg" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
   const mw=document.createElement('div');mw.className='mwrap';
   const ag=document.createElement('div');ag.className='agen2';
   ag.innerHTML=`<div class="agspin"></div><span style="font-size:13px;color:var(--t2)">${L.audgen}</span>`;
@@ -2816,7 +2816,7 @@ function renderAudio(data){
   const wrap=document.getElementById('cmsgs');
   const md=document.createElement('div');md.className='msg bot';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.jpg" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
   const mw=document.createElement('div');mw.className='mwrap';
   const ac=document.createElement('div');ac.className='acrd';
   const lbl={ru:'🎧 АУДИРОВАНИЕ',en:'🎧 LISTENING',es:'🎧 ESCUCHA',de:'🎧 HÖREN',fr:'🎧 ÉCOUTE',pt:'🎧 ESCUTA',uk:'🎧 АУДІЮВАННЯ',tr:'🎧 DİNLEME',zh:'🎧 听力',ar:'🎧 استماع'}[lang]||'🎧 LISTENING';
