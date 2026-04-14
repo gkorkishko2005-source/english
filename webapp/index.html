@@ -443,6 +443,28 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .gg-wrap{padding:4px 0}
 .gg-title{font-size:16px;font-weight:700;margin-bottom:4px}
 
+/* ══ CONFETTI ══ */
+.confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;overflow:hidden}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;top:-10px;animation:confetti-fall 3s ease-in forwards}
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg) scale(1);opacity:1}80%{opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(.3);opacity:0}}
+
+/* ══ ANIMATED COUNTER ══ */
+.count-up{transition:none}
+@keyframes num-pop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.num-pop{animation:num-pop .4s ease}
+
+/* ══ XP BAR GLOW ══ */
+@keyframes xp-glow{0%{box-shadow:0 0 0 rgba(0,212,170,0)}50%{box-shadow:0 0 12px rgba(0,212,170,.4)}100%{box-shadow:0 0 0 rgba(0,212,170,0)}}
+.xp-gained .xpf{animation:xp-glow 1s ease}
+
+/* ══ TRIAL BANNER ══ */
+.trial-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(46,204,113,.1),rgba(0,212,170,.06));border:1px solid rgba(46,204,113,.2);border-radius:var(--r);margin-bottom:14px;cursor:pointer}
+.trial-banner:active{transform:scale(.98)}
+.trial-icon{font-size:20px}
+.trial-text{font-size:12px;color:var(--t1);font-weight:600;line-height:1.4}
+.trial-text small{display:block;font-weight:400;color:var(--t2);font-size:11px}
+.trial-badge{margin-left:auto;font-size:10px;font-weight:700;color:#2ecc71;background:rgba(46,204,113,.12);padding:3px 8px;border-radius:20px}
+
 /* ══ ACHIEVEMENTS home button ══ */
 .ach-home-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(0,212,170,.04));border:1px solid rgba(var(--ar),.15);border-radius:var(--r);cursor:pointer;transition:.2s;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px}
 .ach-home-btn:active{transform:scale(.97)}
@@ -891,6 +913,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- HOME -->
 <div class="screen active" id="s-home">
+  <div id="trial-banner" class="trial-banner" style="display:none" onclick="openPremium()">
+    <div class="trial-icon">🎁</div>
+    <div class="trial-text"><b>Free Basic trial!</b><small>3 days left</small></div>
+    <div class="trial-badge">FREE</div>
+  </div>
   <div class="hero"><div class="hbg"></div>
     <div class="htm" id="greet"></div>
     <div class="hnm" id="hname">—</div>
@@ -2010,7 +2037,13 @@ function drawProgress(){
   const errors=Math.max(d.errors||0,  savedStats.errors||0);
   const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
-  safe('hs1', d.streak||0); safe('hs2', words); safe('hs3', tests);
+  // Animate home stats
+  animateCount(document.getElementById('hs1'), d.streak||0, 600);
+  animateCount(document.getElementById('hs2'), words, 800);
+  animateCount(document.getElementById('hs3'), tests, 600);
+
+  // Trial banner
+  try{checkTrialBanner();}catch(e){}
 
   // Achievements
   try{renderAchievements();}catch(e){}
@@ -3946,7 +3979,7 @@ function getAchievements(){
   const results=[];
   ACHIEVEMENTS.forEach(a=>{
     const done=a.check(stats);
-    if(done&&!unlocked[a.id]){unlocked[a.id]=Date.now();haptic('success');toast(`🏅 ${a.title[lang]||a.title.en}`,'🎉');}
+    if(done&&!unlocked[a.id]){unlocked[a.id]=Date.now();haptic('success');toast(`🏅 ${a.title[lang]||a.title.en}`,'🎉');try{fireConfetti();}catch(e){}}
     results.push({...a,done});
   });
   LS.setJ('achievements_unlocked',unlocked);
@@ -4087,6 +4120,97 @@ function pickStoryOption(sid,idx){
   // Next scene after delay
   storyState.scene++;
   setTimeout(showScene,2000);
+}
+
+/* ══ CONFETTI EFFECT ══ */
+function fireConfetti(duration=3000){
+  const wrap=document.createElement('div');wrap.className='confetti-wrap';
+  const colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#a78bfa','#f472b6','#00d4aa','#ffb830'];
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.left=Math.random()*100+'%';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay=Math.random()*1.5+'s';
+    p.style.animationDuration=(2+Math.random()*2)+'s';
+    p.style.width=(5+Math.random()*8)+'px';
+    p.style.height=(5+Math.random()*8)+'px';
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(()=>wrap.remove(),duration);
+}
+
+/* ══ ANIMATED COUNTER ══ */
+function animateCount(el,target,duration=800){
+  if(!el)return;
+  const start=parseInt(el.textContent)||0;
+  if(start===target)return;
+  const diff=target-start;
+  const startTime=performance.now();
+  function tick(now){
+    const elapsed=now-startTime;
+    const progress=Math.min(elapsed/duration,1);
+    const eased=1-Math.pow(1-progress,3);// easeOutCubic
+    el.textContent=Math.round(start+diff*eased);
+    if(progress<1)requestAnimationFrame(tick);
+    else{el.textContent=target;el.classList.add('num-pop');setTimeout(()=>el.classList.remove('num-pop'),500);}
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ══ ANIMATED XP BAR ══ */
+function animateXPBar(el,pct){
+  if(!el)return;
+  el.style.transition='width 1.2s cubic-bezier(.4,0,.2,1)';
+  el.style.width=pct+'%';
+  el.parentElement?.classList.add('xp-gained');
+  setTimeout(()=>el.parentElement?.classList.remove('xp-gained'),1500);
+}
+
+/* ══ ADD LOCAL XP WITH ANIMATION ══ */
+function addLocalXP(amount){
+  try{
+    const d=window._d||{};
+    const oldXP=d.xp||0;
+    d.xp=(d.xp||0)+amount;
+    window._d=d;
+    LS.set('local_xp',d.xp);
+    // Animate XP display
+    const xpEl=document.getElementById('xpv');
+    if(xpEl)animateCount(xpEl,d.xp);
+    const xpBar=document.querySelector('.xpf');
+    const rank=rankOf(d.xp);
+    if(xpBar)animateXPBar(xpBar,Math.min(100,((d.xp-rank.min)/(rank.max-rank.min))*100));
+    // Check for rank up → confetti
+    const oldRank=rankOf(oldXP);
+    const newRank=rankOf(d.xp);
+    if(newRank.r!==oldRank.r){fireConfetti();toast(`Level up: ${newRank.r}!`,'🎉');}
+  }catch(e){console.warn('addLocalXP',e);}
+}
+
+/* ══ TRIAL BANNER ══ */
+function checkTrialBanner(){
+  try{
+    const banner=document.getElementById('trial-banner');
+    if(!banner)return;
+    const created=LS.get('user_created');
+    if(!created){LS.set('user_created',Date.now());banner.style.display='flex';return;}
+    const days=Math.floor((Date.now()-parseInt(created))/(86400000));
+    const isPrem=LS.get('is_premium')==='true';
+    if(days<=3&&!isPrem){
+      banner.style.display='flex';
+      const daysLeft=3-days;
+      const txt=banner.querySelector('.trial-text');
+      if(txt){
+        txt.innerHTML=lang==='ru'
+          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 30 сообщений/день</small>`
+          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 30 messages/day</small>`;
+      }
+    }else{
+      banner.style.display='none';
+    }
+  }catch(e){}
 }
 
 function hideLoader(){
