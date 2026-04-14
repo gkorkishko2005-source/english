@@ -553,9 +553,30 @@ async def handle_sync_stats(request):
         logger.error(f"sync_stats error: {e}")
         return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── ADMIN STATS ───────────────────────────────────────────────────────────────
+async def handle_admin_stats(request):
+    uid = int(request.headers.get("X-UID", "0"))
+    if uid not in ADMIN_IDS:
+        return web.json_response({"error": "forbidden"}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import db
+        total = await db("SELECT COUNT(*) as c FROM users", fetch="one")
+        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= CURRENT_DATE", fetch="one")
+        premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_until > NOW()", fetch="one")
+        result = {
+            "total_users": total["c"] if total else 0,
+            "today_active": today["c"] if today else 0,
+            "premium_users": premium["c"] if premium else 0,
+            "today_messages": sum(v for k,v in _msg_counts.items() if str(__import__('datetime').date.today()) in k),
+        }
+    except Exception as e:
+        logger.warning(f"admin stats error: {e}")
+        result = {"total_users": "--", "today_active": "--", "premium_users": "--", "today_messages": sum(_msg_counts.values())}
+    return web.json_response(result, headers={"Access-Control-Allow-Origin":"*"})
+
 # ── CORS ──────────────────────────────────────────────────────────────────────
 async def handle_options(request):
-    return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data"})
+    return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data,X-UID"})
 
 # ── APP ───────────────────────────────────────────────────────────────────────
 def create_app():
@@ -576,6 +597,7 @@ def create_app():
     app.router.add_post("/api/tts",handle_tts)
     app.router.add_post("/api/sync_stats",handle_sync_stats)
     app.router.add_get("/health",handle_health)
+    app.router.add_get("/api/admin/stats",handle_admin_stats)
     app.router.add_route("OPTIONS","/{tail:.*}",handle_options)
     app.router.add_static("/",WEBAPP_DIR,show_index=False)
     return app
