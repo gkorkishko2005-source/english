@@ -1067,7 +1067,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs3" style="color:var(--a)">0</div><div class="sbl" id="hs3l"></div></div>
   </div>
   <div id="path-banner" class="lp-banner" style="display:none" onclick="goTab('settings')"></div>
-  <button class="ach-home-btn" onclick="goTab('progress');setTimeout(()=>{document.getElementById('achievements-wrap')?.scrollIntoView({behavior:'smooth'})},300)">
+  <button class="ach-home-btn" onclick="openAchModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     <span id="ach-btn-lbl">Достижения</span>
     <span class="ach-home-cnt" id="ach-cnt">0/12</span>
@@ -1235,8 +1235,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
   <!-- Achievements -->
-  <div class="sec"><span id="ach-lbl">Achievements</span></div>
-  <div id="achievements-wrap"></div>
+  <!-- Achievements moved to modal -->
 </div>
 
 <!-- SETTINGS -->
@@ -1448,6 +1447,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="mtit" id="path-mtit">🎯 Learning Path</div>
     <div style="padding:8px 16px 16px" id="path-selector"></div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT MODAL -->
+<div class="mov" id="achm" style="display:none" onclick="closeMod('achm')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit" id="ach-mtit">🏅 Achievements</div>
+    <div style="padding:4px 16px 20px" id="achievements-wrap"></div>
   </div>
 </div>
 
@@ -1850,12 +1857,12 @@ function applyLang(){
   document.getElementById('qb3s').textContent=L.tfs;
   document.getElementById('qb4t').textContent=L.sp;document.getElementById('qb4s').textContent=L.sps;
   // Drill & Path buttons
-  var qb5t=document.getElementById('qb5t');if(qb5t)qb5t.textContent={ru:'Drill',en:'Drill'}[lang]||'Drill';
-  var qb5s=document.getElementById('qb5s');if(qb5s)qb5s.textContent={ru:'Тест на время',en:'Timed quiz'}[lang]||'Timed quiz';
-  var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path'}[lang]||'Path';
-  var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal'}[lang]||'Choose goal';
-  var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path'}[lang]||'🎯 Learning Path';
-  var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic'}[lang]||'🧠 Grammar Drill';
+  var qb5t=document.getElementById('qb5t');if(qb5t)qb5t.textContent={ru:'Drill',en:'Drill',es:'Drill',de:'Drill',fr:'Drill',pt:'Drill',uk:'Drill',tr:'Drill',zh:'训练',ar:'تمرين'}[lang]||'Drill';
+  var qb5s=document.getElementById('qb5s');if(qb5s)qb5s.textContent={ru:'Тест на время',en:'Timed quiz',es:'Quiz cronometrado',de:'Zeitquiz',fr:'Quiz minuté',pt:'Quiz cronometrado',uk:'Тест на час',tr:'Zamanlı test',zh:'限时测试',ar:'اختبار موقت'}[lang]||'Timed quiz';
+  var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path',es:'Ruta',de:'Pfad',fr:'Parcours',pt:'Caminho',uk:'Шлях',tr:'Yol',zh:'路径',ar:'مسار'}[lang]||'Path';
+  var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal',es:'Elegir meta',de:'Ziel wählen',fr:'Choisir objectif',pt:'Escolher meta',uk:'Обрати ціль',tr:'Hedef seç',zh:'选择目标',ar:'اختر الهدف'}[lang]||'Choose goal';
+  var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path',es:'🎯 Elige tu camino',de:'🎯 Lernpfad wählen',fr:'🎯 Choisir un parcours',pt:'🎯 Escolher caminho',uk:'🎯 Обери шлях навчання',tr:'🎯 Öğrenme yolunu seç',zh:'🎯 选择学习路径',ar:'🎯 اختر مسار التعلم'}[lang]||'🎯 Learning Path';
+  var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
   document.getElementById('online-lbl').textContent=L.online;
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
@@ -1998,10 +2005,10 @@ function buildChips(){
   if(!el) return;
   el.innerHTML = '';
   const texts=[L.c_corr,L.c_gr,L.c_sp,L.c_vc,L.c_au,L.c_id,L.c_er,
-    {ru:'Объясни проще',en:'Explain simply'}[lang]||'Explain simply',
-    {ru:'Сценки',en:'Roleplay'}[lang]||'Roleplay',
-    {ru:'🧩 Собери фразу',en:'🧩 Build phrase'}[lang]||'🧩 Build phrase',
-    {ru:'📖 Истории',en:'📖 Stories'}[lang]||'📖 Stories',
+    {ru:'Объясни проще',en:'Explain simply',es:'Explica simple',de:'Einfach erklären',fr:'Explique simplement',pt:'Explique simples',uk:'Поясни простіше',tr:'Basitçe açıkla',zh:'简单解释',ar:'اشرح ببساطة'}[lang]||'Explain simply',
+    {ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes',pt:'Cenários',uk:'Сценки',tr:'Rol yapma',zh:'角色扮演',ar:'تمثيل أدوار'}[lang]||'Roleplay',
+    {ru:'🧩 Собери фразу',en:'🧩 Build phrase',es:'🧩 Arma frase',de:'🧩 Satz bauen',fr:'🧩 Construis phrase',pt:'🧩 Monte frase',uk:'🧩 Склади фразу',tr:'🧩 Cümle kur',zh:'🧩 组句',ar:'🧩 كوّن جملة'}[lang]||'🧩 Build phrase',
+    {ru:'📖 Истории',en:'📖 Stories',es:'📖 Historias',de:'📖 Geschichten',fr:'📖 Histoires',pt:'📖 Histórias',uk:'📖 Історії',tr:'📖 Hikayeler',zh:'📖 故事',ar:'📖 قصص'}[lang]||'📖 Stories',
   ];
   const fns=[
     ()=>chipAction(()=>sendChip(L.c_corr)),
@@ -2190,17 +2197,15 @@ function drawProgress(){
   try{renderAdminPanel();}catch(e){}
   // Wave 5 button labels
   try{
-    var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress'}[lang]||'Share progress';
-    var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report'}[lang]||'Export report';
-    var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate'}[lang]||'Certificate';
-    var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium'}[lang]||'Gift Premium';
+    var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
+    var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
+    var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
+    var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium',es:'Regalar Premium',de:'Premium verschenken',fr:'Offrir Premium',pt:'Dar Premium',uk:'Подарувати Premium',tr:'Premium hediye et',zh:'赠送Premium',ar:'إهداء Premium'}[lang]||'Gift Premium';
   }catch(e){}
 
   // Achievements
   try{renderAchievements();}catch(e){}
-  // Achievement label
-  const al=document.getElementById('ach-lbl');
-  if(al)al.textContent={ru:'Достижения',en:'Achievements',es:'Logros',de:'Erfolge',fr:'Succès'}[lang]||'Achievements';
+  // Achievements rendered via modal now
 
   // Weekly chart
   const days={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],uk:['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],en:['Mo','Tu','We','Th','Fr','Sa','Su'],es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],de:['Mo','Di','Mi','Do','Fr','Sa','So'],fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],tr:['Pt','Sa','Ça','Pe','Cu','Ct','Pz'],zh:['一','二','三','四','五','六','日'],ar:['إث','ثل','أر','خم','جم','سب','أح']}[lang]||['Mo','Tu','We','Th','Fr','Sa','Su'];
@@ -2657,7 +2662,7 @@ async function doChat(text){
     rmTyping();
     console.error('doChat error:',e);
     const errMsg=e.name==='TimeoutError'
-      ?{ru:'⏱ Таймаут — ALEX думает слишком долго. Попробуй ещё раз.',en:'⏱ Timeout — try again.'}[lang]||L.errconn
+      ?{ru:'⏱ Таймаут — попробуй ещё раз.',en:'⏱ Timeout — try again.',es:'⏱ Tiempo agotado — inténtalo de nuevo.',de:'⏱ Zeitüberschreitung — versuche es nochmal.',fr:'⏱ Délai dépassé — réessaie.',pt:'⏱ Tempo esgotado — tente novamente.',uk:'⏱ Таймаут — спробуй ще раз.',tr:'⏱ Zaman aşımı — tekrar dene.',zh:'⏱ 超时 — 请重试。',ar:'⏱ انتهت المهلة — حاول مرة أخرى.'}[lang]||L.errconn
       :L.errconn+' ('+e.message+')';
     addMsg('bot',errMsg);
   }
@@ -4170,29 +4175,51 @@ function renderBadges(){
   badges.slice(0,4).forEach(b=>{html+='<span class="pbadge pbadge-master">'+b+'</span>';});
   el.innerHTML=html;
 }
+function openAchModal(){
+  openMod('achm');
+  renderAchievements();
+  var mt=document.getElementById('ach-mtit');
+  if(mt)mt.textContent={ru:'🏅 Достижения',en:'🏅 Achievements',es:'🏅 Logros',de:'🏅 Erfolge',fr:'🏅 Succès',pt:'🏅 Conquistas',uk:'🏅 Досягнення',tr:'🏅 Başarılar',zh:'🏅 成就',ar:'🏅 الإنجازات'}[lang]||'🏅 Achievements';
+}
+
 function renderAchievements(){
   const wrap=document.getElementById('achievements-wrap');
   if(!wrap)return;
   const list=getAchievements();
   const unlocked=LS.getJ('achievements_unlocked')||{};
   const doneCount=list.filter(a=>!!unlocked[a.id]).length;
-  wrap.innerHTML=list.map(a=>{
-    const done=!!unlocked[a.id];
-    const t=a.title[lang]||a.title.en;
-    const d=a.desc[lang]||a.desc.en;
-    const tierLabel=TIER_LABELS[a.tier]?.[lang]||TIER_LABELS[a.tier]?.en||'';
-    const tierClass='ach-tier-'+(a.tier||'bronze');
-    return `<div class="ach-card${done?' done':''}">
-      <div class="ach-icon">${a.icon}</div>
-      <div class="ach-info"><div class="ach-title">${t}</div><div class="ach-desc">${d}</div></div>
-      <span class="ach-tier ${tierClass}">${tierLabel}</span>
-      ${done?'<div class="ach-check"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div>':'<div class="ach-lock">🔒</div>'}
-    </div>`;
-  }).join('');
+  // Group by tier
+  const tiers=['bronze','silver','gold','diamond'];
+  const tierNames={
+    bronze:{ru:'🥉 Бронза',en:'🥉 Bronze',es:'🥉 Bronce',de:'🥉 Bronze',fr:'🥉 Bronze',pt:'🥉 Bronze',uk:'🥉 Бронза',tr:'🥉 Bronz',zh:'🥉 铜牌',ar:'🥉 برونز'},
+    silver:{ru:'🥈 Серебро',en:'🥈 Silver',es:'🥈 Plata',de:'🥈 Silber',fr:'🥈 Argent',pt:'🥈 Prata',uk:'🥈 Срібло',tr:'🥈 Gümüş',zh:'🥈 银牌',ar:'🥈 فضة'},
+    gold:{ru:'🥇 Золото',en:'🥇 Gold',es:'🥇 Oro',de:'🥇 Gold',fr:'🥇 Or',pt:'🥇 Ouro',uk:'🥇 Золото',tr:'🥇 Altın',zh:'🥇 金牌',ar:'🥇 ذهب'},
+    diamond:{ru:'💎 Алмаз',en:'💎 Diamond',es:'💎 Diamante',de:'💎 Diamant',fr:'💎 Diamant',pt:'💎 Diamante',uk:'💎 Діамант',tr:'💎 Elmas',zh:'💎 钻石',ar:'💎 ألماس'},
+  };
+  var html='';
+  tiers.forEach(tier=>{
+    const items=list.filter(a=>a.tier===tier);
+    if(!items.length)return;
+    const tierDone=items.filter(a=>!!unlocked[a.id]).length;
+    html+='<div style="margin-top:12px;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:space-between">'
+      +'<span>'+(tierNames[tier]?.[lang]||tierNames[tier]?.en||tier)+'</span>'
+      +'<span style="font-size:10px;color:var(--t3)">'+tierDone+'/'+items.length+'</span></div>';
+    items.forEach(a=>{
+      const done=!!unlocked[a.id];
+      const t=a.title[lang]||a.title.en;
+      const d=a.desc[lang]||a.desc.en;
+      html+='<div class="ach-card'+(done?' done':'')+'">'
+        +'<div class="ach-icon">'+a.icon+'</div>'
+        +'<div class="ach-info"><div class="ach-title">'+t+'</div><div class="ach-desc">'+d+'</div></div>'
+        +(done?'<div class="ach-check"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div>':'<div class="ach-lock">🔒</div>')
+        +'</div>';
+    });
+  });
+  wrap.innerHTML=html;
   const cnt=document.getElementById('ach-cnt');
-  if(cnt)cnt.textContent=`${doneCount}/${list.length}`;
+  if(cnt)cnt.textContent=doneCount+'/'+list.length;
   const lbl=document.getElementById('ach-btn-lbl');
-  if(lbl)lbl.textContent={ru:'Достижения',en:'Achievements'}[lang]||'Achievements';
+  if(lbl)lbl.textContent={ru:'Достижения',en:'Achievements',es:'Logros',de:'Erfolge',fr:'Succès',pt:'Conquistas',uk:'Досягнення',tr:'Başarılar',zh:'成就',ar:'الإنجازات'}[lang]||'Achievements';
   try{renderBadges();}catch(e){}
 }
 
@@ -4692,8 +4719,8 @@ function applyDarkLight(mode){
   const sw=document.getElementById('dl-switch');
   if(icon)icon.textContent=mode==='light'?'☀️':'🌙';
   if(text)text.textContent=mode==='light'
-    ?({ru:'Светлый режим',en:'Light mode'}[lang]||'Light mode')
-    :({ru:'Тёмный режим',en:'Dark mode'}[lang]||'Dark mode');
+    ?({ru:'Светлый режим',en:'Light mode',es:'Modo claro',de:'Heller Modus',fr:'Mode clair',pt:'Modo claro',uk:'Світлий режим',tr:'Açık mod',zh:'浅色模式',ar:'الوضع الفاتح'}[lang]||'Light mode')
+    :({ru:'Тёмный режим',en:'Dark mode',es:'Modo oscuro',de:'Dunkler Modus',fr:'Mode sombre',pt:'Modo escuro',uk:'Темний режим',tr:'Koyu mod',zh:'深色模式',ar:'الوضع الداكن'}[lang]||'Dark mode');
   if(sw)sw.classList.toggle('on',mode==='light');
 }
 
