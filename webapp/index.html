@@ -443,6 +443,22 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .gg-wrap{padding:4px 0}
 .gg-title{font-size:16px;font-weight:700;margin-bottom:4px}
 
+/* ══ IDIOM OF THE DAY ══ */
+.idiom-card{padding:16px;background:linear-gradient(135deg,rgba(255,184,48,.06),rgba(167,139,250,.04));border:1px solid rgba(255,184,48,.15);border-radius:var(--r);margin-bottom:14px}
+.idiom-emoji{font-size:22px;margin-bottom:6px}
+.idiom-phrase{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px}
+.idiom-meaning{font-size:12px;color:var(--t2);margin-bottom:6px;line-height:1.4}
+.idiom-example{font-size:12px;color:var(--t3);font-style:italic;line-height:1.4}
+.idiom-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--or);margin-bottom:6px}
+
+/* ══ DRILL TOPIC PICKER ══ */
+.drill-topic{display:flex;align-items:center;gap:12px;padding:14px;background:var(--e1);border:1.5px solid var(--b1);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:.2s}
+.drill-topic:active{transform:scale(.97)}
+.drill-topic-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.drill-topic-name{font-size:14px;font-weight:700;color:var(--t1)}
+.drill-topic-desc{font-size:11px;color:var(--t2);margin-top:1px}
+.drill-topic-count{font-size:10px;color:var(--a);margin-left:auto;font-weight:600}
+
 /* ══ SM-2 REVIEW QUEUE ══ */
 .review-badge{position:absolute;top:-4px;right:-4px;background:#ff6b6b;color:#fff;font-size:9px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 2px 6px rgba(255,107,107,.4)}
 .sm2-next{font-size:10px;color:var(--t3);margin-top:2px}
@@ -1057,7 +1073,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
-    <div class="qb" style="border-color:rgba(255,184,48,.2);background:rgba(255,184,48,.04)" onclick="startDrill('tenses')">
+    <div class="qb" style="border-color:rgba(255,184,48,.2);background:rgba(255,184,48,.04)" onclick="openDrillPicker()">
       <div class="qbi" style="background:rgba(255,184,48,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><path d="M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 14l2 2 4-4"/></svg></div>
       <div class="qbt" id="qb5t">Drill</div><div class="qbs" id="qb5s">Grammar quiz</div>
     </div>
@@ -1074,6 +1090,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="ch-progress"><div class="ch-fill" id="ch-fill" style="width:20%"></div></div>
     <div class="ch-footer"><span class="ch-days" id="ch-days">—</span><span class="ch-reward" id="ch-reward">—</span></div>
   </div>
+  <!-- Idiom of the Day -->
+  <div class="idiom-card" id="idiom-card"></div>
 </div>
 
 <!-- CHAT -->
@@ -1401,6 +1419,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="mtit" id="path-mtit">🎯 Learning Path</div>
     <div style="padding:8px 16px 16px" id="path-selector"></div>
+  </div>
+</div>
+
+<!-- DRILL TOPIC PICKER MODAL -->
+<div class="mov" id="drillm" style="display:none" onclick="closeMod('drillm')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit" id="drill-mtit">🧠 Grammar Drill</div>
+    <div style="padding:8px 16px 16px" id="drill-selector"></div>
   </div>
 </div>
 
@@ -1809,6 +1835,7 @@ function applyLang(){
   var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path'}[lang]||'Path';
   var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal'}[lang]||'Choose goal';
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path'}[lang]||'🎯 Learning Path';
+  var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic'}[lang]||'🧠 Grammar Drill';
   // Chat
   document.getElementById('online-lbl').textContent=L.online;
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
@@ -2147,6 +2174,7 @@ function drawProgress(){
   try{addRippleToButtons();}catch(e){}
   try{renderBadges();}catch(e){}
   try{renderPathBanner();}catch(e){}
+  try{renderIdiomOfDay();}catch(e){}
 
   // Achievements
   try{renderAchievements();}catch(e){}
@@ -4379,12 +4407,131 @@ const DRILL_BANKS={
     {q:'I was born ___ 1999.',o:['at','in','on','to'],a:1},
     {q:'The book is ___ the table.',o:['at','in','on','to'],a:2},
   ],
+  phrasal_verbs:[
+    {q:'Please ___ your shoes before entering.',o:['take off','take on','take up','take in'],a:0},
+    {q:'I need to ___ this problem.',o:['figure out','figure in','figure up','figure on'],a:0},
+    {q:'She ___ her children alone.',o:['brought up','brought in','brought on','brought out'],a:0},
+    {q:'The meeting was ___ until next week.',o:['put off','put on','put up','put in'],a:0},
+    {q:'He ___ smoking last year.',o:['gave up','gave in','gave out','gave off'],a:0},
+    {q:'Can you ___ the music? It is loud.',o:['turn down','turn up','turn off','turn on'],a:0},
+    {q:'I ___ an old friend at the mall.',o:['ran into','ran out','ran up','ran off'],a:0},
+    {q:'We need to ___ a solution.',o:['come up with','come in with','come on with','come out with'],a:0},
+    {q:'She ___ her mother in looks.',o:['takes after','takes on','takes up','takes in'],a:0},
+    {q:'The plane ___ at 6 AM.',o:['took off','took on','took up','took in'],a:0},
+  ],
+  collocations:[
+    {q:'You should ___ a decision quickly.',o:['make','do','take','get'],a:0},
+    {q:'She ___ a mistake on the test.',o:['made','did','took','got'],a:0},
+    {q:'I need to ___ my homework.',o:['do','make','take','get'],a:0},
+    {q:'He ___ a photo of the sunset.',o:['took','made','did','got'],a:0},
+    {q:'There was ___ rain all day.',o:['heavy','strong','big','hard'],a:0},
+    {q:'She has ___ hair and blue eyes.',o:['blonde','yellow','gold','light'],a:0},
+    {q:'I ___ a cold last week.',o:['caught','got','took','made'],a:0},
+    {q:'Please ___ attention to the teacher.',o:['pay','give','make','do'],a:0},
+    {q:'They ___ an appointment for Friday.',o:['made','did','took','set'],a:0},
+    {q:'The traffic was ___ this morning.',o:['heavy','strong','big','thick'],a:0},
+  ],
+  word_formation:[
+    {q:'decide (noun) = ?',o:['decision','decidement','decidence','decidion'],a:0},
+    {q:'happy (noun) = ?',o:['happiness','happyness','happiment','happitude'],a:0},
+    {q:'success (adjective) = ?',o:['successful','successfull','successing','successal'],a:0},
+    {q:'beauty (adjective) = ?',o:['beautiful','beautyful','beautious','beautied'],a:0},
+    {q:'create (noun) = ?',o:['creation','createment','creatence','createness'],a:0},
+    {q:'danger (adjective) = ?',o:['dangerous','dangerful','dangerable','dangering'],a:0},
+    {q:'achieve (noun) = ?',o:['achievement','achieval','achieveness','achievance'],a:0},
+    {q:'strong (noun) = ?',o:['strength','strongness','strongth','strongity'],a:0},
+    {q:'broad (verb) = ?',o:['broaden','broadify','broadize','broading'],a:0},
+    {q:'rely (adjective) = ?',o:['reliable','relyable','reliful','reliant'],a:0},
+  ],
 };
+
+// Drill topic metadata for picker
+const DRILL_TOPICS=[
+  {id:'tenses',icon:'⏰',color:'#4f8aff',name:{ru:'Времена',en:'Tenses'},desc:{ru:'Present, Past, Future',en:'Present, Past, Future'}},
+  {id:'articles',icon:'📰',color:'#2ecc71',name:{ru:'Артикли',en:'Articles'},desc:{ru:'a, an, the',en:'a, an, the'}},
+  {id:'prepositions',icon:'📍',color:'#e74c3c',name:{ru:'Предлоги',en:'Prepositions'},desc:{ru:'at, in, on, to',en:'at, in, on, to'}},
+  {id:'phrasal_verbs',icon:'🔗',color:'#ffb830',name:{ru:'Фразовые глаголы',en:'Phrasal Verbs'},desc:{ru:'take off, give up...',en:'take off, give up...'}},
+  {id:'collocations',icon:'🤝',color:'#a78bfa',name:{ru:'Словосочетания',en:'Collocations'},desc:{ru:'make/do/take',en:'make/do/take'}},
+  {id:'word_formation',icon:'🔤',color:'#f472b6',name:{ru:'Словообразование',en:'Word Formation'},desc:{ru:'decide → decision',en:'decide → decision'}},
+];
+
+function openDrillPicker(){
+  openMod('drillm');
+  var wrap=document.getElementById('drill-selector');if(!wrap)return;
+  var scores=LS.getJ('drill_scores')||{};
+  wrap.innerHTML=DRILL_TOPICS.map(function(t){
+    var best=scores[t.id]||0;
+    return '<div class="drill-topic" onclick="closeMod(\'drillm\');startDrill(\''+t.id+'\')"><div class="drill-topic-icon" style="background:'+t.color+'22;color:'+t.color+'">'+t.icon+'</div><div><div class="drill-topic-name">'+(t.name[lang]||t.name.en)+'</div><div class="drill-topic-desc">'+(t.desc[lang]||t.desc.en)+'</div></div>'+(best>0?'<div class="drill-topic-count">Best: '+best+'%</div>':'')+'</div>';
+  }).join('');
+}
+
+/* ══ IDIOM OF THE DAY ══ */
+const IDIOMS=[
+  {phrase:'Break the ice',meaning:{ru:'Начать разговор, растопить лёд',en:'Start a conversation in a social setting'},example:'She told a joke to break the ice.'},
+  {phrase:'Hit the nail on the head',meaning:{ru:'Попасть в точку',en:'Describe exactly what is causing a problem'},example:'You hit the nail on the head with that analysis.'},
+  {phrase:'Bite the bullet',meaning:{ru:'Смириться и сделать',en:'Endure a painful situation bravely'},example:'I had to bite the bullet and apologize.'},
+  {phrase:'Cost an arm and a leg',meaning:{ru:'Стоить очень дорого',en:'Be very expensive'},example:'This car cost an arm and a leg.'},
+  {phrase:'Under the weather',meaning:{ru:'Чувствовать себя плохо',en:'Feel sick or unwell'},example:'I am feeling under the weather today.'},
+  {phrase:'Piece of cake',meaning:{ru:'Проще простого',en:'Something very easy'},example:'The exam was a piece of cake.'},
+  {phrase:'Let the cat out of the bag',meaning:{ru:'Проболтаться',en:'Reveal a secret accidentally'},example:'She let the cat out of the bag about the surprise party.'},
+  {phrase:'Kill two birds with one stone',meaning:{ru:'Убить двух зайцев сразу',en:'Accomplish two things at once'},example:'By cycling to work I kill two birds with one stone.'},
+  {phrase:'Burning the midnight oil',meaning:{ru:'Работать допоздна',en:'Working late into the night'},example:'She was burning the midnight oil before the deadline.'},
+  {phrase:'The ball is in your court',meaning:{ru:'Ход за тобой',en:'It is your turn to act'},example:'I have done my part. The ball is in your court now.'},
+  {phrase:'Spill the beans',meaning:{ru:'Выдать секрет',en:'Reveal secret information'},example:'Come on, spill the beans! What happened?'},
+  {phrase:'Once in a blue moon',meaning:{ru:'Очень редко',en:'Very rarely'},example:'I only eat fast food once in a blue moon.'},
+  {phrase:'Sit on the fence',meaning:{ru:'Быть нерешительным',en:'Avoid making a decision'},example:'Stop sitting on the fence and choose!'},
+  {phrase:'A penny for your thoughts',meaning:{ru:'О чём задумался?',en:'What are you thinking about?'},example:'You look so serious. A penny for your thoughts?'},
+  {phrase:'Barking up the wrong tree',meaning:{ru:'Ошибаться в предположениях',en:'Looking in the wrong place'},example:'If you think I did it, you are barking up the wrong tree.'},
+  {phrase:'Beat around the bush',meaning:{ru:'Ходить вокруг да около',en:'Avoid saying what you mean'},example:'Stop beating around the bush and tell me the truth.'},
+  {phrase:'Best of both worlds',meaning:{ru:'Лучшее от обоих вариантов',en:'Enjoy advantages of two different things'},example:'Working from home gives you the best of both worlds.'},
+  {phrase:'Blessing in disguise',meaning:{ru:'Благо под маской неудачи',en:'Something good that initially seemed bad'},example:'Losing that job was a blessing in disguise.'},
+  {phrase:'Cut to the chase',meaning:{ru:'Переходить к делу',en:'Get to the point'},example:'Let me cut to the chase: we need more funding.'},
+  {phrase:'Easy as pie',meaning:{ru:'Проще пареной репы',en:'Very easy'},example:'The instructions were easy as pie.'},
+  {phrase:'Get out of hand',meaning:{ru:'Выйти из-под контроля',en:'Get out of control'},example:'The party got out of hand quickly.'},
+  {phrase:'It takes two to tango',meaning:{ru:'Нужны двое',en:'Both people involved are responsible'},example:'Do not blame only her. It takes two to tango.'},
+  {phrase:'Miss the boat',meaning:{ru:'Упустить возможность',en:'Miss an opportunity'},example:'If you do not apply now you will miss the boat.'},
+  {phrase:'Pull someones leg',meaning:{ru:'Подшучивать',en:'Joke with someone'},example:'I was just pulling your leg! It was a joke.'},
+  {phrase:'Speak of the devil',meaning:{ru:'Лёгок на помине',en:'The person you were talking about appears'},example:'Speak of the devil! We were just talking about you.'},
+  {phrase:'The last straw',meaning:{ru:'Последняя капля',en:'The final problem in a series'},example:'Being late again was the last straw for the boss.'},
+  {phrase:'Through thick and thin',meaning:{ru:'И в радости, и в горе',en:'Through good and bad times'},example:'True friends stay through thick and thin.'},
+  {phrase:'When pigs fly',meaning:{ru:'Когда рак на горе свистнет',en:'Something that will never happen'},example:'He will clean his room when pigs fly.'},
+  {phrase:'You can not judge a book by its cover',meaning:{ru:'Не суди по обложке',en:'Do not judge by appearance'},example:'She looks shy but is very confident. You can not judge a book by its cover.'},
+  {phrase:'Actions speak louder than words',meaning:{ru:'Поступки говорят громче слов',en:'What you do matters more than what you say'},example:'Do not just promise. Actions speak louder than words.'},
+];
+
+function renderIdiomOfDay(){
+  var el=document.getElementById('idiom-card');if(!el)return;
+  var dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+  var idiom=IDIOMS[dayOfYear%IDIOMS.length];
+  el.innerHTML='<div class="idiom-label">'+(lang==='ru'?'Идиома дня':'Idiom of the day')+'</div><div class="idiom-emoji">💡</div><div class="idiom-phrase">'+idiom.phrase+'</div><div class="idiom-meaning">'+(idiom.meaning[lang]||idiom.meaning.en)+'</div><div class="idiom-example">"'+idiom.example+'"</div>';
+}
+
+/* ══ ADAPTIVE DIFFICULTY ══ */
+function trackPerformance(topic,correct,total){
+  var perf=LS.getJ('adaptive_perf')||{};
+  if(!perf[topic])perf[topic]={history:[],avg:50};
+  perf[topic].history.push(Math.round(correct/total*100));
+  if(perf[topic].history.length>20)perf[topic].history=perf[topic].history.slice(-20);
+  perf[topic].avg=Math.round(perf[topic].history.reduce(function(a,b){return a+b;},0)/perf[topic].history.length);
+  LS.setJ('adaptive_perf',perf);
+  // Save best score for drill picker
+  var scores=LS.getJ('drill_scores')||{};
+  var pct=Math.round(correct/total*100);
+  if(!scores[topic]||pct>scores[topic])scores[topic]=pct;
+  LS.setJ('drill_scores',scores);
+  return perf[topic].avg;
+}
+function getAdaptiveLevel(topic){
+  var perf=LS.getJ('adaptive_perf')||{};
+  var avg=(perf[topic]||{}).avg||50;
+  if(avg>=85)return'hard';if(avg>=60)return'medium';return'easy';
+}
+
 let drillState=null;
 function startDrill(topic){
   const bank=DRILL_BANKS[topic]||DRILL_BANKS.tenses;
   const questions=bank.slice().sort(function(){return Math.random()-.5;}).slice(0,10);
-  drillState={questions:questions,current:0,correct:0,total:questions.length,startTime:Date.now(),timeLimit:120};
+  drillState={questions:questions,current:0,correct:0,total:questions.length,startTime:Date.now(),timeLimit:120,topic:topic};
   goTab('chat');
   addMsg('bot','<div style="text-align:center;padding:8px 0"><div style="font-size:20px;margin-bottom:4px">🧠</div><div style="font-size:16px;font-weight:800">Grammar Drill</div><div style="font-size:12px;color:var(--t2)">'+drillState.total+' '+(lang==='ru'?'вопросов':'questions')+' - 2 min</div></div>');
   setTimeout(showDrillQ,600);
@@ -4411,7 +4558,7 @@ function finishDrill(){
   haptic(pct>=70?'success':'warning');
   if(pct>=80)try{fireConfetti();}catch(e){}
   addMsg('bot','<div class="drill-result"><div class="drill-result-score">'+(pct>=90?'🏆':pct>=70?'🎯':pct>=50?'💪':'📚')+' '+c+'/'+t+'</div><div class="drill-result-label">'+pct+'% - +'+xp+' XP</div></div>');
-  try{addLocalXP(xp);bumpStat('tests');}catch(e){}
+  try{addLocalXP(xp);bumpStat('tests');trackPerformance(drillState.topic||'tenses',c,t);}catch(e){}
   drillState=null;
 }
 
