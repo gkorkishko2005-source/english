@@ -174,6 +174,7 @@ async def handle_chat(request):
     # Check premium for model selection and limits
     user_premium = False
     user_tier = ""
+    is_trial = False
     if uid in ADMIN_IDS:
         user_premium = True
         user_tier = "ultimate"
@@ -185,6 +186,24 @@ async def handle_chat(request):
             user_tier = info.get("tier", "")
         except Exception:
             pass
+        # 3-day Basic trial for new users
+        if not user_premium and uid:
+            try:
+                from database import db
+                row = await db("SELECT created_at FROM users WHERE uid=$1", uid, fetch="one")
+                if row and row.get("created_at"):
+                    import datetime
+                    created = row["created_at"]
+                    if hasattr(created, 'date'):
+                        days_since = (datetime.datetime.now(created.tzinfo if created.tzinfo else None) - created).days
+                    else:
+                        days_since = 999
+                    if days_since <= 3:
+                        user_tier = "basic"
+                        is_trial = True
+                        logger.info(f"Trial active for {uid}, day {days_since+1}/3")
+            except Exception as e:
+                logger.debug(f"trial check: {e}")
 
     # Model routing by tier:
     # Free = Haiku (10 msgs/day)
@@ -217,11 +236,35 @@ async def handle_chat(request):
         today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
         msg_count = _msg_counts.get(today_key, 0)
         if msg_count >= msg_limit:
-            limit_msg = ("Лимит сообщений на сегодня исчерпан. " if lang=="ru" else "Daily message limit reached. ")
+            import random
             if not user_premium:
-                limit_msg += "Оформи Premium для большего лимита! /premium" if lang=="ru" else "Get Premium for more! /premium"
+                grace_ru = [
+                    "Ты сегодня отлично позанимался! 🎉 Хочешь больше? Premium = 30 сообщений/день",
+                    "Лимит на сегодня исчерпан, но ты молодец! 💪 Premium откроет ещё больше",
+                    "10 сообщений пролетели! Завтра будет ещё 10, или бери Premium 🚀",
+                    "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
+                    "Сегодня ты уже выполнил норму! 📚 Premium = безлимитное обучение",
+                ]
+                grace_en = [
+                    "Great work today! 🎉 Want more? Premium = 30 messages/day",
+                    "Daily limit reached, but you did amazing! 💪 Premium unlocks more",
+                    "10 messages flew by! Come back tomorrow or get Premium 🚀",
+                    "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
+                    "You've hit today's limit! 📚 Premium = unlimited learning",
+                ]
+                limit_msg = random.choice(grace_ru if lang=="ru" else grace_en)
             else:
-                limit_msg += "Приходи завтра! 😊" if lang=="ru" else "Come back tomorrow! 😊"
+                grace_prem_ru = [
+                    "Ты сегодня выжал максимум! Отдохни и приходи завтра 💪",
+                    "Лимит на сегодня — но какой продуктивный день! 🌟 До завтра!",
+                    "ALEX тоже нужен сон 😴 Продолжим завтра!",
+                ]
+                grace_prem_en = [
+                    "You maxed out today! Rest up, see you tomorrow 💪",
+                    "Today's limit reached — what a productive day! 🌟",
+                    "Even ALEX needs sleep 😴 See you tomorrow!",
+                ]
+                limit_msg = random.choice(grace_prem_ru if lang=="ru" else grace_prem_en)
             return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
         _msg_counts[today_key] = msg_count + 1
 
