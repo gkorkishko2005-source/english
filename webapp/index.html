@@ -295,7 +295,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .xnms{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
 
 /* Streak */
-.stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:13px}
+.stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:6px}
 .stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0}
 .stk-flame svg{width:28px;height:28px}
 .stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px;text-align:center}
@@ -318,7 +318,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mxp{font-size:11px;font-weight:700;color:var(--a);background:rgba(var(--ar),.1);padding:2px 7px;border-radius:100px}
 
 /* Quick grid */
-.qg{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
 .qb{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:15px 13px;cursor:pointer;transition:.2s;animation:float 4s ease-in-out infinite}
 .qb:nth-child(2){animation-delay:.5s}.qb:nth-child(3){animation-delay:1s}.qb:nth-child(4){animation-delay:1.5s}
 .qb:active{transform:scale(.94)!important;animation:none}
@@ -1060,13 +1060,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="stkn" id="hstk">0</div>
     <div><div class="stkt"><span id="stkt-lbl"></span></div><div class="stks" id="stks"></div></div>
   </div>
-  <button class="share-streak-btn" onclick="shareStreak()"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><span id="share-lbl">Share streak</span></button>
-  <div class="s3">
+  <div class="s3" style="margin-top:14px">
     <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs1" style="color:var(--or)">0</div><div class="sbl" id="hs1l"></div></div>
     <div class="sb" onclick="goTab('learn')">   <div class="sbv" id="hs2" style="color:var(--a2)">0</div><div class="sbl" id="hs2l"></div></div>
     <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs3" style="color:var(--a)">0</div><div class="sbl" id="hs3l"></div></div>
   </div>
-  <div id="path-banner" class="lp-banner" style="display:none" onclick="goTab('settings')"></div>
+  <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="goTab('settings')"></div>
   <button class="ach-home-btn" onclick="openAchModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     <span id="ach-btn-lbl">Достижения</span>
@@ -1140,6 +1139,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- LEARN -->
 <div class="screen" id="s-learn">
   <div class="lhdr"><div class="ltit" id="ltit-lbl"></div><div class="lctr" id="fctr"></div></div>
+  <div id="learn-sub" style="font-size:11px;color:var(--t3);margin:-6px 0 8px;padding:0 2px"></div>
   <!-- Tabs -->
   <div class="learn-tabs">
     <div class="learn-tab on" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
@@ -1873,6 +1873,7 @@ function applyLang(){
   document.getElementById('sp-new').textContent=L.new_chat;
   // Learn
   document.getElementById('ltit-lbl').textContent=L.fc;
+  try{var lsub=document.getElementById('learn-sub');if(lsub){var rc=getReviewCount();lsub.textContent=rc>0?({ru:rc+' карточек на повторение',en:rc+' cards due for review'}[lang]||rc+' cards due'):({ru:'Изучай слова и проходи уроки',en:'Study words and complete lessons'}[lang]||'');}}catch(e){}
   document.getElementById('dw-sec-lbl').textContent=L.dw;
   document.getElementById('dw-add-lbl').textContent=L.dwa;
   document.getElementById('rev-lbl').textContent=L.rev;
@@ -4827,7 +4828,17 @@ async function init(){
     try{
       const s=getSes(curSid);
       if(s?.msgs?.length)s.msgs.forEach(m=>renderMsg(m.role,m.content,false));
-      else addMsg('bot',L.welcome||'Привет! Я ALEX 👋');
+      else{
+        addMsg('bot',L.welcome||'Привет! Я ALEX 👋');
+        // Add quick action hints
+        setTimeout(function(){
+          var hints={
+            ru:'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"><button class="chip" onclick="sendChip(\'Tell me about yourself\')" style="font-size:12px">👋 Расскажи о себе</button><button class="chip" onclick="sendChip(\'Give me a grammar quiz\')" style="font-size:12px">📝 Тест грамматики</button><button class="chip" onclick="sendChip(\'Fix my text: I go to school yesterday\')" style="font-size:12px">✏️ Проверь текст</button></div>',
+            en:'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"><button class="chip" onclick="sendChip(\'Tell me about yourself\')" style="font-size:12px">👋 About you</button><button class="chip" onclick="sendChip(\'Give me a grammar quiz\')" style="font-size:12px">📝 Grammar quiz</button><button class="chip" onclick="sendChip(\'Fix my text: I go to school yesterday\')" style="font-size:12px">✏️ Fix my text</button></div>',
+          };
+          addMsg('bot',hints[lang]||hints.en);
+        },400);
+      }
     }catch(e){
       try{addMsg('bot',L?.welcome||'Привет! Я ALEX 👋');}catch{}
     }
