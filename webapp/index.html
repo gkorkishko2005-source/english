@@ -2045,6 +2045,7 @@ function buildChips(){
 let chipCooldown=false;
 function chipAction(fn){if(chipCooldown||busy)return;chipCooldown=true;fn();setTimeout(()=>chipCooldown=false,30000);}
 function resetChipCooldown(){chipCooldown=false;setChipsBusy(false);}
+function setChipsBusy(b){try{document.querySelectorAll('.chip').forEach(c=>{c.style.opacity=b?'0.5':'1';c.style.pointerEvents=b?'none':'auto';});}catch(e){}}
 
 /* ══ THEMES ══ */
 function setTheme(t){
@@ -2649,8 +2650,9 @@ async function sendMsg(){
 async function sendChip(text){if(busy)return;addMsg('user',text);goTab('chat');await doChat(text);}
 
 async function doChat(text){
+  if(typeof setChipsBusy==='undefined')window.setChipsBusy=function(){};
   busy=true;document.getElementById('sndb').disabled=true;
-  setChipsBusy(true);
+  try{setChipsBusy(true);}catch(e){}
   addTyping();
   trackM('chat');
   const pp=PERSONAS[persona]?.prompt||'';
@@ -2680,7 +2682,7 @@ async function doChat(text){
       :L.errconn+' ('+e.message+')';
     addMsg('bot',errMsg);
   }
-  finally{busy=false;document.getElementById('sndb').disabled=false;resetChipCooldown();}
+  finally{busy=false;try{document.getElementById('sndb').disabled=false;}catch(e){}try{resetChipCooldown();}catch(e){}}
 }
 
 function confirmClear(){openMod('cfmm');}
