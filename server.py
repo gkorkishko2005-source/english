@@ -563,8 +563,8 @@ async def handle_admin_stats(request):
     try:
         from database import db
         total = await db("SELECT COUNT(*) as c FROM users", fetch="one")
-        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= CURRENT_DATE", fetch="one")
-        premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_until > NOW()", fetch="one")
+        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= $1", str(__import__('datetime').date.today()), fetch="one")
+        premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_tier != '' AND premium_tier IS NOT NULL", fetch="one")
         result = {
             "total_users": total["c"] if total else 0,
             "today_active": today["c"] if today else 0,
