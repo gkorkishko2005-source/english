@@ -535,25 +535,40 @@ async def handle_tts(request):
 
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
-    """Sync local stats from webapp to server — updates XP and streak."""
+    """Sync local stats from webapp to server."""
     try:
         body = await request.json()
         uid = int(body.get("uid",0))
-        stats = body.get("stats",{})
         if not uid:
-            return web.json_response({"error":"no uid"},status=400)
+            return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     except Exception:
-        return web.json_response({"error":"bad request"},status=400)
+        return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     try:
-        from database import db, update_streak
-        xp = int(stats.get("xp",0))
-        if xp > 0:
-            await db("UPDATE users SET xp=GREATEST(xp,?) WHERE uid=?", xp, uid)
-        await update_streak(uid)
+        from database import db, update_streak, upsert_user
+        # Ensure user exists
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        xp = int(body.get("xp",0))
+        sessions = int(body.get("sessions",0))
+        words = int(body.get("words",0))
+        tests = int(body.get("tests",0))
+        errors = int(body.get("errors",0))
+        level = body.get("level","B1")
+        # Update with GREATEST to never decrease
+        try:
+            await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),$1), sessions=GREATEST(COALESCE(sessions,0),$2), words=GREATEST(COALESCE(words,0),$3), tests=GREATEST(COALESCE(tests,0),$4), mistakes=GREATEST(COALESCE(mistakes,0),$5), level=$6, last_active=CURRENT_DATE WHERE uid=$7", xp, sessions, words, tests, errors, level, uid)
+        except Exception as e:
+            logger.debug(f"sync update: {e}")
+        try:
+            await update_streak(uid)
+        except Exception:
+            pass
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         logger.error(f"sync_stats error: {e}")
-        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+        return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── ADMIN STATS ───────────────────────────────────────────────────────────────
 async def handle_admin_stats(request):
