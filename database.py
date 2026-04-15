@@ -1,615 +1,588 @@
 """
-LinguaMax - API server v3
+LinguaMax DB v4
 """
-import os, json, logging
-from pathlib import Path
-from aiohttp import web
-import httpx
 
-logger      = logging.getLogger(__name__)
-WEBAPP_DIR  = Path(__file__).parent / "webapp"
-RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
-BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
-ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL       = "claude-haiku-4-5-20251001"   # ← FIXED model name
+import os
+import logging
+from datetime import datetime, timedelta
 
-# ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
-# Add your Telegram user IDs here — they get lifetime free premium
-# To find your ID: message @userinfobot in Telegram
-ADMIN_IDS = {
-    1738695057,
-    5399839500,
-    725259177,
-    1241890707,
-    1428437531,
-}
-# Any username in this set also gets free premium
-ADMIN_USERNAMES = {
-    # "utiqo",
-}
+logger = logging.getLogger(__name__)
 
-if not ANT_KEY:
-    logger.error("❌ ANTHROPIC_API_KEY is not set!")
-else:
-    logger.info(f"✅ ANTHROPIC_API_KEY loaded (starts with {ANT_KEY[:8]}...)")
+DATABASE_URL = os.getenv("DATABASE_URL")  # Railway PostgreSQL
+USE_POSTGRES  = bool(DATABASE_URL)
 
-_histories: dict = {}
-_msg_counts: dict = {}  # daily message counts per user
+# ── Инициализация ─────────────────────────────────────────────────
 
-# ── STATIC ──────────────────────────────────────────────────────────────────
-async def handle_index(request):
-    html_path = WEBAPP_DIR / "index.html"
-    if not html_path.exists():
-        return web.Response(text="WebApp not found", status=404)
-    html = html_path.read_text(encoding="utf-8")
-    return web.Response(text=html, content_type="text/html", charset="utf-8")
+if USE_POSTGRES:
+    import asyncpg
+    _pool = None
 
-# ── USER DATA ────────────────────────────────────────────────────────────────
-async def handle_user(request):
-    try:
-        uid = int(request.match_info["uid"])
-    except Exception:
-        return web.json_response({"error": "invalid uid"}, status=400)
-    try:
-        from database import (
-            get_user, get_level, get_xp, get_streak_count,
-            get_word_count, get_session_count, get_test_count,
-            get_mistake_count, get_all_interests, get_due_words,
-            get_profession, get_lang, upsert_user, check_premium
-        )
-        user = await get_user(uid)
-        if not user:
-            # Auto-create user from WebApp
-            await upsert_user(uid, "Student")
-            user = await get_user(uid)
-        if not user:
-            # Fallback - return minimal data
-            return web.json_response({
-                "uid": uid, "name": "Student", "level": "B1", "xp": 0,
-                "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
-                "lang": "ru", "profession": "", "remind_time": "",
-                "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-                "is_premium": uid in ADMIN_IDS,
-            }, headers={"Access-Control-Allow-Origin": "*"})
-        xp         = await get_xp(uid) or 0
-        level      = await get_level(uid) or "B1"
-        streak     = await get_streak_count(uid) or 0
-        words      = await get_word_count(uid) or 0
-        sessions   = await get_session_count(uid) or 0
-        tests      = await get_test_count(uid) or 0
-        errors     = await get_mistake_count(uid) or 0
-        interests  = await get_all_interests(uid) or []
-        due_words  = await get_due_words(uid, 10) or []
-        profession = await get_profession(uid) or ""
-        lang_db    = await get_lang(uid) or "ru"
-        is_prem    = uid in ADMIN_IDS or await check_premium(uid)
-        weekly = [0]*7
-        return web.json_response({
-            "uid": uid,
-            "name": user.get("name", "Student") if isinstance(user, dict) else "Student",
-            "level": level,
-            "xp": xp,
-            "streak": streak,
-            "sessions": sessions,
-            "words": words,
-            "tests": tests,
-            "errors": errors,
-            "lang": lang_db,
-            "profession": profession,
-            "remind_time": user.get("remind_time", "") if isinstance(user, dict) else "",
-            "interests": [i["name"] for i in interests] if interests else [],
-            "weekly": weekly,
-            "toefl_scores": [],
-            "due_words": [],
-            "is_premium": is_prem,
-        }, headers={"Access-Control-Allow-Origin": "*"})
-    except Exception as e:
-        logger.error(f"handle_user error: {e}")
-        # Return minimal working data instead of 500
-        return web.json_response({
-            "uid": uid, "name": "Student", "level": "B1", "xp": 0,
-            "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
-            "lang": "ru", "profession": "", "remind_time": "",
-            "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-            "is_premium": uid in ADMIN_IDS,
-        }, headers={"Access-Control-Allow-Origin": "*"})
+    async def get_pool():
+        global _pool
+        if _pool is None:
+            _pool = await asyncpg.create_pool(DATABASE_URL, min_size=2, max_size=10)
+        return _pool
 
-# ── CHAT ─────────────────────────────────────────────────────────────────────
-async def handle_chat(request):
-    try:
-        body    = await request.json()
-        uid     = int(body.get("uid", 0))
-        message = str(body.get("message", "")).strip()
-        if not message:
-            return web.json_response({"error": "empty"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
-    except Exception as e:
-        return web.json_response({"error": str(e)}, status=400, headers={"Access-Control-Allow-Origin":"*"})
-
-    if not ANT_KEY:
-        logger.error("ANTHROPIC_API_KEY is not set!")
-        return web.json_response({"error": "API key not configured. Add ANTHROPIC_API_KEY to Railway variables."}, status=500, headers={"Access-Control-Allow-Origin":"*"})
-
-    level="B1"; lang="ru"; interests=""; profession=""
-    if uid:
-        try:
-            from database import get_level, get_lang, get_interests, get_profession
-            level      = await get_level(uid)
-            lang       = await get_lang(uid)
-            interests  = await get_interests(uid)
-            profession = await get_profession(uid)
-        except Exception as e:
-            logger.warning(f"user data error: {e}")
-
-    try:
-        from prompts import build_system
-        system = build_system(level, lang, interests, profession, "correction")
-    except Exception:
-        system = f"You are ALEX, a friendly English tutor. The student's level is {level}."
-
-    persona_prompt = str(body.get("persona_prompt", ""))
-    bl = str(body.get("bot_lang", "Respond in Russian."))
-
-    fmt = (
-        "\n\nFORMATTING (mandatory):\n"
-        "- **bold** NOT <b> tags\n"
-        "- *italic* NOT <i> tags\n"
-        "- `code` NOT <code> tags\n"
-        "- Bullet: • or -\n"
-        "- 💡 for tips, ✅ for corrections\n"
-        "- NEVER use HTML tags\n"
-        "- Keep responses concise and engaging\n"
-    )
-    if persona_prompt:
-        system = persona_prompt + "\n\n" + system
-    system = system + fmt + "\n" + bl
-
-    # Check premium for model selection and limits
-    user_premium = False
-    user_tier = ""
-    is_trial = False
-    if uid in ADMIN_IDS:
-        user_premium = True
-        user_tier = "ultimate"
-    elif uid:
-        try:
-            from database import check_premium, get_premium_info
-            info = await get_premium_info(uid)
-            user_premium = info.get("is_premium", False)
-            user_tier = info.get("tier", "")
-        except Exception:
-            pass
-        # 3-day Basic trial for new users
-        if not user_premium and uid:
-            try:
-                from database import db
-                row = await db("SELECT created_at FROM users WHERE uid=$1", uid, fetch="one")
-                if row and row.get("created_at"):
-                    import datetime
-                    created = row["created_at"]
-                    if hasattr(created, 'date'):
-                        days_since = (datetime.datetime.now(created.tzinfo if created.tzinfo else None) - created).days
-                    else:
-                        days_since = 999
-                    if days_since <= 3:
-                        user_tier = "basic"
-                        is_trial = True
-                        logger.info(f"Trial active for {uid}, day {days_since+1}/3")
-            except Exception as e:
-                logger.debug(f"trial check: {e}")
-
-    # Model routing by tier:
-    # Free = Haiku (10 msgs/day)
-    # Basic = Haiku (30 msgs/day)
-    # Pro = Haiku default + Sonnet for complex tasks (60 msgs/day)
-    # Ultimate = Sonnet default (80 msgs/day)
-    chat_model = MODEL  # default Haiku
-    max_tokens = 600
-    msg_limit = 10  # free users
-    if user_tier == "basic":
-        chat_model = MODEL  # Haiku
-        max_tokens = 800
-        msg_limit = 30
-    elif user_tier == "pro":
-        # Pro: use Sonnet for grammar/correction, Haiku for casual chat
-        is_complex = any(kw in message.lower() for kw in [
-            'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
-            'toefl','test','тест','анализ','разбор','why','почему','правило'
-        ])
-        chat_model = "claude-sonnet-4-6-20250514" if is_complex else MODEL
-        max_tokens = 1200
-        msg_limit = 60
-    elif user_tier == "ultimate":
-        chat_model = "claude-sonnet-4-6-20250514"
-        max_tokens = 1500
-        msg_limit = 80
-
-    # Check daily message limit (skip for admins)
-    if uid not in ADMIN_IDS:
-        today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
-        msg_count = _msg_counts.get(today_key, 0)
-        if msg_count >= msg_limit:
-            import random
-            if not user_premium:
-                grace_ru = [
-                    "Ты сегодня отлично позанимался! 🎉 Хочешь больше? Premium = 30 сообщений/день",
-                    "Лимит на сегодня исчерпан, но ты молодец! 💪 Premium откроет ещё больше",
-                    "10 сообщений пролетели! Завтра будет ещё 10, или бери Premium 🚀",
-                    "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
-                    "Сегодня ты уже выполнил норму! 📚 Premium = больше обучения",
-                    "Каждый день по 10 сообщений — уже прогресс! 🔥 Premium = в 3 раза больше",
-                    "ALEX скучает когда ты уходишь 😢 С Premium он будет рядом дольше!",
-                    "Знаешь, что 30 минут в день = B2 за 6 месяцев? Premium поможет 📈",
-                ]
-                grace_en = [
-                    "Great work today! 🎉 Want more? Premium = 30 messages/day",
-                    "Daily limit reached, but you did amazing! 💪 Premium unlocks more",
-                    "10 messages flew by! Come back tomorrow or get Premium 🚀",
-                    "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
-                    "You've hit today's limit! 📚 Premium = more learning",
-                    "10 messages a day = real progress! 🔥 Premium = 3x more",
-                    "ALEX misses you when you leave 😢 Premium keeps him longer!",
-                    "Did you know? 30 min/day = B2 in 6 months! Premium helps 📈",
-                ]
-                limit_msg = random.choice(grace_ru if lang=="ru" else grace_en)
+    async def db(query: str, *params, fetch: str = "none"):
+        pool = await get_pool()
+        # asyncpg uses $1,$2 instead of ?
+        query = _convert_query(query)
+        async with pool.acquire() as conn:
+            if fetch == "all":
+                rows = await conn.fetch(query, *params)
+                return [dict(r) for r in rows]
+            elif fetch == "one":
+                row = await conn.fetchrow(query, *params)
+                return dict(row) if row else None
             else:
-                grace_prem_ru = [
-                    "Ты сегодня выжал максимум! Отдохни и приходи завтра 💪",
-                    "Лимит на сегодня — но какой продуктивный день! 🌟 До завтра!",
-                    "ALEX тоже нужен сон 😴 Продолжим завтра!",
-                    "Мозгу нужен отдых чтобы запомнить всё новое 🧠 До завтра!",
-                    "Ты среди самых активных учеников! 🏆 Увидимся завтра!",
-                ]
-                grace_prem_en = [
-                    "You maxed out today! Rest up, see you tomorrow 💪",
-                    "Today's limit reached — what a productive day! 🌟",
-                    "Even ALEX needs sleep 😴 See you tomorrow!",
-                    "Your brain needs rest to absorb everything 🧠 See you tomorrow!",
-                    "You're among the most active students! 🏆 See you tomorrow!",
-                ]
-                limit_msg = random.choice(grace_prem_ru if lang=="ru" else grace_prem_en)
-            return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
-        _msg_counts[today_key] = msg_count + 1
+                await conn.execute(query, *params)
+                return None
 
-    h = _histories.setdefault(uid, [])
-    h.append({"role": "user", "content": message})
-    history_limit = 20 if not user_premium else (30 if user_tier=="basic" else 50 if user_tier=="pro" else 80)
-    if len(h) > history_limit:
-        _histories[uid] = h[-history_limit:]
+    def _convert_query(q: str) -> str:
+        """Convert SQLite ? placeholders to PostgreSQL $1, $2..."""
+        count = 0
+        result = []
+        for ch in q:
+            if ch == "?":
+                count += 1
+                result.append(f"${count}")
+            else:
+                result.append(ch)
+        return "".join(result)
 
-    try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": ANT_KEY,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                },
-                json={
-                    "model": chat_model,
-                    "max_tokens": max_tokens,
-                    "system": system,
-                    "messages": _histories[uid],
-                },
-            )
-            data = r.json()
-            if "error" in data:
-                logger.error(f"Anthropic error: {data['error']}")
-                return web.json_response({"error": data["error"].get("message","API error")[:200]}, status=500)
-            reply = data["content"][0]["text"].strip()
-    except Exception as e:
-        logger.error(f"Chat failed: {e}")
-        return web.json_response({"error": str(e)[:150]}, status=500)
+else:
+    # SQLite fallback для локальной разработки
+    import sqlite3
 
-    _histories[uid].append({"role": "assistant", "content": reply})
-    if uid:
+    def _db_sync(query: str, params=(), fetch: str = "none"):
+        con = sqlite3.connect("linguamax.db")
+        con.row_factory = sqlite3.Row
+        c = con.cursor()
+        c.execute(query, params)
+        result = None
+        if fetch == "all":
+            result = [dict(r) for r in c.fetchall()]
+        elif fetch == "one":
+            row = c.fetchone()
+            result = dict(row) if row else None
+        con.commit()
+        con.close()
+        return result
+
+    async def db(query: str, *params, fetch: str = "none"):
+        return _db_sync(query, params, fetch)
+
+
+# ── DDL — создание таблиц ─────────────────────────────────────────
+
+SCHEMA_POSTGRES = """
+CREATE TABLE IF NOT EXISTS users (
+    uid             BIGINT PRIMARY KEY,
+    name            TEXT,
+    lang            TEXT DEFAULT 'ru',
+    level           TEXT DEFAULT 'B1',
+    interests       TEXT DEFAULT '',
+    profession      TEXT DEFAULT '',
+    streak          INTEGER DEFAULT 0,
+    last_active     DATE,
+    xp              INTEGER DEFAULT 0,
+    remind_time     TEXT,
+    complex_streak  INTEGER DEFAULT 0,
+    simple_streak   INTEGER DEFAULT 0,
+    auto_level      BOOLEAN DEFAULT TRUE,
+    is_premium      BOOLEAN DEFAULT FALSE,
+    premium_until   TIMESTAMPTZ,
+    premium_tier    TEXT DEFAULT '',
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id         SERIAL PRIMARY KEY,
+    uid        BIGINT,
+    type       TEXT,
+    date       DATE,
+    score      INTEGER DEFAULT 0,
+    total      INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS vocabulary (
+    id          SERIAL PRIMARY KEY,
+    uid         BIGINT,
+    word        TEXT,
+    translation TEXT,
+    example     TEXT,
+    topic       TEXT DEFAULT 'general',
+    next_review DATE,
+    interval    INTEGER DEFAULT 1,
+    ease        FLOAT DEFAULT 2.5,
+    reviews     INTEGER DEFAULT 0,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS mistakes (
+    id          SERIAL PRIMARY KEY,
+    uid         BIGINT,
+    original    TEXT,
+    corrected   TEXT,
+    explanation TEXT,
+    category    TEXT DEFAULT 'grammar',
+    date        DATE,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS toefl_scores (
+    id        SERIAL PRIMARY KEY,
+    uid       BIGINT,
+    section   TEXT,
+    score     INTEGER,
+    max_score INTEGER,
+    date      DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS interests_log (
+    id         SERIAL PRIMARY KEY,
+    uid        BIGINT,
+    interest   TEXT,
+    source     TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS story_progress (
+    id         SERIAL PRIMARY KEY,
+    uid        BIGINT,
+    story_type TEXT,
+    chapter    INTEGER DEFAULT 1,
+    hp         INTEGER DEFAULT 100,
+    score      INTEGER DEFAULT 0,
+    active     BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS idioms (
+    id          SERIAL PRIMARY KEY,
+    uid         BIGINT,
+    idiom       TEXT,
+    meaning     TEXT,
+    example     TEXT,
+    next_review DATE,
+    interval    INTEGER DEFAULT 1,
+    ease        FLOAT DEFAULT 2.5,
+    reviews     INTEGER DEFAULT 0,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tone_history (
+    id         SERIAL PRIMARY KEY,
+    uid        BIGINT,
+    original   TEXT,
+    analysis   TEXT,
+    date       DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
+CREATE INDEX IF NOT EXISTS idx_sessions_uid ON sessions(uid);
+CREATE INDEX IF NOT EXISTS idx_mistakes_uid ON mistakes(uid);
+"""
+
+SCHEMA_SQLITE = """
+CREATE TABLE IF NOT EXISTS users (
+    uid INTEGER PRIMARY KEY, name TEXT, lang TEXT DEFAULT 'ru',
+    level TEXT DEFAULT 'B1', interests TEXT DEFAULT '', profession TEXT DEFAULT '',
+    streak INTEGER DEFAULT 0, last_active TEXT, xp INTEGER DEFAULT 0,
+    remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
+    auto_level INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, type TEXT,
+    date TEXT, score INTEGER DEFAULT 0, total INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS vocabulary (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, word TEXT,
+    translation TEXT, example TEXT, topic TEXT DEFAULT 'general',
+    next_review TEXT, interval INTEGER DEFAULT 1, ease REAL DEFAULT 2.5,
+    reviews INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS mistakes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, original TEXT,
+    corrected TEXT, explanation TEXT, category TEXT DEFAULT 'grammar',
+    date TEXT, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS toefl_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, section TEXT,
+    score INTEGER, max_score INTEGER, date TEXT
+);
+CREATE TABLE IF NOT EXISTS interests_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, interest TEXT,
+    source TEXT, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS story_progress (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, story_type TEXT,
+    chapter INTEGER DEFAULT 1, hp INTEGER DEFAULT 100, score INTEGER DEFAULT 0,
+    active INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS idioms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, idiom TEXT,
+    meaning TEXT, example TEXT, next_review TEXT,
+    interval INTEGER DEFAULT 1, ease REAL DEFAULT 2.5, reviews INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS tone_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, original TEXT,
+    analysis TEXT, date TEXT, created_at TEXT DEFAULT (datetime('now'))
+);
+"""
+
+
+async def db_init():
+    schema = SCHEMA_POSTGRES if USE_POSTGRES else SCHEMA_SQLITE
+    statements = [s.strip() for s in schema.split(";") if s.strip()]
+    for stmt in statements:
         try:
-            from database import log_session
-            await log_session(uid, "webapp_chat")
-        except Exception:
-            pass
+            await db(stmt)
+        except Exception as e:
+            logger.warning(f"Schema statement warning: {e}")
+    logger.info(f"DB initialized ({'PostgreSQL' if USE_POSTGRES else 'SQLite'})")
 
-    return web.json_response({"reply": reply}, headers={"Access-Control-Allow-Origin": "*"})
 
-# ── CHAT RESET ───────────────────────────────────────────────────────────────
-async def handle_chat_reset(request):
+# ══════════════════════════════════════════════════════════════════
+#  HELPERS
+# ══════════════════════════════════════════════════════════════════
+
+def _today():
+    if USE_POSTGRES:
+        return datetime.now().date()  # asyncpg needs date object
+    return datetime.now().strftime("%Y-%m-%d")
+
+def _days_later(n: int):
+    if USE_POSTGRES:
+        return (datetime.now() + timedelta(days=n)).date()
+    return (datetime.now() + timedelta(days=n)).strftime("%Y-%m-%d")
+
+
+# ── Пользователи ──────────────────────────────────────────────────
+
+async def get_user(uid: int) -> dict | None:
+    return await db("SELECT * FROM users WHERE uid=?", uid, fetch="one")
+
+async def get_lang(uid: int) -> str:
+    u = await get_user(uid); return (u.get("lang") or "ru") if u else "ru"
+
+async def get_level(uid: int) -> str:
+    u = await get_user(uid); return (u.get("level") or "B1") if u else "B1"
+
+async def get_interests(uid: int) -> str:
+    u = await get_user(uid); return (u.get("interests") or "") if u else ""
+
+async def get_profession(uid: int) -> str:
+    u = await get_user(uid); return (u.get("profession") or "") if u else ""
+
+async def upsert_user(uid: int, name: str):
+    if USE_POSTGRES:
+        await db(
+            "INSERT INTO users (uid, name, last_active) VALUES (?, ?, ?) "
+            "ON CONFLICT (uid) DO NOTHING",
+            uid, name, _today()
+        )
+    else:
+        await db(
+            "INSERT OR IGNORE INTO users (uid, name, last_active) VALUES (?, ?, ?)",
+            uid, name, _today()
+        )
+
+async def update_user(uid: int, **kwargs):
+    for k, v in kwargs.items():
+        await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
+
+async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
+    """Grant premium access for given months with tier. 0 = revoke."""
+    from datetime import datetime, timedelta
+    if months <= 0:
+        await db("UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='' WHERE uid=?", uid)
+    elif months >= 900:
+        # Lifetime (admin)
+        await db("UPDATE users SET is_premium=TRUE, premium_until=NULL, premium_tier=? WHERE uid=?", tier, uid)
+    else:
+        # Check if user already has active premium — extend from end date
+        user = await get_user(uid)
+        now = datetime.now()
+        current_until = None
+        if user and user.get("premium_until"):
+            try:
+                current_until = datetime.fromisoformat(str(user["premium_until"]))
+            except: pass
+        # If current premium is still active, extend from its end
+        base = current_until if (current_until and current_until > now) else now
+        until = base + timedelta(days=30 * months)
+        await db("UPDATE users SET is_premium=TRUE, premium_until=?, premium_tier=? WHERE uid=?", until.isoformat(), tier, uid)
+
+async def get_premium_info(uid: int) -> dict:
+    """Returns detailed premium info for UI display."""
+    from datetime import datetime
+    user = await get_user(uid)
+    if not user:
+        return {"is_premium": False, "tier": "", "until": None, "lifetime": False}
+    is_prem = bool(user.get("is_premium"))
+    until_str = user.get("premium_until")
+    tier = user.get("premium_tier", "") or ""
+    lifetime = is_prem and until_str is None
+    until = None
+    active = False
+    if is_prem:
+        if lifetime:
+            active = True
+        elif until_str:
+            try:
+                until = datetime.fromisoformat(str(until_str))
+                active = until > datetime.now()
+            except:
+                active = False
+    return {
+        "is_premium": active,
+        "tier": tier if active else "",
+        "until": until.isoformat() if until else None,
+        "lifetime": lifetime,
+    }
+
+async def check_premium(uid: int) -> bool:
+    """Returns True if user has active premium."""
+    from datetime import datetime
+    user = await get_user(uid)
+    if not user: return False
+    if not user.get("is_premium"): return False
+    until = user.get("premium_until")
+    if until is None: return True  # Lifetime
     try:
-        uid = int(request.match_info["uid"])
-        _histories.pop(uid, None)
+        return datetime.fromisoformat(str(until)) > datetime.now()
     except Exception:
-        pass
-    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin": "*"})
+        return False
 
-# ── LESSON ───────────────────────────────────────────────────────────────────
-async def handle_lesson(request):
-    try:
-        body  = await request.json()
-        uid   = int(body.get("uid", 0))
-        topic = str(body.get("topic", "Present Simple"))
-        lang  = str(body.get("lang", "ru"))
-    except Exception as e:
-        return web.json_response({"error": str(e)}, status=400)
-    system = (
-        f"You are ALEX, an English tutor. Teach a grammar lesson about '{topic}'. "
-        f"Respond in {'Russian' if lang=='ru' else 'English'}. "
-        "Format: brief explanation, 3 examples, 2 practice exercises. Use **bold** for key terms."
+async def add_xp(uid: int, amount: int):
+    await db("UPDATE users SET xp=xp+? WHERE uid=?", amount, uid)
+
+async def get_xp(uid: int) -> int:
+    u = await get_user(uid); return (u.get("xp") or 0) if u else 0
+
+async def update_streak(uid: int):
+    user = await get_user(uid)
+    if not user: return
+    today = _today()
+    last  = str(user.get("last_active") or "")[:10]
+    if last == today: return
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    if last == yesterday:
+        await db("UPDATE users SET streak=streak+1, last_active=?, xp=xp+10 WHERE uid=?", today, uid)
+    else:
+        await db("UPDATE users SET streak=1, last_active=? WHERE uid=?", today, uid)
+
+async def get_streak_count(uid: int) -> int:
+    u = await get_user(uid); return (u.get("streak") or 0) if u else 0
+
+def get_rank(xp: int) -> str:
+    if xp < 100:   return "🌱 Seedling"
+    if xp < 300:   return "📗 Beginner"
+    if xp < 600:   return "📘 Elementary"
+    if xp < 1000:  return "📙 Pre-Intermediate"
+    if xp < 1500:  return "⭐ Intermediate"
+    if xp < 2500:  return "🌟 Upper-Intermediate"
+    if xp < 4000:  return "💫 Advanced"
+    return "🏆 Master"
+
+LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
+
+async def track_complexity(uid: int, is_complex: bool) -> str | None:
+    user = await get_user(uid)
+    if not user or not user.get("auto_level", True): return None
+    if is_complex:
+        cs = (user.get("complex_streak") or 0) + 1
+        await db("UPDATE users SET complex_streak=?, simple_streak=0 WHERE uid=?", cs, uid)
+        if cs >= 3:
+            current = await get_level(uid)
+            idx = LEVEL_ORDER.index(current) if current in LEVEL_ORDER else 2
+            if idx < len(LEVEL_ORDER) - 1:
+                new_level = LEVEL_ORDER[idx + 1]
+                await update_user(uid, level=new_level, complex_streak=0)
+                return f"up:{new_level}"
+    else:
+        ss = (user.get("simple_streak") or 0) + 1
+        await db("UPDATE users SET simple_streak=?, complex_streak=0 WHERE uid=?", ss, uid)
+        if ss >= 5:
+            current = await get_level(uid)
+            idx = LEVEL_ORDER.index(current) if current in LEVEL_ORDER else 2
+            if idx > 0:
+                new_level = LEVEL_ORDER[idx - 1]
+                await update_user(uid, level=new_level, simple_streak=0)
+                return f"down:{new_level}"
+    return None
+
+
+# ── Интересы ──────────────────────────────────────────────────────
+
+async def save_interest(uid: int, interest: str, source: str = "auto") -> bool:
+    existing = await db(
+        "SELECT id FROM interests_log WHERE uid=? AND LOWER(interest)=LOWER(?)",
+        uid, interest, fetch="one"
     )
-    try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":f"Teach me about {topic}"}]},
-            )
-            data=r.json()
-            content=data["content"][0]["text"].strip()
-    except Exception as e:
-        return web.json_response({"error":str(e)[:150]},status=500)
-    return web.json_response({"content":content},headers={"Access-Control-Allow-Origin":"*"})
+    if existing: return False
+    await db("INSERT INTO interests_log (uid, interest, source) VALUES (?,?,?)", uid, interest, source)
+    user = await get_user(uid)
+    current = user.get("interests","") if user else ""
+    parts = [p.strip() for p in current.split(",") if p.strip()]
+    if interest.lower() not in [p.lower() for p in parts]:
+        parts.append(interest)
+        await update_user(uid, interests=", ".join(parts[:10]))
+    return True
 
-# ── TEST ─────────────────────────────────────────────────────────────────────
-async def handle_test(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); level=str(body.get("level","B1")); lang=str(body.get("lang","ru"))
-    except Exception as e:
-        return web.json_response({"error":str(e)},status=400)
-    system=(
-        f"Generate a 5-question English grammar test for level {level}. "
-        f"Respond in {'Russian' if lang=='ru' else 'English'}. "
-        "Format: numbered questions with 4 options A/B/C/D and correct answer. Use clear markdown."
+async def get_all_interests(uid: int):
+    return await db("SELECT interest, source FROM interests_log WHERE uid=? ORDER BY created_at DESC", uid, fetch="all")
+
+
+# ── Словарь SM-2 ──────────────────────────────────────────────────
+
+async def add_word(uid: int, word: str, translation: str, example: str, topic: str = "general") -> bool:
+    exists = await db("SELECT id FROM vocabulary WHERE uid=? AND LOWER(word)=LOWER(?)", uid, word, fetch="one")
+    if exists: return False
+    await db(
+        "INSERT INTO vocabulary (uid,word,translation,example,topic,next_review) VALUES (?,?,?,?,?,?)",
+        uid, word, translation, example, topic, _days_later(1)
     )
-    try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r=await client.post("https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate test"}]})
-            data=r.json(); content=data["content"][0]["text"].strip()
-    except Exception as e:
-        return web.json_response({"error":str(e)[:150]},status=500)
-    return web.json_response({"content":content},headers={"Access-Control-Allow-Origin":"*"})
+    await add_xp(uid, 5)
+    return True
 
-# ── RATE CARD ─────────────────────────────────────────────────────────────────
-async def handle_rate(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); word_id=int(body.get("word_id",0)); quality=int(body.get("quality",3))
-    except Exception as e:
-        return web.json_response({"error":str(e)},status=400)
-    if uid and word_id:
-        try:
-            from database import update_word_review
-            await update_word_review(uid,word_id,quality)
-        except Exception: pass
-    return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
-
-# ── ADD XP ────────────────────────────────────────────────────────────────────
-async def handle_add_xp(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); xp=int(body.get("xp",0))
-    except Exception:
-        return web.json_response({"error":"bad request"},status=400)
-    if uid and xp>0:
-        try:
-            from database import add_xp
-            await add_xp(uid,min(xp,100))
-        except Exception: pass
-    return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
-
-# ── SET PROFESSION ────────────────────────────────────────────────────────────
-async def handle_set_profession(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); profession=str(body.get("profession",""))[:100]
-    except Exception:
-        return web.json_response({"error":"bad"},status=400)
-    if uid and profession:
-        try:
-            from database import set_profession
-            await set_profession(uid,profession)
-        except Exception: pass
-    return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
-
-# ── SET REMINDER ──────────────────────────────────────────────────────────────
-async def handle_set_reminder(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); remind_time=str(body.get("remind_time",""))
-    except Exception:
-        return web.json_response({"error":"bad"},status=400)
-    if uid:
-        try:
-            from database import set_reminder
-            await set_reminder(uid,remind_time)
-        except Exception: pass
-    return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
-
-# ── AUDIO TASK ────────────────────────────────────────────────────────────────
-async def handle_audio_task(request):
-    try:
-        body=await request.json()
-        uid=int(body.get("uid",0)); lang=str(body.get("lang","ru"))
-    except Exception:
-        return web.json_response({"error":"bad"},status=400)
-    ru=lang=="ru"
-    system=(
-        "Generate a TOEFL listening task. Return ONLY valid JSON (no markdown):\n"
-        '{"topic":"...", "transcript":"3-4 sentence academic paragraph in English", '
-        '"questions":[{"q":"...","options":["A","B","C","D"],"correct":0},'
-        '{"q":"...","options":["A","B","C","D"],"correct":1},'
-        '{"q":"...","options":["A","B","C","D"],"correct":2}]}\n'
-        f'Questions in {"Russian" if ru else "English"}. Transcript always in English.'
+async def get_due_words(uid: int, limit: int = 5):
+    return await db(
+        "SELECT * FROM vocabulary WHERE uid=? AND next_review<=? ORDER BY next_review LIMIT ?",
+        uid, _today(), limit, fetch="all"
     )
-    try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r=await client.post("https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate"}]})
-            data=r.json(); raw=data["content"][0]["text"].strip()
-        raw=raw.replace("```json","").replace("```","").strip()
-        task=json.loads(raw)
-    except Exception as e:
-        task={"topic":"Academic Lecture","transcript":"The Industrial Revolution began in Britain in the late 18th century, transforming manufacturing through steam power and mechanization, fundamentally changing economic and social structures worldwide.","questions":[{"q":"When did the Industrial Revolution begin?" if not ru else "Когда началась промышленная революция?","options":["Early 17th century","Late 18th century","Early 19th century","Mid 20th century"],"correct":1},{"q":"Where did it begin?" if not ru else "Где она началась?","options":["France","Germany","Britain","USA"],"correct":2},{"q":"What powered new manufacturing?" if not ru else "Что питало новое производство?","options":["Wind power","Water wheels","Steam power","Electricity"],"correct":2}]}
-    return web.json_response(task,headers={"Access-Control-Allow-Origin":"*"})
 
-# ── HEALTH ────────────────────────────────────────────────────────────────────
-async def handle_health(request):
-    return web.json_response({"status":"ok","model":MODEL},headers={"Access-Control-Allow-Origin":"*"})
+async def update_word_review(word_id: int, quality: int):
+    row = await db("SELECT ease, interval FROM vocabulary WHERE id=?", word_id, fetch="one")
+    if not row: return
+    ease = row["ease"]; interval = row["interval"]
+    if quality >= 3:
+        if interval == 1:    new_interval = 6
+        elif interval == 6:  new_interval = 15
+        else:                new_interval = round(interval * ease)
+        new_ease = max(1.3, ease + (0.1 - (5-quality)*(0.08+(5-quality)*0.02)))
+    else:
+        new_interval = 1; new_ease = ease
+    await db(
+        "UPDATE vocabulary SET interval=?, ease=?, next_review=?, reviews=reviews+1 WHERE id=?",
+        new_interval, new_ease, _days_later(new_interval), word_id
+    )
 
-# ── CHECK PREMIUM ─────────────────────────────────────────────────────────────
-async def handle_check_premium(request):
-    """Returns detailed premium status for a user."""
-    try:
-        uid = int(request.match_info["uid"])
-    except Exception:
-        return web.json_response({"error":"invalid uid"},status=400)
+async def get_word_count(uid: int) -> int:
+    row = await db("SELECT COUNT(*) as c FROM vocabulary WHERE uid=?", uid, fetch="one")
+    return row["c"] if row else 0
 
-    # Check whitelist first (free lifetime premium for admins)
-    if uid in ADMIN_IDS:
-        return web.json_response({
-            "is_premium":True,"tier":"ultimate","until":None,"lifetime":True,"source":"admin"
-        }, headers={"Access-Control-Allow-Origin":"*"})
 
-    try:
-        from database import get_premium_info
-        info = await get_premium_info(uid)
-        info["source"] = "database"
-        return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
-    except Exception as e:
-        return web.json_response({"is_premium":False,"tier":"","error":str(e)},
-                                  headers={"Access-Control-Allow-Origin":"*"})
+# ── Идиомы SM-2 ───────────────────────────────────────────────────
 
-# ── GRANT PREMIUM (called by bot after successful payment) ────────────────────
-async def handle_grant_premium(request):
-    """Called internally by bot after Telegram Stars payment confirmed."""
-    try:
-        body = await request.json()
-        uid = int(body.get("uid",0))
-        months = int(body.get("months",1))
-        tier = str(body.get("tier","pro"))
-        secret = body.get("secret","")
-    except Exception:
-        return web.json_response({"error":"bad request"},status=400)
+async def add_idiom(uid: int, idiom: str, meaning: str, example: str) -> bool:
+    exists = await db("SELECT id FROM idioms WHERE uid=? AND LOWER(idiom)=LOWER(?)", uid, idiom, fetch="one")
+    if exists: return False
+    await db(
+        "INSERT INTO idioms (uid,idiom,meaning,example,next_review) VALUES (?,?,?,?,?)",
+        uid, idiom, meaning, example, _days_later(1)
+    )
+    return True
 
-    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
-    if secret != BOT_SECRET:
-        return web.json_response({"error":"unauthorized"},status=403)
+async def get_due_idioms(uid: int, limit: int = 3):
+    return await db(
+        "SELECT * FROM idioms WHERE uid=? AND next_review<=? ORDER BY next_review LIMIT ?",
+        uid, _today(), limit, fetch="all"
+    )
 
-    try:
-        from database import set_premium
-        await set_premium(uid, months, tier)
-        return web.json_response({"ok":True,"uid":uid,"months":months,"tier":tier},
-                                  headers={"Access-Control-Allow-Origin":"*"})
-    except Exception as e:
-        return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
-# ── TTS ──────────────────────────────────────────────────────────────────────
-async def handle_tts(request):
-    """Text-to-speech endpoint. Returns MP3 audio bytes."""
-    try:
-        body = await request.json()
-        text = str(body.get("text","")).strip()[:500]  # limit 500 chars
-        tts_lang = str(body.get("lang","en"))[:5]
-        if not text:
-            return web.json_response({"error":"empty text"},status=400)
-    except Exception:
-        return web.json_response({"error":"bad request"},status=400)
+# ── Ошибки ────────────────────────────────────────────────────────
 
-    try:
-        from tts import text_to_speech
-        audio = await text_to_speech(text, lang=tts_lang)
-        if audio:
-            return web.Response(
-                body=audio,
-                content_type="audio/mpeg",
-                headers={
-                    "Access-Control-Allow-Origin":"*",
-                    "Cache-Control":"public, max-age=86400",
-                }
-            )
-        return web.json_response({"error":"TTS failed"},status=500,headers={"Access-Control-Allow-Origin":"*"})
-    except Exception as e:
-        logger.error(f"TTS error: {e}")
-        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+async def log_mistake(uid: int, original: str, corrected: str, explanation: str, category: str = "grammar"):
+    await db(
+        "INSERT INTO mistakes (uid,original,corrected,explanation,category,date) VALUES (?,?,?,?,?,?)",
+        uid, original[:300], corrected[:300], explanation[:600], category, _today()
+    )
 
-# ── SYNC STATS ────────────────────────────────────────────────────────────────
-async def handle_sync_stats(request):
-    """Sync local stats from webapp to server — updates XP and streak."""
-    try:
-        body = await request.json()
-        uid = int(body.get("uid",0))
-        stats = body.get("stats",{})
-        if not uid:
-            return web.json_response({"error":"no uid"},status=400)
-    except Exception:
-        return web.json_response({"error":"bad request"},status=400)
-    try:
-        from database import db, update_streak
-        xp = int(stats.get("xp",0))
-        if xp > 0:
-            await db("UPDATE users SET xp=GREATEST(xp,?) WHERE uid=?", xp, uid)
-        await update_streak(uid)
-        return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
-    except Exception as e:
-        logger.error(f"sync_stats error: {e}")
-        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+async def get_mistakes(uid: int, limit: int = 10):
+    return await db("SELECT * FROM mistakes WHERE uid=? ORDER BY created_at DESC LIMIT ?", uid, limit, fetch="all")
 
-# ── ADMIN STATS ───────────────────────────────────────────────────────────────
-async def handle_admin_stats(request):
-    uid = int(request.headers.get("X-UID", "0"))
-    if uid not in ADMIN_IDS:
-        return web.json_response({"error": "forbidden"}, status=403, headers={"Access-Control-Allow-Origin":"*"})
-    try:
-        from database import db
-        total = await db("SELECT COUNT(*) as c FROM users", fetch="one")
-        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= $1", str(__import__('datetime').date.today()), fetch="one")
-        premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_tier != '' AND premium_tier IS NOT NULL", fetch="one")
-        result = {
-            "total_users": total["c"] if total else 0,
-            "today_active": today["c"] if today else 0,
-            "premium_users": premium["c"] if premium else 0,
-            "today_messages": sum(v for k,v in _msg_counts.items() if str(__import__('datetime').date.today()) in k),
-        }
-    except Exception as e:
-        logger.warning(f"admin stats error: {e}")
-        result = {"total_users": "--", "today_active": "--", "premium_users": "--", "today_messages": sum(_msg_counts.values())}
-    return web.json_response(result, headers={"Access-Control-Allow-Origin":"*"})
+async def get_mistake_count(uid: int) -> int:
+    row = await db("SELECT COUNT(*) as c FROM mistakes WHERE uid=?", uid, fetch="one")
+    return row["c"] if row else 0
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
-async def handle_options(request):
-    return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data,X-UID"})
 
-# ── APP ───────────────────────────────────────────────────────────────────────
-def create_app():
-    app=web.Application()
-    app.router.add_get("/",handle_index)
-    app.router.add_get("/api/user/{uid}",handle_user)
-    app.router.add_post("/api/chat",handle_chat)
-    app.router.add_delete("/api/chat/{uid}",handle_chat_reset)
-    app.router.add_post("/api/lesson",handle_lesson)
-    app.router.add_post("/api/test",handle_test)
-    app.router.add_post("/api/rate_card",handle_rate)
-    app.router.add_post("/api/add_xp",handle_add_xp)
-    app.router.add_post("/api/set_profession",handle_set_profession)
-    app.router.add_post("/api/set_reminder",handle_set_reminder)
-    app.router.add_post("/api/audio_task",handle_audio_task)
-    app.router.add_get("/api/premium/{uid}",handle_check_premium)
-    app.router.add_post("/api/premium/grant",handle_grant_premium)
-    app.router.add_post("/api/tts",handle_tts)
-    app.router.add_post("/api/sync_stats",handle_sync_stats)
-    app.router.add_get("/health",handle_health)
-    app.router.add_get("/api/admin/stats",handle_admin_stats)
-    app.router.add_route("OPTIONS","/{tail:.*}",handle_options)
-    app.router.add_static("/",WEBAPP_DIR,show_index=False)
-    return app
+# ── Сессии ────────────────────────────────────────────────────────
 
-async def start_server():
-    port=int(os.getenv("PORT",8080))
-    app=create_app()
-    runner=web.AppRunner(app)
-    await runner.setup()
-    site=web.TCPSite(runner,"0.0.0.0",port)
-    await site.start()
-    logger.info(f"🌐 Server on port {port}")
-    return runner
+async def log_session(uid: int, stype: str, score: int = 0, total: int = 0):
+    await db("INSERT INTO sessions (uid,type,date,score,total) VALUES (?,?,?,?,?)",
+             uid, stype, _today(), score, total)
+    await add_xp(uid, 15)
+    await update_streak(uid)
+
+async def get_session_count(uid: int) -> int:
+    row = await db("SELECT COUNT(*) as c FROM sessions WHERE uid=?", uid, fetch="one")
+    return row["c"] if row else 0
+
+async def get_test_count(uid: int) -> int:
+    row = await db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%test%'", uid, fetch="one")
+    return row["c"] if row else 0
+
+async def get_toefl_count(uid: int) -> int:
+    row = await db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'", uid, fetch="one")
+    return row["c"] if row else 0
+
+
+# ── TOEFL ─────────────────────────────────────────────────────────
+
+async def log_toefl(uid: int, section: str, score: int, max_score: int):
+    await db("INSERT INTO toefl_scores (uid,section,score,max_score,date) VALUES (?,?,?,?,?)",
+             uid, section, score, max_score, _today())
+
+async def get_toefl_scores(uid: int):
+    return await db(
+        "SELECT section, AVG(score) as avg_s, MAX(score) as best, COUNT(*) as cnt "
+        "FROM toefl_scores WHERE uid=? GROUP BY section", uid, fetch="all"
+    )
+
+
+# ── Story ─────────────────────────────────────────────────────────
+
+async def start_story(uid: int, story_type: str):
+    await db("UPDATE story_progress SET active=? WHERE uid=?", False if USE_POSTGRES else 0, uid)
+    await db("INSERT INTO story_progress (uid, story_type, chapter, hp, score) VALUES (?,?,1,100,0)",
+             uid, story_type)
+
+async def get_active_story(uid: int):
+    val = True if USE_POSTGRES else 1
+    return await db("SELECT * FROM story_progress WHERE uid=? AND active=? ORDER BY id DESC LIMIT 1",
+                    uid, val, fetch="one")
+
+async def update_story(uid: int, **kwargs):
+    for k, v in kwargs.items():
+        val = True if USE_POSTGRES else 1
+        await db(f"UPDATE story_progress SET {k}=? WHERE uid=? AND active=?", v, uid, val)
+
+
+# ── Tone history ──────────────────────────────────────────────────
+
+async def log_tone(uid: int, original: str, analysis: str):
+    await db("INSERT INTO tone_history (uid, original, analysis, date) VALUES (?,?,?,?)",
+             uid, original[:500], analysis[:2000], _today())
+
+
+# ── Полная статистика ─────────────────────────────────────────────
+
+async def get_full_stats(uid: int) -> dict:
+    return {
+        "sessions": await get_session_count(uid),
+        "tests":    await get_test_count(uid),
+        "words":    await get_word_count(uid),
+        "errors":   await get_mistake_count(uid),
+        "toefl":    await get_toefl_count(uid),
+        "streak":   await get_streak_count(uid),
+        "xp":       await get_xp(uid),
+        "rank":     get_rank(await get_xp(uid)),
+        "level":    await get_level(uid),
+    }
