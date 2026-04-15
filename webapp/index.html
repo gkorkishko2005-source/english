@@ -145,49 +145,58 @@
   display:flex;align-items:center;justify-content:center;
   gap:0;padding:0 17px;margin-bottom:4px;
   position:relative;user-select:none;
+  touch-action:none;-webkit-user-select:none;
 }
 .time-drum-wrap::before,.time-drum-wrap::after{
-  content:'';position:absolute;left:17px;right:17px;height:44px;
-  pointer-events:none;z-index:2;
+  content:'';position:absolute;left:17px;right:17px;height:56px;
+  pointer-events:none;z-index:4;
 }
 .time-drum-wrap::before{
   top:0;
-  background:linear-gradient(to bottom, var(--e1) 0%, transparent 100%);
+  background:linear-gradient(to bottom, var(--e1) 10%, rgba(22,27,39,0) 100%);
 }
 .time-drum-wrap::after{
   bottom:0;
-  background:linear-gradient(to top, var(--e1) 0%, transparent 100%);
+  background:linear-gradient(to top, var(--e1) 10%, rgba(22,27,39,0) 100%);
 }
 .time-drum-sel{
   position:absolute;left:17px;right:17px;
   top:50%;transform:translateY(-50%);
-  height:44px;border-radius:10px;
+  height:40px;border-radius:10px;
   background:rgba(var(--ar),.1);
   border:1px solid rgba(var(--ar),.2);
   pointer-events:none;z-index:1;
 }
 .time-drum-col{
-  flex:1;height:220px;overflow:hidden;
+  flex:1;height:200px;overflow:hidden;
   position:relative;cursor:pointer;
+  perspective:800px;
+  touch-action:none;-webkit-overflow-scrolling:auto;
 }
 .time-drum-inner{
   display:flex;flex-direction:column;
-  transition:transform .1s ease;
+  will-change:transform;
 }
 .time-drum-item{
-  height:44px;display:flex;align-items:center;justify-content:center;
-  font-size:20px;font-weight:600;color:var(--t2);
-  flex-shrink:0;transition:color .15s,font-size .15s,font-weight .15s;
+  height:40px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:600;color:var(--t3);
+  flex-shrink:0;font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum';
+  min-width:50px;
+  transition:none;
+  transform-style:preserve-3d;
+  opacity:.3;
 }
 .time-drum-item.selected{
-  color:var(--t1);font-size:22px;font-weight:700;
+  color:var(--t1);font-size:22px;font-weight:700;opacity:1;
+  transform:scale(1.05);
 }
-.time-drum-item.near{color:var(--t2);opacity:.7}
-.time-drum-item.far{color:var(--t3);opacity:.35;font-size:17px}
+.time-drum-item.near1{color:var(--t2);opacity:.7;transform:rotateX(18deg) scale(.95)}
+.time-drum-item.near2{color:var(--t3);opacity:.4;transform:rotateX(35deg) scale(.88);font-size:17px}
 .time-drum-sep{
   font-size:26px;font-weight:800;color:var(--t1);
-  padding:0 4px;align-self:center;position:relative;z-index:3;
-  margin-bottom:2px;
+  padding:0 4px;align-self:center;position:relative;z-index:5;
+  margin-bottom:2px;font-variant-numeric:tabular-nums;
 }
 .time-drum-label{
   font-size:11px;color:var(--t3);text-align:center;
@@ -1251,11 +1260,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Admin Dashboard (visible only to admins) -->
   <div class="admin-panel" id="admin-panel" style="display:none"></div>
 
-  <!-- Share & Export buttons -->
-  <button class="gift-btn" onclick="shareProgress()">📤 <span id="share-lbl">Share progress</span></button>
-  <button class="gift-btn" onclick="exportProgress()">📊 <span id="export-lbl">Export report</span></button>
-  <button class="gift-btn" onclick="generateCertificate()">🏅 <span id="cert-lbl">Certificate</span></button>
-  <button class="gift-btn" onclick="openGiftSub()">🎁 <span id="gift-lbl">Gift Premium</span></button>
+  <!-- Collapsible Tools section -->
+  <div class="gift-btn" onclick="toggleSettingsTools()" style="justify-content:center;gap:6px">
+    🛠 <span id="tools-toggle-lbl">Tools</span>
+    <svg id="tools-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+  <div id="settings-tools" style="display:none;overflow:hidden;transition:max-height .3s ease">
+    <button class="gift-btn" onclick="shareProgress()">📤 <span id="share-lbl">Share progress</span></button>
+    <button class="gift-btn" onclick="exportProgress()">📊 <span id="export-lbl">Export report</span></button>
+    <button class="gift-btn" onclick="generateCertificate()">🏅 <span id="cert-lbl">Certificate</span></button>
+    <button class="gift-btn" onclick="openGiftSub()">🎁 <span id="gift-lbl">Gift Premium</span></button>
+  </div>
 
   <!-- Dark/Light mode toggle -->
   <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
@@ -1291,25 +1306,32 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M4 21l12-7 12 7"/><path d="M2 17l14-9 14 9"/><rect x="14" y="21" width="4" height="7" rx="1"/><path d="M10 27h12"/><path d="M26 17v6"/><circle cx="26.5" cy="24.5" r="1.5" fill="var(--t2)"/></svg></div>
       <div class="pbn" id="pb2n"></div><div class="pbs" id="pb2s"></div>
     </div>
-    <div class="pbtn" data-p="gamer" onclick="pickPersona(this)">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="10" width="26" height="15" rx="5"/><line x1="16" y1="14" x2="16" y2="21"/><line x1="12.5" y1="17.5" x2="19.5" y2="17.5"/><circle cx="24" cy="14.5" r="1.5" fill="var(--t2)"/><circle cx="27" cy="17.5" r="1.5" fill="var(--t2)"/></svg></div>
-      <div class="pbn" id="pb3n"></div><div class="pbs" id="pb3s"></div>
+  </div>
+  <!-- More personas (collapsed) -->
+  <div id="persona-more" style="display:none">
+    <div class="pgrid">
+      <div class="pbtn" data-p="gamer" onclick="pickPersona(this)">
+        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="10" width="26" height="15" rx="5"/><line x1="16" y1="14" x2="16" y2="21"/><line x1="12.5" y1="17.5" x2="19.5" y2="17.5"/><circle cx="24" cy="14.5" r="1.5" fill="var(--t2)"/><circle cx="27" cy="17.5" r="1.5" fill="var(--t2)"/></svg></div>
+        <div class="pbn" id="pb3n"></div><div class="pbs" id="pb3s"></div>
+      </div>
+      <div class="pbtn" data-p="brit" onclick="pickPersona(this)">
+        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><ellipse cx="16" cy="20" rx="10" ry="6"/><path d="M6 20c0-3.5 4.5-7 10-7s10 3.5 10 7"/><path d="M7 17c2-5 16-5 18 0"/><rect x="4" y="14" width="24" height="3" rx="1.5"/></svg></div>
+        <div class="pbn" id="pb4n"></div><div class="pbs" id="pb4s"></div>
+      </div>
+      <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
+        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M16 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/><path d="M8 22h16v4H8z"/><path d="M12 22v-6M20 22v-6"/><path d="M8 16h16"/></svg></div>
+        <div class="pbn" id="pb5n">Harvard Prof</div><div class="pbs" id="pb5s">Academic style</div>
+        <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
+      </div>
+      <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
+        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="8" width="24" height="16" rx="3"/><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="2"/><line x1="4" y1="12" x2="28" y2="12"/></svg></div>
+        <div class="pbn" id="pb6n">BBC Anchor</div><div class="pbs" id="pb6s">British accent</div>
+        <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
+      </div>
     </div>
-    <div class="pbtn" data-p="brit" onclick="pickPersona(this)">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><ellipse cx="16" cy="20" rx="10" ry="6"/><path d="M6 20c0-3.5 4.5-7 10-7s10 3.5 10 7"/><path d="M7 17c2-5 16-5 18 0"/><rect x="4" y="14" width="24" height="3" rx="1.5"/></svg></div>
-      <div class="pbn" id="pb4n"></div><div class="pbs" id="pb4s"></div>
-    </div>
-    <!-- PREMIUM personas -->
-    <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M16 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/><path d="M8 22h16v4H8z"/><path d="M12 22v-6M20 22v-6"/><path d="M8 16h16"/></svg></div>
-      <div class="pbn" id="pb5n">Harvard Prof</div><div class="pbs" id="pb5s">Academic style</div>
-      <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
-    </div>
-    <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="8" width="24" height="16" rx="3"/><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="2"/><line x1="4" y1="12" x2="28" y2="12"/></svg></div>
-      <div class="pbn" id="pb6n">BBC Anchor</div><div class="pbs" id="pb6s">British accent</div>
-      <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
-    </div>
+  </div>
+  <div style="text-align:center;margin:-4px 0 12px;cursor:pointer" onclick="togglePersonaMore()">
+    <svg id="persona-arrow" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
 
   <!-- Profile -->
@@ -2203,6 +2225,10 @@ function drawProgress(){
   try{renderPathBanner();}catch(e){}
   try{renderIdiomOfDay();}catch(e){}
   try{renderAdminPanel();}catch(e){}
+  // Sync with server
+  try{syncFromServer();}catch(e){}
+  // Periodic sync every 60s
+  setInterval(function(){try{syncToServer();}catch(e){}},60000);
   // Wave 5 button labels
   try{
     var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
@@ -2669,6 +2695,7 @@ async function doChat(text){
     resetChipCooldown();
     saveCurSes();
     bumpStat('sessions');
+    try{syncToServer();}catch(e){}
     // Extract errors from ALEX reply
     const replyText=document.querySelector('#cmsgs .msg.bot:last-child .mbub')?.innerText||'';
     try{extractErrorsFromReply(replyText);}catch(e){}
@@ -2915,9 +2942,7 @@ function initDrumCol(colId,innerId,val,total,numeric){
   const col=document.getElementById(colId);
   const inner=document.getElementById(innerId);
   if(!col||!inner)return;
-
-  // Render 3 full sets of items
-  const SETS=3;
+  const IH=40,SETS=3;
   inner.innerHTML='';
   for(let set=0;set<SETS;set++){
     for(let i=0;i<total;i++){
@@ -2928,119 +2953,116 @@ function initDrumCol(colId,innerId,val,total,numeric){
     }
   }
   inner.style.transition='none';
-
-  // Position: middle set (set index 1) + val
-  // Offset so that center of col (height/2) aligns to center of item (ITEM_H/2)
-  // col height = 220px, center = 110px
-  // item center at position p = p*ITEM_H + ITEM_H/2
-  // we want item at (total+val) to be at center: translateY = 110 - (total+val)*ITEM_H - ITEM_H/2
-  const colH=220;
-  const center=colH/2 - ITEM_H/2;
-  const startPos=center - (total+val)*ITEM_H;
-  inner.style.transform=`translateY(${startPos}px)`;
-  inner._total=total;inner._numeric=numeric;inner._sets=SETS;inner._startY=startPos;inner._curVal=val;
-
-  applyHighlight(inner,total+val,total);
-  addGestures(col,inner,total,innerId==='drum-h-inner'?'h':'m');
+  const colH=200,center=colH/2-IH/2;
+  const startPos=center-(total+val)*IH;
+  inner.style.transform='translateY('+startPos+'px)';
+  inner._total=total;inner._IH=IH;inner._numeric=numeric;inner._curVal=val;
+  apply3DHighlight(inner,total+val,total);
+  addDrumGestures(col,inner,total,innerId==='drum-h-inner'?'h':'m');
 }
 
-function getValFromTranslate(inner){
-  const total=inner._total;
-  const colH=220,center=colH/2-ITEM_H/2;
-  const mat=new DOMMatrix(inner.style.transform);
-  const ty=mat.m42;
-  // Which index is at center?
-  const idx=Math.round((center-ty)/ITEM_H);
-  return((idx%total)+total)%total;
-}
-
-function snapToVal(inner,val,type,animate){
-  const total=inner._total;
-  const colH=220,center=colH/2-ITEM_H/2;
-  // Use middle set as reference
-  const targetIdx=total+val;
-  const targetY=center-targetIdx*ITEM_H;
-  inner.style.transition=animate?'transform .22s cubic-bezier(.25,.46,.45,.94)':'none';
-  inner.style.transform=`translateY(${targetY}px)`;
-  inner._curVal=val;
-  if(type==='h')drumH=val; else drumM=val;
-  applyHighlight(inner,targetIdx,total);
-  if(animate)setTimeout(()=>{inner.style.transition='';},240);
-  updateTimeDisplay();
-}
-
-function applyHighlight(inner,centerIdx,total){
-  const items=inner.querySelectorAll('.time-drum-item');
-  items.forEach((item,i)=>{
-    const d=Math.abs(i-centerIdx);
-    item.classList.remove('selected','near','far');
+function apply3DHighlight(inner,centerIdx,total){
+  var items=inner.querySelectorAll('.time-drum-item');
+  items.forEach(function(item,i){
+    var d=Math.abs(i-centerIdx);
+    item.className='time-drum-item';
     if(d===0)item.classList.add('selected');
-    else if(d===1)item.classList.add('near');
-    else item.classList.add('far');
+    else if(d===1)item.classList.add('near1');
+    else if(d===2)item.classList.add('near2');
   });
 }
 
-function addGestures(col,inner,total,type){
-  const colH=220,center=colH/2-ITEM_H/2;
-  let startY=0,startTY=0,lastY=0,vel=0,dragging=false,raf=0;
-
-  function getTY(){const m=new DOMMatrix(inner.style.transform);return m.m42;}
-
-  function onStart(y){
-    cancelAnimationFrame(raf);
+function snapToVal(inner,val,type,animate){
+  var total=inner._total,IH=inner._IH||40;
+  var colH=200,center=colH/2-IH/2;
+  var targetIdx=total+val;
+  var targetY=center-targetIdx*IH;
+  if(animate){
+    inner.style.transition='transform .3s cubic-bezier(.23,1,.32,1)';
+  }else{
     inner.style.transition='none';
-    startY=y;lastY=y;vel=0;dragging=true;
+  }
+  inner.style.transform='translateY('+targetY+'px)';
+  inner._curVal=val;
+  if(type==='h')drumH=val;else drumM=val;
+  apply3DHighlight(inner,targetIdx,total);
+  if(animate)setTimeout(function(){inner.style.transition='';},320);
+  updateTimeDisplay();
+}
+
+function getValFromTY(inner,ty){
+  var total=inner._total,IH=inner._IH||40;
+  var colH=200,center=colH/2-IH/2;
+  var idx=Math.round((center-ty)/IH);
+  return((idx%total)+total)%total;
+}
+
+function addDrumGestures(col,inner,total,type){
+  var IH=inner._IH||40,colH=200,center=colH/2-IH/2;
+  var startY=0,startTY=0,lastY=0,lastTime=0,vel=0,dragging=false,rafId=0;
+
+  function getTY(){
+    var s=inner.style.transform;
+    var m=s.match(/translateY\(([-\d.]+)px\)/);
+    return m?parseFloat(m[1]):0;
+  }
+
+  function onStart(e){
+    e.preventDefault();e.stopPropagation();
+    cancelAnimationFrame(rafId);
+    inner.style.transition='none';
+    var y=e.touches?e.touches[0].clientY:e.clientY;
+    startY=y;lastY=y;vel=0;dragging=true;lastTime=Date.now();
     startTY=getTY();
-    if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();
   }
 
-  function onMove(y){
+  function onMove(e){
     if(!dragging)return;
-    const dy=y-startY;
-    vel=y-lastY;lastY=y;
-    let newTY=startTY+dy;
-    inner.style.transform=`translateY(${newTY}px)`;
-    // Live highlight
-    const liveIdx=Math.round((center-newTY)/ITEM_H);
-    applyHighlight(inner,liveIdx,total);
-    updateTimeDisplay();
+    e.preventDefault();e.stopPropagation();
+    var y=e.touches?e.touches[0].clientY:e.clientY;
+    var now=Date.now();var dt=Math.max(1,now-lastTime);
+    vel=(y-lastY)/dt*16;
+    lastY=y;lastTime=now;
+    var dy=y-startY;
+    var newTY=startTY+dy;
+    inner.style.transform='translateY('+newTY+'px)';
+    var liveIdx=Math.round((center-newTY)/IH);
+    apply3DHighlight(inner,liveIdx,total);
   }
 
-  function onEnd(y){
+  function onEnd(e){
     if(!dragging)return;dragging=false;
-    const dy=y-startY;
-    let finalTY=startTY+dy+vel*8; // small momentum
-    // Snap to nearest item
-    const rawIdx=Math.round((center-finalTY)/ITEM_H);
-    const val=((rawIdx%total)+total)%total;
+    e.preventDefault();
+    var curTY=getTY();
+    // Momentum deceleration
+    var momentum=vel*3;
+    var finalTY=curTY+momentum;
+    var rawIdx=Math.round((center-finalTY)/IH);
+    var val=((rawIdx%total)+total)%total;
     snapToVal(inner,val,type,true);
-    if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();
+    try{if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();}catch(ex){}
   }
 
-  // Touch
-  col.addEventListener('touchstart',e=>{onStart(e.touches[0].clientY);},{passive:true});
-  col.addEventListener('touchmove', e=>{onMove(e.touches[0].clientY);},{passive:true});
-  col.addEventListener('touchend',  e=>{onEnd(e.changedTouches[0].clientY);});
+  // Touch events with preventDefault to stop background scroll
+  col.addEventListener('touchstart',onStart,{passive:false});
+  col.addEventListener('touchmove',onMove,{passive:false});
+  col.addEventListener('touchend',onEnd,{passive:false});
+  col.addEventListener('touchcancel',onEnd,{passive:false});
 
   // Mouse
-  col.addEventListener('mousedown',e=>{onStart(e.clientY);e.preventDefault();});
-  const mv=e=>{onMove(e.clientY);};
-  const mu=e=>{onEnd(e.clientY);};
-  window.addEventListener('mousemove',mv);
-  window.addEventListener('mouseup',mu);
+  col.addEventListener('mousedown',function(e){onStart(e);
+    function mmv(ev){onMove(ev);}
+    function mup(ev){onEnd(ev);window.removeEventListener('mousemove',mmv);window.removeEventListener('mouseup',mup);}
+    window.addEventListener('mousemove',mmv);window.addEventListener('mouseup',mup);
+  });
 
-  // Wheel — one step at a time
-  let wheelDebounce=null;
-  col.addEventListener('wheel',e=>{
+  // Wheel
+  col.addEventListener('wheel',function(e){
     e.preventDefault();e.stopPropagation();
-    clearTimeout(wheelDebounce);
-    wheelDebounce=setTimeout(()=>{
-      const cur=type==='h'?drumH:drumM;
-      const dir=e.deltaY>0?1:-1;
-      const next=((cur+dir)%total+total)%total;
-      const innerEl=document.getElementById(type==='h'?'drum-h-inner':'drum-m-inner');
-      if(innerEl)snapToVal(innerEl,next,type,true);
-    },16);
+    var cur=type==='h'?drumH:drumM;
+    var dir=e.deltaY>0?1:-1;
+    var next=((cur+dir)%total+total)%total;
+    snapToVal(inner,next,type,true);
   },{passive:false});
 }
 
@@ -4714,6 +4736,43 @@ function exportProgress(){
   var text='=== PolyGlotty Progress ===\n\nName: '+name+'\nLevel: '+level+'\nXP: '+xp+'\nStreak: '+streak+' days\nSessions: '+sessions+'\nWords: '+words+'\nTests: '+tests+'\n\n'+new Date().toLocaleString()+'\n@PolyGlotty_bot';
   try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Скопировано!':'Copied!','📋');}catch(e){}
   addMsg('bot','<pre style="font-size:11px;white-space:pre-wrap;background:var(--e2);padding:12px;border-radius:8px">'+text+'</pre>');
+}
+
+/* ══ COLLAPSIBLE SETTINGS ══ */
+function toggleSettingsTools(){
+  var el=document.getElementById('settings-tools');var arr=document.getElementById('tools-arrow');
+  if(!el)return;
+  if(el.style.display==='none'){el.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
+  else{el.style.display='none';if(arr)arr.style.transform='';}
+  haptic('light');
+}
+function togglePersonaMore(){
+  var el=document.getElementById('persona-more');var arr=document.getElementById('persona-arrow');
+  if(!el)return;
+  if(el.style.display==='none'){el.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
+  else{el.style.display='none';if(arr)arr.style.transform='';}
+  haptic('light');
+}
+
+/* ══ SERVER SYNC ══ */
+function syncToServer(){
+  if(!API||!window._uid)return;
+  var stats=LS.getJ('local_stats')||{};var xp=loadXP();
+  fetch(API+'/api/sync_stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:xp,sessions:stats.sessions||0,words:stats.words||0,tests:stats.tests||0,errors:stats.errors||0,streak:window._d?.streak||0,level:LS.get('ob_level')||'B1'})}).catch(function(){});
+}
+function syncFromServer(){
+  if(!API||!window._uid)return;
+  fetch(API+'/api/user/'+window._uid).then(function(r){return r.json();}).then(function(d){
+    if(!d||d.error)return;
+    var stats=LS.getJ('local_stats')||{};var localXP=loadXP();
+    if((d.xp||0)>localXP)saveXP(d.xp);
+    if((d.sessions||0)>(stats.sessions||0))stats.sessions=d.sessions;
+    if((d.words||0)>(stats.words||0))stats.words=d.words;
+    if((d.tests||0)>(stats.tests||0))stats.tests=d.tests;
+    if((d.errors||0)>(stats.errors||0))stats.errors=d.errors;
+    LS.setJ('local_stats',stats);window._d=d;
+    try{renderHome(d);}catch(e){}try{renderProgress(d);}catch(e){}
+  }).catch(function(){});
 }
 
 /* ══ TRIAL BANNER ══ */
