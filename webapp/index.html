@@ -2592,7 +2592,14 @@ function renderMsg(role,text,save=true){
     :'<img src="alex-avatar.png" alt="A" style="width:28px;height:28px;border-radius:9px;object-fit:cover">';
   const mw=document.createElement('div');mw.className='mwrap';
   const bub=document.createElement('div');bub.className='mbub';
-  if(role==='user')bub.textContent=text;else bub.innerHTML=fmtMsg(text);
+  if(role==='user')bub.textContent=text;
+  else{
+    // If text contains raw HTML tags (like buttons, divs), render directly
+    if(text.match(/^<div[\s>]|^<button[\s>]|class="chip"|class="lt-|class="drill-|class="share-|class="cert-|class="gg-/))
+      bub.innerHTML=text;
+    else
+      bub.innerHTML=fmtMsg(text);
+  }
   mw.appendChild(bub);
   if(role==='bot'){
     const acts=document.createElement('div');acts.className='macts';
