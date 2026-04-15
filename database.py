@@ -252,10 +252,14 @@ async def db_init():
 #  HELPERS
 # ══════════════════════════════════════════════════════════════════
 
-def _today() -> str:
+def _today():
+    if USE_POSTGRES:
+        return datetime.now().date()  # asyncpg needs date object
     return datetime.now().strftime("%Y-%m-%d")
 
-def _days_later(n: int) -> str:
+def _days_later(n: int):
+    if USE_POSTGRES:
+        return (datetime.now() + timedelta(days=n)).date()
     return (datetime.now() + timedelta(days=n)).strftime("%Y-%m-%d")
 
 
