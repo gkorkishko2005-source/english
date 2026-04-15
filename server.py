@@ -215,11 +215,11 @@ async def handle_chat(request):
             'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
             'toefl','test','тест','анализ','разбор','why','почему','правило'
         ])
-        chat_model = "claude-sonnet-4-6-20250514" if is_complex else MODEL
+        chat_model = "claude-sonnet-4-6" if is_complex else MODEL
         max_tokens = 1200
         msg_limit = 60
     elif user_tier == "ultimate":
-        chat_model = "claude-sonnet-4-6-20250514"
+        chat_model = "claude-sonnet-4-6"
         max_tokens = 1500
         msg_limit = 80
 
