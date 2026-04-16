@@ -1474,16 +1474,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 </div>
 
 <!-- THEME PICKER MODAL -->
-<div class="mov" id="themem" style="display:none" onclick="closeThemePicker()">
-  <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow:hidden"><div class="mhnd"></div>
-    <div class="mtit" id="theme-mtit">Theme</div>
-    <div class="theme-scroll-outer">
-      <div class="theme-scroll-wrap" id="theme-scroll"></div>
-    </div>
-    <div style="height:8px"></div>
-  </div>
-</div>
-
 <!-- LEARNING PATH PICKER MODAL -->
 <div class="mov" id="pathm" style="display:none" onclick="closeMod('pathm')">
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
@@ -2106,28 +2096,6 @@ function setTheme(t){
   const bgColor=th.bg||'#0d1117';
   if(tg){tg.setHeaderColor(bgColor);tg.setBackgroundColor(bgColor);}
 }
-
-/* ══ THEME PICKER (circle grid) ══ */
-function openThemePicker(){
-  openMod('themem');
-  const wrap=document.getElementById('theme-scroll');
-  if(!wrap)return;
-  wrap.className='theme-circle-grid';
-  const cur=LS.get('app_theme')||'';
-  wrap.innerHTML='';
-  THEMES.forEach(th=>{
-    const circle=document.createElement('div');
-    circle.className='theme-circle'+(th.t===cur?' on':'');
-    circle.innerHTML=`<div class="theme-dot" style="background:${th.grad}"></div><div class="theme-dot-name">${th.n[lang]||th.n.en||th.n.ru}</div>`;
-    circle.addEventListener('click',()=>{
-      document.querySelectorAll('.theme-circle').forEach(c=>c.classList.remove('on'));
-      circle.classList.add('on');
-      setTheme(th.t);
-    });
-    wrap.appendChild(circle);
-  });
-}
-function closeThemePicker(){closeMod('themem');}
 
 /* ══ XP TREE SVGs ══ */
 function getTreeSvg(xp){
@@ -3130,7 +3098,6 @@ try{
 document.getElementById('profm')&&(document.getElementById('profm').onclick=function(e){if(e.target===this)closeProfModal();});
 document.getElementById('remm')&&(document.getElementById('remm').onclick=function(e){if(e.target===this)closeRemModal();});
 document.getElementById('cfmm')&&(document.getElementById('cfmm').onclick=function(e){if(e.target===this)closeCfm();});
-document.getElementById('themem')&&(document.getElementById('themem').onclick=function(e){if(e.target===this)closeThemePicker();});
 document.getElementById('renamem')&&(document.getElementById('renamem').onclick=function(e){if(e.target===this)closeRenameModal();});
 }catch(e){console.warn('modal init',e);}
 document.getElementById('uilangm')?.addEventListener('click',function(e){if(e.target===this)closeMod('uilangm');});
