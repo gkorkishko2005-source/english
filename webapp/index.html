@@ -769,8 +769,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .tbtn.on .tchk{opacity:1}
 
 /* Persona */
-.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pbtn{padding:13px 9px;border-radius:var(--r);border:1.5px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:.25s;position:relative;overflow:hidden}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pbtn{padding:14px 10px;border-radius:var(--r);border:1.5px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:transform .2s,border-color .2s,background .2s;position:relative;overflow:hidden}
+.pbtn:active{transform:scale(.95)}
+.pbtn.on{animation:persona-pop .35s ease-out}
+@keyframes persona-pop{0%{transform:scale(1)}40%{transform:scale(1.06)}100%{transform:scale(1)}}
 .pbtn:active{transform:scale(.93)}
 .pbtn.on{border-color:var(--a);background:linear-gradient(135deg,rgba(var(--ar),.1),var(--e2));box-shadow:0 0 14px rgba(var(--ar),.18)}
 .pbtn.on::after{content:'✓';position:absolute;top:7px;right:8px;font-size:11px;font-weight:800;color:var(--a)}
@@ -1262,7 +1265,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
   <!-- Collapsible Tools section -->
   <div class="gift-btn" onclick="toggleSettingsTools()" style="justify-content:center;gap:6px">
-    🛠 <span id="tools-toggle-lbl">Tools</span>
+    🛠 <span id="tools-toggle-lbl">Инструменты</span>
     <svg id="tools-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
   <div id="settings-tools" style="display:none;overflow:hidden;transition:max-height .3s ease">
@@ -1490,7 +1493,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 </div>
 
 <!-- UI LANGUAGE PICKER MODAL -->
-<div class="mov" id="uilangm" style="display:none" onclick="closeModal('uilangm')">
+<div class="mov" id="uilangm" style="display:none" onclick="closeMod('uilangm')">
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="uilang-mtit">Interface language</div>
     <div class="lang-scroll-wrap" id="uilang-scroll"></div>
@@ -1498,7 +1501,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 </div>
 
 <!-- BOT LANGUAGE PICKER MODAL -->
-<div class="mov" id="botlangm" style="display:none" onclick="closeModal('botlangm')">
+<div class="mov" id="botlangm" style="display:none" onclick="closeMod('botlangm')">
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="botlang-mtit">Bot language</div>
     <div class="lang-scroll-wrap" id="botlang-scroll"></div>
@@ -1522,7 +1525,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div id="sctx" class="sctx" style="display:none"></div>
 
 <!-- ROLEPLAY SCENARIO MODAL -->
-<div class="mov" id="roleplaym" style="display:none" onclick="closeModal('roleplaym')">
+<div class="mov" id="roleplaym" style="display:none" onclick="closeMod('roleplaym')">
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rp-modal-title">Choose a scenario</div>
     <div class="scenario-grid" id="scenario-grid"></div>
@@ -1530,7 +1533,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 </div>
 
 <!-- TEXT CHECKER MODAL -->
-<div class="mov" id="textcheckm" style="display:none" onclick="closeModal('textcheckm')">
+<div class="mov" id="textcheckm" style="display:none" onclick="closeMod('textcheckm')">
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="tc-modal-title">Check my text</div>
     <div class="mbdy">
@@ -1538,13 +1541,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <textarea class="tc-inp" id="tc-inp" rows="5"></textarea>
       <div class="text-check-count"><span id="tc-count">0</span> / 500</div>
       <button class="msav" onclick="submitTextCheck()" id="tc-btn">Analyze →</button>
-      <button class="moff" onclick="closeModal('textcheckm')" id="tc-cancel">Cancel</button>
+      <button class="moff" onclick="closeMod('textcheckm')" id="tc-cancel">Cancel</button>
     </div>
   </div>
 </div>
 
 <!-- PREMIUM MODAL -->
-<div class="mov" id="premiumm" style="display:none" onclick="closeModal('premiumm')">
+<div class="mov" id="premiumm" style="display:none" onclick="closeMod('premiumm')">
   <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="prem-hero">
       <div class="prem-crown"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg></div>
@@ -1566,7 +1569,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
-    <div class="prem-free" onclick="closeModal('premiumm')" id="prem-free">Continue free</div>
+    <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Continue free</div>
   </div>
 </div>
 
@@ -1864,7 +1867,6 @@ let L = LANGS[lang] || LANGS.en;
 function applyLang(){
   L = LANGS[lang] || LANGS.en;
   // Nav
-  document.getElementById('nb1').textContent = L.qs.split(' ')[0]==='Q'?'Home':(['Главная','Inicio','Hauptseite','Accueil','Início','Головна','Ana Sayfa','首页','الرئيسية'][Object.keys(LANGS).indexOf(lang)])||'Home';
   document.getElementById('nb1').textContent = {ru:'Главная',en:'Home',es:'Inicio',de:'Start',fr:'Accueil',pt:'Início',uk:'Головна',tr:'Ana Sayfa',zh:'首页',ar:'الرئيسية'}[lang]||'Home';
   document.getElementById('nb2').textContent = {ru:'Чат',en:'Chat',es:'Chat',de:'Chat',fr:'Chat',pt:'Chat',uk:'Чат',tr:'Sohbet',zh:'聊天',ar:'محادثة'}[lang]||'Chat';
   document.getElementById('nb3').textContent = {ru:'Учёба',en:'Learn',es:'Aprender',de:'Lernen',fr:'Apprendre',pt:'Aprender',uk:'Навчання',tr:'Öğren',zh:'学习',ar:'تعلم'}[lang]||'Learn';
@@ -2235,6 +2237,7 @@ function drawProgress(){
     var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
     var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
     var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium',es:'Regalar Premium',de:'Premium verschenken',fr:'Offrir Premium',pt:'Dar Premium',uk:'Подарувати Premium',tr:'Premium hediye et',zh:'赠送Premium',ar:'إهداء Premium'}[lang]||'Gift Premium';
+    var ttl=document.getElementById('tools-toggle-lbl');if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
   }catch(e){}
 
   // Achievements
@@ -2936,7 +2939,6 @@ function closeRemModal(){closeMod('remm');}
 function pickTime(){}
 
 /* ─── Single drum column implementation ─── */
-const ITEM_H=44; // px per item
 // Infinite scroll: render 3 full cycles (prev, current, next) so user can scroll freely
 function initDrumCol(colId,innerId,val,total,numeric){
   const col=document.getElementById(colId);
@@ -4263,7 +4265,7 @@ function renderAchievements(){
 
 /* ══ STORY MODE ══ */
 const STORIES=[
-  {id:'cafe',title:{ru:'В кафе',en:'At the café'},
+  {id:'cafe',emoji:'☕',title:{ru:'В кафе',en:'At the café'},
    scenes:[
      {text:{ru:'Ты заходишь в кафе в Лондоне. Бариста улыбается.',en:'You walk into a London café. The barista smiles.'},
       prompt:'Barista: "Good morning! What can I get you today?"',
@@ -4273,36 +4275,123 @@ const STORIES=[
       prompt:'"Sure! Would you like a small, medium, or large?"',
       options:['A medium one, please.','Large. And a muffin too.','What size is the medium?'],
       best:0,feedback:{0:{ru:'Идеально!',en:'Perfect!'},1:{ru:'Уверенно! Хороший английский.',en:'Confident! Good English.'},2:{ru:'Хороший вопрос — это нормально уточнять.',en:'Good question — it\'s normal to clarify.'}}},
+     {text:{ru:'Бариста интересуется молоком.',en:'The barista asks about milk.'},
+      prompt:'"Whole milk, skim, or oat milk?"',
+      options:['Oat milk, please.','Any milk is fine.','What\'s the difference?'],
+      best:0,feedback:{0:{ru:'Чёткий выбор!',en:'Clear choice!'},1:{ru:'Ок, но лучше конкретно.',en:'Okay but be specific.'},2:{ru:'Хороший вопрос для изучения!',en:'Good question for learning!'}}},
      {text:{ru:'Ты платишь и бариста говорит...',en:'You pay and the barista says...'},
       prompt:'"That\'ll be £4.50. Would you like anything else?"',
       options:['No, that\'s all. Thank you!','Nothing else, thanks.','Can I also get the WiFi password?'],
       best:2,feedback:{0:{ru:'Классика! Вежливо.',en:'Classic! Polite.'},1:{ru:'Коротко и ясно.',en:'Short and clear.'},2:{ru:'Практично! Хороший разговорный ход.',en:'Practical! Smart conversational move.'}}},
    ]},
-  {id:'interview',title:{ru:'Собеседование',en:'Job interview'},
+  {id:'interview',emoji:'💼',title:{ru:'Собеседование',en:'Job interview'},
    scenes:[
      {text:{ru:'Ты пришёл на собеседование. HR менеджер встаёт навстречу.',en:'You arrive at a job interview. The HR manager stands up.'},
       prompt:'"Hi! Thanks for coming in. Can you tell me a little about yourself?"',
       options:['Sure! I\'m a software developer with 3 years of experience.','I am very good worker.','Well, I like coding and stuff...'],
-      best:0,feedback:{0:{ru:'Профессионально и структурировано!',en:'Professional and structured!'},1:{ru:'Слишком просто. Добавь деталей.',en:'Too simple. Add details.'},2:{ru:'Слишком неформально для собеседования.',en:'Too casual for an interview.'}}},
-     {text:{ru:'HR спрашивает о твоих сильных сторонах.',en:'HR asks about your strengths.'},
+      best:0,feedback:{0:{ru:'Профессионально!',en:'Professional!'},1:{ru:'Слишком просто.',en:'Too simple.'},2:{ru:'Слишком неформально.',en:'Too casual.'}}},
+     {text:{ru:'HR спрашивает о сильных сторонах.',en:'HR asks about strengths.'},
       prompt:'"What would you say is your greatest strength?"',
-      options:['I\'m a fast learner and I adapt quickly to new technologies.','I am perfect at everything.','I think I work hard.'],
-      best:0,feedback:{0:{ru:'Конкретно и убедительно!',en:'Specific and convincing!'},1:{ru:'Звучит неискренне. Будь конкретнее.',en:'Sounds insincere. Be specific.'},2:{ru:'Слабовато. Добавь примеры.',en:'Weak. Add examples.'}}},
+      options:['I\'m a fast learner who adapts to new technologies.','I am perfect at everything.','I think I work hard.'],
+      best:0,feedback:{0:{ru:'Конкретно!',en:'Specific!'},1:{ru:'Неискренне.',en:'Insincere.'},2:{ru:'Слабовато.',en:'Weak.'}}},
+     {text:{ru:'Вопрос о слабостях.',en:'Question about weaknesses.'},
+      prompt:'"What about a weakness you\'re working on?"',
+      options:['I sometimes take on too much. I\'m learning to delegate.','I don\'t have any weaknesses.','I\'m really bad at public speaking.'],
+      best:0,feedback:{0:{ru:'Идеально! Честно + рост.',en:'Perfect! Honest + growth.'},1:{ru:'Красный флаг для HR!',en:'Red flag for HR!'},2:{ru:'Слишком негативно без решения.',en:'Too negative without solution.'}}},
      {text:{ru:'Финальный вопрос.',en:'Final question.'},
       prompt:'"Do you have any questions for us?"',
       options:['Yes! Could you tell me about the team culture?','What is the salary?','No, I think I\'m good.'],
-      best:0,feedback:{0:{ru:'Показывает интерес! Отличный вопрос.',en:'Shows interest! Excellent question.'},1:{ru:'Важно, но лучше спрашивать позже.',en:'Important but better to ask later.'},2:{ru:'Всегда задавай вопросы — это показывает интерес.',en:'Always ask questions — it shows interest.'}}},
+      best:0,feedback:{0:{ru:'Показывает интерес!',en:'Shows interest!'},1:{ru:'Лучше спрашивать позже.',en:'Better to ask later.'},2:{ru:'Всегда задавай вопросы.',en:'Always ask questions.'}}},
    ]},
-  {id:'airport',title:{ru:'В аэропорту',en:'At the airport'},
+  {id:'airport',emoji:'✈️',title:{ru:'В аэропорту',en:'At the airport'},
    scenes:[
-     {text:{ru:'Ты на паспортном контроле в Хитроу.',en:'You\'re at passport control at Heathrow.'},
-      prompt:'Officer: "Good afternoon. What is the purpose of your visit?"',
+     {text:{ru:'Паспортный контроль в Хитроу.',en:'Passport control at Heathrow.'},
+      prompt:'Officer: "What is the purpose of your visit?"',
       options:['I\'m here on holiday for two weeks.','Tourism.','I want to visit your beautiful country!'],
-      best:0,feedback:{0:{ru:'Чётко и информативно!',en:'Clear and informative!'},1:{ru:'Работает, но слишком коротко.',en:'Works but too short.'},2:{ru:'Мило, но офицеру нужны факты.',en:'Sweet but the officer needs facts.'}}},
-     {text:{ru:'Офицер спрашивает про жильё.',en:'The officer asks about accommodation.'},
+      best:0,feedback:{0:{ru:'Чётко!',en:'Clear!'},1:{ru:'Слишком коротко.',en:'Too short.'},2:{ru:'Офицеру нужны факты.',en:'Officer needs facts.'}}},
+     {text:{ru:'Офицер про жильё.',en:'Officer about accommodation.'},
       prompt:'"Where will you be staying?"',
       options:['At the Hilton Hotel in central London.','With my friend.','I haven\'t decided yet.'],
-      best:0,feedback:{0:{ru:'Конкретный адрес — идеально.',en:'Specific address — perfect.'},1:{ru:'Ок, но могут попросить адрес друга.',en:'Ok but they may ask for friend\'s address.'},2:{ru:'Не лучший ответ на границе!',en:'Not the best answer at the border!'}}},
+      best:0,feedback:{0:{ru:'Конкретно — идеально.',en:'Specific — perfect.'},1:{ru:'Могут попросить адрес.',en:'May ask for address.'},2:{ru:'Плохой ответ на границе!',en:'Bad answer at the border!'}}},
+     {text:{ru:'Вопрос о деньгах.',en:'Question about money.'},
+      prompt:'"How much cash are you carrying?"',
+      options:['About 500 pounds and some cards.','None of your business.','A lot.'],
+      best:0,feedback:{0:{ru:'Честно и чётко!',en:'Honest and clear!'},1:{ru:'Тебя задержат!',en:'You\'ll be detained!'},2:{ru:'Слишком размыто.',en:'Too vague.'}}},
+   ]},
+  {id:'hotel',emoji:'🏨',title:{ru:'В отеле',en:'Hotel check-in'},
+   scenes:[
+     {text:{ru:'Ресепшен отеля в Нью-Йорке.',en:'Hotel reception in New York.'},
+      prompt:'"Good evening! Do you have a reservation?"',
+      options:['Yes, under the name Smith for three nights.','I have room.','Reservation yes.'],
+      best:0,feedback:{0:{ru:'Профессионально!',en:'Professional!'},1:{ru:'Грамматика хромает.',en:'Broken grammar.'},2:{ru:'Слишком отрывисто.',en:'Too choppy.'}}},
+     {text:{ru:'Ресепшионист про удобства.',en:'Receptionist about amenities.'},
+      prompt:'"Your room is on the 12th floor. Would you like a wake-up call?"',
+      options:['Yes, at 7 AM please.','I will wake up myself.','No thanks, I have an alarm.'],
+      best:0,feedback:{0:{ru:'Вежливо!',en:'Polite!'},1:{ru:'Звучит грубо.',en:'Sounds rude.'},2:{ru:'Нормально.',en:'Fine.'}}},
+     {text:{ru:'Проблема с номером.',en:'Issue with the room.'},
+      prompt:'You come back: "Excuse me, the air conditioning isn\'t working."',
+      options:['"Could you send someone to fix it, please?"','"Fix it now!"','"Can I get another room?"'],
+      best:0,feedback:{0:{ru:'Вежливый запрос!',en:'Polite request!'},1:{ru:'Грубо.',en:'Rude.'},2:{ru:'Ок, но попробуй сначала починить.',en:'Ok but try fixing first.'}}},
+   ]},
+  {id:'doctor',emoji:'🏥',title:{ru:'У врача',en:'At the doctor'},
+   scenes:[
+     {text:{ru:'Ты у врача с простудой.',en:'You\'re at the doctor with a cold.'},
+      prompt:'Doctor: "What brings you in today?"',
+      options:['I\'ve had a sore throat and fever for three days.','I\'m sick.','My body is broken.'],
+      best:0,feedback:{0:{ru:'Отличное описание!',en:'Great description!'},1:{ru:'Слишком общо.',en:'Too general.'},2:{ru:'Звучит странно.',en:'Sounds weird.'}}},
+     {text:{ru:'Врач про лекарства.',en:'Doctor about medication.'},
+      prompt:'"Are you allergic to any medications?"',
+      options:['Yes, I\'m allergic to penicillin.','I don\'t know.','No allergies that I know of.'],
+      best:0,feedback:{0:{ru:'Важная информация!',en:'Important info!'},1:{ru:'Лучше уточнить.',en:'Better to clarify.'},2:{ru:'Хороший честный ответ.',en:'Good honest answer.'}}},
+     {text:{ru:'Врач даёт рецепт.',en:'Doctor gives prescription.'},
+      prompt:'"Take this twice a day with food. Any questions?"',
+      options:['Yes, how long should I take it?','Ok thanks bye.','What if I forget a dose?'],
+      best:2,feedback:{0:{ru:'Хороший вопрос!',en:'Good question!'},1:{ru:'Задай вопросы!',en:'Ask questions!'},2:{ru:'Отличная предусмотрительность!',en:'Excellent foresight!'}}},
+   ]},
+  {id:'shopping',emoji:'🛍️',title:{ru:'В магазине',en:'Shopping'},
+   scenes:[
+     {text:{ru:'Ты в магазине одежды.',en:'You\'re at a clothing store.'},
+      prompt:'Shop assistant: "Can I help you find something?"',
+      options:['Yes, I\'m looking for a blue sweater in medium size.','I want sweater.','Just browsing, thanks.'],
+      best:0,feedback:{0:{ru:'Чётко и подробно!',en:'Clear and detailed!'},1:{ru:'Простовато.',en:'Too simple.'},2:{ru:'Нормально если просто смотришь.',en:'Fine if just looking.'}}},
+     {text:{ru:'Примерка.',en:'Trying on clothes.'},
+      prompt:'"The fitting rooms are on the left. Let me know how it fits."',
+      options:['Thank you! I\'ll try it on now.','Ok.','Where exactly is left?'],
+      best:0,feedback:{0:{ru:'Вежливо!',en:'Polite!'},1:{ru:'Слишком кратко.',en:'Too brief.'},2:{ru:'Если не понял — нормально спросить.',en:'If unclear, fine to ask.'}}},
+     {text:{ru:'Размер не подошёл.',en:'Size didn\'t fit.'},
+      prompt:'"How was it?"',
+      options:['It\'s a bit too tight. Do you have a larger size?','Bad.','I don\'t like it.'],
+      best:0,feedback:{0:{ru:'Конкретно + решение!',en:'Specific + solution!'},1:{ru:'Слишком негативно.',en:'Too negative.'},2:{ru:'Объясни почему.',en:'Explain why.'}}},
+   ]},
+  {id:'smalltalk',emoji:'💬',title:{ru:'Знакомство',en:'Small talk'},
+   scenes:[
+     {text:{ru:'На вечеринке кто-то подходит.',en:'Someone approaches you at a party.'},
+      prompt:'"Hey! I don\'t think we\'ve met. I\'m Sarah."',
+      options:['Hi Sarah! I\'m [your name], nice to meet you.','Hi.','Yes, we haven\'t met.'],
+      best:0,feedback:{0:{ru:'Идеально!',en:'Perfect!'},1:{ru:'Слишком сухо.',en:'Too dry.'},2:{ru:'Странная реакция.',en:'Weird reply.'}}},
+     {text:{ru:'Вопрос о работе.',en:'Question about work.'},
+      prompt:'"So what do you do?"',
+      options:['I work as a designer at a tech startup.','I work.','It\'s complicated.'],
+      best:0,feedback:{0:{ru:'Открывает для беседы!',en:'Opens conversation!'},1:{ru:'Останавливает беседу.',en:'Kills conversation.'},2:{ru:'Звучит подозрительно.',en:'Sounds suspicious.'}}},
+     {text:{ru:'Прощание.',en:'Saying goodbye.'},
+      prompt:'"It was great meeting you! Are you on Instagram?"',
+      options:['Yes! Let me give you my handle.','No I don\'t use it.','Maybe.'],
+      best:0,feedback:{0:{ru:'Открыто и дружелюбно!',en:'Open and friendly!'},1:{ru:'Ок если правда не используешь.',en:'Ok if true.'},2:{ru:'Слишком уклончиво.',en:'Too evasive.'}}},
+   ]},
+  {id:'phone',emoji:'📞',title:{ru:'Телефонный звонок',en:'Phone call'},
+   scenes:[
+     {text:{ru:'Звонишь в банк.',en:'You\'re calling a bank.'},
+      prompt:'"Thank you for calling. How can I help you today?"',
+      options:['Hi, I\'d like to report a lost card.','Card lost.','Help me with my card problem.'],
+      best:0,feedback:{0:{ru:'Чётко и вежливо!',en:'Clear and polite!'},1:{ru:'Слишком коротко.',en:'Too short.'},2:{ru:'Ок, но будь конкретнее.',en:'Ok but be specific.'}}},
+     {text:{ru:'Подтверждение личности.',en:'Identity verification.'},
+      prompt:'"I need to verify your identity. Can you confirm your date of birth?"',
+      options:['Yes, it\'s the 15th of March, 1995.','Why do you need it?','I don\'t want to share that.'],
+      best:0,feedback:{0:{ru:'Формат даты правильный!',en:'Correct date format!'},1:{ru:'Это стандартная процедура.',en:'It\'s standard procedure.'},2:{ru:'Тогда не смогут помочь.',en:'Then they can\'t help.'}}},
+     {text:{ru:'Подтверждение блокировки.',en:'Confirming card block.'},
+      prompt:'"Your card has been blocked. Anything else?"',
+      options:['Could you send a replacement to my address on file?','Ok bye.','When will I get a new one?'],
+      best:0,feedback:{0:{ru:'Проактивно!',en:'Proactive!'},1:{ru:'Не завершил.',en:'Didn\'t finish.'},2:{ru:'Хороший вопрос.',en:'Good question.'}}},
    ]},
 ];
 let storyState=null;
@@ -4311,7 +4400,7 @@ function openStoryMode(){
   const grid=STORIES.map(s=>{
     const t=s.title[lang]||s.title.en;
     return `<div class="story-card" onclick="startStory('${s.id}')">
-      <div class="story-emoji">${s.id==='cafe'?'☕':s.id==='interview'?'💼':'✈️'}</div>
+      <div class="story-emoji">${s.emoji||'📖'}</div>
       <div class="story-title">${t}</div>
       <div class="story-scenes">${s.scenes.length} ${lang==='ru'?'сцен':'scenes'}</div>
     </div>`;
