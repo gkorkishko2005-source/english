@@ -577,14 +577,16 @@ async def handle_admin_stats(request):
         return web.json_response({"error": "forbidden"}, status=403, headers={"Access-Control-Allow-Origin":"*"})
     try:
         from database import db
+        import datetime as _dt
+        _today_date = _dt.date.today()
         total = await db("SELECT COUNT(*) as c FROM users", fetch="one")
-        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= $1", str(__import__('datetime').date.today()), fetch="one")
+        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= ?", _today_date, fetch="one")
         premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_tier != '' AND premium_tier IS NOT NULL", fetch="one")
         result = {
             "total_users": total["c"] if total else 0,
             "today_active": today["c"] if today else 0,
             "premium_users": premium["c"] if premium else 0,
-            "today_messages": sum(v for k,v in _msg_counts.items() if str(__import__('datetime').date.today()) in k),
+            "today_messages": sum(v for k,v in _msg_counts.items() if str(_today_date) in k),
         }
     except Exception as e:
         logger.warning(f"admin stats error: {e}")
