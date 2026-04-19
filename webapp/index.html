@@ -896,7 +896,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ══ QUICK START — icon backgrounds ══ */
-.qbi{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:13px;margin-bottom:11px}
+.qbi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:13px;margin-bottom:11px;overflow:hidden}
+.qbi img{width:100%;height:100%;object-fit:contain}
 .qbi svg{width:26px;height:26px}
 .qa .qbi{background:rgba(var(--ar),.15)} .qa .qbi svg{stroke:var(--a)}
 .qb2 .qbi{background:rgba(0,212,170,.14)} .qb2 .qbi svg{stroke:var(--a2)}
@@ -1110,27 +1111,27 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="qs-lbl"></span></div>
   <div class="qg">
     <div class="qb qa"  onclick="openChat('lesson')">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg></div>
+      <div class="qbi"><img src="icons/grammar.png" alt="Grammar"></div>
       <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
     </div>
     <div class="qb qb2" onclick="openRoleplay()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+      <div class="qbi"><img src="icons/roleplay.png" alt="Roleplay"></div>
       <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
     </div>
     <div class="qb qc"  onclick="startAudio()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3z"/><path d="M3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg></div>
+      <div class="qbi"><img src="icons/toefl.png" alt="TOEFL"></div>
       <div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div>
     </div>
     <div class="qb qd"  onclick="openTextChecker()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+      <div class="qbi"><img src="icons/textcheck.png" alt="Text check"></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
-    <div class="qb" style="border-color:rgba(255,184,48,.2);background:rgba(255,184,48,.04)" onclick="openDrillPicker()">
-      <div class="qbi" style="background:rgba(255,184,48,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linecap="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><path d="M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 14l2 2 4-4"/></svg></div>
+    <div class="qb" onclick="openDrillPicker()">
+      <div class="qbi"><img src="icons/drill.png" alt="Drill"></div>
       <div class="qbt" id="qb5t">Drill</div><div class="qbs" id="qb5s">Grammar quiz</div>
     </div>
-    <div class="qb" style="border-color:rgba(167,139,250,.2);background:rgba(167,139,250,.04)" onclick="openPathPicker()">
-      <div class="qbi" style="background:rgba(167,139,250,.15)"><svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.8" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+    <div class="qb" onclick="openPathPicker()">
+      <div class="qbi"><img src="icons/path.png" alt="Path"></div>
       <div class="qbt" id="qb6t">Path</div><div class="qbs" id="qb6s">Learning path</div>
     </div>
   </div>
