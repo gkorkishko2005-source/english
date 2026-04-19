@@ -305,8 +305,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Streak */
 .stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:6px}
-.stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0}
+.stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0;overflow:hidden}
 .stk-flame svg{width:28px;height:28px}
+.stk-flame img,.stk-flame video{width:40px;height:40px;object-fit:contain}
 .stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px;text-align:center}
 .stkt{font-size:14px;font-weight:700}.stks{font-size:12px;color:var(--t2);margin-top:2px}
 
@@ -1082,10 +1083,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="stk">
     <div class="stk-flame">
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M14 3 C14 3 8 9 8 15 A6 6 0 0 0 20 15 C20 11 17 8 17 8 C17 8 16 12 13 12 C13 6 14 3 14 3Z" fill="rgba(255,149,0,.35)" stroke="#ff9500" stroke-width="1.3" stroke-linejoin="round"/>
-        <path d="M14 8 C14 8 11 13 11 16 A3 3 0 0 0 17 16 C17 13.5 15.5 11 15.5 11 C15.5 11 15 13.5 13.5 13.5 C13.5 10 14 8 14 8Z" fill="rgba(255,107,107,.5)" stroke="#ff6b6b" stroke-width="1" stroke-linejoin="round"/>
-      </svg>
+      <video autoplay loop muted playsinline poster="icons/fire.png" onerror="this.outerHTML='<img src=&quot;icons/fire.png&quot;>'" style="width:40px;height:40px;object-fit:contain">
+        <source src="icons/fire.webm" type="video/webm">
+      </video>
     </div>
     <div class="stkn" id="hstk">0</div>
     <div><div class="stkt"><span id="stkt-lbl"></span></div><div class="stks" id="stks"></div></div>
