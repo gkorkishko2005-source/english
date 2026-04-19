@@ -484,7 +484,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .admin-stat-lbl{font-size:10px;color:var(--t3);margin-top:2px}
 .admin-refresh{font-size:11px;color:var(--a);cursor:pointer;margin-left:auto;font-weight:600}
 /* ══ GIFT SUB ══ */
-.gift-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(255,184,48,.04));border:1px solid rgba(167,139,250,.2);border-radius:var(--r);cursor:pointer;margin-bottom:10px;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);width:100%}
+.gift-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;margin-bottom:10px;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);width:100%;transition:transform .15s,border-color .2s}
+.gift-btn:active{transform:scale(.98)}
+.gift-btn .gbi{width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.gift-btn .gbi img{width:100%;height:100%;object-fit:contain}
 .gift-btn:active{transform:scale(.97)}
 
 /* ══ IDIOM OF THE DAY ══ */
@@ -794,7 +797,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pbtn:active{transform:scale(.93)}
 .pbtn.on{border-color:var(--a);background:linear-gradient(135deg,rgba(var(--ar),.1),var(--e2));box-shadow:0 0 14px rgba(var(--ar),.18)}
 .pbtn.on::after{content:'✓';position:absolute;top:7px;right:8px;font-size:11px;font-weight:800;color:var(--a)}
-.pbic{width:32px;height:32px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center}
+.pbic{width:44px;height:44px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center}
+.pbic img{width:100%;height:100%;object-fit:contain}
 .pbic svg{width:32px;height:32px}
 .pbn{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:2px}
 .pbs{font-size:10px;color:var(--t3);line-height:1.3}
@@ -1284,10 +1288,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <svg id="tools-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
   <div id="settings-tools" style="display:none;overflow:hidden;transition:max-height .3s ease">
-    <button class="gift-btn" onclick="shareProgress()">📤 <span id="share-lbl">Share progress</span></button>
-    <button class="gift-btn" onclick="exportProgress()">📊 <span id="export-lbl">Export report</span></button>
-    <button class="gift-btn" onclick="generateCertificate()">🏅 <span id="cert-lbl">Certificate</span></button>
-    <button class="gift-btn" onclick="openGiftSub()">🎁 <span id="gift-lbl">Gift Premium</span></button>
+    <button class="gift-btn" onclick="shareProgress()"><div class="gbi"><img src="icons/tool_share.png" alt=""></div><span id="share-lbl">Share progress</span></button>
+    <button class="gift-btn" onclick="exportProgress()"><div class="gbi"><img src="icons/tool_export.png" alt=""></div><span id="export-lbl">Export report</span></button>
+    <button class="gift-btn" onclick="generateCertificate()"><div class="gbi"><img src="icons/tool_certificate.png" alt=""></div><span id="cert-lbl">Certificate</span></button>
+    <button class="gift-btn" onclick="openGiftSub()"><div class="gbi"><img src="icons/tool_gift.png" alt=""></div><span id="gift-lbl">Gift Premium</span></button>
   </div>
 
   <!-- Dark/Light mode toggle -->
@@ -1317,11 +1321,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="persona-lbl"></span></div>
   <div class="pgrid" id="pgrid">
     <div class="pbtn on" data-p="default" onclick="pickPersona(this)">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--a)" stroke-width="1.7" stroke-linecap="round"><rect x="6" y="5" width="20" height="14" rx="5"/><circle cx="11" cy="10" r="1.8" fill="var(--a)"/><circle cx="21" cy="10" r="1.8" fill="var(--a)"/><path d="M11 15c1.5 2 8.5 2 10 0"/><path d="M16 19v4M12 27h8"/></svg></div>
+      <div class="pbic"><img src="icons/persona_friendly.png" alt=""></div>
       <div class="pbn" id="pb1n"></div><div class="pbs" id="pb1s"></div>
     </div>
     <div class="pbtn" data-p="professor" onclick="pickPersona(this)">
-      <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M4 21l12-7 12 7"/><path d="M2 17l14-9 14 9"/><rect x="14" y="21" width="4" height="7" rx="1"/><path d="M10 27h12"/><path d="M26 17v6"/><circle cx="26.5" cy="24.5" r="1.5" fill="var(--t2)"/></svg></div>
+      <div class="pbic"><img src="icons/persona_professor.png" alt=""></div>
       <div class="pbn" id="pb2n"></div><div class="pbs" id="pb2s"></div>
     </div>
   </div>
@@ -1329,20 +1333,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div id="persona-more" style="display:none;margin-top:14px">
     <div class="pgrid">
       <div class="pbtn" data-p="gamer" onclick="pickPersona(this)">
-        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="10" width="26" height="15" rx="5"/><line x1="16" y1="14" x2="16" y2="21"/><line x1="12.5" y1="17.5" x2="19.5" y2="17.5"/><circle cx="24" cy="14.5" r="1.5" fill="var(--t2)"/><circle cx="27" cy="17.5" r="1.5" fill="var(--t2)"/></svg></div>
+        <div class="pbic"><img src="icons/persona_gamer.png" alt=""></div>
         <div class="pbn" id="pb3n"></div><div class="pbs" id="pb3s"></div>
       </div>
       <div class="pbtn" data-p="brit" onclick="pickPersona(this)">
-        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><ellipse cx="16" cy="20" rx="10" ry="6"/><path d="M6 20c0-3.5 4.5-7 10-7s10 3.5 10 7"/><path d="M7 17c2-5 16-5 18 0"/><rect x="4" y="14" width="24" height="3" rx="1.5"/></svg></div>
+        <div class="pbic"><img src="icons/persona_brit.png" alt=""></div>
         <div class="pbn" id="pb4n"></div><div class="pbs" id="pb4s"></div>
       </div>
       <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><path d="M16 4l2 4h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z"/><path d="M8 22h16v4H8z"/><path d="M12 22v-6M20 22v-6"/><path d="M8 16h16"/></svg></div>
+        <div class="pbic"><img src="icons/persona_harvard.png" alt=""></div>
         <div class="pbn" id="pb5n">Harvard Prof</div><div class="pbs" id="pb5s">Academic style</div>
         <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
       </div>
       <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-        <div class="pbic"><svg viewBox="0 0 32 32" fill="none" stroke="var(--t2)" stroke-width="1.7" stroke-linecap="round"><rect x="4" y="8" width="24" height="16" rx="3"/><circle cx="16" cy="16" r="5"/><circle cx="16" cy="16" r="2"/><line x1="4" y1="12" x2="28" y2="12"/></svg></div>
+        <div class="pbic"><img src="icons/persona_bbc.png" alt=""></div>
         <div class="pbn" id="pb6n">BBC Anchor</div><div class="pbs" id="pb6s">British accent</div>
         <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
       </div>
@@ -3833,24 +3837,24 @@ function updatePremiumUI(){
       }catch(e){untilText='';}
     }
     banner.innerHTML=`
-      <div style="padding:14px 16px;background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(255,184,48,.08));border:1px solid rgba(212,168,67,.3);border-radius:var(--r)">
+      <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
         <div style="display:flex;align-items:center;gap:13px;margin-bottom:${untilText?'10':'0'}px">
-          <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+          <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <img src="icons/sub_${premiumTier||'pro'}.png" alt="" style="width:100%;height:100%;object-fit:contain">
           </div>
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName} 👑</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName}</div>
             <div style="font-size:12px;color:var(--t2)">${untilText}</div>
           </div>
           <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
         </div>
-        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(212,168,67,.3);background:rgba(212,168,67,.06);color:var(--gd);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan',es:'⬆ Mejorar plan',de:'⬆ Plan upgraden',fr:'⬆ Améliorer le plan',pt:'⬆ Melhorar plano',uk:'⬆ Покращити план',tr:'⬆ Planı yükselt',zh:'⬆ 升级计划',ar:'⬆ ترقية الخطة'}[lang]||'⬆ Upgrade'}</button>`:''}
+        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--b1);background:var(--e1);color:var(--a);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan',es:'⬆ Mejorar plan',de:'⬆ Plan upgraden',fr:'⬆ Améliorer le plan',pt:'⬆ Melhorar plano',uk:'⬆ Покращити план',tr:'⬆ Planı yükselt',zh:'⬆ 升级计划',ar:'⬆ ترقية الخطة'}[lang]||'⬆ Upgrade'}</button>`:''}
       </div>`;
   } else {
     banner.innerHTML=`
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
-        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg>
+        <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <img src="icons/sub_free.png" alt="" style="width:100%;height:100%;object-fit:contain">
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
