@@ -406,9 +406,13 @@ async def handle_set_profession(request):
         return web.json_response({"error":"bad"},status=400)
     if uid and profession:
         try:
-            from database import set_profession
-            await set_profession(uid,profession)
-        except Exception: pass
+            from database import set_profession, upsert_user
+            await upsert_user(uid, "Student")
+            await set_profession(uid, profession)
+        except Exception as e:
+            logger.error(f"set_profession failed: {e}")
+            return web.json_response({"error": str(e)[:200]}, status=500,
+                headers={"Access-Control-Allow-Origin": "*"})
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── SET REMINDER ──────────────────────────────────────────────────────────────
@@ -420,9 +424,13 @@ async def handle_set_reminder(request):
         return web.json_response({"error":"bad"},status=400)
     if uid:
         try:
-            from database import set_reminder
-            await set_reminder(uid,remind_time)
-        except Exception: pass
+            from database import set_reminder, upsert_user
+            await upsert_user(uid, "Student")
+            await set_reminder(uid, remind_time)
+        except Exception as e:
+            logger.error(f"set_reminder failed: {e}")
+            return web.json_response({"error": str(e)[:200]}, status=500,
+                headers={"Access-Control-Allow-Origin": "*"})
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── AUDIO TASK ────────────────────────────────────────────────────────────────
