@@ -904,7 +904,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ══ QUICK START — icon backgrounds ══ */
-.qbi{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;margin-bottom:11px;overflow:hidden;aspect-ratio:1/1;flex-shrink:0}
+.qbi{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;margin-bottom:10px;overflow:hidden;aspect-ratio:1/1;flex-shrink:0}
 .qbi img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .qbi svg{width:26px;height:26px}
 .qa .qbi{background:rgba(var(--ar),.15)} .qa .qbi svg{stroke:var(--a)}
@@ -3913,11 +3913,11 @@ function openPremium(highlightFeature){
   if(lang==='ru'){
     if(basicB)basicB.innerHTML='✅ 30 сообщений/день<br>✅ Голосовые ответы<br>✅ Story Mode + games<br>⚡ Модель Haiku';
     if(proB)proB.innerHTML='✅ 60 сообщений/день<br>✅ 🧠 <b>Модель Sonnet (3× умнее)</b><br>✅ Все сценки + анализ<br>✅ 🎭 VIP личности';
-    if(ultB)ultB.innerHTML='✅ 80 сообщений/день<br>✅ 🧠 <b>Модель Sonnet</b><br>✅ TOEFL + план обучения<br>✅ 💎 Эксклюзивные темы';
+    if(ultB)ultB.innerHTML='✅ 80 сообщений/день<br>✅ 🧠 <b>Модель Sonnet</b><br>✅ TOEFL + план обучения<br>✅ 📊 Детальная статистика';
   } else {
     if(basicB)basicB.innerHTML='✅ 30 messages/day<br>✅ Voice replies<br>✅ Story Mode + games<br>⚡ Haiku model';
     if(proB)proB.innerHTML='✅ 60 messages/day<br>✅ 🧠 <b>Sonnet model (3× smarter)</b><br>✅ All scenarios + analysis<br>✅ 🎭 VIP personas';
-    if(ultB)ultB.innerHTML='✅ 80 messages/day<br>✅ 🧠 <b>Sonnet model</b><br>✅ TOEFL + study plan<br>✅ 💎 Exclusive themes';
+    if(ultB)ultB.innerHTML='✅ 80 messages/day<br>✅ 🧠 <b>Sonnet model</b><br>✅ TOEFL + study plan<br>✅ 📊 Detailed analytics';
   }
 
   // Hide plans that are lower or equal to current tier
