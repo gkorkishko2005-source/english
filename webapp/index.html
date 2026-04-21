@@ -797,8 +797,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pbtn:active{transform:scale(.93)}
 .pbtn.on{border-color:var(--a);background:linear-gradient(135deg,rgba(var(--ar),.1),var(--e2));box-shadow:0 0 14px rgba(var(--ar),.18)}
 .pbtn.on::after{content:'✓';position:absolute;top:7px;right:8px;font-size:11px;font-weight:800;color:var(--a)}
-.pbic{width:44px;height:44px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center}
-.pbic img{width:100%;height:100%;object-fit:contain}
+.pbic{width:40px;height:40px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;flex-shrink:0;overflow:hidden}
+.pbic img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .pbic svg{width:32px;height:32px}
 .pbn{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:2px}
 .pbs{font-size:10px;color:var(--t3);line-height:1.3}
@@ -884,7 +884,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .agspin{width:17px;height:17px;border:2px solid var(--b2);border-top-color:var(--a);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
 
 /* Notif */
-.notif{position:fixed;bottom:calc(var(--nav)+var(--safe)+12px);left:12px;right:12px;max-width:calc(420px - 24px);margin:0 auto;background:var(--e1);border:1px solid rgba(var(--ar),.2);border-radius:var(--r);padding:13px;box-shadow:0 8px 26px rgba(0,0,0,.38);z-index:150;display:flex;align-items:flex-start;gap:11px;cursor:pointer;animation:slu .38s cubic-bezier(.34,1.56,.64,1)}
+.notif{position:fixed;bottom:calc(var(--nav)+var(--safe)+12px);left:12px;right:12px;max-width:calc(420px - 24px);margin:0 auto;background:#000;border:1px solid rgba(255,255,255,.08);border-radius:var(--r);padding:13px;box-shadow:0 8px 26px rgba(0,0,0,.6);z-index:150;display:flex;align-items:flex-start;gap:11px;cursor:pointer;animation:slu .38s cubic-bezier(.34,1.56,.64,1)}
+[data-mode=light] .notif{background:#1a1a1a;border-color:rgba(255,255,255,.1)}
+[data-mode=light] .notif .nnm,[data-mode=light] .notif .ntxt{color:#fff}
+[data-mode=light] .notif .ntxt{color:rgba(255,255,255,.75)}
 .notif.dis{animation:sld .3s ease forwards}
 .navic{width:40px;height:40px;border-radius:12px;flex-shrink:0;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.18s}
 .navic:active{transform:scale(.84)}
@@ -901,8 +904,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .toast.show{transform:translateY(0);opacity:1}
 
 /* ══ QUICK START — icon backgrounds ══ */
-.qbi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:13px;margin-bottom:11px;overflow:hidden}
-.qbi img{width:100%;height:100%;object-fit:contain}
+.qbi{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:13px;margin-bottom:11px;overflow:hidden;aspect-ratio:1/1;flex-shrink:0}
+.qbi img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block}
 .qbi svg{width:26px;height:26px}
 .qa .qbi{background:rgba(var(--ar),.15)} .qa .qbi svg{stroke:var(--a)}
 .qb2 .qbi{background:rgba(0,212,170,.14)} .qb2 .qbi svg{stroke:var(--a2)}
@@ -2214,10 +2217,14 @@ function drawProgress(){
   try{renderPathBanner();}catch(e){}
   try{renderIdiomOfDay();}catch(e){}
   try{renderAdminPanel();}catch(e){}
-  // Sync with server
-  try{syncFromServer();}catch(e){}
-  // Periodic sync every 60s
-  setInterval(function(){try{syncToServer();}catch(e){}},60000);
+  // Sync with server (throttled, only if >30s since last sync)
+  try{
+    var lastSyncFrom=parseInt(LS.get('last_sync_from')||'0',10);
+    if(Date.now()-lastSyncFrom>30000){
+      LS.set('last_sync_from',String(Date.now()));
+      syncFromServer();
+    }
+  }catch(e){}
   // Wave 5 button labels
   try{
     var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
@@ -4840,13 +4847,31 @@ function syncFromServer(){
   fetch(API+'/api/user/'+window._uid).then(function(r){return r.json();}).then(function(d){
     if(!d||d.error)return;
     var stats=LS.getJ('local_stats')||{};var localXP=loadXP();
-    if((d.xp||0)>localXP)saveXP(d.xp);
-    if((d.sessions||0)>(stats.sessions||0))stats.sessions=d.sessions;
-    if((d.words||0)>(stats.words||0))stats.words=d.words;
-    if((d.tests||0)>(stats.tests||0))stats.tests=d.tests;
-    if((d.errors||0)>(stats.errors||0))stats.errors=d.errors;
-    LS.setJ('local_stats',stats);window._d=d;
-    try{renderHome(d);}catch(e){}try{renderProgress(d);}catch(e){}
+    // Merge: always take MAX, never decrease
+    var mergedXP=Math.max(d.xp||0,localXP);
+    if(mergedXP>localXP)saveXP(mergedXP);
+    stats.sessions=Math.max(stats.sessions||0,d.sessions||0);
+    stats.words=Math.max(stats.words||0,d.words||0);
+    stats.tests=Math.max(stats.tests||0,d.tests||0);
+    stats.errors=Math.max(stats.errors||0,d.errors||0);
+    LS.setJ('local_stats',stats);
+    // Merge profession/reminder: server wins if non-empty, else keep local
+    var localProf=LS.get('app_profession')||'';
+    var localRem=LS.get('app_remind')||'';
+    var prof=(d.profession&&d.profession.length)?d.profession:localProf;
+    var rem=(d.remind_time&&d.remind_time.length)?d.remind_time:localRem;
+    // Save server-authoritative profile fields to localStorage so devices converge
+    if(d.profession&&d.profession.length)LS.set('app_profession',d.profession);
+    if(d.remind_time&&d.remind_time.length)LS.set('app_remind',d.remind_time);
+    var merged=Object.assign({},window._d||{},d,{
+      xp:mergedXP,
+      sessions:stats.sessions,words:stats.words,tests:stats.tests,errors:stats.errors,
+      profession:prof,remind_time:rem,
+    });
+    window._d=merged;
+    try{renderHome(merged);}catch(e){}
+    try{renderProgress(merged);}catch(e){}
+    try{updateProfileUI(merged);}catch(e){}
   }).catch(function(){});
 }
 
@@ -5019,8 +5044,9 @@ async function init(){
 
     setTimeout(()=>{try{showNotif();}catch{}},3000);
 
-    // Sync stats to server every 60s and on close
-    if(uid&&API){
+    // Sync stats to server every 60s and on close (guarded against duplicate init)
+    if(uid&&API&&!window._syncIntervalSet){
+      window._syncIntervalSet=true;
       const syncStats=()=>{
         const s=LS.getJ('local_stats')||{};
         s.xp=loadXP();
