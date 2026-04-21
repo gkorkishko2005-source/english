@@ -297,6 +297,16 @@ async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
 
+async def set_profession(uid: int, profession: str):
+    """Save user's profession to DB (syncs across devices)."""
+    await db("UPDATE users SET profession=? WHERE uid=?", profession, uid)
+
+async def set_reminder(uid: int, remind_time: str):
+    """Save user's reminder time. 'off' or empty = disabled."""
+    if remind_time == "off":
+        remind_time = ""
+    await db("UPDATE users SET remind_time=? WHERE uid=?", remind_time, uid)
+
 async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
     """Grant premium access for given months with tier. 0 = revoke."""
     from datetime import datetime, timedelta
