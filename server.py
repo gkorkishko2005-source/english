@@ -42,7 +42,26 @@ async def handle_index(request):
     if not html_path.exists():
         return web.Response(text="WebApp not found", status=404)
     html = html_path.read_text(encoding="utf-8")
-    return web.Response(text=html, content_type="text/html", charset="utf-8")
+    return web.Response(text=html, content_type="text/html", charset="utf-8",
+                        headers={"Cache-Control": "no-cache"})
+
+# Долгий кэш для редко меняющейся статики (иконки, аватарка, шрифты).
+# index.html и /api/* не трогаем — они должны быть всегда свежими.
+_STATIC_CACHE_EXT = (".png",".jpg",".jpeg",".webp",".gif",".svg",".ico",
+                     ".woff",".woff2",".ttf",".otf")
+
+@web.middleware
+async def cache_static_mw(request, handler):
+    resp = await handler(request)
+    try:
+        path = request.path.lower()
+        if (resp.status == 200 and not path.startswith("/api/")
+                and path.endswith(_STATIC_CACHE_EXT)
+                and "Cache-Control" not in resp.headers):
+            resp.headers["Cache-Control"] = "public, max-age=604800"
+    except Exception as e:
+        logger.warning(f"cache_static_mw: {e}")
+    return resp
 
 # ── USER DATA ────────────────────────────────────────────────────────────────
 async def handle_user(request):
@@ -406,13 +425,9 @@ async def handle_set_profession(request):
         return web.json_response({"error":"bad"},status=400)
     if uid and profession:
         try:
-            from database import set_profession, upsert_user
-            await upsert_user(uid, "Student")
-            await set_profession(uid, profession)
-        except Exception as e:
-            logger.error(f"set_profession failed: {e}")
-            return web.json_response({"error": str(e)[:200]}, status=500,
-                headers={"Access-Control-Allow-Origin": "*"})
+            from database import set_profession
+            await set_profession(uid,profession)
+        except Exception: pass
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── SET REMINDER ──────────────────────────────────────────────────────────────
@@ -424,13 +439,9 @@ async def handle_set_reminder(request):
         return web.json_response({"error":"bad"},status=400)
     if uid:
         try:
-            from database import set_reminder, upsert_user
-            await upsert_user(uid, "Student")
-            await set_reminder(uid, remind_time)
-        except Exception as e:
-            logger.error(f"set_reminder failed: {e}")
-            return web.json_response({"error": str(e)[:200]}, status=500,
-                headers={"Access-Control-Allow-Origin": "*"})
+            from database import set_reminder
+            await set_reminder(uid,remind_time)
+        except Exception: pass
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── AUDIO TASK ────────────────────────────────────────────────────────────────
@@ -607,7 +618,7 @@ async def handle_options(request):
 
 # ── APP ───────────────────────────────────────────────────────────────────────
 def create_app():
-    app=web.Application()
+    app=web.Application(middlewares=[cache_static_mw])
     app.router.add_get("/",handle_index)
     app.router.add_get("/api/user/{uid}",handle_user)
     app.router.add_post("/api/chat",handle_chat)
