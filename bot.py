@@ -1432,12 +1432,12 @@ async def cmd_premium(msg: Message):
             "Ты в VIP-списке — всё бесплатно навсегда 🎉\n\n"
             "🎤 Голосовые ответы · 💬 Безлимит\n"
             "🎭 Все сценки · 📊 Анализ ошибок\n"
-            "👑 VIP личности · 📊 Детальная статистика"
+            "👑 VIP личности · 💎 Все темы"
         ) if ru else (
             "👑 <b>Premium Ultimate activated!</b>\n\n"
             "You're on the VIP list — everything is free forever 🎉\n\n"
             "🎤 Voice · 💬 Unlimited · 🎭 Roleplay\n"
-            "📊 Error analysis · 👑 VIP personas · 📊 Analytics"
+            "📊 Error analysis · 👑 VIP personas · 💎 All themes"
         )
         await msg.answer(text, parse_mode="HTML")
         return
@@ -1482,7 +1482,13 @@ async def cmd_premium(msg: Message):
             callback_data=f"prem_buy:ultimate:{'d' if is_first else 'n'}"
         )],
     ]
-    # Card payment option removed — Telegram Stars only
+    # Add card payment option if Stripe is configured
+    if STRIPE_TOKEN:
+        kb_rows.append([InlineKeyboardButton(
+            text="💳 Оплатить картой" if ru else "💳 Pay by card",
+            callback_data="prem_card_menu"
+        )])
+
     plans_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
 
     text = (
@@ -1501,10 +1507,10 @@ async def cmd_premium(msg: Message):
         "├ 80 сообщений/день\n"
         "├ <b>Умная модель Sonnet</b>\n"
         "├ TOEFL + персональный план\n"
-        "└ 📊 Детальная статистика"
+        "└ 💎 Эксклюзивные темы"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Оплата через Telegram Stars"
+        "⭐ Stars или 💳 карта"
     ) if ru else (
         "💎 <b>ALEX Premium</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
@@ -1521,10 +1527,10 @@ async def cmd_premium(msg: Message):
         "├ 80 messages/day\n"
         "├ <b>Smart Sonnet model</b>\n"
         "├ TOEFL + personal study plan\n"
-        "└ 📊 Detailed analytics"
+        "└ 💎 Exclusive themes"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Payment via Telegram Stars"
+        "⭐ Stars or 💳 card"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
@@ -1567,26 +1573,50 @@ async def cb_prem_buy(cb: CallbackQuery):
         err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
         await bot.send_message(uid, err)
 
-# ══ CARD PAYMENT DISABLED — Telegram Stars only ════════════════════════════
+# ══ CARD PAYMENT MENU ════════════════════════════════════════════════════
 @dp.callback_query(F.data == "prem_card_menu")
 async def cb_card_menu(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    await cb.answer(
-        "⭐ Оплата только через Telegram Stars" if ru else "⭐ Payment via Telegram Stars only",
-        show_alert=True,
-    )
+    await cb.answer()
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"🟢 Basic — $5/мес" if ru else "🟢 Basic — $5/mo", callback_data="prem_card:basic")],
+        [InlineKeyboardButton(text=f"🔵 Pro — $12/мес 🧠" if ru else "🔵 Pro — $12/mo 🧠", callback_data="prem_card:pro")],
+        [InlineKeyboardButton(text=f"💎 Ultimate — $20/мес 🧠" if ru else "💎 Ultimate — $20/mo 🧠", callback_data="prem_card:ultimate")],
+    ])
+    await cb.message.answer("💳 " + ("Выбери план для оплаты картой:" if ru else "Choose a plan to pay by card:"), reply_markup=kb)
 
 @dp.callback_query(F.data.startswith("prem_card:"))
 async def cb_card_buy(cb: CallbackQuery):
+    from aiogram.types import LabeledPrice
+    plan_id = cb.data.split(":")[1]
+    plan = PREMIUM_PLANS.get(plan_id)
+    if not plan or not STRIPE_TOKEN:
+        await cb.answer("Card payments not configured" if not STRIPE_TOKEN else "Invalid plan", show_alert=True)
+        return
+
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    await cb.answer(
-        "⭐ Оплата только через Telegram Stars" if ru else "⭐ Payment via Telegram Stars only",
-        show_alert=True,
-    )
+    label = plan["label_ru"] if ru else plan["label_en"]
+    price_usd = plan["price_usd"]  # in cents
+
+    await cb.answer()
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title=f"ALEX Premium {label}",
+            description=f"ALEX Premium {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}",
+            payload=f"premium:{plan_id}:{uid}",
+            provider_token=STRIPE_TOKEN,
+            currency="USD",
+            prices=[LabeledPrice(label=f"Premium {label}", amount=price_usd)],
+            protect_content=False,
+        )
+    except Exception as e:
+        logger.error(f"card invoice error: {e}")
+        await bot.send_message(uid, "⚠️ " + ("Ошибка. Попробуй оплату через Stars." if ru else "Error. Try Stars payment."))
 
 # ══ PRE-CHECKOUT ══════════════════════════════════════════════════════════
 @dp.pre_checkout_query()
