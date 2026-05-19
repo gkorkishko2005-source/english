@@ -1194,10 +1194,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><img src="icons/path.png" alt="Path"></div>
       <div class="qbt" id="qb6t">Path</div><div class="qbs" id="qb6s">Learning path</div>
     </div>
-    <div class="qb" onclick="openHangman()">
-      <div class="qbi" style="font-size:26px">🎮</div>
-      <div class="qbt" id="qb7t">Hangman</div><div class="qbs" id="qb7s">Word game</div>
-    </div>
   </div>
   <!-- Weekly Challenge -->
   <div class="challenge-card" id="challenge-card" onclick="joinChallenge()">
@@ -1957,8 +1953,6 @@ function applyLang(){
   var qb5s=document.getElementById('qb5s');if(qb5s)qb5s.textContent={ru:'Тест на время',en:'Timed quiz',es:'Quiz cronometrado',de:'Zeitquiz',fr:'Quiz minuté',pt:'Quiz cronometrado',uk:'Тест на час',tr:'Zamanlı test',zh:'限时测试',ar:'اختبار موقت'}[lang]||'Timed quiz';
   var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path',es:'Ruta',de:'Pfad',fr:'Parcours',pt:'Caminho',uk:'Шлях',tr:'Yol',zh:'路径',ar:'مسار'}[lang]||'Path';
   var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal',es:'Elegir meta',de:'Ziel wählen',fr:'Choisir objectif',pt:'Escolher meta',uk:'Обрати ціль',tr:'Hedef seç',zh:'选择目标',ar:'اختر الهدف'}[lang]||'Choose goal';
-  var qb7t=document.getElementById('qb7t');if(qb7t)qb7t.textContent={ru:'Виселица',en:'Hangman',es:'Ahorcado',de:'Galgenmännchen',fr:'Le pendu',pt:'Forca',uk:'Шибениця',tr:'Adam Asmaca',zh:'猜词游戏',ar:'المشنقة'}[lang]||'Hangman';
-  var qb7s=document.getElementById('qb7s');if(qb7s)qb7s.textContent={ru:'Игра в слова',en:'Word game',es:'Juego de palabras',de:'Wortspiel',fr:'Jeu de mots',pt:'Jogo de palavras',uk:'Гра в слова',tr:'Kelime oyunu',zh:'单词游戏',ar:'لعبة الكلمات'}[lang]||'Word game';
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path',es:'🎯 Elige tu camino',de:'🎯 Lernpfad wählen',fr:'🎯 Choisir un parcours',pt:'🎯 Escolher caminho',uk:'🎯 Обери шлях навчання',tr:'🎯 Öğrenme yolunu seç',zh:'🎯 选择学习路径',ar:'🎯 اختر مسار التعلم'}[lang]||'🎯 Learning Path';
   var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
@@ -2102,6 +2096,7 @@ const CHIP_SVGS=[
   `<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`, // roleplay
   `<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>`, // grammar game
   `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M8 7h8M8 11h5"/></svg>`, // stories
+  `<svg viewBox="0 0 24 24"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>`, // hangman
 ];
 
 function buildChips(){
@@ -2113,6 +2108,7 @@ function buildChips(){
     {ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes',pt:'Cenários',uk:'Сценки',tr:'Rol yapma',zh:'角色扮演',ar:'تمثيل أدوار'}[lang]||'Roleplay',
     {ru:'🧩 Собери фразу',en:'🧩 Build phrase',es:'🧩 Arma frase',de:'🧩 Satz bauen',fr:'🧩 Construis phrase',pt:'🧩 Monte frase',uk:'🧩 Склади фразу',tr:'🧩 Cümle kur',zh:'🧩 组句',ar:'🧩 كوّن جملة'}[lang]||'🧩 Build phrase',
     {ru:'📖 Истории',en:'📖 Stories',es:'📖 Historias',de:'📖 Geschichten',fr:'📖 Histoires',pt:'📖 Histórias',uk:'📖 Історії',tr:'📖 Hikayeler',zh:'📖 故事',ar:'📖 قصص'}[lang]||'📖 Stories',
+    {ru:'🎮 Виселица',en:'🎮 Hangman',es:'🎮 Ahorcado',de:'🎮 Galgenmännchen',fr:'🎮 Le pendu',pt:'🎮 Forca',uk:'🎮 Шибениця',tr:'🎮 Adam Asmaca',zh:'🎮 猜词游戏',ar:'🎮 المشنقة'}[lang]||'🎮 Hangman',
   ];
   const fns=[
     ()=>chipAction(()=>sendChip(L.c_corr)),
@@ -2126,6 +2122,7 @@ function buildChips(){
     ()=>openRoleplay(),
     ()=>openGrammarGame(),
     ()=>openStoryMode(),
+    ()=>chipAction(openHangman),
   ];
   texts.forEach((text,i)=>{
     const div=document.createElement('div');
@@ -4663,6 +4660,12 @@ function addLocalXP(amount){
     d.xp=(d.xp||0)+amount;
     window._d=d;
     LS.set('local_xp',d.xp);
+    // Persist: saved_xp (read by loadXP/syncToServer), weekly chart, and server DB
+    saveXP(d.xp);
+    addWeeklyXP(amount);
+    if(API&&window._uid){
+      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:amount})}).catch(function(){});
+    }
     // Animate XP display
     const xpEl=document.getElementById('xpv');
     if(xpEl)animateCount(xpEl,d.xp);
