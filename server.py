@@ -411,9 +411,11 @@ async def handle_add_xp(request):
         return web.json_response({"error":"bad request"},status=400)
     if uid and xp>0:
         try:
-            from database import add_xp
+            from database import add_xp, upsert_user
+            await upsert_user(uid, "Student")  # гарантируем строку, иначе UPDATE затронет 0 строк
             await add_xp(uid,min(xp,100))
-        except Exception: pass
+        except Exception as e:
+            logger.warning(f"add_xp failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── SET PROFESSION ────────────────────────────────────────────────────────────

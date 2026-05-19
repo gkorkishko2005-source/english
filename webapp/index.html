@@ -41,11 +41,11 @@
 #loader.gone{opacity:0;pointer-events:none}
 #loader.hidden{display:none!important}
 .ll{font-size:24px;font-weight:800;color:var(--t1)}.ll span{color:var(--a)}
-.lmasc{width:104px;height:104px;animation:lmfloat 3s ease-in-out infinite}
-.lmasc svg{width:100%;height:100%;display:block;filter:drop-shadow(0 8px 22px rgba(0,212,170,.18))}
-.lm-eyes{transform-origin:120px 130px;animation:lmblink 3.4s ease-in-out infinite}
-@keyframes lmfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes lmblink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.12)}}
+.lboot{display:flex;gap:13px;align-items:center;height:40px}
+.lboot span{width:14px;height:14px;border-radius:50%;background:var(--a);animation:lbjump 1.2s ease-in-out infinite}
+.lboot span:nth-child(2){background:var(--a2);animation-delay:.16s}
+.lboot span:nth-child(3){animation-delay:.32s}
+@keyframes lbjump{0%,75%,100%{transform:translateY(0);opacity:.45}38%{transform:translateY(-18px);opacity:1}}
 .loader-quote{font-size:13px;color:var(--t3);text-align:center;max-width:220px;line-height:1.5;font-style:italic}
 .ldots{display:flex;gap:6px}
 .ld{width:7px;height:7px;border-radius:50%;background:var(--a);opacity:.3;animation:bounce 1s ease-in-out infinite}
@@ -1073,23 +1073,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 </head>
 <body>
 <div id="loader">
-  <div class="lmasc"><svg viewBox="0 0 240 230" xmlns="http://www.w3.org/2000/svg" fill="none" aria-label="PolyGlotty">
-    <defs><linearGradient id="lmH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#33405a"/><stop offset="1" stop-color="#222b3d"/></linearGradient></defs>
-    <rect x="34" y="108" width="20" height="46" rx="10" fill="#2a3447"/>
-    <rect x="186" y="108" width="20" height="46" rx="10" fill="#2a3447"/>
-    <rect x="50" y="66" width="140" height="134" rx="46" fill="url(#lmH)"/>
-    <rect x="66" y="86" width="108" height="96" rx="34" fill="#10151f"/>
-    <g class="lm-eyes" fill="#00d4aa">
-      <ellipse cx="104" cy="130" rx="12" ry="15"/>
-      <ellipse cx="136" cy="130" rx="12" ry="15"/>
-    </g>
-    <path d="M103 156 Q120 171 137 156" stroke="#00d4aa" stroke-width="6" stroke-linecap="round"/>
-    <path d="M106 52 L134 52 L130 67 Q120 72 110 67 Z" fill="#3f74e6"/>
-    <polygon points="120,16 180,40 120,64 60,40" fill="#4f8aff"/>
-    <circle cx="120" cy="40" r="5.5" fill="#345fc4"/>
-    <path d="M180 40 L188 40 L188 64" stroke="#4f8aff" stroke-width="3.5" stroke-linecap="round"/>
-    <circle cx="188" cy="69" r="5.5" fill="#00d4aa"/>
-  </svg></div>
+  <div class="lboot"><span></span><span></span><span></span></div>
   <div class="ll">Lingua<span>Max</span></div>
   <div id="loader-anim"></div>
   <div class="loader-quote" id="loader-quote"></div>
@@ -5002,11 +4986,14 @@ function syncFromServer(){
   fetch(API+'/api/user/'+window._uid).then(function(r){return r.json();}).then(function(d){
     if(!d||d.error)return;
     var stats=LS.getJ('local_stats')||{};var localXP=loadXP();
-    if((d.xp||0)>localXP)saveXP(d.xp);
-    if((d.sessions||0)>(stats.sessions||0))stats.sessions=d.sessions;
-    if((d.words||0)>(stats.words||0))stats.words=d.words;
-    if((d.tests||0)>(stats.tests||0))stats.tests=d.tests;
-    if((d.errors||0)>(stats.errors||0))stats.errors=d.errors;
+    // Монотонная сверка: серверное значение (может отставать/быть 0 из-за гонки
+    // или молчаливого сбоя add_xp) НЕ должно занижать уже заработанный прогресс.
+    d.xp=Math.max(d.xp||0,localXP);
+    saveXP(d.xp);
+    stats.sessions=d.sessions=Math.max(d.sessions||0,stats.sessions||0);
+    stats.words=d.words=Math.max(d.words||0,stats.words||0);
+    stats.tests=d.tests=Math.max(d.tests||0,stats.tests||0);
+    stats.errors=d.errors=Math.max(d.errors||0,stats.errors||0);
     LS.setJ('local_stats',stats);window._d=d;
     try{renderHome(d);}catch(e){}try{renderProgress(d);}catch(e){}
   }).catch(function(){});
