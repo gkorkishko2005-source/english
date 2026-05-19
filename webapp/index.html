@@ -2682,10 +2682,73 @@ function showDW(i){
 function dwNav(d){dwIdx=Math.max(0,Math.min(dwWords.length-1,dwIdx+d));showDW(dwIdx);}
 
 /* ══ FLASHCARDS ══ */
+/* ══ FLASHCARD DECK (client-side, varied vocabulary) ══ */
+const VOCAB_DECK=[
+  {id:1,w:'accomplish',p:'/əˈkʌm.plɪʃ/',tr:{ru:'достигать, выполнять',en:'to succeed in doing something'},ex:'She accomplished her goal in two years.'},
+  {id:2,w:'reluctant',p:'/rɪˈlʌk.tənt/',tr:{ru:'неохотный',en:'unwilling and hesitant'},ex:'He was reluctant to admit the mistake.'},
+  {id:3,w:'thorough',p:'/ˈθʌr.ə/',tr:{ru:'тщательный',en:'complete and careful'},ex:'They did a thorough review of the report.'},
+  {id:4,w:'inevitable',p:'/ɪˈnev.ɪ.tə.bəl/',tr:{ru:'неизбежный',en:'certain to happen'},ex:'Change is inevitable in any company.'},
+  {id:5,w:'genuine',p:'/ˈdʒen.ju.ɪn/',tr:{ru:'подлинный, искренний',en:'real and sincere'},ex:'She showed genuine interest in the topic.'},
+  {id:6,w:'overwhelm',p:'/ˌoʊ.vɚˈwelm/',tr:{ru:'переполнять, ошеломлять',en:'to affect someone very strongly'},ex:'The support overwhelmed her with joy.'},
+  {id:7,w:'efficient',p:'/ɪˈfɪʃ.ənt/',tr:{ru:'эффективный',en:'working well without wasting resources'},ex:'This is a more efficient way to work.'},
+  {id:8,w:'estimate',p:'/ˈes.tɪ.meɪt/',tr:{ru:'оценивать, прикидывать',en:'to make an approximate calculation'},ex:'We estimate the trip will take five hours.'},
+  {id:9,w:'fragile',p:'/ˈfrædʒ.aɪl/',tr:{ru:'хрупкий',en:'easily broken or damaged'},ex:'Handle the box carefully — it is fragile.'},
+  {id:10,w:'remarkable',p:'/rɪˈmɑːr.kə.bəl/',tr:{ru:'замечательный',en:'unusual in a way that surprises you'},ex:'She made remarkable progress this month.'},
+  {id:11,w:'persuade',p:'/pɚˈsweɪd/',tr:{ru:'убеждать',en:'to make someone do something by arguing'},ex:'He persuaded me to join the team.'},
+  {id:12,w:'consequence',p:'/ˈkɑːn.sə.kwens/',tr:{ru:'последствие',en:'a result of an action'},ex:'Every choice has consequences.'},
+  {id:13,w:'sufficient',p:'/səˈfɪʃ.ənt/',tr:{ru:'достаточный',en:'enough for a purpose'},ex:'We have sufficient time to finish.'},
+  {id:14,w:'deliberate',p:'/dɪˈlɪb.ɚ.ət/',tr:{ru:'намеренный',en:'done on purpose'},ex:'It was a deliberate decision, not an accident.'},
+  {id:15,w:'vague',p:'/veɪɡ/',tr:{ru:'расплывчатый',en:'not clear or exact'},ex:'His answer was too vague to help.'},
+  {id:16,w:'acquire',p:'/əˈkwaɪɚ/',tr:{ru:'приобретать',en:'to get or obtain something'},ex:'She acquired fluency through daily practice.'},
+  {id:17,w:'tremendous',p:'/trɪˈmen.dəs/',tr:{ru:'огромный',en:'very great in amount or scale'},ex:'They put in a tremendous effort.'},
+  {id:18,w:'hesitate',p:'/ˈhez.ɪ.teɪt/',tr:{ru:'колебаться',en:'to pause before doing something'},ex:'Do not hesitate to ask for help.'},
+  {id:19,w:'reliable',p:'/rɪˈlaɪ.ə.bəl/',tr:{ru:'надёжный',en:'able to be trusted'},ex:'He is a reliable colleague.'},
+  {id:20,w:'subtle',p:'/ˈsʌt.əl/',tr:{ru:'тонкий, едва заметный',en:'not obvious; delicate'},ex:'There is a subtle difference between the words.'},
+  {id:21,w:'anticipate',p:'/ænˈtɪs.ə.peɪt/',tr:{ru:'предвидеть, ожидать',en:'to expect something will happen'},ex:'We anticipate strong demand next year.'},
+  {id:22,w:'abundant',p:'/əˈbʌn.dənt/',tr:{ru:'обильный',en:'existing in large quantities'},ex:'The region has abundant natural resources.'},
+  {id:23,w:'compromise',p:'/ˈkɑːm.prə.maɪz/',tr:{ru:'компромисс',en:'an agreement where each side gives up something'},ex:'They reached a fair compromise.'},
+  {id:24,w:'diligent',p:'/ˈdɪl.ɪ.dʒənt/',tr:{ru:'усердный',en:'working hard and carefully'},ex:'A diligent student reviews every day.'},
+  {id:25,w:'obstacle',p:'/ˈɑːb.stə.kəl/',tr:{ru:'препятствие',en:'something that blocks progress'},ex:'Fear is the biggest obstacle to learning.'},
+  {id:26,w:'generous',p:'/ˈdʒen.ɚ.əs/',tr:{ru:'щедрый',en:'willing to give freely'},ex:'She is generous with her time.'},
+  {id:27,w:'precise',p:'/prɪˈsaɪs/',tr:{ru:'точный',en:'exact and accurate'},ex:'Give me the precise figures, please.'},
+  {id:28,w:'endure',p:'/ɪnˈdʊr/',tr:{ru:'выдерживать, терпеть',en:'to suffer something difficult patiently'},ex:'They endured many hardships.'},
+  {id:29,w:'spontaneous',p:'/spɑːnˈteɪ.ni.əs/',tr:{ru:'спонтанный',en:'happening without planning'},ex:'It was a spontaneous trip to the coast.'},
+  {id:30,w:'crucial',p:'/ˈkruː.ʃəl/',tr:{ru:'решающий',en:'extremely important'},ex:'Sleep is crucial for memory.'},
+  {id:31,w:'modest',p:'/ˈmɑː.dɪst/',tr:{ru:'скромный',en:'not boastful; moderate'},ex:'He stayed modest despite his success.'},
+  {id:32,w:'urgent',p:'/ˈɝː.dʒənt/',tr:{ru:'срочный',en:'needing immediate action'},ex:'This is an urgent matter.'},
+  {id:33,w:'witness',p:'/ˈwɪt.nəs/',tr:{ru:'свидетель; быть свидетелем',en:'to see something happen'},ex:'She witnessed the whole event.'},
+  {id:34,w:'gradually',p:'/ˈɡrædʒ.u.ə.li/',tr:{ru:'постепенно',en:'slowly over time'},ex:'Your accent improves gradually.'},
+  {id:35,w:'sincere',p:'/sɪnˈsɪr/',tr:{ru:'искренний',en:'honest and true in feelings'},ex:'Please accept my sincere thanks.'},
+  {id:36,w:'demand',p:'/dɪˈmænd/',tr:{ru:'требовать; спрос',en:'to ask firmly; a strong need'},ex:'Customers demand better service.'},
+  {id:37,w:'flexible',p:'/ˈflek.sə.bəl/',tr:{ru:'гибкий',en:'able to change easily'},ex:'My schedule is flexible this week.'},
+  {id:38,w:'achieve',p:'/əˈtʃiːv/',tr:{ru:'добиваться',en:'to successfully reach a goal'},ex:'You can achieve a lot with consistency.'},
+  {id:39,w:'aware',p:'/əˈwer/',tr:{ru:'осведомлённый',en:'knowing that something exists'},ex:'Be aware of common mistakes.'},
+  {id:40,w:'encourage',p:'/ɪnˈkɝː.ɪdʒ/',tr:{ru:'поощрять, ободрять',en:'to give someone confidence to do something'},ex:'Teachers should encourage questions.'},
+  {id:41,w:'frequent',p:'/ˈfriː.kwənt/',tr:{ru:'частый',en:'happening often'},ex:'Make frequent short reviews.'},
+  {id:42,w:'recover',p:'/rɪˈkʌv.ɚ/',tr:{ru:'восстанавливаться',en:'to return to a normal state'},ex:'It took a week to recover from the flu.'},
+  {id:43,w:'valuable',p:'/ˈvæl.jə.bəl/',tr:{ru:'ценный',en:'worth a lot; very useful'},ex:'That was valuable feedback.'},
+  {id:44,w:'apparent',p:'/əˈper.ənt/',tr:{ru:'очевидный',en:'clear and easy to see'},ex:'It became apparent that he was right.'},
+  {id:45,w:'maintain',p:'/meɪnˈteɪn/',tr:{ru:'поддерживать',en:'to keep something at the same level'},ex:'Maintain a daily learning streak.'},
+];
 let cards=[],cIdx=0,flipped=false;
+function buildDeckCards(){
+  // Server-provided due words win if present (back-compat)
+  var sv=(window._d||{}).due_words||[];
+  if(sv.length)return sv.slice();
+  // Otherwise build from local deck via SM-2: new cards + cards whose review is due
+  var sm=getSM2Data();var now=Date.now();var out=[];
+  VOCAB_DECK.forEach(function(v){
+    var st=sm['v_'+v.id];
+    if(!st||(st.next||0)<=now){
+      out.push({id:'v_'+v.id,word:v.w,phonetic:v.p||'',translation:(v.tr&&(v.tr[lang]||v.tr.en))||'',example:v.ex||''});
+    }
+  });
+  out.sort(function(){return Math.random()-0.5;});
+  return out.slice(0,12);
+}
 function initLearn(){
   initDW();
-  cards=(window._d||{}).due_words||[];cIdx=0;flipped=false;
+  cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
   document.getElementById('rrow').classList.add('hid');
@@ -2717,6 +2780,7 @@ async function rate(q){
   toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
   trackM('words');
   bumpStat('words');
+  try{sm2Review(c.id,Math.max(0,q-1));}catch(e){}
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
   cIdx++;showCard(cIdx);
 }
@@ -4049,6 +4113,42 @@ const HANGMAN_WORDS=[
   {w:'CAMERA',h:{ru:'Камера',en:'A device for taking photos'}},
   {w:'FUTURE',h:{ru:'Будущее',en:'The time that has not happened yet'}},
   {w:'MARKET',h:{ru:'Рынок',en:'A place where people buy and sell goods'}},
+  {w:'ADVENTURE',h:{ru:'Приключение',en:'An exciting or unusual experience'}},
+  {w:'COURAGE',h:{ru:'Смелость',en:'The ability to do something that frightens you'}},
+  {w:'FREEDOM',h:{ru:'Свобода',en:'The power to act or speak without restraint'}},
+  {w:'HONESTY',h:{ru:'Честность',en:'The quality of being truthful'}},
+  {w:'PATIENCE',h:{ru:'Терпение',en:'The ability to wait calmly'}},
+  {w:'CURIOSITY',h:{ru:'Любопытство',en:'A strong desire to know or learn'}},
+  {w:'WISDOM',h:{ru:'Мудрость',en:'Knowledge and good judgement from experience'}},
+  {w:'BALANCE',h:{ru:'Равновесие',en:'An even distribution that keeps something steady'}},
+  {w:'PROGRESS',h:{ru:'Прогресс',en:'Forward movement toward a goal'}},
+  {w:'SUCCESS',h:{ru:'Успех',en:'Achieving what you aimed for'}},
+  {w:'FAILURE',h:{ru:'Неудача',en:'A lack of success'}},
+  {w:'OPINION',h:{ru:'Мнение',en:'A personal view or judgement'}},
+  {w:'CULTURE',h:{ru:'Культура',en:'The customs and arts of a society'}},
+  {w:'HISTORY',h:{ru:'История',en:'The study of past events'}},
+  {w:'NATURE',h:{ru:'Природа',en:'The physical world of plants, animals and landscapes'}},
+  {w:'ENERGY',h:{ru:'Энергия',en:'The power to do work or be active'}},
+  {w:'MACHINE',h:{ru:'Машина, механизм',en:'A device that uses power to do a task'}},
+  {w:'NETWORK',h:{ru:'Сеть',en:'A group of connected people or computers'}},
+  {w:'PROBLEM',h:{ru:'Проблема',en:'Something difficult that needs solving'}},
+  {w:'SOLUTION',h:{ru:'Решение',en:'A way to solve a problem'}},
+  {w:'QUESTION',h:{ru:'Вопрос',en:'A sentence asking for information'}},
+  {w:'DECISION',h:{ru:'Решение, выбор',en:'A choice you make after thinking'}},
+  {w:'OPPORTUNITY',h:{ru:'Возможность',en:'A chance for progress or advancement'}},
+  {w:'CHALLENGE',h:{ru:'Вызов',en:'A difficult task that tests your ability'}},
+  {w:'EXPERIENCE',h:{ru:'Опыт',en:'Knowledge gained from doing things'}},
+  {w:'CONFIDENCE',h:{ru:'Уверенность',en:'A feeling of trust in your abilities'}},
+  {w:'IMAGINATION',h:{ru:'Воображение',en:'The ability to form new ideas in the mind'}},
+  {w:'ENVIRONMENT',h:{ru:'Окружающая среда',en:'The natural world around us'}},
+  {w:'TECHNOLOGY',h:{ru:'Технология',en:'Tools and machines from scientific knowledge'}},
+  {w:'COMMUNICATION',h:{ru:'Общение',en:'Sharing information between people'}},
+  {w:'RESPONSIBILITY',h:{ru:'Ответственность',en:'A duty to deal with something'}},
+  {w:'NEIGHBOUR',h:{ru:'Сосед',en:'A person who lives near you'}},
+  {w:'BREAKFAST',h:{ru:'Завтрак',en:'The first meal of the day'}},
+  {w:'AIRPORT',h:{ru:'Аэропорт',en:'A place where planes take off and land'}},
+  {w:'HOSPITAL',h:{ru:'Больница',en:'A place where sick people are treated'}},
+  {w:'WEEKEND',h:{ru:'Выходные',en:'Saturday and Sunday'}},
 ];
 const HM_T={
   title:{ru:'🎮 Виселица',en:'🎮 Hangman',es:'🎮 El ahorcado',de:'🎮 Galgenmännchen',fr:'🎮 Le pendu',pt:'🎮 Forca',uk:'🎮 Шибениця',tr:'🎮 Adam Asmaca',zh:'🎮 猜词游戏',ar:'🎮 لعبة المشنقة'},
