@@ -26,8 +26,9 @@ def build_system(level: str, lang: str, interests: str = "", profession: str = "
     profession_ctx = ""
     if profession:
         profession_ctx = (
-            f"\nSTUDENT PROFESSION: {profession}\n"
-            "When doing roleplays or generating examples, prioritize this professional context."
+            f"\nABOUT THE STUDENT (in their own words): {profession}\n"
+            "Use this to personalize everything: examples, roleplays, vocabulary, topics, "
+            "tone and difficulty. Reference their context naturally when relevant."
         )
 
     slang_rule = (

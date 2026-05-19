@@ -422,14 +422,16 @@ async def handle_add_xp(request):
 async def handle_set_profession(request):
     try:
         body=await request.json()
-        uid=int(body.get("uid",0)); profession=str(body.get("profession",""))[:100]
+        uid=int(body.get("uid",0)); profession=str(body.get("profession",""))[:500]
     except Exception:
         return web.json_response({"error":"bad"},status=400)
     if uid and profession:
         try:
-            from database import set_profession
+            from database import set_profession, upsert_user
+            await upsert_user(uid, "Student")
             await set_profession(uid,profession)
-        except Exception: pass
+        except Exception as e:
+            logger.warning(f"set_profession failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── SET REMINDER ──────────────────────────────────────────────────────────────
