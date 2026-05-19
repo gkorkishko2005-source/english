@@ -1109,35 +1109,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="hsb" id="hsub"></div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
-  <div class="card xpc">
-    <div class="xpt">
-      <div class="xptr">
-        <div class="xtree" id="xtree"></div>
-        <div class="xrnk" id="xrnk">—</div>
-      </div>
-      <div class="xpill" id="xpill">—</div>
-    </div>
-    <div class="xbar"><div class="xfill" id="xfill" style="width:0"></div></div>
-    <div class="xnms"><span id="xcur">0 XP</span><span id="xmax">—</span></div>
-  </div>
-  <div class="stk">
-    <div class="stk-flame">
-      <img src="icons/fire.png" alt="🔥" style="width:40px;height:40px;object-fit:contain">
-    </div>
-    <div class="stkn" id="hstk">0</div>
-    <div><div class="stkt"><span id="stkt-lbl"></span></div><div class="stks" id="stks"></div></div>
-  </div>
-  <div class="s3" style="margin-top:14px">
-    <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs1" style="color:var(--or)">0</div><div class="sbl" id="hs1l"></div></div>
-    <div class="sb" onclick="goTab('learn')">   <div class="sbv" id="hs2" style="color:var(--a2)">0</div><div class="sbl" id="hs2l"></div></div>
-    <div class="sb" onclick="goTab('progress')"><div class="sbv" id="hs3" style="color:var(--a)">0</div><div class="sbl" id="hs3l"></div></div>
-  </div>
   <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="goTab('settings')"></div>
-  <button class="ach-home-btn" onclick="openAchModal()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-    <span id="ach-btn-lbl">Достижения</span>
-    <span class="ach-home-cnt" id="ach-cnt">0/12</span>
-  </button>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
     <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp">+20 XP</div></div>
@@ -1301,8 +1273,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
-  <!-- Achievements -->
-  <!-- Achievements moved to modal -->
+  <!-- Achievements (moved here from Home) -->
+  <button class="ach-home-btn" style="margin-top:6px" onclick="openAchModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span id="ach-btn-lbl">Достижения</span>
+    <span class="ach-home-cnt" id="ach-cnt">0/12</span>
+  </button>
 </div>
 
 <!-- SETTINGS -->
@@ -1352,45 +1328,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <span class="lang-picker-arr">›</span>
   </div>
 
-  <!-- ALEX persona -->
-  <div class="sec"><span id="persona-lbl"></span></div>
-  <div class="pgrid" id="pgrid">
-    <div class="pbtn on" data-p="default" onclick="pickPersona(this)">
-      <div class="pbic"><img src="icons/persona_friendly.png" alt=""></div>
-      <div class="pbn" id="pb1n"></div><div class="pbs" id="pb1s"></div>
-    </div>
-    <div class="pbtn" data-p="professor" onclick="pickPersona(this)">
-      <div class="pbic"><img src="icons/persona_professor.png" alt=""></div>
-      <div class="pbn" id="pb2n"></div><div class="pbs" id="pb2s"></div>
-    </div>
-  </div>
-  <!-- More personas (collapsed) -->
-  <div id="persona-more" style="display:none;margin-top:14px">
-    <div class="pgrid">
-      <div class="pbtn" data-p="gamer" onclick="pickPersona(this)">
-        <div class="pbic"><img src="icons/persona_gamer.png" alt=""></div>
-        <div class="pbn" id="pb3n"></div><div class="pbs" id="pb3s"></div>
-      </div>
-      <div class="pbtn" data-p="brit" onclick="pickPersona(this)">
-        <div class="pbic"><img src="icons/persona_brit.png" alt=""></div>
-        <div class="pbn" id="pb4n"></div><div class="pbs" id="pb4s"></div>
-      </div>
-      <div class="pbtn" data-p="harvard" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-        <div class="pbic"><img src="icons/persona_harvard.png" alt=""></div>
-        <div class="pbn" id="pb5n">Harvard Prof</div><div class="pbs" id="pb5s">Academic style</div>
-        <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
-      </div>
-      <div class="pbtn" data-p="bbc" onclick="isPremium?pickPersona(this):openPremium()" style="position:relative">
-        <div class="pbic"><img src="icons/persona_bbc.png" alt=""></div>
-        <div class="pbn" id="pb6n">BBC Anchor</div><div class="pbs" id="pb6s">British accent</div>
-        <div style="position:absolute;top:6px;right:6px"><span class="premium-badge" style="font-size:8px">PRO</span></div>
-      </div>
-    </div>
-  </div>
-  <div style="text-align:center;margin:-4px 0 12px;cursor:pointer" onclick="togglePersonaMore()">
-    <svg id="persona-arrow" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round" style="width:20px;height:20px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
-  </div>
-
   <!-- Profile -->
   <div class="sec"><span id="prof-sec-lbl"></span></div>
   <div class="slist">
@@ -1398,10 +1335,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="sric sric-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/></svg></div>
       <div class="srbd"><div class="srt" id="slvt"></div><div class="srs" id="slvs"></div></div>
       <div class="srv" id="silv">—</div>
-    </div>
-    <div class="srow" onclick="openProfModal()">
-      <div class="sric sric-green"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
-      <div class="srbd"><div class="srt" id="sproft"></div><div class="srs" id="siprof">—</div></div>
     </div>
     <div class="srow" onclick="openRemModal()">
       <div class="sric sric-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -1412,6 +1345,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Interests -->
   <div class="sec"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
   <div id="intwrap"></div>
+
+  <!-- About you (ALEX adapts to this) -->
+  <div class="sec"><span id="prof-mtit">About you</span></div>
+  <div class="slist" style="padding:12px">
+    <textarea class="minp" id="profinp" rows="5" style="resize:none;min-height:110px;line-height:1.5;margin-top:0"></textarea>
+    <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
+  </div>
   <div style="height:8px"></div>
 </div>
 
@@ -1440,19 +1380,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <span id="tmsg">—</span>
 </div>
 
-  <!-- PROFESSION MODAL -->
-<div class="mov" id="profm" style="display:none" onclick="closeProfModal()">
-  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
-    <div class="mtit" id="prof-mtit">Profession</div>
-    <div class="mbdy">
-      <textarea class="minp" id="profinp" rows="5" style="resize:none;min-height:110px;line-height:1.5"></textarea>
-      <button class="msav" onclick="saveProf()" id="prof-sav">Save</button>
-      <button class="moff"  onclick="closeProfModal()" id="prof-can">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- REMINDER MODAL -->
+  <!-- REMINDER MODAL -->
 <div class="mov" id="remm" style="display:none" onclick="closeRemModal()">
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rem-mtit">Reminder</div>
@@ -1953,24 +1881,13 @@ function applyLang(){
   document.getElementById('set-tit').textContent=L.settings;
   document.getElementById('uilang-lbl').textContent=L.uilang;
   document.getElementById('botlang-lbl').textContent=L.botlang;
-  document.getElementById('persona-lbl').textContent=L.persona;
-  document.getElementById('pb1n').textContent=L.p1n;document.getElementById('pb1s').textContent=L.p1s;
-  document.getElementById('pb2n').textContent=L.p2n;document.getElementById('pb2s').textContent=L.p2s;
-  document.getElementById('pb3n').textContent=L.p3n;document.getElementById('pb3s').textContent=L.p3s;
-  document.getElementById('pb4n').textContent=L.p4n;document.getElementById('pb4s').textContent=L.p4s;
-  // PRO personas
-  var pb5n=document.getElementById('pb5n');if(pb5n)pb5n.textContent='Harvard Prof';
-  var pb5s=document.getElementById('pb5s');if(pb5s)pb5s.textContent={ru:'Академический стиль',en:'Academic style',es:'Estilo académico',de:'Akademischer Stil',fr:'Style académique',pt:'Estilo acadêmico',uk:'Академічний стиль',tr:'Akademik stil',zh:'学术风格',ar:'أسلوب أكاديمي'}[lang]||'Academic style';
-  var pb6n=document.getElementById('pb6n');if(pb6n)pb6n.textContent='BBC Anchor';
-  var pb6s=document.getElementById('pb6s');if(pb6s)pb6s.textContent={ru:'Британский акцент',en:'British accent',es:'Acento británico',de:'Britischer Akzent',fr:'Accent britannique',pt:'Sotaque britânico',uk:'Британський акцент',tr:'İngiliz aksanı',zh:'英式口音',ar:'لهجة بريطانية'}[lang]||'British accent';
   document.getElementById('prof-sec-lbl').textContent=L.myprof;
   document.getElementById('slvt').textContent=L.lvt;document.getElementById('slvs').textContent=L.lvs;
-  document.getElementById('sproft').textContent=L.proft;document.getElementById('sremt').textContent=L.remt;
+  document.getElementById('sremt').textContent=L.remt;
   document.getElementById('int-lbl').textContent=L.ints;document.getElementById('int-edit-lbl').textContent=L.intedit;
-  // Modals
   document.getElementById('prof-mtit').textContent=L.proft;
   document.getElementById('profinp').placeholder=L.profinpp;
-  document.getElementById('prof-sav').textContent=L.save;document.getElementById('prof-can').textContent=L.cancel;
+  document.getElementById('prof-sav').textContent=L.save;
   document.getElementById('rem-mtit').textContent=L.remt;
   document.getElementById('rem-sav').textContent=L.save;document.getElementById('rem-dis').textContent=L.disrem;document.getElementById('rem-can').textContent=L.cancel;
   document.getElementById('cfmt').textContent=L.cfmt;document.getElementById('cfms').textContent=L.cfms;
@@ -2165,13 +2082,6 @@ function goTab(n){
 function refreshSub(){
   const h=new Date().getHours();
   const el=document.getElementById('greet');if(el)el.textContent=L.greet(h);
-  document.getElementById('stkt-lbl').textContent=L.streak_t;
-  document.getElementById('hs1l').textContent=L.streak;
-  document.getElementById('hs2l').textContent=L.words;
-  document.getElementById('hs3l').textContent=L.tests;
-  const s=window._d?.streak||0;
-  const sub=document.getElementById('stks');
-  if(sub)sub.textContent=s>1?`${s} ${lang==='ru'?'дней подряд 🔥':lang==='uk'?'днів поспіль 🔥':'days in a row! 🔥'}`:{ru:'Начни сегодня!',en:'Start today!',es:'¡Empieza hoy!',de:'Heute starten!',fr:"Commencez aujourd'hui !",pt:'Comece hoje!',uk:'Почни сьогодні!',tr:'Bugün başla!',zh:'今天开始！',ar:'ابدأ اليوم!'}[lang]||'Start today!';
 }
 
 /* ══ RENDER HOME ══ */
@@ -2179,18 +2089,6 @@ function renderHome(d){
   refreshSub();
   document.getElementById('hname').textContent=d.name||'Student';
   document.getElementById('hsub').textContent=d.streak>1?`${d.streak} ${lang==='ru'?'дней подряд 🔥':'days in a row! 🔥'}`:{ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
-  const inf=rankOf(d.xp||0),tr=treeOf(d.xp||0);
-  const pct=Math.max(0,Math.round((d.xp-inf.min)/(inf.max-inf.min)*100));
-  const xtEl=document.getElementById('xtree');if(xtEl)xtEl.innerHTML=getTreeSvg(d.xp||0);
-  document.getElementById('xrnk').textContent=inf.r;
-  document.getElementById('xpill').textContent=d.level||'B1';
-  setTimeout(()=>document.getElementById('xfill').style.width=pct+'%',300);
-  document.getElementById('xcur').textContent=`${d.xp||0} XP`;
-  document.getElementById('xmax').textContent=inf.max<9999?`${d.xp||0} / ${inf.max} XP`:'🏆 Max!';
-  document.getElementById('hstk').textContent=d.streak||0;
-  document.getElementById('hs1').textContent=d.streak||0;
-  document.getElementById('hs2').textContent=d.words||0;
-  document.getElementById('hs3').textContent=d.tests||0;
   loadMissions();
   try{renderChallenge();}catch(e){}
   try{renderLeaderboard(d.xp||0);}catch(e){}
@@ -2203,13 +2101,13 @@ function renderProgress(d){
   const pct=Math.max(0,Math.round((d.xp-inf.min)/(inf.max-inf.min)*100));
   document.getElementById('plv').textContent=d.level||'B1';
   document.getElementById('prk').textContent=inf.r+' '+tr.t;
-  document.getElementById('pxp').textContent=`${d.xp||0} XP total`;
   document.getElementById('rlvtxt').textContent=d.level||'B1';
-  document.getElementById('psess').textContent=d.sessions||0;
-  document.getElementById('pwrds').textContent=d.words||0;
-  document.getElementById('ptsts').textContent=d.tests||0;
-  document.getElementById('perrs').textContent=d.errors||0;
-  document.getElementById('pbc').textContent=`${d.xp||0} XP`;
+  animateCount(document.getElementById('pxp'),d.xp||0,900,' XP total');
+  animateCount(document.getElementById('pbc'),d.xp||0,900,' XP');
+  animateCount(document.getElementById('psess'),d.sessions||0,700);
+  animateCount(document.getElementById('pwrds'),d.words||0,700);
+  animateCount(document.getElementById('ptsts'),d.tests||0,700);
+  animateCount(document.getElementById('perrs'),d.errors||0,700);
   document.getElementById('pbm').textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
   setTimeout(()=>document.getElementById('pbfi').style.width=pct+'%',350);
   renderInterests(d.interests||[]);
@@ -2229,10 +2127,6 @@ function drawProgress(){
   const errors=Math.max(d.errors||0,  savedStats.errors||0);
   const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
-  // Animate home stats
-  animateCount(document.getElementById('hs1'), d.streak||0, 600);
-  animateCount(document.getElementById('hs2'), words, 800);
-  animateCount(document.getElementById('hs3'), tests, 600);
 
   // Trial banner
   try{checkTrialBanner();}catch(e){}
@@ -2309,11 +2203,11 @@ function renderInterests(ints){
 }
 
 function updateProfileUI(d){
-  const ep=d.profession||L.no_prof;
   const er=d.remind_time||L.no_rem;
   const sl=document.getElementById('silv');if(sl)sl.textContent=d.level||'—';
-  const sp=document.getElementById('siprof');if(sp)sp.textContent=ep;
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
+  const ab=document.getElementById('profinp');
+  if(ab&&document.activeElement!==ab)ab.value=d.profession||'';
 }
 
 /* ══ XP PERSISTENCE + WEEKLY TRACKING ══ */
@@ -2554,25 +2448,6 @@ function openSpanel(){saveCurSes();renderSList();document.getElementById('spanel
 function closeSpanel(){document.getElementById('spanel').classList.remove('open');}
 
 /* ══ PERSONA ══ */
-const PERSONAS={
-  default:  {prompt:''},
-  professor:{prompt:'You are a strict, formal English professor. Be precise, academic, correct every error carefully. Use formal language. Start each lesson with "Today we shall examine..."'},
-  gamer:    {prompt:'You are a chill gamer friend from London. Use gaming analogies, casual slang (GG, noob, respawn, level up), be fun and energetic. Say "Let\'s grind this vocab!" type things.'},
-  brit:     {prompt:'You are a witty, slightly sarcastic British English tutor. Use British idioms and expressions, be charming and clever. Occasionally say "Brilliant!", "Crikey!", "Spot on!"'},
-  // PREMIUM PERSONAS
-  harvard:  {prompt:'You are a Harvard linguistics professor — brilliant, demanding, but inspiring. Reference academic research, use sophisticated vocabulary, push the student to think deeper. Say things like "According to Chomsky\'s theory..." and "Let me challenge that assumption."'},
-  bbc:      {prompt:'You are a seasoned BBC World Service presenter teaching English. Speak with impeccable RP (Received Pronunciation) style. Use proper broadcast English, reference news events, be authoritative yet warm. Occasionally use BBC-style phrasing like "And now, turning to your English..."'},
-};
-let persona='default';
-
-function pickPersona(el){
-  document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');
-  persona=el.dataset.p;LS.set('app_persona',persona);
-  const lbl=document.getElementById('cplbl');
-  const n=el.querySelector('.pbn');
-  lbl.textContent=persona!=='default'?n?.textContent||persona:'';
-  toast(n?.textContent||persona);
-}
 
 /* ══ MESSAGE FORMATTING ══ */
 function fmtMsg(text){
@@ -2699,12 +2574,11 @@ async function doChat(text){
   try{setChipsBusy(true);}catch(e){}
   addTyping();
   trackM('chat');
-  const pp=PERSONAS[persona]?.prompt||'';
   const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.',ja:'Respond in Japanese.',ko:'Respond in Korean.'}[botLang]||'Respond in Russian.';
   try{
     const r=await fetch(`${API}/api/chat`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({uid:window._uid||0,message:text,persona_prompt:pp,bot_lang:bl}),
+      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl}),
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
@@ -2905,20 +2779,14 @@ function renderAudio(data){
 function openMod(id){const m=document.getElementById(id);if(!m)return;m.style.display='flex';m.classList.remove('cls');}
 function closeMod(id){const m=document.getElementById(id);if(!m)return;m.classList.add('cls');setTimeout(()=>{m.style.display='none';m.classList.remove('cls');},230);}
 
-// About you (free-text profile ALEX adapts to)
-function openProfModal(){
-  openMod('profm');
-  document.getElementById('profinp').value=LS.get('app_profession')||window._d?.profession||'';
-}
-function closeProfModal(){closeMod('profm');}
+// About you — inline free-text profile ALEX adapts to (Settings, bottom)
 async function saveProf(){
   const val=document.getElementById('profinp').value.trim().slice(0,500);
   if(!val){toast(L.profpt,'⚠️');return;}
   LS.set('app_profession',val);
   if(window._d)window._d.profession=val;
-  updateProfileUI(window._d||{});
   if(API&&window._uid)try{await fetch(`${API}/api/set_profession`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,profession:val})});}catch{}
-  closeProfModal();toast(L.psav,'✅');
+  toast(L.psav,'✅');
   setTimeout(()=>sendChip(lang==='ru'?`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`:`About me: ${val}. Remember this and adapt your teaching to it.`),300);
 }
 
@@ -3119,7 +2987,6 @@ function closeCfm(){closeMod('cfmm');}
 
 // Close modals on overlay click (with null checks)
 try{
-document.getElementById('profm')&&(document.getElementById('profm').onclick=function(e){if(e.target===this)closeProfModal();});
 document.getElementById('remm')&&(document.getElementById('remm').onclick=function(e){if(e.target===this)closeRemModal();});
 document.getElementById('cfmm')&&(document.getElementById('cfmm').onclick=function(e){if(e.target===this)closeCfm();});
 document.getElementById('renamem')&&(document.getElementById('renamem').onclick=function(e){if(e.target===this)closeRenameModal();});
@@ -3233,15 +3100,11 @@ function toast(msg,icon='✅'){
 function restoreSettings(d){
   const prof=LS.get('app_profession');
   const rem =LS.get('app_remind');
-  const p   =LS.get('app_persona')||'default';
   if(prof)d.profession=prof;
   if(rem) d.remind_time=rem;
   // XP: take max of server and local (local wins if server returns 0 due to offline)
   const localXP=loadXP();
   if(localXP>0&&localXP>(d.xp||0))d.xp=localXP;
-  persona=p;
-  const el=document.querySelector(`.pbtn[data-p="${p}"]`);
-  if(el){document.querySelectorAll('.pbtn').forEach(b=>b.classList.remove('on'));el.classList.add('on');const n=el.querySelector('.pbn');if(n&&p!=='default')document.getElementById('cplbl').textContent=n.textContent;}
   updateProfileUI(d);
   // Update theme picker button
   setTheme(LS.get('app_theme')||'');
@@ -4586,19 +4449,19 @@ function fireConfetti(duration=3000){
 }
 
 /* ══ ANIMATED COUNTER ══ */
-function animateCount(el,target,duration=800){
+function animateCount(el,target,duration=800,suffix=''){
   if(!el)return;
   const start=parseInt(el.textContent)||0;
-  if(start===target)return;
+  if(start===target){el.textContent=target+suffix;return;}
   const diff=target-start;
   const startTime=performance.now();
   function tick(now){
     const elapsed=now-startTime;
     const progress=Math.min(elapsed/duration,1);
     const eased=1-Math.pow(1-progress,3);// easeOutCubic
-    el.textContent=Math.round(start+diff*eased);
+    el.textContent=Math.round(start+diff*eased)+suffix;
     if(progress<1)requestAnimationFrame(tick);
-    else{el.textContent=target;el.classList.add('num-pop');setTimeout(()=>el.classList.remove('num-pop'),500);}
+    else{el.textContent=target+suffix;el.classList.add('num-pop');setTimeout(()=>el.classList.remove('num-pop'),500);}
   }
   requestAnimationFrame(tick);
 }
@@ -4938,13 +4801,6 @@ function exportProgress(){
 /* ══ COLLAPSIBLE SETTINGS ══ */
 function toggleSettingsTools(){
   var el=document.getElementById('settings-tools');var arr=document.getElementById('tools-arrow');
-  if(!el)return;
-  if(el.style.display==='none'){el.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
-  else{el.style.display='none';if(arr)arr.style.transform='';}
-  haptic('light');
-}
-function togglePersonaMore(){
-  var el=document.getElementById('persona-more');var arr=document.getElementById('persona-arrow');
   if(!el)return;
   if(el.style.display==='none'){el.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
   else{el.style.display='none';if(arr)arr.style.transform='';}

@@ -165,7 +165,6 @@ async def handle_chat(request):
     except Exception:
         system = f"You are ALEX, a friendly English tutor. The student's level is {level}."
 
-    persona_prompt = str(body.get("persona_prompt", ""))
     bl = str(body.get("bot_lang", "Respond in Russian."))
 
     fmt = (
@@ -178,8 +177,6 @@ async def handle_chat(request):
         "- NEVER use HTML tags\n"
         "- Keep responses concise and engaging\n"
     )
-    if persona_prompt:
-        system = persona_prompt + "\n\n" + system
     system = system + fmt + "\n" + bl
 
     # Check premium for model selection and limits
