@@ -887,6 +887,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rpe{font-size:20px;line-height:1;margin-bottom:4px}
 .rpt{font-size:13px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums}
 .rpl{font-size:10px;color:var(--t2);margin-top:1px;text-transform:uppercase;letter-spacing:.3px}
+/* ══ COMPACT SETTINGS GRID + ACCORDIONS ══ */
+.set-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.set-grid-2 .dl-toggle,.set-grid-2 .lang-picker-btn{margin-bottom:0;padding:11px 12px;gap:8px}
+.set-grid-2 .dl-toggle-text,.set-grid-2 .lang-picker-name{font-size:12.5px}
+.set-grid-2 .dl-toggle-icon{font-size:17px}
+.set-grid-2 .lang-flag-big{font-size:18px}
+.set-grid-2 .dl-switch{transform:scale(.85);margin-left:auto}
+.set-acc{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.set-acc>summary{padding:13px 14px;font-size:13px;font-weight:600;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none}
+.set-acc>summary::-webkit-details-marker{display:none}
+.set-acc>summary::after{content:'›';margin-left:auto;font-size:20px;color:var(--t3);transition:transform .25s;line-height:1}
+.set-acc[open]>summary::after{transform:rotate(90deg)}
+.set-acc>summary .set-acc-ico{width:26px;height:26px;border-radius:8px;background:rgba(var(--ar),.10);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.set-acc-bd{padding:0 14px 14px}
 /* ══ ONBOARDING CHAT CARD ══ */
 .onb-card{padding:14px 14px 12px;background:linear-gradient(150deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.25);border-radius:var(--r);margin:2px 0}
 .onb-tit{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:6px}
@@ -1336,35 +1350,36 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <button class="gift-btn" onclick="openGiftSub()"><div class="gbi"><svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8"/><rect x="2.5" y="7" width="19" height="5" rx="1"/><path d="M12 7v14"/><path d="M12 7S10.5 3 8 3 5 5.5 7 7M12 7s1.5-4 4-4 3 2.5 1 4"/></svg></div><span id="gift-lbl">Gift Premium</span></button>
   </div>
 
-  <!-- Dark/Light mode toggle -->
-  <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
-    <div class="dl-toggle-icon" id="dl-icon">🌙</div>
-    <div class="dl-toggle-text" id="dl-text">Dark mode</div>
-    <div class="dl-switch" id="dl-switch"></div>
-  </div>
-  <div class="dl-toggle" id="sfx-toggle" onclick="toggleSfx()">
-    <div class="dl-toggle-icon" id="sfx-icon">🔊</div>
-    <div class="dl-toggle-text" id="sfx-text">Sound effects</div>
-    <div class="dl-switch on" id="sfx-switch"></div>
-  </div>
-
-  <!-- Interface language picker -->
-  <div class="sec"><span id="uilang-lbl"></span></div>
-  <div class="lang-picker-btn" onclick="openLangPicker('ui')">
-    <span class="lang-flag-big" id="ui-lang-flag">🇷🇺</span>
-    <div class="lang-picker-name" id="ui-lang-name">Русский</div>
-    <span class="lang-picker-arr">›</span>
+  <!-- Compact quick-toggles row: Dark + Sound -->
+  <div class="set-grid-2">
+    <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
+      <div class="dl-toggle-icon" id="dl-icon">🌙</div>
+      <div class="dl-toggle-text" id="dl-text">Dark</div>
+      <div class="dl-switch" id="dl-switch"></div>
+    </div>
+    <div class="dl-toggle" id="sfx-toggle" onclick="toggleSfx()">
+      <div class="dl-toggle-icon" id="sfx-icon">🔊</div>
+      <div class="dl-toggle-text" id="sfx-text">Sound</div>
+      <div class="dl-switch on" id="sfx-switch"></div>
+    </div>
   </div>
 
-  <!-- Bot response language picker -->
-  <div class="sec"><span id="botlang-lbl"></span></div>
-  <div class="lang-picker-btn" onclick="openLangPicker('bot')">
-    <span class="lang-flag-big" id="bot-lang-flag">🇷🇺</span>
-    <div class="lang-picker-name" id="bot-lang-name">Русский</div>
-    <span class="lang-picker-arr">›</span>
+  <!-- Compact languages row: UI + Bot -->
+  <div class="sec"><span id="lang-sec-lbl">Languages</span></div>
+  <div class="set-grid-2">
+    <div class="lang-picker-btn" onclick="openLangPicker('ui')">
+      <span class="lang-flag-big" id="ui-lang-flag">🇷🇺</span>
+      <div class="lang-picker-name" id="ui-lang-name">Русский</div>
+      <span class="lang-picker-arr">›</span>
+    </div>
+    <div class="lang-picker-btn" onclick="openLangPicker('bot')">
+      <span class="lang-flag-big" id="bot-lang-flag">🇷🇺</span>
+      <div class="lang-picker-name" id="bot-lang-name">Русский</div>
+      <span class="lang-picker-arr">›</span>
+    </div>
   </div>
 
-  <!-- Profile -->
+  <!-- Profile: reminder + interests inline -->
   <div class="sec"><span id="prof-sec-lbl"></span></div>
   <div class="slist">
     <div class="srow" onclick="openRemModal()">
@@ -1373,27 +1388,31 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
   </div>
 
+  <!-- About you (collapsed by default to save space) -->
+  <details class="set-acc">
+    <summary><span class="set-acc-ico">👤</span><span id="prof-mtit">About you</span></summary>
+    <div class="set-acc-bd">
+      <textarea class="minp" id="profinp" rows="3" style="resize:none;min-height:78px;line-height:1.5;margin-top:0"></textarea>
+      <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
+    </div>
+  </details>
+
+  <!-- Free API key (Gemini BYOK) — collapsed -->
+  <details class="set-acc">
+    <summary><span class="set-acc-ico">🔑</span><span id="byok-lbl">Free API key (Gemini)</span></summary>
+    <div class="set-acc-bd">
+      <input id="byokinp" class="minp" type="text" autocomplete="off" spellcheck="false"
+        placeholder="AIza…" oninput="saveByok(this.value)" style="margin-top:0;font-family:ui-monospace,Menlo,monospace;font-size:13px">
+      <div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.5">
+        <span id="byok-hint">Paste a free Google Gemini key — get unlimited messages on Free tier.</span><br>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">🔑 aistudio.google.com/app/apikey</a>
+      </div>
+    </div>
+  </details>
+
   <!-- Interests -->
   <div class="sec"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
   <div id="intwrap"></div>
-
-  <!-- Free API key (Gemini BYOK) -->
-  <div class="sec"><span id="byok-lbl">Free API key (Gemini)</span></div>
-  <div class="slist" style="padding:12px">
-    <input id="byokinp" class="minp" type="text" autocomplete="off" spellcheck="false"
-      placeholder="AIza…" oninput="saveByok(this.value)" style="margin-top:0;font-family:ui-monospace,Menlo,monospace;font-size:13px">
-    <div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.5">
-      <span id="byok-hint">Paste a free Google Gemini key — get unlimited messages on Free tier.</span><br>
-      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">🔑 aistudio.google.com/app/apikey</a>
-    </div>
-  </div>
-
-  <!-- About you (ALEX adapts to this) -->
-  <div class="sec"><span id="prof-mtit">About you</span></div>
-  <div class="slist" style="padding:12px">
-    <textarea class="minp" id="profinp" rows="5" style="resize:none;min-height:110px;line-height:1.5;margin-top:0"></textarea>
-    <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
-  </div>
   <div style="height:8px"></div>
 </div>
 
@@ -1908,8 +1927,8 @@ function applyLang(){
   document.getElementById('toefll').textContent=L.notoefl;
   // Settings
   document.getElementById('set-tit').textContent=L.settings;
-  document.getElementById('uilang-lbl').textContent=L.uilang;
-  document.getElementById('botlang-lbl').textContent=L.botlang;
+  var lsl=document.getElementById('lang-sec-lbl');
+  if(lsl)lsl.textContent={ru:'Языки',en:'Languages',es:'Idiomas',de:'Sprachen',fr:'Langues',pt:'Idiomas',uk:'Мови',tr:'Diller',zh:'语言',ar:'اللغات'}[lang]||'Languages';
   document.getElementById('prof-sec-lbl').textContent=L.myprof;
   document.getElementById('sremt').textContent=L.remt;
   document.getElementById('int-lbl').textContent=L.ints;document.getElementById('int-edit-lbl').textContent=L.intedit;
