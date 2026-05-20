@@ -345,7 +345,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .qb:hover{transform:translateY(-2px);border-color:rgba(var(--ar),.2)}
 @keyframes qb-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .qb:nth-child(2){animation-delay:.5s}.qb:nth-child(3){animation-delay:1s}.qb:nth-child(4){animation-delay:1.5s}
-.qb:active{transform:scale(.94)!important;animation:none}
+.qb:active{transform:scale(.94)!important}
 .qbi{font-size:23px;margin-bottom:8px;display:block}.qbt{font-size:13px;font-weight:700;margin-bottom:2px}.qbs{font-size:11px;color:var(--t2)}
 .qa{border-color:rgba(var(--ar),.2);background:linear-gradient(140deg,rgba(var(--ar),.07),var(--e1))}
 .qb2{border-color:rgba(0,212,170,.2);background:linear-gradient(140deg,rgba(0,212,170,.07),var(--e1))}
@@ -493,6 +493,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .gift-btn:active{transform:scale(.98)}
 .gift-btn .gbi{width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .gift-btn .gbi img{width:100%;height:100%;object-fit:contain}
+.gift-btn .gbi svg{width:24px;height:24px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gift-btn:active{transform:scale(.97)}
 
 /* ══ IDIOM OF THE DAY ══ */
@@ -918,7 +919,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ QUICK START — icon backgrounds ══ */
 .qbi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:13px;margin-bottom:11px;overflow:hidden}
 .qbi img{width:100%;height:100%;object-fit:contain}
-.qbi svg{width:26px;height:26px}
+.qbi svg{width:27px;height:27px;stroke:var(--a);transition:transform .28s cubic-bezier(.34,1.56,.64,1)}
+.qb:hover .qbi svg{transform:scale(1.18) rotate(-5deg)}
+.qb:active .qbi svg{transform:scale(.92)}
 .qa .qbi{background:rgba(var(--ar),.15)} .qa .qbi svg{stroke:var(--a)}
 .qb2 .qbi{background:rgba(0,212,170,.14)} .qb2 .qbi svg{stroke:var(--a2)}
 .qc .qbi{background:rgba(255,184,48,.14)}  .qc .qbi svg{stroke:var(--gd)}
@@ -950,7 +953,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .emico-wrap{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,rgba(var(--ar),.15),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:float 3s ease-in-out infinite}
 .emico-wrap svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;stroke-linecap:round}
 @media(max-width:420px){body{display:block}#app{max-width:100%;height:100vh;border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
-@media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px);animation:none!important}}
+@media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px)}}
 
 /* ══ PREMIUM ══ */
 .premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#d4a843,#ffb830);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
@@ -1120,27 +1123,27 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="qs-lbl"></span></div>
   <div class="qg">
     <div class="qb qa"  onclick="openChat('lesson')">
-      <div class="qbi"><img src="icons/grammar.png" alt="Grammar"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5v14"/><path d="M3 5.2c0-.55.45-1 1-1h4.5a3 3 0 013 3v13a2.5 2.5 0 00-2.5-2.5H4a1 1 0 01-1-1V5.2z"/><path d="M21 5.2c0-.55-.45-1-1-1h-4.5a3 3 0 00-3 3v13a2.5 2.5 0 012.5-2.5H20a1 1 0 001-1V5.2z"/></svg></div>
       <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
     </div>
     <div class="qb qb2" onclick="openRoleplay()">
-      <div class="qbi"><img src="icons/roleplay.png" alt="Roleplay"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8l-4 3v-3H5a2 2 0 01-2-2V6z"/><path d="M16.5 10H19a2 2 0 012 2v4a2 2 0 01-2 2h-1v3l-3.5-3H13"/></svg></div>
       <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
     </div>
     <div class="qb qc"  onclick="startAudio()">
-      <div class="qbi"><img src="icons/toefl.png" alt="TOEFL"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.6"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.6"/></svg></div>
       <div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div>
     </div>
     <div class="qb qd"  onclick="openTextChecker()">
-      <div class="qbi"><img src="icons/textcheck.png" alt="Text check"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2.2 2.2 4.3-4.4"/></svg></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
     <div class="qb" onclick="openDrillPicker()">
-      <div class="qbi"><img src="icons/drill.png" alt="Drill"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 2.5h5"/><path d="M19.5 6l1.4-1.4"/></svg></div>
       <div class="qbt" id="qb5t">Drill</div><div class="qbs" id="qb5s">Grammar quiz</div>
     </div>
     <div class="qb" onclick="openPathPicker()">
-      <div class="qbi"><img src="icons/path.png" alt="Path"></div>
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 5h11l-2.3 3.2L17 11.5H6"/><circle cx="6" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg></div>
       <div class="qbt" id="qb6t">Path</div><div class="qbs" id="qb6s">Learning path</div>
     </div>
   </div>
@@ -1159,7 +1162,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- CHAT -->
 <div class="screen" id="s-chat">
   <div class="chdr">
-    <div class="cav"><img src="alex-avatar.png" alt="ALEX" style="width:36px;height:36px;border-radius:50%;object-fit:cover"></div>
+    <div class="cav" style="width:36px;height:36px"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><circle cx="20" cy="20" r="20" fill="#4f8aff"/><rect x="10.5" y="14" width="19" height="15" rx="6" fill="#0e1626"/><circle cx="16" cy="21" r="2.3" fill="#00d4aa"/><circle cx="24" cy="21" r="2.3" fill="#00d4aa"/><path d="M16 25.6c2.4 2 5.6 2 8 0" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"/><path d="M12.5 12.5L27.5 12.5L20 8.2Z" fill="#fff"/><rect x="19" y="8" width="2" height="4.5" fill="#fff"/></svg></div>
     <div><div class="chnm">ALEX</div><div class="chst"><span class="odot"></span><span id="online-lbl"></span></div><div class="cplbl" id="cplbl"></div></div>
     <div class="hbtns">
       <button class="hbtn" onclick="openSpanel()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
@@ -1186,14 +1189,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <!-- CARDS panel -->
   <div id="learn-cards-panel">
-    <div class="sec"><span id="dw-sec-lbl"></span><span class="seca" onclick="openChat('words_new')" id="dw-add-lbl"></span></div>
-    <div class="card" id="dwcard">
-      <button class="dw-speak" id="dw-speak" onclick="speakDW()"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></button>
-      <div class="dwbadge" id="dwbadge">WORD 1/5</div>
-      <div class="dwword" id="dwword">—</div><div class="dwph" id="dwph"></div>
-      <div class="dwtr"   id="dwtr">—</div><div class="dwex" id="dwex"></div>
-      <div class="dwnav"><button class="dwarr" id="dwprv" onclick="dwNav(-1)">‹</button><div class="dwdots" id="dwdots"></div><button class="dwarr" id="dwnxt" onclick="dwNav(1)">›</button></div>
-    </div>
     <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
     <div id="lmain">
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
@@ -1299,10 +1294,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <svg id="tools-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
   </div>
   <div id="settings-tools" style="display:none;overflow:hidden;transition:max-height .3s ease">
-    <button class="gift-btn" onclick="shareProgress()"><div class="gbi"><img src="icons/tool_share.png" alt=""></div><span id="share-lbl">Share progress</span></button>
-    <button class="gift-btn" onclick="exportProgress()"><div class="gbi"><img src="icons/tool_export.png" alt=""></div><span id="export-lbl">Export report</span></button>
-    <button class="gift-btn" onclick="generateCertificate()"><div class="gbi"><img src="icons/tool_certificate.png" alt=""></div><span id="cert-lbl">Certificate</span></button>
-    <button class="gift-btn" onclick="openGiftSub()"><div class="gbi"><img src="icons/tool_gift.png" alt=""></div><span id="gift-lbl">Gift Premium</span></button>
+    <button class="gift-btn" onclick="shareProgress()"><div class="gbi"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div><span id="share-lbl">Share progress</span></button>
+    <button class="gift-btn" onclick="exportProgress()"><div class="gbi"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/></svg></div><span id="export-lbl">Export report</span></button>
+    <button class="gift-btn" onclick="generateCertificate()"><div class="gbi"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M9 14.5L8 22l4-2.2L16 22l-1-7.5"/></svg></div><span id="cert-lbl">Certificate</span></button>
+    <button class="gift-btn" onclick="openGiftSub()"><div class="gbi"><svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8"/><rect x="2.5" y="7" width="19" height="5" rx="1"/><path d="M12 7v14"/><path d="M12 7S10.5 3 8 3 5 5.5 7 7M12 7s1.5-4 4-4 3 2.5 1 4"/></svg></div><span id="gift-lbl">Gift Premium</span></button>
   </div>
 
   <!-- Dark/Light mode toggle -->
@@ -1368,7 +1363,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- NOTIFICATION -->
 <div class="notif" id="notif" onclick="notifTap()" style="display:none">
-  <div class="navic" id="navic" onclick="notifAvTap(event)"><img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:50%;object-fit:cover"></div>
+  <div class="navic" id="navic" onclick="notifAvTap(event)"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><circle cx="20" cy="20" r="20" fill="#4f8aff"/><rect x="10.5" y="14" width="19" height="15" rx="6" fill="#0e1626"/><circle cx="16" cy="21" r="2.3" fill="#00d4aa"/><circle cx="24" cy="21" r="2.3" fill="#00d4aa"/><path d="M16 25.6c2.4 2 5.6 2 8 0" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"/><path d="M12.5 12.5L27.5 12.5L20 8.2Z" fill="#fff"/><rect x="19" y="8" width="2" height="4.5" fill="#fff"/></svg></div>
   <div style="flex:1;min-width:0"><div class="nnm">ALEX <span class="ndot"></span></div><div class="ntxt" id="ntxt"></div><div class="ncta" id="ncta"></div></div>
   <button class="nx" onclick="dismissNotif(event)" aria-label="Close">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
@@ -1385,28 +1380,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rem-mtit">Reminder</div>
     <div class="mbdy" style="padding-bottom:8px">
-      <!-- Display selected time -->
-      <div class="time-selected-display" id="time-display">08:00</div>
-      <div class="time-selected-sub" id="time-sub"></div>
-      <!-- Drum labels -->
-      <div class="time-drum-labels">
-        <div class="time-drum-label" id="rem-lbl-h">Hour</div>
-        <div style="width:24px"></div>
-        <div class="time-drum-label" id="rem-lbl-m">Minute</div>
-      </div>
-      <!-- Drum picker -->
-      <div class="time-drum-wrap">
-        <div class="time-drum-sel"></div>
-        <!-- Hours -->
-        <div class="time-drum-col" id="drum-h">
-          <div class="time-drum-inner" id="drum-h-inner"></div>
-        </div>
-        <div class="time-drum-sep">:</div>
-        <!-- Minutes -->
-        <div class="time-drum-col" id="drum-m">
-          <div class="time-drum-inner" id="drum-m-inner"></div>
-        </div>
-      </div>
+      <input type="time" id="rem-time" class="minp" value="08:00" style="font-size:30px;text-align:center;padding:18px 12px;letter-spacing:2px;font-weight:700">
       <button class="msav" onclick="saveRem()" id="rem-sav" style="margin-top:16px">Save</button>
       <button class="moff" onclick="disableRem()" id="rem-dis">🔕 Disable</button>
       <button class="moff" onclick="closeRemModal()" id="rem-can">Cancel</button>
@@ -1861,8 +1835,6 @@ function applyLang(){
   // Learn
   document.getElementById('ltit-lbl').textContent=L.fc;
   try{var lsub=document.getElementById('learn-sub');if(lsub){var rc=getReviewCount();lsub.textContent=rc>0?({ru:rc+' карточек на повторение',en:rc+' cards due for review'}[lang]||rc+' cards due'):({ru:'Изучай слова и проходи уроки',en:'Study words and complete lessons',es:'Estudia palabras y completa lecciones',de:'Wörter lernen und Lektionen abschließen',fr:'Étudie les mots et termine les leçons',pt:'Estude palavras e complete lições',uk:'Вивчай слова та проходь уроки',tr:'Kelime öğren ve dersleri tamamla',zh:'学习单词和完成课程',ar:'ادرس الكلمات وأكمل الدروس'}[lang]||'');}}catch(e){}
-  document.getElementById('dw-sec-lbl').textContent=L.dw;
-  document.getElementById('dw-add-lbl').textContent=L.dwa;
   document.getElementById('rev-lbl').textContent=L.rev;
   document.getElementById('fchint').textContent=L.tap_flip+' ↕';
   document.getElementById('fcbg2').textContent=L.translation;
@@ -1968,6 +1940,7 @@ function setBotLang(l){
 }
 
 /* ══ CHIPS ══ */
+const ALEX_SVG='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><circle cx="20" cy="20" r="20" fill="#4f8aff"/><rect x="10.5" y="14" width="19" height="15" rx="6" fill="#0e1626"/><circle cx="16" cy="21" r="2.3" fill="#00d4aa"/><circle cx="24" cy="21" r="2.3" fill="#00d4aa"/><path d="M16 25.6c2.4 2 5.6 2 8 0" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"/><path d="M12.5 12.5L27.5 12.5L20 8.2Z" fill="#fff"/><rect x="19" y="8" width="2" height="4.5" fill="#fff"/></svg>';
 const CHIP_SVGS=[
   `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, // correct
   `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`, // grammar
@@ -2509,7 +2482,7 @@ function renderMsg(role,text,save=true){
   const av=document.createElement('div');av.className='mav';
   av.innerHTML=role==='user'
     ?'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>'
-    :'<img src="alex-avatar.png" alt="A" style="width:28px;height:28px;border-radius:9px;object-fit:cover">';
+    :'<span style="width:28px;height:28px;display:inline-block">'+ALEX_SVG+'</span>';
   const mw=document.createElement('div');mw.className='mwrap';
   const bub=document.createElement('div');bub.className='mbub';
   if(role==='user')bub.textContent=text;
@@ -2549,7 +2522,7 @@ function addTyping(){
   const w=document.getElementById('cmsgs');
   const d=document.createElement('div');d.className='msg bot';d.id='typing';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML=ALEX_SVG;
   const mw=document.createElement('div');mw.className='mwrap';
   const tw=document.createElement('div');tw.className='typw';
   tw.innerHTML='<span></span><span></span><span></span>';
@@ -2646,41 +2619,6 @@ function toggleMic(){
 }
 
 /* ══ DAILY WORDS ══ */
-let dwWords=[],dwIdx=0;
-function initDW(){
-  const d=window._d||{};
-  const today=new Date().toDateString();
-  const sv=LS.getJ('daily_words');
-  if(sv&&sv.date===today&&sv.words?.length){dwWords=sv.words;}
-  else{
-    dwWords=(d.due_words||[]).slice(0,5);
-    if(!dwWords.length)dwWords=[
-      {word:'Perseverance',phonetic:'/ˌpɜːsɪˈvɪərəns/',translation:{ru:'Настойчивость',en:'Perseverance',es:'Perseverancia',de:'Beharrlichkeit',fr:'Persévérance',pt:'Perseverança',uk:'Наполегливість',tr:'Azim',zh:'毅力',ar:'المثابرة'}[lang]||'Perseverance',example:'Success requires perseverance.'},
-      {word:'Eloquent',phonetic:'/ˈeləkwənt/',translation:{ru:'Красноречивый',en:'Eloquent',es:'Elocuente',de:'Eloquent',fr:'Éloquent',pt:'Eloquente',uk:'Красномовний',tr:'Belagatlı',zh:'口才好的',ar:'بليغ'}[lang]||'Eloquent',example:'She gave an eloquent speech.'},
-      {word:'Resilient',phonetic:'/rɪˈzɪliənt/',translation:{ru:'Стойкий',en:'Resilient',es:'Resiliente',de:'Resilient',fr:'Résilient',pt:'Resiliente',uk:'Стійкий',tr:'Dayanıklı',zh:'有韧性的',ar:'صامد'}[lang]||'Resilient',example:'Children are remarkably resilient.'},
-      {word:'Ambiguous',phonetic:'/æmˈbɪɡjuəs/',translation:{ru:'Неоднозначный',en:'Ambiguous',es:'Ambiguo',de:'Zweideutig',fr:'Ambigu',pt:'Ambíguo',uk:'Неоднозначний',tr:'Belirsiz',zh:'模棱两可的',ar:'غامض'}[lang]||'Ambiguous',example:'The message was ambiguous.'},
-      {word:'Diligent',phonetic:'/ˈdɪlɪdʒənt/',translation:{ru:'Прилежный',en:'Diligent',es:'Diligente',de:'Fleißig',fr:'Diligent',pt:'Diligente',uk:'Старанний',tr:'Çalışkan',zh:'勤奋的',ar:'مجتهد'}[lang]||'Diligent',example:'She is a diligent student.'},
-    ];
-    LS.setJ('daily_words',{date:today,words:dwWords});
-  }
-  dwIdx=0;showDW(0);
-  const dots=document.getElementById('dwdots');
-  dots.innerHTML=dwWords.map((_,i)=>`<div class="dwdot${i===0?' on':''}"></div>`).join('');
-}
-function showDW(i){
-  const w=dwWords[i];if(!w)return;
-  document.getElementById('dwbadge').textContent=`${L.dw||'WORD'} ${i+1}/${dwWords.length}`;
-  document.getElementById('dwword').textContent=w.word||'—';
-  document.getElementById('dwph').textContent=w.phonetic||'';
-  document.getElementById('dwtr').textContent=typeof w.translation==='object'?(w.translation[lang]||w.translation.en||JSON.stringify(w.translation)):w.translation||'—';
-  document.getElementById('dwex').textContent=w.example||'';
-  document.querySelectorAll('.dwdot').forEach((d,j)=>d.classList.toggle('on',j===i));
-  document.getElementById('dwprv').disabled=i===0;
-  document.getElementById('dwnxt').disabled=i===dwWords.length-1;
-  if(i===dwWords.length-1)trackM('dwords');
-}
-function dwNav(d){dwIdx=Math.max(0,Math.min(dwWords.length-1,dwIdx+d));showDW(dwIdx);}
-
 /* ══ FLASHCARDS ══ */
 /* ══ FLASHCARD DECK (client-side, varied vocabulary) ══ */
 const VOCAB_DECK=[
@@ -2744,10 +2682,9 @@ function buildDeckCards(){
     }
   });
   out.sort(function(){return Math.random()-0.5;});
-  return out.slice(0,12);
+  return out.slice(0,5);
 }
 function initLearn(){
-  initDW();
   cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
@@ -2778,11 +2715,20 @@ async function rate(q){
   haptic(q>=3?'success':'light');
   const c=cards[cIdx];
   toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
-  trackM('words');
+  trackM('words');trackM('dwords');
   bumpStat('words');
   try{sm2Review(c.id,Math.max(0,q-1));}catch(e){}
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
-  cIdx++;showCard(cIdx);
+  cIdx++;
+  if(q<3){
+    const w=c.word||'';
+    const req=lang==='ru'
+      ?`Объясни простыми словами английское слово «${w}»: значение, как и когда его использовать, 2-3 примера предложений и типичные ошибки.`
+      :`Explain the English word "${w}" simply: its meaning, how and when to use it, 2-3 example sentences, and common mistakes.`;
+    sendChip(req);
+    return;
+  }
+  showCard(cIdx);
 }
 
 /* ══ AUDIO TASK ══ */
@@ -2790,7 +2736,7 @@ async function startAudio(){
   if(busy)return;goTab('chat');
   const gd=document.createElement('div');gd.className='msg bot';gd.id='audgen';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML=ALEX_SVG;
   const mw=document.createElement('div');mw.className='mwrap';
   const ag=document.createElement('div');ag.className='agen2';
   ag.innerHTML=`<div class="agspin"></div><span style="font-size:13px;color:var(--t2)">${L.audgen}</span>`;
@@ -2808,7 +2754,7 @@ function renderAudio(data){
   const wrap=document.getElementById('cmsgs');
   const md=document.createElement('div');md.className='msg bot';
   const av=document.createElement('div');av.className='mav';
-  av.innerHTML='<img src="alex-avatar.png" alt="A" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">';
+  av.innerHTML=ALEX_SVG;
   const mw=document.createElement('div');mw.className='mwrap';
   const ac=document.createElement('div');ac.className='acrd';
   const lbl={ru:'🎧 АУДИРОВАНИЕ',en:'🎧 LISTENING',es:'🎧 ESCUCHA',de:'🎧 HÖREN',fr:'🎧 ÉCOUTE',pt:'🎧 ESCUTA',uk:'🎧 АУДІЮВАННЯ',tr:'🎧 DİNLEME',zh:'🎧 听力',ar:'🎧 استماع'}[lang]||'🎧 LISTENING';
@@ -2856,182 +2802,26 @@ async function saveProf(){
 
 // Reminder
 /* ══ iOS DRUM PICKER LOGIC ══ */
-let drumH=8,drumM=0,selTime='';
+let selTime='';
 
 function openRemModal(){
   openMod('remm');
-  const lh=document.getElementById('rem-lbl-h');
-  const lm=document.getElementById('rem-lbl-m');
-  if(lh)lh.textContent=lang==='ru'?'Часы':'Hour';
-  if(lm)lm.textContent=lang==='ru'?'Минуты':'Minute';
-  const cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
-  const p=cur.split(':');
-  drumH=Math.max(0,Math.min(23,parseInt(p[0]||'8',10)));
-  const mRaw=parseInt(p[1]||'0',10);
-  drumM=Math.min(11,Math.round(mRaw/5));
-  setTimeout(()=>{
-    initDrumCol('drum-h','drum-h-inner',drumH,24,true);
-    initDrumCol('drum-m','drum-m-inner',drumM,12,false);
-    updateTimeDisplay();
-  },80);
+  let cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
+  if(!/^\d{1,2}:\d{2}$/.test(cur))cur='08:00';
+  const inp=document.getElementById('rem-time');
+  if(inp){const p=cur.split(':');inp.value=p[0].padStart(2,'0')+':'+p[1].padStart(2,'0');}
 }
 function closeRemModal(){closeMod('remm');}
-function pickTime(){}
-
-/* ─── Single drum column implementation ─── */
-// Infinite scroll: render 3 full cycles (prev, current, next) so user can scroll freely
-function initDrumCol(colId,innerId,val,total,numeric){
-  const col=document.getElementById(colId);
-  const inner=document.getElementById(innerId);
-  if(!col||!inner)return;
-  const IH=40,SETS=3;
-  inner.innerHTML='';
-  for(let set=0;set<SETS;set++){
-    for(let i=0;i<total;i++){
-      const div=document.createElement('div');
-      div.className='time-drum-item';
-      div.textContent=numeric?String(i).padStart(2,'0'):String(i*5).padStart(2,'0');
-      inner.appendChild(div);
-    }
-  }
-  inner.style.transition='none';
-  const colH=200,center=colH/2-IH/2;
-  const startPos=center-(total+val)*IH;
-  inner.style.transform='translateY('+startPos+'px)';
-  inner._total=total;inner._IH=IH;inner._numeric=numeric;inner._curVal=val;
-  apply3DHighlight(inner,total+val,total);
-  addDrumGestures(col,inner,total,innerId==='drum-h-inner'?'h':'m');
-}
-
-function apply3DHighlight(inner,centerIdx,total){
-  var items=inner.querySelectorAll('.time-drum-item');
-  items.forEach(function(item,i){
-    var d=Math.abs(i-centerIdx);
-    item.className='time-drum-item';
-    if(d===0)item.classList.add('selected');
-    else if(d===1)item.classList.add('near1');
-    else if(d===2)item.classList.add('near2');
-  });
-}
-
-function snapToVal(inner,val,type,animate){
-  var total=inner._total,IH=inner._IH||40;
-  var colH=200,center=colH/2-IH/2;
-  var targetIdx=total+val;
-  var targetY=center-targetIdx*IH;
-  if(animate){
-    inner.style.transition='transform .3s cubic-bezier(.23,1,.32,1)';
-  }else{
-    inner.style.transition='none';
-  }
-  inner.style.transform='translateY('+targetY+'px)';
-  inner._curVal=val;
-  if(type==='h')drumH=val;else drumM=val;
-  apply3DHighlight(inner,targetIdx,total);
-  if(animate)setTimeout(function(){inner.style.transition='';},320);
-  updateTimeDisplay();
-}
-
-function getValFromTY(inner,ty){
-  var total=inner._total,IH=inner._IH||40;
-  var colH=200,center=colH/2-IH/2;
-  var idx=Math.round((center-ty)/IH);
-  return((idx%total)+total)%total;
-}
-
-function addDrumGestures(col,inner,total,type){
-  var IH=inner._IH||40,colH=200,center=colH/2-IH/2;
-  var startY=0,startTY=0,lastY=0,lastTime=0,vel=0,dragging=false,rafId=0;
-
-  function getTY(){
-    var s=inner.style.transform;
-    var m=s.match(/translateY\(([-\d.]+)px\)/);
-    return m?parseFloat(m[1]):0;
-  }
-
-  function onStart(e){
-    e.preventDefault();e.stopPropagation();
-    cancelAnimationFrame(rafId);
-    inner.style.transition='none';
-    var y=e.touches?e.touches[0].clientY:e.clientY;
-    startY=y;lastY=y;vel=0;dragging=true;lastTime=Date.now();
-    startTY=getTY();
-  }
-
-  function onMove(e){
-    if(!dragging)return;
-    e.preventDefault();e.stopPropagation();
-    var y=e.touches?e.touches[0].clientY:e.clientY;
-    var now=Date.now();var dt=Math.max(1,now-lastTime);
-    vel=(y-lastY)/dt*16;
-    lastY=y;lastTime=now;
-    var dy=y-startY;
-    var newTY=startTY+dy;
-    inner.style.transform='translateY('+newTY+'px)';
-    var liveIdx=Math.round((center-newTY)/IH);
-    apply3DHighlight(inner,liveIdx,total);
-  }
-
-  function onEnd(e){
-    if(!dragging)return;dragging=false;
-    e.preventDefault();
-    var curTY=getTY();
-    // Momentum deceleration
-    var momentum=vel*3;
-    var finalTY=curTY+momentum;
-    var rawIdx=Math.round((center-finalTY)/IH);
-    var val=((rawIdx%total)+total)%total;
-    snapToVal(inner,val,type,true);
-    try{if(tg?.HapticFeedback)tg.HapticFeedback.selectionChanged();}catch(ex){}
-  }
-
-  // Touch events with preventDefault to stop background scroll
-  col.addEventListener('touchstart',onStart,{passive:false});
-  col.addEventListener('touchmove',onMove,{passive:false});
-  col.addEventListener('touchend',onEnd,{passive:false});
-  col.addEventListener('touchcancel',onEnd,{passive:false});
-
-  // Mouse
-  col.addEventListener('mousedown',function(e){onStart(e);
-    function mmv(ev){onMove(ev);}
-    function mup(ev){onEnd(ev);window.removeEventListener('mousemove',mmv);window.removeEventListener('mouseup',mup);}
-    window.addEventListener('mousemove',mmv);window.addEventListener('mouseup',mup);
-  });
-
-  // Wheel
-  col.addEventListener('wheel',function(e){
-    e.preventDefault();e.stopPropagation();
-    var cur=type==='h'?drumH:drumM;
-    var dir=e.deltaY>0?1:-1;
-    var next=((cur+dir)%total+total)%total;
-    snapToVal(inner,next,type,true);
-  },{passive:false});
-}
-
-function updateTimeDisplay(){
-  const hh=String(drumH).padStart(2,'0');
-  const mSteps=[0,5,10,15,20,25,30,35,40,45,50,55];
-  const mm=String(mSteps[drumM%12]||0).padStart(2,'0');
-  const disp=document.getElementById('time-display');
-  if(disp)disp.textContent=`${hh}:${mm}`;
-  const sub=document.getElementById('time-sub');
-  if(sub){
-    const h=drumH;
-    const p=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
-    const lbl={ru:h<6?'Ночь':h<12?'Утро':h<17?'День':h<21?'Вечер':'Ночь',en:h<6?'Night':h<12?'Morning':h<17?'Afternoon':h<21?'Evening':'Night'}[lang]||'';
-    sub.textContent=`${p} ${lbl}`;
-  }
-}
 
 async function saveRem(){
-  const mSteps=[0,5,10,15,20,25,30,35,40,45,50,55];
-  const hh=String(drumH).padStart(2,'0');
-  const mm=String(mSteps[drumM%12]||0).padStart(2,'0');
-  selTime=`${hh}:${mm}`;
+  const inp=document.getElementById('rem-time');
+  const v=(inp&&inp.value)||'';
+  if(!/^\d{2}:\d{2}$/.test(v)){toast('⏰ 08:00','⚠️');return;}
+  selTime=v;
   LS.set('app_remind',selTime);LS.set('remind_time_str',selTime);
   if(window._d)window._d.remind_time=selTime;
   updateProfileUI(window._d||{});
-  scheduleReminder(selTime);
+  try{scheduleReminder(selTime);}catch(e){}
   if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch{}
   closeRemModal();toast((L.remsav||'Reminder: ')+selTime,'⏰');
 }
@@ -3788,7 +3578,7 @@ function updatePremiumUI(){
       <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
         <div style="display:flex;align-items:center;gap:13px;margin-bottom:${untilText?'10':'0'}px">
           <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <img src="icons/sub_${premiumTier||'pro'}.png" alt="" style="width:100%;height:100%;object-fit:contain">
+            <svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-1.6 12H4.6L3 7z" fill="#ffb830" stroke="#ffb830" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="14.5" r="1.6" fill="#0e1626"/></svg>
           </div>
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName}</div>
@@ -3802,7 +3592,7 @@ function updatePremiumUI(){
     banner.innerHTML=`
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <img src="icons/sub_free.png" alt="" style="width:100%;height:100%;object-fit:contain">
+          <svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.7L17 19l-5-3-5 3 1.4-6L4 9.3l5.8-.7L12 3z" fill="rgba(79,138,255,.18)" stroke="#4f8aff" stroke-width="1.6" stroke-linejoin="round"/></svg>
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
@@ -3974,12 +3764,6 @@ function fallbackSpeak(text){
     if(enVoice)u.voice=enVoice;
     speechSynthesis.speak(u);
   }
-}
-function speakDW(){
-  const word=document.getElementById('dwword')?.textContent;
-  if(!word||word==='—')return;
-  const btn=document.getElementById('dw-speak');
-  speakText(word,btn);
 }
 
 /* ══ HAPTIC FEEDBACK ══ */
