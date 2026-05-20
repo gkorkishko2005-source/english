@@ -310,6 +310,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Streak */
 .stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:6px}
+.streak-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:12px 0 0;background:linear-gradient(135deg,rgba(255,149,0,.10),rgba(255,107,107,.06));border:1px solid rgba(255,149,0,.22);border-radius:var(--r);cursor:pointer;transition:transform .15s,border-color .2s}
+.streak-chip:hover{transform:translateY(-1px);border-color:rgba(255,149,0,.4)}
+.streak-chip:active{transform:scale(.98)}
+.streak-chip-fire{width:32px;height:32px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(255,149,0,.35))}
+.streak-chip-n{font-size:20px;font-weight:800;color:#ff9500;line-height:1;min-width:20px}
+.streak-chip-lbl{font-size:13px;font-weight:600;color:var(--t2);margin-left:-2px}
 .stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0;overflow:hidden}
 .stk-flame svg{width:28px;height:28px}
 .stk-flame img,.stk-flame video{width:40px;height:40px;object-fit:contain}
@@ -972,11 +978,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-btn:active{transform:scale(.97)}
 .prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
 /* Premium plan cards */
-.prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
-.prem-plan{background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);padding:14px;cursor:pointer;transition:.2s;position:relative}
+.prem-plans{display:flex;flex-direction:column;gap:12px;padding:0 17px 12px}
+.prem-plan{background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);padding:15px 15px 13px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;position:relative}
+.prem-plan:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35)}
 .prem-plan:active{transform:scale(.97)}
-.prem-plan.pp-pop{border-color:rgba(var(--ar),.4);background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(0,212,170,.04))}
-.pp-popular{position:absolute;top:-9px;right:14px;font-size:10px;font-weight:700;color:#fff;background:var(--a);padding:2px 10px;border-radius:100px;letter-spacing:.3px}
+.prem-plan.pp-pop{border-color:rgba(var(--ar),.55);background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.06));box-shadow:0 4px 22px rgba(79,138,255,.12)}
+.pp-popular{position:absolute;top:-9px;right:14px;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(90deg,#4f8aff,#00d4aa);padding:3px 10px;border-radius:100px;letter-spacing:.4px;box-shadow:0 2px 8px rgba(79,138,255,.4)}
 .pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .pp-badge{font-size:12px;font-weight:800;color:#fff;padding:3px 10px;border-radius:6px}
 .pp-price{font-size:16px;font-weight:800;color:var(--t1)}
@@ -1113,6 +1120,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="profile-badges" id="profile-badges"></div>
   </div>
   <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="goTab('settings')"></div>
+  <div class="streak-chip" onclick="goTab('progress')">
+    <img src="icons/fire.png" alt="🔥" class="streak-chip-fire">
+    <span class="streak-chip-n" id="hstk">0</span>
+    <span class="streak-chip-lbl" id="hstk-lbl">days</span>
+  </div>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
     <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp">+20 XP</div></div>
@@ -1306,6 +1318,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="dl-toggle-text" id="dl-text">Dark mode</div>
     <div class="dl-switch" id="dl-switch"></div>
   </div>
+  <div class="dl-toggle" id="sfx-toggle" onclick="toggleSfx()">
+    <div class="dl-toggle-icon" id="sfx-icon">🔊</div>
+    <div class="dl-toggle-text" id="sfx-text">Sound effects</div>
+    <div class="dl-switch on" id="sfx-switch"></div>
+  </div>
 
   <!-- Interface language picker -->
   <div class="sec"><span id="uilang-lbl"></span></div>
@@ -1487,21 +1504,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="prem-hero">
       <div class="prem-crown"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg></div>
-      <div class="prem-title" id="prem-title">ALEX Premium</div>
+      <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
       <div class="prem-sub" id="prem-sub">Unlock the full power of your AI tutor</div>
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">250 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro 🧠</span><span class="pp-price">600 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro 🧠</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate 🧠</span><span class="pp-price">1000 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate 🧠</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -1940,6 +1957,50 @@ function setBotLang(l){
 }
 
 /* ══ CHIPS ══ */
+/* ══ SFX — синтезированные звуки (Web Audio, без файлов) ══ */
+const sfx=(function(){
+  var ctx=null,muted=null;
+  function isMuted(){if(muted===null)muted=LS.get('sfx_muted')==='1';return muted;}
+  function setMuted(v){muted=!!v;LS.set('sfx_muted',v?'1':'0');}
+  function ac(){if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
+    if(ctx.state==='suspended')ctx.resume().catch(function(){});return ctx;}
+  function tone(freq,dur,type,vol,attack,release){
+    if(isMuted())return;var c=ac();if(!c)return;
+    var t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine';o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol||.18,t+(attack||.01));
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.12)+(release||0));
+    o.connect(g).connect(c.destination);o.start(t);o.stop(t+(dur||.12)+(release||.02));
+  }
+  function seq(notes,gap,type,vol){
+    if(isMuted())return;var c=ac();if(!c)return;
+    notes.forEach(function(n,i){setTimeout(function(){tone(n,.12,type||'sine',vol||.18);},i*(gap||80));});
+  }
+  return {
+    isMuted:isMuted,setMuted:setMuted,
+    tap:function(){tone(620,.04,'sine',.10,.005,.02);},
+    flip:function(){tone(280,.08,'triangle',.12);setTimeout(function(){tone(440,.08,'triangle',.10);},40);},
+    correct:function(){seq([523,659,784],70,'sine',.16);},   // C E G
+    wrong:function(){tone(180,.16,'sawtooth',.12,.005,.02);setTimeout(function(){tone(140,.18,'sawtooth',.10);},80);},
+    xp:function(){seq([880,1175,1568],60,'sine',.12);},      // A D G shimmer
+    level:function(){seq([523,659,784,1047],90,'sine',.18);},// C E G C
+    send:function(){tone(700,.06,'sine',.10);setTimeout(function(){tone(900,.06,'sine',.08);},35);},
+  };
+})();
+function toggleSfx(){
+  var m=!sfx.isMuted();sfx.setMuted(m);
+  var sw=document.getElementById('sfx-switch');if(sw)sw.classList.toggle('on',!m);
+  var ic=document.getElementById('sfx-icon');if(ic)ic.textContent=m?'🔇':'🔊';
+  if(!m)sfx.tap();
+  try{haptic('light');}catch(e){}
+}
+function applySfxToggleUI(){
+  var m=sfx.isMuted();
+  var sw=document.getElementById('sfx-switch');if(sw)sw.classList.toggle('on',!m);
+  var ic=document.getElementById('sfx-icon');if(ic)ic.textContent=m?'🔇':'🔊';
+}
+
 const ALEX_SVG='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block"><circle cx="20" cy="20" r="20" fill="#4f8aff"/><rect x="10.5" y="14" width="19" height="15" rx="6" fill="#0e1626"/><circle cx="16" cy="21" r="2.3" fill="#00d4aa"/><circle cx="24" cy="21" r="2.3" fill="#00d4aa"/><path d="M16 25.6c2.4 2 5.6 2 8 0" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"/><path d="M12.5 12.5L27.5 12.5L20 8.2Z" fill="#fff"/><rect x="19" y="8" width="2" height="4.5" fill="#fff"/></svg>';
 const CHIP_SVGS=[
   `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, // correct
@@ -2062,6 +2123,10 @@ function renderHome(d){
   refreshSub();
   document.getElementById('hname').textContent=d.name||'Student';
   document.getElementById('hsub').textContent=d.streak>1?`${d.streak} ${lang==='ru'?'дней подряд 🔥':'days in a row! 🔥'}`:{ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
+  const s=d.streak||0;
+  const stkEl=document.getElementById('hstk');if(stkEl)stkEl.textContent=s;
+  const stkLbl=document.getElementById('hstk-lbl');
+  if(stkLbl)stkLbl.textContent={ru:s===1?'день':(s%10>=2&&s%10<=4&&!(s%100>=12&&s%100<=14))?'дня':'дней',en:s===1?'day':'days',es:s===1?'día':'días',de:s===1?'Tag':'Tage',fr:s===1?'jour':'jours',pt:s===1?'dia':'dias',uk:s===1?'день':(s%10>=2&&s%10<=4)?'дні':'днів',tr:'gün',zh:'天',ar:'يوم'}[lang]||'days';
   loadMissions();
   try{renderChallenge();}catch(e){}
   try{renderLeaderboard(d.xp||0);}catch(e){}
@@ -2104,6 +2169,7 @@ function drawProgress(){
   // Trial banner
   try{checkTrialBanner();}catch(e){}
   try{applyDarkLight(LS.get('dark_mode')||'dark');}catch(e){}
+  try{applySfxToggleUI();}catch(e){}
   try{addRippleToButtons();}catch(e){}
   try{renderBadges();}catch(e){}
   try{renderPathBanner();}catch(e){}
@@ -2536,7 +2602,7 @@ async function sendMsg(){
   const inp=document.getElementById('cinp');
   const text=inp.value.trim();if(!text)return;
   if(isSpam(text)){inp.value='';grow(inp);addMsg('bot',L.spam);return;}
-  haptic('light');
+  haptic('light');try{sfx.send();}catch(e){}
   inp.value='';grow(inp);addMsg('user',text);await doChat(text);
 }
 async function sendChip(text){if(busy)return;addMsg('user',text);goTab('chat');await doChat(text);}
@@ -2710,9 +2776,10 @@ function showCard(i){
   document.getElementById('pfill').style.width=(i/cards.length*100)+'%';
   document.getElementById('rrow').classList.add('hid');
 }
-function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');}
+function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');try{sfx.flip();}catch(e){}}
 async function rate(q){
   haptic(q>=3?'success':'light');
+  try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
   const c=cards[cIdx];
   toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
   trackM('words');trackM('dwords');
@@ -3595,8 +3662,8 @@ function updatePremiumUI(){
           <svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.7L17 19l-5-3-5 3 1.4-6L4 9.3l5.8-.7L12 3z" fill="rgba(79,138,255,.18)" stroke="#4f8aff" stroke-width="1.6" stroke-linejoin="round"/></svg>
         </div>
         <div style="flex:1">
-          <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Premium</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 250 ⭐/мес · Голос · Sonnet · VIP',en:'from 250 ⭐/mo · Voice · Sonnet · VIP',es:'desde 250 ⭐/mes',de:'ab 250 ⭐/Mo',fr:'à partir de 250 ⭐/mois',pt:'a partir de 250 ⭐/mês',uk:'від 250 ⭐/міс',tr:'250 ⭐/ay',zh:'250⭐/月起',ar:'من 250 ⭐/شهر'}[lang]||'from 250 ⭐'}</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 300 ⭐/мес · Голос · Sonnet · VIP',en:'from 300 ⭐/mo · Voice · Sonnet · VIP',es:'desde 300 ⭐/mes',de:'ab 300 ⭐/Mo',fr:'à partir de 300 ⭐/mois',pt:'a partir de 300 ⭐/mês',uk:'від 300 ⭐/міс',tr:'300 ⭐/ay',zh:'300⭐/月起',ar:'من 300 ⭐/شهر'}[lang]||'from 300 ⭐'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -3631,7 +3698,7 @@ function openPremium(highlightFeature){
   const sub=document.getElementById('prem-sub');
   const free=document.getElementById('prem-free');
 
-  if(title)title.textContent='ALEX Premium';
+  if(title)title.textContent='ALEX Subscriptions';
   if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor',es:'Desbloquea todo el poder del tutor AI',de:'Schalte die volle Kraft des AI-Tutors frei',fr:'Libère toute la puissance du tuteur IA',pt:'Desbloqueie todo o poder do tutor IA',uk:'Розблокуй повну потужність AI-репетитора',tr:'AI öğretmenin tam gücünü aç',zh:'解锁AI导师的全部功能',ar:'افتح القوة الكاملة لمعلم AI'}[lang]||'Unlock the full power';
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',de:'Kostenlos fortfahren',fr:'Continuer gratuitement',pt:'Continuar grátis',uk:'Продовжити безкоштовно',tr:'Ücretsiz devam et',zh:'继续免费',ar:'متابعة مجانية'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
@@ -4382,7 +4449,8 @@ function addLocalXP(amount){
     // Check for rank up → confetti
     const oldRank=rankOf(oldXP);
     const newRank=rankOf(d.xp);
-    if(newRank.r!==oldRank.r){fireConfetti();toast(`Level up: ${newRank.r}!`,'🎉');}
+    if(newRank.r!==oldRank.r){fireConfetti();toast(`Level up: ${newRank.r}!`,'🎉');try{sfx.level();}catch(e){}}
+    else{try{sfx.xp();}catch(e){}}
   }catch(e){console.warn('addLocalXP',e);}
 }
 

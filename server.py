@@ -215,16 +215,17 @@ async def handle_chat(request):
 
     # Model routing by tier:
     # Free = Haiku (10 msgs/day)
-    # Basic = Haiku (30 msgs/day)
-    # Pro = Haiku default + Sonnet for complex tasks (60 msgs/day)
-    # Ultimate = Sonnet default (80 msgs/day)
+    # Free   = Haiku (5 msgs/day)
+    # Basic  = Haiku (20 msgs/day)
+    # Pro    = Haiku default + Sonnet for complex tasks (40 msgs/day)
+    # Ultimate = Sonnet default (50 msgs/day)
     chat_model = MODEL  # default Haiku
-    max_tokens = 600
-    msg_limit = 10  # free users
+    max_tokens = 500
+    msg_limit = 5  # free users
     if user_tier == "basic":
         chat_model = MODEL  # Haiku
-        max_tokens = 800
-        msg_limit = 30
+        max_tokens = 700
+        msg_limit = 20
     elif user_tier == "pro":
         # Pro: use Sonnet for grammar/correction, Haiku for casual chat
         is_complex = any(kw in message.lower() for kw in [
@@ -232,12 +233,12 @@ async def handle_chat(request):
             'toefl','test','тест','анализ','разбор','why','почему','правило'
         ])
         chat_model = "claude-sonnet-4-6" if is_complex else MODEL
-        max_tokens = 1200
-        msg_limit = 60
+        max_tokens = 1000
+        msg_limit = 40
     elif user_tier == "ultimate":
         chat_model = "claude-sonnet-4-6"
-        max_tokens = 1500
-        msg_limit = 80
+        max_tokens = 1400
+        msg_limit = 50
 
     # Check daily message limit (skip for admins)
     if uid not in ADMIN_IDS:

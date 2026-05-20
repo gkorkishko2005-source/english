@@ -69,22 +69,22 @@ ADMIN_IDS: set = {
 # 3 плана с разными баффами
 PREMIUM_PLANS = {
     "basic": {
-        "stars": 250, "months": 1, "price_usd": 500,  # cents for Stripe
+        "stars": 300, "months": 1, "price_usd": 400,  # cents for Stripe
         "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
         "tier": "basic",
-        "model": "haiku", "msg_limit": 30, "history": 30, "max_tokens": 800,
+        "model": "haiku", "msg_limit": 20, "history": 30, "max_tokens": 700,
     },
     "pro": {
-        "stars": 600, "months": 1, "price_usd": 1200,
+        "stars": 800, "months": 1, "price_usd": 1000,
         "label_ru": "Pro · 1 мес", "label_en": "Pro · 1 mo",
         "tier": "pro",
-        "model": "sonnet", "msg_limit": 60, "history": 50, "max_tokens": 1200,
+        "model": "sonnet", "msg_limit": 40, "history": 50, "max_tokens": 1000,
     },
     "ultimate": {
-        "stars": 1000, "months": 1, "price_usd": 2000,
+        "stars": 1500, "months": 1, "price_usd": 2000,
         "label_ru": "Ultimate · 1 мес", "label_en": "Ultimate · 1 mo",
         "tier": "ultimate",
-        "model": "sonnet", "msg_limit": 80, "history": 80, "max_tokens": 1500,
+        "model": "sonnet", "msg_limit": 50, "history": 80, "max_tokens": 1400,
     },
 }
 # First-time discount: 10% off
@@ -1464,9 +1464,9 @@ async def cmd_premium(msg: Message):
         discount_text = "\n\n🎁 <b>-10% на первую покупку!</b>" if ru else "\n\n🎁 <b>10% off your first purchase!</b>"
 
     # Prices with discount
-    b_stars = int(250 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 250
-    p_stars = int(600 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 600
-    u_stars = int(1000 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 1000
+    b_stars = int(300 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 300
+    p_stars = int(800 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 800
+    u_stars = int(1500 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 1500
 
     kb_rows = [
         [InlineKeyboardButton(
@@ -1492,7 +1492,7 @@ async def cmd_premium(msg: Message):
     plans_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
 
     text = (
-        "💎 <b>ALEX Premium</b>\n"
+        "💎 <b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
         f"🟢 <b>Basic</b> — {b_stars} ⭐/мес\n"
         "├ 30 сообщений/день\n"
@@ -1512,7 +1512,7 @@ async def cmd_premium(msg: Message):
         f"{prem_badge}\n\n"
         "⭐ Stars или 💳 карта"
     ) if ru else (
-        "💎 <b>ALEX Premium</b>\n"
+        "💎 <b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
         f"🟢 <b>Basic</b> — {b_stars} ⭐/mo\n"
         "├ 30 messages/day\n"
@@ -1555,13 +1555,13 @@ async def cb_prem_buy(cb: CallbackQuery):
     if has_discount:
         stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
 
-    desc = f"ALEX Premium {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}"
+    desc = f"ALEX Subscriptions {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}"
 
     await cb.answer()
     try:
         await bot.send_invoice(
             chat_id=uid,
-            title=f"ALEX Premium {label}",
+            title=f"ALEX Subscriptions {label}",
             description=desc,
             payload=f"premium:{plan_id}:{uid}",
             currency="XTR",
@@ -1606,8 +1606,8 @@ async def cb_card_buy(cb: CallbackQuery):
     try:
         await bot.send_invoice(
             chat_id=uid,
-            title=f"ALEX Premium {label}",
-            description=f"ALEX Premium {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}",
+            title=f"ALEX Subscriptions {label}",
+            description=f"ALEX Subscriptions {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}",
             payload=f"premium:{plan_id}:{uid}",
             provider_token=STRIPE_TOKEN,
             currency="USD",
@@ -1646,12 +1646,12 @@ async def on_payment_success(msg: Message):
         # Confirm to user
         text = (
             f"🎉 <b>Оплата прошла!</b>\n\n"
-            f"{tier_emoji} ALEX Premium <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
+            f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
             f"Открой приложение — все функции разблокированы!\n\n"
             f"Спасибо за поддержку! 🙏"
         ) if ru else (
             f"🎉 <b>Payment successful!</b>\n\n"
-            f"{tier_emoji} ALEX Premium <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
+            f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
             f"Open the app — all features unlocked!\n\n"
             f"Thank you for your support! 🙏"
         )
