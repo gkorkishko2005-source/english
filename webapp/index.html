@@ -872,6 +872,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .minp{width:100%;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;margin-top:8px;transition:border-color .2s}
 .minp:focus{border-color:rgba(var(--ar),.4)}
 .minp::placeholder{color:var(--t3)}
+/* ══ REMINDER REDESIGN ══ */
+.rem-hero{position:relative;text-align:center;padding:18px 12px 16px;background:linear-gradient(160deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);margin-top:4px;overflow:hidden}
+.rem-hero::after{content:'';position:absolute;inset:auto -30% -60% -30%;height:120px;background:radial-gradient(closest-side,rgba(255,184,48,.18),transparent 70%);pointer-events:none}
+.rem-sun{font-size:30px;line-height:1;margin-bottom:6px;filter:drop-shadow(0 4px 12px rgba(255,184,48,.35));transition:transform .25s}
+.rem-input{appearance:none;-webkit-appearance:none;background:transparent;border:none;outline:none;color:var(--t1);font-family:var(--f);font-size:46px;font-weight:800;text-align:center;letter-spacing:2px;width:100%;padding:2px 0;cursor:pointer;font-variant-numeric:tabular-nums}
+.rem-input::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;position:absolute;inset:0;width:100%;height:100%}
+.rem-sub{font-size:12px;color:var(--t2);margin-top:4px;font-weight:500;letter-spacing:.4px;text-transform:uppercase}
+.rem-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:14px}
+.rem-preset{background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 4px 8px;cursor:pointer;color:var(--t1);font-family:var(--f);transition:transform .15s,border-color .2s,background .2s}
+.rem-preset:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35);background:rgba(var(--ar),.05)}
+.rem-preset:active{transform:scale(.95)}
+.rem-preset.on{border-color:var(--a);background:rgba(var(--ar),.10)}
+.rpe{font-size:20px;line-height:1;margin-bottom:4px}
+.rpt{font-size:13px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums}
+.rpl{font-size:10px;color:var(--t2);margin-top:1px;text-transform:uppercase;letter-spacing:.3px}
+/* ══ ONBOARDING CHAT CARD ══ */
+.onb-card{padding:14px 14px 12px;background:linear-gradient(150deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.25);border-radius:var(--r);margin:2px 0}
+.onb-tit{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:6px}
+.onb-txt{font-size:13px;color:var(--t1);line-height:1.5;margin:6px 0}
+.onb-txt b{color:var(--a)}
+.onb-link{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0;padding:11px 14px;border-radius:var(--r2);background:linear-gradient(90deg,#4f8aff,#00d4aa);color:#fff!important;font-size:13px;font-weight:700;text-decoration:none;transition:transform .15s,box-shadow .2s;box-shadow:0 4px 14px rgba(79,138,255,.25)}
+.onb-link:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,138,255,.35)}
+.onb-link:active{transform:scale(.97)}
+.onb-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:2px}
 .mtg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .mtb{padding:12px 6px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:.2s;font-size:13px;font-weight:600;color:var(--t1)}
 .mtb:active{transform:scale(.93)}
@@ -1358,6 +1382,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
   <div id="intwrap"></div>
 
+  <!-- Free API key (Gemini BYOK) -->
+  <div class="sec"><span id="byok-lbl">Free API key (Gemini)</span></div>
+  <div class="slist" style="padding:12px">
+    <input id="byokinp" class="minp" type="text" autocomplete="off" spellcheck="false"
+      placeholder="AIza…" oninput="saveByok(this.value)" style="margin-top:0;font-family:ui-monospace,Menlo,monospace;font-size:13px">
+    <div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.5">
+      <span id="byok-hint">Paste a free Google Gemini key — get unlimited messages on Free tier.</span><br>
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">🔑 aistudio.google.com/app/apikey</a>
+    </div>
+  </div>
+
   <!-- About you (ALEX adapts to this) -->
   <div class="sec"><span id="prof-mtit">About you</span></div>
   <div class="slist" style="padding:12px">
@@ -1397,7 +1432,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rem-mtit">Reminder</div>
     <div class="mbdy" style="padding-bottom:8px">
-      <input type="time" id="rem-time" class="minp" value="08:00" style="font-size:30px;text-align:center;padding:18px 12px;letter-spacing:2px;font-weight:700">
+      <div class="rem-hero">
+        <div class="rem-sun" id="rem-sun">🌅</div>
+        <input type="time" id="rem-time" value="08:00" class="rem-input">
+        <div class="rem-sub" id="rem-sub-lbl">Daily reminder</div>
+      </div>
+      <div class="rem-presets">
+        <button class="rem-preset" data-t="08:00" onclick="remPreset('08:00')"><div class="rpe">🌅</div><div class="rpt">08:00</div><div class="rpl" id="rp1">Morning</div></button>
+        <button class="rem-preset" data-t="13:00" onclick="remPreset('13:00')"><div class="rpe">☀️</div><div class="rpt">13:00</div><div class="rpl" id="rp2">Lunch</div></button>
+        <button class="rem-preset" data-t="19:00" onclick="remPreset('19:00')"><div class="rpe">🌇</div><div class="rpt">19:00</div><div class="rpl" id="rp3">Evening</div></button>
+        <button class="rem-preset" data-t="22:00" onclick="remPreset('22:00')"><div class="rpe">🌙</div><div class="rpt">22:00</div><div class="rpl" id="rp4">Night</div></button>
+      </div>
       <button class="msav" onclick="saveRem()" id="rem-sav" style="margin-top:16px">Save</button>
       <button class="moff" onclick="disableRem()" id="rem-dis">🔕 Disable</button>
       <button class="moff" onclick="closeRemModal()" id="rem-can">Cancel</button>
@@ -2108,8 +2153,58 @@ function goTab(n){
   tab=n;
   if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
-  if(n==='settings'){try{updatePremiumUI();}catch(e){}}
-  if(n==='chat')scrollMsgs();
+  if(n==='settings'){try{updatePremiumUI();}catch(e){}try{loadByok();}catch(e){}}
+  if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
+}
+/* One-time chat onboarding for FREE users — explain Gemini BYOK option */
+/* BYOK Gemini key — saved locally; backend routing wires up next batch */
+function saveByok(v){
+  v=(v||'').trim().slice(0,200);
+  LS.set('user_gemini_key',v);
+}
+function loadByok(){
+  const inp=document.getElementById('byokinp');
+  if(inp&&document.activeElement!==inp)inp.value=LS.get('user_gemini_key')||'';
+  const L10={ru:{lbl:'Бесплатный API-ключ (Gemini)',hint:'Вставь свой бесплатный ключ Google Gemini — получишь безлимит на Free тарифе.'},
+             en:{lbl:'Free API key (Gemini)',hint:'Paste a free Google Gemini key — get unlimited messages on Free tier.'},
+             es:{lbl:'API key gratis (Gemini)',hint:'Pega tu clave gratis de Google Gemini para mensajes ilimitados en Free.'},
+             de:{lbl:'Kostenloser API-Schlüssel (Gemini)',hint:'Füge einen kostenlosen Google-Gemini-Schlüssel ein — unbegrenzte Nachrichten im Free-Tarif.'},
+             fr:{lbl:'Clé API gratuite (Gemini)',hint:'Colle ta clé Google Gemini gratuite — messages illimités en Free.'},
+             pt:{lbl:'Chave API grátis (Gemini)',hint:'Cole sua chave grátis do Google Gemini para mensagens ilimitadas no Free.'},
+             uk:{lbl:'Безкоштовний API-ключ (Gemini)',hint:'Встав свій безкоштовний ключ Google Gemini — безліміт на Free тарифі.'},
+             tr:{lbl:'Ücretsiz API anahtarı (Gemini)',hint:'Ücretsiz Google Gemini anahtarınızı yapıştırın — Free planda sınırsız mesaj.'},
+             zh:{lbl:'免费 API 密钥 (Gemini)',hint:'粘贴免费的 Google Gemini 密钥即可在 Free 套餐获得无限消息。'},
+             ar:{lbl:'مفتاح API مجاني (Gemini)',hint:'الصق مفتاح Google Gemini المجاني للحصول على رسائل غير محدودة في الباقة المجانية.'}};
+  const t=L10[lang]||L10.en;
+  const lbl=document.getElementById('byok-lbl');if(lbl)lbl.textContent=t.lbl;
+  const h=document.getElementById('byok-hint');if(h)h.textContent=t.hint;
+}
+function maybeOnboardChat(){
+  if(LS.get('chat_onb_v1')==='1')return;
+  if(isPremium||LS.get('premium')==='1')return; // skip paid users
+  const name=(window._d&&window._d.name)||'';
+  const T={
+    ru:{tit:'👋 '+(name||'Привет')+(name?', привет!':''),
+        l1:'Ты на <b>бесплатном тарифе</b> — 5 сообщений в день к ALEX.',
+        l2:'Хочешь <b>безлимит бесплатно</b>? Возьми свой бесплатный ключ Google Gemini (без карты):',
+        btn:'🔑 Получить бесплатный ключ',
+        l3:'Затем вставь его в <b>Настройки → Free API key</b>. Или оформи подписку.',
+        host:'aistudio.google.com'},
+    en:{tit:'👋 '+(name?'Hi '+name+'!':'Welcome!'),
+        l1:"You're on the <b>Free tier</b> — 5 messages/day to ALEX.",
+        l2:'Want <b>unlimited free messages</b>? Get your own free Google Gemini key (no card needed):',
+        btn:'🔑 Get your free key',
+        l3:'Then paste it in <b>Settings → Free API key</b>. Or upgrade to a subscription.',
+        host:'aistudio.google.com'}
+  };
+  const t=T[lang]||T.en;
+  const html='<div class="onb-card"><div class="onb-tit">'+t.tit+'</div>'
+    +'<div class="onb-txt">'+t.l1+'</div>'
+    +'<div class="onb-txt">'+t.l2+'</div>'
+    +'<a class="onb-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">'+t.btn+'</a>'
+    +'<div class="onb-hint">'+t.host+'</div>'
+    +'<div class="onb-txt">'+t.l3+'</div></div>';
+  try{addMsg('bot',html);LS.set('chat_onb_v1','1');}catch(e){}
 }
 
 /* ══ REFRESH SUB (greeting / streak) ══ */
@@ -2876,7 +2971,19 @@ function openRemModal(){
   let cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
   if(!/^\d{1,2}:\d{2}$/.test(cur))cur='08:00';
   const inp=document.getElementById('rem-time');
-  if(inp){const p=cur.split(':');inp.value=p[0].padStart(2,'0')+':'+p[1].padStart(2,'0');}
+  if(inp){const p=cur.split(':');inp.value=p[0].padStart(2,'0')+':'+p[1].padStart(2,'0');inp.oninput=remReflect;inp.onchange=remReflect;}
+  remReflect();
+}
+function remReflect(){
+  var inp=document.getElementById('rem-time');if(!inp)return;
+  var v=inp.value||'08:00',h=parseInt(v.split(':')[0]||'8',10);
+  var s=document.getElementById('rem-sun');
+  if(s)s.textContent=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
+  document.querySelectorAll('.rem-preset').forEach(function(b){b.classList.toggle('on',b.dataset.t===v);});
+}
+function remPreset(t){
+  var inp=document.getElementById('rem-time');if(inp)inp.value=t;
+  remReflect();try{sfx.tap();}catch(e){}haptic('light');
 }
 function closeRemModal(){closeMod('remm');}
 

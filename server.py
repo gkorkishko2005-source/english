@@ -300,12 +300,16 @@ async def handle_chat(request):
                 headers={
                     "x-api-key": ANT_KEY,
                     "anthropic-version": "2023-06-01",
+                    "anthropic-beta": "prompt-caching-2024-07-31",
                     "content-type": "application/json",
                 },
                 json={
                     "model": chat_model,
                     "max_tokens": max_tokens,
-                    "system": system,
+                    # Prompt caching: системный промпт стабильный → большая скидка
+                    # (до 90% input cost) на cache hits в пределах ~5 минут TTL.
+                    "system": [{"type": "text", "text": system,
+                                "cache_control": {"type": "ephemeral"}}],
                     "messages": _histories[uid],
                 },
             )
