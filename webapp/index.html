@@ -1367,11 +1367,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Profile -->
   <div class="sec"><span id="prof-sec-lbl"></span></div>
   <div class="slist">
-    <div class="srow na">
-      <div class="sric sric-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/></svg></div>
-      <div class="srbd"><div class="srt" id="slvt"></div><div class="srs" id="slvs"></div></div>
-      <div class="srv" id="silv">—</div>
-    </div>
     <div class="srow" onclick="openRemModal()">
       <div class="sric sric-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
       <div class="srbd"><div class="srt" id="sremt"></div><div class="srs" id="sirem">—</div></div>
@@ -1916,7 +1911,6 @@ function applyLang(){
   document.getElementById('uilang-lbl').textContent=L.uilang;
   document.getElementById('botlang-lbl').textContent=L.botlang;
   document.getElementById('prof-sec-lbl').textContent=L.myprof;
-  document.getElementById('slvt').textContent=L.lvt;document.getElementById('slvs').textContent=L.lvs;
   document.getElementById('sremt').textContent=L.remt;
   document.getElementById('int-lbl').textContent=L.ints;document.getElementById('int-edit-lbl').textContent=L.intedit;
   document.getElementById('prof-mtit').textContent=L.proft;
@@ -2384,13 +2378,6 @@ function updateXPBar(xp){
   saveXP(xp);
   const inf=rankOf(xp),tr=treeOf(xp);
   const pct=Math.max(0,Math.min(100,Math.round((xp-inf.min)/(inf.max-inf.min)*100)));
-  // Tree SVG
-  const xtEl=document.getElementById('xtree');if(xtEl)xtEl.innerHTML=getTreeSvg(xp);
-  // Text
-  const xr=document.getElementById('xrnk');    if(xr)xr.textContent=inf.r;
-  const xf=document.getElementById('xfill');   if(xf)xf.style.width=pct+'%';
-  const xc=document.getElementById('xcur');    if(xc)xc.textContent=xp+' XP';
-  const xm=document.getElementById('xmax');    if(xm)xm.textContent=inf.max<9999?`${xp} / ${inf.max} XP`:'🏆 Max!';
   // Progress screen
   const pbf=document.getElementById('pbfi');   if(pbf)pbf.style.width=pct+'%';
   const pbc=document.getElementById('pbc');    if(pbc)pbc.textContent=xp+' XP';

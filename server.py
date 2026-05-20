@@ -399,9 +399,11 @@ async def handle_rate(request):
         return web.json_response({"error":str(e)},status=400)
     if uid and word_id:
         try:
-            from database import update_word_review
+            from database import update_word_review, upsert_user
+            await upsert_user(uid, "Student")
             await update_word_review(uid,word_id,quality)
-        except Exception: pass
+        except Exception as e:
+            logger.warning(f"rate_card failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── ADD XP ────────────────────────────────────────────────────────────────────
@@ -445,9 +447,11 @@ async def handle_set_reminder(request):
         return web.json_response({"error":"bad"},status=400)
     if uid:
         try:
-            from database import set_reminder
+            from database import set_reminder, upsert_user
+            await upsert_user(uid, "Student")
             await set_reminder(uid,remind_time)
-        except Exception: pass
+        except Exception as e:
+            logger.warning(f"set_reminder failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── AUDIO TASK ────────────────────────────────────────────────────────────────
