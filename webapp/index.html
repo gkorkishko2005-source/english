@@ -1392,7 +1392,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <details class="set-acc">
     <summary><span class="set-acc-ico">👤</span><span id="prof-mtit">About you</span></summary>
     <div class="set-acc-bd">
-      <textarea class="minp" id="profinp" rows="3" style="resize:none;min-height:78px;line-height:1.5;margin-top:0"></textarea>
+      <textarea class="minp" id="profinp" rows="3" oninput="profDraft(this.value)" onblur="saveProfSilent()" style="resize:none;min-height:78px;line-height:1.5;margin-top:0"></textarea>
       <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
     </div>
   </details>
@@ -2350,11 +2350,15 @@ function renderInterests(ints){
 }
 
 function updateProfileUI(d){
-  const er=d.remind_time||L.no_rem;
+  // Локальное значение профиля имеет приоритет — если сервер ещё не получил
+  // последний POST (или вернул пусто из-за гонки), не затираем введённое.
+  const localProf=LS.get('app_profession')||'';
+  const prof=localProf||d.profession||'';
+  const er=(LS.get('app_remind')||d.remind_time||L.no_rem);
   const sl=document.getElementById('silv');if(sl)sl.textContent=d.level||'—';
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
   const ab=document.getElementById('profinp');
-  if(ab&&document.activeElement!==ab)ab.value=d.profession||'';
+  if(ab&&document.activeElement!==ab&&ab.value!==prof)ab.value=prof;
 }
 
 /* ══ XP PERSISTENCE + WEEKLY TRACKING ══ */
@@ -2958,12 +2962,32 @@ function openMod(id){const m=document.getElementById(id);if(!m)return;m.style.di
 function closeMod(id){const m=document.getElementById(id);if(!m)return;m.classList.add('cls');setTimeout(()=>{m.style.display='none';m.classList.remove('cls');},230);}
 
 // About you — inline free-text profile ALEX adapts to (Settings, bottom)
+// Сохраняем «черновик» при каждом вводе — переживает синки/перерисовки UI
+function profDraft(v){
+  v=(v||'').slice(0,500);
+  LS.set('app_profession',v);
+  if(window._d)window._d.profession=v;
+}
+// Тихое сохранение (по blur textarea): пишет в БД, без toast и без чата
+async function saveProfSilent(){
+  const val=(document.getElementById('profinp')?.value||'').trim().slice(0,500);
+  if(!val)return;
+  if(LS.get('app_profession_saved')===val)return; // уже отправлено
+  profDraft(val);
+  if(API&&window._uid)try{
+    await fetch(`${API}/api/set_profession`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,profession:val})});
+    LS.set('app_profession_saved',val);
+  }catch{}
+}
+// Явное сохранение по кнопке: toast + chip ALEX'у
 async function saveProf(){
   const val=document.getElementById('profinp').value.trim().slice(0,500);
   if(!val){toast(L.profpt,'⚠️');return;}
-  LS.set('app_profession',val);
-  if(window._d)window._d.profession=val;
-  if(API&&window._uid)try{await fetch(`${API}/api/set_profession`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,profession:val})});}catch{}
+  profDraft(val);
+  if(API&&window._uid)try{
+    await fetch(`${API}/api/set_profession`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,profession:val})});
+    LS.set('app_profession_saved',val);
+  }catch{}
   toast(L.psav,'✅');
   setTimeout(()=>sendChip(lang==='ru'?`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`:`About me: ${val}. Remember this and adapt your teaching to it.`),300);
 }
@@ -4891,6 +4915,9 @@ function syncFromServer(){
     stats.words=d.words=Math.max(d.words||0,stats.words||0);
     stats.tests=d.tests=Math.max(d.tests||0,stats.tests||0);
     stats.errors=d.errors=Math.max(d.errors||0,stats.errors||0);
+    // Локально-редактируемые поля: LS-приоритет (защита от перезаписи серверной гонкой)
+    var lp=LS.get('app_profession');if(lp)d.profession=lp;
+    var lr=LS.get('app_remind');if(lr)d.remind_time=lr;
     LS.setJ('local_stats',stats);window._d=d;
     try{renderHome(d);}catch(e){}try{renderProgress(d);}catch(e){}
   }).catch(function(){});
