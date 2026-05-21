@@ -127,8 +127,20 @@ async def _call_anthropic(system: str, messages: list, max_tokens: int = 1500) -
     async with httpx.AsyncClient(timeout=60) as client:
         r = await client.post(
             "https://api.anthropic.com/v1/messages",
-            headers={"x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-            json={"model": MODEL, "max_tokens": max_tokens, "system": system, "messages": messages},
+            headers={
+                "x-api-key": ANTHROPIC_KEY,
+                "anthropic-version": "2023-06-01",
+                "anthropic-beta": "prompt-caching-2024-07-31",
+                "content-type": "application/json",
+            },
+            json={
+                "model": MODEL,
+                "max_tokens": max_tokens,
+                # Prompt caching: до 90% скидки на input-токены при cache hits
+                "system": [{"type": "text", "text": system,
+                            "cache_control": {"type": "ephemeral"}}],
+                "messages": messages,
+            },
         )
         data = r.json()
         if "error" in data:
@@ -1432,12 +1444,12 @@ async def cmd_premium(msg: Message):
             "Ты в VIP-списке — всё бесплатно навсегда 🎉\n\n"
             "🎤 Голосовые ответы · 💬 Безлимит\n"
             "🎭 Все сценки · 📊 Анализ ошибок\n"
-            "👑 VIP личности · 💎 Все темы"
+            "🧠 Sonnet 4.6 · 🎯 TOEFL prep"
         ) if ru else (
             "👑 <b>Premium Ultimate activated!</b>\n\n"
             "You're on the VIP list — everything is free forever 🎉\n\n"
             "🎤 Voice · 💬 Unlimited · 🎭 Roleplay\n"
-            "📊 Error analysis · 👑 VIP personas · 💎 All themes"
+            "📊 Error analysis · 🧠 Sonnet 4.6 · 🎯 TOEFL prep"
         )
         await msg.answer(text, parse_mode="HTML")
         return
@@ -1495,19 +1507,19 @@ async def cmd_premium(msg: Message):
         "💎 <b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
         f"🟢 <b>Basic</b> — {b_stars} ⭐/мес\n"
-        "├ 30 сообщений/день\n"
+        "├ 20 сообщений/день\n"
         "├ Голосовые ответы ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"🔵 <b>Pro</b> — {p_stars} ⭐/мес 🧠\n"
-        "├ 60 сообщений/день\n"
-        "├ <b>Умная модель Sonnet</b>\n"
+        "├ 40 сообщений/день\n"
+        "├ <b>Умная модель Sonnet</b> для сложных задач\n"
         "├ Все сценки + анализ ошибок\n"
-        "└ 🎭 VIP личности\n\n"
+        "└ 📝 Развёрнутые ответы\n\n"
         f"💎 <b>Ultimate</b> — {u_stars} ⭐/мес 🧠\n"
-        "├ 80 сообщений/день\n"
-        "├ <b>Умная модель Sonnet</b>\n"
+        "├ 50 сообщений/день\n"
+        "├ <b>Sonnet всегда</b> — топ-качество\n"
         "├ TOEFL + персональный план\n"
-        "└ 💎 Эксклюзивные темы"
+        "└ 📊 Длинная история диалога"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars или 💳 карта"
@@ -1515,19 +1527,19 @@ async def cmd_premium(msg: Message):
         "💎 <b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
         f"🟢 <b>Basic</b> — {b_stars} ⭐/mo\n"
-        "├ 30 messages/day\n"
+        "├ 20 messages/day\n"
         "├ Voice replies from ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"🔵 <b>Pro</b> — {p_stars} ⭐/mo 🧠\n"
-        "├ 60 messages/day\n"
-        "├ <b>Smart Sonnet model</b>\n"
+        "├ 40 messages/day\n"
+        "├ <b>Smart Sonnet</b> for complex tasks\n"
         "├ All scenarios + error analysis\n"
-        "└ 🎭 VIP personas\n\n"
+        "└ 📝 Detailed answers\n\n"
         f"💎 <b>Ultimate</b> — {u_stars} ⭐/mo 🧠\n"
-        "├ 80 messages/day\n"
-        "├ <b>Smart Sonnet model</b>\n"
+        "├ 50 messages/day\n"
+        "├ <b>Sonnet always</b> — top quality\n"
         "├ TOEFL + personal study plan\n"
-        "└ 💎 Exclusive themes"
+        "└ 📊 Long chat history"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars or 💳 card"

@@ -248,7 +248,7 @@ async def handle_chat(request):
             import random
             if not user_premium:
                 grace_ru = [
-                    "Ты сегодня отлично позанимался! 🎉 Хочешь больше? Premium = 30 сообщений/день",
+                    "Ты сегодня отлично позанимался! 🎉 Хочешь больше? Basic = 20 сообщений/день, Ultimate = 50/день",
                     "Лимит на сегодня исчерпан, но ты молодец! 💪 Premium откроет ещё больше",
                     "10 сообщений пролетели! Завтра будет ещё 10, или бери Premium 🚀",
                     "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
@@ -258,7 +258,7 @@ async def handle_chat(request):
                     "Знаешь, что 30 минут в день = B2 за 6 месяцев? Premium поможет 📈",
                 ]
                 grace_en = [
-                    "Great work today! 🎉 Want more? Premium = 30 messages/day",
+                    "Great work today! 🎉 Want more? Basic = 20 msg/day, Ultimate = 50/day",
                     "Daily limit reached, but you did amazing! 💪 Premium unlocks more",
                     "10 messages flew by! Come back tomorrow or get Premium 🚀",
                     "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
