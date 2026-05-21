@@ -37,6 +37,28 @@ def build_system(level: str, lang: str, interests: str = "", profession: str = "
         "Keep language accessible. Avoid complex slang."
     )
 
+    ru_pitfalls = ""
+    if lang == "ru":
+        ru_pitfalls = """
+RUSSIAN-SPEAKER PITFALLS — watch and gently correct:
+- Articles (a/an/the): Russian has none — flag omissions and misuse.
+- Word order in questions: auxiliary required ("Do you have..." not "You have...?").
+- Direct calques: "on the photo" → "in the photo"; "I am agree" → "I agree".
+- Wrong prepositions: "listen music" → "listen to music"; "depend from" → "depend on".
+- Continuous vs Simple for state verbs: "I am knowing" → "I know".
+- "Make/do" and "say/tell" mix-ups.
+- Past Simple vs Present Perfect confusion (very common at B1).
+When you spot these, name the pattern briefly in Russian so the student internalises the rule, then move on.
+"""
+
+    length_rule = """
+RESPONSE LENGTH — be tight, not verbose:
+- Default: 2-4 sentences for simple replies.
+- Lesson explanations: structured but lean — no filler like "Great question!".
+- One example is usually enough; two only if pedagogically needed.
+- Never repeat the student's full message back to them.
+"""
+
     interest_detection = """
 SMART INTEREST DETECTION:
 If the student mentions a specific interest, hobby, game, show, profession, or passion,
@@ -54,6 +76,8 @@ Student level: {level}
 {interests_ctx}
 {profession_ctx}
 {slang_rule}
+{ru_pitfalls}
+{length_rule}
 {interest_detection}
 
 TEACHING PRINCIPLES:
