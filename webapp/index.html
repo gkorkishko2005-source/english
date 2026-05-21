@@ -692,6 +692,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
+.mstrip{display:flex;gap:6px;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
+.mchip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);cursor:pointer;font-family:var(--f);font-size:11px;font-weight:700;transition:transform .15s,border-color .2s,background .2s,color .2s}
+.mchip:active{transform:scale(.93)}
+.mchip.on{border-color:var(--a);background:rgba(var(--ar),.14);color:var(--a);box-shadow:0 0 0 2px rgba(var(--ar),.10)}
+.mchip.locked{opacity:.55;color:var(--t3)}
+.mchip .mc-ic{font-size:13px;line-height:1}
+.mchip .mc-lock{font-size:8px;font-weight:800;padding:1px 5px;border-radius:100px;background:rgba(255,184,48,.18);color:var(--gd);letter-spacing:.5px;margin-left:1px;display:none}
+.mchip.locked .mc-lock{display:inline}
 .inrow{padding:7px 10px;padding-bottom:calc(7px + var(--safe));background:rgba(22,27,39,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--b1);display:flex;align-items:flex-end;gap:6px;flex-shrink:0}
 .cinp{flex:1;background:var(--e2);border:1px solid var(--b1);border-radius:18px;padding:8px 14px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;resize:none;max-height:96px;min-height:34px;line-height:1.35;transition:border-color .18s,background .18s}
 .cinp:focus{border-color:rgba(var(--ar),.45);background:var(--e1)}
@@ -1230,6 +1238,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="cmsgs" id="cmsgs"></div>
   <div class="chips" id="chips"></div>
+  <!-- Model strip (visible from Basic+) -->
+  <div class="mstrip" id="mstrip" style="display:none">
+    <button class="mchip" data-m="haiku" onclick="pickModel('haiku')"><span class="mc-ic">🐇</span><span class="mc-n">Haiku</span></button>
+    <button class="mchip" data-m="sonnet" onclick="pickModel('sonnet')"><span class="mc-ic">✨</span><span class="mc-n">Sonnet</span><span class="mc-lock" id="ml-sonnet">PRO</span></button>
+    <button class="mchip" data-m="opus" onclick="pickModel('opus')"><span class="mc-ic">💎</span><span class="mc-n">Opus</span><span class="mc-lock" id="ml-opus">ULT</span></button>
+  </div>
   <div class="inrow">
     <textarea class="cinp" id="cinp" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
     <button class="micb" id="micb" onclick="toggleMic()"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></button>
@@ -1386,14 +1400,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="lang-picker-name" id="bot-lang-name">Русский</div>
       <span class="lang-picker-arr">›</span>
     </div>
-  </div>
-
-  <!-- Model picker (visible only for paid tiers) -->
-  <div class="sec model-sec" id="model-sec" style="display:none"><span id="model-lbl">AI Model</span><span class="seca" id="model-hint">PRO+</span></div>
-  <div class="model-grid" id="model-grid" style="display:none">
-    <button class="model-btn on" data-m="auto" onclick="pickModel('auto')"><div class="mb-emoji">⚡</div><div class="mb-name" id="mb-auto">Auto</div><div class="mb-sub" id="mb-auto-s">Smart routing</div></button>
-    <button class="model-btn" data-m="haiku" onclick="pickModel('haiku')"><div class="mb-emoji">🐇</div><div class="mb-name" id="mb-haiku">Fast</div><div class="mb-sub" id="mb-haiku-s">Haiku · faster</div></button>
-    <button class="model-btn" data-m="sonnet" onclick="pickModel('sonnet')"><div class="mb-emoji">🧠</div><div class="mb-name" id="mb-sonnet">Smart</div><div class="mb-sub" id="mb-sonnet-s">Sonnet · best</div></button>
   </div>
 
   <!-- Profile: reminder + interests inline -->
@@ -2209,48 +2215,45 @@ function loadByok(){
   const lbl=document.getElementById('byok-lbl');if(lbl)lbl.textContent=t.lbl;
   const h=document.getElementById('byok-hint');if(h)h.textContent=t.hint;
 }
-/* Model picker (Pro/Ultimate only — server enforces tier gating) */
+/* Chat model picker — 3 tiers (Haiku/Sonnet/Opus) gated per subscription.
+   Server re-validates so a cheating client cannot bypass tier limits. */
+function modelAllowedForTier(m){
+  // Free has no tier (handled by isPremium=false → strip hidden anyway)
+  const tier=(premiumTier||'').toLowerCase();
+  if(m==='haiku')return ['basic','pro','ultimate'].includes(tier);
+  if(m==='sonnet')return ['pro','ultimate'].includes(tier);
+  if(m==='opus')return tier==='ultimate';
+  return false;
+}
 function getChosenModel(){
-  if(!isPremium)return 'auto'; // free/basic always auto (server uses Haiku)
-  const v=LS.get('app_model_choice')||'auto';
-  return ['auto','haiku','sonnet'].indexOf(v)>=0?v:'auto';
+  if(!isPremium)return 'auto';
+  const v=LS.get('app_model_choice')||'haiku';
+  // sanitize against the user's actual tier
+  return modelAllowedForTier(v)?v:'haiku';
 }
 function pickModel(m){
   if(!isPremium){openPremium();return;}
-  if(['auto','haiku','sonnet'].indexOf(m)<0)return;
+  if(!modelAllowedForTier(m)){openPremium();return;}
+  if(!['haiku','sonnet','opus'].includes(m))return;
   LS.set('app_model_choice',m);
-  document.querySelectorAll('.model-btn').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   try{sfx.tap();}catch(e){}haptic('light');
-  const names={auto:'Auto',haiku:'Fast',sonnet:'Smart'};
+  updateChatModelStrip();
+  const names={haiku:'Haiku',sonnet:'Sonnet',opus:'Opus'};
   toast((lang==='ru'?'Модель: ':'Model: ')+names[m],'⚙️');
 }
-function applyModelPickerVisibility(){
-  const show=isPremium;
-  const sec=document.getElementById('model-sec');
-  const grid=document.getElementById('model-grid');
-  if(sec)sec.style.display=show?'flex':'none';
-  if(grid)grid.style.display=show?'grid':'none';
-  if(!show)return;
-  // restore selection
+function updateChatModelStrip(){
+  const strip=document.getElementById('mstrip');
+  if(!strip)return;
+  // Visible only for paid tiers (Basic+)
+  strip.style.display=isPremium?'flex':'none';
+  if(!isPremium)return;
   const cur=getChosenModel();
-  document.querySelectorAll('.model-btn').forEach(b=>b.classList.toggle('on',b.dataset.m===cur));
-  // localize
-  const L10={
-    ru:{lbl:'Модель AI',auto:'Авто',haiku:'Быстрая',sonnet:'Умная',autos:'Умный роутинг',haikus:'Haiku · быстрее',sonnets:'Sonnet · лучше'},
-    en:{lbl:'AI Model',auto:'Auto',haiku:'Fast',sonnet:'Smart',autos:'Smart routing',haikus:'Haiku · faster',sonnets:'Sonnet · best'},
-    es:{lbl:'Modelo IA',auto:'Auto',haiku:'Rápido',sonnet:'Inteligente',autos:'Auto-selección',haikus:'Haiku · rápido',sonnets:'Sonnet · top'},
-    de:{lbl:'KI-Modell',auto:'Auto',haiku:'Schnell',sonnet:'Smart',autos:'Auto-Routing',haikus:'Haiku · schneller',sonnets:'Sonnet · top'},
-    fr:{lbl:'Modèle IA',auto:'Auto',haiku:'Rapide',sonnet:'Intelligent',autos:'Routage auto',haikus:'Haiku · rapide',sonnets:'Sonnet · top'},
-    pt:{lbl:'Modelo IA',auto:'Auto',haiku:'Rápido',sonnet:'Inteligente',autos:'Auto-roteamento',haikus:'Haiku · rápido',sonnets:'Sonnet · top'},
-    uk:{lbl:'Модель ШІ',auto:'Авто',haiku:'Швидка',sonnet:'Розумна',autos:'Розумний роутинг',haikus:'Haiku · швидше',sonnets:'Sonnet · краще'},
-    tr:{lbl:'AI Modeli',auto:'Otomatik',haiku:'Hızlı',sonnet:'Akıllı',autos:'Akıllı yönlendirme',haikus:'Haiku · hızlı',sonnets:'Sonnet · en iyi'},
-    zh:{lbl:'AI 模型',auto:'自动',haiku:'快速',sonnet:'智能',autos:'智能路由',haikus:'Haiku · 更快',sonnets:'Sonnet · 最佳'},
-    ar:{lbl:'نموذج الذكاء',auto:'تلقائي',haiku:'سريع',sonnet:'ذكي',autos:'توجيه تلقائي',haikus:'Haiku · أسرع',sonnets:'Sonnet · الأفضل'},
-  };
-  const t=L10[lang]||L10.en;
-  const ml=document.getElementById('model-lbl');if(ml)ml.textContent=t.lbl;
-  const pairs={'mb-auto':t.auto,'mb-haiku':t.haiku,'mb-sonnet':t.sonnet,'mb-auto-s':t.autos,'mb-haiku-s':t.haikus,'mb-sonnet-s':t.sonnets};
-  Object.keys(pairs).forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=pairs[id];});
+  document.querySelectorAll('.mchip').forEach(b=>{
+    const m=b.dataset.m;
+    const ok=modelAllowedForTier(m);
+    b.classList.toggle('locked',!ok);
+    b.classList.toggle('on',ok&&m===cur);
+  });
 }
 
 function maybeOnboardChat(){
@@ -3819,7 +3822,7 @@ function setPremium(active, source){
   LS.set('premium',active?'1':'0');
   if(premiumTier)LS.set('premium_tier',premiumTier);
   updatePremiumUI();
-  try{applyModelPickerVisibility();}catch(e){}
+  try{updateChatModelStrip();}catch(e){}
   if(active&&source!=='cache'){
     const shdr=document.querySelector('.shdr .stit');
     if(shdr){

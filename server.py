@@ -213,40 +213,56 @@ async def handle_chat(request):
             except Exception as e:
                 logger.debug(f"trial check: {e}")
 
-    # Model routing by tier (with optional client override for paid):
-    # Free     = Haiku (5  msgs/day)
-    # Basic    = Haiku (20 msgs/day)
-    # Pro      = Auto (Haiku + Sonnet on complex) | Haiku | Sonnet — 40 msgs/day
-    # Ultimate = Sonnet default | Haiku optional   — 50 msgs/day
-    chosen = str(body.get("chosen_model", "auto")).lower()
-    if chosen not in ("auto", "haiku", "sonnet"):
-        chosen = "auto"
+    # Model picker (paid tiers only). Server is source of truth — client
+    # cannot upgrade beyond their tier by spoofing chosen_model.
+    # Per-model quota WEIGHT: Opus costs ~5x Sonnet, so we count it as 4
+    # daily-quota points to keep economics sane.
+    #   Free     → Haiku only,        5  pts/day
+    #   Basic    → Haiku only,        20 pts/day
+    #   Pro      → Haiku/Sonnet,      40 pts/day  (Opus locked → Sonnet)
+    #   Ultimate → Haiku/Sonnet/Opus, 50 pts/day  (Opus = 4 pts each)
+    OPUS_MODEL = "claude-opus-4-1"
+    SONNET_MODEL = "claude-sonnet-4-6"
+    chosen = str(body.get("chosen_model", "haiku")).lower()
+    if chosen not in ("haiku", "sonnet", "opus", "auto"):
+        chosen = "haiku"
 
     chat_model = MODEL  # default Haiku
     max_tokens = 500
-    msg_limit = 5  # free users
+    msg_limit = 5      # free
+    weight = 1
     if user_tier == "basic":
-        chat_model = MODEL  # Haiku (client choice ignored for Basic)
+        chat_model = MODEL                           # locked to Haiku
         max_tokens = 700
         msg_limit = 20
     elif user_tier == "pro":
-        if chosen == "haiku":
-            chat_model = MODEL
-        elif chosen == "sonnet":
-            chat_model = "claude-sonnet-4-6"
-        else:  # auto — smart routing
-            is_complex = any(kw in message.lower() for kw in [
-                'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
-                'toefl','test','тест','анализ','разбор','why','почему','правило'
-            ])
-            chat_model = "claude-sonnet-4-6" if is_complex else MODEL
-        # Haiku gets smaller cap (cheaper); Sonnet keeps full cap
+        if chosen == "sonnet":
+            chat_model = SONNET_MODEL
+        elif chosen in ("opus", "auto"):
+            # Opus not allowed on Pro; auto = smart routing
+            if chosen == "opus":
+                chat_model = SONNET_MODEL
+            else:
+                is_complex = any(kw in message.lower() for kw in [
+                    'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
+                    'toefl','test','тест','анализ','разбор','why','почему','правило'
+                ])
+                chat_model = SONNET_MODEL if is_complex else MODEL
+        else:
+            chat_model = MODEL                       # haiku
         max_tokens = 700 if chat_model == MODEL else 1000
         msg_limit = 40
     elif user_tier == "ultimate":
-        # Ultimate can choose Haiku to save (faster, cheaper); default = Sonnet
-        chat_model = MODEL if chosen == "haiku" else "claude-sonnet-4-6"
-        max_tokens = 800 if chat_model == MODEL else 1400
+        if chosen == "opus":
+            chat_model = OPUS_MODEL
+            max_tokens = 1200
+            weight = 4                               # Opus burns 4 quota points
+        elif chosen == "haiku":
+            chat_model = MODEL
+            max_tokens = 800
+        else:                                        # sonnet (default) or auto
+            chat_model = SONNET_MODEL
+            max_tokens = 1400
         msg_limit = 50
 
     # Check daily message limit (skip for admins)
@@ -294,7 +310,7 @@ async def handle_chat(request):
                 ]
                 limit_msg = random.choice(grace_prem_ru if lang=="ru" else grace_prem_en)
             return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
-        _msg_counts[today_key] = msg_count + 1
+        _msg_counts[today_key] = msg_count + weight  # weight=4 for Opus, 1 otherwise
 
     h = _histories.setdefault(uid, [])
     h.append({"role": "user", "content": message})
