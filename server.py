@@ -275,8 +275,12 @@ async def handle_chat(request):
         last = _last_msg_ts.get(uid, 0.0)
         if now_ts - last < gap:
             wait = max(1, int(gap - (now_ts - last)))
-            slow_msg = (f"⏳ Подожди {wait} с — слишком быстро." if lang=="ru"
-                        else f"⏳ Slow down — wait {wait} s.")
+            slow_map = {
+                "ru": f"⏳ Подожди {wait} с — слишком быстро.",
+                "es": f"⏳ Espera {wait} s — demasiado rápido.",
+                "pt": f"⏳ Espere {wait} s — rápido demais.",
+            }
+            slow_msg = slow_map.get(lang, f"⏳ Slow down — wait {wait} s.")
             return web.json_response({"reply": slow_msg},
                                      headers={"Access-Control-Allow-Origin":"*"})
         _last_msg_ts[uid] = now_ts
