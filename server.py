@@ -213,31 +213,40 @@ async def handle_chat(request):
             except Exception as e:
                 logger.debug(f"trial check: {e}")
 
-    # Model routing by tier:
-    # Free = Haiku (10 msgs/day)
-    # Free   = Haiku (5 msgs/day)
-    # Basic  = Haiku (20 msgs/day)
-    # Pro    = Haiku default + Sonnet for complex tasks (40 msgs/day)
-    # Ultimate = Sonnet default (50 msgs/day)
+    # Model routing by tier (with optional client override for paid):
+    # Free     = Haiku (5  msgs/day)
+    # Basic    = Haiku (20 msgs/day)
+    # Pro      = Auto (Haiku + Sonnet on complex) | Haiku | Sonnet — 40 msgs/day
+    # Ultimate = Sonnet default | Haiku optional   — 50 msgs/day
+    chosen = str(body.get("chosen_model", "auto")).lower()
+    if chosen not in ("auto", "haiku", "sonnet"):
+        chosen = "auto"
+
     chat_model = MODEL  # default Haiku
     max_tokens = 500
     msg_limit = 5  # free users
     if user_tier == "basic":
-        chat_model = MODEL  # Haiku
+        chat_model = MODEL  # Haiku (client choice ignored for Basic)
         max_tokens = 700
         msg_limit = 20
     elif user_tier == "pro":
-        # Pro: use Sonnet for grammar/correction, Haiku for casual chat
-        is_complex = any(kw in message.lower() for kw in [
-            'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
-            'toefl','test','тест','анализ','разбор','why','почему','правило'
-        ])
-        chat_model = "claude-sonnet-4-6" if is_complex else MODEL
-        max_tokens = 1000
+        if chosen == "haiku":
+            chat_model = MODEL
+        elif chosen == "sonnet":
+            chat_model = "claude-sonnet-4-6"
+        else:  # auto — smart routing
+            is_complex = any(kw in message.lower() for kw in [
+                'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
+                'toefl','test','тест','анализ','разбор','why','почему','правило'
+            ])
+            chat_model = "claude-sonnet-4-6" if is_complex else MODEL
+        # Haiku gets smaller cap (cheaper); Sonnet keeps full cap
+        max_tokens = 700 if chat_model == MODEL else 1000
         msg_limit = 40
     elif user_tier == "ultimate":
-        chat_model = "claude-sonnet-4-6"
-        max_tokens = 1400
+        # Ultimate can choose Haiku to save (faster, cheaper); default = Sonnet
+        chat_model = MODEL if chosen == "haiku" else "claude-sonnet-4-6"
+        max_tokens = 800 if chat_model == MODEL else 1400
         msg_limit = 50
 
     # Check daily message limit (skip for admins)
