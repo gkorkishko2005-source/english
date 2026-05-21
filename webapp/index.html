@@ -692,14 +692,25 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
-.mstrip{display:flex;gap:6px;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
-.mchip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);cursor:pointer;font-family:var(--f);font-size:11px;font-weight:700;transition:transform .15s,border-color .2s,background .2s,color .2s}
-.mchip:active{transform:scale(.93)}
-.mchip.on{border-color:var(--a);background:rgba(var(--ar),.14);color:var(--a);box-shadow:0 0 0 2px rgba(var(--ar),.10)}
-.mchip.locked{opacity:.55;color:var(--t3)}
-.mchip .mc-ic{font-size:13px;line-height:1}
-.mchip .mc-lock{font-size:8px;font-weight:800;padding:1px 5px;border-radius:100px;background:rgba(255,184,48,.18);color:var(--gd);letter-spacing:.5px;margin-left:1px;display:none}
-.mchip.locked .mc-lock{display:inline}
+.mbar{display:flex;justify-content:flex-start;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
+.mtoggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 12px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);color:var(--t1);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;transition:transform .15s,border-color .2s,background .2s}
+.mtoggle:hover{border-color:rgba(var(--ar),.4);background:rgba(var(--ar),.06)}
+.mtoggle:active{transform:scale(.95)}
+.mt-arr{width:13px;height:13px;opacity:.7}
+/* Bottom-sheet model options */
+.mopt{display:flex;align-items:center;gap:11px;padding:12px 13px;width:100%;background:var(--e2);border:1.5px solid var(--b1);border-radius:var(--r2);margin-bottom:7px;cursor:pointer;font-family:var(--f);text-align:left;color:var(--t1);transition:transform .15s,border-color .2s,background .2s;position:relative}
+.mopt:hover{border-color:rgba(var(--ar),.35)}
+.mopt:active{transform:scale(.98)}
+.mopt.on{border-color:var(--a);background:rgba(var(--ar),.08)}
+.mopt.locked{opacity:.55}
+.mopt-body{flex:1;min-width:0}
+.mopt-name{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:2px}
+.mopt-sub{font-size:11px;color:var(--t2);line-height:1.4}
+.mopt-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--a)}
+.mopt.on .mopt-check{border-color:var(--a);background:rgba(var(--ar),.18)}
+.mopt-check svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;display:none}
+.mopt.on .mopt-check svg{display:block}
+.mopt-lock{font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;background:rgba(255,184,48,.18);color:var(--gd);letter-spacing:.5px}
 .inrow{padding:7px 10px;padding-bottom:calc(7px + var(--safe));background:rgba(22,27,39,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--b1);display:flex;align-items:flex-end;gap:6px;flex-shrink:0}
 .cinp{flex:1;background:var(--e2);border:1px solid var(--b1);border-radius:18px;padding:8px 14px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;resize:none;max-height:96px;min-height:34px;line-height:1.35;transition:border-color .18s,background .18s}
 .cinp:focus{border-color:rgba(var(--ar),.45);background:var(--e1)}
@@ -1238,11 +1249,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="cmsgs" id="cmsgs"></div>
   <div class="chips" id="chips"></div>
-  <!-- Model strip (visible from Basic+) -->
-  <div class="mstrip" id="mstrip" style="display:none">
-    <button class="mchip" data-m="haiku" onclick="pickModel('haiku')"><span class="mc-ic">🐇</span><span class="mc-n">Haiku</span></button>
-    <button class="mchip" data-m="sonnet" onclick="pickModel('sonnet')"><span class="mc-ic">✨</span><span class="mc-n">Sonnet</span><span class="mc-lock" id="ml-sonnet">PRO</span></button>
-    <button class="mchip" data-m="opus" onclick="pickModel('opus')"><span class="mc-ic">💎</span><span class="mc-n">Opus</span><span class="mc-lock" id="ml-opus">ULT</span></button>
+  <!-- Model button (visible from Basic+; opens model picker modal) -->
+  <div class="mbar" id="mbar" style="display:none">
+    <button class="mtoggle" onclick="openModelPicker()" type="button">
+      <span class="mt-name" id="mt-name">Haiku</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-arr"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
   </div>
   <div class="inrow">
     <textarea class="cinp" id="cinp" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
@@ -1462,6 +1474,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="toast" id="toast">
   <div id="t-icon-wrap" style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center"></div>
   <span id="tmsg">—</span>
+</div>
+
+  <!-- MODEL PICKER MODAL -->
+<div class="mov" id="modelm" style="display:none" onclick="closeMod('modelm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="mtit" id="model-mtit">Choose model</div>
+    <div class="mbdy">
+      <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
+        <div class="mopt-body"><div class="mopt-name">Haiku 3.5</div><div class="mopt-sub" id="mopt-haiku-s">Fast and light</div></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
+        <div class="mopt-body"><div class="mopt-name">Sonnet 3.5</div><div class="mopt-sub" id="mopt-sonnet-s">Balanced quality</div></div>
+        <span class="mopt-lock" id="mopt-sonnet-lock" style="display:none">PRO</span>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
+        <div class="mopt-body"><div class="mopt-name">Opus 3</div><div class="mopt-sub" id="mopt-opus-s">Smartest, slower</div></div>
+        <span class="mopt-lock" id="mopt-opus-lock" style="display:none">ULT</span>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="moff" onclick="closeMod('modelm')" type="button" style="margin-top:6px">Cancel</button>
+    </div>
+  </div>
 </div>
 
   <!-- REMINDER MODAL -->
@@ -2241,19 +2277,45 @@ function pickModel(m){
   const names={haiku:'Haiku',sonnet:'Sonnet',opus:'Opus'};
   toast((lang==='ru'?'Модель: ':'Model: ')+names[m],'⚙️');
 }
+function selectModel(m){
+  pickModel(m);
+  if(modelAllowedForTier(m))closeMod('modelm');
+}
+function openModelPicker(){
+  if(!isPremium){openPremium();return;}
+  updateModelOptions();
+  openMod('modelm');
+}
+function updateModelOptions(){
+  const cur=getChosenModel();
+  document.querySelectorAll('#modelm .mopt').forEach(b=>{
+    const m=b.dataset.m,ok=modelAllowedForTier(m);
+    b.classList.toggle('on',ok&&m===cur);
+    b.classList.toggle('locked',!ok);
+    const lock=b.querySelector('.mopt-lock');
+    if(lock)lock.style.display=ok?'none':'inline-block';
+  });
+  // localized title
+  const titles={ru:'Выбери модель',en:'Choose model',es:'Elige modelo',de:'Modell wählen',fr:'Choisir le modèle',pt:'Escolher modelo',uk:'Обери модель',tr:'Modeli seç',zh:'选择模型',ar:'اختر النموذج'};
+  const t=document.getElementById('model-mtit');if(t)t.textContent=titles[lang]||titles.en;
+  const subs={
+    haiku:{ru:'Быстрая и лёгкая',en:'Fast and light',es:'Rápido y ligero',de:'Schnell, leicht',fr:'Rapide, léger',pt:'Rápido, leve',uk:'Швидка, легка',tr:'Hızlı, hafif',zh:'快速、轻量',ar:'سريع وخفيف'},
+    sonnet:{ru:'Сбалансированное качество',en:'Balanced quality',es:'Calidad equilibrada',de:'Ausgewogen',fr:'Qualité équilibrée',pt:'Qualidade equilibrada',uk:'Збалансована якість',tr:'Dengeli kalite',zh:'均衡质量',ar:'جودة متوازنة'},
+    opus:{ru:'Самая умная, медленнее',en:'Smartest, slower',es:'Más inteligente, más lenta',de:'Klügste, langsamer',fr:'La plus intelligente, plus lente',pt:'Mais inteligente, mais lento',uk:'Найрозумніша, повільніша',tr:'En akıllı, daha yavaş',zh:'最聪明,较慢',ar:'الأذكى، أبطأ'},
+  };
+  ['haiku','sonnet','opus'].forEach(m=>{
+    const el=document.getElementById('mopt-'+m+'-s');
+    if(el)el.textContent=(subs[m][lang]||subs[m].en);
+  });
+}
 function updateChatModelStrip(){
-  const strip=document.getElementById('mstrip');
-  if(!strip)return;
-  // Visible only for paid tiers (Basic+)
-  strip.style.display=isPremium?'flex':'none';
+  const bar=document.getElementById('mbar');
+  if(!bar)return;
+  bar.style.display=isPremium?'flex':'none';
   if(!isPremium)return;
   const cur=getChosenModel();
-  document.querySelectorAll('.mchip').forEach(b=>{
-    const m=b.dataset.m;
-    const ok=modelAllowedForTier(m);
-    b.classList.toggle('locked',!ok);
-    b.classList.toggle('on',ok&&m===cur);
-  });
+  const names={haiku:'Haiku',sonnet:'Sonnet',opus:'Opus'};
+  const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
 }
 
 function maybeOnboardChat(){

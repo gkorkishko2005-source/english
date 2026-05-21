@@ -11,7 +11,7 @@ WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL       = "claude-haiku-4-5-20251001"   # ← FIXED model name
+MODEL       = "claude-3-5-haiku-20241022"   # older Haiku ~4× cheaper, still solid
 
 # ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
 # Add your Telegram user IDs here — they get lifetime free premium
@@ -35,6 +35,7 @@ else:
 
 _histories: dict = {}
 _msg_counts: dict = {}  # daily message counts per user
+_last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
 
 # ── STATIC ──────────────────────────────────────────────────────────────────
 async def handle_index(request):
@@ -221,8 +222,8 @@ async def handle_chat(request):
     #   Basic    → Haiku only,        20 pts/day
     #   Pro      → Haiku/Sonnet,      40 pts/day  (Opus locked → Sonnet)
     #   Ultimate → Haiku/Sonnet/Opus, 50 pts/day  (Opus = 4 pts each)
-    OPUS_MODEL = "claude-opus-4-1"
-    SONNET_MODEL = "claude-sonnet-4-6"
+    OPUS_MODEL = "claude-3-opus-20240229"            # older Opus — same quality tier
+    SONNET_MODEL = "claude-3-5-sonnet-20241022"       # older Sonnet — proven, identical price
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in ("haiku", "sonnet", "opus", "auto"):
         chosen = "haiku"
@@ -267,6 +268,18 @@ async def handle_chat(request):
 
     # Check daily message limit (skip for admins)
     if uid not in ADMIN_IDS:
+        # Anti-burst: min gap between messages — 5s free, 2s paid.
+        import time as _time
+        now_ts = _time.time()
+        gap = 2.0 if user_premium else 5.0
+        last = _last_msg_ts.get(uid, 0.0)
+        if now_ts - last < gap:
+            wait = max(1, int(gap - (now_ts - last)))
+            slow_msg = (f"⏳ Подожди {wait} с — слишком быстро." if lang=="ru"
+                        else f"⏳ Slow down — wait {wait} s.")
+            return web.json_response({"reply": slow_msg},
+                                     headers={"Access-Control-Allow-Origin":"*"})
+        _last_msg_ts[uid] = now_ts
         today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
         msg_count = _msg_counts.get(today_key, 0)
         if msg_count >= msg_limit:

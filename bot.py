@@ -90,7 +90,7 @@ PREMIUM_PLANS = {
 # First-time discount: 10% off
 FIRST_TIME_DISCOUNT = 0.10
 STRIPE_TOKEN = os.getenv("STRIPE_PROVIDER_TOKEN", "")
-MODEL         = "claude-haiku-4-5"
+MODEL         = "claude-3-5-haiku-20241022"  # older Haiku ~4× cheaper
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
