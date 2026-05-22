@@ -597,6 +597,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .dl-toggle-icon.light{transform:rotate(180deg)}
 .dl-toggle-icon.light .sun{opacity:1;transform:scale(1) rotate(0)}
 .dl-toggle-icon.light .moon{opacity:0;transform:scale(.45) rotate(90deg)}
+.sound-orb{position:relative;width:23px;height:23px;display:block}
+.sound-orb svg{position:absolute;inset:0;width:23px;height:23px;transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 2px 7px rgba(0,212,170,.16))}
+.sound-orb .sound-on{opacity:1;transform:scale(1) rotate(0)}
+.sound-orb .sound-off{opacity:0;transform:scale(.45) rotate(-90deg)}
+.dl-toggle-icon.muted{transform:rotate(-180deg)}
+.dl-toggle-icon.muted .sound-on{opacity:0;transform:scale(.45) rotate(90deg)}
+.dl-toggle-icon.muted .sound-off{opacity:1;transform:scale(1) rotate(0)}
 .dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1);flex:1}
 .dl-switch{width:44px;height:24px;border-radius:12px;background:var(--e3);position:relative;transition:.3s}
 .dl-switch.on{background:var(--a)}
@@ -1410,7 +1417,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="dl-switch" id="dl-switch"></div>
     </div>
     <div class="dl-toggle" id="sfx-toggle" onclick="toggleSfx()">
-      <div class="dl-toggle-icon" id="sfx-icon">🔊</div>
+      <div class="dl-toggle-icon" id="sfx-icon">
+        <span class="sound-orb">
+          <svg class="sound-on" viewBox="0 0 24 24" fill="none"><path d="M4 10v4h4l5 4V6l-5 4H4z" fill="#00d4aa"/><path d="M16 9.5c1.1 1.4 1.1 3.6 0 5M18.5 7c2.4 2.8 2.4 7.2 0 10" stroke="#00d4aa" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="sound-off" viewBox="0 0 24 24" fill="none"><path d="M4 10v4h4l5 4V6l-5 4H4z" fill="#8a93a8"/><path d="M17 9l5 5M22 9l-5 5" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+      </div>
       <div class="dl-toggle-text" id="sfx-text">Sound</div>
       <div class="dl-switch on" id="sfx-switch"></div>
     </div>
@@ -2005,14 +2017,14 @@ const sfx=(function(){
 function toggleSfx(){
   var m=!sfx.isMuted();sfx.setMuted(m);
   var sw=document.getElementById('sfx-switch');if(sw)sw.classList.toggle('on',!m);
-  var ic=document.getElementById('sfx-icon');if(ic)ic.textContent=m?'🔇':'🔊';
+  var ic=document.getElementById('sfx-icon');if(ic)ic.classList.toggle('muted',m);
   if(!m)sfx.tap();
   try{haptic('light');}catch(e){}
 }
 function applySfxToggleUI(){
   var m=sfx.isMuted();
   var sw=document.getElementById('sfx-switch');if(sw)sw.classList.toggle('on',!m);
-  var ic=document.getElementById('sfx-icon');if(ic)ic.textContent=m?'🔇':'🔊';
+  var ic=document.getElementById('sfx-icon');if(ic)ic.classList.toggle('muted',m);
 }
 
 const ALEX_SVG='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M8 2H32A6 6 0 0 1 38 8V25A6 6 0 0 1 32 31H17L8 39V31A6 6 0 0 1 2 25V8A6 6 0 0 1 8 2Z" fill="none" stroke="#9aebbc" stroke-width="3" stroke-linejoin="round"/><g transform="translate(20 17)"><ellipse rx="8.5" ry="5.2" transform="rotate(35)" fill="none" stroke="#9aebbc" stroke-width="3"/><ellipse rx="8.5" ry="5.2" transform="rotate(-35)" fill="none" stroke="#4f8aff" stroke-width="3"/></g></svg>';
