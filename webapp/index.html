@@ -416,9 +416,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mbub .corr{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:6px 9px;margin:5px 0;font-size:13px}
 
 /* Copy btn */
-.macts{display:flex;gap:4px;opacity:0;transition:opacity .2s}
-.msg:hover .macts,.msg:active .macts,.msg:focus-within .macts{opacity:1}
-@media(hover:none){.macts{opacity:1}}
+.macts{display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity .18s}
+.msg:hover .macts{opacity:1;pointer-events:auto}
+@media(hover:none),(pointer:coarse){.macts{opacity:1;pointer-events:auto}}
 .mtime{font-size:10px;color:var(--t3);padding:0 2px;line-height:1.2}
 .msg.user .mtime{display:none}
 .cpbtn{background:var(--e2);border:1px solid var(--b1);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:11px;color:var(--t3);font-family:var(--f);display:flex;align-items:center;gap:3px;transition:.15s}
