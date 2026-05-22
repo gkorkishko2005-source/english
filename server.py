@@ -11,7 +11,7 @@ WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL       = "claude-3-5-haiku-20241022"   # older Haiku ~4× cheaper, still solid
+MODEL       = "claude-haiku-4-5"            # current Haiku alias — always live
 
 # ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
 # Add your Telegram user IDs here — they get lifetime free premium
@@ -222,8 +222,8 @@ async def handle_chat(request):
     #   Basic    → Haiku only,        20 pts/day
     #   Pro      → Haiku/Sonnet,      40 pts/day  (Opus locked → Sonnet)
     #   Ultimate → Haiku/Sonnet/Opus, 50 pts/day  (Opus = 4 pts each)
-    OPUS_MODEL = "claude-3-opus-20240229"            # older Opus — same quality tier
-    SONNET_MODEL = "claude-3-5-sonnet-20241022"       # older Sonnet — proven, identical price
+    OPUS_MODEL = "claude-opus-4-1-20250805"           # current available Opus
+    SONNET_MODEL = "claude-sonnet-4-5"                # current Sonnet alias
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in ("haiku", "sonnet", "opus", "auto"):
         chosen = "haiku"
@@ -646,22 +646,30 @@ async def handle_admin_stats(request):
     uid = int(request.headers.get("X-UID", "0"))
     if uid not in ADMIN_IDS:
         return web.json_response({"error": "forbidden"}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    from database import db
+    import datetime as _dt
+    _today_date = _dt.date.today()
+    result = {"total_users": "--", "today_active": "--", "premium_users": "--", "today_messages": 0}
+    # Each query in its own try so a single missing column doesn't kill the whole panel.
     try:
-        from database import db
-        import datetime as _dt
-        _today_date = _dt.date.today()
-        total = await db("SELECT COUNT(*) as c FROM users", fetch="one")
-        today = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= ?", _today_date, fetch="one")
-        premium = await db("SELECT COUNT(*) as c FROM users WHERE premium_tier != '' AND premium_tier IS NOT NULL", fetch="one")
-        result = {
-            "total_users": total["c"] if total else 0,
-            "today_active": today["c"] if today else 0,
-            "premium_users": premium["c"] if premium else 0,
-            "today_messages": sum(v for k,v in _msg_counts.items() if str(_today_date) in k),
-        }
+        r = await db("SELECT COUNT(*) as c FROM users", fetch="one")
+        if r is not None: result["total_users"] = r["c"]
     except Exception as e:
-        logger.warning(f"admin stats error: {e}")
-        result = {"total_users": "--", "today_active": "--", "premium_users": "--", "today_messages": sum(_msg_counts.values())}
+        logger.warning(f"admin total_users: {e}")
+    try:
+        r = await db("SELECT COUNT(*) as c FROM users WHERE last_active >= ?", _today_date, fetch="one")
+        if r is not None: result["today_active"] = r["c"]
+    except Exception as e:
+        logger.warning(f"admin today_active: {e}")
+    try:
+        r = await db("SELECT COUNT(*) as c FROM users WHERE premium_tier != '' AND premium_tier IS NOT NULL", fetch="one")
+        if r is not None: result["premium_users"] = r["c"]
+    except Exception as e:
+        logger.warning(f"admin premium_users: {e}")
+    try:
+        result["today_messages"] = sum(v for k,v in _msg_counts.items() if str(_today_date) in k)
+    except Exception:
+        pass
     return web.json_response(result, headers={"Access-Control-Allow-Origin":"*"})
 
 # ── CORS ──────────────────────────────────────────────────────────────────────

@@ -5053,8 +5053,10 @@ function renderAdminPanel(){
   loadAdminStats();
 }
 function loadAdminStats(){
-  fetch(API+'/api/admin/stats',{headers:{'X-UID':''+(window._uid||0)}}).then(function(r){return r.json();}).then(function(d){
-    var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v||'--';};
+  if(!API||!window._uid)return;
+  fetch(API+'/api/admin/stats',{headers:{'X-UID':''+(window._uid||0)}}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(!d)return;
+    var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=(v==null||v==='')?'--':v;};
     e('adm-users',d.total_users);e('adm-today',d.today_active);e('adm-prem',d.premium_users);e('adm-msgs',d.today_messages);
   }).catch(function(){});
 }
