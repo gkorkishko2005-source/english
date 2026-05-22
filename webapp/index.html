@@ -133,7 +133,7 @@
 .stat-svg{transition:opacity .2s}
 
 /* ══ WEEKLY CHART improved ══ */
-.chart-wrap{padding:4px 0}
+.chart-wrap{padding:14px 0 6px;overflow:visible!important}
 .chart{display:flex;align-items:flex-end;gap:5px;height:72px;margin-bottom:8px}
 .bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;cursor:pointer}
 .bb{width:100%;border-radius:5px 5px 0 0;min-height:3px;background:linear-gradient(180deg,var(--a),rgba(var(--ar),.18));transition:height .75s cubic-bezier(.4,0,.2,1),opacity .2s}
@@ -141,8 +141,8 @@
 .bb.td{background:linear-gradient(180deg,var(--a2),rgba(0,212,170,.18))}
 .bb.zero{background:var(--e3);min-height:4px}
 .bd{font-size:10px;color:var(--t3)}.bd.td{color:var(--a2);font-weight:700}
-.chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--t1);pointer-events:none;transform:translateX(-50%);white-space:nowrap;z-index:10;opacity:0;transition:opacity .15s}
-.chart-tooltip.show{opacity:1}
+.chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--t1);pointer-events:none;transform:translate(-50%,-2px);white-space:nowrap;z-index:40;opacity:0;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.chart-tooltip.show{opacity:1;transform:translate(-50%,-8px)}
 
 /* ══ iOS TIME DRUM PICKER ══ */
 .time-drum-wrap{
@@ -589,7 +589,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ DARK/LIGHT TOGGLE ══ */
 .dl-toggle{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;margin-bottom:10px}
 .dl-toggle:active{transform:scale(.98)}
-.dl-toggle-icon{font-size:20px;transition:transform .3s}
+.dl-toggle-icon{width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.theme-orb{position:relative;width:23px;height:23px;display:block}
+.theme-orb svg{position:absolute;inset:0;width:23px;height:23px;transition:opacity .35s,transform .45s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 2px 7px rgba(79,138,255,.18))}
+.theme-orb .sun{opacity:0;transform:scale(.45) rotate(-90deg)}
+.theme-orb .moon{opacity:1;transform:scale(1) rotate(0)}
+.dl-toggle-icon.light{transform:rotate(180deg)}
+.dl-toggle-icon.light .sun{opacity:1;transform:scale(1) rotate(0)}
+.dl-toggle-icon.light .moon{opacity:0;transform:scale(.45) rotate(90deg)}
 .dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1);flex:1}
 .dl-switch{width:44px;height:24px;border-radius:12px;background:var(--e3);position:relative;transition:.3s}
 .dl-switch.on{background:var(--a)}
@@ -808,7 +815,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .s4cv{font-size:25px;font-weight:800;line-height:1;margin-bottom:3px}
 .s4cl{font-size:11px;color:var(--t2)}
 
-.chart{display:flex;align-items:flex-end;gap:4px;height:64px;margin-bottom:6px}
+.chart{display:flex;align-items:flex-end;gap:4px;height:64px;margin-bottom:6px;overflow:visible}
 .bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
 .bb{width:100%;border-radius:4px 4px 0 0;min-height:3px;background:linear-gradient(180deg,var(--a),rgba(var(--ar),.18));transition:height .75s cubic-bezier(.4,0,.2,1)}
 .bb.td{background:linear-gradient(180deg,var(--a2),rgba(0,212,170,.18))}
@@ -1393,7 +1400,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- Compact quick-toggles row: Dark + Sound -->
   <div class="set-grid-2">
     <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
-      <div class="dl-toggle-icon" id="dl-icon">🌙</div>
+      <div class="dl-toggle-icon" id="dl-icon">
+        <span class="theme-orb">
+          <svg class="moon" viewBox="0 0 24 24" fill="none"><path d="M20.5 14.5A8.5 8.5 0 019.5 3.5a8.8 8.8 0 1011 11z" fill="#8ea2ff"/><path d="M17 4.5l.5 1 .9.5-.9.5-.5 1-.5-1-.9-.5.9-.5.5-1z" fill="#c8d2ff"/></svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="#ffb830"/><g stroke="#ffb830" stroke-width="2" stroke-linecap="round"><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
+        </span>
+      </div>
       <div class="dl-toggle-text" id="dl-text">Dark</div>
       <div class="dl-switch" id="dl-switch"></div>
     </div>
@@ -1947,33 +1959,47 @@ function setBotLang(l){
 /* ══ CHIPS ══ */
 /* ══ SFX — синтезированные звуки (Web Audio, без файлов) ══ */
 const sfx=(function(){
-  var ctx=null,muted=null;
+  var ctx=null,muted=null,master=null;
   function isMuted(){if(muted===null)muted=LS.get('sfx_muted')==='1';return muted;}
   function setMuted(v){muted=!!v;LS.set('sfx_muted',v?'1':'0');}
   function ac(){if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
-    if(ctx.state==='suspended')ctx.resume().catch(function(){});return ctx;}
-  function tone(freq,dur,type,vol,attack,release){
+    if(ctx.state==='suspended')ctx.resume().catch(function(){});
+    if(!master&&ctx){master=ctx.createGain();master.gain.value=.72;master.connect(ctx.destination);}
+    return ctx;}
+  function tone(freq,dur,type,vol,attack,release,delay){
     if(isMuted())return;var c=ac();if(!c)return;
-    var t=c.currentTime,o=c.createOscillator(),g=c.createGain();
+    var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();
     o.type=type||'sine';o.frequency.setValueAtTime(freq,t);
+    f.type='lowpass';f.frequency.setValueAtTime(3600,t);f.Q.setValueAtTime(.4,t);
     g.gain.setValueAtTime(0,t);
     g.gain.linearRampToValueAtTime(vol||.18,t+(attack||.01));
-    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.12)+(release||0));
-    o.connect(g).connect(c.destination);o.start(t);o.stop(t+(dur||.12)+(release||.02));
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.12)+(release||.04));
+    o.connect(f).connect(g).connect(master||c.destination);o.start(t);o.stop(t+(dur||.12)+(release||.05));
   }
-  function seq(notes,gap,type,vol){
+  function seq(notes,gap,type,vol,dur){
     if(isMuted())return;var c=ac();if(!c)return;
-    notes.forEach(function(n,i){setTimeout(function(){tone(n,.12,type||'sine',vol||.18);},i*(gap||80));});
+    notes.forEach(function(n,i){tone(n,dur||.11,type||'sine',vol||.14,.008,.05,i*((gap||70)/1000));});
+  }
+  function noise(dur,vol,filterFreq){
+    if(isMuted())return;var c=ac();if(!c)return;
+    var t=c.currentTime,len=Math.max(1,Math.floor(c.sampleRate*(dur||.08)));
+    var b=c.createBuffer(1,len,c.sampleRate),data=b.getChannelData(0);
+    for(var i=0;i<len;i++)data[i]=(Math.random()*2-1)*(1-i/len);
+    var src=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();
+    src.buffer=b;f.type='highpass';f.frequency.value=filterFreq||900;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol||.035,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.08));
+    src.connect(f).connect(g).connect(master||c.destination);src.start(t);src.stop(t+(dur||.08)+.02);
   }
   return {
     isMuted:isMuted,setMuted:setMuted,
-    tap:function(){tone(620,.04,'sine',.10,.005,.02);},
-    flip:function(){tone(280,.08,'triangle',.12);setTimeout(function(){tone(440,.08,'triangle',.10);},40);},
-    correct:function(){seq([523,659,784],70,'sine',.16);},   // C E G
-    wrong:function(){tone(180,.16,'sawtooth',.12,.005,.02);setTimeout(function(){tone(140,.18,'sawtooth',.10);},80);},
-    xp:function(){seq([880,1175,1568],60,'sine',.12);},      // A D G shimmer
-    level:function(){seq([523,659,784,1047],90,'sine',.18);},// C E G C
-    send:function(){tone(700,.06,'sine',.10);setTimeout(function(){tone(900,.06,'sine',.08);},35);},
+    tap:function(){tone(680,.045,'triangle',.075,.004,.025);noise(.035,.018,1400);},
+    flip:function(){tone(260,.075,'triangle',.09,.004,.04);tone(390,.08,'triangle',.075,.004,.04,.045);},
+    correct:function(){seq([523,659,784,1047],58,'triangle',.13,.095);},
+    wrong:function(){tone(210,.13,'sawtooth',.07,.006,.07);tone(155,.16,'triangle',.06,.008,.08,.08);},
+    xp:function(){seq([880,1175,1568,1760],44,'sine',.085,.08);noise(.09,.018,2200);},
+    level:function(){seq([392,523,659,784,1047],76,'triangle',.14,.12);noise(.16,.025,1800);},
+    send:function(){tone(620,.055,'triangle',.07,.004,.035);tone(980,.07,'sine',.055,.004,.045,.04);},
+    theme:function(mode){mode==='light'?seq([440,660,880],62,'sine',.075,.085):seq([880,660,440],62,'triangle',.07,.09);},
   };
 })();
 function toggleSfx(){
@@ -5212,6 +5238,7 @@ function toggleDarkLight(){
   const newMode=isDark?'light':'dark';
   LS.set('dark_mode',newMode);
   applyDarkLight(newMode);
+  try{sfx.theme(newMode);}catch(e){}
   haptic('light');
 }
 function applyDarkLight(mode){
@@ -5227,7 +5254,7 @@ function applyDarkLight(mode){
   const icon=document.getElementById('dl-icon');
   const text=document.getElementById('dl-text');
   const sw=document.getElementById('dl-switch');
-  if(icon)icon.textContent=mode==='light'?'☀️':'🌙';
+  if(icon)icon.classList.toggle('light',mode==='light');
   if(text)text.textContent=mode==='light'
     ?({ru:'Светлый режим',en:'Light mode',es:'Modo claro',de:'Heller Modus',fr:'Mode clair',pt:'Modo claro',uk:'Світлий режим',tr:'Açık mod',zh:'浅色模式',ar:'الوضع الفاتح'}[lang]||'Light mode')
     :({ru:'Тёмный режим',en:'Dark mode',es:'Modo oscuro',de:'Dunkler Modus',fr:'Mode sombre',pt:'Modo escuro',uk:'Темний режим',tr:'Koyu mod',zh:'深色模式',ar:'الوضع الداكن'}[lang]||'Dark mode');
