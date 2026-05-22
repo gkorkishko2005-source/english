@@ -969,6 +969,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .set-acc>summary::after{content:'›';margin-left:auto;font-size:20px;color:var(--t3);transition:transform .25s;line-height:1}
 .set-acc[open]>summary::after{transform:rotate(90deg)}
 .set-acc>summary .set-acc-ico{width:26px;height:26px;border-radius:8px;background:rgba(var(--ar),.10);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.set-acc-ico svg{width:16px;height:16px;fill:none;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.set-acc-ico.about{background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.09))}
+.set-acc-ico.key{background:linear-gradient(135deg,rgba(0,212,170,.15),rgba(var(--ar),.08))}
 .set-acc-bd{padding:0 14px 14px}
 /* ══ ONBOARDING CHAT CARD ══ */
 .onb-card{padding:14px 14px 12px;background:linear-gradient(150deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.25);border-radius:var(--r);margin:2px 0}
@@ -1061,6 +1064,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .sric-green{background:linear-gradient(135deg,#10b981,#059669)}
 .sric-orange{background:linear-gradient(135deg,#f59e0b,#ef4444)}
 .sric-purple{background:linear-gradient(135deg,#8b5cf6,#a78bfa)}
+.sric-rem{background:linear-gradient(135deg,#4f8aff,#00d4aa);box-shadow:0 6px 16px rgba(79,138,255,.18)}
+.sric-rem svg{width:19px;height:19px;stroke:#fff}
+.sric-rem-dot{fill:#fff;stroke:none}
 
 /* ══ EMPTY STATE — better ══ */
 .emico-wrap{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,rgba(var(--ar),.15),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:float 3s ease-in-out infinite}
@@ -1465,14 +1471,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="prof-sec-lbl"></span></div>
   <div class="slist">
     <div class="srow" onclick="openRemModal()">
-      <div class="sric sric-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div class="sric sric-rem"><svg viewBox="0 0 24 24"><path d="M7 11.5a5 5 0 0 1 10 0v3.3l1.4 2.2H5.6L7 14.8v-3.3Z"/><path d="M10 19a2.2 2.2 0 0 0 4 0"/><path d="M9 5.2 7.4 3.6M15 5.2l1.6-1.6"/><circle class="sric-rem-dot" cx="17.7" cy="7.1" r="1.8"/></svg></div>
       <div class="srbd"><div class="srt" id="sremt"></div><div class="srs" id="sirem">—</div></div>
     </div>
   </div>
 
   <!-- About you (collapsed by default to save space) -->
   <details class="set-acc">
-    <summary><span class="set-acc-ico">👤</span><span id="prof-mtit">About you</span></summary>
+    <summary><span class="set-acc-ico about"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="4"/><circle cx="10" cy="11" r="2"/><path d="M14 10h3M14 14h3M8 16c.8-1.5 3.2-1.5 4 0"/></svg></span><span id="prof-mtit">About you</span></summary>
     <div class="set-acc-bd">
       <textarea class="minp" id="profinp" rows="3" oninput="profDraft(this.value)" onblur="saveProfSilent()" style="resize:none;min-height:78px;line-height:1.5;margin-top:0"></textarea>
       <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
@@ -1481,13 +1487,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
   <!-- Free API key (Gemini BYOK) — collapsed -->
   <details class="set-acc">
-    <summary><span class="set-acc-ico">🔑</span><span id="byok-lbl">Free API key (Gemini)</span></summary>
+    <summary><span class="set-acc-ico key"><svg viewBox="0 0 24 24"><path d="M9.5 14.5 6 18l-2-2 3.5-3.5"/><circle cx="14.5" cy="9.5" r="5"/><path d="M16.5 7.5h.01"/></svg></span><span id="byok-lbl">Free API key (Gemini)</span></summary>
     <div class="set-acc-bd">
       <input id="byokinp" class="minp" type="text" autocomplete="off" spellcheck="false"
         placeholder="AIza…" oninput="saveByok(this.value)" style="margin-top:0;font-family:ui-monospace,Menlo,monospace;font-size:13px">
       <div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.5">
         <span id="byok-hint">Paste a free Google Gemini key — get unlimited messages on Free tier.</span><br>
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">🔑 aistudio.google.com/app/apikey</a>
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">aistudio.google.com/app/apikey</a>
       </div>
     </div>
   </details>
