@@ -914,20 +914,40 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .minp:focus{border-color:rgba(var(--ar),.4)}
 .minp::placeholder{color:var(--t3)}
 /* ══ REMINDER REDESIGN ══ */
-.rem-hero{position:relative;text-align:center;padding:18px 12px 16px;background:linear-gradient(160deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);margin-top:4px;overflow:hidden}
-.rem-hero::after{content:'';position:absolute;inset:auto -30% -60% -30%;height:120px;background:radial-gradient(closest-side,rgba(255,184,48,.18),transparent 70%);pointer-events:none}
-.rem-sun{font-size:30px;line-height:1;margin-bottom:6px;filter:drop-shadow(0 4px 12px rgba(255,184,48,.35));transition:transform .25s}
-.rem-input{appearance:none;-webkit-appearance:none;background:transparent;border:none;outline:none;color:var(--t1);font-family:var(--f);font-size:46px;font-weight:800;text-align:center;letter-spacing:2px;width:100%;padding:2px 0;cursor:pointer;font-variant-numeric:tabular-nums}
+.rem-hero{position:relative;display:flex;align-items:center;gap:14px;padding:14px;background:linear-gradient(145deg,rgba(var(--ar),.11),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);margin-top:4px;overflow:hidden}
+.rem-hero::after{content:'';position:absolute;right:-42px;bottom:-52px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,170,.16),transparent 68%);pointer-events:none;transition:background .25s}
+.rem-hero[data-phase=day]::after{background:radial-gradient(circle,rgba(255,184,48,.18),transparent 68%)}
+.rem-hero[data-phase=evening]::after{background:radial-gradient(circle,rgba(255,107,107,.14),transparent 68%)}
+.rem-hero[data-phase=night]::after{background:radial-gradient(circle,rgba(141,121,255,.16),transparent 68%)}
+.rem-mark{position:relative;z-index:1;width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;flex:0 0 58px;background:linear-gradient(145deg,rgba(var(--ar),.18),rgba(0,212,170,.10));border:1px solid rgba(var(--ar),.2);box-shadow:0 10px 24px rgba(0,0,0,.12);transition:transform .22s,background .25s}
+.rem-hero[data-phase=night] .rem-mark{background:linear-gradient(145deg,rgba(141,121,255,.18),rgba(var(--ar),.10))}
+.rem-hero[data-phase=evening] .rem-mark{background:linear-gradient(145deg,rgba(255,107,107,.15),rgba(255,184,48,.10))}
+.rem-mark svg{width:34px;height:34px;fill:none;stroke:var(--a);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rem-hand{transform-origin:24px 24px;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.rem-hero[data-phase=morning] .rem-hand{transform:rotate(-30deg)}
+.rem-hero[data-phase=day] .rem-hand{transform:rotate(25deg)}
+.rem-hero[data-phase=evening] .rem-hand{transform:rotate(82deg)}
+.rem-hero[data-phase=night] .rem-hand{transform:rotate(145deg)}
+.rem-hero.tick .rem-mark{transform:scale(1.04)}
+.rem-timebox{position:relative;z-index:1;min-width:0;flex:1;text-align:left}
+.rem-input{appearance:none;-webkit-appearance:none;background:transparent;border:none;outline:none;color:var(--t1);font-family:var(--f);font-size:42px;font-weight:800;text-align:left;letter-spacing:1px;width:100%;padding:0;cursor:pointer;font-variant-numeric:tabular-nums;line-height:1.05}
 .rem-input::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;position:absolute;inset:0;width:100%;height:100%}
-.rem-sub{font-size:12px;color:var(--t2);margin-top:4px;font-weight:500;letter-spacing:.4px;text-transform:uppercase}
-.rem-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:14px}
-.rem-preset{background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 4px 8px;cursor:pointer;color:var(--t1);font-family:var(--f);transition:transform .15s,border-color .2s,background .2s}
+.rem-sub{font-size:11px;color:var(--t2);margin-top:5px;font-weight:700;letter-spacing:.45px;text-transform:uppercase}
+.rem-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.rem-preset{display:flex;align-items:center;gap:9px;min-height:60px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px;cursor:pointer;color:var(--t1);font-family:var(--f);transition:transform .15s,border-color .2s,background .2s,box-shadow .2s;text-align:left}
 .rem-preset:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35);background:rgba(var(--ar),.05)}
-.rem-preset:active{transform:scale(.95)}
-.rem-preset.on{border-color:var(--a);background:rgba(var(--ar),.10)}
-.rpe{font-size:20px;line-height:1;margin-bottom:4px}
-.rpt{font-size:13px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums}
-.rpl{font-size:10px;color:var(--t2);margin-top:1px;text-transform:uppercase;letter-spacing:.3px}
+.rem-preset:active{transform:scale(.97)}
+.rem-preset.on{border-color:rgba(var(--ar),.75);background:rgba(var(--ar),.10);box-shadow:0 0 0 3px rgba(var(--ar),.07)}
+.rpe{width:34px;height:34px;border-radius:11px;background:rgba(var(--ar),.10);display:flex;align-items:center;justify-content:center;flex:0 0 34px}
+.rpe svg{width:21px;height:21px;fill:none;stroke:var(--a);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.rptext{min-width:0}
+.rpt{font-size:14px;font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1.1}
+.rpl{font-size:10px;color:var(--t2);margin-top:3px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
+.rem-actions{margin-top:14px}
+.rem-actions .msav{margin-top:0}
+.rem-secondary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.rem-secondary .moff{margin-top:0}
+@media(max-width:360px){.rem-hero{gap:10px;padding:12px}.rem-mark{width:50px;height:50px;flex-basis:50px;border-radius:15px}.rem-input{font-size:36px}.rem-preset{padding:9px 8px;gap:7px}.rpe{width:30px;height:30px;flex-basis:30px}.rpt{font-size:13px}.rpl{font-size:9px}}
 /* ══ COMPACT SETTINGS GRID + ACCORDIONS ══ */
 .set-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .model-sec .seca{font-size:10px;color:var(--gd);background:rgba(255,184,48,.14);padding:2px 8px;border-radius:100px;font-weight:700;letter-spacing:.4px}
@@ -1548,20 +1568,33 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mtit" id="rem-mtit">Reminder</div>
     <div class="mbdy" style="padding-bottom:8px">
-      <div class="rem-hero">
-        <div class="rem-sun" id="rem-sun">🌅</div>
-        <input type="time" id="rem-time" value="08:00" class="rem-input">
-        <div class="rem-sub" id="rem-sub-lbl">Daily reminder</div>
+      <div class="rem-hero" id="rem-hero" data-phase="morning">
+        <div class="rem-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="15"></circle>
+            <path class="rem-hand" d="M24 24V13"></path>
+            <path d="M24 24h9"></path>
+            <path d="M12 8L7 13M36 8l5 5"></path>
+          </svg>
+        </div>
+        <div class="rem-timebox">
+          <input type="time" id="rem-time" value="08:00" class="rem-input">
+          <div class="rem-sub" id="rem-sub-lbl">Daily reminder</div>
+        </div>
       </div>
       <div class="rem-presets">
-        <button class="rem-preset" data-t="08:00" onclick="remPreset('08:00')"><div class="rpe">🌅</div><div class="rpt">08:00</div><div class="rpl" id="rp1">Morning</div></button>
-        <button class="rem-preset" data-t="13:00" onclick="remPreset('13:00')"><div class="rpe">☀️</div><div class="rpt">13:00</div><div class="rpl" id="rp2">Lunch</div></button>
-        <button class="rem-preset" data-t="19:00" onclick="remPreset('19:00')"><div class="rpe">🌇</div><div class="rpt">19:00</div><div class="rpl" id="rp3">Evening</div></button>
-        <button class="rem-preset" data-t="22:00" onclick="remPreset('22:00')"><div class="rpe">🌙</div><div class="rpt">22:00</div><div class="rpl" id="rp4">Night</div></button>
+        <button class="rem-preset" data-t="08:00" onclick="remPreset('08:00')"><div class="rpe"><svg viewBox="0 0 32 32"><path d="M5 24h22"></path><path d="M10 24a6 6 0 0 1 12 0"></path><path d="M16 8v4M8 14l3 3M24 14l-3 3"></path></svg></div><div class="rptext"><div class="rpt">08:00</div><div class="rpl" id="rp1">Morning</div></div></button>
+        <button class="rem-preset" data-t="13:00" onclick="remPreset('13:00')"><div class="rpe"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="5"></circle><path d="M16 4v4M16 24v4M4 16h4M24 16h4M7.5 7.5l2.8 2.8M21.7 21.7l2.8 2.8M24.5 7.5l-2.8 2.8M10.3 21.7l-2.8 2.8"></path></svg></div><div class="rptext"><div class="rpt">13:00</div><div class="rpl" id="rp2">Lunch</div></div></button>
+        <button class="rem-preset" data-t="19:00" onclick="remPreset('19:00')"><div class="rpe"><svg viewBox="0 0 32 32"><path d="M5 22h22"></path><path d="M10 22a6 6 0 0 0 12 0"></path><path d="M16 9v4M8 13l3 3M24 13l-3 3"></path></svg></div><div class="rptext"><div class="rpt">19:00</div><div class="rpl" id="rp3">Evening</div></div></button>
+        <button class="rem-preset" data-t="22:00" onclick="remPreset('22:00')"><div class="rpe"><svg viewBox="0 0 32 32"><path d="M21.5 21.5A9 9 0 0 1 10.5 10.5 8.5 8.5 0 1 0 21.5 21.5Z"></path><path d="M23 8h3M24.5 6.5v3"></path></svg></div><div class="rptext"><div class="rpt">22:00</div><div class="rpl" id="rp4">Night</div></div></button>
       </div>
-      <button class="msav" onclick="saveRem()" id="rem-sav" style="margin-top:16px">Save</button>
-      <button class="moff" onclick="disableRem()" id="rem-dis">🔕 Disable</button>
-      <button class="moff" onclick="closeRemModal()" id="rem-can">Cancel</button>
+      <div class="rem-actions">
+        <button class="msav" onclick="saveRem()" id="rem-sav">Save</button>
+        <div class="rem-secondary">
+          <button class="moff" onclick="disableRem()" id="rem-dis">Disable</button>
+          <button class="moff" onclick="closeRemModal()" id="rem-can">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1730,7 +1763,7 @@ const LANGS = {
     p1n:'Дружелюбный',p1s:'Тёплый и поддерживающий',p2n:'Профессор',p2s:'Формальный и точный',p3n:'Геймер',p3s:'Расслабленный, сленг',p4n:'Британец',p4s:'Остроумный и саркастичный',
     myprof:'Мой профиль',lvt:'Уровень',lvs:'Скажи ALEX чтобы изменить',proft:'О себе',remt:'Напоминание',ints:'Интересы',intedit:'Изменить в чате',
     online:'Онлайн',chats:'Беседы',new_chat:'+ Новая',
-    save:'Сохранить',cancel:'Отмена',disrem:'🔕 Отключить',
+    save:'Сохранить',cancel:'Отмена',disrem:'Отключить',
     cfmt:'Очистить диалог?',cfms:'ALEX забудет беседу. Прогресс сохранится.',yescl:'Да, очистить',
     c_corr:'Проверь мой английский',c_gr:'Урок грамматики',c_sp:'Давай поговорим',c_vc:'Тест по словарю',c_au:'Аудирование',c_id:'Учи идиомам',c_er:'Мои ошибки',
     welcome:'Привет! Я ALEX, твой репетитор английского. 👋\n\nПиши по-английски — исправлю ошибки, или задай вопрос.',
@@ -1754,7 +1787,7 @@ const LANGS = {
     p1n:'Friendly',p1s:'Warm & encouraging',p2n:'Professor',p2s:'Formal & precise',p3n:'Gamer',p3s:'Chill & uses slang',p4n:'Brit',p4s:'Witty & sarcastic',
     myprof:'My profile',lvt:'Level',lvs:'Ask ALEX to change it',proft:'About you',remt:'Reminder',ints:'Interests',intedit:'Edit in chat',
     online:'Online',chats:'Chats',new_chat:'+ New',
-    save:'Save',cancel:'Cancel',disrem:'🔕 Disable',
+    save:'Save',cancel:'Cancel',disrem:'Disable',
     cfmt:'Clear conversation?',cfms:'ALEX will forget this chat. Your progress is safe.',yescl:'Yes, clear',
     c_corr:'Correct my English',c_gr:'Grammar lesson',c_sp:"Let's practice speaking",c_vc:'Vocabulary test',c_au:'Listening',c_id:'Teach idioms',c_er:'My mistakes',
     welcome:"Hi! I'm ALEX, your English tutor. 👋\n\nWrite in English — I'll correct mistakes, or ask me anything.",
@@ -1778,7 +1811,7 @@ const LANGS = {
     p1n:'Amigable',p1s:'Cálido y motivador',p2n:'Profesor',p2s:'Formal y preciso',p3n:'Gamer',p3s:'Relajado, usa jerga',p4n:'Británico',p4s:'Ingenioso y sarcástico',
     myprof:'Mi perfil',lvt:'Nivel',lvs:'Dile a ALEX para cambiar',proft:'Sobre ti',remt:'Recordatorio',ints:'Intereses',intedit:'Editar en chat',
     online:'En línea',chats:'Chats',new_chat:'+ Nuevo',
-    save:'Guardar',cancel:'Cancelar',disrem:'🔕 Desactivar',
+    save:'Guardar',cancel:'Cancelar',disrem:'Desactivar',
     cfmt:'¿Borrar conversación?',cfms:'ALEX olvidará este chat. Tu progreso está seguro.',yescl:'Sí, borrar',
     c_corr:'Corrige mi inglés',c_gr:'Lección de gramática',c_sp:'Practiquemos hablar',c_vc:'Test de vocabulario',c_au:'Escucha',c_id:'Enseña modismos',c_er:'Mis errores',
     welcome:'¡Hola! Soy ALEX, tu tutor de inglés. 👋\n\nEscribe en inglés — corregiré errores.',
@@ -1802,7 +1835,7 @@ const LANGS = {
     p1n:'Amigável',p1s:'Caloroso & encorajador',p2n:'Professor',p2s:'Formal & preciso',p3n:'Gamer',p3s:'Descontraído, usa gírias',p4n:'Britânico',p4s:'Espirituoso & sarcástico',
     myprof:'Meu perfil',lvt:'Nível',lvs:'Peça ao ALEX para mudar',proft:'Sobre você',remt:'Lembrete',ints:'Interesses',intedit:'Editar no chat',
     online:'Online',chats:'Chats',new_chat:'+ Novo',
-    save:'Salvar',cancel:'Cancelar',disrem:'🔕 Desativar',
+    save:'Salvar',cancel:'Cancelar',disrem:'Desativar',
     cfmt:'Limpar conversa?',cfms:'ALEX esquecerá este chat. Seu progresso está seguro.',yescl:'Sim, limpar',
     c_corr:'Corrija meu inglês',c_gr:'Aula de gramática',c_sp:'Vamos praticar falar',c_vc:'Teste de vocabulário',c_au:'Escuta',c_id:'Ensinar expressões',c_er:'Meus erros',
     welcome:'Olá! Sou o ALEX, seu tutor de inglês. 👋\n\nEscreva em inglês — vou corrigir os erros.',
@@ -3272,8 +3305,15 @@ function openRemModal(){
 function remReflect(){
   var inp=document.getElementById('rem-time');if(!inp)return;
   var v=inp.value||'08:00',h=parseInt(v.split(':')[0]||'8',10);
-  var s=document.getElementById('rem-sun');
-  if(s)s.textContent=h<6?'🌙':h<12?'🌅':h<17?'☀️':h<21?'🌇':'🌙';
+  var phase=h<6?'night':h<12?'morning':h<17?'day':h<21?'evening':'night';
+  var hero=document.getElementById('rem-hero');
+  if(hero){
+    hero.dataset.phase=phase;
+    hero.classList.remove('tick');
+    void hero.offsetWidth;
+    hero.classList.add('tick');
+    setTimeout(function(){hero.classList.remove('tick');},220);
+  }
   document.querySelectorAll('.rem-preset').forEach(function(b){b.classList.toggle('on',b.dataset.t===v);});
 }
 function remPreset(t){
