@@ -24,6 +24,7 @@
 [data-mode=light] nav{background:rgba(255,255,255,.92)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(0,0,0,.08)!important}
 [data-mode=light] .chdr{background:rgba(255,255,255,.95)!important;border-bottom:1px solid rgba(0,0,0,.06)!important}
 [data-mode=light] .inrow{background:rgba(255,255,255,.95)!important;border-top:1px solid rgba(0,0,0,.06)!important}
+[data-mode=light] .mbar{background:rgba(255,255,255,.95)!important;border-color:rgba(0,0,0,.06)!important}
 [data-mode=light] .msg.bot .mbub{background:rgba(0,0,0,.04)!important;color:#1a1a2e}
 [data-mode=light] .msg.user .mbub{background:#3478f6!important}
 [data-mode=light] .chip{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.08)!important;color:#1a1a2e!important}
@@ -350,7 +351,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .qb:active{transform:scale(.94);border-color:rgba(var(--ar),.3)}
 .qb:hover{transform:translateY(-2px);border-color:rgba(var(--ar),.2)}
 @keyframes qb-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.qb:nth-child(2){animation-delay:.5s}.qb:nth-child(3){animation-delay:1s}.qb:nth-child(4){animation-delay:1.5s}
 .qb:active{transform:scale(.94)!important}
 .qbi{font-size:23px;margin-bottom:8px;display:block}.qbt{font-size:13px;font-weight:700;margin-bottom:2px}.qbs{font-size:11px;color:var(--t2)}
 .qa{border-color:rgba(var(--ar),.2);background:linear-gradient(140deg,rgba(var(--ar),.07),var(--e1))}
@@ -394,7 +394,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .msg{display:flex;gap:8px;animation:msgin .2s ease}
 .msg.user{flex-direction:row-reverse}
 .mav{width:28px;height:28px;border-radius:9px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.msg.bot .mav{background:transparent}
+.msg.bot .mav{display:none}
+.msg.bot .mwrap{max-width:88%}
 .msg.bot .mav img{width:100%;height:100%;object-fit:cover;border-radius:9px}
 .msg.bot .mav svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
 .msg.user .mav{background:var(--e3);border:1px solid var(--b1)}
@@ -696,7 +697,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
-.mbar{display:flex;justify-content:flex-start;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);flex-shrink:0}
+.mbar{display:flex;justify-content:flex-start;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid transparent;flex-shrink:0}
 .mtoggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 12px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);color:var(--t1);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;transition:transform .15s,border-color .2s,background .2s}
 .mtoggle:hover{border-color:rgba(var(--ar),.4);background:rgba(var(--ar),.06)}
 .mtoggle:active{transform:scale(.95)}
@@ -1652,16 +1653,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">🟢 Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">🔵 Pro 🧠</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">Pro</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">💎 Ultimate 🧠</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">Ultimate</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -2841,6 +2842,9 @@ function grow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeigh
 
 /* ══ MIC ══ */
 let srRec=null;
+let mediaRec=null;
+let micStream=null;
+let micChunks=[];
 let _micPermWatched=false;
 function micLangBCP47(){
   // Map bot reply language to BCP-47 code for SpeechRecognition.
@@ -2850,6 +2854,10 @@ function micLangBCP47(){
 }
 function _resetMicBtn(){
   srRec=null;
+  mediaRec=null;
+  micChunks=[];
+  if(micStream){try{micStream.getTracks().forEach(t=>t.stop());}catch(_){}}
+  micStream=null;
   const btn=document.getElementById('micb');if(btn)btn.classList.remove('rec');
 }
 function _micT(key){
@@ -2864,6 +2872,9 @@ function _micT(key){
     nocap:{ru:'Микрофон не найден',en:'Microphone not found',es:'Micrófono no encontrado',pt:'Microfone não encontrado'},
     nonet:{ru:'Нет сети для распознавания',en:'No network for recognition',es:'Sin red para reconocimiento',pt:'Sem rede para reconhecimento'},
     listen:{ru:'Говорите...',en:'Listening...',es:'Escuchando...',pt:'Ouvindo...'},
+    rec:{ru:'Запись идёт — нажми ещё раз, чтобы остановить',en:'Recording — tap again to stop',es:'Grabando — toca otra vez para parar',pt:'Gravando — toque de novo para parar'},
+    trans:{ru:'Распознаю голос...',en:'Transcribing...',es:'Transcribiendo...',pt:'Transcrevendo...'},
+    empty:{ru:'Речь не распознана',en:'Speech not recognized',es:'No se reconoció la voz',pt:'Fala não reconhecida'},
     failed:{ru:'Не удалось запустить микрофон',en:'Could not start mic',es:'No se pudo iniciar el micrófono',pt:'Não foi possível iniciar o microfone'},
     granted:{ru:'Микрофон разрешён',en:'Microphone allowed',es:'Micrófono permitido',pt:'Microfone permitido'},
   };
@@ -2883,11 +2894,75 @@ async function _micPermissionState(){
   }catch(_){}
   return 'unknown';
 }
+function _recMime(){
+  if(!window.MediaRecorder)return '';
+  const opts=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  for(const m of opts){try{if(MediaRecorder.isTypeSupported(m))return m;}catch(_){}}
+  return '';
+}
+function _audioExt(mime){
+  if((mime||'').includes('mp4'))return 'mp4';
+  if((mime||'').includes('ogg'))return 'ogg';
+  return 'webm';
+}
+async function _uploadVoice(blob,mime){
+  if(!API){toast(_micT('notsup'),'⚠️');return;}
+  const fd=new FormData();
+  const ext=_audioExt(mime);
+  fd.append('audio',blob,`voice.${ext}`);
+  fd.append('lang',(botLang||lang||'en').slice(0,2));
+  try{
+    toast(_micT('trans'),'🎤');
+    const r=await fetch(`${API}/api/transcribe`,{method:'POST',body:fd,signal:AbortSignal.timeout(45000)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.text){toast((d&&d.error)||_micT('empty'),'⚠️');return;}
+    const inp=document.getElementById('cinp');
+    inp.value=d.text.trim();
+    try{grow(inp);}catch(_){}
+    inp.focus?.();
+  }catch(e){
+    toast(_micT('failed'),'⚠️');
+  }
+}
+async function _startMediaMic(btn){
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast(_micT('notsup'),'⚠️');return;}
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+    const mime=_recMime();
+    mediaRec=new MediaRecorder(micStream,mime?{mimeType:mime}:undefined);
+    micChunks=[];
+    mediaRec.ondataavailable=e=>{if(e.data&&e.data.size)micChunks.push(e.data);};
+    mediaRec.onstop=async()=>{
+      const blob=new Blob(micChunks,{type:mime||'audio/webm'});
+      _resetMicBtn();
+      if(blob.size<800){toast(_micT('nospeech'),'🎤');return;}
+      await _uploadVoice(blob,mime||blob.type);
+    };
+    mediaRec.start();
+    btn.classList.add('rec');
+    try{sfx.tap();}catch(_){}haptic('light');
+    toast(_micT('rec'),'🎤');
+  }catch(err){
+    _resetMicBtn();
+    const reason=(err&&err.name)||'';
+    if(reason==='NotAllowedError'){toast(_micT('denied'),'🚫');}
+    else if(reason==='NotFoundError'){toast(_micT('nocap'),'⚠️');}
+    else {toast(_micT('unav'),'🎤');}
+  }
+}
 async function toggleMic(){
   const btn=document.getElementById('micb');
+  if(mediaRec){
+    try{if(mediaRec.state!=='inactive')mediaRec.stop();else _resetMicBtn();}catch(e){_resetMicBtn();}
+    return;
+  }
   if(srRec){try{srRec.stop();}catch(e){}_resetMicBtn();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast(_micT('notsup'),'⚠️');return;}
+  const inTelegram=!!window.Telegram?.WebApp;
+  if(inTelegram||!SR){
+    await _startMediaMic(btn);
+    return;
+  }
   // Permission state — short-circuit hard "denied" with clear OS instructions.
   const ps=await _micPermissionState();
   if(ps==='denied'){
@@ -3249,7 +3324,6 @@ function fireReminder(){
   }
   // In-app toast notification
   toast(msg,'⏰');
-  showNotif();
 }
 
 // Restore reminder on load
@@ -3259,21 +3333,8 @@ function fireReminder(){
 })();
 let notifShown=false;
 function showNotif(){
-  if(notifShown)return;
-  const last=parseInt(LS.get('last_notif')||'0',10);
-  const now=Date.now();
-  const elapsed=now-last;
-  const MS_6H=6*60*60*1000;
-  const sessCount=parseInt(LS.get('notif_count')||'0',10);
-  // First time: always show. After that: every 6+ hours, and less often over time
-  // After 5 shows, increase to 24h. After 15, increase to 48h.
-  const minDelay=sessCount<5?MS_6H:sessCount<15?(24*60*60*1000):(48*60*60*1000);
-  if(last===0||elapsed>minDelay){
-    notifShown=true;
-    LS.set('last_notif',String(now));
-    LS.set('notif_count',String(sessCount+1));
-    document.getElementById('notif').style.display='flex';
-  }
+  // The chat-invite notification was too noisy inside Telegram WebApp.
+  // Reminders now use browser/Telegram haptics + toast only.
 }
 function dismissNotif(e){if(e)e.stopPropagation();const el=document.getElementById('notif');el.classList.add('dis');setTimeout(()=>{el.style.display='none';el.classList.remove('dis');},300);}
 function notifTap(){dismissNotif();goTab('chat');}
@@ -3925,7 +3986,7 @@ function setPremium(active, source){
 function updatePremiumUI(){
   const banner=document.getElementById('premium-settings-banner');
   if(!banner)return;
-  const tierNames={basic:'🟢 Basic',pro:'🔵 Pro',ultimate:'💎 Ultimate'};
+  const tierNames={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
   const tierName=tierNames[premiumTier]||premiumTier||'Premium';
 
   if(isPremium){
@@ -3951,7 +4012,7 @@ function updatePremiumUI(){
           </div>
           <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
         </div>
-        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--b1);background:var(--e1);color:var(--a);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'⬆ Улучшить план',en:'⬆ Upgrade plan',es:'⬆ Mejorar plan',de:'⬆ Plan upgraden',fr:'⬆ Améliorer le plan',pt:'⬆ Melhorar plano',uk:'⬆ Покращити план',tr:'⬆ Planı yükselt',zh:'⬆ 升级计划',ar:'⬆ ترقية الخطة'}[lang]||'⬆ Upgrade'}</button>`:''}
+        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--b1);background:var(--e1);color:var(--a);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'Улучшить план',en:'Upgrade plan',es:'Mejorar plan',pt:'Melhorar plano'}[lang]||'Upgrade'}</button>`:''}
       </div>`;
   } else {
     banner.innerHTML=`
@@ -3961,7 +4022,7 @@ function updatePremiumUI(){
         </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 300 ⭐/мес · Голос · Sonnet · VIP',en:'from 300 ⭐/mo · Voice · Sonnet · VIP',es:'desde 300 ⭐/mes',de:'ab 300 ⭐/Mo',fr:'à partir de 300 ⭐/mois',pt:'a partir de 300 ⭐/mês',uk:'від 300 ⭐/міс',tr:'300 ⭐/ay',zh:'300⭐/月起',ar:'من 300 ⭐/شهر'}[lang]||'from 300 ⭐'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 300 ⭐/мес · голос · Sonnet',en:'from 300 ⭐/mo · voice · Sonnet',es:'desde 300 ⭐/mes · voz · Sonnet',pt:'a partir de 300 ⭐/mês · voz · Sonnet'}[lang]||'from 300 ⭐'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -3977,7 +4038,7 @@ function requirePremium(featureName, fn){
   const msg={
     voice:{ru:'Голосовые ответы ALEX',en:'Voice replies from ALEX'},
     unlimited:{ru:'Безлимитные сообщения',en:'Unlimited messages'},
-    personas:{ru:'Эксклюзивные личности',en:'Exclusive personas'},
+    personas:{ru:'Расширенные сценарии',en:'Advanced scenarios'},
     analysis:{ru:'Детальный анализ ошибок',en:'Detailed error analysis'},
   };
   openPremium(msg[featureName]);
@@ -3986,7 +4047,7 @@ function requirePremium(featureName, fn){
 const PREMIUM_FEATURES=[
   {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX speaks back like a real tutor'}},
   {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Безлимитные сообщения',sub:'Общайся с ALEX без ограничений'},en:{title:'Unlimited Messages',sub:'Chat with ALEX without any limits'}},
-  {icon:'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75',ru:{title:'Эксклюзивные личности ALEX',sub:'Harvard Prof · BBC Anchor · Gordon Ramsay'},en:{title:'Exclusive ALEX Personas',sub:'Harvard Prof · BBC Anchor · Gordon Ramsay'}},
+  {icon:'M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z M8 8h8 M8 12h5',ru:{title:'Расширенные сценарии',sub:'Истории, сценки и персональные задания'},en:{title:'Advanced scenarios',sub:'Stories, roleplays and personal tasks'}},
   {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Анализ произношения',sub:'ALEX разбирает твоё произношение по голосу'},en:{title:'Pronunciation Analysis',sub:'ALEX analyzes your pronunciation from voice'}},
   {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Еженедельный отчёт и персональные упражнения'},en:{title:'Detailed Error Analysis',sub:'Weekly report + targeted exercises'}},
 ];
@@ -3997,23 +4058,23 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent={ru:'Разблокируй полную мощь AI-репетитора',en:'Unlock the full power of your AI tutor',es:'Desbloquea todo el poder del tutor AI',de:'Schalte die volle Kraft des AI-Tutors frei',fr:'Libère toute la puissance du tuteur IA',pt:'Desbloqueie todo o poder do tutor IA',uk:'Розблокуй повну потужність AI-репетитора',tr:'AI öğretmenin tam gücünü aç',zh:'解锁AI导师的全部功能',ar:'افتح القوة الكاملة لمعلم AI'}[lang]||'Unlock the full power';
-  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',de:'Kostenlos fortfahren',fr:'Continuer gratuitement',pt:'Continuar grátis',uk:'Продовжити безкоштовно',tr:'Ücretsiz devam et',zh:'继续免费',ar:'متابعة مجانية'}[lang]||'Continue free';
+  if(sub)sub.textContent={ru:'Планы, лимиты и модели без лишнего шума',en:'Plans, limits and models without clutter',es:'Planes, límites y modelos sin ruido',pt:'Planos, limites e modelos sem ruído'}[lang]||'Plans and limits';
+  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
-  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',de:'Beliebt',fr:'Populaire',pt:'Popular',uk:'Популярний',tr:'Popüler',zh:'热门',ar:'شائع'}[lang]||'Popular';
+  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
 
   // Fill plan buffs
   const basicB=document.getElementById('pp-basic-buffs');
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='✅ 30 сообщений/день<br>✅ Голосовые ответы<br>✅ Story Mode + games<br>⚡ Модель Haiku';
-    if(proB)proB.innerHTML='✅ 60 сообщений/день<br>✅ 🧠 <b>Модель Sonnet (3× умнее)</b><br>✅ Все сценки + анализ<br>✅ 🎭 VIP личности';
-    if(ultB)ultB.innerHTML='✅ 80 сообщений/день<br>✅ 🧠 <b>Модель Sonnet</b><br>✅ TOEFL + план обучения<br>✅ 💎 Эксклюзивные темы';
+    if(basicB)basicB.innerHTML='20 сообщений/день<br>Голосовые ответы<br>Story Mode + grammar games<br>Модель Haiku';
+    if(proB)proB.innerHTML='40 сообщений/день<br>Haiku или Sonnet<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='50 quota points/день<br>Haiku, Sonnet или Opus<br>TOEFL + персональный план<br>Длинная история диалога';
   } else {
-    if(basicB)basicB.innerHTML='✅ 30 messages/day<br>✅ Voice replies<br>✅ Story Mode + games<br>⚡ Haiku model';
-    if(proB)proB.innerHTML='✅ 60 messages/day<br>✅ 🧠 <b>Sonnet model (3× smarter)</b><br>✅ All scenarios + analysis<br>✅ 🎭 VIP personas';
-    if(ultB)ultB.innerHTML='✅ 80 messages/day<br>✅ 🧠 <b>Sonnet model</b><br>✅ TOEFL + study plan<br>✅ 💎 Exclusive themes';
+    if(basicB)basicB.innerHTML='20 messages/day<br>Voice replies<br>Story Mode + grammar games<br>Haiku model';
+    if(proB)proB.innerHTML='40 messages/day<br>Haiku or Sonnet<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='50 quota points/day<br>Haiku, Sonnet or Opus<br>TOEFL + personal plan<br>Long chat history';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -4040,7 +4101,7 @@ function openPremium(highlightFeature){
 
   // If ultimate, hide free button and show "you have max"
   if(isPremium&&premiumTier==='ultimate'){
-    if(sub)sub.textContent={ru:'У тебя максимальный план 👑',en:'You have the highest plan 👑',es:'Tienes el plan máximo 👑',de:'Du hast den besten Plan 👑',fr:'Tu as le meilleur plan 👑',pt:'Você tem o plano máximo 👑',uk:'У тебе максимальний план 👑',tr:'En üst plandasın 👑',zh:'你已拥有最高计划 👑',ar:'لديك أفضل خطة 👑'}[lang]||'Max plan';
+    if(sub)sub.textContent={ru:'У тебя максимальный план',en:'You have the highest plan',es:'Tienes el plan máximo',pt:'Você tem o plano máximo'}[lang]||'Max plan';
   }
 
   openMod('premiumm');
@@ -5217,8 +5278,8 @@ function checkTrialBanner(){
       const txt=banner.querySelector('.trial-text');
       if(txt){
         txt.innerHTML=lang==='ru'
-          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 30 сообщений/день</small>`
-          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 30 messages/day</small>`;
+          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 20 сообщений/день</small>`
+          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 20 messages/day</small>`;
       }
     }else{
       banner.style.display='none';

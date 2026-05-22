@@ -290,22 +290,22 @@ async def handle_chat(request):
             import random
             if not user_premium:
                 grace_ru = [
-                    "Ты сегодня отлично позанимался! 🎉 Хочешь больше? Basic = 20 сообщений/день, Ultimate = 50/день",
-                    "Лимит на сегодня исчерпан, но ты молодец! 💪 Premium откроет ещё больше",
-                    "10 сообщений пролетели! Завтра будет ещё 10, или бери Premium 🚀",
+                    "Ты сегодня отлично позанимался! Basic = 20 сообщений/день, Pro = 40, Ultimate = 50 quota points",
+                    "Лимит на сегодня исчерпан. Premium откроет больше практики",
+                    "5 бесплатных сообщений на сегодня закончились. Завтра будет ещё 5, или бери подписку",
                     "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
                     "Сегодня ты уже выполнил норму! 📚 Premium = больше обучения",
-                    "Каждый день по 10 сообщений — уже прогресс! 🔥 Premium = в 3 раза больше",
+                    "Каждый день по 5 сообщений — уже прогресс. Premium даёт больше практики",
                     "ALEX скучает когда ты уходишь 😢 С Premium он будет рядом дольше!",
                     "Знаешь, что 30 минут в день = B2 за 6 месяцев? Premium поможет 📈",
                 ]
                 grace_en = [
-                    "Great work today! 🎉 Want more? Basic = 20 msg/day, Ultimate = 50/day",
-                    "Daily limit reached, but you did amazing! 💪 Premium unlocks more",
-                    "10 messages flew by! Come back tomorrow or get Premium 🚀",
+                    "Great work today! Basic = 20 msg/day, Pro = 40, Ultimate = 50 quota points",
+                    "Daily limit reached. Premium unlocks more practice",
+                    "Your 5 free messages are done for today. Come back tomorrow or subscribe",
                     "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
                     "You've hit today's limit! 📚 Premium = more learning",
-                    "10 messages a day = real progress! 🔥 Premium = 3x more",
+                    "5 messages a day still builds progress. Premium gives more practice",
                     "ALEX misses you when you leave 😢 Premium keeps him longer!",
                     "Did you know? 30 min/day = B2 in 6 months! Premium helps 📈",
                 ]
@@ -604,6 +604,55 @@ async def handle_tts(request):
         logger.error(f"TTS error: {e}")
         return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── STT ──────────────────────────────────────────────────────────────────────
+async def handle_transcribe(request):
+    """Speech-to-text endpoint for Telegram WebView, where Web Speech API is unreliable."""
+    max_bytes = 8 * 1024 * 1024
+    audio = b""
+    filename = "voice.webm"
+    lang = "en"
+    try:
+        if request.content_type.startswith("multipart/"):
+            reader = await request.multipart()
+            async for part in reader:
+                if part.name == "lang":
+                    lang = (await part.text()).strip()[:5] or "en"
+                elif part.name in ("audio", "file", "voice"):
+                    filename = part.filename or filename
+                    chunks = []
+                    size = 0
+                    while True:
+                        chunk = await part.read_chunk()
+                        if not chunk:
+                            break
+                        size += len(chunk)
+                        if size > max_bytes:
+                            return web.json_response({"error":"audio too large"},status=413,headers={"Access-Control-Allow-Origin":"*"})
+                        chunks.append(chunk)
+                    audio = b"".join(chunks)
+        else:
+            audio = await request.read()
+            filename = request.query.get("filename", filename)
+            lang = request.query.get("lang", lang)[:5] or "en"
+            if len(audio) > max_bytes:
+                return web.json_response({"error":"audio too large"},status=413,headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.warning(f"transcribe parse error: {e}")
+        return web.json_response({"error":"bad audio request"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+
+    if not audio:
+        return web.json_response({"error":"empty audio"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+
+    try:
+        from tts import transcribe_audio
+        text = await transcribe_audio(audio, filename=filename, lang=lang)
+        if text:
+            return web.json_response({"text":text},headers={"Access-Control-Allow-Origin":"*"})
+        return web.json_response({"error":"speech not recognized"},status=422,headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"transcribe error: {e}")
+        return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -693,6 +742,7 @@ def create_app():
     app.router.add_get("/api/premium/{uid}",handle_check_premium)
     app.router.add_post("/api/premium/grant",handle_grant_premium)
     app.router.add_post("/api/tts",handle_tts)
+    app.router.add_post("/api/transcribe",handle_transcribe)
     app.router.add_post("/api/sync_stats",handle_sync_stats)
     app.router.add_get("/health",handle_health)
     app.router.add_get("/api/admin/stats",handle_admin_stats)

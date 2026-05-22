@@ -8,6 +8,7 @@ import io
 import os
 import logging
 import difflib
+from pathlib import Path
 
 import httpx
 
@@ -77,35 +78,52 @@ async def _elevenlabs_tts(text: str) -> bytes | None:
 #  STT — Whisper произношение
 # ══════════════════════════════════════════════════════════════════
 
-async def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg") -> str | None:
+async def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg", lang: str = "en") -> str | None:
     """
     Транскрибирует аудио.
-    Приоритет: OpenAI Whisper (если есть ключ) → Google STT (бесплатно)
+    Приоритет: OpenAI Whisper (если есть ключ) → Google STT (бесплатно).
+    `lang` — BCP-47 base (e.g. 'en','ru','es','pt'). Whisper auto-detects but
+    accepts a hint; Google free STT needs explicit lang.
     """
     if OPENAI_KEY:
-        result = await _whisper_transcribe(audio_bytes, filename)
+        result = await _whisper_transcribe(audio_bytes, filename, lang)
         if result: return result
-    return await _google_stt(audio_bytes)
+    return await _google_stt(audio_bytes, lang, filename)
 
 
-async def _whisper_transcribe(audio_bytes: bytes, filename: str) -> str | None:
+def _audio_mime(filename: str) -> str:
+    ext = Path(filename or "").suffix.lower()
+    return {
+        ".webm": "audio/webm",
+        ".ogg": "audio/ogg",
+        ".oga": "audio/ogg",
+        ".mp4": "audio/mp4",
+        ".m4a": "audio/mp4",
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+    }.get(ext, "application/octet-stream")
+
+
+async def _whisper_transcribe(audio_bytes: bytes, filename: str, lang: str = "en") -> str | None:
     try:
+        mime = _audio_mime(filename)
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(
                 "https://api.openai.com/v1/audio/transcriptions",
                 headers={"Authorization": f"Bearer {OPENAI_KEY}"},
-                files={"file": (filename, audio_bytes, "audio/ogg")},
-                data={"model": "whisper-1", "language": "en"},
+                files={"file": (filename, audio_bytes, mime)},
+                data={"model": "whisper-1", "language": lang or "en"},
             )
             if r.status_code == 200:
                 return r.json().get("text","").strip()
+            logger.warning(f"Whisper STT {r.status_code}: {r.text[:200]}")
             return None
     except Exception as e:
         logger.error(f"Whisper: {e}")
         return None
 
 
-async def _google_stt(audio_bytes: bytes) -> str | None:
+async def _google_stt(audio_bytes: bytes, lang: str = "en", filename: str = "audio.ogg") -> str | None:
     """Google Speech Recognition — бесплатно, без API ключа."""
     try:
         import asyncio
@@ -114,10 +132,15 @@ async def _google_stt(audio_bytes: bytes) -> str | None:
 
         def _recognize():
             recognizer = sr.Recognizer()
-            # Конвертируем OGG в WAV через pydub
+            lang_map = {"ru":"ru-RU","en":"en-US","es":"es-ES","pt":"pt-BR"}
+            stt_lang = lang_map.get((lang or "en")[:2], "en-US")
+            ext = Path(filename or "audio.ogg").suffix.lower().lstrip(".") or "ogg"
+            if ext == "m4a":
+                ext = "mp4"
+            # Конвертируем браузерный формат в WAV через pydub/ffmpeg.
             try:
                 from pydub import AudioSegment
-                audio_segment = AudioSegment.from_ogg(io.BytesIO(audio_bytes))
+                audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes), format=ext)
                 wav_buf = io.BytesIO()
                 audio_segment.export(wav_buf, format="wav")
                 wav_buf.seek(0)
@@ -127,7 +150,7 @@ async def _google_stt(audio_bytes: bytes) -> str | None:
                 # Fallback: пробуем напрямую
                 with sr.AudioFile(io.BytesIO(audio_bytes)) as source:
                     audio = recognizer.record(source)
-            return recognizer.recognize_google(audio, language="en-US")
+            return recognizer.recognize_google(audio, language=stt_lang)
 
         return await asyncio.to_thread(_recognize)
     except ImportError:
