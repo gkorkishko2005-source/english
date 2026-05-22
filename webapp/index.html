@@ -2841,32 +2841,69 @@ function grow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeigh
 
 /* ══ MIC ══ */
 let srRec=null;
+let _micPermWatched=false;
 function micLangBCP47(){
   // Map bot reply language to BCP-47 code for SpeechRecognition.
   const map={ru:'ru-RU',en:'en-US',es:'es-ES',de:'de-DE',fr:'fr-FR',pt:'pt-BR',
              uk:'uk-UA',tr:'tr-TR',zh:'zh-CN',ar:'ar-SA',ja:'ja-JP',ko:'ko-KR'};
   return map[botLang]||map[lang]||'en-US';
 }
+function _resetMicBtn(){
+  srRec=null;
+  const btn=document.getElementById('micb');if(btn)btn.classList.remove('rec');
+}
+function _micT(key){
+  const L10={
+    notsup:{ru:'Голос не поддерживается на этом устройстве',en:'Voice input not supported here',es:'Voz no compatible aquí',pt:'Voz não suportada aqui'},
+    denied:{ru:'Доступ к микрофону запрещён системой. Открой настройки Telegram → Конфиденциальность → Микрофон и разреши.',
+            en:'Microphone is blocked by the system. Open Telegram → Settings → Privacy → Microphone and allow it.',
+            es:'El micrófono está bloqueado. Abre Telegram → Ajustes → Privacidad → Micrófono y permítelo.',
+            pt:'O microfone está bloqueado. Abra Telegram → Configurações → Privacidade → Microfone e permita.'},
+    unav:{ru:'Микрофон недоступен',en:'Microphone unavailable',es:'Micrófono no disponible',pt:'Microfone indisponível'},
+    nospeech:{ru:'Ничего не услышал — попробуй ещё',en:'Did not hear anything — try again',es:'No oí nada, inténtalo de nuevo',pt:'Não ouvi nada, tente de novo'},
+    nocap:{ru:'Микрофон не найден',en:'Microphone not found',es:'Micrófono no encontrado',pt:'Microfone não encontrado'},
+    nonet:{ru:'Нет сети для распознавания',en:'No network for recognition',es:'Sin red para reconocimiento',pt:'Sem rede para reconhecimento'},
+    listen:{ru:'Говорите...',en:'Listening...',es:'Escuchando...',pt:'Ouvindo...'},
+    failed:{ru:'Не удалось запустить микрофон',en:'Could not start mic',es:'No se pudo iniciar el micrófono',pt:'Não foi possível iniciar o microfone'},
+    granted:{ru:'Микрофон разрешён',en:'Microphone allowed',es:'Micrófono permitido',pt:'Microfone permitido'},
+  };
+  return (L10[key]||{})[lang]||(L10[key]||{}).en||'';
+}
+async function _micPermissionState(){
+  // 'granted' | 'denied' | 'prompt' | 'unknown'
+  try{
+    if(navigator.permissions&&navigator.permissions.query){
+      const p=await navigator.permissions.query({name:'microphone'});
+      if(!_micPermWatched){
+        _micPermWatched=true;
+        try{p.onchange=()=>{ if(p.state==='granted'){toast(_micT('granted'),'🎤');} };}catch(_){}
+      }
+      return p.state;
+    }
+  }catch(_){}
+  return 'unknown';
+}
 async function toggleMic(){
   const btn=document.getElementById('micb');
-  if(srRec){try{srRec.stop();}catch(e){}srRec=null;btn.classList.remove('rec');return;}
+  if(srRec){try{srRec.stop();}catch(e){}_resetMicBtn();return;}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
-    toast({ru:'Голос не поддерживается на этом устройстве',en:'Voice input not supported here',es:'Voz no compatible aquí',pt:'Voz não suportada aqui'}[lang]||'Voice input not supported here','⚠️');
+  if(!SR){toast(_micT('notsup'),'⚠️');return;}
+  // Permission state — short-circuit hard "denied" with clear OS instructions.
+  const ps=await _micPermissionState();
+  if(ps==='denied'){
+    toast(_micT('denied'),'🚫');
     return;
   }
-  // Explicitly request mic permission first — gives a clear error if denied.
+  // For 'granted' OR 'prompt' OR 'unknown' — try to start. 'prompt' will show OS dialog.
   if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
     try{
       const s=await navigator.mediaDevices.getUserMedia({audio:true});
-      // Release the test stream immediately — SpeechRecognition opens its own.
       s.getTracks().forEach(t=>t.stop());
     }catch(err){
       const reason=(err&&err.name)||'';
-      const msg=reason==='NotAllowedError'
-        ?({ru:'Разреши доступ к микрофону в настройках Telegram',en:'Grant microphone access in Telegram settings',es:'Permite el acceso al micrófono en Telegram',pt:'Permita acesso ao microfone no Telegram'}[lang]||'Allow microphone access')
-        :({ru:'Микрофон недоступен',en:'Microphone unavailable',es:'Micrófono no disponible',pt:'Microfone indisponível'}[lang]||'Microphone unavailable');
-      toast(msg,'🎤');
+      if(reason==='NotAllowedError'){toast(_micT('denied'),'🚫');}
+      else if(reason==='NotFoundError'){toast(_micT('nocap'),'⚠️');}
+      else {toast(_micT('unav'),'🎤');}
       return;
     }
   }
@@ -2882,26 +2919,21 @@ async function toggleMic(){
       inp.value=txt;try{grow(inp);}catch(_){}
     };
     srRec.onerror=e=>{
-      btn.classList.remove('rec');srRec=null;
+      _resetMicBtn();
       const code=(e&&e.error)||'';
-      if(code==='not-allowed'||code==='service-not-allowed'){
-        toast({ru:'Доступ к микрофону запрещён',en:'Microphone access denied',es:'Acceso al micrófono denegado',pt:'Acesso ao microfone negado'}[lang]||'Microphone access denied','🚫');
-      }else if(code==='no-speech'){
-        toast({ru:'Ничего не услышал — попробуй ещё',en:'Did not hear anything — try again',es:'No oí nada, inténtalo de nuevo',pt:'Não ouvi nada, tente de novo'}[lang]||'Try again','🤔');
-      }else if(code==='audio-capture'){
-        toast({ru:'Микрофон не найден',en:'Microphone not found',es:'Micrófono no encontrado',pt:'Microfone não encontrado'}[lang]||'Mic not found','⚠️');
-      }else if(code==='network'){
-        toast({ru:'Нет сети для распознавания',en:'No network for recognition',es:'Sin red para reconocimiento',pt:'Sem rede para reconhecimento'}[lang]||'No network','📡');
-      }
+      if(code==='not-allowed'||code==='service-not-allowed') toast(_micT('denied'),'🚫');
+      else if(code==='no-speech')      toast(_micT('nospeech'),'🤔');
+      else if(code==='audio-capture')  toast(_micT('nocap'),'⚠️');
+      else if(code==='network')        toast(_micT('nonet'),'📡');
     };
-    srRec.onend=()=>{btn.classList.remove('rec');srRec=null;};
+    srRec.onend=()=>{_resetMicBtn();};
     srRec.start();
     btn.classList.add('rec');
     try{sfx.tap();}catch(_){}haptic('light');
-    toast({ru:'Говорите...',en:'Listening...',es:'Hablando...',de:'Sprechen...',fr:'En écoute...',pt:'Falando...',uk:'Говоріть...',tr:'Dinliyor...',zh:'聆听中...',ar:'يستمع...'}[lang]||'Listening...','🎤');
+    toast(_micT('listen'),'🎤');
   }catch(err){
-    btn.classList.remove('rec');srRec=null;
-    toast({ru:'Не удалось запустить микрофон',en:'Could not start mic',es:'No se pudo iniciar el micrófono',pt:'Não foi possível iniciar o microfone'}[lang]||'Could not start mic','⚠️');
+    _resetMicBtn();
+    toast(_micT('failed'),'⚠️');
   }
 }
 
