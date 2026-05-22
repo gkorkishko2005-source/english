@@ -376,13 +376,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .sdel:hover{color:var(--rd)}
 
 /* ══ CHAT ══ */
-.chdr{padding:11px 15px;background:rgba(22,27,39,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:11px;flex-shrink:0}
-.cav{width:38px;height:38px;border-radius:12px;flex-shrink:0;background:transparent;display:flex;align-items:center;justify-content:center}
-.cav svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
-.chnm{font-size:15px;font-weight:700}.chst{font-size:11px;color:var(--a2);display:flex;align-items:center;gap:4px;margin-top:1px}
+.chdr{padding:12px 15px;background:rgba(22,27,39,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chtxt{display:flex;align-items:center;min-height:28px}
+.chnm{font-size:16px;font-weight:800;letter-spacing:.1px}
 .odot{width:6px;height:6px;border-radius:50%;background:var(--a2);box-shadow:0 0 6px rgba(0,212,170,.5);animation:pulse-dot 2s ease-in-out infinite}
 @keyframes pulse-dot{0%,100%{opacity:1;box-shadow:0 0 4px rgba(0,212,170,.4)}50%{opacity:.65;box-shadow:0 0 10px rgba(0,212,170,.7)}}
-.cplbl{font-size:10px;color:var(--t3);margin-top:1px}
 .hbtns{margin-left:auto;display:flex;align-items:center;gap:4px}
 .hbtn{background:none;border:none;cursor:pointer;color:var(--t3);padding:5px;border-radius:8px;transition:.15s;display:flex;align-items:center;justify-content:center}
 .hbtn:hover{color:var(--t2);background:var(--e2)}
@@ -1038,12 +1036,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 @media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px)}}
 
 /* ══ PREMIUM ══ */
-.premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#d4a843,#ffb830);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
-.prem-hero{text-align:center;padding:28px 20px 16px}
-.prem-crown{width:72px;height:72px;margin:0 auto 14px;background:linear-gradient(135deg,#d4a843,#ffb830);border-radius:22px;display:flex;align-items:center;justify-content:center}
-.prem-crown svg{width:36px;height:36px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
-.prem-title{font-size:22px;font-weight:800;margin-bottom:6px}
-.prem-sub{font-size:14px;color:var(--t2);line-height:1.55;margin-bottom:18px}
+.premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#4f8aff,#00d4aa);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
+.prem-hero{display:flex;align-items:center;gap:14px;text-align:left;padding:22px 18px 16px;margin-bottom:8px;border-bottom:1px solid var(--b1)}
+.prem-mark{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.12));border:1px solid rgba(var(--ar),.24);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 28px rgba(79,138,255,.12)}
+.prem-mark svg{width:32px;height:32px;stroke:var(--a);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.prem-title{font-size:19px;font-weight:800;margin-bottom:4px}
+.prem-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-bottom:0}
 .prem-feats{display:flex;flex-direction:column;gap:8px;padding:0 17px 16px}
 .prem-feat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e2);border-radius:var(--r2)}
 .prem-feat-ico{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1054,17 +1052,18 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-btn:active{transform:scale(.97)}
 .prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
 /* Premium plan cards */
-.prem-plans{display:flex;flex-direction:column;gap:12px;padding:0 17px 12px}
-.prem-plan{background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);padding:15px 15px 13px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;position:relative}
+.prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
+.prem-plan{background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:14px 14px 12px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
+.prem-plan::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--a),var(--a2));opacity:.75}
 .prem-plan:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35)}
 .prem-plan:active{transform:scale(.97)}
-.prem-plan.pp-pop{border-color:rgba(var(--ar),.55);background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.06));box-shadow:0 4px 22px rgba(79,138,255,.12)}
-.pp-popular{position:absolute;top:-9px;right:14px;font-size:10px;font-weight:800;color:#fff;background:linear-gradient(90deg,#4f8aff,#00d4aa);padding:3px 10px;border-radius:100px;letter-spacing:.4px;box-shadow:0 2px 8px rgba(79,138,255,.4)}
+.prem-plan.pp-pop{border-color:rgba(var(--ar),.36);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));box-shadow:0 4px 20px rgba(79,138,255,.08)}
+.pp-popular{position:absolute;top:10px;right:12px;font-size:9px;font-weight:800;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.2);padding:2px 8px;border-radius:100px;letter-spacing:.35px}
 .pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.pp-badge{font-size:12px;font-weight:800;color:#fff;padding:3px 10px;border-radius:6px}
+.pp-badge{font-size:12px;font-weight:800;color:#fff;padding:3px 10px;border-radius:7px}
 .pp-price{font-size:16px;font-weight:800;color:var(--t1)}
 .pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
-.pp-buffs{font-size:12px;color:var(--t2);line-height:1.7}
+.pp-buffs{font-size:12px;color:var(--t2);line-height:1.65;padding-left:1px}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -1250,8 +1249,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- CHAT -->
 <div class="screen" id="s-chat">
   <div class="chdr">
-    <div class="cav" style="width:36px;height:36px"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M8 2H32A6 6 0 0 1 38 8V25A6 6 0 0 1 32 31H17L8 39V31A6 6 0 0 1 2 25V8A6 6 0 0 1 8 2Z" fill="none" stroke="#9aebbc" stroke-width="3" stroke-linejoin="round"/><g transform="translate(20 17)"><ellipse rx="8.5" ry="5.2" transform="rotate(35)" fill="none" stroke="#9aebbc" stroke-width="3"/><ellipse rx="8.5" ry="5.2" transform="rotate(-35)" fill="none" stroke="#4f8aff" stroke-width="3"/></g></svg></div>
-    <div><div class="chnm">ALEX</div><div class="chst"><span class="odot"></span><span id="online-lbl"></span></div><div class="cplbl" id="cplbl"></div></div>
+    <div class="chtxt"><div class="chnm">ALEX</div></div>
     <div class="hbtns">
       <button class="hbtn" onclick="openSpanel()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
       <button class="hbtn" onclick="confirmClear()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
@@ -1647,9 +1645,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="mov" id="premiumm" style="display:none" onclick="closeMod('premiumm')">
   <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="prem-hero">
-      <div class="prem-crown"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,.3)" stroke="#fff" stroke-width="1.5" stroke-linecap="round"><path d="M2 18l3-11 4.5 6L12 4l2.5 9 4.5-6 3 11H2z"/><line x1="2" y1="21" x2="22" y2="21"/></svg></div>
-      <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
-      <div class="prem-sub" id="prem-sub">Unlock the full power of your AI tutor</div>
+      <div class="prem-mark"><svg viewBox="0 0 32 32"><rect x="6" y="8" width="20" height="16" rx="5"/><path d="M10 14h12M10 19h7"/><path d="M23 5l3 3-3 3M9 5L6 8l3 3"/></svg></div>
+      <div><div class="prem-title" id="prem-title">ALEX Subscriptions</div>
+      <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div></div>
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
@@ -1844,7 +1842,7 @@ function applyLang(){
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path',es:'🎯 Elige tu camino',de:'🎯 Lernpfad wählen',fr:'🎯 Choisir un parcours',pt:'🎯 Escolher caminho',uk:'🎯 Обери шлях навчання',tr:'🎯 Öğrenme yolunu seç',zh:'🎯 选择学习路径',ar:'🎯 اختر مسار التعلم'}[lang]||'🎯 Learning Path';
   var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
-  document.getElementById('online-lbl').textContent=L.online;
+  var ol=document.getElementById('online-lbl');if(ol)ol.textContent=L.online;
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
   // Build chips
   buildChips();
