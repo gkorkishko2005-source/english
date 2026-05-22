@@ -103,7 +103,6 @@
   cursor:pointer;transition:.2s;width:100%;
 }
 .lang-picker-btn:active{background:var(--e2)}
-.lang-flag-big{font-size:22px;flex-shrink:0;line-height:1}
 .lang-picker-name{font-size:14px;font-weight:600;flex:1}
 .lang-picker-arr{color:var(--t3);font-size:16px}
 /* Lang scroll in modal */
@@ -118,7 +117,6 @@
 }
 .lang-opt-row:active{background:var(--e2)}
 .lang-opt-row.on{background:rgba(var(--ar),.1)}
-.lang-opt-flag{font-size:20px;flex-shrink:0}
 .lang-opt-name{font-size:14px;font-weight:500;flex:1;color:var(--t1)}
 .lang-opt-chk{font-size:14px;color:var(--a);opacity:0;transition:.15s}
 .lang-opt-row.on .lang-opt-chk{opacity:1}
@@ -421,6 +419,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .macts{display:flex;gap:4px;opacity:0;transition:opacity .2s}
 .msg:hover .macts,.msg:active .macts,.msg:focus-within .macts{opacity:1}
 @media(hover:none){.macts{opacity:1}}
+.mtime{font-size:10px;color:var(--t3);padding:0 2px;line-height:1.2}
+.msg.user .mtime{display:none}
 .cpbtn{background:var(--e2);border:1px solid var(--b1);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:11px;color:var(--t3);font-family:var(--f);display:flex;align-items:center;gap:3px;transition:.15s}
 .cpbtn:hover{border-color:var(--a);color:var(--a)}
 .cpbtn.ok{color:var(--a2);border-color:var(--a2)}
@@ -928,7 +928,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .set-grid-2 .dl-toggle,.set-grid-2 .lang-picker-btn{margin-bottom:0;padding:11px 12px;gap:8px}
 .set-grid-2 .dl-toggle-text,.set-grid-2 .lang-picker-name{font-size:12.5px}
 .set-grid-2 .dl-toggle-icon{font-size:17px}
-.set-grid-2 .lang-flag-big{font-size:18px}
 .set-grid-2 .dl-switch{transform:scale(.85);margin-left:auto}
 .set-acc{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
 .set-acc>summary{padding:13px 14px;font-size:13px;font-weight:600;color:var(--t1);cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none}
@@ -1037,9 +1036,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* ══ PREMIUM ══ */
 .premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#4f8aff,#00d4aa);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
-.prem-hero{display:flex;align-items:center;gap:14px;text-align:left;padding:22px 18px 16px;margin-bottom:8px;border-bottom:1px solid var(--b1)}
-.prem-mark{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.12));border:1px solid rgba(var(--ar),.24);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 28px rgba(79,138,255,.12)}
-.prem-mark svg{width:32px;height:32px;stroke:var(--a);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.prem-hero{text-align:left;padding:20px 18px 14px;margin-bottom:8px;border-bottom:1px solid var(--b1)}
 .prem-title{font-size:19px;font-weight:800;margin-bottom:4px}
 .prem-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-bottom:0}
 .prem-feats{display:flex;flex-direction:column;gap:8px;padding:0 17px 16px}
@@ -1060,7 +1057,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-plan.pp-pop{border-color:rgba(var(--ar),.36);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));box-shadow:0 4px 20px rgba(79,138,255,.08)}
 .pp-popular{position:absolute;top:10px;right:12px;font-size:9px;font-weight:800;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.2);padding:2px 8px;border-radius:100px;letter-spacing:.35px}
 .pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.pp-badge{font-size:12px;font-weight:800;color:#fff;padding:3px 10px;border-radius:7px}
+.pp-badge{font-size:12px;font-weight:800;color:var(--t1);padding:3px 9px;border-radius:7px;background:var(--e3);border:1px solid var(--b1)}
 .pp-price{font-size:16px;font-weight:800;color:var(--t1)}
 .pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
 .pp-buffs{font-size:12px;color:var(--t2);line-height:1.65;padding-left:1px}
@@ -1411,12 +1408,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="sec"><span id="lang-sec-lbl">Languages</span></div>
   <div class="set-grid-2">
     <div class="lang-picker-btn" onclick="openLangPicker('ui')">
-      <span class="lang-flag-big" id="ui-lang-flag">🇷🇺</span>
       <div class="lang-picker-name" id="ui-lang-name">Русский</div>
       <span class="lang-picker-arr">›</span>
     </div>
     <div class="lang-picker-btn" onclick="openLangPicker('bot')">
-      <span class="lang-flag-big" id="bot-lang-flag">🇷🇺</span>
       <div class="lang-picker-name" id="bot-lang-name">Русский</div>
       <span class="lang-picker-arr">›</span>
     </div>
@@ -1645,22 +1640,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="mov" id="premiumm" style="display:none" onclick="closeMod('premiumm')">
   <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="prem-hero">
-      <div class="prem-mark"><svg viewBox="0 0 32 32"><rect x="6" y="8" width="20" height="16" rx="5"/><path d="M10 14h12M10 19h7"/><path d="M23 5l3 3-3 3M9 5L6 8l3 3"/></svg></div>
-      <div><div class="prem-title" id="prem-title">ALEX Subscriptions</div>
-      <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div></div>
+      <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
+      <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div>
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:#2ecc71">Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge" style="background:#4f8aff">Pro</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Pro</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge" style="background:linear-gradient(135deg,#d4a843,#ffb830)">Ultimate</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -1892,24 +1886,22 @@ function applyLang(){
 
 /* ══ LANGUAGE DATA ══ */
 const UI_LANGS=[
-  {code:'ru',flag:'🇷🇺',name:'Русский'},
-  {code:'en',flag:'🇬🇧',name:'English'},
-  {code:'es',flag:'🇪🇸',name:'Español'},
-  {code:'pt',flag:'🇧🇷',name:'Português'},
+  {code:'ru',name:'Русский'},
+  {code:'en',name:'English'},
+  {code:'es',name:'Español'},
+  {code:'pt',name:'Português'},
 ];
 const BOT_LANGS=[
-  {code:'ru',flag:'🇷🇺',name:'Русский'},
-  {code:'en',flag:'🇬🇧',name:'English'},
-  {code:'es',flag:'🇪🇸',name:'Español'},
-  {code:'pt',flag:'🇧🇷',name:'Português'},
+  {code:'ru',name:'Русский'},
+  {code:'en',name:'English'},
+  {code:'es',name:'Español'},
+  {code:'pt',name:'Português'},
 ];
 
 function updateLangPickerBtns(){
   const ul=UI_LANGS.find(x=>x.code===lang)||UI_LANGS[0];
   const bl=BOT_LANGS.find(x=>x.code===botLang)||BOT_LANGS[0];
-  const uf=document.getElementById('ui-lang-flag');  if(uf)uf.textContent=ul.flag;
   const un=document.getElementById('ui-lang-name');  if(un)un.textContent=ul.name;
-  const bf=document.getElementById('bot-lang-flag'); if(bf)bf.textContent=bl.flag;
   const bn=document.getElementById('bot-lang-name'); if(bn)bn.textContent=bl.name;
   // Also update modal titles
   const um=document.getElementById('uilang-mtit');  if(um)um.textContent=L.uilang||'Interface language';
@@ -1928,7 +1920,7 @@ function openLangPicker(type){
   langs.forEach(l=>{
     const row=document.createElement('div');
     row.className='lang-opt-row'+(l.code===cur?' on':'');
-    row.innerHTML=`<span class="lang-opt-flag">${l.flag}</span><span class="lang-opt-name">${l.name}</span><span class="lang-opt-chk">✓</span>`;
+    row.innerHTML=`<span class="lang-opt-name">${l.name}</span><span class="lang-opt-chk">✓</span>`;
     row.onclick=()=>{
       wrap.querySelectorAll('.lang-opt-row').forEach(r=>r.classList.remove('on'));
       row.classList.add('on');
@@ -1944,12 +1936,12 @@ function openLangPicker(type){
 function setLang(l){
   lang=l;LS.set('app_lang',l);L=LANGS[l]||LANGS.en;
   applyLang();updateLangPickerBtns();
-  toast((UI_LANGS.find(x=>x.code===l)?.flag||'')+(UI_LANGS.find(x=>x.code===l)?.name||l));
+  toast(UI_LANGS.find(x=>x.code===l)?.name||l);
 }
 function setBotLang(l){
   botLang=l;LS.set('bot_lang',l);
   updateLangPickerBtns();
-  toast((BOT_LANGS.find(x=>x.code===l)?.flag||'')+' '+(BOT_LANGS.find(x=>x.code===l)?.name||l));
+  toast(BOT_LANGS.find(x=>x.code===l)?.name||l);
 }
 
 /* ══ CHIPS ══ */
@@ -2648,7 +2640,11 @@ function delSes(id,e){
 function saveCurSes(){
   const s=getSes(curSid);if(!s)return;
   const bubbles=document.querySelectorAll('#cmsgs .msg');s.msgs=[];
-  bubbles.forEach(b=>{const role=b.classList.contains('user')?'user':'bot';const bub=b.querySelector('.mbub');if(bub)s.msgs.push({role,content:bub.innerText});});
+  bubbles.forEach(b=>{
+    const role=b.classList.contains('user')?'user':'bot';
+    const bub=b.querySelector('.mbub');
+    if(bub)s.msgs.push({role,content:bub.innerText,time:b.dataset.time||new Date().toISOString()});
+  });
   if(s.msgs.length&&s.title===L.nosessiont){const fu=s.msgs.find(m=>m.role==='user');if(fu)s.title=fu.content.slice(0,40)+(fu.content.length>40?'…':'');}
   saveSessions();
 }
@@ -2712,9 +2708,17 @@ function isSpam(t){
 /* ══ CHAT ══ */
 let busy=false;
 
-function renderMsg(role,text,save=true){
+function fmtTime(ts){
+  const d=ts?new Date(ts):new Date();
+  if(Number.isNaN(d.getTime()))return '';
+  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderMsg(role,text,save=true,time=null){
   const wrap=document.getElementById('cmsgs');
   const d=document.createElement('div');d.className='msg '+(role==='user'?'user':'bot');
+  const msgTime=time||new Date().toISOString();
+  d.dataset.time=msgTime;
   const av=document.createElement('div');av.className='mav';
   av.innerHTML=role==='user'
     ?'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>'
@@ -2731,6 +2735,8 @@ function renderMsg(role,text,save=true){
   }
   mw.appendChild(bub);
   if(role==='bot'){
+    const tm=document.createElement('div');tm.className='mtime';tm.textContent=fmtTime(msgTime);
+    mw.appendChild(tm);
     const acts=document.createElement('div');acts.className='macts';
     // TTS button
     const spk=document.createElement('button');spk.className='cpbtn spk-btn';
@@ -4001,9 +4007,6 @@ function updatePremiumUI(){
     banner.innerHTML=`
       <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
         <div style="display:flex;align-items:center;gap:13px;margin-bottom:${untilText?'10':'0'}px">
-          <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-1.6 12H4.6L3 7z" fill="#ffb830" stroke="#ffb830" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="14.5" r="1.6" fill="#0e1626"/></svg>
-          </div>
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName}</div>
             <div style="font-size:12px;color:var(--t2)">${untilText}</div>
@@ -4015,9 +4018,6 @@ function updatePremiumUI(){
   } else {
     banner.innerHTML=`
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
-        <div style="width:46px;height:46px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <svg viewBox="0 0 24 24" fill="none" style="width:100%;height:100%"><path d="M12 3l2.2 5.6L20 9.3l-4.4 3.7L17 19l-5-3-5 3 1.4-6L4 9.3l5.8-.7L12 3z" fill="rgba(79,138,255,.18)" stroke="#4f8aff" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        </div>
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
           <div style="font-size:12px;color:var(--t2)">${{ru:'от 300 ⭐/мес · голос · Sonnet',en:'from 300 ⭐/mo · voice · Sonnet',es:'desde 300 ⭐/mes · voz · Sonnet',pt:'a partir de 300 ⭐/mês · voz · Sonnet'}[lang]||'from 300 ⭐'}</div>
@@ -5336,7 +5336,7 @@ async function init(){
     // Restore chat messages
     try{
       const s=getSes(curSid);
-      if(s?.msgs?.length)s.msgs.forEach(m=>renderMsg(m.role,m.content,false));
+      if(s?.msgs?.length)s.msgs.forEach(m=>renderMsg(m.role,m.content,false,m.time));
       else{
         addMsg('bot',L.welcome||'Привет! Я ALEX 👋');
         // Add quick action hints
