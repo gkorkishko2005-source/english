@@ -323,7 +323,8 @@ async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
         if user and user.get("premium_until"):
             try:
                 current_until = datetime.fromisoformat(str(user["premium_until"]))
-            except: pass
+            except Exception as e:
+                logger.warning("premium_until parse failed uid=%s value=%r: %s", uid, user.get("premium_until"), e)
         # If current premium is still active, extend from its end
         base = current_until if (current_until and current_until > now) else now
         until = base + timedelta(days=30 * months)

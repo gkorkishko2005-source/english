@@ -2364,30 +2364,31 @@ function updateChatModelStrip(){
 function maybeOnboardChat(){
   if(LS.get('chat_onb_v1')==='1')return;
   if(isPremium||LS.get('premium')==='1')return; // skip paid users
-  const name=(window._d&&window._d.name)||'';
+  const esc=function(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  const name=esc((window._d&&window._d.name)||'');
   const T={
     ru:{tit:'👋 '+(name||'Привет')+(name?', привет!':''),
         l1:'Ты на <b>бесплатном тарифе</b> — 5 сообщений в день к ALEX.',
         l2:'Хочешь <b>безлимит бесплатно</b>? Возьми свой бесплатный ключ Google Gemini (без карты):',
-        btn:'🔑 Получить бесплатный ключ',
+        btn:'Получить бесплатный ключ',
         l3:'Затем вставь его в <b>Настройки → Free API key</b>. Или оформи подписку.',
         host:'aistudio.google.com'},
     en:{tit:'👋 '+(name?'Hi '+name+'!':'Welcome!'),
         l1:"You're on the <b>Free tier</b> — 5 messages/day to ALEX.",
         l2:'Want <b>unlimited free messages</b>? Get your own free Google Gemini key (no card needed):',
-        btn:'🔑 Get your free key',
+        btn:'Get your free key',
         l3:'Then paste it in <b>Settings → Free API key</b>. Or upgrade to a subscription.',
         host:'aistudio.google.com'},
     es:{tit:'👋 '+(name?'¡Hola '+name+'!':'¡Bienvenido!'),
         l1:'Estás en el <b>plan gratuito</b> — 5 mensajes/día con ALEX.',
         l2:'¿Quieres <b>mensajes ilimitados gratis</b>? Consigue tu clave gratuita de Google Gemini (sin tarjeta):',
-        btn:'🔑 Obtener clave gratis',
+        btn:'Obtener clave gratis',
         l3:'Luego pégala en <b>Ajustes → Clave API gratis</b>. O suscríbete.',
         host:'aistudio.google.com'},
     pt:{tit:'👋 '+(name?'Olá '+name+'!':'Bem-vindo!'),
         l1:'Você está no <b>plano gratuito</b> — 5 mensagens/dia com o ALEX.',
         l2:'Quer <b>mensagens ilimitadas grátis</b>? Pegue sua chave gratuita do Google Gemini (sem cartão):',
-        btn:'🔑 Pegar chave grátis',
+        btn:'Pegar chave grátis',
         l3:'Depois cole em <b>Ajustes → Chave API grátis</b>. Ou assine.',
         host:'aistudio.google.com'}
   };
