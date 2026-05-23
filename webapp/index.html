@@ -425,11 +425,15 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .msg.user .mbub code{background:rgba(255,255,255,.2);color:#fff}
 .mbub .mh{font-size:12px;font-weight:700;color:var(--a);margin:7px 0 3px;display:block;text-transform:uppercase;letter-spacing:.5px}
 .msg.user .mbub .mh{color:rgba(255,255,255,.85)}
-.mbub ul,.mbub ol{padding-left:15px;margin:5px 0}
-.mbub li{margin-bottom:3px;font-size:14px}
-.mbub .tip{background:rgba(var(--ar),.08);border-left:3px solid var(--a);border-radius:0 5px 5px 0;padding:7px 9px;margin:7px 0;font-size:13px}
+.mbub ul,.mbub ol{padding:8px 10px 8px 24px;margin:7px 0;background:rgba(var(--ar),.045);border:1px solid rgba(var(--ar),.08);border-radius:10px}
+.mbub li{margin-bottom:4px;font-size:14px;padding-left:2px}
+.mbub li::marker{color:var(--a);font-weight:800}
+.mbub .tip{background:rgba(var(--ar),.08);border-left:3px solid var(--a);border-radius:0 8px 8px 0;padding:8px 10px;margin:8px 0;font-size:13px}
 .msg.user .mbub .tip{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.5)}
-.mbub .corr{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:6px;padding:6px 9px;margin:5px 0;font-size:13px}
+.mbub .corr{background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.2);border-radius:9px;padding:7px 10px;margin:7px 0;font-size:13px}
+.msg-block{display:block;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:8px 10px;margin:8px 0}
+.msg-block-k{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--a);margin-bottom:3px}
+.msg-block-v{display:block;color:var(--t1)}
 
 /* Copy btn */
 .macts{display:flex;gap:4px;opacity:0;pointer-events:none;transition:opacity .18s}
@@ -540,13 +544,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .tool-card.gift .tool-ico{background:rgba(167,139,250,.13)}.tool-card.gift .tool-ico svg{stroke:#a78bfa}
 @media(max-width:350px){.tools-grid{grid-template-columns:1fr}.tool-card{min-height:76px;display:flex;align-items:center;gap:11px}.tool-ico{margin-bottom:0;flex:0 0 34px}}
 
-/* ══ IDIOM OF THE DAY ══ */
-.idiom-card{padding:16px;background:linear-gradient(135deg,rgba(255,184,48,.06),rgba(167,139,250,.04));border:1px solid rgba(255,184,48,.15);border-radius:var(--r);margin-bottom:14px}
-.idiom-emoji{font-size:22px;margin-bottom:6px}
+.idiom-card{padding:15px;background:linear-gradient(135deg,rgba(255,184,48,.07),rgba(167,139,250,.045));border:1px solid rgba(255,184,48,.16);border-radius:var(--r);margin-bottom:14px;position:relative;overflow:hidden}
+.idiom-card::after{content:'';position:absolute;right:-34px;top:-42px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,48,.16),transparent 68%);pointer-events:none}
+.idiom-top{display:flex;align-items:center;gap:10px;margin-bottom:9px;position:relative;z-index:1}
+.idiom-ico{width:34px;height:34px;border-radius:11px;background:rgba(255,184,48,.13);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.idiom-ico svg{width:19px;height:19px;fill:none;stroke:var(--gd);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .idiom-phrase{font-size:15px;font-weight:800;color:var(--t1);margin-bottom:4px}
 .idiom-meaning{font-size:12px;color:var(--t2);margin-bottom:6px;line-height:1.4}
 .idiom-example{font-size:12px;color:var(--t3);font-style:italic;line-height:1.4}
-.idiom-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--or);margin-bottom:6px}
+.idiom-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--or)}
+.idiom-tag{display:inline-flex;width:max-content;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.55px;color:#a78bfa;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.18);border-radius:100px;padding:3px 7px;margin-top:8px}
 
 /* ══ DRILL TOPIC PICKER ══ */
 .drill-topic{display:flex;align-items:center;gap:12px;padding:14px;background:var(--e1);border:1.5px solid var(--b1);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:.2s}
@@ -806,18 +813,23 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .dwarr:disabled{opacity:.25;cursor:default}
 
 /* Flashcard */
-.fcs{perspective:900px;height:212px;cursor:pointer;margin-bottom:13px;overflow:hidden;user-select:none}
+.fcs{perspective:900px;height:236px;cursor:pointer;margin-bottom:13px;overflow:hidden;user-select:none}
 .fci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
 .fci.flip{transform:rotateY(180deg)}
 .fcf{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
-.fcfr{background:var(--e1);border:1px solid var(--b2);box-shadow:0 4px 24px rgba(0,0,0,.15)}
-.fcbk{background:var(--g);border:1px solid rgba(var(--ar),.2);transform:rotateY(180deg);box-shadow:0 4px 24px rgba(0,0,0,.15)}
+.fcfr{background:linear-gradient(145deg,var(--e1),rgba(var(--ar),.035));border:1px solid var(--b2);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden}
+.fcfr::after{content:'';position:absolute;right:-42px;top:-42px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.16),transparent 68%);pointer-events:none}
+.fcbk{background:linear-gradient(145deg,rgba(var(--ar),.12),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.2);transform:rotateY(180deg);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden}
+.fcbk::after{content:'';position:absolute;left:-44px;bottom:-54px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,170,.13),transparent 68%);pointer-events:none}
 .fcbg{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:11px}
 .fcw{font-size:clamp(17px,5vw,24px);font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:8px;word-break:break-word;max-width:100%}
-.fcp{font-size:13px;color:var(--a);margin-bottom:7px}
+.fcp{font-size:13px;color:var(--a);margin-bottom:7px;font-weight:700}
 .fctr{font-size:21px;font-weight:700;color:var(--a);margin-bottom:8px}
-.fcex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.5}
+.fcex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.5;max-width:95%}
 .fch{position:absolute;bottom:10px;font-size:10px;color:var(--t3)}
+.fcmeta{display:flex;gap:6px;position:absolute;top:13px;left:13px;z-index:2}
+.fcmeta span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.55px;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);border-radius:100px;padding:3px 7px}
+.fcuse{margin-top:10px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.08);border:1px solid rgba(var(--ar),.09);font-size:11px;color:var(--t2);line-height:1.35;max-width:96%}
 
 .rrow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px;transition:opacity .3s,transform .3s}
 .rrow.hid{opacity:0;pointer-events:none;transform:translateY(6px)}
@@ -1377,8 +1389,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
       <div class="fcs" id="fcs" onclick="flipCard()">
         <div class="fci" id="fci">
-          <div class="fcf fcfr"><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint"></div></div>
-          <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div></div>
+          <div class="fcf fcfr"><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint"></div></div>
+          <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div><div class="fcuse" id="fcuse"></div></div>
         </div>
       </div>
       <div class="rrow hid" id="rrow">
@@ -2406,6 +2418,7 @@ function renderHome(d){
   if(stkLbl)stkLbl.textContent={ru:s===1?'день':(s%10>=2&&s%10<=4&&!(s%100>=12&&s%100<=14))?'дня':'дней',en:s===1?'day':'days',es:s===1?'día':'días',de:s===1?'Tag':'Tage',fr:s===1?'jour':'jours',pt:s===1?'dia':'dias',uk:s===1?'день':(s%10>=2&&s%10<=4)?'дні':'днів',tr:'gün',zh:'天',ar:'يوم'}[lang]||'days';
   loadMissions();
   try{renderChallenge();}catch(e){}
+  try{renderIdiomOfDay();}catch(e){}
   try{renderLeaderboard(d.xp||0);}catch(e){}
   try{updateNewLabels();}catch(e){}
 }
@@ -2589,14 +2602,24 @@ const MK=['1','2','3','4'];
 const MISSION_POOL=[
   {id:'chat3', key:'chat',  target:3, xp:20, label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
   {id:'chat5', key:'chat',  target:5, xp:30, label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
+  {id:'chat7', key:'chat',  target:7, xp:40, label:{ru:'Проведи 7 реплик в чате',en:'Send 7 chat messages',es:'Envía 7 mensajes',pt:'Envie 7 mensagens'}},
   {id:'words5',key:'words', target:5, xp:25, label:{ru:'Повтори 5 карточек',en:'Review 5 cards',es:'Repasa 5 tarjetas',pt:'Revise 5 cartões'}},
   {id:'words8',key:'words', target:8, xp:35, label:{ru:'Повтори 8 карточек',en:'Review 8 cards',es:'Repasa 8 tarjetas',pt:'Revise 8 cartões'}},
+  {id:'words10',key:'words',target:10,xp:45,label:{ru:'Закрой 10 карточек',en:'Finish 10 cards',es:'Completa 10 tarjetas',pt:'Conclua 10 cartões'}},
   {id:'listen',key:'listen',target:1, xp:35, label:{ru:'Аудио-задание TOEFL',en:'TOEFL listening task',es:'Tarea de escucha TOEFL',pt:'Tarefa de escuta TOEFL'}},
+  {id:'listen2',key:'listen',target:2, xp:50, label:{ru:'Сделай 2 задания на слух',en:'Complete 2 listening tasks',es:'Completa 2 escuchas',pt:'Complete 2 escutas'}},
   {id:'drill', key:'drill', target:1, xp:30, label:{ru:'Пройди один drill по грамматике',en:'Complete one grammar drill',es:'Completa un drill de gramática',pt:'Complete um drill de gramática'}},
+  {id:'drill2',key:'drill', target:2, xp:45, label:{ru:'Пройди 2 grammar drills',en:'Complete 2 grammar drills',es:'Completa 2 drills',pt:'Complete 2 drills'}},
   {id:'game',  key:'game',  target:1, xp:25, label:{ru:'Выиграй в любую мини-игру',en:'Win any mini-game',es:'Gana cualquier mini-juego',pt:'Vença qualquer mini-jogo'}},
+  {id:'game2', key:'game',  target:2, xp:40, label:{ru:'Выиграй 2 мини-игры',en:'Win 2 mini-games',es:'Gana 2 mini-juegos',pt:'Vença 2 mini-jogos'}},
   {id:'rolep', key:'roleplay',target:1,xp:30,label:{ru:'Поговори в ролевой сценке',en:'Try a roleplay scenario',es:'Prueba un escenario de roleplay',pt:'Experimente um cenário de roleplay'}},
+  {id:'rolep2',key:'roleplay',target:2,xp:45,label:{ru:'Сыграй 2 ролевые сценки',en:'Play 2 roleplay scenes',es:'Haz 2 roleplays',pt:'Faça 2 roleplays'}},
   {id:'story', key:'story', target:1, xp:30, label:{ru:'Пройди одну историю',en:'Finish one story',es:'Termina una historia',pt:'Termine uma história'}},
+  {id:'story2',key:'story', target:2, xp:45, label:{ru:'Пройди 2 истории',en:'Finish 2 stories',es:'Termina 2 historias',pt:'Termine 2 histórias'}},
   {id:'check', key:'check', target:1, xp:25, label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
+  {id:'check2',key:'check', target:2, xp:40, label:{ru:'Проверь 2 текста',en:'Check 2 texts',es:'Revisa 2 textos',pt:'Revise 2 textos'}},
+  {id:'mix_chat_words',key:'chat',target:4,xp:30,label:{ru:'Спроси ALEX о 4 новых словах',en:'Ask ALEX about 4 new words',es:'Pregunta 4 palabras nuevas',pt:'Pergunte 4 palavras novas'}},
+  {id:'mix_error',key:'check',target:1,xp:35,label:{ru:'Найди и исправь ошибку',en:'Find and fix one mistake',es:'Corrige un error',pt:'Corrija um erro'}},
 ];
 function _todaySeed(){const d=new Date();return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate();}
 function localDayKey(d=new Date()){
@@ -2680,6 +2703,7 @@ function trackM(key,delta=1){
   if(sv.date!==today){sv={date:today,done:{},cnt:{}};}
   if(!sv.cnt)sv.cnt={};
   sv.cnt[key]=(sv.cnt[key]||0)+delta;
+  try{incrementChallenge(key,delta);}catch(e){}
   // Award all matching missions for today
   let earned=false,xpGain=0;
   todayMissions().forEach(m=>{
@@ -2875,6 +2899,8 @@ function fmtMsg(text){
   // 6. Tip boxes
   t = t.replace(/^(💡[^\n]+)$/gm,'<div class="tip">$1</div>');
   t = t.replace(/^(✅[^\n]+)$/gm,'<div class="corr">$1</div>');
+  t = t.replace(/^(Example|Examples|Correction|Fix|Why|Rule|Practice|Tip|Mistake|Пример|Примеры|Исправление|Правка|Почему|Правило|Практика|Совет|Ошибка):\s*(.+)$/gmi,
+    '<span class="msg-block"><span class="msg-block-k">$1</span><span class="msg-block-v">$2</span></span>');
 
   // 7. Lists
   t = t.replace(/^(?:\d+\.|[-•])\s(.+)$/gm,'<li>$1</li>');
@@ -2996,8 +3022,7 @@ async function doChat(text){
     // Extract errors from ALEX reply
     const replyText=document.querySelector('#cmsgs .msg.bot:last-child .mbub')?.innerText||'';
     try{extractErrorsFromReply(replyText);}catch(e){}
-    // Increment challenge counter
-    try{incrementChallenge();}catch(e){}
+    // Weekly challenge progress is tracked by concrete actions in trackM().
   }catch(e){
     rmTyping();
     console.error('doChat error:',e);
@@ -3245,9 +3270,6 @@ const VOCAB_DECK=[
   {id:33,w:'witness',p:'/ˈwɪt.nəs/',tr:{ru:'свидетель; быть свидетелем',en:'to see something happen'},ex:'She witnessed the whole event.'},
   {id:34,w:'gradually',p:'/ˈɡrædʒ.u.ə.li/',tr:{ru:'постепенно',en:'slowly over time'},ex:'Your accent improves gradually.'},
   {id:35,w:'sincere',p:'/sɪnˈsɪr/',tr:{ru:'искренний',en:'honest and true in feelings'},ex:'Please accept my sincere thanks.'},
-  {id:36,w:'demand',p:'/dɪˈmænd/',tr:{ru:'требовать; спрос',en:'to ask firmly; a strong need'},ex:'Customers demand better service.'},
-  {id:37,w:'flexible',p:'/ˈflek.sə.bəl/',tr:{ru:'гибкий',en:'able to change easily'},ex:'My schedule is flexible this week.'},
-  {id:38,w:'achieve',p:'/əˈtʃiːv/',tr:{ru:'добиваться',en:'to successfully reach a goal'},ex:'You can achieve a lot with consistency.'},
   {id:39,w:'aware',p:'/əˈwer/',tr:{ru:'осведомлённый',en:'knowing that something exists'},ex:'Be aware of common mistakes.'},
   {id:40,w:'encourage',p:'/ɪnˈkɝː.ɪdʒ/',tr:{ru:'поощрять, ободрять',en:'to give someone confidence to do something'},ex:'Teachers should encourage questions.'},
   {id:41,w:'frequent',p:'/ˈfriː.kwənt/',tr:{ru:'частый',en:'happening often'},ex:'Make frequent short reviews.'},
@@ -3255,8 +3277,33 @@ const VOCAB_DECK=[
   {id:43,w:'valuable',p:'/ˈvæl.jə.bəl/',tr:{ru:'ценный',en:'worth a lot; very useful'},ex:'That was valuable feedback.'},
   {id:44,w:'apparent',p:'/əˈper.ənt/',tr:{ru:'очевидный',en:'clear and easy to see'},ex:'It became apparent that he was right.'},
   {id:45,w:'maintain',p:'/meɪnˈteɪn/',tr:{ru:'поддерживать',en:'to keep something at the same level'},ex:'Maintain a daily learning streak.'},
+  {id:46,w:'insight',p:'/ˈɪn.saɪt/',tr:{ru:'понимание, озарение',en:'a clear understanding of something'},ex:'Her comment gave me a useful insight.'},
+  {id:47,w:'resolve',p:'/rɪˈzɑːlv/',tr:{ru:'решать; решимость',en:'to solve a problem; determination'},ex:'We need to resolve this issue today.'},
+  {id:48,w:'curious',p:'/ˈkjʊr.i.əs/',tr:{ru:'любопытный',en:'wanting to know or learn'},ex:'Stay curious when you study English.'},
+  {id:49,w:'approach',p:'/əˈproʊtʃ/',tr:{ru:'подход; подходить',en:'a way of dealing with something'},ex:'This approach saves a lot of time.'},
+  {id:50,w:'consistent',p:'/kənˈsɪs.tənt/',tr:{ru:'последовательный',en:'done in the same reliable way'},ex:'Consistent practice matters more than long sessions.'},
+  {id:51,w:'evaluate',p:'/ɪˈvæl.ju.eɪt/',tr:{ru:'оценивать',en:'to judge the value or quality'},ex:'ALEX can evaluate your answer.'},
+  {id:52,w:'expand',p:'/ɪkˈspænd/',tr:{ru:'расширять',en:'to make larger or wider'},ex:'Reading helps expand your vocabulary.'},
+  {id:53,w:'focus',p:'/ˈfoʊ.kəs/',tr:{ru:'фокусироваться',en:'to give attention to one thing'},ex:'Focus on one grammar point at a time.'},
+  {id:54,w:'impact',p:'/ˈɪm.pækt/',tr:{ru:'влияние',en:'a strong effect'},ex:'Small habits have a big impact.'},
+  {id:55,w:'negotiate',p:'/nɪˈɡoʊ.ʃi.eɪt/',tr:{ru:'вести переговоры',en:'to discuss to reach agreement'},ex:'They negotiated a better price.'},
+  {id:56,w:'prioritize',p:'/praɪˈɔːr.ə.taɪz/',tr:{ru:'расставлять приоритеты',en:'to decide what is most important'},ex:'Prioritize speaking if your goal is travel.'},
+  {id:57,w:'clarify',p:'/ˈkler.ə.faɪ/',tr:{ru:'прояснять',en:'to make something clear'},ex:'Could you clarify what you mean?'},
+  {id:58,w:'adapt',p:'/əˈdæpt/',tr:{ru:'адаптироваться',en:'to change for a new situation'},ex:'You quickly adapt to new accents.'},
+  {id:59,w:'confident',p:'/ˈkɑːn.fə.dənt/',tr:{ru:'уверенный',en:'sure of yourself'},ex:'Practice makes you more confident.'},
+  {id:60,w:'fluent',p:'/ˈfluː.ənt/',tr:{ru:'беглый',en:'able to speak easily and naturally'},ex:'She is fluent in English and Spanish.'},
+  {id:61,w:'accurate',p:'/ˈæk.jɚ.ət/',tr:{ru:'точный, правильный',en:'correct and exact'},ex:'Try to be accurate, not just fast.'},
+  {id:62,w:'context',p:'/ˈkɑːn.tekst/',tr:{ru:'контекст',en:'the situation around a word or idea'},ex:'The meaning depends on context.'},
+  {id:63,w:'phrase',p:'/freɪz/',tr:{ru:'фраза',en:'a small group of words'},ex:'Learn this phrase as one chunk.'},
+  {id:64,w:'pattern',p:'/ˈpæt̬.ɚn/',tr:{ru:'шаблон, модель',en:'a repeated form or structure'},ex:'Notice the pattern in this sentence.'},
+  {id:65,w:'attempt',p:'/əˈtempt/',tr:{ru:'попытка; пытаться',en:'to try to do something'},ex:'Make an attempt before checking the answer.'},
 ];
 let cards=[],cIdx=0,flipped=false;
+function vocabMeta(v){
+  const topics=['Core','Speaking','Writing','Business','Travel','Study'];
+  const levels=['A2','B1','B1','B2','B2','C1'];
+  return {topic:v.topic||topics[v.id%topics.length],level:v.level||levels[v.id%levels.length]};
+}
 function buildDeckCards(){
   // Server-provided due words win if present (back-compat)
   var sv=(window._d||{}).due_words||[];
@@ -3265,8 +3312,9 @@ function buildDeckCards(){
   var sm=getSM2Data();var now=Date.now();var out=[];
   VOCAB_DECK.forEach(function(v){
     var st=sm['v_'+v.id];
+    var meta=vocabMeta(v);
     if(!st||(st.next||0)<=now){
-      out.push({id:'v_'+v.id,word:v.w,phonetic:v.p||'',translation:(v.tr&&(v.tr[lang]||v.tr.en))||'',example:v.ex||''});
+      out.push({id:'v_'+v.id,word:v.w,phonetic:v.p||'',translation:(v.tr&&(v.tr[lang]||v.tr.en))||'',example:v.ex||'',topic:meta.topic,level:meta.level});
     }
   });
   out.sort(function(){return Math.random()-0.5;});
@@ -3294,6 +3342,9 @@ function showCard(i){
   document.getElementById('fcph').textContent=c.phonetic||'';
   document.getElementById('fctr2').textContent=c.translation||'';
   document.getElementById('fcex').textContent=c.example||'';
+  const lvl=document.getElementById('fclevel');if(lvl)lvl.textContent=c.level||'B1';
+  const topic=document.getElementById('fctopic');if(topic)topic.textContent=c.topic||'Core';
+  const use=document.getElementById('fcuse');if(use)use.textContent=(lang==='ru'?'Используй в контексте: ':'Use in context: ')+(c.word||'');
   document.getElementById('fctr').textContent=`${i+1} / ${cards.length}`;
   document.getElementById('pfill').style.width=(i/cards.length*100)+'%';
   document.getElementById('rrow').classList.add('hid');
@@ -4072,22 +4123,42 @@ const CHALLENGES=[
   {
     title:{ru:'Напиши 10 сообщений ALEX',en:'Send 10 messages to ALEX'},
     sub:{ru:'Практикуй разговорный английский',en:'Practice conversational English'},
-    goal:10,unit:'messages',metric:'sess',reward:'+300 XP'
+    goal:10,unit:'messages',metric:'chat',reward:'+300 XP'
   },
   {
     title:{ru:'Повтори 20 карточек',en:'Review 20 flashcards'},
     sub:{ru:'Укрепи словарный запас',en:'Strengthen your vocabulary'},
-    goal:20,unit:'cards',metric:'cards',reward:'+250 XP'
+    goal:20,unit:'cards',metric:'words',reward:'+250 XP'
   },
   {
     title:{ru:'Сыграй 3 сценария',en:'Play 3 roleplay scenarios'},
     sub:{ru:'Прокачай разговорные навыки',en:'Level up your speaking skills'},
-    goal:3,unit:'scenarios',metric:'rp',reward:'+400 XP + 🎭 Badge'
+    goal:3,unit:'scenarios',metric:'roleplay',reward:'+400 XP'
   },
   {
     title:{ru:'Проверь 3 своих текста',en:'Check 3 of your texts'},
     sub:{ru:'Улучши письменный английский',en:'Improve your written English'},
-    goal:3,unit:'texts',metric:'tc',reward:'+350 XP'
+    goal:3,unit:'texts',metric:'check',reward:'+350 XP'
+  },
+  {
+    title:{ru:'Пройди 5 grammar drills',en:'Complete 5 grammar drills'},
+    sub:{ru:'Закрепи правила на практике',en:'Build accuracy with practice'},
+    goal:5,unit:'drills',metric:'drill',reward:'+420 XP'
+  },
+  {
+    title:{ru:'Сделай 4 аудио-тренировки',en:'Complete 4 listening tasks'},
+    sub:{ru:'Прокачай понимание на слух',en:'Train listening comprehension'},
+    goal:4,unit:'audio',metric:'listen',reward:'+380 XP'
+  },
+  {
+    title:{ru:'Выиграй 6 мини-игр',en:'Win 6 mini-games'},
+    sub:{ru:'Повтори слова через игру',en:'Review words through play'},
+    goal:6,unit:'wins',metric:'game',reward:'+360 XP'
+  },
+  {
+    title:{ru:'Закончи 3 истории',en:'Finish 3 stories'},
+    sub:{ru:'Тренируй контекст и реакцию',en:'Practice context and response'},
+    goal:3,unit:'stories',metric:'story',reward:'+400 XP'
   },
 ];
 
@@ -4122,16 +4193,18 @@ function joinChallenge(){
   goTab('chat');setTimeout(()=>sendChip(msg),150);
 }
 
-function incrementChallenge(){
+function incrementChallenge(metric,delta=1){
   const week=Math.floor(Date.now()/(7*24*60*60*1000));
   const prog=LS.getJ('ch_progress')||{week:0,count:0};
-  if(prog.week!==week){LS.setJ('ch_progress',{week,count:1});return;}
   const ch=CHALLENGES[week%CHALLENGES.length];
-  prog.count=Math.min(ch.goal,(prog.count||0)+1);
+  if(metric&&ch.metric&&metric!==ch.metric)return;
+  if(prog.week!==week){LS.setJ('ch_progress',{week,count:Math.min(ch.goal,delta)});renderChallenge();return;}
+  const wasDone=(prog.count||0)>=ch.goal;
+  prog.count=Math.min(ch.goal,(prog.count||0)+delta);
   LS.setJ('ch_progress',prog);
-  if(prog.count>=ch.goal){
-    toast(lang==='ru'?'🏆 Испытание выполнено!':'🏆 Challenge complete!','⭐');
-    addWeeklyXP(300);
+  if(!wasDone&&prog.count>=ch.goal){
+    toast(lang==='ru'?'Испытание выполнено!':'Challenge complete!','⭐');
+    addLocalXP(parseInt((ch.reward||'+300').replace(/\D/g,''),10)||300);
   }
   renderChallenge();
 }
@@ -5208,13 +5281,33 @@ const IDIOMS=[
   {phrase:'When pigs fly',meaning:{ru:'Когда рак на горе свистнет',en:'Something that will never happen'},example:'He will clean his room when pigs fly.'},
   {phrase:'You can not judge a book by its cover',meaning:{ru:'Не суди по обложке',en:'Do not judge by appearance'},example:'She looks shy but is very confident. You can not judge a book by its cover.'},
   {phrase:'Actions speak louder than words',meaning:{ru:'Поступки говорят громче слов',en:'What you do matters more than what you say'},example:'Do not just promise. Actions speak louder than words.'},
+  {phrase:'Call it a day',tag:'work',meaning:{ru:'Закончить работу на сегодня',en:'Stop working for now',es:'Dar por terminado por hoy',pt:'Encerrar por hoje'},example:'We fixed the bug, so let us call it a day.'},
+  {phrase:'Back to square one',tag:'problem',meaning:{ru:'Вернуться к началу',en:'Return to the starting point'},example:'The plan failed, so we are back to square one.'},
+  {phrase:'On the same page',tag:'team',meaning:{ru:'Понимать друг друга одинаково',en:'Agree or understand the situation similarly'},example:'Before we start, let us make sure we are on the same page.'},
+  {phrase:'A blessing in disguise',tag:'mindset',meaning:{ru:'Неудача, которая оказалась полезной',en:'A bad thing that turns out good'},example:'The delay was a blessing in disguise.'},
+  {phrase:'Go the extra mile',tag:'effort',meaning:{ru:'Сделать больше ожидаемого',en:'Do more than expected'},example:'She always goes the extra mile for her students.'},
+  {phrase:'In hot water',tag:'trouble',meaning:{ru:'В неприятной ситуации',en:'In trouble'},example:'He is in hot water after missing the deadline.'},
+  {phrase:'Keep an eye on',tag:'attention',meaning:{ru:'Следить за чем-то',en:'Watch or monitor something'},example:'Keep an eye on your pronunciation.'},
+  {phrase:'Learn the ropes',tag:'learning',meaning:{ru:'Освоить основы',en:'Learn how something works'},example:'It takes a week to learn the ropes.'},
+  {phrase:'Make up your mind',tag:'decision',meaning:{ru:'Принять решение',en:'Decide'},example:'You need to make up your mind soon.'},
+  {phrase:'No pain, no gain',tag:'motivation',meaning:{ru:'Без труда нет результата',en:'Progress needs effort'},example:'Grammar drills are hard, but no pain, no gain.'},
+  {phrase:'Out of the blue',tag:'surprise',meaning:{ru:'Внезапно',en:'Unexpectedly'},example:'She called me out of the blue.'},
+  {phrase:'Put it on the back burner',tag:'priority',meaning:{ru:'Отложить на потом',en:'Delay something because it is less urgent'},example:'We put that idea on the back burner.'},
+  {phrase:'Raise the bar',tag:'growth',meaning:{ru:'Повысить планку',en:'Set a higher standard'},example:'Your last essay really raised the bar.'},
+  {phrase:'Rule of thumb',tag:'advice',meaning:{ru:'Практическое правило',en:'A useful general rule'},example:'As a rule of thumb, review new words the next day.'},
+  {phrase:'Take it with a grain of salt',tag:'critical thinking',meaning:{ru:'Отнестись скептически',en:'Not believe something completely'},example:'Take online advice with a grain of salt.'},
+  {phrase:'Up in the air',tag:'uncertain',meaning:{ru:'Пока неопределённо',en:'Not decided yet'},example:'Our weekend plans are still up in the air.'},
+  {phrase:'Worth a shot',tag:'attempt',meaning:{ru:'Стоит попробовать',en:'Worth trying'},example:'It is worth a shot to answer in English.'},
+  {phrase:'Zero in on',tag:'focus',meaning:{ru:'Сфокусироваться на конкретном',en:'Focus closely on one thing'},example:'Let us zero in on your verb mistakes.'},
 ];
 
 function renderIdiomOfDay(){
   var el=document.getElementById('idiom-card');if(!el)return;
   var dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
   var idiom=IDIOMS[dayOfYear%IDIOMS.length];
-  el.innerHTML='<div class="idiom-label">'+(lang==='ru'?'Идиома дня':'Idiom of the day')+'</div><div class="idiom-emoji">💡</div><div class="idiom-phrase">'+idiom.phrase+'</div><div class="idiom-meaning">'+(idiom.meaning[lang]||idiom.meaning.en)+'</div><div class="idiom-example">"'+idiom.example+'"</div>';
+  var ih=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var lbl={ru:'Идиома дня',en:'Idiom of the day',es:'Modismo del día',pt:'Expressão do dia'}[lang]||'Idiom of the day';
+  el.innerHTML='<div class="idiom-top"><div class="idiom-ico"><svg viewBox="0 0 24 24"><path d="M12 3v3M5.6 5.6l2.1 2.1M18.4 5.6l-2.1 2.1"/><path d="M8 13a4 4 0 1 1 8 0c0 1.5-.8 2.3-1.6 3.1-.5.5-.9 1-.9 1.9h-3c0-.9-.4-1.4-.9-1.9C8.8 15.3 8 14.5 8 13Z"/><path d="M10 21h4"/></svg></div><div><div class="idiom-label">'+lbl+'</div><div class="idiom-tag">'+ih(idiom.tag||'daily speech')+'</div></div></div><div class="idiom-phrase">'+ih(idiom.phrase)+'</div><div class="idiom-meaning">'+ih(idiom.meaning[lang]||idiom.meaning.en)+'</div><div class="idiom-example">"'+ih(idiom.example)+'"</div>';
 }
 
 /* ══ ADAPTIVE DIFFICULTY ══ */
