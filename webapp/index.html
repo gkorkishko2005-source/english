@@ -764,16 +764,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mt-arr{width:13px;height:13px;opacity:.7}
 /* Bottom-sheet model options */
 .mtable-hdr{display:none}
-.mopt{display:grid;grid-template-columns:34px 1fr auto 22px;align-items:center;gap:10px;padding:9px 11px;width:100%;background:var(--e2);border:1px solid var(--b1);border-radius:12px;margin-bottom:6px;cursor:pointer;font-family:var(--f);text-align:left;color:var(--t1);transition:transform .15s,border-color .2s,background .2s;position:relative}
+.mopt{display:grid;grid-template-columns:31px 1fr auto 20px;align-items:center;gap:9px;padding:7px 10px;width:100%;background:var(--e2);border:1px solid var(--b1);border-radius:12px;margin-bottom:6px;cursor:pointer;font-family:var(--f);text-align:left;color:var(--t1);transition:transform .15s,border-color .2s,background .2s;position:relative}
 .mopt:hover{border-color:rgba(var(--ar),.35)}
 .mopt:active{transform:scale(.98)}
 .mopt.on{border-color:var(--a);background:rgba(var(--ar),.08);box-shadow:0 0 0 2px rgba(var(--ar),.06)}
 .mopt.locked{opacity:.55}
-.mopt-ic{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--e3);color:var(--a);border:1px solid var(--b1)}
-.mopt-ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mopt-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--e3);color:var(--a);border:1px solid var(--b1)}
+.mopt-ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mopt-main{min-width:0}
 .mopt-top{display:flex;align-items:center;gap:7px;min-width:0}
-.mopt-name{font-size:13px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mopt-name{font-size:12.5px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mopt-tier{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.45px;color:var(--t3);background:var(--e3);border:1px solid var(--b1);border-radius:100px;padding:2px 6px;white-space:nowrap}
 .mopt-sub{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mopt-meta{display:flex;align-items:center;gap:5px;justify-content:flex-end}
@@ -1660,20 +1660,32 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       </div>
       <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
         <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 10-13h-7l1-7z"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku</div><span class="mopt-tier">fast</span></div><div class="mopt-sub">Short answers, cheapest</div></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div><span class="mopt-tier">fast</span></div><div class="mopt-sub">Short answers, cheapest</div></div>
         <div class="mopt-meta"><div class="mt-cell mt-low">1</div></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="sonnet4" onclick="selectModel('sonnet4')" type="button">
+        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M7 4v16"/><path d="M17 4v16"/><path d="M4 17h16"/></svg></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div><span class="mopt-tier">classic</span></div><div class="mopt-sub">Balanced older model</div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-mid">4</div><span class="mopt-lock" style="display:none">BASIC</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
         <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 3H20v18H6.5A2.5 2.5 0 014 18.5v-13A2.5 2.5 0 016.5 3z"/><path d="M8 8h8M8 12h6"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet</div><span class="mopt-tier">smart</span></div><div class="mopt-sub">Reasoning and corrections</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" id="mopt-sonnet-lock" style="display:none">BASIC</span></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div><span class="mopt-tier">smart</span></div><div class="mopt-sub">Reasoning and corrections</div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" id="mopt-sonnet-lock" style="display:none">PRO</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="opus41" onclick="selectModel('opus41')" type="button">
+        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3z"/><path d="M19 19l2 2"/></svg></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div><span class="mopt-tier">deep</span></div><div class="mopt-sub">Deep work, older Opus</div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
         <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2 7.5 14 3 9.6l6.2-.9L12 3z"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus</div><span class="mopt-tier">deep</span></div><div class="mopt-sub">Hard tasks, highest cost</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" id="mopt-opus-lock" style="display:none">ULT</span></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div><span class="mopt-tier">max</span></div><div class="mopt-sub">Hard tasks, highest cost</div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" id="mopt-opus-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="moff" onclick="closeMod('modelm')" type="button" style="margin-top:6px">Cancel</button>
@@ -2311,15 +2323,17 @@ function loadByok(){
   const lbl=document.getElementById('byok-lbl');if(lbl)lbl.textContent=t.lbl;
   const h=document.getElementById('byok-hint');if(h)h.textContent=t.hint;
 }
-/* Chat model picker — 3 tiers (Haiku/Sonnet/Opus) gated per subscription.
+/* Chat model picker — compact Claude choices gated per subscription.
    Server re-validates so a cheating client cannot bypass tier limits. */
-function modelAllowedForTier(m){
-  // Free has no tier (handled by isPremium=false → strip hidden anyway)
+function modelChoicesForTier(){
   const tier=(premiumTier||'').toLowerCase();
-  if(m==='haiku')return ['basic','pro','ultimate'].includes(tier);
-  if(m==='sonnet')return ['basic','pro','ultimate'].includes(tier);
-  if(m==='opus')return tier==='ultimate';
-  return false;
+  if(tier==='ultimate')return ['haiku','sonnet4','sonnet','opus41','opus'];
+  if(tier==='pro')return ['haiku','sonnet4','sonnet'];
+  if(tier==='basic')return ['haiku','sonnet4'];
+  return [];
+}
+function modelAllowedForTier(m){
+  return modelChoicesForTier().includes(m);
 }
 function getChosenModel(){
   if(!isPremium)return 'auto';
@@ -2330,11 +2344,11 @@ function getChosenModel(){
 function pickModel(m){
   if(!isPremium){openPremium();return;}
   if(!modelAllowedForTier(m)){openPremium();return;}
-  if(!['haiku','sonnet','opus'].includes(m))return;
+  if(!['haiku','sonnet4','sonnet','opus41','opus'].includes(m))return;
   LS.set('app_model_choice',m);
   try{sfx.tap();}catch(e){}haptic('light');
   updateChatModelStrip();
-  const names={haiku:'Haiku',sonnet:'Sonnet',opus:'Opus'};
+  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7'};
   toast((lang==='ru'?'Модель: ':'Model: ')+names[m],'⚙️');
 }
 function selectModel(m){
@@ -2350,27 +2364,28 @@ function updateModelOptions(){
   const cur=getChosenModel();
   // localized table headers + cells
   const T={
-    ru:{title:'Выбери модель',cost:'Points',perf:'Качество',speed:'Скорость',
-        fast:'быстро',smart:'умно',deep:'глубоко',
-        haiku:'Быстро и экономно',sonnet:'Разборы и исправления',opus:'Сложные задачи',sonnetName:'Sonnet 4',sonnetPlus:'Sonnet 4.6'},
-    en:{title:'Choose model',cost:'Points',perf:'Quality',speed:'Speed',
-        fast:'fast',smart:'smart',deep:'deep',
-        haiku:'Fast and efficient',sonnet:'Corrections and reasoning',opus:'Hard tasks',sonnetName:'Sonnet 4',sonnetPlus:'Sonnet 4.6'},
-    es:{title:'Elige modelo',cost:'Puntos',perf:'Calidad',speed:'Vel.',
-        fast:'rápido',smart:'listo',deep:'profundo',
-        haiku:'Rápido y eficiente',sonnet:'Correcciones y razonamiento',opus:'Tareas difíciles',sonnetName:'Sonnet 4',sonnetPlus:'Sonnet 4.6'},
-    pt:{title:'Escolher modelo',cost:'Pontos',perf:'Qualidade',speed:'Velocidade',
-        fast:'rápido',smart:'inteligente',deep:'profundo',
-        haiku:'Rápido e eficiente',sonnet:'Correções e raciocínio',opus:'Tarefas difíceis',sonnetName:'Sonnet 4',sonnetPlus:'Sonnet 4.6'},
+    ru:{title:'Выбери модель',
+        fast:'быстро',classic:'стабильно',smart:'умно',deep:'глубоко',max:'макс',
+        haiku:'Быстро и экономно',sonnet4:'Старая рабочая версия',sonnet:'Разборы и исправления',opus41:'Глубокие задачи',opus:'Максимум качества'},
+    en:{title:'Choose model',
+        fast:'fast',classic:'classic',smart:'smart',deep:'deep',max:'max',
+        haiku:'Fast and efficient',sonnet4:'Older stable version',sonnet:'Corrections and reasoning',opus41:'Deep tasks',opus:'Maximum quality'},
+    es:{title:'Elige modelo',
+        fast:'rápido',classic:'clásico',smart:'listo',deep:'profundo',max:'máx.',
+        haiku:'Rápido y eficiente',sonnet4:'Versión estable anterior',sonnet:'Correcciones y razonamiento',opus41:'Tareas profundas',opus:'Máxima calidad'},
+    pt:{title:'Escolher modelo',
+        fast:'rápido',classic:'clássico',smart:'inteligente',deep:'profundo',max:'máx.',
+        haiku:'Rápido e eficiente',sonnet4:'Versão estável anterior',sonnet:'Correções e raciocínio',opus41:'Tarefas profundas',opus:'Qualidade máxima'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setT('model-mtit',t.title);
-  const tier=(premiumTier||'').toLowerCase();
   const data={
-    haiku:{name:'Haiku',tag:t.fast,sub:t.haiku,pts:'1'},
-    sonnet:{name:(tier==='pro'||tier==='ultimate')?t.sonnetPlus:t.sonnetName,tag:t.smart,sub:t.sonnet,pts:'5'},
-    opus:{name:'Opus',tag:t.deep,sub:t.opus,pts:'12'}
+    haiku:{name:'Haiku 4.5',tag:t.fast,sub:t.haiku,pts:'1'},
+    sonnet4:{name:'Sonnet 4',tag:t.classic,sub:t.sonnet4,pts:'4'},
+    sonnet:{name:'Sonnet 4.6',tag:t.smart,sub:t.sonnet,pts:'5'},
+    opus41:{name:'Opus 4.1',tag:t.deep,sub:t.opus41,pts:'12'},
+    opus:{name:'Opus 4.7',tag:t.max,sub:t.opus,pts:'14'}
   };
   document.querySelectorAll('#modelm .mopt').forEach(row=>{
     const m=row.dataset.m,ok=modelAllowedForTier(m),meta=data[m]||data.haiku;
@@ -2389,7 +2404,7 @@ function updateChatModelStrip(){
   bar.style.display=isPremium?'flex':'none';
   if(!isPremium)return;
   const cur=getChosenModel();
-  const names={haiku:'Haiku',sonnet:'Sonnet',opus:'Opus'};
+  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7'};
   const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
 }
 
@@ -4486,13 +4501,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku = 1, Sonnet 4 = 5<br>Голосовые ответы<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/день<br>Haiku = 1, Sonnet 4.6 = 5<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Haiku = 1, Sonnet 4.6 = 5, Opus = 12<br>TOEFL + персональный план';
+    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku 4.5 = 1, Sonnet 4 = 4<br>Голосовые ответы<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6 = 4-5 points<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7 = 12-14 points<br>TOEFL + персональный план';
   } else {
-    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku = 1, Sonnet 4 = 5<br>Voice replies<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/day<br>Haiku = 1, Sonnet 4.6 = 5<br>All scenarios + error analysis<br>Detailed replies';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Haiku = 1, Sonnet 4.6 = 5, Opus = 12<br>TOEFL + personal plan';
+    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku 4.5 = 1, Sonnet 4 = 4<br>Voice replies<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6 = 4-5 points<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7 = 12-14 points<br>TOEFL + personal plan';
   }
 
   // Hide plans that are lower or equal to current tier

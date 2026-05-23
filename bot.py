@@ -76,7 +76,7 @@ PREMIUM_PLANS = {
         "stars": 650, "months": 1, "price_usd": 899,  # cents for card payments
         "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
         "tier": "basic",
-        "model": "sonnet", "msg_limit": 45, "history": 35, "max_tokens": 700,
+        "model": "sonnet4", "msg_limit": 45, "history": 35, "max_tokens": 700,
     },
     "pro": {
         "stars": 1600, "months": 1, "price_usd": 1999,
@@ -1562,12 +1562,12 @@ async def cmd_premium(msg: Message):
             "<b>Ultimate активирован</b>\n\n"
             "Ты в VIP-списке — доступ бесплатный навсегда.\n\n"
             "Голосовые ответы · все сценки · анализ ошибок\n"
-            "Модели: Haiku, Sonnet, Opus · TOEFL prep"
+            "Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7 · TOEFL prep"
         ) if ru else (
             "<b>Ultimate activated</b>\n\n"
             "You're on the VIP list — access is free forever.\n\n"
             "Voice replies · all scenarios · error analysis\n"
-            "Models: Haiku, Sonnet, Opus · TOEFL prep"
+            "Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7 · TOEFL prep"
         )
         await msg.answer(text, parse_mode="HTML")
         return
@@ -1626,20 +1626,20 @@ async def cmd_premium(msg: Message):
         "━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Basic</b> — {b_stars} ⭐/мес\n"
         "├ 45 quota points/день\n"
-        "├ Выбор модели: Haiku или Sonnet 4\n"
-        "├ Haiku = 1 point, Sonnet = 5 points\n"
+        "├ Модели: Haiku 4.5 или Sonnet 4\n"
+        "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Голосовые ответы ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/мес\n"
         "├ 110 quota points/день\n"
-        "├ Выбор модели: Haiku или Sonnet 4.6\n"
-        "├ Haiku = 1 point, Sonnet = 5 points\n"
+        "├ Модели: Haiku 4.5, Sonnet 4 или Sonnet 4.6\n"
+        "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
         "├ Все сценки + анализ ошибок\n"
         "└ Развёрнутые ответы\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
         "├ 260 quota points/день\n"
-        "├ Выбор модели: Haiku, Sonnet 4.6 или Opus\n"
-        "├ Haiku = 1, Sonnet = 5, Opus = 12 points\n"
+        "├ Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
+        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + персональный план\n"
         "└ Длинная история диалога\n\n"
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
@@ -1651,20 +1651,20 @@ async def cmd_premium(msg: Message):
         "━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Basic</b> — {b_stars} ⭐/mo\n"
         "├ 45 quota points/day\n"
-        "├ Model choice: Haiku or Sonnet 4\n"
-        "├ Haiku = 1 point, Sonnet = 5 points\n"
+        "├ Models: Haiku 4.5 or Sonnet 4\n"
+        "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Voice replies from ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/mo\n"
         "├ 110 quota points/day\n"
-        "├ Model choice: Haiku or Sonnet 4.6\n"
-        "├ Haiku = 1 point, Sonnet = 5 points\n"
+        "├ Models: Haiku 4.5, Sonnet 4 or Sonnet 4.6\n"
+        "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
         "├ All scenarios + error analysis\n"
         "└ Detailed answers\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
         "├ 260 quota points/day\n"
-        "├ Model choice: Haiku, Sonnet 4.6 or Opus\n"
-        "├ Haiku = 1, Sonnet = 5, Opus = 12 points\n"
+        "├ Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
+        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + personal study plan\n"
         "└ Long chat history\n\n"
         "<i>Quota points keep premium limits fair and sustainable.</i>"

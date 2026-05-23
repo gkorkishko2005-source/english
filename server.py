@@ -18,6 +18,7 @@ MODEL       = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 SONNET_MODEL = os.getenv("CLAUDE_BASIC_SONNET_MODEL", "claude-sonnet-4-20250514")
 SONNET_PLUS_MODEL = os.getenv("CLAUDE_PRO_SONNET_MODEL", "claude-sonnet-4-6")
 OPUS_MODEL   = os.getenv("CLAUDE_OPUS_MODEL", "claude-opus-4-1-20250805")
+OPUS_PLUS_MODEL = os.getenv("CLAUDE_OPUS_PLUS_MODEL", "claude-opus-4-7")
 
 MODEL_ECONOMY = {
     "haiku": {
@@ -29,16 +30,29 @@ MODEL_ECONOMY = {
         "output_per_m": 4.00,
     },
     "sonnet": {
-        "model": SONNET_MODEL,
-        "model_by_tier": {"pro": SONNET_PLUS_MODEL, "ultimate": SONNET_PLUS_MODEL},
+        "model": SONNET_PLUS_MODEL,
         "weight": 5,
-        "max_tokens": {"basic": 700, "pro": 1050, "ultimate": 1300},
+        "max_tokens": {"pro": 1050, "ultimate": 1300},
         "input_per_m": 3.00,
         "output_per_m": 15.00,
     },
-    "opus": {
+    "sonnet4": {
+        "model": SONNET_MODEL,
+        "weight": 4,
+        "max_tokens": {"basic": 700, "pro": 900, "ultimate": 1100},
+        "input_per_m": 3.00,
+        "output_per_m": 15.00,
+    },
+    "opus41": {
         "model": OPUS_MODEL,
         "weight": 12,
+        "max_tokens": {"ultimate": 1100},
+        "input_per_m": 15.00,
+        "output_per_m": 75.00,
+    },
+    "opus": {
+        "model": OPUS_PLUS_MODEL,
+        "weight": 14,
         "max_tokens": {"ultimate": 1100},
         "input_per_m": 15.00,
         "output_per_m": 75.00,
@@ -46,10 +60,10 @@ MODEL_ECONOMY = {
 }
 
 TIER_ECONOMY = {
-    "free":     {"quota": 5,   "models": ("haiku",),                  "daily_budget": 0.025, "history": 18, "burst_gap": 5.0},
-    "basic":    {"quota": 45,  "models": ("haiku", "sonnet"),         "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
-    "pro":      {"quota": 110, "models": ("haiku", "sonnet"),         "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
-    "ultimate": {"quota": 260, "models": ("haiku", "sonnet", "opus"), "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
+    "free":     {"quota": 5,   "models": ("haiku",),                                      "daily_budget": 0.025, "history": 18, "burst_gap": 5.0},
+    "basic":    {"quota": 45,  "models": ("haiku", "sonnet4"),                            "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
+    "pro":      {"quota": 110, "models": ("haiku", "sonnet4", "sonnet"),                  "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
+    "ultimate": {"quota": 260, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus"), "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
 }
 
 # ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
@@ -369,7 +383,7 @@ async def handle_chat(request):
     tier_key = user_tier if user_tier in TIER_ECONOMY else "free"
     tier_cfg = TIER_ECONOMY[tier_key]
     chosen = str(body.get("chosen_model", "haiku")).lower()
-    if chosen not in ("haiku", "sonnet", "opus", "auto"):
+    if chosen not in {*MODEL_ECONOMY.keys(), "auto"}:
         chosen = "haiku"
 
     is_complex = any(kw in message.lower() for kw in [
@@ -378,11 +392,21 @@ async def handle_chat(request):
         "почему", "правило", "эссе", "тест",
     ])
     if chosen == "auto":
-        model_key = "sonnet" if tier_key in ("basic", "pro", "ultimate") and is_complex else "haiku"
+        if tier_key == "basic" and is_complex:
+            model_key = "sonnet4"
+        elif tier_key in ("pro", "ultimate") and is_complex:
+            model_key = "sonnet"
+        else:
+            model_key = "haiku"
     else:
         model_key = chosen
     if model_key not in tier_cfg["models"]:
-        model_key = "sonnet" if "sonnet" in tier_cfg["models"] and chosen == "opus" else "haiku"
+        if chosen.startswith("opus") and "sonnet" in tier_cfg["models"]:
+            model_key = "sonnet"
+        elif chosen in {"sonnet", "sonnet4"} and "sonnet4" in tier_cfg["models"]:
+            model_key = "sonnet4"
+        else:
+            model_key = "haiku" if "haiku" in tier_cfg["models"] else tier_cfg["models"][0]
 
     model_cfg = MODEL_ECONOMY[model_key]
     chat_model = model_cfg.get("model_by_tier", {}).get(tier_key, model_cfg["model"])
