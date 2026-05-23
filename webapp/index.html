@@ -2356,13 +2356,13 @@ function updateModelOptions(){
   // localized table headers + cells
   const T={
     ru:{title:'Выбери модель',cost:'Points',perf:'Качество',speed:'Скорость',
-        p1:'1',p3:'4',p10:'12',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',med:'Сред.',slow:'Медл.'},
+        p1:'1',p3:'5',p10:'12',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',med:'Сред.',slow:'Медл.'},
     en:{title:'Choose model',cost:'Points',perf:'Quality',speed:'Speed',
-        p1:'1',p3:'4',p10:'12',basic:'Basic',good:'Good',best:'Best',fast:'Fast',med:'Med',slow:'Slow'},
+        p1:'1',p3:'5',p10:'12',basic:'Basic',good:'Good',best:'Best',fast:'Fast',med:'Med',slow:'Slow'},
     es:{title:'Elige modelo',cost:'Puntos',perf:'Calidad',speed:'Vel.',
-        p1:'1',p3:'4',p10:'12',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',med:'Media',slow:'Lento'},
+        p1:'1',p3:'5',p10:'12',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',med:'Media',slow:'Lento'},
     pt:{title:'Escolher modelo',cost:'Pontos',perf:'Qualidade',speed:'Velocidade',
-        p1:'1',p3:'4',p10:'12',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',med:'Média',slow:'Lento'},
+        p1:'1',p3:'5',p10:'12',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',med:'Média',slow:'Lento'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
@@ -3071,8 +3071,9 @@ async function doChat(text){
   const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.',ja:'Respond in Japanese.',ko:'Respond in Korean.'}[botLang]||'Respond in Russian.';
   try{
     const r=await fetch(`${API}/api/chat`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel()}),
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel(),init_data:tg?.initData||''}),
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
@@ -4483,13 +4484,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku = 1, Sonnet = 4<br>Голосовые ответы<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/день<br>Haiku = 1, Sonnet = 4<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Haiku = 1, Sonnet = 4, Opus = 12<br>TOEFL + персональный план<br>Длинная история диалога';
+    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku = 1, Sonnet 4 = 5<br>Голосовые ответы<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/день<br>Haiku = 1, Sonnet 4.6 = 5<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Haiku = 1, Sonnet 4.6 = 5, Opus = 12<br>TOEFL + персональный план';
   } else {
-    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku = 1, Sonnet = 4<br>Voice replies<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/day<br>Haiku = 1, Sonnet = 4<br>All scenarios + error analysis<br>Detailed replies';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Haiku = 1, Sonnet = 4, Opus = 12<br>TOEFL + personal plan<br>Long chat history';
+    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku = 1, Sonnet 4 = 5<br>Voice replies<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/day<br>Haiku = 1, Sonnet 4.6 = 5<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Haiku = 1, Sonnet 4.6 = 5, Opus = 12<br>TOEFL + personal plan';
   }
 
   // Hide plans that are lower or equal to current tier

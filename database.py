@@ -184,6 +184,15 @@ CREATE TABLE IF NOT EXISTS tone_history (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS quota_usage (
+    uid        BIGINT,
+    day        DATE,
+    quota_used INTEGER DEFAULT 0,
+    ai_cost    DOUBLE PRECISION DEFAULT 0,
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (uid, day)
+);
+
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
 CREATE INDEX IF NOT EXISTS idx_sessions_uid ON sessions(uid);
 CREATE INDEX IF NOT EXISTS idx_mistakes_uid ON mistakes(uid);
@@ -238,6 +247,14 @@ CREATE TABLE IF NOT EXISTS idioms (
 CREATE TABLE IF NOT EXISTS tone_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, original TEXT,
     analysis TEXT, date TEXT, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS quota_usage (
+    uid INTEGER,
+    day TEXT,
+    quota_used INTEGER DEFAULT 0,
+    ai_cost REAL DEFAULT 0,
+    updated_at TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (uid, day)
 );
 """
 
@@ -333,6 +350,36 @@ async def get_referral_count(uid: int) -> int:
     if not user:
         return 0
     return int(user.get("referrals") or 0)
+
+async def get_quota_usage(uid: int) -> dict:
+    row = await db(
+        "SELECT quota_used, ai_cost FROM quota_usage WHERE uid=? AND day=?",
+        uid, _today(), fetch="one"
+    )
+    if not row:
+        return {"quota_used": 0, "ai_cost": 0.0}
+    return {
+        "quota_used": int(row.get("quota_used") or 0),
+        "ai_cost": float(row.get("ai_cost") or 0.0),
+    }
+
+async def add_quota_usage(uid: int, points: int = 0, ai_cost: float = 0.0):
+    if USE_POSTGRES:
+        await db(
+            "INSERT INTO quota_usage (uid, day, quota_used, ai_cost, updated_at) VALUES (?, ?, ?, ?, NOW()) "
+            "ON CONFLICT (uid, day) DO UPDATE SET "
+            "quota_used=quota_usage.quota_used+EXCLUDED.quota_used, "
+            "ai_cost=quota_usage.ai_cost+EXCLUDED.ai_cost, updated_at=NOW()",
+            uid, _today(), int(points or 0), float(ai_cost or 0.0)
+        )
+    else:
+        await db(
+            "INSERT INTO quota_usage (uid, day, quota_used, ai_cost, updated_at) VALUES (?, ?, ?, ?, datetime('now')) "
+            "ON CONFLICT(uid, day) DO UPDATE SET "
+            "quota_used=quota_used+excluded.quota_used, "
+            "ai_cost=ai_cost+excluded.ai_cost, updated_at=datetime('now')",
+            uid, _today(), int(points or 0), float(ai_cost or 0.0)
+        )
 
 async def set_profession(uid: int, profession: str):
     """Save user's profession to DB (syncs across devices)."""

@@ -1,8 +1,9 @@
 """
 LinguaMax - API server v3
 """
-import os, json, logging
+import os, json, logging, hmac, hashlib, time
 from pathlib import Path
+from urllib.parse import parse_qsl
 from aiohttp import web
 import httpx
 
@@ -11,9 +12,12 @@ WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL       = "claude-haiku-4-5"            # current Haiku alias — always live
-SONNET_MODEL = "claude-sonnet-4-5"
-OPUS_MODEL   = "claude-opus-4-1-20250805"
+BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
+REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
+MODEL       = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
+SONNET_MODEL = os.getenv("CLAUDE_BASIC_SONNET_MODEL", "claude-sonnet-4-20250514")
+SONNET_PLUS_MODEL = os.getenv("CLAUDE_PRO_SONNET_MODEL", "claude-sonnet-4-6")
+OPUS_MODEL   = os.getenv("CLAUDE_OPUS_MODEL", "claude-opus-4-1-20250805")
 
 MODEL_ECONOMY = {
     "haiku": {
@@ -26,7 +30,8 @@ MODEL_ECONOMY = {
     },
     "sonnet": {
         "model": SONNET_MODEL,
-        "weight": 4,
+        "model_by_tier": {"pro": SONNET_PLUS_MODEL, "ultimate": SONNET_PLUS_MODEL},
+        "weight": 5,
         "max_tokens": {"basic": 700, "pro": 1050, "ultimate": 1300},
         "input_per_m": 3.00,
         "output_per_m": 15.00,
@@ -71,6 +76,39 @@ _histories: dict = {}
 _msg_counts: dict = {}  # daily quota points per user
 _daily_ai_costs: dict = {}  # estimated daily Anthropic cost per user
 _last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
+
+def _is_local_request(request) -> bool:
+    host = (request.host or "").split(":")[0]
+    peer = request.transport.get_extra_info("peername") if request.transport else None
+    ip = peer[0] if peer else ""
+    return host in {"localhost", "127.0.0.1", "::1"} or ip in {"127.0.0.1", "::1"}
+
+def _verify_telegram_init_data(init_data: str, expected_uid: int | None = None, max_age: int = 86400):
+    if not BOT_TOKEN:
+        return False, "bot token missing", None
+    if not init_data:
+        return False, "missing init data", None
+    try:
+        pairs = dict(parse_qsl(init_data, keep_blank_values=True))
+        received_hash = pairs.pop("hash", "")
+        if not received_hash:
+            return False, "missing hash", None
+        data_check = "\n".join(f"{k}={v}" for k, v in sorted(pairs.items()))
+        secret = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+        calc_hash = hmac.new(secret, data_check.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(calc_hash, received_hash):
+            return False, "bad signature", None
+        auth_date = int(pairs.get("auth_date") or 0)
+        if auth_date and time.time() - auth_date > max_age:
+            return False, "expired init data", None
+        user_raw = pairs.get("user") or "{}"
+        tg_user = json.loads(user_raw)
+        signed_uid = int(tg_user.get("id") or 0)
+        if expected_uid and signed_uid != int(expected_uid):
+            return False, "uid mismatch", signed_uid
+        return True, "", signed_uid
+    except Exception as e:
+        return False, str(e), None
 
 def _estimate_ai_cost(model_key: str, usage: dict) -> float:
     cfg = MODEL_ECONOMY.get(model_key, MODEL_ECONOMY["haiku"])
@@ -246,6 +284,17 @@ async def handle_chat(request):
     except Exception as e:
         return web.json_response({"error": str(e)}, status=400, headers={"Access-Control-Allow-Origin":"*"})
 
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    if REQUIRE_TG_INIT_DATA and BOT_TOKEN and not _is_local_request(request):
+        ok, reason, signed_uid = _verify_telegram_init_data(init_data, uid)
+        if not ok:
+            logger.warning("blocked unsigned chat uid=%s signed_uid=%s reason=%s", uid, signed_uid, reason)
+            return web.json_response({
+                "error": "Telegram session check failed. Reopen the bot app and try again."
+            }, status=403, headers={"Access-Control-Allow-Origin":"*"})
+        if signed_uid and not uid:
+            uid = signed_uid
+
     if not ANT_KEY:
         logger.error("ANTHROPIC_API_KEY is not set!")
         return web.json_response({"error": "API key not configured. Add ANTHROPIC_API_KEY to Railway variables."}, status=500, headers={"Access-Control-Allow-Origin":"*"})
@@ -336,7 +385,7 @@ async def handle_chat(request):
         model_key = "sonnet" if "sonnet" in tier_cfg["models"] and chosen == "opus" else "haiku"
 
     model_cfg = MODEL_ECONOMY[model_key]
-    chat_model = model_cfg["model"]
+    chat_model = model_cfg.get("model_by_tier", {}).get(tier_key, model_cfg["model"])
     max_tokens = model_cfg["max_tokens"].get(tier_key, 500)
     weight = int(model_cfg["weight"])
     msg_limit = int(tier_cfg["quota"])
@@ -359,19 +408,33 @@ async def handle_chat(request):
             return web.json_response({"reply": slow_msg},
                                      headers={"Access-Control-Allow-Origin":"*"})
         _last_msg_ts[uid] = now_ts
+        add_quota_usage_fn = None
+        try:
+            from database import get_quota_usage, add_quota_usage
+            quota_usage = await get_quota_usage(uid)
+            add_quota_usage_fn = add_quota_usage
+        except Exception as e:
+            logger.warning("quota DB read failed uid=%s: %s", uid, e)
+            quota_usage = {"quota_used": _msg_counts.get(f"msgs:{uid}:{__import__('datetime').date.today()}", 0), "ai_cost": 0.0}
         today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
-        msg_count = _msg_counts.get(today_key, 0)
-        if msg_count + weight > msg_limit:
-            limit_msg = _limit_message(lang, tier_key, msg_count, msg_limit)
-            return web.json_response({"reply": limit_msg, "limit": True, "limit_tier": tier_key}, headers={"Access-Control-Allow-Origin":"*"})
+        msg_count = int(quota_usage.get("quota_used") or 0)
         cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
-        if _daily_ai_costs.get(cost_key, 0.0) >= float(tier_cfg["daily_budget"]) and model_key != "haiku":
+        used_cost = max(float(quota_usage.get("ai_cost") or 0.0), _daily_ai_costs.get(cost_key, 0.0))
+        if used_cost >= float(tier_cfg["daily_budget"]) and model_key != "haiku":
             model_key = "haiku"
             model_cfg = MODEL_ECONOMY["haiku"]
             chat_model = model_cfg["model"]
             max_tokens = model_cfg["max_tokens"].get(tier_key, 600)
             weight = model_cfg["weight"]
+        if msg_count + weight > msg_limit:
+            limit_msg = _limit_message(lang, tier_key, msg_count, msg_limit)
+            return web.json_response({"reply": limit_msg, "limit": True, "limit_tier": tier_key}, headers={"Access-Control-Allow-Origin":"*"})
         _msg_counts[today_key] = msg_count + weight
+        if add_quota_usage_fn:
+            try:
+                await add_quota_usage_fn(uid, points=weight, ai_cost=0.0)
+            except Exception as e:
+                logger.warning("quota DB reserve failed uid=%s: %s", uid, e)
 
     h = _histories.setdefault(uid, [])
     h.append({"role": "user", "content": message})
@@ -406,10 +469,13 @@ async def handle_chat(request):
             reply = data["content"][0]["text"].strip()
             if uid not in ADMIN_IDS:
                 cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
-                _daily_ai_costs[cost_key] = round(
-                    _daily_ai_costs.get(cost_key, 0.0) + _estimate_ai_cost(model_key, data.get("usage") or {}),
-                    6,
-                )
+                ai_cost = _estimate_ai_cost(model_key, data.get("usage") or {})
+                _daily_ai_costs[cost_key] = round(_daily_ai_costs.get(cost_key, 0.0) + ai_cost, 6)
+                try:
+                    from database import add_quota_usage
+                    await add_quota_usage(uid, points=0, ai_cost=ai_cost)
+                except Exception as e:
+                    logger.warning("quota DB cost update failed uid=%s: %s", uid, e)
     except Exception as e:
         logger.error(f"Chat failed: {e}")
         return web.json_response({"error": str(e)[:150]}, status=500)
