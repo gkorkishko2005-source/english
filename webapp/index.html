@@ -290,7 +290,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ HOME ══ */
 .hero{padding:4px 0 18px;position:relative;overflow:hidden}
 .hbg{position:absolute;right:-12px;top:-8px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.1),transparent 70%);pointer-events:none;animation:float 5s ease-in-out infinite}
-.htm{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px;line-height:1.35;max-width:92%}
 .hnm{font-size:clamp(18px,5vw,26px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word}
 .hsb{font-size:13px;color:var(--t2);margin-top:4px}
 
@@ -1204,7 +1204,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rm-lesson.active-lesson{border-color:rgba(var(--ar),.45);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.035))}
 .rm-lesson.locked{opacity:.48;cursor:default}
 .rm-lesson.locked:hover{transform:none;box-shadow:none;border-color:var(--b1)}
-.rm-lesson-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm-lesson-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff}
 .rm-lesson-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .rm-info{flex:1;min-width:0}
 .rm-title{font-size:13px;font-weight:750;margin-bottom:2px;color:var(--t1)}
@@ -2428,15 +2428,47 @@ function maybeOnboardChat(){
 }
 
 /* ══ REFRESH SUB (greeting / streak) ══ */
-function refreshSub(){
+function cleanDisplayName(v){
+  v=String(v||'').trim();
+  if(!v||/^student$/i.test(v)||/^undefined$/i.test(v)||/^null$/i.test(v))return '';
+  return v;
+}
+function telegramDisplayName(){
+  const u=tg?.initDataUnsafe?.user||{};
+  if(u.username)return '@'+u.username;
+  return cleanDisplayName([u.first_name,u.last_name].filter(Boolean).join(' '));
+}
+function displayName(d){
+  return telegramDisplayName()||cleanDisplayName(d?.name)||({ru:'Ученик',en:'Learner',es:'Estudiante',de:'Lernender',fr:'Apprenant',pt:'Aluno',uk:'Учень',tr:'Öğrenci',zh:'学习者',ar:'متعلم'}[lang]||'Learner');
+}
+const HERO_MOTIVATIONS={
+  ru:['один урок сегодня уже победа','маленький шаг сильнее нуля','английский растёт от регулярности','пять минут лучше, чем завтра','сделай одну фразу увереннее','сегодня тренируем живой English','не идеально, а стабильно'],
+  en:['one lesson today is a win','small steps beat zero','consistency builds English','five minutes beats tomorrow','make one sentence clearer','practice real English today','steady beats perfect'],
+  es:['una lección hoy ya cuenta','un paso pequeño supera cero','la constancia crea inglés','cinco minutos mejor que mañana','haz una frase más clara','practica inglés real hoy','constancia antes que perfección'],
+  de:['eine Lektion heute zählt','kleine Schritte schlagen null','Regelmäßigkeit baut Englisch auf','fünf Minuten sind besser als morgen','mach einen Satz klarer','übe heute echtes Englisch','stetig schlägt perfekt'],
+  fr:["une leçon aujourd'hui compte",'un petit pas vaut mieux que rien',"la régularité construit l'anglais",'cinq minutes valent mieux que demain','clarifie une phrase','pratique un anglais réel aujourd’hui','régulier vaut mieux que parfait'],
+  pt:['uma lição hoje já conta','um passo pequeno vence o zero','consistência constrói inglês','cinco minutos é melhor que amanhã','deixe uma frase mais clara','pratique inglês real hoje','constante vence perfeito'],
+  uk:['один урок сьогодні вже перемога','малий крок кращий за нуль','регулярність будує англійську','п’ять хвилин краще, ніж завтра','зроби одну фразу впевненішою','сьогодні тренуємо живу English','стабільно краще за ідеально'],
+  tr:['bugün bir ders kazançtır','küçük adım sıfırdan iyidir','düzen İngilizceyi büyütür','beş dakika yarından iyidir','bir cümleyi daha net yap','bugün gerçek İngilizce çalış','istikrar mükemmelden iyidir'],
+  zh:['今天一课就是进步','小步也比零步强','坚持会长出英语感','五分钟胜过明天再说','把一句话说清楚','今天练真实英语','稳定胜过完美'],
+  ar:['درس واحد اليوم انتصار','خطوة صغيرة أفضل من لا شيء','الاستمرار يبني الإنجليزية','خمس دقائق أفضل من التأجيل','اجعل جملة واحدة أوضح','تدرّب على إنجليزية حقيقية اليوم','الثبات أفضل من الكمال']
+};
+function heroGreeting(){
   const h=new Date().getHours();
-  const el=document.getElementById('greet');if(el)el.textContent=L.greet(h);
+  const base=(L.greet?L.greet(h):'Hello,').replace(/[,،]\s*$/,'');
+  const arr=HERO_MOTIVATIONS[lang]||HERO_MOTIVATIONS.en;
+  const day=Math.floor(Date.now()/86400000);
+  const uid=parseInt(window._uid||0,10)||0;
+  return base+' · '+arr[(day+uid)%arr.length];
+}
+function refreshSub(){
+  const el=document.getElementById('greet');if(el)el.textContent=heroGreeting();
 }
 
 /* ══ RENDER HOME ══ */
 function renderHome(d){
   refreshSub();
-  document.getElementById('hname').textContent=d.name||'Student';
+  document.getElementById('hname').textContent=displayName(d);
   document.getElementById('hsub').textContent=d.streak>1?`${d.streak} ${lang==='ru'?'дней подряд 🔥':'days in a row! 🔥'}`:{ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
   const s=d.streak||0;
   const stkEl=document.getElementById('hstk');if(stkEl)stkEl.textContent=s;
@@ -3670,15 +3702,15 @@ async function fetchData(uid){
 ══════════════════════════════════════════════════ */
 const ROADMAP_DATA=[
   {level:'A1',color:'#2ecc71',lessons:[
-    {id:'a1-1',title:{ru:'Present Simple',en:'Present Simple'},sub:{ru:'Настоящее время',en:'Basic statements'},icon:'M12 20h9M4 6l2 2 4-4'},
-    {id:'a1-2',title:{ru:'Артикли a/an/the',en:'Articles a/an/the'},sub:{ru:'Неопределённый и определённый',en:'Definite & indefinite'},icon:'M4 6h16M4 12h16M4 18h7'},
-    {id:'a1-3',title:{ru:'Местоимения',en:'Pronouns'},sub:{ru:'I, you, he, she...',en:'I, you, he, she...'},icon:'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2'},
+    {id:'a1-1',title:{ru:'Present Simple',en:'Present Simple'},sub:{ru:'Настоящее время',en:'Basic statements'},icon:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16M8 14h5M8 17h8"/>'},
+    {id:'a1-2',title:{ru:'Артикли a/an/the',en:'Articles a/an/the'},sub:{ru:'Неопределённый и определённый',en:'Definite & indefinite'},icon:'<path d="M5 5.5A2.5 2.5 0 017.5 3H20v16H7.5A2.5 2.5 0 015 16.5z"/><path d="M5 16.5A2.5 2.5 0 017.5 14H20"/><path d="M9 8h6M9 11h4"/>'},
+    {id:'a1-3',title:{ru:'Местоимения',en:'Pronouns'},sub:{ru:'I, you, he, she...',en:'I, you, he, she...'},icon:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.2"/><path d="M3.8 20a5.2 5.2 0 0110.4 0M14.2 18.5a4 4 0 016.8 1.5"/>'},
     {id:'a1-4',title:{ru:'Числа и время',en:'Numbers & Time'},sub:{ru:'Считаем и говорим о времени',en:'Count and tell time'},icon:'M12 2a10 10 0 100 20A10 10 0 0012 2zM12 6v6l4 2'},
   ]},
   {level:'A2',color:'#3498db',lessons:[
-    {id:'a2-1',title:{ru:'Past Simple',en:'Past Simple'},sub:{ru:'Прошедшее время',en:'Regular & irregular verbs'},icon:'M3 3h18v4H3zM3 11h18M3 19h18'},
+    {id:'a2-1',title:{ru:'Past Simple',en:'Past Simple'},sub:{ru:'Прошедшее время',en:'Regular & irregular verbs'},icon:'<path d="M4 6h16M8 3v6M16 3v6"/><rect x="4" y="6" width="16" height="14" rx="3"/><path d="M11 15H7m0 0l3-3m-3 3l3 3"/>'},
     {id:'a2-2',title:{ru:'Future: will / going to',en:'Future: will / going to'},sub:{ru:'Планы и предсказания',en:'Plans & predictions'},icon:'M5 12h14M12 5l7 7-7 7'},
-    {id:'a2-3',title:{ru:'Сравнительные',en:'Comparatives'},sub:{ru:'bigger, better, faster',en:'bigger, better, faster'},icon:'M18 15l-6-6-6 6'},
+    {id:'a2-3',title:{ru:'Сравнительные',en:'Comparatives'},sub:{ru:'bigger, better, faster',en:'bigger, better, faster'},icon:'<path d="M5 19V9M12 19V5M19 19v-7"/><path d="M4 19h16M14 7l-2-2-2 2"/>'},
     {id:'a2-4',title:{ru:'Предлоги',en:'Prepositions'},sub:{ru:'in, on, at, by...',en:'in, on, at, by...'},icon:'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z'},
   ]},
   {level:'B1',color:'#9b59b6',lessons:[
@@ -3697,12 +3729,12 @@ const ROADMAP_DATA=[
     {id:'c1-1',title:{ru:'Инверсия',en:'Inversion'},sub:{ru:'Not only did he...',en:'Not only did he...'},icon:'M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4'},
     {id:'c1-2',title:{ru:'Subjunctive Mood',en:'Subjunctive Mood'},sub:{ru:'I wish I were...',en:'I wish I were...'},icon:'M12 2a10 10 0 100 20 10 10 0 000-20zM8 14s1.5 2 4 2 4-2 4-2'},
     {id:'c1-3',title:{ru:'Cleft Sentences',en:'Cleft Sentences'},sub:{ru:'It was John who...',en:'It was John who...'},icon:'M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5z'},
-    {id:'c1-4',title:{ru:'Discourse Markers',en:'Discourse Markers'},sub:{ru:'Nevertheless, Furthermore...',en:'Nevertheless, Furthermore...'},icon:'M4 6h16M4 12h8M4 18h16'},
+    {id:'c1-4',title:{ru:'Discourse Markers',en:'Discourse Markers'},sub:{ru:'Nevertheless, Furthermore...',en:'Nevertheless, Furthermore...'},icon:'<path d="M5 6h14M5 12h10M5 18h14"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>'},
     {id:'c1-5',title:{ru:'Nominalisation',en:'Nominalisation'},sub:{ru:'decide → decision',en:'decide → decision'},icon:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18 2l4 4-10 10H8v-4L18 2z'},
   ]},
   {level:'C2',color:'#f1c40f',lessons:[
     {id:'c2-1',title:{ru:'Стилистика',en:'Stylistics'},sub:{ru:'Метафоры, ирония',en:'Metaphors, irony'},icon:'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'},
-    {id:'c2-2',title:{ru:'Ellipsis & Substitution',en:'Ellipsis & Substitution'},sub:{ru:'Omission for elegance',en:'Omission for elegance'},icon:'M5 12h14'},
+    {id:'c2-2',title:{ru:'Ellipsis & Substitution',en:'Ellipsis & Substitution'},sub:{ru:'Omission for elegance',en:'Omission for elegance'},icon:'<circle cx="7" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="17" cy="12" r="1.6" fill="currentColor" stroke="none"/>'},
     {id:'c2-3',title:{ru:'Hedging Language',en:'Hedging Language'},sub:{ru:'It seems, apparently...',en:'It seems, apparently...'},icon:'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 8v4M12 16h.01'},
     {id:'c2-4',title:{ru:'Academic Writing',en:'Academic Writing'},sub:{ru:'Эссе, аргументация',en:'Essays, argumentation'},icon:'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8M16 17H8M10 9H8'},
     {id:'c2-5',title:{ru:'Native Idioms & Slang',en:'Native Idioms & Slang'},sub:{ru:'Звучи как носитель',en:'Sound like a native'},icon:'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'},
@@ -3882,6 +3914,11 @@ function rmStatusIcon(type){
   if(type==='locked')return '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>';
   return '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>';
 }
+function rmLessonSvg(icon){
+  const body=String(icon||'M4 6h16M4 12h16M4 18h7').trim();
+  const inner=body.charAt(0)==='<'?body:'<path d="'+body+'"/>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
+}
 function rmGetPath(){
   const pid=getActivePath();
   return LEARNING_PATHS.find(p=>p.id===pid)||null;
@@ -3998,7 +4035,7 @@ function renderRoadmap(){
       const icoColor=done?'#2ecc71':isActive?'var(--a)':lvlData.color;
       const status=locked?'locked':done?'done':isActive?'active':'idle';
       card.innerHTML=`
-        <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="${ls.icon||'M4 6h16M4 12h16M4 18h7'}"/></svg></div>
+        <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}">${rmLessonSvg(ls.icon)}</div>
         <div class="rm-info">
           <div class="rm-title">${ls.title[lang]||ls.title.en}</div>
           <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'уроков':'lessons'}</div>
@@ -5513,7 +5550,7 @@ function safeHTML(v){
 let lastExportReport='';
 function shareProgress(){
   var d=window._d||{};var stats=LS.getJ('local_stats')||{};
-  var name=d.name||tg?.initDataUnsafe?.user?.first_name||'Student';
+  var name=displayName(d);
   var level=LS.get('ob_level')||d.level||'A1';
   var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
   var rank=rankOf(xp);
@@ -5527,7 +5564,7 @@ function doShareTg(){
   var d=window._d||{};var xp=d.xp||0;var streak=d.streak||0;var level=LS.get('ob_level')||'A1';
   var botName=window.BOT_NAME||'PolyGlotty_bot';
   var link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
-  var text=(d.name||'Student')+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @'+botName;
+  var text=displayName(d)+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @'+botName;
   if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));}
   else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
   else{try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Скопировано!':'Copied!','✅');}catch(e){}}
@@ -5535,7 +5572,7 @@ function doShareTg(){
 
 /* ══ CERTIFICATE ══ */
 function generateCertificate(){
-  var d=window._d||{};var name=d.name||tg?.initDataUnsafe?.user?.first_name||'Student';
+  var d=window._d||{};var name=displayName(d);
   var level=LS.get('ob_level')||'A1';var uid=window._uid||0;
   var date=new Date().toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{year:'numeric',month:'long',day:'numeric'});
   var certId='PG-'+level+'-'+uid+'-'+Date.now().toString(36).toUpperCase();
@@ -5581,7 +5618,7 @@ function openGiftSub(){
 /* ══ EXPORT PROGRESS ══ */
 function exportProgress(){
   var d=window._d||{};var stats=LS.getJ('local_stats')||{};
-  var name=d.name||'Student';var level=LS.get('ob_level')||'A1';
+  var name=displayName(d);var level=LS.get('ob_level')||'A1';
   var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
   var sessions=Math.max(d.sessions||0,stats.sessions||0);var tests=Math.max(d.tests||0,stats.tests||0);
   var text='=== PolyGlotty Progress ===\n\nName: '+name+'\nLevel: '+level+'\nXP: '+xp+'\nStreak: '+streak+' days\nSessions: '+sessions+'\nWords: '+words+'\nTests: '+tests+'\n\n'+new Date().toLocaleString()+'\n@PolyGlotty_bot';
@@ -5748,7 +5785,7 @@ async function init(){
 
     const user=tg?.initDataUnsafe?.user;
     const uid=user?.id; window._uid=uid;
-    const fallback=user?.username?('@'+user.username):(user?.first_name||'Student');
+    const fallback=user?.username?('@'+user.username):([user?.first_name,user?.last_name].filter(Boolean).join(' ')||'Learner');
 
     // Show UI immediately with local data
     const localXP=loadXP();
@@ -5794,7 +5831,7 @@ async function init(){
     if(uid&&API){
       fetchData(uid).then(srv=>{
         if(!srv)return;
-        const merged={...d,...srv,name:srv.name||d.name,xp:Math.max(srv.xp||0,localXP)};
+        const merged={...d,...srv,name:telegramDisplayName()||cleanDisplayName(srv.name)||cleanDisplayName(d.name),xp:Math.max(srv.xp||0,localXP)};
         window._d=merged;
         // Apply server premium status
         if(srv.is_premium)setPremium(true,'server');

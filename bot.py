@@ -677,6 +677,12 @@ async def handle_inline(query: InlineQuery):
 #  КОМАНДЫ
 # ══════════════════════════════════════════════════════════════════
 
+def user_display_name(user) -> str:
+    if getattr(user, "username", None):
+        return f"@{user.username}"
+    full = " ".join(p for p in [getattr(user, "first_name", ""), getattr(user, "last_name", "")] if p)
+    return full or "Learner"
+
 async def setup_bot_profile():
     """Apply BotFather growth basics from prompt.rtf: searchable name, about text, commands, WebApp menu."""
     commands = [
@@ -709,7 +715,7 @@ async def setup_bot_profile():
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     uid  = message.from_user.id
-    name = message.from_user.first_name or "Student"
+    name = user_display_name(message.from_user)
 
     try:
         await upsert_user(uid, name)
@@ -817,7 +823,7 @@ async def cmd_share(message: Message):
     ru = lang == "ru"
     ref_count = 0
     try:
-        await upsert_user(uid, message.from_user.first_name or "Student")
+        await upsert_user(uid, user_display_name(message.from_user))
         ref_count = await get_referral_count(uid)
     except Exception as e:
         logger.warning(f"share stats failed uid={uid}: {e}")
@@ -1092,7 +1098,7 @@ async def cb_lang(cb: CallbackQuery):
     await update_user(uid, lang=lang)
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer("✅")
-    name = cb.from_user.first_name or "Student"
+    name = user_display_name(cb.from_user)
     await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b> 👋\n\nALEX. 🎯", reply_markup=main_kb(lang))
     await cb.message.answer("🎯 <b>Level:</b>", reply_markup=level_kb())
 
