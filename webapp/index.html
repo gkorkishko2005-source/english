@@ -477,6 +477,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .share-card-footer{font-size:10px;color:rgba(255,255,255,.4)}
 .share-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;background:var(--a);color:#fff;border-radius:var(--r2);font-size:13px;font-weight:700;cursor:pointer;border:none;width:100%;margin-top:8px;font-family:var(--f)}
 .share-btn:active{transform:scale(.97)}
+.share-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tool-result{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:12px;margin:4px 0}
+.tool-result-title{font-size:13px;font-weight:800;color:var(--t1);margin-bottom:7px}
+.tool-pre{font-size:11px;white-space:pre-wrap;background:var(--e2);border:1px solid var(--b1);padding:12px;border-radius:8px;color:var(--t1);overflow:auto;max-height:240px}
 /* ══ CERTIFICATE ══ */
 .cert-wrap{background:linear-gradient(135deg,#faf3e0,#f5e6c8);border:3px solid #d4a843;border-radius:16px;padding:28px 20px;text-align:center;color:#2c1810;margin:8px 0}
 .cert-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8b6914;margin-bottom:8px}
@@ -484,7 +488,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .cert-level{font-size:32px;font-weight:900;color:#d4a843;margin:12px 0}
 .cert-desc{font-size:12px;color:#5a4020;line-height:1.5;margin-bottom:12px}
 .cert-date{font-size:10px;color:#8b7040}
-.cert-seal{font-size:36px;margin:8px 0}
+.cert-seal{width:58px;height:58px;border-radius:50%;margin:10px auto 12px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(212,168,67,.18)}
+.cert-seal svg{width:31px;height:31px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 /* ══ ADMIN PANEL ══ */
 .admin-panel{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:16px;margin-bottom:14px}
 .admin-title{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:8px}
@@ -493,13 +498,31 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .admin-stat-val{font-size:20px;font-weight:800;color:var(--a)}
 .admin-stat-lbl{font-size:10px;color:var(--t3);margin-top:2px}
 .admin-refresh{font-size:11px;color:var(--a);cursor:pointer;margin-left:auto;font-weight:600}
-/* ══ GIFT SUB ══ */
+/* ══ SETTINGS TOOLS ══ */
 .gift-btn{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer;margin-bottom:10px;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);width:100%;transition:transform .15s,border-color .2s}
 .gift-btn:active{transform:scale(.98)}
 .gift-btn .gbi{width:28px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .gift-btn .gbi img{width:100%;height:100%;object-fit:contain}
 .gift-btn .gbi svg{width:24px;height:24px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gift-btn:active{transform:scale(.97)}
+.tools-toggle{display:flex;align-items:center;justify-content:space-between;width:100%;padding:12px 14px;margin-bottom:10px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r);font-family:var(--f);color:var(--t1);cursor:pointer;transition:transform .15s,border-color .2s,background .2s}
+.tools-toggle:active{transform:scale(.98)}
+.tools-toggle-main{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700}
+.tools-toggle-ico{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.1));display:flex;align-items:center;justify-content:center}
+.tools-toggle-ico svg,.tools-arrow{width:16px;height:16px;fill:none;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tools-arrow{transition:transform .25s}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.tool-card{min-height:92px;padding:12px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r);font-family:var(--f);color:var(--t1);cursor:pointer;text-align:left;transition:transform .15s,border-color .2s,background .2s,box-shadow .2s}
+.tool-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.34);background:rgba(var(--ar),.045)}
+.tool-card:active{transform:scale(.97)}
+.tool-ico{width:34px;height:34px;border-radius:11px;background:rgba(var(--ar),.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.tool-ico svg{width:20px;height:20px;fill:none;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tool-title{font-size:12.5px;font-weight:800;color:var(--t1);line-height:1.15}
+.tool-sub{font-size:10.5px;color:var(--t3);line-height:1.3;margin-top:4px}
+.tool-card.export .tool-ico{background:rgba(0,212,170,.12)}.tool-card.export .tool-ico svg{stroke:var(--a2)}
+.tool-card.cert .tool-ico{background:rgba(255,184,48,.13)}.tool-card.cert .tool-ico svg{stroke:var(--gd)}
+.tool-card.gift .tool-ico{background:rgba(167,139,250,.13)}.tool-card.gift .tool-ico svg{stroke:#a78bfa}
+@media(max-width:350px){.tools-grid{grid-template-columns:1fr}.tool-card{min-height:76px;display:flex;align-items:center;gap:11px}.tool-ico{margin-bottom:0;flex:0 0 34px}}
 
 /* ══ IDIOM OF THE DAY ══ */
 .idiom-card{padding:16px;background:linear-gradient(135deg,rgba(255,184,48,.06),rgba(167,139,250,.04));border:1px solid rgba(255,184,48,.15);border-radius:var(--r);margin-bottom:14px}
@@ -1419,15 +1442,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="admin-panel" id="admin-panel" style="display:none"></div>
 
   <!-- Collapsible Tools section -->
-  <div class="gift-btn" onclick="toggleSettingsTools()" style="justify-content:center;gap:6px">
-    🛠 <span id="tools-toggle-lbl">Инструменты</span>
-    <svg id="tools-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px;transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
-  </div>
-  <div id="settings-tools" style="display:none;overflow:hidden;transition:max-height .3s ease">
-    <button class="gift-btn" onclick="shareProgress()"><div class="gbi"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></div><span id="share-lbl">Share progress</span></button>
-    <button class="gift-btn" onclick="exportProgress()"><div class="gbi"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/></svg></div><span id="export-lbl">Export report</span></button>
-    <button class="gift-btn" onclick="generateCertificate()"><div class="gbi"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M9 14.5L8 22l4-2.2L16 22l-1-7.5"/></svg></div><span id="cert-lbl">Certificate</span></button>
-    <button class="gift-btn" onclick="openGiftSub()"><div class="gbi"><svg viewBox="0 0 24 24"><path d="M20 12v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8"/><rect x="2.5" y="7" width="19" height="5" rx="1"/><path d="M12 7v14"/><path d="M12 7S10.5 3 8 3 5 5.5 7 7M12 7s1.5-4 4-4 3 2.5 1 4"/></svg></div><span id="gift-lbl">Gift Premium</span></button>
+  <button class="tools-toggle" onclick="toggleSettingsTools()" type="button">
+    <span class="tools-toggle-main">
+      <span class="tools-toggle-ico"><svg viewBox="0 0 24 24"><path d="M5 6h14M8 12h8M10 18h4"/><circle cx="5" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="10" cy="18" r="1.5"/></svg></span>
+      <span id="tools-toggle-lbl">Инструменты</span>
+    </span>
+    <svg class="tools-arrow" id="tools-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div id="settings-tools" class="tools-grid" style="display:none">
+    <button class="tool-card share" onclick="shareProgress()" type="button">
+      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M8 12h8"/><path d="M13 7l5 5-5 5"/><rect x="3" y="5" width="8" height="14" rx="3"/></svg></div>
+      <div class="tool-title" id="share-lbl">Share progress</div><div class="tool-sub" id="share-sub">Ready post</div>
+    </button>
+    <button class="tool-card export" onclick="exportProgress()" type="button">
+      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 14h6M10 17h4"/></svg></div>
+      <div class="tool-title" id="export-lbl">Export report</div><div class="tool-sub" id="export-sub">Copy or download</div>
+    </button>
+    <button class="tool-card cert" onclick="generateCertificate()" type="button">
+      <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3"/><path d="M8 9h8M8 13h5"/><path d="M15 16l1.2 1.2L19 14.5"/></svg></div>
+      <div class="tool-title" id="cert-lbl">Certificate</div><div class="tool-sub" id="cert-sub">Achievement card</div>
+    </button>
+    <button class="tool-card gift" onclick="openGiftSub()" type="button">
+      <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8v12M4 12h16"/><path d="M12 8s-1.4-4-4-4c-1.4 0-2.2 1.1-1.6 2.2C7 7.4 9.3 8 12 8Zm0 0s1.4-4 4-4c1.4 0 2.2 1.1 1.6 2.2C17 7.4 14.7 8 12 8Z"/></svg></div>
+      <div class="tool-title" id="gift-lbl">Gift Premium</div><div class="tool-sub" id="gift-sub">Invite link</div>
+    </button>
   </div>
 
   <!-- Compact quick-toggles row: Dark + Sound -->
@@ -2395,6 +2433,10 @@ function drawProgress(){
     var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
     var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium',es:'Regalar Premium',de:'Premium verschenken',fr:'Offrir Premium',pt:'Dar Premium',uk:'Подарувати Premium',tr:'Premium hediye et',zh:'赠送Premium',ar:'إهداء Premium'}[lang]||'Gift Premium';
     var ttl=document.getElementById('tools-toggle-lbl');if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
+    var ss=document.getElementById('share-sub');if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',pt:'Post para Telegram'}[lang]||'Telegram post';
+    var es=document.getElementById('export-sub');if(es)es.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',pt:'Copiar ou baixar'}[lang]||'Copy or download';
+    var cs=document.getElementById('cert-sub');if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',pt:'Cartão de conquista'}[lang]||'Achievement card';
+    var gs=document.getElementById('gift-sub');if(gs)gs.textContent={ru:'Ссылка-приглашение',en:'Invite link',es:'Enlace de invitación',pt:'Link de convite'}[lang]||'Invite link';
   }catch(e){}
 
   // Achievements
@@ -5187,21 +5229,28 @@ function renderPathSelector(){
 }
 
 /* ══ SHARE PROGRESS CARD ══ */
+function safeHTML(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+let lastExportReport='';
 function shareProgress(){
   var d=window._d||{};var stats=LS.getJ('local_stats')||{};
   var name=d.name||tg?.initDataUnsafe?.user?.first_name||'Student';
   var level=LS.get('ob_level')||d.level||'A1';
   var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
   var rank=rankOf(xp);
-  var html='<div class="share-card"><div class="share-card-name">'+name+'</div><div class="share-card-level">'+level+' - '+rank.r+'</div><div class="share-card-stats"><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ffb830">'+xp+'</div><div class="share-card-stat-lbl">XP</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ff6b6b">'+streak+'</div><div class="share-card-stat-lbl">'+(lang==='ru'?'Стрик':'Streak')+'</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#2ecc71">'+words+'</div><div class="share-card-stat-lbl">'+(lang==='ru'?'Слова':'Words')+'</div></div></div><div class="share-card-footer">PolyGlotty - AI English Tutor</div></div>';
-  html+='<button class="share-btn" onclick="doShareTg()">'+(lang==='ru'?'📤 Поделиться':'📤 Share')+'</button>';
+  var shareLabel={ru:'Поделиться',en:'Share',es:'Compartir',pt:'Compartilhar'}[lang]||'Share';
+  var html='<div class="share-card"><div class="share-card-name">'+safeHTML(name)+'</div><div class="share-card-level">'+safeHTML(level)+' - '+safeHTML(rank.r)+'</div><div class="share-card-stats"><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ffb830">'+xp+'</div><div class="share-card-stat-lbl">XP</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ff6b6b">'+streak+'</div><div class="share-card-stat-lbl">'+(lang==='ru'?'Стрик':'Streak')+'</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#2ecc71">'+words+'</div><div class="share-card-stat-lbl">'+(lang==='ru'?'Слова':'Words')+'</div></div></div><div class="share-card-footer">PolyGlotty - AI English Tutor</div></div>';
+  html+='<button class="share-btn" onclick="doShareTg()"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/></svg>'+shareLabel+'</button>';
   addMsg('bot',html);
+  try{sfx.correct();}catch(e){}
 }
 function doShareTg(){
   var d=window._d||{};var xp=d.xp||0;var streak=d.streak||0;var level=LS.get('ob_level')||'A1';
   var text=(d.name||'Student')+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @PolyGlotty_bot';
   if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent('https://t.me/PolyGlotty_bot')+'&text='+encodeURIComponent(text));}
-  else{try{navigator.clipboard.writeText(text);toast('Copied!','📋');}catch(e){}}
+  else if(navigator.share){navigator.share({text:text,url:'https://t.me/PolyGlotty_bot'}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Скопировано!':'Copied!','✅');}catch(e){}}
 }
 
 /* ══ CERTIFICATE ══ */
@@ -5214,8 +5263,8 @@ function generateCertificate(){
   var certThis={ru:'Настоящим подтверждается, что',en:'This certifies that',es:'Se certifica que',de:'Hiermit wird bestätigt, dass',fr:'Ceci certifie que',pt:'Certifica-se que',uk:'Цим засвідчується, що',tr:'Bu belge şunu onaylar:',zh:'特此证明',ar:'يشهد بأن'}[lang]||'This certifies that';
   var certCompleted={ru:'успешно завершил программу',en:'has completed the',es:'ha completado el',de:'hat abgeschlossen',fr:'a terminé le',pt:'completou o',uk:'успішно завершив програму',tr:'programı tamamladı',zh:'已完成',ar:'أتم بنجاح'}[lang]||'has completed the';
   var certProgram={ru:'Программа изучения английского языка<br>PolyGlotty AI Academy',en:'English Proficiency Program<br>PolyGlotty AI Academy',es:'Programa de Inglés<br>PolyGlotty AI Academy',de:'Englischprogramm<br>PolyGlotty AI Academy',fr:'Programme d\'anglais<br>PolyGlotty AI Academy',pt:'Programa de Inglês<br>PolyGlotty AI Academy',uk:'Програма вивчення англійської<br>PolyGlotty AI Academy',tr:'İngilizce Programı<br>PolyGlotty AI Academy',zh:'英语能力课程<br>PolyGlotty AI Academy',ar:'برنامج إتقان الإنجليزية<br>PolyGlotty AI Academy'}[lang]||'English Proficiency Program<br>PolyGlotty AI Academy';
-  var shareBtn={ru:'📤 Поделиться',en:'📤 Share',es:'📤 Compartir',de:'📤 Teilen',fr:'📤 Partager',pt:'📤 Compartilhar',uk:'📤 Поділитись',tr:'📤 Paylaş',zh:'📤 分享',ar:'📤 مشاركة'}[lang]||'📤 Share';
-  addMsg('bot','<div class="cert-wrap"><div class="cert-title">'+certTitle+'</div><div class="cert-seal">🏅</div><div class="cert-desc">'+certThis+'</div><div class="cert-name">'+name+'</div><div class="cert-desc">'+certCompleted+'</div><div class="cert-level">'+level+' Level</div><div class="cert-desc">'+certProgram+'</div><div class="cert-date">'+date+'</div><div class="cert-date" style="margin-top:4px;font-size:9px">ID: '+certId+'</div></div><button class="share-btn" onclick="doShareTg()" style="background:#d4a843">'+shareBtn+'</button>');
+  var shareBtn={ru:'Поделиться',en:'Share',es:'Compartir',de:'Teilen',fr:'Partager',pt:'Compartilhar',uk:'Поділитись',tr:'Paylaş',zh:'分享',ar:'مشاركة'}[lang]||'Share';
+  addMsg('bot','<div class="cert-wrap"><div class="cert-title">'+safeHTML(certTitle)+'</div><div class="cert-seal"><svg viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.4.8-3.9 3.8.9 5.4L12 15.5 7.2 18l.9-5.4-3.9-3.8 5.4-.8L12 3Z"/></svg></div><div class="cert-desc">'+safeHTML(certThis)+'</div><div class="cert-name">'+safeHTML(name)+'</div><div class="cert-desc">'+safeHTML(certCompleted)+'</div><div class="cert-level">'+safeHTML(level)+' Level</div><div class="cert-desc">'+certProgram+'</div><div class="cert-date">'+safeHTML(date)+'</div><div class="cert-date" style="margin-top:4px;font-size:9px">ID: '+safeHTML(certId)+'</div></div><button class="share-btn" onclick="doShareTg()" style="background:#d4a843"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/></svg>'+shareBtn+'</button>');
   haptic('success');try{fireConfetti();}catch(e){}
 }
 
@@ -5239,7 +5288,7 @@ function loadAdminStats(){
 /* ══ GIFT SUBSCRIPTION ══ */
 function openGiftSub(){
   if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent('https://t.me/PolyGlotty_bot?start=premium')+'&text='+encodeURIComponent(lang==='ru'?'Учи английский с AI! Попробуй бесплатно:':'Learn English with AI! Try free:'));}
-  toast(lang==='ru'?'Ссылка отправлена!':'Link shared!','🎁');
+  toast(lang==='ru'?'Ссылка готова':'Link ready','✅');
 }
 
 /* ══ EXPORT PROGRESS ══ */
@@ -5249,15 +5298,30 @@ function exportProgress(){
   var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
   var sessions=Math.max(d.sessions||0,stats.sessions||0);var tests=Math.max(d.tests||0,stats.tests||0);
   var text='=== PolyGlotty Progress ===\n\nName: '+name+'\nLevel: '+level+'\nXP: '+xp+'\nStreak: '+streak+' days\nSessions: '+sessions+'\nWords: '+words+'\nTests: '+tests+'\n\n'+new Date().toLocaleString()+'\n@PolyGlotty_bot';
-  try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Скопировано!':'Copied!','📋');}catch(e){}
-  addMsg('bot','<pre style="font-size:11px;white-space:pre-wrap;background:var(--e2);padding:12px;border-radius:8px">'+text+'</pre>');
+  lastExportReport=text;
+  try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Отчёт скопирован':'Report copied','✅');}catch(e){}
+  var title={ru:'Отчёт готов',en:'Report ready',es:'Informe listo',pt:'Relatório pronto'}[lang]||'Report ready';
+  var dl={ru:'Скачать .txt',en:'Download .txt',es:'Descargar .txt',pt:'Baixar .txt'}[lang]||'Download .txt';
+  addMsg('bot','<div class="tool-result"><div class="tool-result-title">'+title+'</div><pre class="tool-pre">'+safeHTML(text)+'</pre></div><button class="share-btn" onclick="downloadExportReport()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/></svg>'+dl+'</button>');
+}
+function downloadExportReport(){
+  if(!lastExportReport){exportProgress();return;}
+  try{
+    var blob=new Blob([lastExportReport],{type:'text/plain;charset=utf-8'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='polyglotty-progress.txt';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1200);
+  }catch(e){
+    try{navigator.clipboard.writeText(lastExportReport);toast(lang==='ru'?'Скопировано':'Copied','✅');}catch(_){}
+  }
 }
 
 /* ══ COLLAPSIBLE SETTINGS ══ */
 function toggleSettingsTools(){
   var el=document.getElementById('settings-tools');var arr=document.getElementById('tools-arrow');
   if(!el)return;
-  if(el.style.display==='none'){el.style.display='block';if(arr)arr.style.transform='rotate(180deg)';}
+  if(el.style.display==='none'){el.style.display='grid';if(arr)arr.style.transform='rotate(180deg)';}
   else{el.style.display='none';if(arr)arr.style.transform='';}
   haptic('light');
 }
