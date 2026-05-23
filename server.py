@@ -19,32 +19,32 @@ MODEL_ECONOMY = {
     "haiku": {
         "model": MODEL,
         "weight": 1,
-        "max_tokens": {"free": 500, "basic": 700, "pro": 700, "ultimate": 800},
+        "max_tokens": {"free": 500, "basic": 650, "pro": 750, "ultimate": 850},
         # Approx public Anthropic API prices per 1M tokens.
         "input_per_m": 0.80,
         "output_per_m": 4.00,
     },
     "sonnet": {
         "model": SONNET_MODEL,
-        "weight": 3,
-        "max_tokens": {"pro": 950, "ultimate": 1200},
+        "weight": 4,
+        "max_tokens": {"basic": 700, "pro": 1050, "ultimate": 1300},
         "input_per_m": 3.00,
         "output_per_m": 15.00,
     },
     "opus": {
         "model": OPUS_MODEL,
-        "weight": 10,
-        "max_tokens": {"ultimate": 950},
+        "weight": 12,
+        "max_tokens": {"ultimate": 1100},
         "input_per_m": 15.00,
         "output_per_m": 75.00,
     },
 }
 
 TIER_ECONOMY = {
-    "free":     {"quota": 5,  "models": ("haiku",),                  "daily_budget": 0.03, "history": 20, "burst_gap": 5.0},
-    "basic":    {"quota": 20, "models": ("haiku",),                  "daily_budget": 0.14, "history": 30, "burst_gap": 2.0},
-    "pro":      {"quota": 40, "models": ("haiku", "sonnet"),         "daily_budget": 0.30, "history": 45, "burst_gap": 2.0},
-    "ultimate": {"quota": 70, "models": ("haiku", "sonnet", "opus"), "daily_budget": 0.70, "history": 70, "burst_gap": 2.0},
+    "free":     {"quota": 5,   "models": ("haiku",),                  "daily_budget": 0.025, "history": 18, "burst_gap": 5.0},
+    "basic":    {"quota": 45,  "models": ("haiku", "sonnet"),         "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
+    "pro":      {"quota": 110, "models": ("haiku", "sonnet"),         "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
+    "ultimate": {"quota": 260, "models": ("haiku", "sonnet", "opus"), "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
 }
 
 # ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
@@ -87,36 +87,53 @@ def _estimate_ai_cost(model_key: str, usage: dict) -> float:
     output_cost = output_tokens * cfg["output_per_m"] / 1_000_000
     return round(input_cost + output_cost, 6)
 
-def _limit_message(lang: str, user_premium: bool, tier: str, used: int, quota: int) -> str:
-    if user_premium:
-        prem = {
-            "ru": [
-                f"Лимит на сегодня: {used}/{quota} quota points. Продолжим завтра.",
-                "Ты сегодня выжал максимум. Отдохни, чтобы новые слова закрепились.",
-                "Дневная практика выполнена. Завтра ALEX снова будет на связи.",
-            ],
-            "en": [
-                f"Daily limit reached: {used}/{quota} quota points. Continue tomorrow.",
-                "You maxed out today. Rest helps the new English stick.",
-                "Today's practice is complete. ALEX will be ready tomorrow.",
-            ],
-        }
-        import random
-        return random.choice(prem.get(lang, prem["en"]))
-    free = {
-        "ru": [
-            "5 бесплатных сообщений на сегодня закончились. Basic даёт 20 Haiku-ответов в день.",
-            "Лимит Free исчерпан. Pro открывает Sonnet через quota points.",
-            "На сегодня всё. Завтра будет ещё 5 бесплатных сообщений.",
-        ],
-        "en": [
-            "Your 5 free messages are done today. Basic gives 20 Haiku replies/day.",
-            "Free limit reached. Pro unlocks Sonnet through quota points.",
-            "That's it for today. You get 5 more free messages tomorrow.",
-        ],
-    }
+def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
     import random
-    return random.choice(free.get(lang, free["en"]))
+    paid = tier != "free"
+    copy = {
+        "ru": {
+            "free": [
+                "Free-лимит на сегодня закончился. Ты уже сделал практику — завтра будет новый запас.",
+                "На сегодня бесплатные сообщения закончились. Можно отдохнуть или открыть больше практики.",
+                "Хорошая сессия. Free даёт 5 сообщений в день, дальше нужен тариф с quota points.",
+            ],
+            "paid": [
+                "Ты сегодня сделал много прогресса. Лимит quota points закончился — можно спокойно погулять, мозгу тоже нужно закрепление.",
+                "Дневной лимит достигнут. Новые слова лучше закрепятся после паузы, продолжим завтра.",
+                "Практика на сегодня выполнена. Если хочется больше, можно поднять план.",
+            ],
+            "btn_free": "Открыть тарифы",
+            "btn_paid": "Увеличить лимит",
+            "meta": f"{used}/{quota} quota points",
+        },
+        "en": {
+            "free": [
+                "Free limit reached for today. You already practiced — tomorrow brings a fresh set.",
+                "Your free messages are done today. Rest now or unlock more practice.",
+                "Good session. Free includes 5 messages/day; more practice uses quota points.",
+            ],
+            "paid": [
+                "You made a lot of progress today. Quota points are done — take a walk and let it settle.",
+                "Daily limit reached. A short break helps new English stick; continue tomorrow.",
+                "Today's practice is complete. Upgrade if you want a higher daily ceiling.",
+            ],
+            "btn_free": "Open plans",
+            "btn_paid": "Increase limit",
+            "meta": f"{used}/{quota} quota points",
+        },
+    }
+    t = copy.get(lang, copy["en"])
+    title = "Дневной лимит" if lang == "ru" else "Daily limit"
+    body = random.choice(t["paid" if paid else "free"])
+    btn = "" if tier == "ultimate" else f'<button class="chip" onclick="openPremium()">{t["btn_paid" if paid else "btn_free"]}</button>'
+    return (
+        '<div class="limit-card">'
+        f'<div class="limit-kicker">{t["meta"]}</div>'
+        f'<div class="limit-title">{title}</div>'
+        f'<div class="limit-text">{body}</div>'
+        f'{btn}'
+        '</div>'
+    )
 
 # ── STATIC ──────────────────────────────────────────────────────────────────
 async def handle_index(request):
@@ -283,7 +300,7 @@ async def handle_chat(request):
         if not user_premium and uid:
             try:
                 from database import db
-                row = await db("SELECT created_at FROM users WHERE uid=$1", uid, fetch="one")
+                row = await db("SELECT created_at FROM users WHERE uid=?", uid, fetch="one")
                 if row and row.get("created_at"):
                     import datetime
                     created = row["created_at"]
@@ -312,7 +329,7 @@ async def handle_chat(request):
         "почему", "правило", "эссе", "тест",
     ])
     if chosen == "auto":
-        model_key = "sonnet" if tier_key in ("pro", "ultimate") and is_complex else "haiku"
+        model_key = "sonnet" if tier_key in ("basic", "pro", "ultimate") and is_complex else "haiku"
     else:
         model_key = chosen
     if model_key not in tier_cfg["models"]:
@@ -345,8 +362,8 @@ async def handle_chat(request):
         today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
         msg_count = _msg_counts.get(today_key, 0)
         if msg_count + weight > msg_limit:
-            limit_msg = _limit_message(lang, user_premium, tier_key, msg_count, msg_limit)
-            return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
+            limit_msg = _limit_message(lang, tier_key, msg_count, msg_limit)
+            return web.json_response({"reply": limit_msg, "limit": True, "limit_tier": tier_key}, headers={"Access-Control-Allow-Origin":"*"})
         cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
         if _daily_ai_costs.get(cost_key, 0.0) >= float(tier_cfg["daily_budget"]) and model_key != "haiku":
             model_key = "haiku"

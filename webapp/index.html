@@ -1035,6 +1035,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .onb-link:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,138,255,.35)}
 .onb-link:active{transform:scale(.97)}
 .onb-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:2px}
+.limit-card{padding:14px;background:linear-gradient(150deg,rgba(79,138,255,.10),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.22);border-radius:var(--r);margin:2px 0}
+.limit-kicker{font-size:10px;font-weight:800;letter-spacing:.55px;text-transform:uppercase;color:var(--a);margin-bottom:5px}
+.limit-title{font-size:16px;font-weight:800;color:var(--t1);margin-bottom:5px}
+.limit-text{font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:10px}
+.limit-card .chip{display:inline-flex;margin:0}
 .mtg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .mtb{padding:12px 6px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:.2s;font-size:13px;font-weight:600;color:var(--t1)}
 .mtb:active{transform:scale(.93)}
@@ -1813,16 +1818,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge">Basic</span><span class="pp-price">300 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Basic</span><span class="pp-price">650 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge">Pro</span><span class="pp-price">800 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Pro</span><span class="pp-price">1600 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">1800 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">4200 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -2310,7 +2315,7 @@ function modelAllowedForTier(m){
   // Free has no tier (handled by isPremium=false → strip hidden anyway)
   const tier=(premiumTier||'').toLowerCase();
   if(m==='haiku')return ['basic','pro','ultimate'].includes(tier);
-  if(m==='sonnet')return ['pro','ultimate'].includes(tier);
+  if(m==='sonnet')return ['basic','pro','ultimate'].includes(tier);
   if(m==='opus')return tier==='ultimate';
   return false;
 }
@@ -2351,13 +2356,13 @@ function updateModelOptions(){
   // localized table headers + cells
   const T={
     ru:{title:'Выбери модель',cost:'Points',perf:'Качество',speed:'Скорость',
-        p1:'1',p3:'3',p10:'10',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',med:'Сред.',slow:'Медл.'},
+        p1:'1',p3:'4',p10:'12',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',med:'Сред.',slow:'Медл.'},
     en:{title:'Choose model',cost:'Points',perf:'Quality',speed:'Speed',
-        p1:'1',p3:'3',p10:'10',basic:'Basic',good:'Good',best:'Best',fast:'Fast',med:'Med',slow:'Slow'},
+        p1:'1',p3:'4',p10:'12',basic:'Basic',good:'Good',best:'Best',fast:'Fast',med:'Med',slow:'Slow'},
     es:{title:'Elige modelo',cost:'Puntos',perf:'Calidad',speed:'Vel.',
-        p1:'1',p3:'3',p10:'10',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',med:'Media',slow:'Lento'},
+        p1:'1',p3:'4',p10:'12',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',med:'Media',slow:'Lento'},
     pt:{title:'Escolher modelo',cost:'Pontos',perf:'Qualidade',speed:'Velocidade',
-        p1:'1',p3:'3',p10:'10',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',med:'Média',slow:'Lento'},
+        p1:'1',p3:'4',p10:'12',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',med:'Média',slow:'Lento'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
@@ -3072,7 +3077,9 @@ async function doChat(text){
     });
     rmTyping();
     if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
-    addMsg('bot',(await r.json()).reply||'...');
+    const data=await r.json();
+    addMsg('bot',data.reply||'...');
+    if(data.limit&&!isPremium){try{sfx.warn();}catch(e){}}
     resetChipCooldown();
     saveCurSes();
     bumpStat('sessions');
@@ -4430,7 +4437,7 @@ function updatePremiumUI(){
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 300 ⭐/мес · голос · Sonnet',en:'from 300 ⭐/mo · voice · Sonnet',es:'desde 300 ⭐/mes · voz · Sonnet',pt:'a partir de 300 ⭐/mês · voz · Sonnet'}[lang]||'from 300 ⭐'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'от 650 ⭐/мес · Sonnet с Basic',en:'from 650 ⭐/mo · Sonnet in Basic',es:'desde 650 ⭐/mes · Sonnet en Basic',pt:'a partir de 650 ⭐/mês · Sonnet no Basic'}[lang]||'from 650 ⭐'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -4454,7 +4461,7 @@ function requirePremium(featureName, fn){
 
 const PREMIUM_FEATURES=[
   {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX speaks back like a real tutor'}},
-  {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Больше дневной практики',sub:'20-70 quota points в день в зависимости от плана'},en:{title:'More daily practice',sub:'20-70 quota points per day depending on plan'}},
+  {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Больше дневной практики',sub:'45-260 quota points в день в зависимости от плана'},en:{title:'More daily practice',sub:'45-260 quota points per day depending on plan'}},
   {icon:'M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z M8 8h8 M8 12h5',ru:{title:'Расширенные сценарии',sub:'Истории, сценки и персональные задания'},en:{title:'Advanced scenarios',sub:'Stories, roleplays and personal tasks'}},
   {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Анализ произношения',sub:'ALEX разбирает твоё произношение по голосу'},en:{title:'Pronunciation Analysis',sub:'ALEX analyzes your pronunciation from voice'}},
   {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Еженедельный отчёт и персональные упражнения'},en:{title:'Detailed Error Analysis',sub:'Weekly report + targeted exercises'}},
@@ -4476,13 +4483,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='20 сообщений/день<br>Голосовые ответы<br>Story Mode + grammar games<br>Модель Haiku';
-    if(proB)proB.innerHTML='40 quota points/день<br>Haiku = 1, Sonnet = 3<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='70 quota points/день<br>Haiku = 1, Sonnet = 3, Opus = 10<br>TOEFL + персональный план<br>Длинная история диалога';
+    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku = 1, Sonnet = 4<br>Голосовые ответы<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/день<br>Haiku = 1, Sonnet = 4<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Haiku = 1, Sonnet = 4, Opus = 12<br>TOEFL + персональный план<br>Длинная история диалога';
   } else {
-    if(basicB)basicB.innerHTML='20 messages/day<br>Voice replies<br>Story Mode + grammar games<br>Haiku model';
-    if(proB)proB.innerHTML='40 quota points/day<br>Haiku = 1, Sonnet = 3<br>All scenarios + error analysis<br>Detailed replies';
-    if(ultB)ultB.innerHTML='70 quota points/day<br>Haiku = 1, Sonnet = 3, Opus = 10<br>TOEFL + personal plan<br>Long chat history';
+    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku = 1, Sonnet = 4<br>Voice replies<br>Story Mode + grammar games';
+    if(proB)proB.innerHTML='110 quota points/day<br>Haiku = 1, Sonnet = 4<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Haiku = 1, Sonnet = 4, Opus = 12<br>TOEFL + personal plan<br>Long chat history';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -5751,8 +5758,8 @@ function checkTrialBanner(){
       const txt=banner.querySelector('.trial-text');
       if(txt){
         txt.innerHTML=lang==='ru'
-          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 20 сообщений/день</small>`
-          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 20 messages/day</small>`;
+          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 45 quota points/день</small>`
+          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 45 quota points/day</small>`;
       }
     }else{
       banner.style.display='none';
