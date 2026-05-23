@@ -12,6 +12,40 @@ RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 MODEL       = "claude-haiku-4-5"            # current Haiku alias — always live
+SONNET_MODEL = "claude-sonnet-4-5"
+OPUS_MODEL   = "claude-opus-4-1-20250805"
+
+MODEL_ECONOMY = {
+    "haiku": {
+        "model": MODEL,
+        "weight": 1,
+        "max_tokens": {"free": 500, "basic": 700, "pro": 700, "ultimate": 800},
+        # Approx public Anthropic API prices per 1M tokens.
+        "input_per_m": 0.80,
+        "output_per_m": 4.00,
+    },
+    "sonnet": {
+        "model": SONNET_MODEL,
+        "weight": 3,
+        "max_tokens": {"pro": 950, "ultimate": 1200},
+        "input_per_m": 3.00,
+        "output_per_m": 15.00,
+    },
+    "opus": {
+        "model": OPUS_MODEL,
+        "weight": 10,
+        "max_tokens": {"ultimate": 950},
+        "input_per_m": 15.00,
+        "output_per_m": 75.00,
+    },
+}
+
+TIER_ECONOMY = {
+    "free":     {"quota": 5,  "models": ("haiku",),                  "daily_budget": 0.03, "history": 20, "burst_gap": 5.0},
+    "basic":    {"quota": 20, "models": ("haiku",),                  "daily_budget": 0.14, "history": 30, "burst_gap": 2.0},
+    "pro":      {"quota": 40, "models": ("haiku", "sonnet"),         "daily_budget": 0.30, "history": 45, "burst_gap": 2.0},
+    "ultimate": {"quota": 70, "models": ("haiku", "sonnet", "opus"), "daily_budget": 0.70, "history": 70, "burst_gap": 2.0},
+}
 
 # ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
 # Add your Telegram user IDs here — they get lifetime free premium
@@ -34,8 +68,55 @@ else:
     logger.info(f"✅ ANTHROPIC_API_KEY loaded (starts with {ANT_KEY[:8]}...)")
 
 _histories: dict = {}
-_msg_counts: dict = {}  # daily message counts per user
+_msg_counts: dict = {}  # daily quota points per user
+_daily_ai_costs: dict = {}  # estimated daily Anthropic cost per user
 _last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
+
+def _estimate_ai_cost(model_key: str, usage: dict) -> float:
+    cfg = MODEL_ECONOMY.get(model_key, MODEL_ECONOMY["haiku"])
+    input_tokens = int(usage.get("input_tokens") or 0)
+    output_tokens = int(usage.get("output_tokens") or 0)
+    cache_creation = int(usage.get("cache_creation_input_tokens") or 0)
+    cache_read = int(usage.get("cache_read_input_tokens") or 0)
+    billable_input = max(0, input_tokens - cache_creation - cache_read)
+    input_cost = (
+        billable_input * cfg["input_per_m"]
+        + cache_creation * cfg["input_per_m"] * 1.25
+        + cache_read * cfg["input_per_m"] * 0.10
+    ) / 1_000_000
+    output_cost = output_tokens * cfg["output_per_m"] / 1_000_000
+    return round(input_cost + output_cost, 6)
+
+def _limit_message(lang: str, user_premium: bool, tier: str, used: int, quota: int) -> str:
+    if user_premium:
+        prem = {
+            "ru": [
+                f"Лимит на сегодня: {used}/{quota} quota points. Продолжим завтра.",
+                "Ты сегодня выжал максимум. Отдохни, чтобы новые слова закрепились.",
+                "Дневная практика выполнена. Завтра ALEX снова будет на связи.",
+            ],
+            "en": [
+                f"Daily limit reached: {used}/{quota} quota points. Continue tomorrow.",
+                "You maxed out today. Rest helps the new English stick.",
+                "Today's practice is complete. ALEX will be ready tomorrow.",
+            ],
+        }
+        import random
+        return random.choice(prem.get(lang, prem["en"]))
+    free = {
+        "ru": [
+            "5 бесплатных сообщений на сегодня закончились. Basic даёт 20 Haiku-ответов в день.",
+            "Лимит Free исчерпан. Pro открывает Sonnet через quota points.",
+            "На сегодня всё. Завтра будет ещё 5 бесплатных сообщений.",
+        ],
+        "en": [
+            "Your 5 free messages are done today. Basic gives 20 Haiku replies/day.",
+            "Free limit reached. Pro unlocks Sonnet through quota points.",
+            "That's it for today. You get 5 more free messages tomorrow.",
+        ],
+    }
+    import random
+    return random.choice(free.get(lang, free["en"]))
 
 # ── STATIC ──────────────────────────────────────────────────────────────────
 async def handle_index(request):
@@ -216,62 +297,36 @@ async def handle_chat(request):
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
-    # Per-model quota WEIGHT: Opus costs ~5x Sonnet, so we count it as 4
-    # daily-quota points to keep economics sane.
-    #   Free     → Haiku only,        5  pts/day
-    #   Basic    → Haiku only,        20 pts/day
-    #   Pro      → Haiku/Sonnet,      40 pts/day  (Opus locked → Sonnet)
-    #   Ultimate → Haiku/Sonnet/Opus, 50 pts/day  (Opus = 4 pts each)
-    OPUS_MODEL = "claude-opus-4-1-20250805"           # current available Opus
-    SONNET_MODEL = "claude-sonnet-4-5"                # current Sonnet alias
+    tier_key = user_tier if user_tier in TIER_ECONOMY else "free"
+    tier_cfg = TIER_ECONOMY[tier_key]
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in ("haiku", "sonnet", "opus", "auto"):
         chosen = "haiku"
 
-    chat_model = MODEL  # default Haiku
-    max_tokens = 500
-    msg_limit = 5      # free
-    weight = 1
-    if user_tier == "basic":
-        chat_model = MODEL                           # locked to Haiku
-        max_tokens = 700
-        msg_limit = 20
-    elif user_tier == "pro":
-        if chosen == "sonnet":
-            chat_model = SONNET_MODEL
-        elif chosen in ("opus", "auto"):
-            # Opus not allowed on Pro; auto = smart routing
-            if chosen == "opus":
-                chat_model = SONNET_MODEL
-            else:
-                is_complex = any(kw in message.lower() for kw in [
-                    'correct','grammar','explain','ошибк','грамматик','исправ','объясни',
-                    'toefl','test','тест','анализ','разбор','why','почему','правило'
-                ])
-                chat_model = SONNET_MODEL if is_complex else MODEL
-        else:
-            chat_model = MODEL                       # haiku
-        max_tokens = 700 if chat_model == MODEL else 1000
-        msg_limit = 40
-    elif user_tier == "ultimate":
-        if chosen == "opus":
-            chat_model = OPUS_MODEL
-            max_tokens = 1200
-            weight = 4                               # Opus burns 4 quota points
-        elif chosen == "haiku":
-            chat_model = MODEL
-            max_tokens = 800
-        else:                                        # sonnet (default) or auto
-            chat_model = SONNET_MODEL
-            max_tokens = 1400
-        msg_limit = 50
+    is_complex = any(kw in message.lower() for kw in [
+        "correct", "grammar", "explain", "mistake", "essay", "toefl",
+        "ошибк", "грамматик", "исправ", "объясни", "анализ", "разбор",
+        "почему", "правило", "эссе", "тест",
+    ])
+    if chosen == "auto":
+        model_key = "sonnet" if tier_key in ("pro", "ultimate") and is_complex else "haiku"
+    else:
+        model_key = chosen
+    if model_key not in tier_cfg["models"]:
+        model_key = "sonnet" if "sonnet" in tier_cfg["models"] and chosen == "opus" else "haiku"
+
+    model_cfg = MODEL_ECONOMY[model_key]
+    chat_model = model_cfg["model"]
+    max_tokens = model_cfg["max_tokens"].get(tier_key, 500)
+    weight = int(model_cfg["weight"])
+    msg_limit = int(tier_cfg["quota"])
 
     # Check daily message limit (skip for admins)
     if uid not in ADMIN_IDS:
         # Anti-burst: min gap between messages — 5s free, 2s paid.
         import time as _time
         now_ts = _time.time()
-        gap = 2.0 if user_premium else 5.0
+        gap = float(tier_cfg["burst_gap"])
         last = _last_msg_ts.get(uid, 0.0)
         if now_ts - last < gap:
             wait = max(1, int(gap - (now_ts - last)))
@@ -286,52 +341,21 @@ async def handle_chat(request):
         _last_msg_ts[uid] = now_ts
         today_key = f"msgs:{uid}:{__import__('datetime').date.today()}"
         msg_count = _msg_counts.get(today_key, 0)
-        if msg_count >= msg_limit:
-            import random
-            if not user_premium:
-                grace_ru = [
-                    "Ты сегодня отлично позанимался! Basic = 20 сообщений/день, Pro = 40, Ultimate = 50 quota points",
-                    "Лимит на сегодня исчерпан. Premium откроет больше практики",
-                    "5 бесплатных сообщений на сегодня закончились. Завтра будет ещё 5, или бери подписку",
-                    "ALEX устал бесплатно 😅 Шутка! Приходи завтра или оформи Premium",
-                    "Сегодня ты уже выполнил норму! 📚 Premium = больше обучения",
-                    "Каждый день по 5 сообщений — уже прогресс. Premium даёт больше практики",
-                    "ALEX скучает когда ты уходишь 😢 С Premium он будет рядом дольше!",
-                    "Знаешь, что 30 минут в день = B2 за 6 месяцев? Premium поможет 📈",
-                ]
-                grace_en = [
-                    "Great work today! Basic = 20 msg/day, Pro = 40, Ultimate = 50 quota points",
-                    "Daily limit reached. Premium unlocks more practice",
-                    "Your 5 free messages are done for today. Come back tomorrow or subscribe",
-                    "ALEX needs rest 😅 Just kidding! Come back tomorrow or go Premium",
-                    "You've hit today's limit! 📚 Premium = more learning",
-                    "5 messages a day still builds progress. Premium gives more practice",
-                    "ALEX misses you when you leave 😢 Premium keeps him longer!",
-                    "Did you know? 30 min/day = B2 in 6 months! Premium helps 📈",
-                ]
-                limit_msg = random.choice(grace_ru if lang=="ru" else grace_en)
-            else:
-                grace_prem_ru = [
-                    "Ты сегодня выжал максимум! Отдохни и приходи завтра 💪",
-                    "Лимит на сегодня — но какой продуктивный день! 🌟 До завтра!",
-                    "ALEX тоже нужен сон 😴 Продолжим завтра!",
-                    "Мозгу нужен отдых чтобы запомнить всё новое 🧠 До завтра!",
-                    "Ты среди самых активных учеников! 🏆 Увидимся завтра!",
-                ]
-                grace_prem_en = [
-                    "You maxed out today! Rest up, see you tomorrow 💪",
-                    "Today's limit reached — what a productive day! 🌟",
-                    "Even ALEX needs sleep 😴 See you tomorrow!",
-                    "Your brain needs rest to absorb everything 🧠 See you tomorrow!",
-                    "You're among the most active students! 🏆 See you tomorrow!",
-                ]
-                limit_msg = random.choice(grace_prem_ru if lang=="ru" else grace_prem_en)
+        if msg_count + weight > msg_limit:
+            limit_msg = _limit_message(lang, user_premium, tier_key, msg_count, msg_limit)
             return web.json_response({"reply": limit_msg}, headers={"Access-Control-Allow-Origin":"*"})
-        _msg_counts[today_key] = msg_count + weight  # weight=4 for Opus, 1 otherwise
+        cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
+        if _daily_ai_costs.get(cost_key, 0.0) >= float(tier_cfg["daily_budget"]) and model_key != "haiku":
+            model_key = "haiku"
+            model_cfg = MODEL_ECONOMY["haiku"]
+            chat_model = model_cfg["model"]
+            max_tokens = model_cfg["max_tokens"].get(tier_key, 600)
+            weight = model_cfg["weight"]
+        _msg_counts[today_key] = msg_count + weight
 
     h = _histories.setdefault(uid, [])
     h.append({"role": "user", "content": message})
-    history_limit = 20 if not user_premium else (30 if user_tier=="basic" else 50 if user_tier=="pro" else 80)
+    history_limit = int(tier_cfg["history"])
     if len(h) > history_limit:
         _histories[uid] = h[-history_limit:]
 
@@ -360,6 +384,12 @@ async def handle_chat(request):
                 logger.error(f"Anthropic error: {data['error']}")
                 return web.json_response({"error": data["error"].get("message","API error")[:200]}, status=500)
             reply = data["content"][0]["text"].strip()
+            if uid not in ADMIN_IDS:
+                cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
+                _daily_ai_costs[cost_key] = round(
+                    _daily_ai_costs.get(cost_key, 0.0) + _estimate_ai_cost(model_key, data.get("usage") or {}),
+                    6,
+                )
     except Exception as e:
         logger.error(f"Chat failed: {e}")
         return web.json_response({"error": str(e)[:150]}, status=500)

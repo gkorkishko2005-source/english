@@ -69,22 +69,22 @@ ADMIN_IDS: set = {
 # 3 плана с разными баффами
 PREMIUM_PLANS = {
     "basic": {
-        "stars": 300, "months": 1, "price_usd": 400,  # cents for Stripe
+        "stars": 300, "months": 1, "price_usd": 500,  # cents for card payments
         "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
         "tier": "basic",
         "model": "haiku", "msg_limit": 20, "history": 30, "max_tokens": 700,
     },
     "pro": {
-        "stars": 800, "months": 1, "price_usd": 1000,
+        "stars": 800, "months": 1, "price_usd": 1200,
         "label_ru": "Pro · 1 мес", "label_en": "Pro · 1 mo",
         "tier": "pro",
         "model": "sonnet", "msg_limit": 40, "history": 50, "max_tokens": 1000,
     },
     "ultimate": {
-        "stars": 1500, "months": 1, "price_usd": 2000,
+        "stars": 1800, "months": 1, "price_usd": 2500,
         "label_ru": "Ultimate · 1 мес", "label_en": "Ultimate · 1 mo",
         "tier": "ultimate",
-        "model": "sonnet", "msg_limit": 50, "history": 80, "max_tokens": 1400,
+        "model": "sonnet", "msg_limit": 70, "history": 70, "max_tokens": 1200,
     },
 }
 # First-time discount: 10% off
@@ -1477,7 +1477,7 @@ async def cmd_premium(msg: Message):
     # Prices with discount
     b_stars = int(300 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 300
     p_stars = int(800 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 800
-    u_stars = int(1500 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 1500
+    u_stars = int(1800 * (1 - FIRST_TIME_DISCOUNT)) if is_first else 1800
 
     kb_rows = [
         [InlineKeyboardButton(
@@ -1489,7 +1489,7 @@ async def cmd_premium(msg: Message):
             callback_data=f"prem_buy:pro:{'d' if is_first else 'n'}"
         )],
         [InlineKeyboardButton(
-            text=f"Ultimate — {u_stars} ⭐/мес (~$20)" if ru else f"Ultimate — {u_stars} ⭐/mo (~$20)",
+            text=f"Ultimate — {u_stars} ⭐/мес (~$25)" if ru else f"Ultimate — {u_stars} ⭐/mo (~$25)",
             callback_data=f"prem_buy:ultimate:{'d' if is_first else 'n'}"
         )],
     ]
@@ -1510,16 +1510,18 @@ async def cmd_premium(msg: Message):
         "├ Голосовые ответы ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/мес\n"
-        "├ 40 сообщений/день\n"
+        "├ 40 quota points/день\n"
         "├ Выбор модели: Haiku или Sonnet\n"
+        "├ Haiku = 1 point, Sonnet = 3 points\n"
         "├ Все сценки + анализ ошибок\n"
         "└ Развёрнутые ответы\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
-        "├ 50 quota points/день\n"
+        "├ 70 quota points/день\n"
         "├ Выбор модели: Haiku, Sonnet или Opus\n"
+        "├ Haiku = 1, Sonnet = 3, Opus = 10 points\n"
         "├ TOEFL + персональный план\n"
         "└ Длинная история диалога\n\n"
-        "<i>Opus расходует 4 quota points за ответ.</i>"
+        "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars или 💳 карта"
@@ -1531,16 +1533,18 @@ async def cmd_premium(msg: Message):
         "├ Voice replies from ALEX\n"
         "└ Story Mode + grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/mo\n"
-        "├ 40 messages/day\n"
+        "├ 40 quota points/day\n"
         "├ Model choice: Haiku or Sonnet\n"
+        "├ Haiku = 1 point, Sonnet = 3 points\n"
         "├ All scenarios + error analysis\n"
         "└ Detailed answers\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
-        "├ 50 quota points/day\n"
+        "├ 70 quota points/day\n"
         "├ Model choice: Haiku, Sonnet or Opus\n"
+        "├ Haiku = 1, Sonnet = 3, Opus = 10 points\n"
         "├ TOEFL + personal study plan\n"
         "└ Long chat history\n\n"
-        "<i>Opus uses 4 quota points per answer.</i>"
+        "<i>Quota points keep premium limits fair and sustainable.</i>"
         f"{discount_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars or 💳 card"
@@ -1596,7 +1600,7 @@ async def cb_card_menu(cb: CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"Basic — $5/мес" if ru else "Basic — $5/mo", callback_data="prem_card:basic")],
         [InlineKeyboardButton(text=f"Pro — $12/мес" if ru else "Pro — $12/mo", callback_data="prem_card:pro")],
-        [InlineKeyboardButton(text=f"Ultimate — $20/мес" if ru else "Ultimate — $20/mo", callback_data="prem_card:ultimate")],
+        [InlineKeyboardButton(text=f"Ultimate — $25/мес" if ru else "Ultimate — $25/mo", callback_data="prem_card:ultimate")],
     ])
     await cb.message.answer("💳 " + ("Выбери план для оплаты картой:" if ru else "Choose a plan to pay by card:"), reply_markup=kb)
 

@@ -1797,7 +1797,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
         <div class="pp-buffs" id="pp-pro-buffs"></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">1500 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">1800 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
       </div>
     </div>
@@ -2325,14 +2325,14 @@ function updateModelOptions(){
   });
   // localized table headers + cells
   const T={
-    ru:{title:'Выбери модель',cost:'Цена',perf:'Качество',speed:'Скорость',
-        low:'Низ.',med:'Сред.',hi:'Выс.',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',slow:'Медл.'},
-    en:{title:'Choose model',cost:'Cost',perf:'Quality',speed:'Speed',
-        low:'Low',med:'Med',hi:'High',basic:'Basic',good:'Good',best:'Best',fast:'Fast',slow:'Slow'},
-    es:{title:'Elige modelo',cost:'Coste',perf:'Calidad',speed:'Vel.',
-        low:'Bajo',med:'Medio',hi:'Alto',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',slow:'Lento'},
-    pt:{title:'Escolher modelo',cost:'Custo',perf:'Qualidade',speed:'Velocidade',
-        low:'Baixo',med:'Médio',hi:'Alto',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',slow:'Lento'},
+    ru:{title:'Выбери модель',cost:'Points',perf:'Качество',speed:'Скорость',
+        p1:'1',p3:'3',p10:'10',basic:'База',good:'Хор.',best:'Топ',fast:'Быстро',med:'Сред.',slow:'Медл.'},
+    en:{title:'Choose model',cost:'Points',perf:'Quality',speed:'Speed',
+        p1:'1',p3:'3',p10:'10',basic:'Basic',good:'Good',best:'Best',fast:'Fast',med:'Med',slow:'Slow'},
+    es:{title:'Elige modelo',cost:'Puntos',perf:'Calidad',speed:'Vel.',
+        p1:'1',p3:'3',p10:'10',basic:'Básica',good:'Buena',best:'Top',fast:'Rápido',med:'Media',slow:'Lento'},
+    pt:{title:'Escolher modelo',cost:'Pontos',perf:'Qualidade',speed:'Velocidade',
+        p1:'1',p3:'3',p10:'10',basic:'Básica',good:'Boa',best:'Top',fast:'Rápido',med:'Média',slow:'Lento'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
@@ -2340,9 +2340,9 @@ function updateModelOptions(){
   setT('mh-cost',t.cost); setT('mh-perf',t.perf); setT('mh-speed',t.speed);
   const rows=document.querySelectorAll('#modelm .mopt');
   const map=[
-    {cost:t.low, perf:t.basic, speed:t.fast},
-    {cost:t.med, perf:t.good,  speed:t.med},
-    {cost:t.hi,  perf:t.best,  speed:t.slow},
+    {cost:t.p1,  perf:t.basic, speed:t.fast},
+    {cost:t.p3,  perf:t.good,  speed:t.med},
+    {cost:t.p10, perf:t.best,  speed:t.slow},
   ];
   rows.forEach((row,i)=>{
     const cells=row.querySelectorAll('.mt-cell');
@@ -4306,7 +4306,7 @@ function requirePremium(featureName, fn){
   if(isPremium){fn();return;}
   const msg={
     voice:{ru:'Голосовые ответы ALEX',en:'Voice replies from ALEX'},
-    unlimited:{ru:'Безлимитные сообщения',en:'Unlimited messages'},
+    unlimited:{ru:'Больше дневной практики',en:'More daily practice'},
     personas:{ru:'Расширенные сценарии',en:'Advanced scenarios'},
     analysis:{ru:'Детальный анализ ошибок',en:'Detailed error analysis'},
   };
@@ -4315,7 +4315,7 @@ function requirePremium(featureName, fn){
 
 const PREMIUM_FEATURES=[
   {icon:'M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2',ru:{title:'Голосовые ответы ALEX',sub:'ALEX отвечает голосом как реальный репетитор'},en:{title:'Voice Replies from ALEX',sub:'ALEX speaks back like a real tutor'}},
-  {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Безлимитные сообщения',sub:'Общайся с ALEX без ограничений'},en:{title:'Unlimited Messages',sub:'Chat with ALEX without any limits'}},
+  {icon:'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',ru:{title:'Больше дневной практики',sub:'20-70 quota points в день в зависимости от плана'},en:{title:'More daily practice',sub:'20-70 quota points per day depending on plan'}},
   {icon:'M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z M8 8h8 M8 12h5',ru:{title:'Расширенные сценарии',sub:'Истории, сценки и персональные задания'},en:{title:'Advanced scenarios',sub:'Stories, roleplays and personal tasks'}},
   {icon:'M9 19V6l12-3v13M9 12l12-3',ru:{title:'Анализ произношения',sub:'ALEX разбирает твоё произношение по голосу'},en:{title:'Pronunciation Analysis',sub:'ALEX analyzes your pronunciation from voice'}},
   {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Еженедельный отчёт и персональные упражнения'},en:{title:'Detailed Error Analysis',sub:'Weekly report + targeted exercises'}},
@@ -4338,12 +4338,12 @@ function openPremium(highlightFeature){
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
     if(basicB)basicB.innerHTML='20 сообщений/день<br>Голосовые ответы<br>Story Mode + grammar games<br>Модель Haiku';
-    if(proB)proB.innerHTML='40 сообщений/день<br>Haiku или Sonnet<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='50 quota points/день<br>Haiku, Sonnet или Opus<br>TOEFL + персональный план<br>Длинная история диалога';
+    if(proB)proB.innerHTML='40 quota points/день<br>Haiku = 1, Sonnet = 3<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='70 quota points/день<br>Haiku = 1, Sonnet = 3, Opus = 10<br>TOEFL + персональный план<br>Длинная история диалога';
   } else {
     if(basicB)basicB.innerHTML='20 messages/day<br>Voice replies<br>Story Mode + grammar games<br>Haiku model';
-    if(proB)proB.innerHTML='40 messages/day<br>Haiku or Sonnet<br>All scenarios + error analysis<br>Detailed replies';
-    if(ultB)ultB.innerHTML='50 quota points/day<br>Haiku, Sonnet or Opus<br>TOEFL + personal plan<br>Long chat history';
+    if(proB)proB.innerHTML='40 quota points/day<br>Haiku = 1, Sonnet = 3<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='70 quota points/day<br>Haiku = 1, Sonnet = 3, Opus = 10<br>TOEFL + personal plan<br>Long chat history';
   }
 
   // Hide plans that are lower or equal to current tier
