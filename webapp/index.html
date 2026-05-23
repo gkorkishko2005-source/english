@@ -583,9 +583,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .drill-result-score{font-size:32px;font-weight:800;margin-bottom:4px}
 .drill-result-label{font-size:14px;color:var(--t2)}
 /* ══ LEARNING PATHS ══ */
-.lp-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--e1);border:1.5px solid var(--b1);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:.2s}
-.lp-card:active{transform:scale(.97)}
-.lp-card.active-path{border-color:var(--a);background:rgba(var(--ar),.06)}
+.lp-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s}
+.lp-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25)}
+.lp-card:active{transform:scale(.98)}
+.lp-card.active-path{border-color:rgba(var(--ar),.45);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04))}
 .lp-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 .lp-icon svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lp-card:hover .lp-icon{transform:scale(1.08) rotate(-3deg)}
@@ -594,8 +595,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .lp-info{flex:1}
 .lp-name{font-size:14px;font-weight:700;color:var(--t1)}
 .lp-desc{font-size:11px;color:var(--t2);margin-top:2px}
-.lp-progress{font-size:10px;font-weight:600;color:var(--a);margin-top:4px}
-.lp-check{color:var(--a);font-size:18px}
+.lp-progress{font-size:10px;font-weight:750;color:var(--a);margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
+.lp-check{width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--a);background:rgba(var(--ar),.1);border:1px solid rgba(var(--ar),.2)}
+.lp-check svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .lp-banner{display:flex;align-items:center;gap:10px;padding:12px 14px;background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(79,138,255,.04));border:1px solid rgba(var(--ar),.15);border-radius:var(--r);margin-bottom:14px;cursor:pointer}
 .lp-banner:active{transform:scale(.98)}
 /* ══ SKELETON LOADING ══ */
@@ -1174,24 +1176,47 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .learn-tab{flex:1;padding:9px 8px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:.22s;text-align:center;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1)}
 .learn-tab:active{transform:scale(.96)}
 .learn-tab.on{background:rgba(var(--ar),.12);color:var(--a);border-color:rgba(var(--ar),.25);box-shadow:0 0 12px rgba(var(--ar),.08)}
-.roadmap-wrap{display:flex;flex-direction:column}
-.rm-level{margin-bottom:4px}
-.rm-level-hdr{display:flex;align-items:center;gap:8px;padding:12px 0 6px}
-.rm-level-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.rm-level-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t2)}
-.rm-lesson{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;cursor:pointer;transition:.2s}
-.rm-lesson:active{transform:scale(.97)}
-.rm-lesson.done{border-color:rgba(0,212,170,.25);background:rgba(0,212,170,.04)}
-.rm-lesson.active-lesson{border-color:var(--a);background:rgba(var(--ar),.06)}
-.rm-lesson.locked{opacity:.45;cursor:default}
-.rm-lesson-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.rm-lesson-ico svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
+.roadmap-wrap{display:flex;flex-direction:column;gap:8px}
+.rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
+.rm-overview::after{content:'';position:absolute;right:-34px;top:-42px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,.035)}
+.rm-over-top{display:flex;align-items:center;gap:12px;position:relative}
+.rm-path-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.12)}
+.rm-path-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rm-over-title{font-size:15px;font-weight:800;color:var(--t1)}
+.rm-over-sub{font-size:11px;color:var(--t2);margin-top:2px;line-height:1.35}
+.rm-over-pct{font-size:24px;font-weight:900;color:var(--a);margin-left:auto}
+.rm-over-bar{height:5px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden;margin:12px 0 11px;position:relative}
+.rm-over-fill{height:100%;background:var(--gb);border-radius:100px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.rm-actions{display:grid;grid-template-columns:1fr auto;gap:8px;position:relative}
+.rm-action{border:1px solid var(--b1);background:var(--e1);color:var(--t1);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:750;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.18s}
+.rm-action.primary{background:var(--a);border-color:var(--a);color:#fff}
+.rm-action:active{transform:scale(.97)}
+.rm-action svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rm-level{margin-bottom:2px}
+.rm-level-hdr{display:flex;align-items:center;gap:8px;padding:12px 2px 6px}
+.rm-level-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 4px rgba(255,255,255,.03)}
+.rm-level-name{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--t2)}
+.rm-level-meta{margin-left:auto;font-size:11px;color:var(--t3);font-weight:650}
+.rm-lesson{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:7px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s,box-shadow .2s}
+.rm-lesson:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.rm-lesson:active{transform:scale(.98)}
+.rm-lesson.done{border-color:rgba(0,212,170,.28);background:rgba(0,212,170,.045)}
+.rm-lesson.active-lesson{border-color:rgba(var(--ar),.45);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.035))}
+.rm-lesson.locked{opacity:.48;cursor:default}
+.rm-lesson.locked:hover{transform:none;box-shadow:none;border-color:var(--b1)}
+.rm-lesson-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm-lesson-ico svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .rm-info{flex:1;min-width:0}
-.rm-title{font-size:13px;font-weight:600;margin-bottom:2px}
-.rm-prog{font-size:11px;color:var(--t3)}
-.rm-bar{height:2px;background:var(--e3);border-radius:100px;margin-top:5px;overflow:hidden;max-width:80px}
+.rm-title{font-size:13px;font-weight:750;margin-bottom:2px;color:var(--t1)}
+.rm-prog{font-size:11px;color:var(--t3);line-height:1.35}
+.rm-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.rm-tag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.35px;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:100px;padding:2px 6px}
+.rm-bar{height:3px;background:var(--e3);border-radius:100px;margin-top:7px;overflow:hidden;max-width:118px}
 .rm-fill{height:100%;background:var(--gb);border-radius:100px;transition:width .8s ease}
-.rm-status{font-size:16px;flex-shrink:0}
+.rm-status{width:24px;height:24px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--t3);background:var(--e2);border:1px solid var(--b1)}
+.rm-status svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rm-lesson.done .rm-status{color:#00d4aa;background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.22)}
+.rm-lesson.active-lesson .rm-status{color:var(--a);background:rgba(var(--ar),.09);border-color:rgba(var(--ar),.22)}
 
 /* ══ TEXT CHECKER ══ */
 .tc-inp{width:100%;min-height:110px;background:var(--e1);border:1px solid var(--b2);border-radius:var(--r);padding:13px;color:var(--t1);font-family:var(--f);font-size:14px;line-height:1.6;resize:none;outline:none;transition:.2s}
@@ -1282,7 +1307,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="hsb" id="hsub"></div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
-  <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="goTab('settings')"></div>
+  <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="openPathPicker()"></div>
   <div class="streak-chip" id="streak-chip" onclick="goTab('progress')">
     <svg class="streak-chip-fire" viewBox="0 0 48 48" aria-hidden="true">
       <defs>
@@ -1704,7 +1729,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- LEARNING PATH PICKER MODAL -->
 <div class="mov" id="pathm" style="display:none" onclick="closeMod('pathm')">
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
-    <div class="mtit" id="path-mtit">🎯 Learning Path</div>
+    <div class="mtit" id="path-mtit">Learning Path</div>
     <div style="padding:8px 16px 16px" id="path-selector"></div>
   </div>
 </div>
@@ -1976,7 +2001,7 @@ function applyLang(){
   var qb5s=document.getElementById('qb5s');if(qb5s)qb5s.textContent={ru:'Тест на время',en:'Timed quiz',es:'Quiz cronometrado',de:'Zeitquiz',fr:'Quiz minuté',pt:'Quiz cronometrado',uk:'Тест на час',tr:'Zamanlı test',zh:'限时测试',ar:'اختبار موقت'}[lang]||'Timed quiz';
   var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path',es:'Ruta',de:'Pfad',fr:'Parcours',pt:'Caminho',uk:'Шлях',tr:'Yol',zh:'路径',ar:'مسار'}[lang]||'Path';
   var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal',es:'Elegir meta',de:'Ziel wählen',fr:'Choisir objectif',pt:'Escolher meta',uk:'Обрати ціль',tr:'Hedef seç',zh:'选择目标',ar:'اختر الهدف'}[lang]||'Choose goal';
-  var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'🎯 Выбери путь обучения',en:'🎯 Choose Learning Path',es:'🎯 Elige tu camino',de:'🎯 Lernpfad wählen',fr:'🎯 Choisir un parcours',pt:'🎯 Escolher caminho',uk:'🎯 Обери шлях навчання',tr:'🎯 Öğrenme yolunu seç',zh:'🎯 选择学习路径',ar:'🎯 اختر مسار التعلم'}[lang]||'🎯 Learning Path';
+  var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'Выбери путь обучения',en:'Choose Learning Path',es:'Elige tu camino',pt:'Escolher caminho'}[lang]||'Choose Learning Path';
   var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
   var ol=document.getElementById('online-lbl');if(ol)ol.textContent=L.online;
@@ -3851,23 +3876,104 @@ function switchLearnTab(tab){
   if(tab==='road')renderRoadmap();
 }
 
+function rmStatusIcon(type){
+  if(type==='done')return '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  if(type==='active')return '<svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>';
+  if(type==='locked')return '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>';
+  return '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>';
+}
+function rmGetPath(){
+  const pid=getActivePath();
+  return LEARNING_PATHS.find(p=>p.id===pid)||null;
+}
+function rmProgressStats(progress){
+  const all=ROADMAP_DATA.flatMap(l=>l.lessons.map(x=>({lesson:x,level:l.level,color:l.color})));
+  const done=all.filter(x=>(progress[x.lesson.id]||0)>=5).length;
+  const steps=all.reduce((sum,x)=>sum+Math.min(5,progress[x.lesson.id]||0),0);
+  return {all,done,total:all.length,pct:all.length?Math.round(done/all.length*100):0,steps};
+}
+function rmFindNext(progress,userLevel,passedTests){
+  const levelOrder=['A1','A2','B1','B2','C1','C2'];
+  const userLvlIdx=Math.max(0,levelOrder.indexOf(String(userLevel||'A1').replace(/\+/,'')));
+  for(const lvlData of ROADMAP_DATA){
+    const lvlIdx=levelOrder.indexOf(lvlData.level);
+    const isUnlocked=lvlIdx<=userLvlIdx || !!passedTests[lvlData.level];
+    if(!isUnlocked)continue;
+    for(let idx=0;idx<lvlData.lessons.length;idx++){
+      const prev=idx===0?5:(progress[lvlData.lessons[idx-1].id]||0);
+      const prog=progress[lvlData.lessons[idx].id]||0;
+      if(prev>=5&&prog<5)return {lvlData,lesson:lvlData.lessons[idx]};
+    }
+  }
+  return null;
+}
+function rmLessonPrompt(ls,lvlData,path){
+  const pathLine=path
+    ? `Learning goal: ${path.name.en}. Adapt examples to ${path.desc.en}.`
+    : 'Learning goal: general English.';
+  return [
+    `Teach me: ${ls.title.en}.`,
+    `Level: ${lvlData.level}.`,
+    pathLine,
+    'Use this structure: 1) short rule, 2) 3 real examples, 3) common mistake, 4) mini exercise, 5) ask me to answer.',
+    'Keep it practical and interactive.'
+  ].join(' ');
+}
+function startRoadmapLesson(lessonId){
+  const progress=LS.getJ('rm_progress')||{};
+  let found=null;
+  ROADMAP_DATA.some(lvl=>lvl.lessons.some(ls=>{
+    if(ls.id===lessonId){found={lvlData:lvl,lesson:ls};return true;}
+    return false;
+  }));
+  if(!found)return;
+  progress[lessonId]=Math.min(5,(progress[lessonId]||0)+1);
+  LS.setJ('rm_progress',progress);
+  try{trackM('path');}catch(e){}
+  const path=rmGetPath();
+  goTab('chat');
+  setTimeout(()=>sendChip(rmLessonPrompt(found.lesson,found.lvlData,path)),150);
+}
+
 function renderRoadmap(){
   const wrap=document.getElementById('roadmap-wrap');
   if(!wrap)return;
   const progress=LS.getJ('rm_progress')||{};
   const userLevel=LS.get('ob_level')||window._d?.level||'A1';
   const levelOrder=['A1','A2','B1','B2','C1','C2'];
-  const userLvlIdx=levelOrder.indexOf(userLevel.replace(/\+/,''));
+  const userLvlIdx=Math.max(0,levelOrder.indexOf(String(userLevel).replace(/\+/,'')));
   const passedTests=LS.getJ('passed_level_tests')||{};
+  const stats=rmProgressStats(progress);
+  const path=rmGetPath();
+  const next=rmFindNext(progress,userLevel,passedTests);
   wrap.innerHTML='';
+
+  const ov=document.createElement('div');
+  ov.className='rm-overview';
+  const ovTitle=path?(path.name[lang]||path.name.en):({ru:'Выбери цель обучения',en:'Choose a learning goal',es:'Elige una meta',pt:'Escolha uma meta'}[lang]||'Choose a learning goal');
+  const ovSub=path?(path.desc[lang]||path.desc.en):({ru:'Путь адаптирует примеры и задания ALEX под твою цель',en:'The path adapts ALEX examples and tasks to your goal',es:'El camino adapta ejemplos y tareas',pt:'O caminho adapta exemplos e tarefas'}[lang]||'Personalized lessons');
+  const nextLabel=next?(next.lesson.title[lang]||next.lesson.title.en):({ru:'Путь завершён',en:'Path complete',es:'Ruta completa',pt:'Caminho completo'}[lang]||'Path complete');
+  ov.innerHTML=`
+    <div class="rm-over-top">
+      <div class="rm-path-ico" style="color:${path?path.color:'var(--a)'}">${path?path.icon:'<svg viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 5h11l-2.3 3.2L17 11.5H6"/><circle cx="6" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg>'}</div>
+      <div style="min-width:0;flex:1"><div class="rm-over-title">${safeHTML(ovTitle)}</div><div class="rm-over-sub">${safeHTML(ovSub)} · ${safeHTML(nextLabel)}</div></div>
+      <div class="rm-over-pct">${stats.pct}%</div>
+    </div>
+    <div class="rm-over-bar"><div class="rm-over-fill" style="width:${stats.pct}%"></div></div>
+    <div class="rm-actions">
+      <button class="rm-action primary" type="button" ${next?`onclick="startRoadmapLesson('${next.lesson.id}')"`:'onclick="openPathPicker()"'}><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>${next?({ru:'Продолжить',en:'Continue',es:'Continuar',pt:'Continuar'}[lang]||'Continue'):({ru:'Выбрать путь',en:'Choose path',es:'Elegir',pt:'Escolher'}[lang]||'Choose path')}</button>
+      <button class="rm-action" type="button" onclick="openPathPicker()"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${lang==='ru'?'Цель':'Goal'}</button>
+    </div>`;
+  wrap.appendChild(ov);
 
   ROADMAP_DATA.forEach((lvlData,li)=>{
     const div=document.createElement('div');div.className='rm-level';
     const lvlIdx=levelOrder.indexOf(lvlData.level);
     const isUnlocked=lvlIdx<=userLvlIdx;
     const isNext=lvlIdx===userLvlIdx+1;
+    const levelDone=lvlData.lessons.filter(ls=>(progress[ls.id]||0)>=5).length;
     const hdr=document.createElement('div');hdr.className='rm-level-hdr';
-    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}${isUnlocked?' ✓':isNext?' ⬆':''}</div>`;
+    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}</div><div class="rm-level-meta">${levelDone}/${lvlData.lessons.length}</div>`;
     div.appendChild(hdr);
 
     // Add level-up test button at start of next level
@@ -3875,37 +3981,33 @@ function renderRoadmap(){
       const testBtn=document.createElement('div');testBtn.className='rm-test-btn';
       testBtn.innerHTML=`
         <div class="rm-test-ico"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 14l2 2 4-4"/></svg></div>
-        <div><div class="rm-test-title">${lang==='ru'?'📝 Тест перехода на':'📝 Level-up test for'} ${lvlData.level}</div>
+        <div><div class="rm-test-title">${lang==='ru'?'Тест перехода на':'Level-up test for'} ${lvlData.level}</div>
         <div class="rm-test-sub">${lang==='ru'?'Пройди тест чтобы разблокировать':'Pass the test to unlock'}</div></div>`;
       testBtn.onclick=()=>startLevelTest(lvlData.level);
       div.appendChild(testBtn);
     }
 
     lvlData.lessons.forEach((ls,idx)=>{
-      const done=progress[ls.id]>=3;
+      const prog=Math.min(5,progress[ls.id]||0);
+      const done=prog>=5;
       const lessonUnlocked=isUnlocked||(isNext&&passedTests[lvlData.level]);
-      const isActive=!done&&lessonUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=1);
+      const isActive=!done&&lessonUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=5);
       const locked=!lessonUnlocked&&!done;
-      const prog=progress[ls.id]||0;
       const card=document.createElement('div');
       card.className='rm-lesson'+(done?' done':isActive?' active-lesson':locked?' locked':'');
       const icoColor=done?'#2ecc71':isActive?'var(--a)':lvlData.color;
+      const status=locked?'locked':done?'done':isActive?'active':'idle';
       card.innerHTML=`
         <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="${ls.icon||'M4 6h16M4 12h16M4 18h7'}"/></svg></div>
         <div class="rm-info">
           <div class="rm-title">${ls.title[lang]||ls.title.en}</div>
           <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'уроков':'lessons'}</div>
+          <div class="rm-tags"><span class="rm-tag">${lvlData.level}</span><span class="rm-tag">${path?(path.name[lang]||path.name.en):'Core'}</span></div>
           <div class="rm-bar"><div class="rm-fill" style="width:${done?100:prog*20}%"></div></div>
         </div>
-        <div class="rm-status">${locked?'🔒':done?'✅':isActive?'▶️':''}</div>`;
+        <div class="rm-status">${rmStatusIcon(status)}</div>`;
       if(!locked){
-        card.onclick=()=>{
-          const topic=`Teach me about: ${ls.title.en}. Level: ${lvlData.level}. Give explanation + 3 examples + mini exercise.`;
-          const p=LS.getJ('rm_progress')||{};
-          p[ls.id]=(p[ls.id]||0)+1;
-          LS.setJ('rm_progress',p);
-          goTab('chat');setTimeout(()=>sendChip(topic),150);
-        };
+        card.onclick=()=>startRoadmapLesson(ls.id);
       }
       div.appendChild(card);
     });
@@ -5376,16 +5478,25 @@ const LEARNING_PATHS=[
   {id:'travel',icon:'<svg viewBox="0 0 24 24"><path d="M12 2.5l2.5 7 7.5 1.5-5 4 1.2 7.5-6.2-3.5L5.8 22.5 7 15l-5-4 7.5-1.5z" fill="none"/><path d="M3 12h18"/></svg>',color:'#a78bfa',name:{ru:'Путешествия',en:'Travel'},desc:{ru:'Аэропорт, отель',en:'Airport, hotel'}},
 ];
 function getActivePath(){return LS.get('learning_path')||'';}
-function setActivePath(id){LS.set('learning_path',id);haptic('success');renderPathBanner();closeMod('pathm');}
+function setActivePath(id){
+  LS.set('learning_path',id);
+  haptic('success');
+  renderPathBanner();
+  if(learnTab==='road')renderRoadmap();
+  closeMod('pathm');
+}
 function openPathPicker(){openMod('pathm');renderPathSelector();}
 function renderPathSelector(){
   var wrap=document.getElementById('path-selector');if(!wrap)return;
   var active=getActivePath();
+  var stats=typeof rmProgressStats==='function'?rmProgressStats(LS.getJ('rm_progress')||{}):{pct:0};
+  var label={ru:'прогресс пути',en:'path progress',es:'progreso',pt:'progresso'}[lang]||'progress';
   wrap.innerHTML=LEARNING_PATHS.map(function(p){
     var isActive=p.id===active;
-    return '<div class="lp-card'+(isActive?' active-path':'')+'" onclick="setActivePath(\''+p.id+'\')"><div class="lp-icon" style="background:'+p.color+'22;color:'+p.color+'">'+p.icon+'</div><div class="lp-info"><div class="lp-name">'+(p.name[lang]||p.name.en)+'</div><div class="lp-desc">'+(p.desc[lang]||p.desc.en)+'</div></div>'+(isActive?'<div class="lp-check">✓</div>':'')+'</div>';
+    return '<div class="lp-card'+(isActive?' active-path':'')+'" onclick="setActivePath(\''+p.id+'\')"><div class="lp-icon" style="background:'+p.color+'22;color:'+p.color+'">'+p.icon+'</div><div class="lp-info"><div class="lp-name">'+(p.name[lang]||p.name.en)+'</div><div class="lp-desc">'+(p.desc[lang]||p.desc.en)+'</div><div class="lp-progress">'+stats.pct+'% '+label+'</div></div>'+(isActive?'<div class="lp-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>':'')+'</div>';
   }).join('');
-}function renderPathBanner(){
+}
+function renderPathBanner(){
   var el=document.getElementById('path-banner');if(!el)return;
   var pid=getActivePath();if(!pid){el.style.display='none';return;}
   var path=LEARNING_PATHS.find(function(p){return p.id===pid;});if(!path){el.style.display='none';return;}
