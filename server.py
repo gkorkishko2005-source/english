@@ -675,10 +675,11 @@ async def handle_sync_stats(request):
         words = int(body.get("words",0))
         tests = int(body.get("tests",0))
         errors = int(body.get("errors",0))
+        streak = int(body.get("streak",0))
         level = body.get("level","B1")
         # Update with GREATEST to never decrease
         try:
-            await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),$1), sessions=GREATEST(COALESCE(sessions,0),$2), words=GREATEST(COALESCE(words,0),$3), tests=GREATEST(COALESCE(tests,0),$4), mistakes=GREATEST(COALESCE(mistakes,0),$5), level=$6, last_active=CURRENT_DATE WHERE uid=$7", xp, sessions, words, tests, errors, level, uid)
+            await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),?), sessions=GREATEST(COALESCE(sessions,0),?), words=GREATEST(COALESCE(words,0),?), tests=GREATEST(COALESCE(tests,0),?), mistakes=GREATEST(COALESCE(mistakes,0),?), streak=GREATEST(COALESCE(streak,0),?), level=?, last_active=CURRENT_DATE WHERE uid=?", xp, sessions, words, tests, errors, streak, level, uid)
         except Exception as e:
             logger.debug(f"sync update: {e}")
         try:

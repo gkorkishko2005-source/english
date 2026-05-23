@@ -309,12 +309,28 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Streak */
 .stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:6px}
-.streak-chip{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:12px 0 0;background:linear-gradient(135deg,rgba(255,149,0,.10),rgba(255,107,107,.06));border:1px solid rgba(255,149,0,.22);border-radius:var(--r);cursor:pointer;transition:transform .15s,border-color .2s}
-.streak-chip:hover{transform:translateY(-1px);border-color:rgba(255,149,0,.4)}
+.streak-chip{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;margin:12px 0 0;background:linear-gradient(135deg,rgba(255,149,0,.13),rgba(255,107,107,.07));border:1px solid rgba(255,149,0,.25);border-radius:var(--r);cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s;overflow:hidden}
+.streak-chip::after{content:'';position:absolute;inset:-40% -20% auto auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,48,.20),transparent 68%);pointer-events:none;animation:streakGlow 2.8s ease-in-out infinite}
+.streak-chip:hover{transform:translateY(-1px);border-color:rgba(255,149,0,.4);box-shadow:0 10px 28px rgba(255,149,0,.10)}
 .streak-chip:active{transform:scale(.98)}
-.streak-chip-fire{width:32px;height:32px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(255,149,0,.35))}
+.streak-chip-fire{position:relative;z-index:1;width:34px;height:34px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(255,149,0,.38));animation:flameFloat 1.9s ease-in-out infinite}
+.flame-main{transform-origin:50% 82%;animation:flameMain 1.15s ease-in-out infinite}
+.flame-inner{transform-origin:50% 84%;animation:flameInner .95s ease-in-out infinite}
+.flame-spark{animation:sparkRise 1.7s ease-in-out infinite;opacity:.8}
+.flame-spark.s2{animation-delay:.38s}.flame-spark.s3{animation-delay:.72s}
 .streak-chip-n{font-size:20px;font-weight:800;color:#ff9500;line-height:1;min-width:20px}
 .streak-chip-lbl{font-size:13px;font-weight:600;color:var(--t2);margin-left:-2px}
+.streak-chip.ignite{animation:streakIgnite .9s cubic-bezier(.2,1.2,.2,1)}
+.streak-chip.ignite .streak-chip-n{animation:num-pop .8s ease}
+.streak-toast{position:fixed;left:50%;top:22%;z-index:350;transform:translateX(-50%) scale(.88);padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,#ff9500,#ff5f57);color:#fff;font-weight:900;font-size:18px;box-shadow:0 18px 46px rgba(255,95,87,.32);opacity:0;pointer-events:none;animation:streakToast 1.8s ease forwards}
+.streak-toast small{display:block;font-size:11px;font-weight:700;opacity:.85;margin-top:3px;text-align:center}
+@keyframes flameFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-2px) rotate(1.5deg)}}
+@keyframes flameMain{0%,100%{transform:scale(1)}45%{transform:scale(1.06,.94) translateY(1px)}}
+@keyframes flameInner{0%,100%{transform:scale(1)}50%{transform:scale(.88,1.08) translateY(-1px)}}
+@keyframes sparkRise{0%{transform:translateY(5px) scale(.55);opacity:0}30%{opacity:.85}100%{transform:translateY(-12px) scale(.9);opacity:0}}
+@keyframes streakGlow{0%,100%{opacity:.55;transform:scale(.95)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes streakIgnite{0%{transform:scale(1)}28%{transform:scale(1.04);box-shadow:0 0 0 0 rgba(255,149,0,.38)}65%{transform:scale(.99);box-shadow:0 0 0 12px rgba(255,149,0,0)}100%{transform:scale(1)}}
+@keyframes streakToast{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.86)}18%,72%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-18px) scale(.96)}}
 .stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0;overflow:hidden}
 .stk-flame svg{width:28px;height:28px}
 .stk-flame img,.stk-flame video{width:40px;height:40px;object-fit:contain}
@@ -1255,8 +1271,22 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="profile-badges" id="profile-badges"></div>
   </div>
   <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="goTab('settings')"></div>
-  <div class="streak-chip" onclick="goTab('progress')">
-    <img src="icons/fire.png" alt="🔥" class="streak-chip-fire">
+  <div class="streak-chip" id="streak-chip" onclick="goTab('progress')">
+    <svg class="streak-chip-fire" viewBox="0 0 48 48" aria-hidden="true">
+      <defs>
+        <linearGradient id="fg-main" x1="12" y1="6" x2="34" y2="42" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#ffcf5c"/><stop offset=".48" stop-color="#ff9500"/><stop offset="1" stop-color="#ff5f57"/>
+        </linearGradient>
+        <linearGradient id="fg-inner" x1="19" y1="18" x2="29" y2="39" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#fff4b8"/><stop offset="1" stop-color="#ffd166"/>
+        </linearGradient>
+      </defs>
+      <circle class="flame-spark s1" cx="35" cy="13" r="2" fill="#ffb830"/>
+      <circle class="flame-spark s2" cx="14" cy="18" r="1.7" fill="#ff7a59"/>
+      <circle class="flame-spark s3" cx="30" cy="8" r="1.3" fill="#ffe08a"/>
+      <path class="flame-main" d="M24 43c9.2 0 15.2-6.1 15.2-14.2 0-6.6-3.6-10.8-7.8-14.8-2.4-2.3-4.5-5-4.7-8.7-5.8 3.9-7.4 8.4-6.9 13.2-2.7-1.4-4.3-3.8-4.8-6.4-4 4.1-6.2 8.9-6.2 14.1C8.8 36.2 15 43 24 43Z" fill="url(#fg-main)"/>
+      <path class="flame-inner" d="M24.3 39c4.7 0 7.9-3.2 7.9-7.7 0-3.7-2.2-6-4.5-8.5-1.3-1.4-2.3-3-2.4-5.2-3.4 2.4-4.2 5.2-3.8 8.2-1.7-.8-2.8-2.1-3.3-3.7-2.1 2.4-3.2 5-3.2 8.1C15 35.5 18.8 39 24.3 39Z" fill="url(#fg-inner)"/>
+    </svg>
     <span class="streak-chip-n" id="hstk">0</span>
     <span class="streak-chip-lbl" id="hstk-lbl">days</span>
   </div>
@@ -2569,6 +2599,13 @@ const MISSION_POOL=[
   {id:'check', key:'check', target:1, xp:25, label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
 ];
 function _todaySeed(){const d=new Date();return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate();}
+function localDayKey(d=new Date()){
+  const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return z.toISOString().slice(0,10);
+}
+function prevDayKey(){
+  const d=new Date();d.setDate(d.getDate()-1);return localDayKey(d);
+}
 function todayMissions(){
   const seed=_todaySeed();
   const idx=MISSION_POOL.map((_,i)=>i);
@@ -2578,6 +2615,47 @@ function todayMissions(){
     const t=idx[i];idx[i]=idx[j];idx[j]=t;
   }
   return idx.slice(0,4).map(i=>MISSION_POOL[i]);
+}
+function allMissionsDone(sv){
+  const done=(sv&&sv.done)||{};
+  return todayMissions().every(m=>!!done[m.id]);
+}
+function completeDailyStreak(){
+  const today=localDayKey();
+  if(LS.get('streak_done_date')===today)return false;
+  const prev=LS.get('streak_done_date');
+  if(!window._d)window._d={streak:0,xp:0};
+  const base=Number(window._d.streak||0);
+  window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
+  LS.set('streak_done_date',today);
+  LS.set('local_streak',String(window._d.streak));
+  addLocalXP(10);
+  renderHome(window._d);
+  try{animateStreakComplete(window._d.streak);}catch(e){}
+  try{renderBadges();renderAchievements();}catch(e){}
+  try{syncToServer();}catch(e){}
+  return true;
+}
+function checkDailyStreakCompletion(sv){
+  if(!allMissionsDone(sv))return;
+  completeDailyStreak();
+}
+function animateStreakComplete(streak){
+  const chip=document.getElementById('streak-chip');
+  if(chip){
+    chip.classList.remove('ignite');
+    void chip.offsetWidth;
+    chip.classList.add('ignite');
+    setTimeout(()=>chip.classList.remove('ignite'),950);
+  }
+  const old=document.querySelector('.streak-toast');if(old)old.remove();
+  const t=document.createElement('div');
+  t.className='streak-toast';
+  t.innerHTML=(lang==='ru'?'Стрик продлён':'Streak extended')+'<small>'+streak+' '+({ru:'дней подряд',en:'days in a row',es:'días seguidos',pt:'dias seguidos'}[lang]||'days in a row')+'</small>';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1900);
+  try{sfx.level();}catch(e){}
+  haptic('success');
 }
 function loadMissions(){
   const today=new Date().toDateString();
@@ -2594,6 +2672,7 @@ function loadMissions(){
     if(chk)chk.classList.toggle('done',done);
     if(xp)xp.textContent='+'+m.xp+' XP';
   });
+  checkDailyStreakCompletion(sv);
 }
 function trackM(key,delta=1){
   const today=new Date().toDateString();
@@ -2616,16 +2695,8 @@ function trackM(key,delta=1){
   if(earned&&xpGain>0){
     haptic('success');
     toast(`+${xpGain} XP`, '⭐');
-    if(!window._d) window._d = {xp:0};
-    window._d.xp = (window._d.xp || 0) + xpGain;
-    updateXPBar(window._d.xp);
-    addWeeklyXP(xpGain);
-    if(API && window._uid){
-      fetch(`${API}/api/add_xp`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({uid: window._uid, xp: xpGain})
-      }).catch(()=>{});
-    }
+    addLocalXP(xpGain);
+    checkDailyStreakCompletion(sv);
   }
   loadMissions();
 }
@@ -5340,6 +5411,7 @@ function syncFromServer(){
     // Монотонная сверка: серверное значение (может отставать/быть 0 из-за гонки
     // или молчаливого сбоя add_xp) НЕ должно занижать уже заработанный прогресс.
     d.xp=Math.max(d.xp||0,localXP);
+    d.streak=Math.max(d.streak||0,parseInt(LS.get('local_streak')||'0',10)||0);
     saveXP(d.xp);
     stats.sessions=d.sessions=Math.max(d.sessions||0,stats.sessions||0);
     stats.words=d.words=Math.max(d.words||0,stats.words||0);
@@ -5463,7 +5535,7 @@ async function init(){
 
     // Show UI immediately with local data
     const localXP=loadXP();
-    let d={name:fallback,level:LS.get('ob_level')||'B1',xp:localXP,streak:0,sessions:0,words:0,tests:0,errors:0,lang,profession:LS.get('app_profession')||'',remind_time:LS.get('app_remind')||'',interests:[],weekly:LS.getJ('weekly_xp')||Array(7).fill(0),toefl_scores:[],due_words:[]};
+    let d={name:fallback,level:LS.get('ob_level')||'B1',xp:localXP,streak:parseInt(LS.get('local_streak')||'0',10)||0,sessions:0,words:0,tests:0,errors:0,lang,profession:LS.get('app_profession')||'',remind_time:LS.get('app_remind')||'',interests:[],weekly:LS.getJ('weekly_xp')||Array(7).fill(0),toefl_scores:[],due_words:[]};
 
     try{d=restoreSettings(d);}catch(e){console.warn('restoreSettings',e);}
     window._d=d;
