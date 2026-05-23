@@ -9,6 +9,7 @@ import logging
 import os
 import random
 import re
+from urllib.parse import quote
 
 import httpx
 from aiogram import Bot, Dispatcher, F
@@ -16,11 +17,12 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import (
-    BufferedInputFile, CallbackQuery,
+    BotCommand, BufferedInputFile, CallbackQuery,
     InlineKeyboardButton, InlineKeyboardMarkup,
     InlineQuery, InlineQueryResultArticle, InputTextMessageContent,
-    KeyboardButton, Message,
+    KeyboardButton, MenuButtonWebApp, Message,
     PhotoSize, ReplyKeyboardMarkup, Voice,
+    WebAppInfo,
 )
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
@@ -39,6 +41,7 @@ from database import (
     start_story, get_active_story, update_story,
     log_tone,
     set_premium, check_premium,
+    apply_referral, get_referral_count,
 )
 from prompts import (
     build_system, INTEREST_TAG,
@@ -53,6 +56,7 @@ BOT_TOKEN     = os.getenv("BOT_TOKEN")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
+BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
 
 # ══ ADMIN WHITELIST (free lifetime premium) ══════════════════════════════════
 # Добавь сюда свои Telegram UID — они получат бесплатный Premium навсегда
@@ -98,6 +102,35 @@ logger = logging.getLogger(__name__)
 bot       = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp        = Dispatcher()
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
+
+BOT_PROFILE = {
+    "name_default": "PolyGlotty English",
+    "name_ru": "PolyGlotty English",
+    "short_default": "AI English tutor: chat, corrections, vocabulary, grammar, TOEFL and daily streaks.",
+    "short_ru": "AI-репетитор английского: чат, исправление ошибок, слова, грамматика, TOEFL и стрик.",
+    "description_default": (
+        "PolyGlotty is an AI English tutor inside Telegram.\n\n"
+        "Practice English every day:\n"
+        "• AI chat with corrections\n"
+        "• Flashcards and spaced repetition\n"
+        "• Grammar games and drills\n"
+        "• Roleplay: interview, travel, cafe, business\n"
+        "• TOEFL practice, progress and streaks\n\n"
+        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
+        "Open the app and start with a free trial."
+    ),
+    "description_ru": (
+        "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
+        "Практикуй английский каждый день:\n"
+        "• чат с исправлением ошибок\n"
+        "• карточки и интервальное повторение\n"
+        "• grammar games и drills\n"
+        "• сценки: интервью, путешествия, кафе, бизнес\n"
+        "• TOEFL, прогресс и стрик\n\n"
+        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
+        "Открой приложение и начни с бесплатного периода."
+    ),
+}
 
 # ══════════════════════════════════════════════════════════════════
 #  ИСТОРИЯ И СОСТОЯНИЯ
@@ -644,6 +677,35 @@ async def handle_inline(query: InlineQuery):
 #  КОМАНДЫ
 # ══════════════════════════════════════════════════════════════════
 
+async def setup_bot_profile():
+    """Apply BotFather growth basics from prompt.rtf: searchable name, about text, commands, WebApp menu."""
+    commands = [
+        BotCommand(command="start", description="Open app / Главное меню"),
+        BotCommand(command="premium", description="Plans and limits / Подписки"),
+        BotCommand(command="share", description="Invite friends / Пригласить друзей"),
+        BotCommand(command="lesson", description="Grammar lesson / Урок грамматики"),
+        BotCommand(command="vocab", description="Vocabulary practice / Слова"),
+        BotCommand(command="test", description="English test / Тест"),
+        BotCommand(command="toefl", description="TOEFL practice / TOEFL"),
+        BotCommand(command="roleplay", description="Roleplay scenarios / Сценки"),
+        BotCommand(command="story", description="Interactive stories / Истории"),
+        BotCommand(command="help", description="How to use / Помощь"),
+    ]
+    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    try:
+        await bot.set_my_name(BOT_PROFILE["name_default"])
+        await bot.set_my_name(BOT_PROFILE["name_ru"], language_code="ru")
+        await bot.set_my_short_description(BOT_PROFILE["short_default"])
+        await bot.set_my_short_description(BOT_PROFILE["short_ru"], language_code="ru")
+        await bot.set_my_description(BOT_PROFILE["description_default"])
+        await bot.set_my_description(BOT_PROFILE["description_ru"], language_code="ru")
+        await bot.set_my_commands(commands)
+        if app_url:
+            await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Open App", web_app=WebAppInfo(url=app_url)))
+        logger.info("Bot profile metadata updated")
+    except Exception as e:
+        logger.warning(f"setup_bot_profile failed: {e}")
+
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     uid  = message.from_user.id
@@ -663,12 +725,13 @@ async def cmd_start(message: Message):
             logger.error(f"cmd_premium from start error: {e}")
             await message.answer("⚠️ Error loading premium. Try /premium")
         return
+    ref_applied = False
     if args.startswith("ref_"):
         try:
             ref_uid = int(args.replace("ref_",""))
-            await add_xp(ref_uid, 500)
-        except Exception:
-            pass
+            ref_applied = await apply_referral(uid, ref_uid)
+        except Exception as e:
+            logger.warning(f"referral failed uid={uid} args={args}: {e}")
 
     # Grant free premium if admin (non-blocking)
     try:
@@ -685,7 +748,6 @@ async def cmd_start(message: Message):
     ru = lang == "ru"
 
     # WebApp button
-    from aiogram.types import WebAppInfo
     app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
 
     kb_buttons = []
@@ -698,6 +760,16 @@ async def cmd_start(message: Message):
         text="💎 Premium",
         callback_data="open_premium"
     )])
+    ref_link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
+    share_text = (
+        "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty"
+        if ru else
+        "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty"
+    )
+    kb_buttons.append([InlineKeyboardButton(
+        text="Пригласить друга" if ru else "Invite a friend",
+        url=f"https://t.me/share/url?url={quote(ref_link, safe='')}&text={quote(share_text, safe='')}"
+    )])
 
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
 
@@ -708,28 +780,68 @@ async def cmd_start(message: Message):
         pass
     badge = " · 👑 Premium" if is_prem else ""
 
+    ref_line = "\n\nБонус за приглашение начислен: +50 XP тебе, +150 XP другу." if (ru and ref_applied) else (
+        "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
+    )
     text = (
-        f"👋 <b>Привет, {name}!</b>{badge}\n\n"
-        f"Я <b>ALEX</b> — твой AI-репетитор английского.\n\n"
-        f"📱 <b>Открой приложение</b> для обучения:\n"
-        f"• Чат с AI-репетитором\n"
-        f"• Карточки и повторение слов\n"
-        f"• Grammar games\n"
-        f"• TOEFL тренировка\n"
-        f"• Прогресс и статистика\n\n"
-        f"👇 Нажми кнопку ниже"
+        f"<b>Привет, {name}!</b>{badge}\n\n"
+        f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
+        f"Тренируй английский каждый день без отдельного приложения.\n\n"
+        f"<b>Что умеет бот:</b>\n"
+        f"• исправляет ошибки в чате\n"
+        f"• объясняет грамматику простыми словами\n"
+        f"• даёт карточки, drills и мини-игры\n"
+        f"• тренирует speaking через roleplay\n"
+        f"• готовит к TOEFL и ведёт прогресс\n\n"
+        f"<b>Старт:</b> открой приложение ниже. Новым пользователям доступен Basic trial на 3 дня."
+        f"{ref_line}"
     ) if ru else (
-        f"👋 <b>Hey, {name}!</b>{badge}\n\n"
-        f"I'm <b>ALEX</b> — your AI English tutor.\n\n"
-        f"📱 <b>Open the app</b> to start learning:\n"
-        f"• Chat with AI tutor\n"
-        f"• Flashcards & vocabulary\n"
-        f"• Grammar games\n"
-        f"• TOEFL practice\n"
-        f"• Progress tracking\n\n"
-        f"👇 Tap the button below"
+        f"<b>Hey, {name}!</b>{badge}\n\n"
+        f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
+        f"Practice English every day without installing another app.\n\n"
+        f"<b>What it does:</b>\n"
+        f"• corrects your chat mistakes\n"
+        f"• explains grammar clearly\n"
+        f"• gives flashcards, drills and mini-games\n"
+        f"• trains speaking through roleplay\n"
+        f"• helps with TOEFL and tracks progress\n\n"
+        f"<b>Start:</b> open the app below. New users get a 3-day Basic trial."
+        f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+
+@dp.message(Command("share"))
+async def cmd_share(message: Message):
+    uid = message.from_user.id
+    lang = await get_lang(uid) or "ru"
+    ru = lang == "ru"
+    ref_count = 0
+    try:
+        await upsert_user(uid, message.from_user.first_name or "Student")
+        ref_count = await get_referral_count(uid)
+    except Exception as e:
+        logger.warning(f"share stats failed uid={uid}: {e}")
+    link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
+    text = (
+        "<b>Пригласи друга в PolyGlotty</b>\n\n"
+        "Алгоритм простой: полезный бот + личная рекомендация = лучший рост.\n\n"
+        f"Твоя ссылка:\n<code>{link}</code>\n\n"
+        "Бонус: друг получает +50 XP, ты получаешь +150 XP за нового пользователя.\n"
+        f"Приглашено: <b>{ref_count}</b>"
+    ) if ru else (
+        "<b>Invite a friend to PolyGlotty</b>\n\n"
+        "Simple growth loop: useful bot + personal recommendation.\n\n"
+        f"Your link:\n<code>{link}</code>\n\n"
+        "Bonus: your friend gets +50 XP, you get +150 XP for a new user.\n"
+        f"Invited: <b>{ref_count}</b>"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="Поделиться" if ru else "Share",
+            url=f"https://t.me/share/url?url={quote(link, safe='')}&text={quote('AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty', safe='')}"
+        )]
+    ])
+    await message.answer(text, parse_mode="HTML", reply_markup=kb)
 
 @dp.callback_query(F.data == "open_premium")
 async def cb_open_premium(cb: CallbackQuery):
@@ -928,7 +1040,6 @@ async def cmd_remind(m: Message):
 @dp.message(Command("help"))
 async def cmd_help(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
-    from aiogram.types import WebAppInfo
     app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
     kb = None
     if app_url:
@@ -946,6 +1057,7 @@ async def cmd_help(m: Message):
          "• Story Mode\n"
          "• TOEFL практика\n\n"
          "/premium — подписка\n"
+         "/share — пригласить друга и получить XP\n"
          "/start — главное меню\n\n"
          "👇 Открой приложение") if lang=="ru" else
         ("<b>ALEX — AI English Tutor</b>\n\n"
@@ -956,6 +1068,7 @@ async def cmd_help(m: Message):
          "• Story Mode\n"
          "• TOEFL practice\n\n"
          "/premium — subscription\n"
+         "/share — invite a friend and earn XP\n"
          "/start — main menu\n\n"
          "👇 Open the app"),
         reply_markup=kb
@@ -1710,6 +1823,7 @@ async def main():
     web_runner = await start_server()
 
     await bot.delete_webhook(drop_pending_updates=True)
+    await setup_bot_profile()
 
     try:
         await dp.start_polling(bot)

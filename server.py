@@ -169,6 +169,7 @@ async def handle_user(request):
                 "uid": uid, "name": "Student", "level": "B1", "xp": 0,
                 "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
                 "lang": "ru", "profession": "", "remind_time": "",
+                "referrals": 0,
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
                 "is_premium": uid in ADMIN_IDS,
             }, headers={"Access-Control-Allow-Origin": "*"})
@@ -198,6 +199,7 @@ async def handle_user(request):
             "lang": lang_db,
             "profession": profession,
             "remind_time": user.get("remind_time", "") if isinstance(user, dict) else "",
+            "referrals": int(user.get("referrals") or 0) if isinstance(user, dict) else 0,
             "interests": [i["name"] for i in interests] if interests else [],
             "weekly": weekly,
             "toefl_scores": [],
@@ -211,6 +213,7 @@ async def handle_user(request):
             "uid": uid, "name": "Student", "level": "B1", "xp": 0,
             "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
             "lang": "ru", "profession": "", "remind_time": "",
+            "referrals": 0,
             "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
             "is_premium": uid in ADMIN_IDS,
         }, headers={"Access-Control-Allow-Origin": "*"})

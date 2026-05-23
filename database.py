@@ -93,6 +93,8 @@ CREATE TABLE IF NOT EXISTS users (
     is_premium      BOOLEAN DEFAULT FALSE,
     premium_until   TIMESTAMPTZ,
     premium_tier    TEXT DEFAULT '',
+    ref_by          BIGINT,
+    referrals       INTEGER DEFAULT 0,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -193,7 +195,10 @@ CREATE TABLE IF NOT EXISTS users (
     level TEXT DEFAULT 'B1', interests TEXT DEFAULT '', profession TEXT DEFAULT '',
     streak INTEGER DEFAULT 0, last_active TEXT, xp INTEGER DEFAULT 0,
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
-    auto_level INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now'))
+    auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
+    premium_until TEXT, premium_tier TEXT DEFAULT '',
+    ref_by INTEGER, referrals INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, type TEXT,
@@ -245,6 +250,18 @@ async def db_init():
             await db(stmt)
         except Exception as e:
             logger.warning(f"Schema statement warning: {e}")
+    migrations = [
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_by BIGINT" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ref_by INTEGER",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN referrals INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN is_premium INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_until TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_tier TEXT DEFAULT ''",
+    ]
+    for stmt in migrations:
+        try:
+            await db(stmt)
+        except Exception as e:
+            logger.debug(f"Schema migration skipped: {e}")
     logger.info(f"DB initialized ({'PostgreSQL' if USE_POSTGRES else 'SQLite'})")
 
 
@@ -296,6 +313,26 @@ async def upsert_user(uid: int, name: str):
 async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
+
+async def apply_referral(new_uid: int, ref_uid: int) -> bool:
+    """Attach a valid first referral once and reward the inviter."""
+    if not new_uid or not ref_uid or new_uid == ref_uid:
+        return False
+    await upsert_user(ref_uid, "Student")
+    await upsert_user(new_uid, "Student")
+    user = await get_user(new_uid)
+    if not user or user.get("ref_by"):
+        return False
+    await db("UPDATE users SET ref_by=? WHERE uid=? AND (ref_by IS NULL OR ref_by=0)", ref_uid, new_uid)
+    await db("UPDATE users SET referrals=COALESCE(referrals,0)+1, xp=COALESCE(xp,0)+150 WHERE uid=?", ref_uid)
+    await db("UPDATE users SET xp=COALESCE(xp,0)+50 WHERE uid=?", new_uid)
+    return True
+
+async def get_referral_count(uid: int) -> int:
+    user = await get_user(uid)
+    if not user:
+        return 0
+    return int(user.get("referrals") or 0)
 
 async def set_profession(uid: int, profession: str):
     """Save user's profession to DB (syncs across devices)."""

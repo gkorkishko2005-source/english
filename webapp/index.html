@@ -4584,15 +4584,17 @@ function shareStreak(){
   const streak=d.streak||0;
   const xp=d.xp||0;
   const words=d.words||0;
+  const botName=window.BOT_NAME||'PolyGlotty_bot';
+  const link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
   const texts={
-    ru:`🔥 Мой стрик ${streak} дней в LinguaMax!\n📚 ${words} слов изучено · ${xp} XP\n\nУчи английский с ИИ-репетитором ALEX 🤖\n@PolyGlotty_bot`,
-    en:`🔥 ${streak}-day streak on LinguaMax!\n📚 ${words} words learned · ${xp} XP\n\nLearn English with AI tutor ALEX 🤖\n@PolyGlotty_bot`,
+    ru:`Мой стрик ${streak} дней в PolyGlotty.\n${words} слов изучено · ${xp} XP\n\nУчи английский с AI-репетитором в Telegram: @${botName}`,
+    en:`${streak}-day streak on PolyGlotty.\n${words} words learned · ${xp} XP\n\nLearn English with an AI tutor in Telegram: @${botName}`,
   };
   const text=texts[lang]||texts.en;
   // Try Telegram share
   if(tg?.openTelegramLink){
     const encoded=encodeURIComponent(text);
-    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent('https://t.me/PolyGlotty_bot')}&text=${encoded}`);
+    tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encoded}`);
     return;
   }
   // Fallback: copy to clipboard
@@ -4848,7 +4850,7 @@ const TIER_LABELS={bronze:{ru:'Бронза',en:'Bronze'},silver:{ru:'Сереб
 function getAchievements(){
   const stats=LS.getJ('local_stats')||{};
   stats.xp=loadXP();stats.streak=window._d?.streak||0;
-  stats.referrals=parseInt(LS.get('referral_count')||'0');
+  stats.referrals=Math.max(parseInt(LS.get('referral_count')||'0',10)||0, parseInt(window._d?.referrals||0,10)||0);
   const unlocked=LS.getJ('achievements_unlocked')||{};
   const results=[];
   ACHIEVEMENTS.forEach(a=>{
@@ -5523,9 +5525,11 @@ function shareProgress(){
 }
 function doShareTg(){
   var d=window._d||{};var xp=d.xp||0;var streak=d.streak||0;var level=LS.get('ob_level')||'A1';
-  var text=(d.name||'Student')+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @PolyGlotty_bot';
-  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent('https://t.me/PolyGlotty_bot')+'&text='+encodeURIComponent(text));}
-  else if(navigator.share){navigator.share({text:text,url:'https://t.me/PolyGlotty_bot'}).catch(function(){});}
+  var botName=window.BOT_NAME||'PolyGlotty_bot';
+  var link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
+  var text=(d.name||'Student')+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @'+botName;
+  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));}
+  else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
   else{try{navigator.clipboard.writeText(text);toast(lang==='ru'?'Скопировано!':'Copied!','✅');}catch(e){}}
 }
 
@@ -5563,7 +5567,14 @@ function loadAdminStats(){
 
 /* ══ GIFT SUBSCRIPTION ══ */
 function openGiftSub(){
-  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent('https://t.me/PolyGlotty_bot?start=premium')+'&text='+encodeURIComponent(lang==='ru'?'Учи английский с AI! Попробуй бесплатно:':'Learn English with AI! Try free:'));}
+  var botName=window.BOT_NAME||'PolyGlotty_bot';
+  var link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
+  var text=lang==='ru'
+    ? 'Учи английский с AI-репетитором в Telegram. Попробуй PolyGlotty:'
+    : 'Learn English with an AI tutor in Telegram. Try PolyGlotty:';
+  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));}
+  else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(link);}catch(e){}}
   toast(lang==='ru'?'Ссылка готова':'Link ready','✅');
 }
 
@@ -5622,6 +5633,7 @@ function syncFromServer(){
     stats.words=d.words=Math.max(d.words||0,stats.words||0);
     stats.tests=d.tests=Math.max(d.tests||0,stats.tests||0);
     stats.errors=d.errors=Math.max(d.errors||0,stats.errors||0);
+    stats.referrals=d.referrals=Math.max(parseInt(d.referrals||0,10)||0,parseInt(LS.get('referral_count')||'0',10)||0);
     // Локально-редактируемые поля: LS-приоритет (защита от перезаписи серверной гонкой)
     var lp=LS.get('app_profession');if(lp)d.profession=lp;
     var lr=LS.get('app_remind');if(lr)d.remind_time=lr;
@@ -5740,7 +5752,7 @@ async function init(){
 
     // Show UI immediately with local data
     const localXP=loadXP();
-    let d={name:fallback,level:LS.get('ob_level')||'B1',xp:localXP,streak:parseInt(LS.get('local_streak')||'0',10)||0,sessions:0,words:0,tests:0,errors:0,lang,profession:LS.get('app_profession')||'',remind_time:LS.get('app_remind')||'',interests:[],weekly:LS.getJ('weekly_xp')||Array(7).fill(0),toefl_scores:[],due_words:[]};
+    let d={name:fallback,level:LS.get('ob_level')||'B1',xp:localXP,streak:parseInt(LS.get('local_streak')||'0',10)||0,sessions:0,words:0,tests:0,errors:0,referrals:parseInt(LS.get('referral_count')||'0',10)||0,lang,profession:LS.get('app_profession')||'',remind_time:LS.get('app_remind')||'',interests:[],weekly:LS.getJ('weekly_xp')||Array(7).fill(0),toefl_scores:[],due_words:[]};
 
     try{d=restoreSettings(d);}catch(e){console.warn('restoreSettings',e);}
     window._d=d;
