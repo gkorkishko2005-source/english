@@ -531,6 +531,33 @@ def pronunciation_kb(lang: str):
 #  ПЛАНИРОВЩИК
 # ══════════════════════════════════════════════════════════════════
 
+MOTIVATION_LINES = {
+    "ru": [
+        "Начни сейчас: завтра легче не станет, но ты станешь сильнее.",
+        "Пять минут сегодня лучше, чем идеальный план на потом.",
+        "Двигайся дальше. Английский растёт от повторений, а не от ожидания.",
+        "Одна новая фраза в день — и через месяц ты уже говоришь увереннее.",
+        "Не жди мотивации. Сделай маленький шаг, и она появится по дороге.",
+        "Пока кто-то откладывает, ты можешь стать на один урок ближе к цели.",
+        "Сегодня не нужно идеально. Нужно просто продолжить.",
+        "Будущий ты скажет спасибо за эти 5 минут практики.",
+    ],
+    "en": [
+        "Start now: tomorrow will not get easier, but you will get stronger.",
+        "Five minutes today beats a perfect plan for later.",
+        "Keep moving. English grows through repetition, not waiting.",
+        "One new phrase a day makes you noticeably more confident in a month.",
+        "Do not wait for motivation. Take a small step and it will follow.",
+        "While others postpone, you can get one lesson closer.",
+        "It does not have to be perfect today. It just has to continue.",
+        "Your future self will thank you for these five minutes.",
+    ],
+}
+
+def motivation_line(lang: str = "ru") -> str:
+    lines = MOTIVATION_LINES.get(lang) or MOTIVATION_LINES["en"]
+    return random.choice(lines)
+
 async def send_reminder(uid: int):
     user = await get_user(uid)
     if not user: return
@@ -545,13 +572,21 @@ async def send_reminder(uid: int):
         first = interests.split(",")[0].strip()
         interest_hint = f"\n💡 {'Сегодня разберём тему' if lang=='ru' else 'Today: topic'}: <b>{first}</b>"
 
-    msgs_ru = ["📚 <b>Время английского!</b>","🔥 <b>Не теряй прогресс!</b>","⚡️ <b>Ежедневная практика = беглый English.</b>"]
-    msgs_en = ["📚 <b>Time to practice!</b>","🔥 <b>Keep your streak alive!</b>","⚡️ <b>Daily practice = fluency.</b>"]
+    msgs_ru = ["<b>Время английского.</b>","<b>Твой ежедневный шаг ждёт.</b>","<b>Пора сделать английский чуть сильнее.</b>"]
+    msgs_en = ["<b>Time for English.</b>","<b>Your daily step is waiting.</b>","<b>Make your English a little stronger today.</b>"]
     text = random.choice(msgs_ru if lang=="ru" else msgs_en) + interest_hint
     if streak > 2: text += f"\n\n🔥 Streak: <b>{streak}</b>!"
     if due_cnt:    text += f"\n📅 <b>{due_cnt}</b> {'слов для повторения' if lang=='ru' else 'words due'} → /vocab"
     if due_idioms: text += f"\n🗣 <b>{due_idioms}</b> {'идиом для повторения' if lang=='ru' else 'idioms due'} → /vocab"
-    try: await bot.send_message(uid, text)
+    text += f"\n\n<i>{motivation_line(lang)}</i>"
+    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    kb = None
+    if app_url:
+        kb = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="Открыть практику" if lang=="ru" else "Open practice",
+                                  web_app=WebAppInfo(url=app_url))]
+        ])
+    try: await bot.send_message(uid, text, reply_markup=kb)
     except Exception as e: logger.warning(f"Reminder failed {uid}: {e}")
 
 async def send_weekly_report(uid: int):
@@ -622,7 +657,9 @@ async def send_daily_word(uid: int):
             f"🔊 {w['ph']}\n"
             f"🇷🇺 {w['tr']}\n\n"
             f"📝 <i>{w['ex']}</i>\n\n"
-            f"💡 {'Попробуй использовать в предложении!' if ru else 'Try using it in a sentence!'}",
+            f"<b>{'Как использовать:' if ru else 'How to use it:'}</b> "
+            f"{'напиши своё предложение с этим словом, а ALEX исправит его в чате.' if ru else 'write your own sentence with this word, and ALEX will correct it in chat.'}\n\n"
+            f"<i>{motivation_line(lang)}</i>",
             parse_mode="HTML", reply_markup=kb
         )
     except Exception as e:
@@ -800,6 +837,7 @@ async def cmd_start(message: Message):
         f"• тренирует speaking через roleplay\n"
         f"• готовит к TOEFL и ведёт прогресс\n\n"
         f"<b>Старт:</b> открой приложение ниже. Новым пользователям доступен Basic trial на 3 дня."
+        f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
     ) if ru else (
         f"<b>Hey, {name}!</b>{badge}\n\n"
@@ -812,6 +850,7 @@ async def cmd_start(message: Message):
         f"• trains speaking through roleplay\n"
         f"• helps with TOEFL and tracks progress\n\n"
         f"<b>Start:</b> open the app below. New users get a 3-day Basic trial."
+        f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
@@ -1041,7 +1080,17 @@ async def cmd_interests(m: Message):
 
 @dp.message(Command("remind"))
 async def cmd_remind(m: Message):
-    await m.answer("⏰ Set daily reminder:", reply_markup=remind_kb())
+    lang = await get_lang(m.from_user.id) or "ru"
+    text = (
+        "<b>Ежедневное напоминание</b>\n\n"
+        "Выбери время, когда ALEX будет мягко возвращать тебя к английскому.\n\n"
+        f"<i>{motivation_line('ru')}</i>"
+    ) if lang == "ru" else (
+        "<b>Daily reminder</b>\n\n"
+        "Choose when ALEX should bring you back to English practice.\n\n"
+        f"<i>{motivation_line('en')}</i>"
+    )
+    await m.answer(text, reply_markup=remind_kb())
 
 @dp.message(Command("help"))
 async def cmd_help(m: Message):
@@ -1357,15 +1406,20 @@ async def cb_remind(cb: CallbackQuery):
     if data == "off":
         await update_user(uid, remind_time="off")
         if scheduler.get_job(f"remind_{uid}"): scheduler.remove_job(f"remind_{uid}")
-        await cb.answer(); await cb.message.edit_text("❌ Reminders disabled.")
+        lang = await get_lang(uid) or "ru"
+        await cb.answer(); await cb.message.edit_text("Reminders disabled." if lang=="en" else "Напоминания выключены.")
     else:
+        lang = await get_lang(uid) or "ru"
         await update_user(uid, remind_time=data)
         try:
             h, m = map(int, data.split(":"))
             scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[uid],id=f"remind_{uid}",replace_existing=True)
         except Exception as e: logger.warning(e)
         await cb.answer(f"✅ {data}")
-        await cb.message.edit_text(f"✅ <b>Reminder: {data}</b> 📚")
+        await cb.message.edit_text(
+            (f"<b>Reminder set: {data}</b>\n\n<i>{motivation_line('en')}</i>" if lang=="en"
+             else f"<b>Напоминание: {data}</b>\n\n<i>{motivation_line('ru')}</i>")
+        )
 
 # ══════════════════════════════════════════════════════════════════
 #  ФОТО — Vision Learning

@@ -3644,13 +3644,24 @@ function startReminderTimer(){
   },delay);
 }
 
+const REMINDER_MOTIVATIONS={
+  ru:['Начни сейчас: потом легче не станет, но ты станешь сильнее.','Пять минут сегодня лучше, чем идеальный план на завтра.','Двигайся дальше: английский растёт от повторений.','Одна фраза сегодня уже меняет траекторию.','Не идеально, а стабильно. Открой практику.'],
+  en:['Start now: later will not be easier, but you will be stronger.','Five minutes today beats a perfect plan tomorrow.','Keep moving: English grows through repetition.','One sentence today can change the path.','Steady beats perfect. Open practice.'],
+  es:['Empieza ahora: luego no será más fácil, pero tú serás más fuerte.','Cinco minutos hoy valen más que un plan perfecto mañana.','Sigue: el inglés crece con repetición.','Una frase hoy cambia el camino.','Constancia antes que perfección.'],
+  pt:['Comece agora: depois não fica mais fácil, mas você fica mais forte.','Cinco minutos hoje vencem um plano perfeito amanhã.','Continue: inglês cresce com repetição.','Uma frase hoje muda o caminho.','Constância vence perfeição.']
+};
+function reminderMotivation(){
+  const arr=REMINDER_MOTIVATIONS[lang]||REMINDER_MOTIVATIONS.en;
+  const day=Math.floor(Date.now()/86400000);
+  return arr[day%arr.length];
+}
 function fireReminder(){
-  const msg=lang==='ru'?'Время учить английский! 📚 Открой LinguaMax':'Time to learn English! 📚 Open LinguaMax';
+  const msg=(lang==='ru'?'Время английского. ':'Time for English. ')+reminderMotivation();
   // Telegram WebApp notification (vibrate)
   if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
   // Browser notification
   if('Notification' in window&&Notification.permission==='granted'){
-    new Notification('LinguaMax · ALEX',{
+    new Notification('PolyGlotty · ALEX',{
       body:msg,
       icon:'https://english-production-f7af.up.railway.app/icon.png',
       badge:'https://english-production-f7af.up.railway.app/icon.png',
