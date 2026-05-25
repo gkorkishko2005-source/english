@@ -1187,6 +1187,15 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-grid{display:flex;flex-direction:column;gap:8px}
 .course-card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center}
 .course-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.course-system{background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.05));border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:13px 14px;margin-bottom:9px}
+.course-system-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.course-system-title{font-size:14px;font-weight:850;color:var(--t1)}
+.course-system-sub{font-size:11px;color:var(--t2);line-height:1.35;margin-top:2px}
+.course-system-pill{font-size:10px;font-weight:850;color:var(--a);background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.2);border-radius:999px;padding:4px 8px;white-space:nowrap}
+.course-system-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.course-step{background:rgba(255,255,255,.035);border:1px solid var(--b1);border-radius:10px;padding:8px 6px;text-align:center}
+.course-step strong{display:block;font-size:12px;color:var(--t1);margin-bottom:2px}.course-step span{font-size:9px;color:var(--t3)}
+.course-exam-btn{width:100%;margin-top:10px;border:1px solid rgba(var(--ar),.26);background:rgba(var(--ar),.10);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer}
 .course-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.11);color:var(--a)}
 .course-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-info{min-width:0;flex:1}
@@ -2652,26 +2661,26 @@ function updateXPBar(xp){
 const MK=['1','2','3','4'];
 /* Mission pool — 4 of these are picked daily (deterministic by date). */
 const MISSION_POOL=[
-  {id:'chat3', key:'chat',  target:3, xp:20, label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
-  {id:'chat5', key:'chat',  target:5, xp:30, label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
-  {id:'chat7', key:'chat',  target:7, xp:40, label:{ru:'Проведи 7 реплик в чате',en:'Send 7 chat messages',es:'Envía 7 mensajes',pt:'Envie 7 mensagens'}},
-  {id:'words5',key:'words', target:5, xp:25, label:{ru:'Повтори 5 карточек',en:'Review 5 cards',es:'Repasa 5 tarjetas',pt:'Revise 5 cartões'}},
-  {id:'words8',key:'words', target:8, xp:35, label:{ru:'Повтори 8 карточек',en:'Review 8 cards',es:'Repasa 8 tarjetas',pt:'Revise 8 cartões'}},
-  {id:'words10',key:'words',target:10,xp:45,label:{ru:'Закрой 10 карточек',en:'Finish 10 cards',es:'Completa 10 tarjetas',pt:'Conclua 10 cartões'}},
-  {id:'listen',key:'listen',target:1, xp:35, label:{ru:'Аудио-задание TOEFL',en:'TOEFL listening task',es:'Tarea de escucha TOEFL',pt:'Tarefa de escuta TOEFL'}},
-  {id:'listen2',key:'listen',target:2, xp:50, label:{ru:'Сделай 2 задания на слух',en:'Complete 2 listening tasks',es:'Completa 2 escuchas',pt:'Complete 2 escutas'}},
-  {id:'drill', key:'drill', target:1, xp:30, label:{ru:'Пройди один drill по грамматике',en:'Complete one grammar drill',es:'Completa un drill de gramática',pt:'Complete um drill de gramática'}},
-  {id:'drill2',key:'drill', target:2, xp:45, label:{ru:'Пройди 2 grammar drills',en:'Complete 2 grammar drills',es:'Completa 2 drills',pt:'Complete 2 drills'}},
-  {id:'game',  key:'game',  target:1, xp:25, label:{ru:'Выиграй в любую мини-игру',en:'Win any mini-game',es:'Gana cualquier mini-juego',pt:'Vença qualquer mini-jogo'}},
-  {id:'game2', key:'game',  target:2, xp:40, label:{ru:'Выиграй 2 мини-игры',en:'Win 2 mini-games',es:'Gana 2 mini-juegos',pt:'Vença 2 mini-jogos'}},
-  {id:'rolep', key:'roleplay',target:1,xp:30,label:{ru:'Поговори в ролевой сценке',en:'Try a roleplay scenario',es:'Prueba un escenario de roleplay',pt:'Experimente um cenário de roleplay'}},
-  {id:'rolep2',key:'roleplay',target:2,xp:45,label:{ru:'Сыграй 2 ролевые сценки',en:'Play 2 roleplay scenes',es:'Haz 2 roleplays',pt:'Faça 2 roleplays'}},
-  {id:'story', key:'story', target:1, xp:30, label:{ru:'Пройди одну историю',en:'Finish one story',es:'Termina una historia',pt:'Termine uma história'}},
-  {id:'story2',key:'story', target:2, xp:45, label:{ru:'Пройди 2 истории',en:'Finish 2 stories',es:'Termina 2 historias',pt:'Termine 2 histórias'}},
-  {id:'check', key:'check', target:1, xp:25, label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
-  {id:'check2',key:'check', target:2, xp:40, label:{ru:'Проверь 2 текста',en:'Check 2 texts',es:'Revisa 2 textos',pt:'Revise 2 textos'}},
-  {id:'mix_chat_words',key:'chat',target:4,xp:30,label:{ru:'Спроси ALEX о 4 новых словах',en:'Ask ALEX about 4 new words',es:'Pregunta 4 palabras nuevas',pt:'Pergunte 4 palavras novas'}},
-  {id:'mix_error',key:'check',target:1,xp:35,label:{ru:'Найди и исправь ошибку',en:'Find and fix one mistake',es:'Corrige un error',pt:'Corrija um erro'}},
+  {id:'chat3', key:'chat',  target:3, xp:8, label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
+  {id:'chat5', key:'chat',  target:5, xp:12, label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
+  {id:'chat7', key:'chat',  target:7, xp:16, label:{ru:'Проведи 7 реплик в чате',en:'Send 7 chat messages',es:'Envía 7 mensajes',pt:'Envie 7 mensagens'}},
+  {id:'words5',key:'words', target:5, xp:10, label:{ru:'Повтори 5 карточек',en:'Review 5 cards',es:'Repasa 5 tarjetas',pt:'Revise 5 cartões'}},
+  {id:'words8',key:'words', target:8, xp:14, label:{ru:'Повтори 8 карточек',en:'Review 8 cards',es:'Repasa 8 tarjetas',pt:'Revise 8 cartões'}},
+  {id:'words10',key:'words',target:10,xp:18,label:{ru:'Закрой 10 карточек',en:'Finish 10 cards',es:'Completa 10 tarjetas',pt:'Conclua 10 cartões'}},
+  {id:'listen',key:'listen',target:1, xp:18, label:{ru:'Аудио-задание TOEFL',en:'TOEFL listening task',es:'Tarea de escucha TOEFL',pt:'Tarefa de escuta TOEFL'}},
+  {id:'listen2',key:'listen',target:2, xp:28, label:{ru:'Сделай 2 задания на слух',en:'Complete 2 listening tasks',es:'Completa 2 escuchas',pt:'Complete 2 escutas'}},
+  {id:'drill', key:'drill', target:1, xp:14, label:{ru:'Пройди один drill по грамматике',en:'Complete one grammar drill',es:'Completa un drill de gramática',pt:'Complete um drill de gramática'}},
+  {id:'drill2',key:'drill', target:2, xp:24, label:{ru:'Пройди 2 grammar drills',en:'Complete 2 grammar drills',es:'Completa 2 drills',pt:'Complete 2 drills'}},
+  {id:'game',  key:'game',  target:1, xp:8, label:{ru:'Выиграй в любую мини-игру',en:'Win any mini-game',es:'Gana cualquier mini-juego',pt:'Vença qualquer mini-jogo'}},
+  {id:'game2', key:'game',  target:2, xp:16, label:{ru:'Выиграй 2 мини-игры',en:'Win 2 mini-games',es:'Gana 2 mini-juegos',pt:'Vença 2 mini-jogos'}},
+  {id:'rolep', key:'roleplay',target:1,xp:18,label:{ru:'Поговори в ролевой сценке',en:'Try a roleplay scenario',es:'Prueba un escenario de roleplay',pt:'Experimente um cenário de roleplay'}},
+  {id:'rolep2',key:'roleplay',target:2,xp:30,label:{ru:'Сыграй 2 ролевые сценки',en:'Play 2 roleplay scenes',es:'Haz 2 roleplays',pt:'Faça 2 roleplays'}},
+  {id:'story', key:'story', target:1, xp:16, label:{ru:'Пройди одну историю',en:'Finish one story',es:'Termina una historia',pt:'Termine uma história'}},
+  {id:'story2',key:'story', target:2, xp:28, label:{ru:'Пройди 2 истории',en:'Finish 2 stories',es:'Termina 2 historias',pt:'Termine 2 histórias'}},
+  {id:'check', key:'check', target:1, xp:12, label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
+  {id:'check2',key:'check', target:2, xp:22, label:{ru:'Проверь 2 текста',en:'Check 2 texts',es:'Revisa 2 textos',pt:'Revise 2 textos'}},
+  {id:'mix_chat_words',key:'chat',target:4,xp:12,label:{ru:'Спроси ALEX о 4 новых словах',en:'Ask ALEX about 4 new words',es:'Pregunta 4 palabras nuevas',pt:'Pergunte 4 palavras novas'}},
+  {id:'mix_error',key:'check',target:1,xp:14,label:{ru:'Найди и исправь ошибку',en:'Find and fix one mistake',es:'Corrige un error',pt:'Corrija um erro'}},
 ];
 function _todaySeed(){const d=new Date();return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate();}
 function localDayKey(d=new Date()){
@@ -2706,7 +2715,7 @@ function completeDailyStreak(){
   window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
   LS.set('streak_done_date',today);
   LS.set('local_streak',String(window._d.streak));
-  addLocalXP(10);
+  addLocalXP(5);
   renderHome(window._d);
   try{animateStreakComplete(window._d.streak);}catch(e){}
   try{renderBadges();renderAchievements();}catch(e){}
@@ -4320,7 +4329,24 @@ function courseIconSvg(){
 function renderCourse(){
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
   const done=LS.getJ('course_done')||{};
-  wrap.innerHTML=GALAXY_COURSE.map(function(ls){
+  const doneCount=Object.keys(done).length;
+  const currentLevel=LS.get('ob_level')||window._d?.level||'A1';
+  const nextExam=({A0:'A2',A1:'A2',A2:'B1',B1:'B2',B2:'C1',C1:'C2'})[String(currentLevel).replace(/\+/,'')]||'B1';
+  const system=`<div class="course-system">
+    <div class="course-system-top">
+      <div><div class="course-system-title">${lang==='ru'?'Системный курс A0-C2':'System course A0-C2'}</div>
+      <div class="course-system-sub">${lang==='ru'?'Темы, практика, аудирование и экзамены для перехода между уровнями.':'Rules, practice, listening and exams to unlock the next level.'}</div></div>
+      <div class="course-system-pill">${doneCount}/${GALAXY_COURSE.length}</div>
+    </div>
+    <div class="course-system-grid">
+      <div class="course-step"><strong>${lang==='ru'?'Теория':'Theory'}</strong><span>${lang==='ru'?'коротко':'short'}</span></div>
+      <div class="course-step"><strong>${lang==='ru'?'Практика':'Practice'}</strong><span>${lang==='ru'?'точность':'accuracy'}</span></div>
+      <div class="course-step"><strong>${lang==='ru'?'Слух':'Listen'}</strong><span>${lang==='ru'?'фразы':'phrases'}</span></div>
+      <div class="course-step"><strong>${lang==='ru'?'Экзамен':'Exam'}</strong><span>80%</span></div>
+    </div>
+    <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${lang==='ru'?'Сдать тест перехода на':'Take level-up test for'} ${nextExam}</button>
+  </div>`;
+  wrap.innerHTML=system+GALAXY_COURSE.map(function(ls){
     const isDone=!!done[ls.id];
     return `<div class="course-card" onclick="openCourseLesson('${ls.id}')">
       <div class="course-ico" style="color:${ls.color}">${courseIconSvg()}</div>
@@ -4368,8 +4394,8 @@ function answerCourse(id,picked){
   });
   if(picked===ls.a){
     const done=LS.getJ('course_done')||{};
-    if(!done[id]){done[id]=Date.now();LS.setJ('course_done',done);addLocalXP(25);bumpStat('tests');}
-    toast('+25 XP','✓');
+    if(!done[id]){done[id]=Date.now();LS.setJ('course_done',done);addLocalXP(12);bumpStat('tests');}
+    toast('+12 XP','✓');
     box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Верно. Повтори примеры вслух: так правило быстрее становится автоматическим.':'Correct. Repeat the examples aloud: this helps the rule become automatic.')+'</div>');
   }else{
     toast(lang==='ru'?'Посмотри правильный вариант':'Check the correct answer','');
@@ -4446,7 +4472,7 @@ function finishLevelTest(){
       <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%)</div>
       <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>`:`Your new level: <b>${target}</b>`}</div>
     </div>`);
-    addLocalXP(100);bumpStat('tests');toast(`+100 XP · Level ${target}`,'🏆');
+    addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'🏆');
   } else {
     haptic('error');
     addMsg('bot',`<div class="lt-result lt-fail">
@@ -4830,42 +4856,42 @@ const CHALLENGES=[
   {
     title:{ru:'Напиши 10 сообщений ALEX',en:'Send 10 messages to ALEX'},
     sub:{ru:'Практикуй разговорный английский',en:'Practice conversational English'},
-    goal:10,unit:'messages',metric:'chat',reward:'+300 XP'
+    goal:10,unit:'messages',metric:'chat',reward:'+120 XP'
   },
   {
     title:{ru:'Повтори 20 карточек',en:'Review 20 flashcards'},
     sub:{ru:'Укрепи словарный запас',en:'Strengthen your vocabulary'},
-    goal:20,unit:'cards',metric:'words',reward:'+250 XP'
+    goal:20,unit:'cards',metric:'words',reward:'+110 XP'
   },
   {
     title:{ru:'Сыграй 3 сценария',en:'Play 3 roleplay scenarios'},
     sub:{ru:'Прокачай разговорные навыки',en:'Level up your speaking skills'},
-    goal:3,unit:'scenarios',metric:'roleplay',reward:'+400 XP'
+    goal:3,unit:'scenarios',metric:'roleplay',reward:'+160 XP'
   },
   {
     title:{ru:'Проверь 3 своих текста',en:'Check 3 of your texts'},
     sub:{ru:'Улучши письменный английский',en:'Improve your written English'},
-    goal:3,unit:'texts',metric:'check',reward:'+350 XP'
+    goal:3,unit:'texts',metric:'check',reward:'+140 XP'
   },
   {
     title:{ru:'Пройди 5 grammar drills',en:'Complete 5 grammar drills'},
     sub:{ru:'Закрепи правила на практике',en:'Build accuracy with practice'},
-    goal:5,unit:'drills',metric:'drill',reward:'+420 XP'
+    goal:5,unit:'drills',metric:'drill',reward:'+170 XP'
   },
   {
     title:{ru:'Сделай 4 аудио-тренировки',en:'Complete 4 listening tasks'},
     sub:{ru:'Прокачай понимание на слух',en:'Train listening comprehension'},
-    goal:4,unit:'audio',metric:'listen',reward:'+380 XP'
+    goal:4,unit:'audio',metric:'listen',reward:'+150 XP'
   },
   {
     title:{ru:'Выиграй 6 мини-игр',en:'Win 6 mini-games'},
     sub:{ru:'Повтори слова через игру',en:'Review words through play'},
-    goal:6,unit:'wins',metric:'game',reward:'+360 XP'
+    goal:6,unit:'wins',metric:'game',reward:'+130 XP'
   },
   {
     title:{ru:'Закончи 3 истории',en:'Finish 3 stories'},
     sub:{ru:'Тренируй контекст и реакцию',en:'Practice context and response'},
-    goal:3,unit:'stories',metric:'story',reward:'+400 XP'
+    goal:3,unit:'stories',metric:'story',reward:'+160 XP'
   },
 ];
 
@@ -5333,8 +5359,8 @@ function ggCheck(gid){
   const res=document.getElementById(gid+'-res');
   if(answer===correct){
     haptic('success');
-    res.innerHTML=`<span class="gg-ok">✅ ${lang==='ru'?'Правильно!':'Correct!'} +15 XP</span>`;
-    addLocalXP(15);trackM('tests');trackM('game');bumpStat('tests');toast('+15 XP','✅');
+    res.innerHTML=`<span class="gg-ok">✅ ${lang==='ru'?'Правильно!':'Correct!'} +8 XP</span>`;
+    addLocalXP(8);trackM('tests');trackM('game');bumpStat('tests');toast('+8 XP','✅');
   }else{
     haptic('error');
     res.innerHTML=`<span class="gg-fail">❌ ${lang==='ru'?'Правильный ответ':'Correct answer'}:<br><b>${correct}</b></span>`;
@@ -5441,7 +5467,7 @@ function hmRender(){
   if(s.done){
     var won=s.word.split('').every(function(c){return s.guessed.indexOf(c)>=0;});
     res=won
-      ?'<div class="hm-res"><span class="hm-ok">🏆 '+_hmL(HM_T.win)+' +15 XP</span></div>'
+      ?'<div class="hm-res"><span class="hm-ok">🏆 '+_hmL(HM_T.win)+' +8 XP</span></div>'
       :'<div class="hm-res"><span class="hm-bad">💀 '+_hmL(HM_T.lose)+': <b>'+s.word+'</b></span></div>';
     res+='<button class="btn bp hm-again" onclick="openHangman()">'+_hmL(HM_T.again)+'</button>';
   }
@@ -5462,7 +5488,7 @@ function hmGuess(letter){
   var won=s.word.split('').every(function(c){return s.guessed.indexOf(c)>=0;});
   if(won){
     s.done=true;
-    try{addLocalXP(15);bumpStat('tests');trackM('game');}catch(e){}
+    try{addLocalXP(8);bumpStat('tests');trackM('game');}catch(e){}
     try{fireConfetti();}catch(e){}
     try{haptic('success');}catch(e){}
   }else if(s.wrong.length>=6){
@@ -5784,7 +5810,7 @@ function showScene(){
   if(scene>=story.scenes.length){
     const total=story.scenes.length;
     const pct=Math.round(storyState.score/total*100);
-    const xp=storyState.score*10;
+    const xp=storyState.score*5;
     addLocalXP(xp);bumpStat('tests');try{trackM('story');}catch(e){}
     addMsg('bot',`<div class="story-end">
       <div class="gg-title">${lang==='ru'?'📖 История завершена!':'📖 Story complete!'}</div>
@@ -6273,7 +6299,7 @@ function drillAnswer(did,picked,correct){
 }
 function finishDrill(){
   if(!drillState)return;
-  var c=drillState.correct,t=drillState.total,pct=Math.round(c/t*100),xp=c*10;
+  var c=drillState.correct,t=drillState.total,pct=Math.round(c/t*100),xp=Math.round(c*3+(pct>=90?10:pct>=70?6:0));
   haptic(pct>=70?'success':'warning');
   if(pct>=80)try{fireConfetti();}catch(e){}
   const upgrade=!hasTier('basic')
