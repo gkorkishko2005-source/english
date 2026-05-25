@@ -1184,6 +1184,28 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .learn-tab{flex:1;padding:9px 8px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:.22s;text-align:center;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1)}
 .learn-tab:active{transform:scale(.96)}
 .learn-tab.on{background:rgba(var(--ar),.12);color:var(--a);border-color:rgba(var(--ar),.25);box-shadow:0 0 12px rgba(var(--ar),.08)}
+.course-grid{display:flex;flex-direction:column;gap:8px}
+.course-card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center}
+.course-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.course-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.11);color:var(--a)}
+.course-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-info{min-width:0;flex:1}
+.course-title{font-size:14px;font-weight:850;color:var(--t1)}
+.course-sub{font-size:11px;color:var(--t2);line-height:1.35;margin-top:2px}
+.course-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.course-pill{font-size:10px;font-weight:750;color:var(--t2);background:var(--e2);border:1px solid var(--b1);padding:4px 7px;border-radius:999px}
+.course-go{width:26px;height:26px;border-radius:9px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center}
+.course-go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-lesson{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:14px;margin-bottom:10px}
+.course-lesson h3{margin:0 0 6px;font-size:16px;color:var(--t1)}
+.course-rule{font-size:13px;line-height:1.5;color:var(--t2)}
+.course-ex{display:grid;gap:6px;margin:12px 0}
+.course-line{font-size:12px;color:var(--t1);background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.course-line button{border:0;background:rgba(var(--ar),.12);color:var(--a);border-radius:8px;padding:5px 7px;cursor:pointer}
+.course-practice{display:grid;gap:7px;margin-top:10px}
+.course-opt{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px;font-size:12px;color:var(--t1);cursor:pointer;transition:.18s}
+.course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
+.course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
 .roadmap-wrap{display:flex;flex-direction:column;gap:8px}
 .rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
 .rm-overview::after{content:'';position:absolute;right:-34px;top:-42px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,.035)}
@@ -1435,11 +1457,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div id="learn-sub" style="font-size:11px;color:var(--t3);margin:-6px 0 8px;padding:0 2px"></div>
   <!-- Tabs -->
   <div class="learn-tabs">
-    <div class="learn-tab on" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
+    <div class="learn-tab on" id="lt-course" onclick="switchLearnTab('course')"><span id="lt-course-lbl">Course</span></div>
+    <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
     <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Roadmap</span></div>
   </div>
+  <!-- COURSE panel -->
+  <div id="learn-course-panel">
+    <div class="course-grid" id="course-wrap"></div>
+  </div>
   <!-- CARDS panel -->
-  <div id="learn-cards-panel">
+  <div id="learn-cards-panel" style="display:none">
     <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
     <div id="lmain">
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
@@ -3352,6 +3379,7 @@ function buildDeckCards(){
   return out.slice(0,5);
 }
 function initLearn(){
+  if(learnTab==='course')renderCourse();
   cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
@@ -3812,6 +3840,74 @@ const LEVEL_TESTS={
 // Level test state
 let levelTestState=null;
 
+const GALAXY_COURSE=[
+  {id:'a0-start',level:'A0',color:'#2ecc71',title:{ru:'Старт с нуля',en:'Start from zero'},sub:{ru:'to be, I am, you are',en:'to be, I am, you are'},rule:{ru:'В английском почти всегда нужен глагол. Для фраз “я студент”, “ты дома” используется to be: I am, you are, he is.',en:'English usually needs a verb. For “I am a student” and “you are home”, use to be: I am, you are, he is.'},examples:['I am ready.','You are right.','She is at home.'],words:['ready','right','home','student','today'],q:'Choose: She ___ ready.',o:['am','are','is','be'],a:2},
+  {id:'a1-routine',level:'A1',color:'#3498db',title:{ru:'Ежедневные действия',en:'Daily actions'},sub:{ru:'Present Simple и привычки',en:'Present Simple habits'},rule:{ru:'Present Simple нужен для привычек и фактов. С he/she/it добавляем -s: I work, she works.',en:'Present Simple is for habits and facts. With he/she/it add -s: I work, she works.'},examples:['I study every day.','He speaks English.','They live in Minsk.'],words:['study','speak','live','every day','usually'],q:'Choose: He ___ English.',o:['speak','speaks','speaking','spoken'],a:1},
+  {id:'a2-past',level:'A2',color:'#9b59b6',title:{ru:'Прошлое',en:'Past events'},sub:{ru:'Past Simple без хаоса',en:'Past Simple clearly'},rule:{ru:'Past Simple описывает завершённые действия в прошлом. В утвердительных фразах часто -ed или вторая форма: worked, went.',en:'Past Simple describes finished past actions. Use -ed or the second form: worked, went.'},examples:['I watched a lesson yesterday.','She went home late.','We finished the task.'],words:['yesterday','finished','went','watched','late'],q:'Choose: I ___ the lesson yesterday.',o:['watch','watched','watching','watches'],a:1},
+  {id:'b1-perfect',level:'B1',color:'#e67e22',title:{ru:'Опыт и результат',en:'Experience and result'},sub:{ru:'Present Perfect',en:'Present Perfect'},rule:{ru:'Present Perfect связывает прошлое с настоящим: have/has + V3. Часто используется для опыта и результата.',en:'Present Perfect connects the past with now: have/has + V3. It is common for experience and results.'},examples:['I have learned ten words.','She has already finished.','Have you ever been to London?'],words:['already','ever','never','learned','finished'],q:'Choose: She ___ already finished.',o:['have','has','is','did'],a:1},
+  {id:'b2-flow',level:'B2',color:'#e74c3c',title:{ru:'Связная речь',en:'Connected speech'},sub:{ru:'linkers and structure',en:'linkers and structure'},rule:{ru:'На B2 важно связывать мысли: however, although, because of, as a result. Это делает речь взрослой и понятной.',en:'At B2, connect ideas with however, although, because of, as a result. This makes speech mature and clear.'},examples:['Although it was hard, I continued.','As a result, my English improved.','However, I need more practice.'],words:['although','however','as a result','because of','continue'],q:'Choose: ___ it was difficult, I kept going.',o:['Although','Because of','Despite of','However'],a:0},
+  {id:'c1-precision',level:'C1',color:'#f1c40f',title:{ru:'Точность мысли',en:'Precision'},sub:{ru:'advanced phrasing',en:'advanced phrasing'},rule:{ru:'На C1 важны точные формулировки: tends to, is likely to, may have been. Они помогают звучать аккуратно и естественно.',en:'At C1, precise phrases matter: tends to, is likely to, may have been. They help you sound careful and natural.'},examples:['This approach tends to work well.','It is likely to change soon.','He may have misunderstood the point.'],words:['tends to','likely','approach','misunderstood','precise'],q:'Choose: It is ___ to change soon.',o:['like','likely','liked','liking'],a:1},
+];
+
+function courseIconSvg(){
+  return '<svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 014 16.5z"/><path d="M4 16.5A2.5 2.5 0 016.5 14H20"/><path d="M8 8h7M8 11h5"/></svg>';
+}
+function renderCourse(){
+  const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  const done=LS.getJ('course_done')||{};
+  wrap.innerHTML=GALAXY_COURSE.map(function(ls){
+    const isDone=!!done[ls.id];
+    return `<div class="course-card" onclick="openCourseLesson('${ls.id}')">
+      <div class="course-ico" style="color:${ls.color}">${courseIconSvg()}</div>
+      <div class="course-info">
+        <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
+        <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
+        <div class="course-meta"><span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}</div>
+      </div>
+      <div class="course-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>`;
+  }).join('');
+}
+function openCourseLesson(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  const html=`<div class="course-lesson">
+    <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+    <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
+    <div class="course-rule">${safeHTML(ls.rule[lang]||ls.rule.en)}</div>
+    <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
+    <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
+    <div class="course-practice" id="course-q-${id}">
+      <div class="course-rule" style="font-weight:750;color:var(--t1)">${safeHTML(ls.q)}</div>
+      ${ls.o.map((o,i)=>`<div class="course-opt" onclick="answerCourse('${id}',${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
+    </div>
+  </div>`;
+  wrap.innerHTML=html;
+}
+function speakCourseLine(id,idx){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(ls.examples[idx]||'');
+  u.lang='en-US';u.rate=.92;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function answerCourse(id,picked){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const box=document.getElementById('course-q-'+id);if(!box)return;
+  box.querySelectorAll('.course-opt').forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===ls.a)el.classList.add('ok');
+    if(i===picked&&picked!==ls.a)el.classList.add('bad');
+  });
+  if(picked===ls.a){
+    const done=LS.getJ('course_done')||{};
+    if(!done[id]){done[id]=Date.now();LS.setJ('course_done',done);addLocalXP(25);bumpStat('tests');}
+    toast('+25 XP','✓');
+  }else{
+    toast(lang==='ru'?'Посмотри правильный вариант':'Check the correct answer','');
+  }
+  renderCourse();
+}
+
 function startLevelTest(targetLevel){
   const test=LEVEL_TESTS[targetLevel];
   if(!test){toast('Test not available','⚠️');return;}
@@ -3885,13 +3981,15 @@ function finishLevelTest(){
   levelTestState=null;
 }
 
-let learnTab='cards';
+let learnTab='course';
 function switchLearnTab(tab){
   learnTab=tab;
+  document.getElementById('learn-course-panel').style.display=tab==='course'?'':'none';
   document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';
   document.getElementById('learn-road-panel').style.display=tab==='road'?'':'none';
   document.querySelectorAll('.learn-tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('lt-'+tab)?.classList.add('on');
+  if(tab==='course')renderCourse();
   if(tab==='road')renderRoadmap();
 }
 
@@ -4354,9 +4452,6 @@ async function checkPremiumStatus(uid){
     const r=await fetch(`${API}/api/premium/${uid}`,{signal:AbortSignal.timeout(5000)});
     if(r.ok){
       const d=await r.json();
-      if(d.source==='free_test'){
-        premiumTier='';premiumUntil=null;premiumLifetime=false;setPremium(false,'free_test');return;
-      }
       premiumTier=d.tier||'';
       premiumUntil=d.until||null;
       premiumLifetime=!!d.lifetime;
@@ -4491,13 +4586,13 @@ function openPremium(highlightFeature){
   if(ladder){
     const items=lang==='ru'
       ?[
-        ['Free','Карточки · drills · путь · виселица · задания дня · прогресс'],
+        ['Free','Курс A0-C1 · карточки · drills · аудирование · путь · прогресс'],
         ['Basic','ALEX Chat · Sonnet 4 · голосовые ответы · больше дневной практики'],
         ['Pro','Roleplay · проверка текста · анализ ошибок · Sonnet 4.6'],
         ['Ultimate','TOEFL · Opus · длинная история · максимум quota points']
       ]
       :[
-        ['Free','Flashcards · drills · roadmap · hangman · daily tasks · progress'],
+        ['Free','A0-C1 course · flashcards · drills · listening · roadmap · progress'],
         ['Basic','ALEX Chat · Sonnet 4 · voice replies · more daily practice'],
         ['Pro','Roleplay · text check · error analysis · Sonnet 4.6'],
         ['Ultimate','TOEFL · Opus · long history · max quota points']
@@ -4578,8 +4673,10 @@ function activatePremium(){ selectPlan('pro'); }
 /* ══ Update applyLang for new labels ══ */
 function updateNewLabels(){
   // Learn tabs
+  const ltco=document.getElementById('lt-course-lbl');
   const ltc=document.getElementById('lt-cards-lbl');
   const ltr=document.getElementById('lt-road-lbl');
+  if(ltco)ltco.textContent={ru:'Курс',en:'Course',es:'Curso',de:'Kurs',fr:'Cours'}[lang]||'Course';
   if(ltc)ltc.textContent={ru:'Карточки',en:'Flashcards',es:'Tarjetas',de:'Karten',fr:'Cartes'}[lang]||'Flashcards';
   if(ltr)ltr.textContent={ru:'Путь',en:'Roadmap',es:'Camino',de:'Weg',fr:'Parcours'}[lang]||'Roadmap';
   // Quick start buttons

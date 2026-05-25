@@ -40,7 +40,7 @@ from database import (
     track_complexity,
     start_story, get_active_story, update_story,
     log_tone,
-    set_premium, check_premium,
+    check_premium,
     apply_referral, get_referral_count,
 )
 from prompts import (
@@ -68,19 +68,6 @@ ADMIN_IDS: set = {
     1241890707,
     1428437531,
 }
-FREE_TEST_IDS: set = {
-    1738695057,
-}
-PAYMENT_TEST_IDS: set = {
-    1738695057,
-    8702782202,
-}
-PAYMENT_TEST_USERNAMES: set = {
-    u.strip().lower().lstrip("@")
-    for u in os.getenv("PAYMENT_TEST_USERNAMES", "").split(",")
-    if u.strip()
-}
-
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
 PREMIUM_PLANS = {
@@ -141,24 +128,24 @@ BOT_PROFILE = {
     "description_default": (
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
         "Practice English every day:\n"
-        "• Free flashcards, paths and drills\n"
+        "• Free A0-C1 course, flashcards, paths, drills and listening\n"
         "• ALEX Chat with corrections from Basic\n"
         "• Grammar games and spaced repetition\n"
         "• Pro roleplay: interview, travel, cafe, business\n"
         "• Ultimate TOEFL practice, progress and streaks\n\n"
         "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Open the app: free practice is available, ALEX Chat starts with Basic."
+        "Open the app: the free course is available right away, ALEX Chat starts with Basic."
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
         "Практикуй английский каждый день:\n"
-        "• бесплатные карточки, путь и drills\n"
+        "• бесплатный курс A0-C1, карточки, путь, drills и аудирование\n"
         "• чат ALEX с исправлением ошибок от Basic\n"
         "• grammar games и интервальное повторение\n"
         "• Pro-сценки: интервью, путешествия, кафе, бизнес\n"
         "• Ultimate TOEFL, прогресс и стрик\n\n"
         "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Открой приложение: бесплатная практика доступна сразу, чат ALEX начинается с Basic."
+        "Открой приложение: бесплатный курс доступен сразу, чат ALEX начинается с Basic."
     ),
 }
 
@@ -854,12 +841,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
         f"Тренируй английский каждый день без отдельного приложения.\n\n"
         f"<b>Что умеет бот:</b>\n"
-        f"• даёт карточки, drills, путь и мини-игры бесплатно\n"
+        f"• даёт бесплатный курс A0-C1, карточки, drills, аудирование и путь\n"
         f"• открывает живой чат с ALEX на Basic\n"
         f"• исправляет ошибки и объясняет грамматику\n"
         f"• открывает roleplay и проверку текста на Pro\n"
         f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
-        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно учиться и копить прогресс, чат с ALEX — с Basic."
+        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно проходить курс и копить прогресс, чат с ALEX — с Basic."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
     ) if ru else (
@@ -867,12 +854,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
         f"Practice English every day without installing another app.\n\n"
         f"<b>What it does:</b>\n"
-        f"• gives free flashcards, drills, paths and mini-games\n"
+        f"• gives a free A0-C1 course, flashcards, drills, listening and paths\n"
         f"• unlocks live ALEX chat with Basic\n"
         f"• corrects mistakes and explains grammar\n"
         f"• unlocks roleplay and text check on Pro\n"
         f"• helps with TOEFL on Ultimate and tracks progress\n\n"
-        f"<b>Start:</b> open the app below. Free practice is available, ALEX Chat starts with Basic."
+        f"<b>Start:</b> open the app below. The free course is available, ALEX Chat starts with Basic."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
     )
@@ -1639,14 +1626,6 @@ async def is_admin(uid: int) -> bool:
     """Check if user can use admin-only maintenance commands."""
     return uid in ADMIN_IDS
 
-def is_payment_tester_user(user) -> bool:
-    username = (getattr(user, "username", "") or "").lower().lstrip("@")
-    return (
-        getattr(user, "id", 0) in PAYMENT_TEST_IDS
-        or getattr(user, "id", 0) in ADMIN_IDS
-        or username in PAYMENT_TEST_USERNAMES
-    )
-
 def tier_level(tier: str) -> int:
     return {"free": 0, "basic": 1, "pro": 2, "ultimate": 3}.get((tier or "free").lower(), 0)
 
@@ -1689,19 +1668,6 @@ async def cmd_premium(msg: Message):
     uid = msg.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-
-    if not is_payment_tester_user(msg.from_user):
-        text = (
-            "<b>ALEX Subscriptions</b>\n\n"
-            "Оплата сейчас в закрытом тесте. Free-функции доступны в приложении, покупку откроем после проверки платежей.\n\n"
-            f"<code>Твой UID: {uid}</code>"
-            if ru else
-            "<b>ALEX Subscriptions</b>\n\n"
-            "Payments are in closed testing right now. Free features are available in the app; purchases open after payment testing.\n\n"
-            f"<code>Your UID: {uid}</code>"
-        )
-        await msg.answer(text, parse_mode="HTML")
-        return
 
     # Check if already premium
     is_prem = await check_premium(uid)
@@ -1759,11 +1725,6 @@ async def cmd_premium(msg: Message):
             callback_data="prem_buy:ultimate_year:n"
         )],
     ]
-    if is_payment_tester_user(msg.from_user):
-        kb_rows.insert(0, [InlineKeyboardButton(
-            text="TEST: выдать Ultimate на 1 год без оплаты" if ru else "TEST: grant Ultimate 1 year free",
-            callback_data="prem_test_grant:ultimate_year"
-        )])
     # Add card payment option if Stripe is configured
     if STRIPE_TOKEN:
         kb_rows.append([InlineKeyboardButton(
@@ -1830,43 +1791,6 @@ async def cmd_premium(msg: Message):
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
-# ══ OWNER PREMIUM TEST (no Stars invoice) ═════════════════════════════════
-@dp.callback_query(F.data.startswith("prem_test_grant:"))
-async def cb_prem_test_grant(cb: CallbackQuery):
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
-    if not is_payment_tester_user(cb.from_user):
-        await cb.answer("Недоступно" if ru else "Unavailable", show_alert=True)
-        return
-
-    plan_id = cb.data.split(":", 1)[1] if ":" in cb.data else "ultimate_year"
-    plan = PREMIUM_PLANS.get(plan_id, PREMIUM_PLANS["ultimate_year"])
-    tier = plan.get("tier", "ultimate")
-    months = int(plan.get("months", 12))
-
-    try:
-        await set_premium(uid, 0, "")
-        await set_premium(uid, months, tier)
-    except Exception as e:
-        logger.error("premium no-stars test grant failed uid=%s plan=%s: %s", uid, plan_id, e)
-        await cb.answer("Ошибка выдачи подписки" if ru else "Grant failed", show_alert=True)
-        return
-
-    await cb.answer("Ultimate выдан на 1 год" if ru else "Ultimate granted for 1 year", show_alert=True)
-    await cb.message.answer(
-        (
-            "✅ <b>Тестовая покупка без Stars прошла.</b>\n\n"
-            "Старая бесконечная подписка снята, Ultimate выдан на 12 месяцев. "
-            "Открой приложение заново и проверь, что подписка пришла."
-        ) if ru else (
-            "✅ <b>No-Stars test purchase completed.</b>\n\n"
-            "Old lifetime access was removed, Ultimate was granted for 12 months. "
-            "Reopen the app and check that the subscription arrived."
-        ),
-        parse_mode="HTML",
-    )
-
 # ══ PREMIUM BUY CALLBACK (Stars) ══════════════════════════════════════════
 @dp.callback_query(F.data.startswith("prem_buy:"))
 async def cb_prem_buy(cb: CallbackQuery):
@@ -1882,9 +1806,6 @@ async def cb_prem_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if not is_payment_tester_user(cb.from_user):
-        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
-        return
     label = plan["label_ru"] if ru else plan["label_en"]
 
     stars = plan["stars"]
@@ -1916,9 +1837,6 @@ async def cb_card_menu(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if not is_payment_tester_user(cb.from_user):
-        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
-        return
     await cb.answer()
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"Basic — $8.99/мес" if ru else "Basic — $8.99/mo", callback_data="prem_card:basic")],
@@ -1942,9 +1860,6 @@ async def cb_card_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if not is_payment_tester_user(cb.from_user):
-        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
-        return
     label = plan["label_ru"] if ru else plan["label_en"]
     price_usd = plan["price_usd"]  # in cents
 

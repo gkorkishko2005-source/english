@@ -76,13 +76,6 @@ ADMIN_IDS = {
     1241890707,
     1428437531,
 }
-FREE_TEST_IDS = {
-    1738695057,
-}
-# Any username in this set also gets free premium
-ADMIN_USERNAMES = {
-    # "utiqo",
-}
 
 if not ANT_KEY:
     logger.error("❌ ANTHROPIC_API_KEY is not set!")
@@ -350,16 +343,7 @@ async def handle_chat(request):
     # Check premium for model selection and limits
     user_premium = False
     user_tier = ""
-    if uid in FREE_TEST_IDS:
-        try:
-            from database import get_premium_info
-            info = await get_premium_info(uid)
-            user_premium = info.get("is_premium", False)
-            user_tier = info.get("tier", "") if user_premium else ""
-        except Exception:
-            user_premium = False
-            user_tier = ""
-    elif uid:
+    if uid:
         try:
             from database import check_premium, get_premium_info
             info = await get_premium_info(uid)
@@ -682,21 +666,6 @@ async def handle_check_premium(request):
         uid = int(request.match_info["uid"])
     except Exception:
         return web.json_response({"error":"invalid uid"},status=400)
-
-    # Premium is always database-driven. Admin IDs keep admin tools only;
-    # they no longer receive automatic lifetime Ultimate.
-    if uid in FREE_TEST_IDS:
-        try:
-            from database import get_premium_info
-            info = await get_premium_info(uid)
-            if info.get("is_premium"):
-                info["source"] = "database_free_test"
-                return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
-        except Exception:
-            pass
-        return web.json_response({
-            "is_premium":False,"tier":"","until":None,"lifetime":False,"source":"free_test"
-        }, headers={"Access-Control-Allow-Origin":"*"})
 
     try:
         from database import get_premium_info
