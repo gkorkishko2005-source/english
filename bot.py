@@ -74,7 +74,6 @@ FREE_TEST_IDS: set = {
 PAYMENT_TEST_IDS: set = {
     1738695057,
 }
-TEST_STARS_PRICE = 1  # Telegram Stars invoices need a positive amount; use 1 ⭐ for owner payment QA.
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
@@ -1749,7 +1748,7 @@ async def cmd_premium(msg: Message):
     u_stars = int(PREMIUM_PLANS["ultimate"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["ultimate"]["stars"]
     by_stars = PREMIUM_PLANS["basic_year"]["stars"]
     py_stars = PREMIUM_PLANS["pro_year"]["stars"]
-    uy_stars = TEST_STARS_PRICE if uid in PAYMENT_TEST_IDS else PREMIUM_PLANS["ultimate_year"]["stars"]
+    uy_stars = PREMIUM_PLANS["ultimate_year"]["stars"]
 
     kb_rows = [
         [InlineKeyboardButton(
@@ -1773,10 +1772,15 @@ async def cmd_premium(msg: Message):
             callback_data="prem_buy:pro_year:n"
         )],
         [InlineKeyboardButton(
-            text=(f"Ultimate год TEST — {uy_stars} ⭐" if uid in PAYMENT_TEST_IDS else f"Ultimate год — {uy_stars} ⭐ (-15%)") if ru else (f"Ultimate yearly TEST — {uy_stars} ⭐" if uid in PAYMENT_TEST_IDS else f"Ultimate yearly — {uy_stars} ⭐ (-15%)"),
+            text=f"Ultimate год — {uy_stars} ⭐ (-15%)" if ru else f"Ultimate yearly — {uy_stars} ⭐ (-15%)",
             callback_data="prem_buy:ultimate_year:n"
         )],
     ]
+    if uid in PAYMENT_TEST_IDS:
+        kb_rows.insert(0, [InlineKeyboardButton(
+            text="TEST: выдать Ultimate на 1 год без оплаты" if ru else "TEST: grant Ultimate 1 year free",
+            callback_data="prem_test_grant:ultimate_year"
+        )])
     # Add card payment option if Stripe is configured
     if STRIPE_TOKEN:
         kb_rows.append([InlineKeyboardButton(
@@ -1808,7 +1812,7 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + персональный план\n"
         "└ Длинная история диалога\n\n"
-        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐{' TEST' if uid in PAYMENT_TEST_IDS else ''}\n"
+        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
@@ -1835,13 +1839,50 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + personal study plan\n"
         "└ Long chat history\n\n"
-        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐{' TEST' if uid in PAYMENT_TEST_IDS else ''}\n"
+        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points keep premium limits fair and sustainable.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars or 💳 card"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
+
+# ══ OWNER PREMIUM TEST (no Stars invoice) ═════════════════════════════════
+@dp.callback_query(F.data.startswith("prem_test_grant:"))
+async def cb_prem_test_grant(cb: CallbackQuery):
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    if uid not in PAYMENT_TEST_IDS:
+        await cb.answer("Недоступно" if ru else "Unavailable", show_alert=True)
+        return
+
+    plan_id = cb.data.split(":", 1)[1] if ":" in cb.data else "ultimate_year"
+    plan = PREMIUM_PLANS.get(plan_id, PREMIUM_PLANS["ultimate_year"])
+    tier = plan.get("tier", "ultimate")
+    months = int(plan.get("months", 12))
+
+    try:
+        await set_premium(uid, 0, "")
+        await set_premium(uid, months, tier)
+    except Exception as e:
+        logger.error("premium no-stars test grant failed uid=%s plan=%s: %s", uid, plan_id, e)
+        await cb.answer("Ошибка выдачи подписки" if ru else "Grant failed", show_alert=True)
+        return
+
+    await cb.answer("Ultimate выдан на 1 год" if ru else "Ultimate granted for 1 year", show_alert=True)
+    await cb.message.answer(
+        (
+            "✅ <b>Тестовая покупка без Stars прошла.</b>\n\n"
+            "Старая бесконечная подписка снята, Ultimate выдан на 12 месяцев. "
+            "Открой приложение заново и проверь, что подписка пришла."
+        ) if ru else (
+            "✅ <b>No-Stars test purchase completed.</b>\n\n"
+            "Old lifetime access was removed, Ultimate was granted for 12 months. "
+            "Reopen the app and check that the subscription arrived."
+        ),
+        parse_mode="HTML",
+    )
 
 # ══ PREMIUM BUY CALLBACK (Stars) ══════════════════════════════════════════
 @dp.callback_query(F.data.startswith("prem_buy:"))
@@ -1866,8 +1907,6 @@ async def cb_prem_buy(cb: CallbackQuery):
     stars = plan["stars"]
     if has_discount:
         stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
-    if uid in PAYMENT_TEST_IDS and plan_id == "ultimate_year":
-        stars = TEST_STARS_PRICE
 
     period = "1 год" if (ru and plan["months"] == 12) else "1 year" if plan["months"] == 12 else "1 месяц" if ru else "1 month"
     desc = f"ALEX Subscriptions {plan['tier'].upper()} — {period}"
