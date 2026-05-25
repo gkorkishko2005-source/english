@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ══ THEMES ══ */
-:root{--e0:#0d1117;--e1:#161b27;--e2:#1c2333;--e3:#242b3d;--a:#4f8aff;--a2:#00d4aa;--ar:79,138,255;--g:linear-gradient(135deg,#131f3e,#0f1c2d);--gb:linear-gradient(90deg,#4f8aff,#00d4aa);--t1:#eef2ff;--t2:#94a3b8;--t3:#4b5675;--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.10);--or:#ff9500;--rd:#ff6b6b;--gd:#ffb830}
+:root{--e0:#071427;--e1:#0d1b33;--e2:#14243f;--e3:#1b2f51;--a:#4f8aff;--a2:#00d4aa;--ar:79,138,255;--g:linear-gradient(135deg,#102b5a,#0b233d);--gb:linear-gradient(90deg,#4f8aff,#00d4aa);--t1:#eef2ff;--t2:#94a3b8;--t3:#4b638d;--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.10);--or:#ff9500;--rd:#ff6b6b;--gd:#ffb830}
 
 /* ══ LIGHT MODE ══ */
 [data-mode=light]{
@@ -267,12 +267,14 @@ body{background:var(--e0);color:var(--t1);font-family:var(--f);font-size:15px;-w
 /* ══ NAV ══ */
 nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--safe)+2px);background:rgba(22,27,39,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--b1);display:grid;grid-template-columns:repeat(5,1fr);z-index:100}
 .ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:9px 0}
-.nic{width:34px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .2s cubic-bezier(.34,1.56,.64,1)}
+.nic{width:34px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .2s cubic-bezier(.34,1.56,.64,1);position:relative}
 .nic svg{width:20px;height:20px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nlb{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.2px;transition:color .2s}
 .ni.on .nic{background:rgba(var(--ar),.16);transform:scale(1.1)}
 .ni.on .nic svg{stroke:var(--a)}
 .ni.on .nlb{color:var(--a)}
+.ni.locked{opacity:.62}
+.ni.locked .nic::after{content:'';position:absolute;right:4px;top:4px;width:6px;height:6px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 2px var(--e1)}
 
 /* ══ CARD / BTN ══ */
 .card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:18px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1);transition:box-shadow .2s}
@@ -678,14 +680,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ XP BAR GLOW ══ */
 @keyframes xp-glow{0%{box-shadow:0 0 0 rgba(0,212,170,0)}50%{box-shadow:0 0 12px rgba(0,212,170,.4)}100%{box-shadow:0 0 0 rgba(0,212,170,0)}}
 .xp-gained .xpf{animation:xp-glow 1s ease}
-
-/* ══ TRIAL BANNER ══ */
-.trial-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(135deg,rgba(46,204,113,.1),rgba(0,212,170,.06));border:1px solid rgba(46,204,113,.2);border-radius:var(--r);margin-bottom:14px;cursor:pointer}
-.trial-banner:active{transform:scale(.98)}
-.trial-icon{font-size:20px}
-.trial-text{font-size:12px;color:var(--t1);font-weight:600;line-height:1.4}
-.trial-text small{display:block;font-weight:400;color:var(--t2);font-size:11px}
-.trial-badge{margin-left:auto;font-size:10px;font-weight:700;color:#2ecc71;background:rgba(46,204,113,.12);padding:3px 8px;border-radius:20px}
 
 /* ══ ACHIEVEMENTS home button ══ */
 .ach-home-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:linear-gradient(135deg,rgba(var(--ar),.06),rgba(0,212,170,.04));border:1px solid rgba(var(--ar),.15);border-radius:var(--r);cursor:pointer;transition:.2s;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px}
@@ -1305,11 +1299,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- HOME -->
 <div class="screen active" id="s-home">
-  <div id="trial-banner" class="trial-banner" style="display:none" onclick="openPremium()">
-    <div class="trial-icon">🎁</div>
-    <div class="trial-text"><b>Free Basic trial!</b><small>3 days left</small></div>
-    <div class="trial-badge">FREE</div>
-  </div>
   <div class="hero"><div class="hbg"></div>
     <div class="htm" id="greet"></div>
     <div class="hnm" id="hname">—</div>
@@ -1345,7 +1334,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="sec"><span id="qs-lbl"></span></div>
   <div class="qg">
-    <div class="qb qa"  onclick="openChat('lesson')">
+    <div class="qb qa"  onclick="openDrillPicker()">
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5v14"/><path d="M3 5.2c0-.55.45-1 1-1h4.5a3 3 0 013 3v13a2.5 2.5 0 00-2.5-2.5H4a1 1 0 01-1-1V5.2z"/><path d="M21 5.2c0-.55-.45-1-1-1h-4.5a3 3 0 00-3 3v13a2.5 2.5 0 012.5-2.5H20a1 1 0 001-1V5.2z"/></svg></div>
       <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
     </div>
@@ -1627,19 +1616,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
   </details>
 
-  <!-- Free API key (Gemini BYOK) — collapsed -->
-  <details class="set-acc">
-    <summary><span class="set-acc-ico key"><svg viewBox="0 0 24 24"><path d="M9.5 14.5 6 18l-2-2 3.5-3.5"/><circle cx="14.5" cy="9.5" r="5"/><path d="M16.5 7.5h.01"/></svg></span><span id="byok-lbl">Free API key (Gemini)</span></summary>
-    <div class="set-acc-bd">
-      <input id="byokinp" class="minp" type="text" autocomplete="off" spellcheck="false"
-        placeholder="AIza…" oninput="saveByok(this.value)" style="margin-top:0;font-family:ui-monospace,Menlo,monospace;font-size:13px">
-      <div style="font-size:11px;color:var(--t3);margin-top:8px;line-height:1.5">
-        <span id="byok-hint">Paste a free Google Gemini key — get unlimited messages on Free tier.</span><br>
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--a);text-decoration:none;font-weight:600">aistudio.google.com/app/apikey</a>
-      </div>
-    </div>
-  </details>
-
   <!-- Interests -->
   <div class="sec"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
   <div id="intwrap"></div>
@@ -1651,7 +1627,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- NAV -->
 <nav>
   <div class="ni on" id="nav-home"     onclick="goTab('home')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="nlb" id="nb1"></div></div>
-  <div class="ni"    id="nav-chat"     onclick="goTab('chat')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="nlb" id="nb2"></div></div>
+  <div class="ni locked" id="nav-chat"     onclick="goTab('chat')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="nlb" id="nb2"></div></div>
   <div class="ni"    id="nav-learn"    onclick="goTab('learn')">   <div class="nic"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div><div class="nlb" id="nb3"></div></div>
   <div class="ni"    id="nav-progress" onclick="goTab('progress')"><div class="nic"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="nlb" id="nb4"></div></div>
   <div class="ni"    id="nav-settings" onclick="goTab('settings')"><div class="nic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div><div class="nlb" id="nb5"></div></div>
@@ -2268,6 +2244,10 @@ function rankOf(xp){return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[
 /* ══ NAV ══ */
 let tab='home';
 function goTab(n){
+  if(n==='chat'&&!hasChatAccess()){
+    showChatPaywall();
+    return;
+  }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(i=>i.classList.remove('on'));
   document.getElementById('s-'+n).classList.add('active');
@@ -2275,31 +2255,14 @@ function goTab(n){
   tab=n;
   if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
-  if(n==='settings'){try{updatePremiumUI();}catch(e){}try{loadByok();}catch(e){}}
+  if(n==='settings'){try{updatePremiumUI();}catch(e){}}
   if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
 }
-/* One-time chat onboarding for FREE users — explain Gemini BYOK option */
-/* BYOK Gemini key — saved locally; backend routing wires up next batch */
-function saveByok(v){
-  v=(v||'').trim().slice(0,200);
-  LS.set('user_gemini_key',v);
-}
-function loadByok(){
-  const inp=document.getElementById('byokinp');
-  if(inp&&document.activeElement!==inp)inp.value=LS.get('user_gemini_key')||'';
-  const L10={ru:{lbl:'Бесплатный API-ключ (Gemini)',hint:'Вставь свой бесплатный ключ Google Gemini — получишь безлимит на Free тарифе.'},
-             en:{lbl:'Free API key (Gemini)',hint:'Paste a free Google Gemini key — get unlimited messages on Free tier.'},
-             es:{lbl:'API key gratis (Gemini)',hint:'Pega tu clave gratis de Google Gemini para mensajes ilimitados en Free.'},
-             de:{lbl:'Kostenloser API-Schlüssel (Gemini)',hint:'Füge einen kostenlosen Google-Gemini-Schlüssel ein — unbegrenzte Nachrichten im Free-Tarif.'},
-             fr:{lbl:'Clé API gratuite (Gemini)',hint:'Colle ta clé Google Gemini gratuite — messages illimités en Free.'},
-             pt:{lbl:'Chave API grátis (Gemini)',hint:'Cole sua chave grátis do Google Gemini para mensagens ilimitadas no Free.'},
-             uk:{lbl:'Безкоштовний API-ключ (Gemini)',hint:'Встав свій безкоштовний ключ Google Gemini — безліміт на Free тарифі.'},
-             tr:{lbl:'Ücretsiz API anahtarı (Gemini)',hint:'Ücretsiz Google Gemini anahtarınızı yapıştırın — Free planda sınırsız mesaj.'},
-             zh:{lbl:'免费 API 密钥 (Gemini)',hint:'粘贴免费的 Google Gemini 密钥即可在 Free 套餐获得无限消息。'},
-             ar:{lbl:'مفتاح API مجاني (Gemini)',hint:'الصق مفتاح Google Gemini المجاني للحصول على رسائل غير محدودة في الباقة المجانية.'}};
-  const t=L10[lang]||L10.en;
-  const lbl=document.getElementById('byok-lbl');if(lbl)lbl.textContent=t.lbl;
-  const h=document.getElementById('byok-hint');if(h)h.textContent=t.hint;
+function hasChatAccess(){return !!isPremium;}
+function showChatPaywall(){
+  try{sfx.warn();}catch(e){}haptic('light');
+  openPremium({ru:'Чат с ALEX доступен с Basic',en:'ALEX chat starts with Basic',es:'Chat con ALEX desde Basic',pt:'Chat com ALEX começa no Basic'}[lang]||'ALEX chat starts with Basic');
+  toast({ru:'ALEX Chat — с Basic',en:'ALEX Chat — Basic+',es:'ALEX Chat — Basic+',pt:'ALEX Chat — Basic+'}[lang]||'ALEX Chat — Basic+','🔒');
 }
 /* Chat model picker — compact Claude choices gated per subscription.
    Server re-validates so a cheating client cannot bypass tier limits. */
@@ -2391,44 +2354,34 @@ document.addEventListener('click',function(e){
 });
 
 function maybeOnboardChat(){
-  if(LS.get('chat_onb_v1')==='1')return;
-  if(isPremium||LS.get('premium')==='1')return; // skip paid users
+  if(!hasChatAccess())return;
+  if(LS.get('chat_onb_v2')==='1')return;
   const esc=function(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
   const name=esc((window._d&&window._d.name)||'');
   const T={
     ru:{tit:'👋 '+(name||'Привет')+(name?', привет!':''),
-        l1:'Ты на <b>бесплатном тарифе</b> — 5 сообщений в день к ALEX.',
-        l2:'Хочешь <b>безлимит бесплатно</b>? Возьми свой бесплатный ключ Google Gemini (без карты):',
-        btn:'Получить бесплатный ключ',
-        l3:'Затем вставь его в <b>Настройки → Free API key</b>. Или оформи подписку.',
-        host:'aistudio.google.com'},
+        l1:'ALEX готов тренировать английский в живом чате.',
+        l2:'Пиши фразы, проси исправить ошибки, тренируй speaking и новые слова.',
+        l3:'Подсказка: чем конкретнее запрос, тем полезнее ответ.'},
     en:{tit:'👋 '+(name?'Hi '+name+'!':'Welcome!'),
-        l1:"You're on the <b>Free tier</b> — 5 messages/day to ALEX.",
-        l2:'Want <b>unlimited free messages</b>? Get your own free Google Gemini key (no card needed):',
-        btn:'Get your free key',
-        l3:'Then paste it in <b>Settings → Free API key</b>. Or upgrade to a subscription.',
-        host:'aistudio.google.com'},
+        l1:'ALEX is ready to train English with you in live chat.',
+        l2:'Write sentences, ask for corrections, practice speaking and new words.',
+        l3:'Tip: the more specific your request, the better the answer.'},
     es:{tit:'👋 '+(name?'¡Hola '+name+'!':'¡Bienvenido!'),
-        l1:'Estás en el <b>plan gratuito</b> — 5 mensajes/día con ALEX.',
-        l2:'¿Quieres <b>mensajes ilimitados gratis</b>? Consigue tu clave gratuita de Google Gemini (sin tarjeta):',
-        btn:'Obtener clave gratis',
-        l3:'Luego pégala en <b>Ajustes → Clave API gratis</b>. O suscríbete.',
-        host:'aistudio.google.com'},
+        l1:'ALEX está listo para entrenar inglés contigo en chat.',
+        l2:'Escribe frases, pide correcciones y practica vocabulario.',
+        l3:'Consejo: cuanto más concreta sea tu pregunta, mejor será la respuesta.'},
     pt:{tit:'👋 '+(name?'Olá '+name+'!':'Bem-vindo!'),
-        l1:'Você está no <b>plano gratuito</b> — 5 mensagens/dia com o ALEX.',
-        l2:'Quer <b>mensagens ilimitadas grátis</b>? Pegue sua chave gratuita do Google Gemini (sem cartão):',
-        btn:'Pegar chave grátis',
-        l3:'Depois cole em <b>Ajustes → Chave API grátis</b>. Ou assine.',
-        host:'aistudio.google.com'}
+        l1:'ALEX está pronto para treinar inglês com você no chat.',
+        l2:'Escreva frases, peça correções e pratique vocabulário.',
+        l3:'Dica: quanto mais específico o pedido, melhor a resposta.'}
   };
   const t=T[lang]||T.en;
   const html='<div class="onb-card"><div class="onb-tit">'+t.tit+'</div>'
     +'<div class="onb-txt">'+t.l1+'</div>'
     +'<div class="onb-txt">'+t.l2+'</div>'
-    +'<a class="onb-link" href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">'+t.btn+'</a>'
-    +'<div class="onb-hint">'+t.host+'</div>'
     +'<div class="onb-txt">'+t.l3+'</div></div>';
-  try{addMsg('bot',html);LS.set('chat_onb_v1','1');}catch(e){}
+  try{addMsg('bot',html);LS.set('chat_onb_v2','1');}catch(e){}
 }
 
 /* ══ REFRESH SUB (greeting / streak) ══ */
@@ -2518,8 +2471,6 @@ function drawProgress(){
   const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   safe('psess',sess); safe('pwrds',words); safe('ptsts',tests); safe('perrs',errors);
 
-  // Trial banner
-  try{checkTrialBanner();}catch(e){}
   try{applyDarkLight(LS.get('dark_mode')||'dark');}catch(e){}
   try{applySfxToggleUI();}catch(e){}
   try{addRippleToButtons();}catch(e){}
@@ -2693,13 +2644,14 @@ function prevDayKey(){
 }
 function todayMissions(){
   const seed=_todaySeed();
-  const idx=MISSION_POOL.map((_,i)=>i);
+  const pool=isPremium?MISSION_POOL:MISSION_POOL.filter(m=>!['chat','check','roleplay','story'].includes(m.key));
+  const idx=pool.map((_,i)=>i);
   // Deterministic shuffle using seed.
   for(let i=idx.length-1;i>0;i--){
     const j=Math.abs((seed*9301+i*49297)%233280)%(i+1);
     const t=idx[i];idx[i]=idx[j];idx[j]=t;
   }
-  return idx.slice(0,4).map(i=>MISSION_POOL[i]);
+  return idx.slice(0,4).map(i=>pool[i]);
 }
 function allMissionsDone(sv){
   const done=(sv&&sv.done)||{};
@@ -3053,15 +3005,17 @@ function scrollMsgs(){const w=document.getElementById('cmsgs');setTimeout(()=>w.
 
 async function sendMsg(){
   if(busy)return;
+  if(!hasChatAccess()){showChatPaywall();return;}
   const inp=document.getElementById('cinp');
   const text=inp.value.trim();if(!text)return;
   if(isSpam(text)){inp.value='';grow(inp);addMsg('bot',L.spam);return;}
   haptic('light');try{sfx.send();}catch(e){}
   inp.value='';grow(inp);addMsg('user',text);await doChat(text);
 }
-async function sendChip(text){if(busy)return;addMsg('user',text);goTab('chat');await doChat(text);}
+async function sendChip(text){if(busy)return;if(!hasChatAccess()){showChatPaywall();return;}addMsg('user',text);goTab('chat');await doChat(text);}
 
 async function doChat(text){
+  if(!hasChatAccess()){showChatPaywall();return;}
   if(typeof setChipsBusy==='undefined')window.setChipsBusy=function(){};
   busy=true;document.getElementById('sndb').disabled=true;
   try{setChipsBusy(true);}catch(e){}
@@ -3079,6 +3033,7 @@ async function doChat(text){
     if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
     const data=await r.json();
     addMsg('bot',data.reply||'...');
+    if(data.premium_required){try{sfx.warn();}catch(e){}openPremium();}
     if(data.limit&&!isPremium){try{sfx.warn();}catch(e){}}
     resetChipCooldown();
     saveCurSes();
@@ -3108,6 +3063,7 @@ function clearSilent(){
 }
 
 function openChat(topic){
+  if(!hasChatAccess()){showChatPaywall();return;}
   const P={
     lesson:    lang==='ru'?'Дай урок грамматики.':'Teach me a grammar lesson.',
     toefl:     lang==='ru'?'Дай упражнение TOEFL.':'Give me a TOEFL exercise.',
@@ -3438,6 +3394,7 @@ async function rate(q){
 
 /* ══ AUDIO TASK ══ */
 async function startAudio(){
+  if(!hasChatAccess()){showChatPaywall();return;}
   if(busy)return;goTab('chat');
   const gd=document.createElement('div');gd.className='msg bot';gd.id='audgen';
   const av=document.createElement('div');av.className='mav';
@@ -3522,7 +3479,9 @@ async function saveProf(){
     LS.set('app_profession_saved',val);
   }catch{}
   toast(L.psav,'✅');
-  setTimeout(()=>sendChip(lang==='ru'?`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`:`About me: ${val}. Remember this and adapt your teaching to it.`),300);
+  if(hasChatAccess()){
+    setTimeout(()=>sendChip(lang==='ru'?`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`:`About me: ${val}. Remember this and adapt your teaching to it.`),300);
+  }
 }
 
 // Reminder
@@ -4096,6 +4055,7 @@ const SCENARIOS=[
 
 let activeRoleplay=null;
 function openRoleplay(){
+  if(!hasChatAccess()){showChatPaywall();return;}
   const grid=document.getElementById('scenario-grid');
   const title=document.getElementById('rp-modal-title');
   if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario',es:'Elige un escenario',de:'Szenario wählen',fr:'Choisir un scénario',pt:'Escolher cenário',uk:'Обери сценарій',tr:'Senaryo seç',zh:'选择场景',ar:'اختر سيناريو'}[lang]||'Choose a scenario';
@@ -4115,6 +4075,7 @@ function openRoleplay(){
 }
 
 function startRoleplay(sc){
+  if(!hasChatAccess()){showChatPaywall();return;}
   activeRoleplay=sc;
   try{trackM('roleplay');}catch(e){}
   // Show roleplay banner in chat
@@ -4153,6 +4114,7 @@ const TC_MODES=[
 let tcMode='grammar';
 
 function openTextChecker(){
+  if(!hasChatAccess()){showChatPaywall();return;}
   try{trackM('check');}catch(e){}
   const title=document.getElementById('tc-modal-title');
   const btn=document.getElementById('tc-btn');
@@ -4189,6 +4151,7 @@ function openTextChecker(){
 }
 
 async function submitTextCheck(){
+  if(!hasChatAccess()){showChatPaywall();return;}
   const inp=document.getElementById('tc-inp');
   const text=inp?.value?.trim();
   if(!text||text.length<10){toast(lang==='ru'?'Введи текст':'Enter some text','⚠️');return;}
@@ -4402,6 +4365,10 @@ function setPremium(active, source){
   if(premiumTier)LS.set('premium_tier',premiumTier);
   updatePremiumUI();
   try{updateChatModelStrip();}catch(e){}
+  const navChat=document.getElementById('nav-chat');
+  if(navChat)navChat.classList.toggle('locked',!active);
+  if(!active&&tab==='chat')goTab('home');
+  try{if(window._d)renderHome(window._d);}catch(e){}
   if(active&&source!=='cache'){
     const shdr=document.querySelector('.shdr .stit');
     if(shdr){
@@ -4448,7 +4415,7 @@ function updatePremiumUI(){
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'от 650 ⭐/мес · Sonnet с Basic',en:'from 650 ⭐/mo · Sonnet in Basic',es:'desde 650 ⭐/mes · Sonnet en Basic',pt:'a partir de 650 ⭐/mês · Sonnet no Basic'}[lang]||'from 650 ⭐'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'чат с ALEX с Basic · Sonnet включён',en:'ALEX chat starts with Basic · Sonnet included',es:'chat con ALEX desde Basic · Sonnet incluido',pt:'chat com ALEX no Basic · Sonnet incluído'}[lang]||'ALEX chat starts with Basic'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -4463,6 +4430,7 @@ function requirePremium(featureName, fn){
   if(isPremium){fn();return;}
   const msg={
     voice:{ru:'Голосовые ответы ALEX',en:'Voice replies from ALEX'},
+    chat:{ru:'Чат с ALEX доступен с Basic',en:'ALEX chat starts with Basic'},
     unlimited:{ru:'Больше дневной практики',en:'More daily practice'},
     personas:{ru:'Расширенные сценарии',en:'Advanced scenarios'},
     analysis:{ru:'Детальный анализ ошибок',en:'Detailed error analysis'},
@@ -4484,7 +4452,7 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent={ru:'Планы, лимиты и модели без лишнего шума',en:'Plans, limits and models without clutter',es:'Planes, límites y modelos sin ruido',pt:'Planos, limites e modelos sem ruído'}[lang]||'Plans and limits';
+  if(sub)sub.textContent={ru:'Free: тренировки и прогресс. Basic+: живой чат с ALEX.',en:'Free: practice and progress. Basic+: live ALEX chat.',es:'Free: práctica y progreso. Basic+: chat con ALEX.',pt:'Free: prática e progresso. Basic+: chat com ALEX.'}[lang]||'Free practice. Basic+ chat.';
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
   if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
@@ -4494,13 +4462,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='45 quota points/день<br>Haiku 4.5 = 1, Sonnet 4 = 4<br>Голосовые ответы<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6 = 4-5 points<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7 = 12-14 points<br>TOEFL + персональный план';
+    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>Голосовые ответы';
+    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>TOEFL + персональный план<br>Длинная история диалога';
   } else {
-    if(basicB)basicB.innerHTML='45 quota points/day<br>Haiku 4.5 = 1, Sonnet 4 = 4<br>Voice replies<br>Story Mode + grammar games';
-    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6 = 4-5 points<br>All scenarios + error analysis<br>Detailed replies';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7 = 12-14 points<br>TOEFL + personal plan';
+    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>Voice replies';
+    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>All scenarios + error analysis<br>Detailed replies';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>TOEFL + personal plan<br>Long chat history';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -5752,29 +5720,6 @@ function addRippleToButtons(){
     document.querySelectorAll('.qb,.btn,.ach-home-btn,.lang-picker-btn,.dl-toggle,.rm-test-btn').forEach(el=>{
       if(!el.classList.contains('ripple'))el.classList.add('ripple');
     });
-  }catch(e){}
-}
-
-function checkTrialBanner(){
-  try{
-    const banner=document.getElementById('trial-banner');
-    if(!banner)return;
-    const created=LS.get('user_created');
-    if(!created){LS.set('user_created',Date.now());banner.style.display='flex';return;}
-    const days=Math.floor((Date.now()-parseInt(created))/(86400000));
-    const isPrem=LS.get('is_premium')==='true';
-    if(days<=3&&!isPrem){
-      banner.style.display='flex';
-      const daysLeft=3-days;
-      const txt=banner.querySelector('.trial-text');
-      if(txt){
-        txt.innerHTML=lang==='ru'
-          ?`<b>Бесплатный Basic на 3 дня!</b><small>${daysLeft} ${daysLeft===1?'день':'дн.'} осталось - 45 quota points/день</small>`
-          :`<b>Free Basic trial - 3 days!</b><small>${daysLeft} day${daysLeft>1?'s':''} left - 45 quota points/day</small>`;
-      }
-    }else{
-      banner.style.display='none';
-    }
   }catch(e){}
 }
 

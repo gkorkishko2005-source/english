@@ -145,9 +145,9 @@ def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
     copy = {
         "ru": {
             "free": [
-                "Free-лимит на сегодня закончился. Ты уже сделал практику — завтра будет новый запас.",
-                "На сегодня бесплатные сообщения закончились. Можно отдохнуть или открыть больше практики.",
-                "Хорошая сессия. Free даёт 5 сообщений в день, дальше нужен тариф с quota points.",
+                "ALEX Chat открывается с Basic. В Free остаются карточки, задания, путь и прогресс.",
+                "Бесплатная практика доступна без чата. Чтобы писать ALEX, открой Basic или выше.",
+                "Free помогает учиться каждый день, а живой чат с ALEX начинается с Basic.",
             ],
             "paid": [
                 "Ты сегодня сделал много прогресса. Лимит quota points закончился — можно спокойно погулять, мозгу тоже нужно закрепление.",
@@ -160,9 +160,9 @@ def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
         },
         "en": {
             "free": [
-                "Free limit reached for today. You already practiced — tomorrow brings a fresh set.",
-                "Your free messages are done today. Rest now or unlock more practice.",
-                "Good session. Free includes 5 messages/day; more practice uses quota points.",
+                "ALEX Chat starts with Basic. Free still includes cards, tasks, paths and progress.",
+                "Free practice is available without chat. Upgrade to Basic or higher to write to ALEX.",
+                "Free keeps daily study open; live ALEX chat starts with Basic.",
             ],
             "paid": [
                 "You made a lot of progress today. Quota points are done — take a walk and let it settle.",
@@ -347,7 +347,6 @@ async def handle_chat(request):
     # Check premium for model selection and limits
     user_premium = False
     user_tier = ""
-    is_trial = False
     if uid in ADMIN_IDS:
         user_premium = True
         user_tier = "ultimate"
@@ -359,28 +358,27 @@ async def handle_chat(request):
             user_tier = info.get("tier", "")
         except Exception:
             pass
-        # 3-day Basic trial for new users
-        if not user_premium and uid:
-            try:
-                from database import db
-                row = await db("SELECT created_at FROM users WHERE uid=?", uid, fetch="one")
-                if row and row.get("created_at"):
-                    import datetime
-                    created = row["created_at"]
-                    if hasattr(created, 'date'):
-                        days_since = (datetime.datetime.now(created.tzinfo if created.tzinfo else None) - created).days
-                    else:
-                        days_since = 999
-                    if days_since <= 3:
-                        user_tier = "basic"
-                        is_trial = True
-                        logger.info(f"Trial active for {uid}, day {days_since+1}/3")
-            except Exception as e:
-                logger.debug(f"trial check: {e}")
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
     tier_key = user_tier if user_tier in TIER_ECONOMY else "free"
+    if tier_key == "free":
+        msg = (
+            '<div class="limit-card">'
+            '<div class="limit-kicker">ALEX Chat</div>'
+            '<div class="limit-title">Доступно с Basic</div>'
+            '<div class="limit-text">В бесплатном режиме доступны карточки, задания, путь и прогресс. Живой чат с ALEX открывается с подписки Basic.</div>'
+            '<button class="chip" onclick="openPremium()">Открыть тарифы</button>'
+            '</div>'
+            if lang == "ru" else
+            '<div class="limit-card">'
+            '<div class="limit-kicker">ALEX Chat</div>'
+            '<div class="limit-title">Basic required</div>'
+            '<div class="limit-text">Free includes flashcards, tasks, learning path and progress. Live ALEX chat starts with Basic.</div>'
+            '<button class="chip" onclick="openPremium()">Open plans</button>'
+            '</div>'
+        )
+        return web.json_response({"reply": msg, "premium_required": True}, headers={"Access-Control-Allow-Origin":"*"})
     tier_cfg = TIER_ECONOMY[tier_key]
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in {*MODEL_ECONOMY.keys(), "auto"}:

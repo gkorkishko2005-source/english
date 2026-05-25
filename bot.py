@@ -106,29 +106,29 @@ scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 BOT_PROFILE = {
     "name_default": "PolyGlotty English",
     "name_ru": "PolyGlotty English",
-    "short_default": "AI English tutor: chat, corrections, vocabulary, grammar, TOEFL and daily streaks.",
-    "short_ru": "AI-репетитор английского: чат, исправление ошибок, слова, грамматика, TOEFL и стрик.",
+    "short_default": "English tutor in Telegram: free practice, ALEX chat from Basic, grammar, TOEFL and streaks.",
+    "short_ru": "Репетитор английского в Telegram: бесплатная практика, чат ALEX с Basic, грамматика, TOEFL и стрик.",
     "description_default": (
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
         "Practice English every day:\n"
-        "• AI chat with corrections\n"
-        "• Flashcards and spaced repetition\n"
-        "• Grammar games and drills\n"
+        "• Free flashcards, paths and drills\n"
+        "• ALEX Chat with corrections from Basic\n"
+        "• Grammar games and spaced repetition\n"
         "• Roleplay: interview, travel, cafe, business\n"
         "• TOEFL practice, progress and streaks\n\n"
         "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Open the app and start with a free trial."
+        "Open the app: free practice is available, ALEX Chat starts with Basic."
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
         "Практикуй английский каждый день:\n"
-        "• чат с исправлением ошибок\n"
-        "• карточки и интервальное повторение\n"
-        "• grammar games и drills\n"
+        "• бесплатные карточки, путь и drills\n"
+        "• чат ALEX с исправлением ошибок от Basic\n"
+        "• grammar games и интервальное повторение\n"
         "• сценки: интервью, путешествия, кафе, бизнес\n"
         "• TOEFL, прогресс и стрик\n\n"
         "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Открой приложение и начни с бесплатного периода."
+        "Открой приложение: бесплатная практика доступна сразу, чат ALEX начинается с Basic."
     ),
 }
 
@@ -658,7 +658,7 @@ async def send_daily_word(uid: int):
             f"🇷🇺 {w['tr']}\n\n"
             f"📝 <i>{w['ex']}</i>\n\n"
             f"<b>{'Как использовать:' if ru else 'How to use it:'}</b> "
-            f"{'напиши своё предложение с этим словом, а ALEX исправит его в чате.' if ru else 'write your own sentence with this word, and ALEX will correct it in chat.'}\n\n"
+            f"{'напиши своё предложение с этим словом. В Basic ALEX исправит его в чате.' if ru else 'write your own sentence with this word. With Basic, ALEX will correct it in chat.'}\n\n"
             f"<i>{motivation_line(lang)}</i>",
             parse_mode="HTML", reply_markup=kb
         )
@@ -831,12 +831,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
         f"Тренируй английский каждый день без отдельного приложения.\n\n"
         f"<b>Что умеет бот:</b>\n"
-        f"• исправляет ошибки в чате\n"
-        f"• объясняет грамматику простыми словами\n"
-        f"• даёт карточки, drills и мини-игры\n"
+        f"• даёт карточки, drills, путь и мини-игры бесплатно\n"
+        f"• открывает живой чат с ALEX на Basic\n"
+        f"• исправляет ошибки и объясняет грамматику\n"
         f"• тренирует speaking через roleplay\n"
         f"• готовит к TOEFL и ведёт прогресс\n\n"
-        f"<b>Старт:</b> открой приложение ниже. Новым пользователям доступен Basic trial на 3 дня."
+        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно учиться и копить прогресс, чат с ALEX — с Basic."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
     ) if ru else (
@@ -844,12 +844,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
         f"Practice English every day without installing another app.\n\n"
         f"<b>What it does:</b>\n"
-        f"• corrects your chat mistakes\n"
-        f"• explains grammar clearly\n"
-        f"• gives flashcards, drills and mini-games\n"
+        f"• gives free flashcards, drills, paths and mini-games\n"
+        f"• unlocks live ALEX chat with Basic\n"
+        f"• corrects mistakes and explains grammar\n"
         f"• trains speaking through roleplay\n"
         f"• helps with TOEFL and tracks progress\n\n"
-        f"<b>Start:</b> open the app below. New users get a 3-day Basic trial."
+        f"<b>Start:</b> open the app below. Free practice is available, ALEX Chat starts with Basic."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
     )
