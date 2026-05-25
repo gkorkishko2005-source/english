@@ -5173,10 +5173,19 @@ function updateNewLabels(){
 
 /* ══ TTS — Text to Speech ══ */
 let _ttsAudio=null;
+function cleanTTSInput(text){
+  return String(text||'')
+    .replace(/https?:\/\/\S+/g,' ')
+    .replace(/[*_`#>\[\]{}|~]/g,' ')
+    .replace(/\b(Copy|Copied|Копировать|Скопировано)\b/gi,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+    .slice(0,700);
+}
 async function speakText(text,btn){
   // Stop if already playing
   if(_ttsAudio&&!_ttsAudio.paused){_ttsAudio.pause();_ttsAudio=null;if(btn)btn.classList.remove('playing');return;}
-  const clean=text.replace(/[*_`#]/g,'').slice(0,500);
+  const clean=cleanTTSInput(text);
   if(!clean)return;
   if(btn)btn.classList.add('playing');
   haptic('light');
@@ -5201,9 +5210,10 @@ function fallbackSpeak(text){
   // Browser SpeechSynthesis fallback (free, no server needed)
   if('speechSynthesis' in window){
     const u=new SpeechSynthesisUtterance(text);
-    u.lang='en-US';u.rate=0.9;u.pitch=1;
+    u.lang='en-US';u.rate=0.88;u.pitch=0.98;
     const voices=speechSynthesis.getVoices();
-    const enVoice=voices.find(v=>v.lang.startsWith('en')&&v.name.includes('Google'))||voices.find(v=>v.lang.startsWith('en'));
+    const preferred=['Samantha','Ava','Jenny','Aria','Daniel','Google US English','Google UK English'];
+    const enVoice=preferred.map(function(name){return voices.find(function(v){return v.lang.startsWith('en')&&v.name.toLowerCase().includes(name.toLowerCase());});}).find(Boolean)||voices.find(v=>v.lang.startsWith('en')&&/natural|neural|premium/i.test(v.name))||voices.find(v=>v.lang.startsWith('en'));
     if(enVoice)u.voice=enVoice;
     speechSynthesis.speak(u);
   }

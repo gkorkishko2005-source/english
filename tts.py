@@ -8,6 +8,8 @@ import io
 import os
 import logging
 import difflib
+import html
+import re
 from pathlib import Path
 
 import httpx
@@ -16,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY")
 OPENAI_KEY     = os.getenv("OPENAI_API_KEY")  # для Whisper STT
+TTS_PROVIDER   = (os.getenv("TTS_PROVIDER") or "auto").lower()
+TTS_RATE       = os.getenv("TTS_RATE", "-8%")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -23,11 +27,37 @@ OPENAI_KEY     = os.getenv("OPENAI_API_KEY")  # для Whisper STT
 # ══════════════════════════════════════════════════════════════════
 
 async def text_to_speech(text: str, lang: str = "en") -> bytes | None:
-    """Конвертирует текст в аудио. ElevenLabs → gTTS."""
-    if ELEVENLABS_KEY:
-        result = await _elevenlabs_tts(text)
+    """Конвертирует текст в аудио. ElevenLabs → Edge neural voice → gTTS."""
+    clean = _prepare_tts_text(text)
+    if not clean:
+        return None
+
+    if ELEVENLABS_KEY and TTS_PROVIDER in ("auto", "elevenlabs"):
+        result = await _elevenlabs_tts(clean, lang)
         if result: return result
-    return await _gtts(text, lang)
+
+    if TTS_PROVIDER in ("auto", "edge"):
+        result = await _edge_tts(clean, lang)
+        if result: return result
+
+    return await _gtts(clean, lang)
+
+
+def _prepare_tts_text(text: str) -> str:
+    """Makes AI text sound less mechanical and prevents reading markup aloud."""
+    text = html.unescape(str(text or ""))
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"https?://\S+", " ", text)
+    text = re.sub(r"[*_`#>\[\]{}|~]+", " ", text)
+    text = re.sub(r"\b(copy|copied|копировать|скопировано)\b", " ", text, flags=re.I)
+    text = re.sub(r"([.!?]){2,}", r"\1", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > 700:
+        cut = max(text.rfind(".", 0, 700), text.rfind("?", 0, 700), text.rfind("!", 0, 700))
+        text = text[:cut + 1 if cut > 220 else 700].strip()
+    if text and text[-1] not in ".!?":
+        text += "."
+    return text
 
 
 async def _gtts(text: str, lang: str = "en") -> bytes | None:
@@ -51,23 +81,68 @@ async def _gtts(text: str, lang: str = "en") -> bytes | None:
         return None
 
 
-async def _elevenlabs_tts(text: str) -> bytes | None:
+def _edge_voice(lang: str = "en") -> str:
+    base = (lang or "en").split("-")[0].lower()
+    env_voice = os.getenv(f"TTS_VOICE_{base.upper()}") or os.getenv("TTS_VOICE")
+    if env_voice:
+        return env_voice
+    return {
+        "en": "en-US-AriaNeural",
+        "ru": "ru-RU-SvetlanaNeural",
+        "es": "es-ES-ElviraNeural",
+        "pt": "pt-BR-FranciscaNeural",
+    }.get(base, "en-US-AriaNeural")
+
+
+async def _edge_tts(text: str, lang: str = "en") -> bytes | None:
+    """Microsoft neural voices. Free fallback that is much more natural than gTTS."""
+    try:
+        import edge_tts
+
+        communicate = edge_tts.Communicate(
+            text=text,
+            voice=_edge_voice(lang),
+            rate=TTS_RATE,
+            volume="+0%",
+        )
+        audio = bytearray()
+        async for chunk in communicate.stream():
+            if chunk.get("type") == "audio" and chunk.get("data"):
+                audio.extend(chunk["data"])
+        return bytes(audio) if audio else None
+    except ImportError:
+        logger.info("edge-tts not installed; falling back to gTTS")
+        return None
+    except Exception as e:
+        logger.warning(f"Edge TTS error: {e}")
+        return None
+
+
+async def _elevenlabs_tts(text: str, lang: str = "en") -> bytes | None:
     voices = {
         "lecture": "pNInz6obpgDQGcFmaJgB",   # Adam — академический
         "dialogue_male": "TxGEqnHWrfWFTfGW9XjX",  # Josh
         "dialogue_female": "21m00Tcm4TlvDq8ikWAM",  # Rachel
     }
-    voice_id = voices["lecture"]
+    voice_id = os.getenv("ELEVENLABS_VOICE_ID") or voices["lecture"]
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(
                 f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
                 headers={"xi-api-key": ELEVENLABS_KEY, "Content-Type": "application/json"},
-                json={"text": text, "model_id": "eleven_monolingual_v1",
-                      "voice_settings": {"stability": 0.7, "similarity_boost": 0.8}},
+                json={
+                    "text": text,
+                    "model_id": os.getenv("ELEVENLABS_MODEL", "eleven_multilingual_v2"),
+                    "voice_settings": {
+                        "stability": 0.45,
+                        "similarity_boost": 0.85,
+                        "style": 0.25,
+                        "use_speaker_boost": True,
+                    },
+                },
             )
             if r.status_code == 200: return r.content
-            logger.warning(f"ElevenLabs {r.status_code}")
+            logger.warning(f"ElevenLabs {r.status_code}: {r.text[:160]}")
             return None
     except Exception as e:
         logger.error(f"ElevenLabs: {e}")
