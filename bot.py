@@ -73,6 +73,7 @@ FREE_TEST_IDS: set = {
 }
 PAYMENT_TEST_IDS: set = {
     1738695057,
+    8702782202,
 }
 PAYMENT_TEST_USERNAMES: set = {
     u.strip().lower().lstrip("@")
