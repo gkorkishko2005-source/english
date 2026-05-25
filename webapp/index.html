@@ -25,7 +25,7 @@
 [data-mode=light] .chdr{background:rgba(255,255,255,.95)!important;border-bottom:1px solid rgba(0,0,0,.06)!important}
 [data-mode=light] .inrow{background:rgba(255,255,255,.95)!important;border-top:1px solid rgba(0,0,0,.06)!important}
 [data-mode=light] .mbar{background:rgba(255,255,255,.95)!important;border-color:rgba(0,0,0,.06)!important}
-[data-mode=light] .mpop{background:rgba(255,255,255,.96)!important;border-color:rgba(0,0,0,.08)!important;box-shadow:0 18px 44px rgba(0,0,0,.18)!important}
+[data-mode=light] .mpop{background:rgba(255,255,255,.96)!important;border-color:rgba(79,138,255,.16)!important;box-shadow:0 18px 44px rgba(79,138,255,.16)!important}
 [data-mode=light] .mpop-title{color:rgba(0,0,0,.46)!important}
 [data-mode=light] .mopt{color:#202124!important}
 [data-mode=light] .mopt:hover,[data-mode=light] .mopt.on{background:rgba(0,0,0,.06)!important}
@@ -764,12 +764,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mtoggle:active{transform:scale(.95)}
 .mt-arr{width:13px;height:13px;opacity:.7}
 /* Compact model popover */
-.mpop{position:absolute;left:10px;bottom:calc(100% + 7px);width:218px;padding:7px;border-radius:13px;background:rgba(38,38,40,.96);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 44px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);display:none;z-index:120}
+.mpop{position:absolute;left:10px;bottom:calc(100% + 7px);width:218px;padding:7px;border-radius:13px;background:linear-gradient(180deg,rgba(13,27,51,.98),rgba(7,20,39,.98));border:1px solid rgba(var(--ar),.16);box-shadow:0 18px 44px rgba(4,16,38,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);display:none;z-index:120}
 .mpop.open{display:block;animation:mpop-in .14s ease-out}
 @keyframes mpop-in{from{opacity:0;transform:translateY(5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 .mpop-title{font-size:11px;color:rgba(255,255,255,.46);padding:4px 7px 6px}
 .mopt{display:grid;grid-template-columns:1fr auto 17px;align-items:center;gap:7px;width:100%;height:31px;padding:0 8px;background:transparent;border:0;border-radius:8px;cursor:pointer;font-family:var(--f);text-align:left;color:#f4f4f5;transition:background .12s}
-.mopt:hover,.mopt.on{background:rgba(255,255,255,.10)}
+.mopt:hover,.mopt.on{background:rgba(var(--ar),.12)}
 .mopt:active{transform:scale(.99)}
 .mopt.locked{opacity:.45}
 .mopt-ic,.mopt-sub,.mopt-tier,.mopt-lock{display:none!important}
@@ -1157,6 +1157,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pp-price{font-size:16px;font-weight:800;color:var(--t1)}
 .pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
 .pp-buffs{font-size:12px;color:var(--t2);line-height:1.65;padding-left:1px}
+.pp-year{margin-top:9px;padding:8px 10px;border-radius:9px;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.14);font-size:11px;font-weight:700;color:var(--a);display:flex;align-items:center;justify-content:space-between}
+.prem-ladder{padding:0 17px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lad-card{background:rgba(var(--ar),.055);border:1px solid var(--b1);border-radius:10px;padding:10px}
+.lad-card strong{display:block;font-size:12px;margin-bottom:5px;color:var(--t1)}
+.lad-card span{display:block;font-size:10.5px;line-height:1.45;color:var(--t2)}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -1788,17 +1793,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="prem-plan" onclick="selectPlan('basic')">
         <div class="pp-hdr"><span class="pp-badge">Basic</span><span class="pp-price">650 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
+        <div class="pp-year" id="pp-basic-year">6630 ⭐ / год <span>-15%</span></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
         <div class="pp-hdr"><span class="pp-badge">Pro</span><span class="pp-price">1600 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
+        <div class="pp-year" id="pp-pro-year">16320 ⭐ / год <span>-15%</span></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
         <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">4200 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
+        <div class="pp-year" id="pp-ult-year">42840 ⭐ / год <span>-15%</span></div>
       </div>
     </div>
+    <div class="prem-ladder" id="prem-ladder"></div>
     <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Continue free</div>
   </div>
 </div>
@@ -2644,7 +2653,8 @@ function prevDayKey(){
 }
 function todayMissions(){
   const seed=_todaySeed();
-  const pool=isPremium?MISSION_POOL:MISSION_POOL.filter(m=>!['chat','check','roleplay','story'].includes(m.key));
+  const disallowed = hasTier('ultimate') ? [] : hasTier('pro') ? ['listen'] : hasTier('basic') ? ['check','roleplay','story','listen'] : ['chat','check','roleplay','story','listen'];
+  const pool=MISSION_POOL.filter(m=>!disallowed.includes(m.key));
   const idx=pool.map((_,i)=>i);
   // Deterministic shuffle using seed.
   for(let i=idx.length-1;i>0;i--){
@@ -3394,7 +3404,7 @@ async function rate(q){
 
 /* ══ AUDIO TASK ══ */
 async function startAudio(){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  if(!hasTier('ultimate')){showTierPaywall('ultimate','TOEFL');return;}
   if(busy)return;goTab('chat');
   const gd=document.createElement('div');gd.className='msg bot';gd.id='audgen';
   const av=document.createElement('div');av.className='mav';
@@ -4055,7 +4065,7 @@ const SCENARIOS=[
 
 let activeRoleplay=null;
 function openRoleplay(){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Сценки':'Roleplay');return;}
   const grid=document.getElementById('scenario-grid');
   const title=document.getElementById('rp-modal-title');
   if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario',es:'Elige un escenario',de:'Szenario wählen',fr:'Choisir un scénario',pt:'Escolher cenário',uk:'Обери сценарій',tr:'Senaryo seç',zh:'选择场景',ar:'اختر سيناريو'}[lang]||'Choose a scenario';
@@ -4075,7 +4085,7 @@ function openRoleplay(){
 }
 
 function startRoleplay(sc){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Сценки':'Roleplay');return;}
   activeRoleplay=sc;
   try{trackM('roleplay');}catch(e){}
   // Show roleplay banner in chat
@@ -4114,7 +4124,7 @@ const TC_MODES=[
 let tcMode='grammar';
 
 function openTextChecker(){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Проверка текста':'Text Check');return;}
   try{trackM('check');}catch(e){}
   const title=document.getElementById('tc-modal-title');
   const btn=document.getElementById('tc-btn');
@@ -4151,7 +4161,7 @@ function openTextChecker(){
 }
 
 async function submitTextCheck(){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Проверка текста':'Text Check');return;}
   const inp=document.getElementById('tc-inp');
   const text=inp?.value?.trim();
   if(!text||text.length<10){toast(lang==='ru'?'Введи текст':'Enter some text','⚠️');return;}
@@ -4340,6 +4350,11 @@ let premiumLifetime = false;
 
 async function checkPremiumStatus(uid){
   const ADMIN_IDS_CLIENT = [1738695057,5399839500,725259177,1241890707,1428437531];
+  const FREE_TEST_IDS_CLIENT = [1738695057];
+  if(FREE_TEST_IDS_CLIENT.includes(uid)){
+    premiumTier='';premiumUntil=null;premiumLifetime=false;
+    setPremium(false,'free_test');return;
+  }
   if(ADMIN_IDS_CLIENT.includes(uid)){
     premiumTier='ultimate';premiumLifetime=true;
     setPremium(true,'admin');return;
@@ -4380,6 +4395,25 @@ function setPremium(active, source){
       shdr.appendChild(badge);
     }
   }
+}
+
+function tierLevel(tier){
+  return ({free:0,basic:1,pro:2,ultimate:3}[(tier||'free').toLowerCase()]||0);
+}
+function hasTier(minTier){
+  return isPremium&&tierLevel(premiumTier)>=tierLevel(minTier);
+}
+function showTierPaywall(minTier, feature){
+  const names={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
+  const title={
+    ru:`${feature||'Функция'} доступно с ${names[minTier]||minTier}`,
+    en:`${feature||'Feature'} starts with ${names[minTier]||minTier}`,
+    es:`Disponible desde ${names[minTier]||minTier}`,
+    pt:`Disponível a partir do ${names[minTier]||minTier}`
+  }[lang]||`${feature||'Feature'} starts with ${names[minTier]||minTier}`;
+  try{sfx.warn();}catch(e){}haptic('light');
+  openPremium(title);
+  toast(title,'🔒');
 }
 
 function updatePremiumUI(){
@@ -4452,10 +4486,31 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent={ru:'Free: тренировки и прогресс. Basic+: живой чат с ALEX.',en:'Free: practice and progress. Basic+: live ALEX chat.',es:'Free: práctica y progreso. Basic+: chat con ALEX.',pt:'Free: prática e progresso. Basic+: chat com ALEX.'}[lang]||'Free practice. Basic+ chat.';
+  if(sub)sub.textContent=highlightFeature||({ru:'Free живой, но ALEX Chat начинается с Basic. Годовой план даёт -15%.',en:'Free stays useful, ALEX Chat starts with Basic. Yearly saves 15%.',es:'Free sigue útil, chat desde Basic. Anual ahorra 15%.',pt:'Free continua útil, chat no Basic. Anual economiza 15%.'}[lang]||'Free practice. Basic+ chat.');
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
   if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
+  const by=document.getElementById('pp-basic-year'),py=document.getElementById('pp-pro-year'),uy=document.getElementById('pp-ult-year');
+  if(by)by.innerHTML=lang==='ru'?'6630 ⭐ / год <span>-15%</span>':'6630 ⭐ / year <span>-15%</span>';
+  if(py)py.innerHTML=lang==='ru'?'16320 ⭐ / год <span>-15%</span>':'16320 ⭐ / year <span>-15%</span>';
+  if(uy)uy.innerHTML=lang==='ru'?'42840 ⭐ / год <span>-15%</span>':'42840 ⭐ / year <span>-15%</span>';
+  const ladder=document.getElementById('prem-ladder');
+  if(ladder){
+    const items=lang==='ru'
+      ?[
+        ['Free','Карточки · drills · путь · виселица · задания дня · прогресс'],
+        ['Basic','ALEX Chat · Sonnet 4 · голосовые ответы · больше дневной практики'],
+        ['Pro','Roleplay · проверка текста · анализ ошибок · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · длинная история · максимум quota points']
+      ]
+      :[
+        ['Free','Flashcards · drills · roadmap · hangman · daily tasks · progress'],
+        ['Basic','ALEX Chat · Sonnet 4 · voice replies · more daily practice'],
+        ['Pro','Roleplay · text check · error analysis · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · long history · max quota points']
+      ];
+    ladder.innerHTML=items.map(i=>`<div class="lad-card"><strong>${i[0]}</strong><span>${i[1]}</span></div>`).join('');
+  }
 
   // Fill plan buffs
   const basicB=document.getElementById('pp-basic-buffs');
@@ -4463,11 +4518,11 @@ function openPremium(highlightFeature){
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
     if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>Голосовые ответы';
-    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>Все сценки + анализ ошибок<br>Развёрнутые ответы';
+    if(proB)proB.innerHTML='110 quota points/день<br>Roleplay + проверка текста<br>Sonnet 4/4.6<br>Развёрнутые ответы';
     if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>TOEFL + персональный план<br>Длинная история диалога';
   } else {
     if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>Voice replies';
-    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>All scenarios + error analysis<br>Detailed replies';
+    if(proB)proB.innerHTML='110 quota points/day<br>Roleplay + text check<br>Sonnet 4/4.6<br>Detailed replies';
     if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>TOEFL + personal plan<br>Long chat history';
   }
 

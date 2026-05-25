@@ -76,6 +76,9 @@ ADMIN_IDS = {
     1241890707,
     1428437531,
 }
+FREE_TEST_IDS = {
+    1738695057,
+}
 # Any username in this set also gets free premium
 ADMIN_USERNAMES = {
     # "utiqo",
@@ -240,7 +243,7 @@ async def handle_user(request):
                 "lang": "ru", "profession": "", "remind_time": "",
                 "referrals": 0,
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-                "is_premium": uid in ADMIN_IDS,
+                "is_premium": uid in ADMIN_IDS and uid not in FREE_TEST_IDS,
             }, headers={"Access-Control-Allow-Origin": "*"})
         xp         = await get_xp(uid) or 0
         level      = await get_level(uid) or "B1"
@@ -253,7 +256,7 @@ async def handle_user(request):
         due_words  = await get_due_words(uid, 10) or []
         profession = await get_profession(uid) or ""
         lang_db    = await get_lang(uid) or "ru"
-        is_prem    = uid in ADMIN_IDS or await check_premium(uid)
+        is_prem    = False if uid in FREE_TEST_IDS else (uid in ADMIN_IDS or await check_premium(uid))
         weekly = [0]*7
         return web.json_response({
             "uid": uid,
@@ -284,7 +287,7 @@ async def handle_user(request):
             "lang": "ru", "profession": "", "remind_time": "",
             "referrals": 0,
             "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-            "is_premium": uid in ADMIN_IDS,
+            "is_premium": uid in ADMIN_IDS and uid not in FREE_TEST_IDS,
         }, headers={"Access-Control-Allow-Origin": "*"})
 
 # ── CHAT ─────────────────────────────────────────────────────────────────────
@@ -347,7 +350,10 @@ async def handle_chat(request):
     # Check premium for model selection and limits
     user_premium = False
     user_tier = ""
-    if uid in ADMIN_IDS:
+    if uid in FREE_TEST_IDS:
+        user_premium = False
+        user_tier = ""
+    elif uid in ADMIN_IDS:
         user_premium = True
         user_tier = "ultimate"
     elif uid:
@@ -675,6 +681,11 @@ async def handle_check_premium(request):
         return web.json_response({"error":"invalid uid"},status=400)
 
     # Check whitelist first (free lifetime premium for admins)
+    if uid in FREE_TEST_IDS:
+        return web.json_response({
+            "is_premium":False,"tier":"","until":None,"lifetime":False,"source":"free_test"
+        }, headers={"Access-Control-Allow-Origin":"*"})
+
     if uid in ADMIN_IDS:
         return web.json_response({
             "is_premium":True,"tier":"ultimate","until":None,"lifetime":True,"source":"admin"

@@ -68,6 +68,9 @@ ADMIN_IDS: set = {
     1241890707,
     1428437531,
 }
+FREE_TEST_IDS: set = {
+    1738695057,
+}
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
@@ -87,6 +90,24 @@ PREMIUM_PLANS = {
     "ultimate": {
         "stars": 4200, "months": 1, "price_usd": 4999,
         "label_ru": "Ultimate · 1 мес", "label_en": "Ultimate · 1 mo",
+        "tier": "ultimate",
+        "model": "opus", "msg_limit": 260, "history": 90, "max_tokens": 1300,
+    },
+    "basic_year": {
+        "stars": int(650 * 12 * 0.85), "months": 12, "price_usd": int(899 * 12 * 0.85),
+        "label_ru": "Basic · 1 год", "label_en": "Basic · 1 year",
+        "tier": "basic",
+        "model": "sonnet4", "msg_limit": 45, "history": 35, "max_tokens": 700,
+    },
+    "pro_year": {
+        "stars": int(1600 * 12 * 0.85), "months": 12, "price_usd": int(1999 * 12 * 0.85),
+        "label_ru": "Pro · 1 год", "label_en": "Pro · 1 year",
+        "tier": "pro",
+        "model": "sonnet", "msg_limit": 110, "history": 55, "max_tokens": 1050,
+    },
+    "ultimate_year": {
+        "stars": int(4200 * 12 * 0.85), "months": 12, "price_usd": int(4999 * 12 * 0.85),
+        "label_ru": "Ultimate · 1 год", "label_en": "Ultimate · 1 year",
         "tier": "ultimate",
         "model": "opus", "msg_limit": 260, "history": 90, "max_tokens": 1300,
     },
@@ -114,8 +135,8 @@ BOT_PROFILE = {
         "• Free flashcards, paths and drills\n"
         "• ALEX Chat with corrections from Basic\n"
         "• Grammar games and spaced repetition\n"
-        "• Roleplay: interview, travel, cafe, business\n"
-        "• TOEFL practice, progress and streaks\n\n"
+        "• Pro roleplay: interview, travel, cafe, business\n"
+        "• Ultimate TOEFL practice, progress and streaks\n\n"
         "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
         "Open the app: free practice is available, ALEX Chat starts with Basic."
     ),
@@ -125,8 +146,8 @@ BOT_PROFILE = {
         "• бесплатные карточки, путь и drills\n"
         "• чат ALEX с исправлением ошибок от Basic\n"
         "• grammar games и интервальное повторение\n"
-        "• сценки: интервью, путешествия, кафе, бизнес\n"
-        "• TOEFL, прогресс и стрик\n\n"
+        "• Pro-сценки: интервью, путешествия, кафе, бизнес\n"
+        "• Ultimate TOEFL, прогресс и стрик\n\n"
         "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
         "Открой приложение: бесплатная практика доступна сразу, чат ALEX начинается с Basic."
     ),
@@ -778,7 +799,7 @@ async def cmd_start(message: Message):
 
     # Grant free premium if admin (non-blocking)
     try:
-        if await is_admin(uid):
+        if await is_admin(uid) and uid not in FREE_TEST_IDS:
             await grant_premium_via_server(uid, 999, "ultimate")
     except Exception as e:
         logger.warning(f"grant_premium for admin failed: {e}")
@@ -818,7 +839,7 @@ async def cmd_start(message: Message):
 
     is_prem = False
     try:
-        is_prem = await is_admin(uid) or await check_premium(uid)
+        is_prem = False if uid in FREE_TEST_IDS else (await is_admin(uid) or await check_premium(uid))
     except Exception:
         pass
     badge = " · 👑 Premium" if is_prem else ""
@@ -834,8 +855,8 @@ async def cmd_start(message: Message):
         f"• даёт карточки, drills, путь и мини-игры бесплатно\n"
         f"• открывает живой чат с ALEX на Basic\n"
         f"• исправляет ошибки и объясняет грамматику\n"
-        f"• тренирует speaking через roleplay\n"
-        f"• готовит к TOEFL и ведёт прогресс\n\n"
+        f"• открывает roleplay и проверку текста на Pro\n"
+        f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
         f"<b>Старт:</b> открой приложение ниже. Бесплатно можно учиться и копить прогресс, чат с ALEX — с Basic."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
@@ -847,8 +868,8 @@ async def cmd_start(message: Message):
         f"• gives free flashcards, drills, paths and mini-games\n"
         f"• unlocks live ALEX chat with Basic\n"
         f"• corrects mistakes and explains grammar\n"
-        f"• trains speaking through roleplay\n"
-        f"• helps with TOEFL and tracks progress\n\n"
+        f"• unlocks roleplay and text check on Pro\n"
+        f"• helps with TOEFL on Ultimate and tracks progress\n\n"
         f"<b>Start:</b> open the app below. Free practice is available, ALEX Chat starts with Basic."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
@@ -914,17 +935,26 @@ async def cmd_vocab(m: Message):
 @dp.message(Command("roleplay"))
 async def cmd_roleplay(m: Message):
     lang = await get_lang(m.from_user.id)
+    if not await has_access(m.from_user.id, "pro"):
+        await send_upgrade_hint(m, "pro", lang, "Roleplay")
+        return
     await m.answer("🎭 <b>Roleplay:</b>", reply_markup=roleplay_kb(lang))
 
 @dp.message(Command("story"))
 async def cmd_story(m: Message):
     lang = await get_lang(m.from_user.id)
+    if not await has_access(m.from_user.id, "basic"):
+        await send_upgrade_hint(m, "basic", lang, "Story Quest")
+        return
     await m.answer("🎮 <b>Story Quest:</b>", reply_markup=story_kb(lang))
 
 @dp.message(Command("debate"))
 async def cmd_debate(m: Message):
     uid  = m.from_user.id
     lang = await get_lang(uid)
+    if not await has_access(uid, "pro"):
+        await send_upgrade_hint(m, "pro", lang, "Debate")
+        return
     clear_history(uid)
     set_ctx(uid, debate_round=1)
     await bot.send_chat_action(m.chat.id, "typing")
@@ -944,6 +974,9 @@ async def cmd_test(m: Message):
 @dp.message(Command("toefl"))
 async def cmd_toefl(m: Message):
     lang = await get_lang(m.from_user.id)
+    if not await has_access(m.from_user.id, "ultimate"):
+        await send_upgrade_hint(m, "ultimate", lang, "TOEFL")
+        return
     await m.answer("🎓 <b>TOEFL iBT:</b>", reply_markup=toefl_kb(lang))
 
 @dp.message(Command("talk"))
@@ -1175,6 +1208,10 @@ async def cb_setlevel(cb: CallbackQuery):
 async def cb_roleplay(cb: CallbackQuery):
     uid      = cb.from_user.id
     lang     = await get_lang(uid)
+    if not await has_access(uid, "pro"):
+        await cb.answer("Нужен Pro" if lang == "ru" else "Pro required", show_alert=True)
+        await send_upgrade_hint(cb.message, "pro", lang, "Roleplay")
+        return
     scenario = ROLEPLAY_SCENARIOS.get(cb.data)
     if not scenario: await cb.answer(); return
     if cb.data == "rp_custom":
@@ -1216,6 +1253,11 @@ async def cb_roleplay(cb: CallbackQuery):
 @dp.callback_query(F.data.startswith("story_"))
 async def cb_story(cb: CallbackQuery):
     uid  = cb.from_user.id
+    lang = await get_lang(uid)
+    if not await has_access(uid, "basic"):
+        await cb.answer("Нужен Basic" if lang == "ru" else "Basic required", show_alert=True)
+        await send_upgrade_hint(cb.message, "basic", lang, "Story Quest")
+        return
     data = STORY_TYPES.get(cb.data)
     if not data: await cb.answer(); return
     await cb.message.edit_reply_markup(reply_markup=None)
@@ -1354,6 +1396,10 @@ async def cb_toefl(cb: CallbackQuery):
         text = "🎓 <b>TOEFL Scores:</b>\n\n"
         for r in rows: text += f"📌 <b>{r['section']}</b>: best {r['best']}, avg {r['avg_s']:.0f} ({r['cnt']} sessions)\n"
         await cb.message.answer(text); return
+    if not await has_access(uid, "ultimate"):
+        await cb.answer("Нужен Ultimate" if lang == "ru" else "Ultimate required", show_alert=True)
+        await send_upgrade_hint(cb.message, "ultimate", lang, "TOEFL")
+        return
     if cb.data == "toefl_listening":
         await cb.message.edit_reply_markup(reply_markup=None)
         await cb.answer()
@@ -1502,9 +1548,9 @@ async def handle_text(message: Message):
             [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
         ])
     await message.answer(
-        ("📱 Учись в приложении — там чат с ALEX, карточки, игры и всё остальное!\n\n"
+        ("📱 Учись в приложении — Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается с Basic.\n\n"
          "👇 Нажми кнопку ниже") if lang=="ru" else
-        ("📱 Learn in the app — chat with ALEX, flashcards, games and more!\n\n"
+        ("📱 Learn in the app — Free includes flashcards, drills, games and progress. ALEX Chat starts with Basic.\n\n"
          "👇 Tap the button below"),
         reply_markup=kb
     )
@@ -1591,6 +1637,35 @@ async def is_admin(uid: int) -> bool:
     """Check if user is admin (free premium)."""
     return uid in ADMIN_IDS
 
+def tier_level(tier: str) -> int:
+    return {"free": 0, "basic": 1, "pro": 2, "ultimate": 3}.get((tier or "free").lower(), 0)
+
+async def get_access_tier(uid: int) -> str:
+    if uid in FREE_TEST_IDS:
+        return "free"
+    if uid in ADMIN_IDS:
+        return "ultimate"
+    try:
+        from database import get_premium_info
+        info = await get_premium_info(uid)
+        return info.get("tier") if info.get("is_premium") else "free"
+    except Exception:
+        return "basic" if await check_premium(uid) else "free"
+
+async def has_access(uid: int, tier: str) -> bool:
+    return tier_level(await get_access_tier(uid)) >= tier_level(tier)
+
+async def send_upgrade_hint(message: Message, tier: str, lang: str, feature: str):
+    text = (
+        f"<b>{feature}</b> доступно с тарифа <b>{tier.title()}</b>.\n\n"
+        "В Free остаются карточки, drills, задания дня и прогресс. Подписка открывает живой ALEX Chat и продвинутые тренировки."
+        if lang == "ru" else
+        f"<b>{feature}</b> starts with <b>{tier.title()}</b>.\n\n"
+        "Free still includes flashcards, drills, daily tasks and progress. Subscription unlocks live ALEX Chat and advanced practice."
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="ALEX Subscriptions", callback_data="open_premium")]])
+    await message.answer(text, parse_mode="HTML", reply_markup=kb)
+
 async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate"):
     """Call server API to grant premium."""
     try:
@@ -1610,7 +1685,7 @@ async def cmd_premium(msg: Message):
     ru = user_lang == "ru"
 
     # Admins get free premium automatically
-    if await is_admin(uid):
+    if await is_admin(uid) and uid not in FREE_TEST_IDS:
         await grant_premium_via_server(uid, 999)  # 999 months ≈ lifetime
         text = (
             "<b>Ultimate активирован</b>\n\n"
@@ -1627,7 +1702,7 @@ async def cmd_premium(msg: Message):
         return
 
     # Check if already premium
-    is_prem = await check_premium(uid)
+    is_prem = False if uid in FREE_TEST_IDS else await check_premium(uid)
     prem_badge = ""
     if is_prem:
         prem_badge = ("\n\n✅ <i>У тебя уже есть Premium. Можешь продлить!</i>" if ru
@@ -1646,11 +1721,15 @@ async def cmd_premium(msg: Message):
     discount_text = ""
     if is_first:
         discount_text = "\n\n🎁 <b>-10% на первую покупку!</b>" if ru else "\n\n🎁 <b>10% off your first purchase!</b>"
+    year_text = "\n📅 <b>Годовой план: -15%</b>" if ru else "\n📅 <b>Annual plan: 15% off</b>"
 
     # Prices with discount
     b_stars = int(PREMIUM_PLANS["basic"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["basic"]["stars"]
     p_stars = int(PREMIUM_PLANS["pro"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["pro"]["stars"]
     u_stars = int(PREMIUM_PLANS["ultimate"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["ultimate"]["stars"]
+    by_stars = PREMIUM_PLANS["basic_year"]["stars"]
+    py_stars = PREMIUM_PLANS["pro_year"]["stars"]
+    uy_stars = PREMIUM_PLANS["ultimate_year"]["stars"]
 
     kb_rows = [
         [InlineKeyboardButton(
@@ -1664,6 +1743,18 @@ async def cmd_premium(msg: Message):
         [InlineKeyboardButton(
             text=f"Ultimate — {u_stars} ⭐/мес (~$50)" if ru else f"Ultimate — {u_stars} ⭐/mo (~$50)",
             callback_data=f"prem_buy:ultimate:{'d' if is_first else 'n'}"
+        )],
+        [InlineKeyboardButton(
+            text=f"Basic год — {by_stars} ⭐ (-15%)" if ru else f"Basic yearly — {by_stars} ⭐ (-15%)",
+            callback_data="prem_buy:basic_year:n"
+        )],
+        [InlineKeyboardButton(
+            text=f"Pro год — {py_stars} ⭐ (-15%)" if ru else f"Pro yearly — {py_stars} ⭐ (-15%)",
+            callback_data="prem_buy:pro_year:n"
+        )],
+        [InlineKeyboardButton(
+            text=f"Ultimate год — {uy_stars} ⭐ (-15%)" if ru else f"Ultimate yearly — {uy_stars} ⭐ (-15%)",
+            callback_data="prem_buy:ultimate_year:n"
         )],
     ]
     # Add card payment option if Stripe is configured
@@ -1680,15 +1771,16 @@ async def cmd_premium(msg: Message):
         "━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Basic</b> — {b_stars} ⭐/мес\n"
         "├ 45 quota points/день\n"
+        "├ Живой чат с ALEX\n"
         "├ Модели: Haiku 4.5 или Sonnet 4\n"
         "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Голосовые ответы ALEX\n"
-        "└ Story Mode + grammar games\n\n"
+        "└ Больше карточек и grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/мес\n"
         "├ 110 quota points/день\n"
         "├ Модели: Haiku 4.5, Sonnet 4 или Sonnet 4.6\n"
         "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
-        "├ Все сценки + анализ ошибок\n"
+        "├ Roleplay, проверка текста, анализ ошибок\n"
         "└ Развёрнутые ответы\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
         "├ 260 quota points/день\n"
@@ -1696,8 +1788,9 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + персональный план\n"
         "└ Длинная история диалога\n\n"
+        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
-        f"{discount_text}\n"
+        f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars или 💳 карта"
     ) if ru else (
@@ -1705,15 +1798,16 @@ async def cmd_premium(msg: Message):
         "━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Basic</b> — {b_stars} ⭐/mo\n"
         "├ 45 quota points/day\n"
+        "├ Live ALEX chat\n"
         "├ Models: Haiku 4.5 or Sonnet 4\n"
         "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Voice replies from ALEX\n"
-        "└ Story Mode + grammar games\n\n"
+        "└ More flashcards and grammar games\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/mo\n"
         "├ 110 quota points/day\n"
         "├ Models: Haiku 4.5, Sonnet 4 or Sonnet 4.6\n"
         "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
-        "├ All scenarios + error analysis\n"
+        "├ Roleplay, text check and error analysis\n"
         "└ Detailed answers\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
         "├ 260 quota points/day\n"
@@ -1721,8 +1815,9 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + personal study plan\n"
         "└ Long chat history\n\n"
+        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points keep premium limits fair and sustainable.</i>"
-        f"{discount_text}\n"
+        f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
         "⭐ Stars or 💳 card"
     )
@@ -1749,7 +1844,8 @@ async def cb_prem_buy(cb: CallbackQuery):
     if has_discount:
         stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
 
-    desc = f"ALEX Subscriptions {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}"
+    period = "1 год" if (ru and plan["months"] == 12) else "1 year" if plan["months"] == 12 else "1 месяц" if ru else "1 month"
+    desc = f"ALEX Subscriptions {plan['tier'].upper()} — {period}"
 
     await cb.answer()
     try:
@@ -1778,6 +1874,9 @@ async def cb_card_menu(cb: CallbackQuery):
         [InlineKeyboardButton(text=f"Basic — $8.99/мес" if ru else "Basic — $8.99/mo", callback_data="prem_card:basic")],
         [InlineKeyboardButton(text=f"Pro — $19.99/мес" if ru else "Pro — $19.99/mo", callback_data="prem_card:pro")],
         [InlineKeyboardButton(text=f"Ultimate — $49.99/мес" if ru else "Ultimate — $49.99/mo", callback_data="prem_card:ultimate")],
+        [InlineKeyboardButton(text=f"Basic год — $91.69 (-15%)" if ru else "Basic yearly — $91.69 (-15%)", callback_data="prem_card:basic_year")],
+        [InlineKeyboardButton(text=f"Pro год — $203.89 (-15%)" if ru else "Pro yearly — $203.89 (-15%)", callback_data="prem_card:pro_year")],
+        [InlineKeyboardButton(text=f"Ultimate год — $509.89 (-15%)" if ru else "Ultimate yearly — $509.89 (-15%)", callback_data="prem_card:ultimate_year")],
     ])
     await cb.message.answer("💳 " + ("Выбери план для оплаты картой:" if ru else "Choose a plan to pay by card:"), reply_markup=kb)
 
@@ -1801,7 +1900,7 @@ async def cb_card_buy(cb: CallbackQuery):
         await bot.send_invoice(
             chat_id=uid,
             title=f"ALEX Subscriptions {label}",
-            description=f"ALEX Subscriptions {plan['tier'].upper()} — 1 {'месяц' if ru else 'month'}",
+            description=f"ALEX Subscriptions {plan['tier'].upper()} — {('1 год' if ru else '1 year') if plan['months']==12 else ('1 месяц' if ru else '1 month')}",
             payload=f"premium:{plan_id}:{uid}",
             provider_token=STRIPE_TOKEN,
             currency="USD",
