@@ -1225,6 +1225,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
 .course-note{font-size:12px;line-height:1.45;color:var(--t2);background:rgba(var(--ar),.07);border:1px solid rgba(var(--ar),.14);border-radius:10px;padding:10px;margin-top:10px}
 .course-ai{width:100%;border:1px solid rgba(var(--ar),.28);background:rgba(var(--ar),.1);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer;margin-top:10px}
+.course-lab{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:14px 0 7px}
+.course-build{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:10px;margin-top:9px}
+.course-slots,.course-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:38px}
+.course-slots{background:var(--e1);border:1px dashed var(--b2);border-radius:10px;padding:8px;margin-bottom:8px}
+.course-word{border:1px solid var(--b1);background:var(--e3);color:var(--t1);border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700;cursor:pointer}
+.course-word.used{opacity:.35;pointer-events:none}
+.course-mini-actions{display:flex;gap:7px;margin-top:8px}
+.course-mini-btn{flex:1;border:1px solid rgba(var(--ar),.20);background:rgba(var(--ar),.08);color:var(--a);border-radius:9px;padding:8px;font-size:12px;font-weight:800;font-family:var(--f);cursor:pointer}
+.course-inp{width:100%;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:13px;outline:none}
+.course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
+.course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
 .mini-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--a);font-weight:850;margin-bottom:6px}
 .roadmap-wrap{display:flex;flex-direction:column;gap:8px}
 .rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
@@ -4374,6 +4385,10 @@ function renderCourse(){
 function openCourseLesson(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  const first=ls.examples[0]||'';
+  const words=courseWords(first);
+  const shuffled=shuffleCourseWords(words,id);
+  window['course_target_'+courseKey(id)]=first;
   const html=`<div class="course-lesson">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
@@ -4387,8 +4402,87 @@ function openCourseLesson(id){
       <div class="course-rule" style="font-weight:750;color:var(--t1)">${safeHTML(ls.q)}</div>
       ${ls.o.map((o,i)=>`<div class="course-opt" onclick="answerCourse('${id}',${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
     </div>
+    <div class="course-build">
+      <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
+      <div class="course-slots" id="cb-slots-${id}"></div>
+      <div class="course-pool" id="cb-pool-${id}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}',this)">${safeHTML(w)}</button>`).join('')}</div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}')">${lang==='ru'?'Сброс':'Reset'}</button></div>
+      <div class="course-result" id="cb-res-${id}"></div>
+    </div>
+    <div class="course-build">
+      <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
+      <div class="course-note">${lang==='ru'?'Нажми “Слушать” у первой фразы и запиши её по памяти.':'Tap “Listen” on the first phrase and type it from memory.'}</div>
+      <input class="course-inp" id="cd-inp-${id}" placeholder="${lang==='ru'?'Напиши услышанную фразу':'Type what you heard'}">
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseLine('${id}',0)">${lang==='ru'?'Слушать':'Listen'}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${lang==='ru'?'Проверить':'Check'}</button></div>
+      <div class="course-result" id="cd-res-${id}"></div>
+    </div>
+    <div class="course-build">
+      <div class="course-lab">${lang==='ru'?'Чтение и понимание':'Reading check'}</div>
+      <div class="course-rule">${safeHTML(courseReadingText(ls))}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',true)">${lang==='ru'?'Текст связан с правилом урока':'The text matches the lesson rule'}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Текст не связан с правилом урока':'The text is unrelated to the lesson rule'}</div>
+      <div class="course-result" id="cr-res-${id}"></div>
+    </div>
   </div>`;
   wrap.innerHTML=html;
+}
+function courseKey(id){return String(id).replace(/[^a-z0-9_]/gi,'_');}
+function courseWords(s){return String(s||'').replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);}
+function normalizeCourseText(s){return String(s||'').toLowerCase().replace(/[^a-z0-9\s']/gi,'').replace(/\s+/g,' ').trim();}
+function shuffleCourseWords(words,id){
+  const arr=words.slice();
+  let seed=String(id).split('').reduce((a,c)=>a+c.charCodeAt(0),17);
+  for(let i=arr.length-1;i>0;i--){seed=(seed*9301+49297)%233280;const j=seed%(i+1);const t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+function courseReadingText(ls){
+  const title=ls.title[lang]||ls.title.en;
+  const ex=(ls.examples||[]).slice(0,2).join(' ');
+  return lang==='ru'
+    ?`Этот короткий текст тренирует тему “${title}”. Прочитай примеры и найди знакомую структуру: ${ex}`
+    :`This short text trains “${title}”. Read the examples and notice the target structure: ${ex}`;
+}
+function awardCourseExtra(id,type,amount){
+  const key='course_extra_'+id+'_'+type;
+  if(LS.get(key))return;
+  LS.set(key,'1');addLocalXP(amount);bumpStat('tests');
+}
+function coursePickWord(id,btn){
+  const slots=document.getElementById('cb-slots-'+id);if(!slots||!btn)return;
+  btn.classList.add('used');
+  const w=document.createElement('button');
+  w.className='course-word';w.textContent=btn.dataset.word||btn.textContent;w.onclick=function(){btn.classList.remove('used');w.remove();};
+  slots.appendChild(w);
+}
+function resetCourseBuilder(id){
+  const slots=document.getElementById('cb-slots-'+id);if(slots)slots.innerHTML='';
+  document.querySelectorAll('#cb-pool-'+id+' .course-word').forEach(b=>b.classList.remove('used'));
+  const res=document.getElementById('cb-res-'+id);if(res){res.textContent='';res.className='course-result';}
+}
+function checkCourseBuilder(id){
+  const target=window['course_target_'+courseKey(id)]||'';
+  const answer=[...document.querySelectorAll('#cb-slots-'+id+' .course-word')].map(x=>x.textContent).join(' ');
+  const ok=normalizeCourseText(answer)===normalizeCourseText(target);
+  const res=document.getElementById('cb-res-'+id);if(!res)return;
+  res.className='course-result '+(ok?'ok':'bad');
+  res.textContent=ok?(lang==='ru'?'Собрано правильно. +6 XP':'Correct sentence. +6 XP'):(lang==='ru'?'Почти. Правильно: ':'Almost. Correct: ')+target;
+  if(ok){awardCourseExtra(id,'builder',6);try{trackM('drill');}catch(e){}}
+}
+function checkCourseDictation(id){
+  const target=window['course_target_'+courseKey(id)]||'';
+  const inp=document.getElementById('cd-inp-'+id);
+  const ok=normalizeCourseText(inp&&inp.value)===normalizeCourseText(target);
+  const res=document.getElementById('cd-res-'+id);if(!res)return;
+  res.className='course-result '+(ok?'ok':'bad');
+  res.textContent=ok?(lang==='ru'?'Слух отлично сработал. +8 XP':'Good listening. +8 XP'):(lang==='ru'?'Проверь фразу: ':'Check the phrase: ')+target;
+  if(ok){awardCourseExtra(id,'dictation',8);try{trackM('listen');}catch(e){}}
+}
+function checkCourseReading(id,picked){
+  const ok=!!picked;
+  const res=document.getElementById('cr-res-'+id);if(!res)return;
+  res.className='course-result '+(ok?'ok':'bad');
+  res.textContent=ok?(lang==='ru'?'Верно. Это чтение закрепляет тему урока. +5 XP':'Correct. This reading reinforces the lesson. +5 XP'):(lang==='ru'?'Здесь как раз используется структура урока.':'The text does use the lesson structure.');
+  if(ok){awardCourseExtra(id,'reading',5);}
 }
 function speakCourseLine(id,idx){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
