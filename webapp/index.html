@@ -25,6 +25,11 @@
 [data-mode=light] .chdr{background:rgba(255,255,255,.95)!important;border-bottom:1px solid rgba(0,0,0,.06)!important}
 [data-mode=light] .inrow{background:rgba(255,255,255,.95)!important;border-top:1px solid rgba(0,0,0,.06)!important}
 [data-mode=light] .mbar{background:rgba(255,255,255,.95)!important;border-color:rgba(0,0,0,.06)!important}
+[data-mode=light] .mpop{background:rgba(255,255,255,.96)!important;border-color:rgba(0,0,0,.08)!important;box-shadow:0 18px 44px rgba(0,0,0,.18)!important}
+[data-mode=light] .mpop-title{color:rgba(0,0,0,.46)!important}
+[data-mode=light] .mopt{color:#202124!important}
+[data-mode=light] .mopt:hover,[data-mode=light] .mopt.on{background:rgba(0,0,0,.06)!important}
+[data-mode=light] .mt-cell{background:rgba(0,0,0,.06)!important;color:rgba(0,0,0,.58)!important}
 [data-mode=light] .msg.bot .mbub{background:rgba(0,0,0,.04)!important;color:#1a1a2e}
 [data-mode=light] .msg.user .mbub{background:#3478f6!important}
 [data-mode=light] .chip{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.08)!important;color:#1a1a2e!important}
@@ -133,13 +138,15 @@
 .stat-svg{transition:opacity .2s}
 
 /* ══ WEEKLY CHART improved ══ */
-.chart-wrap{padding:14px 0 6px;overflow:visible!important}
-.chart{display:flex;align-items:flex-end;gap:5px;height:72px;margin-bottom:8px}
-.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;cursor:pointer}
-.bb{width:100%;border-radius:5px 5px 0 0;min-height:3px;background:linear-gradient(180deg,var(--a),rgba(var(--ar),.18));transition:height .75s cubic-bezier(.4,0,.2,1),opacity .2s}
-.bb:hover{opacity:.85}
-.bb.td{background:linear-gradient(180deg,var(--a2),rgba(0,212,170,.18))}
-.bb.zero{background:var(--e3);min-height:4px}
+.chart-wrap{padding:16px 12px 10px;overflow:visible!important;background:linear-gradient(145deg,rgba(var(--ar),.08),rgba(0,212,170,.035) 48%,var(--e1));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 38px rgba(0,0,0,.18);perspective:520px}
+.chart{display:flex;align-items:flex-end;gap:7px;height:96px;margin:2px 0 10px;overflow:visible;transform:rotateX(8deg);transform-origin:50% 100%}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;cursor:pointer;position:relative;transform-style:preserve-3d}
+.bc::after{content:'';width:82%;height:10px;border-radius:50%;background:rgba(0,0,0,.28);filter:blur(5px);transform:translateY(5px);opacity:.38}
+.bb{width:78%;border-radius:8px 8px 5px 5px;min-height:5px;background:linear-gradient(180deg,#89b7ff 0%,var(--a) 48%,#255fc6 100%);transition:height .85s cubic-bezier(.22,1,.36,1),opacity .2s,transform .2s;box-shadow:inset -7px 0 10px rgba(0,0,0,.18),inset 6px 0 10px rgba(255,255,255,.16),0 9px 18px rgba(var(--ar),.18);position:relative;transform:translateZ(10px)}
+.bb::before{content:'';position:absolute;left:8%;right:8%;top:0;height:8px;border-radius:50%;background:rgba(255,255,255,.38)}
+.bb:hover{opacity:.92;transform:translateZ(18px) translateY(-2px)}
+.bb.td{background:linear-gradient(180deg,#7dffd9 0%,var(--a2) 48%,#079b86 100%);box-shadow:inset -7px 0 10px rgba(0,0,0,.18),inset 6px 0 10px rgba(255,255,255,.18),0 11px 22px rgba(0,212,170,.22)}
+.bb.zero{background:linear-gradient(180deg,var(--e3),rgba(255,255,255,.04));min-height:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 10px rgba(0,0,0,.12)}
 .bd{font-size:10px;color:var(--t3)}.bd.td{color:var(--a2);font-weight:700}
 .chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--t1);pointer-events:none;transform:translate(-50%,-2px);white-space:nowrap;z-index:40;opacity:0;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}
 .chart-tooltip.show{opacity:1;transform:translate(-50%,-8px)}
@@ -757,35 +764,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
-.mbar{display:flex;justify-content:flex-start;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid transparent;flex-shrink:0}
-.mtoggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 12px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);color:var(--t1);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;transition:transform .15s,border-color .2s,background .2s}
+.mbar{display:flex;justify-content:flex-start;padding:5px 10px 0;background:rgba(22,27,39,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid transparent;flex-shrink:0;position:relative;z-index:80}
+.mtoggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px 5px 12px;border-radius:9px;border:1px solid var(--b2);background:rgba(255,255,255,.045);color:var(--t1);cursor:pointer;font-family:var(--f);font-size:12px;font-weight:700;transition:transform .15s,border-color .2s,background .2s}
 .mtoggle:hover{border-color:rgba(var(--ar),.4);background:rgba(var(--ar),.06)}
 .mtoggle:active{transform:scale(.95)}
 .mt-arr{width:13px;height:13px;opacity:.7}
-/* Bottom-sheet model options */
-.mtable-hdr{display:none}
-.mopt{display:grid;grid-template-columns:31px 1fr auto 20px;align-items:center;gap:9px;padding:7px 10px;width:100%;background:var(--e2);border:1px solid var(--b1);border-radius:12px;margin-bottom:6px;cursor:pointer;font-family:var(--f);text-align:left;color:var(--t1);transition:transform .15s,border-color .2s,background .2s;position:relative}
-.mopt:hover{border-color:rgba(var(--ar),.35)}
-.mopt:active{transform:scale(.98)}
-.mopt.on{border-color:var(--a);background:rgba(var(--ar),.08);box-shadow:0 0 0 2px rgba(var(--ar),.06)}
-.mopt.locked{opacity:.55}
-.mopt-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--e3);color:var(--a);border:1px solid var(--b1)}
-.mopt-ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Compact model popover */
+.mpop{position:absolute;left:10px;bottom:calc(100% + 7px);width:218px;padding:7px;border-radius:13px;background:rgba(38,38,40,.96);border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 44px rgba(0,0,0,.42);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);display:none;z-index:120}
+.mpop.open{display:block;animation:mpop-in .14s ease-out}
+@keyframes mpop-in{from{opacity:0;transform:translateY(5px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.mpop-title{font-size:11px;color:rgba(255,255,255,.46);padding:4px 7px 6px}
+.mopt{display:grid;grid-template-columns:1fr auto 17px;align-items:center;gap:7px;width:100%;height:31px;padding:0 8px;background:transparent;border:0;border-radius:8px;cursor:pointer;font-family:var(--f);text-align:left;color:#f4f4f5;transition:background .12s}
+.mopt:hover,.mopt.on{background:rgba(255,255,255,.10)}
+.mopt:active{transform:scale(.99)}
+.mopt.locked{opacity:.45}
+.mopt-ic,.mopt-sub,.mopt-tier,.mopt-lock{display:none!important}
 .mopt-main{min-width:0}
-.mopt-top{display:flex;align-items:center;gap:7px;min-width:0}
-.mopt-name{font-size:12.5px;font-weight:800;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mopt-tier{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.45px;color:var(--t3);background:var(--e3);border:1px solid var(--b1);border-radius:100px;padding:2px 6px;white-space:nowrap}
-.mopt-sub{font-size:11px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mopt-meta{display:flex;align-items:center;gap:5px;justify-content:flex-end}
-.mt-cell{font-size:10px;font-weight:800;text-align:center;padding:3px 7px;border-radius:100px;background:var(--e3);color:var(--t2);min-width:28px}
-.mt-low{background:rgba(0,212,170,.14);color:var(--a2)}
-.mt-mid{background:rgba(79,138,255,.14);color:var(--a)}
-.mt-hi{background:rgba(255,184,48,.16);color:var(--gd)}
-.mopt-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--a)}
-.mopt.on .mopt-check{border-color:var(--a);background:rgba(var(--ar),.18)}
-.mopt-check svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;display:none}
+.mopt-top{display:block;min-width:0}
+.mopt-name{font-size:13px;font-weight:500;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mopt-meta{display:flex;align-items:center;justify-content:flex-end}
+.mt-cell{font-size:10px;font-weight:650;text-align:center;padding:2px 7px;border-radius:100px;background:rgba(255,255,255,.09);color:rgba(255,255,255,.64);min-width:24px}
+.mt-low,.mt-mid,.mt-hi{background:rgba(255,255,255,.09);color:rgba(255,255,255,.64)}
+.mopt-check{width:17px;height:17px;display:flex;align-items:center;justify-content:center;color:#f4f4f5}
+.mopt-check svg{width:13px;height:13px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;display:none}
 .mopt.on .mopt-check svg{display:block}
-.mopt-lock{font-size:9px;font-weight:800;padding:2px 6px;border-radius:100px;background:rgba(255,184,48,.18);color:var(--gd);letter-spacing:.45px;white-space:nowrap}
 .inrow{padding:7px 10px;padding-bottom:calc(7px + var(--safe));background:rgba(22,27,39,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--b1);display:flex;align-items:flex-end;gap:6px;flex-shrink:0}
 .cinp{flex:1;background:var(--e2);border:1px solid var(--b1);border-radius:18px;padding:8px 14px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;resize:none;max-height:96px;min-height:34px;line-height:1.35;transition:border-color .18s,background .18s}
 .cinp:focus{border-color:rgba(var(--ar),.45);background:var(--e1)}
@@ -882,11 +884,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .s4cv{font-size:25px;font-weight:800;line-height:1;margin-bottom:3px}
 .s4cl{font-size:11px;color:var(--t2)}
 
-.chart{display:flex;align-items:flex-end;gap:4px;height:64px;margin-bottom:6px;overflow:visible}
-.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
-.bb{width:100%;border-radius:4px 4px 0 0;min-height:3px;background:linear-gradient(180deg,var(--a),rgba(var(--ar),.18));transition:height .75s cubic-bezier(.4,0,.2,1)}
-.bb.td{background:linear-gradient(180deg,var(--a2),rgba(0,212,170,.18))}
-.bd{font-size:10px;color:var(--t3)}.bd.td{color:var(--a2);font-weight:600}
 
 /* ══ SETTINGS ══ */
 .shdr{padding-top:3px;margin-bottom:16px}.stit{font-size:21px;font-weight:800}
@@ -1396,12 +1393,40 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="cmsgs" id="cmsgs"></div>
   <div class="chips" id="chips"></div>
-  <!-- Model button (visible from Basic+; opens model picker modal) -->
+  <!-- Model button (visible from Basic+; opens compact model picker) -->
   <div class="mbar" id="mbar" style="display:none">
-    <button class="mtoggle" onclick="openModelPicker()" type="button">
+    <button class="mtoggle" onclick="event.stopPropagation();openModelPicker()" type="button">
       <span class="mt-name" id="mt-name">Haiku</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-arr"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
+    <div class="mpop" id="modelm" onclick="event.stopPropagation()">
+      <div class="mpop-title" id="model-mtit">Model</div>
+      <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-low">1</div></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="sonnet4" onclick="selectModel('sonnet4')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-mid">4</div><span class="mopt-lock" style="display:none">BASIC</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" style="display:none">PRO</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="opus41" onclick="selectModel('opus41')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+    </div>
   </div>
   <div class="inrow">
     <textarea class="cinp" id="cinp" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
@@ -1644,53 +1669,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <div class="toast" id="toast">
   <div id="t-icon-wrap" style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center"></div>
   <span id="tmsg">—</span>
-</div>
-
-  <!-- MODEL PICKER MODAL -->
-<div class="mov" id="modelm" style="display:none" onclick="closeMod('modelm')">
-  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
-    <div class="mtit" id="model-mtit">Choose model</div>
-    <div class="mbdy">
-      <div class="mtable-hdr">
-        <div></div>
-        <div id="mh-cost">Cost</div>
-        <div id="mh-perf">Quality</div>
-        <div id="mh-speed">Speed</div>
-        <div></div>
-      </div>
-      <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
-        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 10-13h-7l1-7z"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div><span class="mopt-tier">fast</span></div><div class="mopt-sub">Short answers, cheapest</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-low">1</div></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="sonnet4" onclick="selectModel('sonnet4')" type="button">
-        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M7 4v16"/><path d="M17 4v16"/><path d="M4 17h16"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div><span class="mopt-tier">classic</span></div><div class="mopt-sub">Balanced older model</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-mid">4</div><span class="mopt-lock" style="display:none">BASIC</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
-        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 3H20v18H6.5A2.5 2.5 0 014 18.5v-13A2.5 2.5 0 016.5 3z"/><path d="M8 8h8M8 12h6"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div><span class="mopt-tier">smart</span></div><div class="mopt-sub">Reasoning and corrections</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" id="mopt-sonnet-lock" style="display:none">PRO</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="opus41" onclick="selectModel('opus41')" type="button">
-        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3z"/><path d="M19 19l2 2"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div><span class="mopt-tier">deep</span></div><div class="mopt-sub">Deep work, older Opus</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" style="display:none">ULT</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
-        <div class="mopt-ic"><svg viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2 6.4 20.2 7.5 14 3 9.6l6.2-.9L12 3z"/></svg></div>
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div><span class="mopt-tier">max</span></div><div class="mopt-sub">Hard tasks, highest cost</div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" id="mopt-opus-lock" style="display:none">ULT</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="moff" onclick="closeMod('modelm')" type="button" style="margin-top:6px">Cancel</button>
-    </div>
-  </div>
 </div>
 
   <!-- REMINDER MODAL -->
@@ -2353,27 +2331,27 @@ function pickModel(m){
 }
 function selectModel(m){
   pickModel(m);
-  if(modelAllowedForTier(m))closeMod('modelm');
+  if(modelAllowedForTier(m))document.getElementById('modelm')?.classList.remove('open');
 }
 function openModelPicker(){
   if(!isPremium){openPremium();return;}
   updateModelOptions();
-  openMod('modelm');
+  document.getElementById('modelm')?.classList.toggle('open');
 }
 function updateModelOptions(){
   const cur=getChosenModel();
   // localized table headers + cells
   const T={
-    ru:{title:'Выбери модель',
+    ru:{title:'Model',
         fast:'быстро',classic:'стабильно',smart:'умно',deep:'глубоко',max:'макс',
         haiku:'Быстро и экономно',sonnet4:'Старая рабочая версия',sonnet:'Разборы и исправления',opus41:'Глубокие задачи',opus:'Максимум качества'},
-    en:{title:'Choose model',
+    en:{title:'Model',
         fast:'fast',classic:'classic',smart:'smart',deep:'deep',max:'max',
         haiku:'Fast and efficient',sonnet4:'Older stable version',sonnet:'Corrections and reasoning',opus41:'Deep tasks',opus:'Maximum quality'},
-    es:{title:'Elige modelo',
+    es:{title:'Model',
         fast:'rápido',classic:'clásico',smart:'listo',deep:'profundo',max:'máx.',
         haiku:'Rápido y eficiente',sonnet4:'Versión estable anterior',sonnet:'Correcciones y razonamiento',opus41:'Tareas profundas',opus:'Máxima calidad'},
-    pt:{title:'Escolher modelo',
+    pt:{title:'Model',
         fast:'rápido',classic:'clássico',smart:'inteligente',deep:'profundo',max:'máx.',
         haiku:'Rápido e eficiente',sonnet4:'Versão estável anterior',sonnet:'Correções e raciocínio',opus41:'Tarefas profundas',opus:'Qualidade máxima'},
   };
@@ -2407,6 +2385,10 @@ function updateChatModelStrip(){
   const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7'};
   const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
 }
+document.addEventListener('click',function(e){
+  const pop=document.getElementById('modelm');
+  if(pop&&pop.classList.contains('open')&&!e.target.closest('.mbar'))pop.classList.remove('open');
+});
 
 function maybeOnboardChat(){
   if(LS.get('chat_onb_v1')==='1')return;
@@ -2599,7 +2581,7 @@ function drawProgress(){
         }
       };
     }
-    setTimeout(()=>bb.style.height=(v/mx*68)+'px',70+i*45);
+    setTimeout(()=>bb.style.height=(v/mx*86)+'px',70+i*45);
     const dl=document.createElement('div');dl.style.cssText='flex:1;text-align:center';
     dl.className='bd'+(isToday?' td':'');dl.textContent=days[i];dEl.appendChild(dl);
   });
