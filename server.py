@@ -66,8 +66,8 @@ TIER_ECONOMY = {
     "ultimate": {"quota": 260, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus"), "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
 }
 
-# ══ ADMIN / FREE PREMIUM WHITELIST ══════════════════════════════════════════
-# Add your Telegram user IDs here — they get lifetime free premium
+# ══ ADMIN WHITELIST ══════════════════════════════════════════════════════════
+# Add Telegram user IDs here for admin tools. Premium is database-driven only.
 # To find your ID: message @userinfobot in Telegram
 ADMIN_IDS = {
     1738695057,
@@ -243,7 +243,7 @@ async def handle_user(request):
                 "lang": "ru", "profession": "", "remind_time": "",
                 "referrals": 0,
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-                "is_premium": uid in ADMIN_IDS and uid not in FREE_TEST_IDS,
+                "is_premium": False,
             }, headers={"Access-Control-Allow-Origin": "*"})
         xp         = await get_xp(uid) or 0
         level      = await get_level(uid) or "B1"
@@ -256,7 +256,7 @@ async def handle_user(request):
         due_words  = await get_due_words(uid, 10) or []
         profession = await get_profession(uid) or ""
         lang_db    = await get_lang(uid) or "ru"
-        is_prem    = (await check_premium(uid)) if uid in FREE_TEST_IDS else (uid in ADMIN_IDS or await check_premium(uid))
+        is_prem    = await check_premium(uid)
         weekly = [0]*7
         return web.json_response({
             "uid": uid,
@@ -287,7 +287,7 @@ async def handle_user(request):
             "lang": "ru", "profession": "", "remind_time": "",
             "referrals": 0,
             "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
-            "is_premium": uid in ADMIN_IDS and uid not in FREE_TEST_IDS,
+            "is_premium": False,
         }, headers={"Access-Control-Allow-Origin": "*"})
 
 # ── CHAT ─────────────────────────────────────────────────────────────────────
@@ -359,9 +359,6 @@ async def handle_chat(request):
         except Exception:
             user_premium = False
             user_tier = ""
-    elif uid in ADMIN_IDS:
-        user_premium = True
-        user_tier = "ultimate"
     elif uid:
         try:
             from database import check_premium, get_premium_info
@@ -686,7 +683,8 @@ async def handle_check_premium(request):
     except Exception:
         return web.json_response({"error":"invalid uid"},status=400)
 
-    # Check whitelist first (free lifetime premium for admins)
+    # Premium is always database-driven. Admin IDs keep admin tools only;
+    # they no longer receive automatic lifetime Ultimate.
     if uid in FREE_TEST_IDS:
         try:
             from database import get_premium_info
@@ -698,11 +696,6 @@ async def handle_check_premium(request):
             pass
         return web.json_response({
             "is_premium":False,"tier":"","until":None,"lifetime":False,"source":"free_test"
-        }, headers={"Access-Control-Allow-Origin":"*"})
-
-    if uid in ADMIN_IDS:
-        return web.json_response({
-            "is_premium":True,"tier":"ultimate","until":None,"lifetime":True,"source":"admin"
         }, headers={"Access-Control-Allow-Origin":"*"})
 
     try:

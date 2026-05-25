@@ -396,10 +396,8 @@ async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
     from datetime import datetime, timedelta
     if months <= 0:
         await db("UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='' WHERE uid=?", uid)
-    elif months >= 900:
-        # Lifetime (admin)
-        await db("UPDATE users SET is_premium=TRUE, premium_until=NULL, premium_tier=? WHERE uid=?", tier, uid)
     else:
+        months = min(int(months), 120)
         # Check if user already has active premium — extend from end date
         user = await get_user(uid)
         now = datetime.now()
@@ -423,17 +421,16 @@ async def get_premium_info(uid: int) -> dict:
     is_prem = bool(user.get("is_premium"))
     until_str = user.get("premium_until")
     tier = user.get("premium_tier", "") or ""
-    lifetime = is_prem and until_str is None
+    lifetime = False
     until = None
     active = False
     if is_prem:
-        if lifetime:
-            active = True
-        elif until_str:
+        if until_str:
             try:
                 until = datetime.fromisoformat(str(until_str))
                 active = until > datetime.now()
-            except:
+            except Exception as e:
+                logger.warning("premium_until parse failed uid=%s value=%r: %s", uid, until_str, e)
                 active = False
     return {
         "is_premium": active,
@@ -449,7 +446,7 @@ async def check_premium(uid: int) -> bool:
     if not user: return False
     if not user.get("is_premium"): return False
     until = user.get("premium_until")
-    if until is None: return True  # Lifetime
+    if until is None: return False
     try:
         return datetime.fromisoformat(str(until)) > datetime.now()
     except Exception:

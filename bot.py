@@ -58,8 +58,8 @@ BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
 
-# ══ ADMIN WHITELIST (free lifetime premium) ══════════════════════════════════
-# Добавь сюда свои Telegram UID — они получат бесплатный Premium навсегда
+# ══ ADMIN WHITELIST (admin tools only) ═══════════════════════════════════════
+# Добавь сюда Telegram UID админов. Premium больше не выдаётся автоматически.
 # Узнать свой UID: написать @userinfobot
 ADMIN_IDS: set = {
     1738695057,
@@ -73,6 +73,11 @@ FREE_TEST_IDS: set = {
 }
 PAYMENT_TEST_IDS: set = {
     1738695057,
+}
+PAYMENT_TEST_USERNAMES: set = {
+    u.strip().lower().lstrip("@")
+    for u in os.getenv("PAYMENT_TEST_USERNAMES", "").split(",")
+    if u.strip()
 }
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
@@ -800,13 +805,6 @@ async def cmd_start(message: Message):
         except Exception as e:
             logger.warning(f"referral failed uid={uid} args={args}: {e}")
 
-    # Grant free premium if admin (non-blocking)
-    try:
-        if await is_admin(uid) and uid not in FREE_TEST_IDS:
-            await grant_premium_via_server(uid, 999, "ultimate")
-    except Exception as e:
-        logger.warning(f"grant_premium for admin failed: {e}")
-
     lang = "ru"
     try:
         lang = await get_lang(uid) or "ru"
@@ -842,7 +840,7 @@ async def cmd_start(message: Message):
 
     is_prem = False
     try:
-        is_prem = (await check_premium(uid)) if uid in FREE_TEST_IDS else (await is_admin(uid) or await check_premium(uid))
+        is_prem = await check_premium(uid)
     except Exception:
         pass
     badge = " · 👑 Premium" if is_prem else ""
@@ -1637,22 +1635,21 @@ async def handle_webapp_data(message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 async def is_admin(uid: int) -> bool:
-    """Check if user is admin (free premium)."""
+    """Check if user can use admin-only maintenance commands."""
     return uid in ADMIN_IDS
+
+def is_payment_tester_user(user) -> bool:
+    username = (getattr(user, "username", "") or "").lower().lstrip("@")
+    return (
+        getattr(user, "id", 0) in PAYMENT_TEST_IDS
+        or getattr(user, "id", 0) in ADMIN_IDS
+        or username in PAYMENT_TEST_USERNAMES
+    )
 
 def tier_level(tier: str) -> int:
     return {"free": 0, "basic": 1, "pro": 2, "ultimate": 3}.get((tier or "free").lower(), 0)
 
 async def get_access_tier(uid: int) -> str:
-    if uid in FREE_TEST_IDS:
-        try:
-            from database import get_premium_info
-            info = await get_premium_info(uid)
-            return info.get("tier") if info.get("is_premium") else "free"
-        except Exception:
-            return "free"
-    if uid in ADMIN_IDS:
-        return "ultimate"
     try:
         from database import get_premium_info
         info = await get_premium_info(uid)
@@ -1692,30 +1689,15 @@ async def cmd_premium(msg: Message):
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
 
-    # Admins get free premium automatically
-    if await is_admin(uid) and uid not in FREE_TEST_IDS:
-        await grant_premium_via_server(uid, 999)  # 999 months ≈ lifetime
-        text = (
-            "<b>Ultimate активирован</b>\n\n"
-            "Ты в VIP-списке — доступ бесплатный навсегда.\n\n"
-            "Голосовые ответы · все сценки · анализ ошибок\n"
-            "Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7 · TOEFL prep"
-        ) if ru else (
-            "<b>Ultimate activated</b>\n\n"
-            "You're on the VIP list — access is free forever.\n\n"
-            "Voice replies · all scenarios · error analysis\n"
-            "Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7 · TOEFL prep"
-        )
-        await msg.answer(text, parse_mode="HTML")
-        return
-
-    if uid not in PAYMENT_TEST_IDS:
+    if not is_payment_tester_user(msg.from_user):
         text = (
             "<b>ALEX Subscriptions</b>\n\n"
-            "Оплата сейчас в закрытом тесте. Free-функции доступны в приложении, покупку откроем после проверки платежей."
+            "Оплата сейчас в закрытом тесте. Free-функции доступны в приложении, покупку откроем после проверки платежей.\n\n"
+            f"<code>Твой UID: {uid}</code>"
             if ru else
             "<b>ALEX Subscriptions</b>\n\n"
-            "Payments are in closed testing right now. Free features are available in the app; purchases open after payment testing."
+            "Payments are in closed testing right now. Free features are available in the app; purchases open after payment testing.\n\n"
+            f"<code>Your UID: {uid}</code>"
         )
         await msg.answer(text, parse_mode="HTML")
         return
@@ -1776,7 +1758,7 @@ async def cmd_premium(msg: Message):
             callback_data="prem_buy:ultimate_year:n"
         )],
     ]
-    if uid in PAYMENT_TEST_IDS:
+    if is_payment_tester_user(msg.from_user):
         kb_rows.insert(0, [InlineKeyboardButton(
             text="TEST: выдать Ultimate на 1 год без оплаты" if ru else "TEST: grant Ultimate 1 year free",
             callback_data="prem_test_grant:ultimate_year"
@@ -1853,7 +1835,7 @@ async def cb_prem_test_grant(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if uid not in PAYMENT_TEST_IDS:
+    if not is_payment_tester_user(cb.from_user):
         await cb.answer("Недоступно" if ru else "Unavailable", show_alert=True)
         return
 
@@ -1899,7 +1881,7 @@ async def cb_prem_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if uid not in PAYMENT_TEST_IDS:
+    if not is_payment_tester_user(cb.from_user):
         await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
         return
     label = plan["label_ru"] if ru else plan["label_en"]
@@ -1933,7 +1915,7 @@ async def cb_card_menu(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if uid not in PAYMENT_TEST_IDS:
+    if not is_payment_tester_user(cb.from_user):
         await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
         return
     await cb.answer()
@@ -1959,7 +1941,7 @@ async def cb_card_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
-    if uid not in PAYMENT_TEST_IDS:
+    if not is_payment_tester_user(cb.from_user):
         await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
         return
     label = plan["label_ru"] if ru else plan["label_en"]
