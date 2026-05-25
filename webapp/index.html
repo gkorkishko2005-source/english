@@ -4311,12 +4311,12 @@ const LEVEL_TESTS={
     {q:'Choose: Little ___ she know what awaited her.',o:['did','does','was','had'],a:0},
     {q:'Choose: It is imperative that he ___ on time.',o:['arrives','arrive','arrived','arriving'],a:1},
     {q:'Choose: ___ as it may seem, the theory holds.',o:['Paradoxical','Paradoxically','Paradox','Paradoxing'],a:0},
-    {q:'Choose: The hypothesis, ___ unproven, merits further study.',o:['although','while','albeit','despite'],a:2},
+    {q:'Choose: The hypothesis, ___ unproven, merits further study.',o:['despite','albeit','whereas','therefore'],a:1},
     {q:'Choose: Under no circumstances ___ this be tolerated.',o:['should','shall','can','would'],a:0},
     {q:'Choose: She speaks as though she ___ a native.',o:['is','were','was','be'],a:1},
     {q:'Choose: Notwithstanding the risks, the team ___ ahead.',o:['pressed','pressing','press','to press'],a:0},
     {q:'Choose: Only after the results were published ___ the extent of the problem become clear.',o:['did','had','was','does'],a:0},
-    {q:'Choose: The argument, ___ cogent, failed to persuade the jury.',o:['however','while','albeit','despite being'],a:2},
+    {q:'Choose: The argument, ___ cogent, failed to persuade the jury.',o:['despite','albeit','whereas','therefore'],a:1},
     {q:'Choose: So ___ was the performance that the audience gave a standing ovation.',o:['remarkable','remarkably','remarked','remarking'],a:0},
     {q:'Choose: He spoke in such ___ terms that even experts were confused.',o:['abstruse','abstract','absurd','absolute'],a:0},
     {q:'Choose: Were she to ___ the findings, the implications would be profound.',o:['publish','published','publishing','publishes'],a:0},
@@ -4325,23 +4325,130 @@ const LEVEL_TESTS={
     {q:'Choose: It is ___ that the policy be reconsidered.',o:['essential','essentially','essence','essentials'],a:0},
   ]},
   C2:{title:{ru:'Тест перехода на C2',en:'C2 Level-Up Test'},questions:[
-    {q:'Choose the most natural: The discovery ___ new avenues of research.',o:['opened up','opened','has opened up','was opening up'],a:0},
+    {q:'Choose the most natural: The discovery has already ___ new avenues of research.',o:['opened up','opened','has opened up','was opening up'],a:0},
     {q:'Choose: Her prose style is characterised by a ___ elegance.',o:['studied','studying','studious','study'],a:0},
     {q:'Choose: The legislation, ___ contentious, was passed unanimously.',o:['far from being','far from','being far','from far being'],a:0},
     {q:'Choose: He has a(n) ___ for getting into trouble.',o:['knack','trick','habit','ability'],a:0},
     {q:'Choose: The report ___ the notion that economic growth is linear.',o:['debunks','debunk','debunking','debunked'],a:0},
     {q:'Choose: ___ the evidence, the conclusion is inescapable.',o:['In light of','In the light','By light of','With light to'],a:0},
-    {q:'Choose: Her argument, ___ elegant, contains a fundamental flaw.',o:['however','notwithstanding','albeit','whilst'],a:0},
+    {q:'Choose: Her argument, ___ elegant, contains a fundamental flaw.',o:['however','despite','whereas','therefore'],a:0},
     {q:'Choose: The ___ of events was such that no single factor could be isolated.',o:['concatenation','congregation','conflagration','configuration'],a:0},
     {q:'Choose: He evinced a(n) ___ disregard for convention.',o:['studied','student','studying','studiously'],a:0},
     {q:'Choose: The manuscript, long thought ___, was discovered in an attic.',o:['to have been lost','lost','to be lost','being lost'],a:0},
     {q:'Choose: ___ unprecedented, such occurrences are exceedingly rare.',o:['While not','Whilst not being','Although not','Not being'],a:0},
-    {q:'Choose: The nuances of the argument were lost on all ___ the most attentive readers.',o:['but','except','save','besides'],a:0},
+    {q:'Choose: The nuances of the argument were lost on all ___ the most attentive readers.',o:['but','by','from','over'],a:0},
     {q:'Choose: She spoke with a ___ that belied her years.',o:['gravitas','gravity','grave','graving'],a:0},
     {q:'Choose: The results, taken ___, paint a compelling picture.',o:['in toto','in total','totally','as total'],a:0},
     {q:'Choose: His ___ of the subject is second to none.',o:['command','commanding','commandment','commanded'],a:0},
   ]},
 };
+
+const LEVEL_TEST_CONFIG={
+  A1:{pass:80,count:8,minSeconds:12,cooldownMin:3},
+  A2:{pass:80,count:10,minSeconds:15,cooldownMin:4},
+  B1:{pass:82,count:10,minSeconds:18,cooldownMin:5},
+  B2:{pass:84,count:12,minSeconds:22,cooldownMin:6},
+  C1:{pass:86,count:12,minSeconds:25,cooldownMin:7},
+  C2:{pass:88,count:12,minSeconds:25,cooldownMin:8},
+};
+
+const LEVEL_TEST_VARIANTS={
+  A1:[
+    {q:'Choose: My sister ___ at home.',o:['am','are','is','be'],a:2},
+    {q:'Choose: ___ is your phone?',o:['Where','What','Who','Why'],a:0},
+    {q:'Choose: I usually ___ tea in the morning.',o:['drink','drinks','drinking','drank'],a:0},
+    {q:'Choose: He ___ not like coffee.',o:['do','does','is','are'],a:1},
+    {q:'Choose: There ___ two windows in my room.',o:['is','are','am','be'],a:1},
+    {q:'Choose: This is ___ old photo.',o:['a','an','the','---'],a:1},
+    {q:'Choose: They can ___ very fast.',o:['run','runs','running','to run'],a:0},
+    {q:'Choose: She likes ___ in the evening.',o:['read','reads','reading','to reading'],a:2},
+  ],
+  A2:[
+    {q:'Choose: We ___ to the museum last Saturday.',o:['go','went','gone','going'],a:1},
+    {q:'Choose: I was cooking when the phone ___.',o:['rings','rang','was ringing','has rung'],a:1},
+    {q:'Choose: She has ___ finished her homework.',o:['yet','already','ago','last'],a:1},
+    {q:'Choose: There is ___ sugar in this tea.',o:['too many','many','too much','few'],a:2},
+    {q:'Choose: This bag is ___ than that one.',o:['heavy','heavier','heaviest','more heavy'],a:1},
+    {q:'Choose: I am going ___ a new course next week.',o:['start','to start','starting','started'],a:1},
+    {q:'Choose: If you heat ice, it ___.',o:['melts','will melted','would melt','melted'],a:0},
+    {q:'Choose: You should ___ a doctor.',o:['see','seeing','to see','saw'],a:0},
+  ],
+  B1:[
+    {q:'Choose: I have been learning English ___ 2024.',o:['for','since','during','from'],a:1},
+    {q:'Choose: The email ___ sent yesterday.',o:['is','was','has','did'],a:1},
+    {q:'Choose: If I had more time, I ___ more books.',o:['read','will read','would read','would have read'],a:2},
+    {q:'Choose: She said that she ___ busy.',o:['is','was','will be','has been'],a:1},
+    {q:'Choose: He ___ be at work; his office light is on.',o:['must','can’t','shouldn’t','won’t'],a:0},
+    {q:'Choose: You have finished, ___?',o:['haven’t you','didn’t you','don’t you','aren’t you'],a:0},
+    {q:'Choose: I need to look ___ this word.',o:['up','for','after','into'],a:0},
+    {q:'Choose: Although it was difficult, we ___ going.',o:['kept','made','held','put'],a:0},
+  ],
+  B2:[
+    {q:'Choose: I wish I ___ more carefully yesterday.',o:['listen','listened','had listened','would listen'],a:2},
+    {q:'Choose: By June, I will have ___ the course.',o:['finish','finished','finishing','finishes'],a:1},
+    {q:'Choose: If she had left earlier, she ___ here now.',o:['will be','would be','would have been','is'],a:1},
+    {q:'Choose: You shouldn’t have ___ that message.',o:['send','sent','sending','sends'],a:1},
+    {q:'Choose: The laptop needs to be ___.',o:['repair','repaired','repairing','repairs'],a:1},
+    {q:'Choose: The person ___ called you is my teacher.',o:['which','who','where','when'],a:1},
+    {q:'Choose: I am used to ___ early.',o:['wake up','waking up','woke up','wakes up'],a:1},
+    {q:'Choose: She did ___ the final report.',o:['finish','finished','finishing','finishes'],a:0},
+  ],
+  C1:[
+    {q:'Choose: Rarely ___ such clear evidence available.',o:['is','does','has','had'],a:0},
+    {q:'Choose: What matters most ___ consistency.',o:['are','is','be','being'],a:1},
+    {q:'Choose: I recommend that the file ___ reviewed again.',o:['is','be','was','being'],a:1},
+    {q:'Choose: In light ___ the results, we changed the plan.',o:['of','to','for','with'],a:0},
+    {q:'Choose: The sooner we start, the ___ we finish.',o:['fast','faster','fastest','more fast'],a:1},
+    {q:'Choose: Having ___ the article, she wrote a summary.',o:['read','reading','reads','to read'],a:0},
+    {q:'Choose: Under no circumstances ___ users share passwords.',o:['should','do','are','have'],a:0},
+    {q:'Choose: The proposal, ___ ambitious, is realistic.',o:['albeit','despite','therefore','whereas'],a:0},
+  ],
+  C2:[
+    {q:'Choose: The speaker adjusted his tone to suit the formal ___.',o:['register','registry','regime','region'],a:0},
+    {q:'Choose: Her comment was ironic rather than ___.',o:['literal','literate','literary','literalness'],a:0},
+    {q:'Choose: The evidence lends ___ to the hypothesis.',o:['weight','heavy','weigh','weighted'],a:0},
+    {q:'Choose: The policy may prove to be a double-edged ___.',o:['sword','knife','blade','tool'],a:0},
+    {q:'Choose: The author’s meaning is mostly conveyed through ___.',o:['subtext','subtitle','subject','subway'],a:0},
+    {q:'Choose: The argument is compelling, ___ not entirely original.',o:['though','despite','therefore','whereby'],a:0},
+    {q:'Choose: He has an exceptional command ___ idiomatic English.',o:['of','for','to','with'],a:0},
+    {q:'Choose: Her response was concise, nuanced and ___.',o:['apt','aptly','aptness','aptitude'],a:0},
+  ],
+};
+
+function levelTestCfg(target){
+  return LEVEL_TEST_CONFIG[target]||{pass:80,count:10,minSeconds:15,cooldownMin:4};
+}
+function levelTestPool(target){
+  const test=LEVEL_TESTS[target]||{};
+  return [...(test.questions||[]),...(LEVEL_TEST_VARIANTS[target]||[])];
+}
+function seededShuffle(arr,seed){
+  const out=arr.slice();
+  let s=Math.max(1,Math.floor(seed)%2147483647);
+  for(let i=out.length-1;i>0;i--){s=(s*48271)%2147483647;const j=s%(i+1);const t=out[i];out[i]=out[j];out[j]=t;}
+  return out;
+}
+function prepareLevelQuestion(q,seed){
+  const opts=seededShuffle(q.o.map((text,i)=>({text,idx:i})),seed);
+  return {q:q.q,o:opts.map(x=>x.text),a:opts.findIndex(x=>x.idx===q.a)};
+}
+function buildLevelQuestions(target){
+  const cfg=levelTestCfg(target);
+  const seed=Date.now()+Math.floor(Math.random()*100000);
+  const pool=seededShuffle(levelTestPool(target),seed);
+  return pool.slice(0,Math.min(cfg.count,pool.length)).map((q,i)=>prepareLevelQuestion(q,seed+i*97));
+}
+function levelTestLockLeft(target){
+  return Math.max(0,(parseInt(LS.get('level_test_lock_'+target)||'0',10)||0)-Date.now());
+}
+function setLevelTestCooldown(target,passed){
+  if(passed){LS.set('level_test_fail_'+target,'0');LS.set('level_test_lock_'+target,'0');return;}
+  const cfg=levelTestCfg(target);
+  const fails=(parseInt(LS.get('level_test_fail_'+target)||'0',10)||0)+1;
+  LS.set('level_test_fail_'+target,String(fails));
+  const mins=Math.min(20,cfg.cooldownMin+Math.max(0,fails-1)*2);
+  LS.set('level_test_lock_'+target,String(Date.now()+mins*60000));
+}
 
 // Level test state
 let levelTestState=null;
@@ -4639,11 +4746,32 @@ function courseAIBreakdown(id){
 function startLevelTest(targetLevel){
   const test=LEVEL_TESTS[targetLevel];
   if(!test){toast('Test not available','⚠️');return;}
+  const locked=levelTestLockLeft(targetLevel);
+  if(locked>0){
+    const mins=Math.ceil(locked/60000);
+    toast((lang==='ru'?'Повтор через ':'Try again in ')+mins+(lang==='ru'?' мин':' min'),'⚠️');
+    return;
+  }
+  const cfg=levelTestCfg(targetLevel);
+  const questions=buildLevelQuestions(targetLevel);
+  if(!questions.length){toast('Test not available','⚠️');return;}
   haptic('medium');
-  levelTestState={target:targetLevel,questions:[...test.questions].sort(()=>Math.random()-.5),current:0,correct:0,total:test.questions.length};
+  levelTestState={
+    target:targetLevel,
+    questions,
+    current:0,
+    correct:0,
+    total:questions.length,
+    pass:cfg.pass,
+    minSeconds:cfg.minSeconds,
+    startedAt:Date.now(),
+    session:'lt-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
+    answers:{},
+    answered:{}
+  };
   goTab('chat',true);
   const title=test.title[lang]||test.title.en;
-  addMsg('bot',`<div class="lt-header">📝 <b>${title}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов · нужно 80% правильных':'questions · need 80% correct'}</span></div>`);
+  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов':'questions'} · ${lang==='ru'?'проходной балл':'passing score'} ${cfg.pass}% · ${lang==='ru'?'варианты каждый раз новые':'new mix every attempt'}</span></div>`);
   setTimeout(showLevelQuestion,500);
 }
 
@@ -4652,17 +4780,23 @@ function showLevelQuestion(){
   const {questions,current,total}=levelTestState;
   if(current>=total){finishLevelTest();return;}
   const q=questions[current];
-  const qid='lq-'+Date.now();
-  const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i},${q.a})">${String.fromCharCode(65+i)}) ${o}</div>`).join('');
+  const qid=levelTestState.session+'-'+current+'-'+Date.now();
+  levelTestState.answers[qid]=q.a;
+  levelTestState.answered[qid]=false;
+  const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('');
   addMsg('bot',`<div class="lt-q" id="${qid}">
     <div class="lt-num">${current+1}/${total}</div>
-    <div class="lt-text">${q.q}</div>
+    <div class="lt-text">${safeHTML(q.q)}</div>
     <div class="lt-opts">${opts}</div>
   </div>`);
 }
 
-function answerLevelQ(qid,picked,correct){
+function answerLevelQ(qid,picked){
   if(!levelTestState)return;
+  if(levelTestState.answered[qid])return;
+  const correct=levelTestState.answers[qid];
+  if(typeof correct!=='number')return;
+  levelTestState.answered[qid]=true;
   const isRight=picked===correct;
   if(isRight)levelTestState.correct++;
   haptic(isRight?'success':'error');
@@ -4677,33 +4811,37 @@ function answerLevelQ(qid,picked,correct){
 }
 
 function finishLevelTest(){
-  const {target,correct,total}=levelTestState;
+  const {target,correct,total,pass,minSeconds,startedAt}=levelTestState;
   const pct=Math.round(correct/total*100);
-  const passed=pct>=80;
+  const elapsed=Math.round((Date.now()-startedAt)/1000);
+  const tooFast=elapsed<minSeconds;
+  const passed=pct>=pass&&!tooFast;
   if(passed){
     haptic('success');
     LS.set('ob_level',target);
     if(window._d)window._d.level=target;
     // Save passed test
     const pt=LS.getJ('passed_level_tests')||{};
+    const alreadyPassed=!!pt[target];
     pt[target]=Date.now();
     LS.setJ('passed_level_tests',pt);
+    setLevelTestCooldown(target,true);
     // Sync to server
     if(API&&window._uid)fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,message:`/setlevel ${target}`})}).catch(()=>{});
     addMsg('bot',`<div class="lt-result lt-pass">
-      <div style="font-size:36px;margin-bottom:8px">🏆</div>
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Тест пройден!':'Test passed!'}</div>
-      <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%)</div>
+      <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${lang==='ru'?'нужно':'required'} ${pass}%</div>
       <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>`:`Your new level: <b>${target}</b>`}</div>
     </div>`);
-    addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'🏆');
+    if(!alreadyPassed){addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'⭐');}
+    else toast(`Level ${target}`,'✅');
   } else {
     haptic('error');
+    setLevelTestCooldown(target,false);
     addMsg('bot',`<div class="lt-result lt-fail">
-      <div style="font-size:36px;margin-bottom:8px">💪</div>
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Пока не прошёл':'Not yet'}</div>
-      <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${lang==='ru'?'нужно 80%':'need 80%'}</div>
-      <div style="font-size:13px;color:var(--t2)">${lang==='ru'?'Продолжай практиковать и попробуй снова!':'Keep practicing and try again!'}</div>
+      <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${lang==='ru'?'нужно':'need'} ${pass}%</div>
+      <div style="font-size:13px;color:var(--t2)">${tooFast?(lang==='ru'?`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`:`Attempt too fast to validate: minimum ${minSeconds} sec.`):(lang==='ru'?'Повтори слабые темы и попробуй снова после короткой паузы.':'Review weak topics and try again after a short pause.')}</div>
     </div>`);
   }
   levelTestState=null;
