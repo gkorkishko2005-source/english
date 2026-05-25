@@ -1206,6 +1206,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-opt{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px;font-size:12px;color:var(--t1);cursor:pointer;transition:.18s}
 .course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
+.course-note{font-size:12px;line-height:1.45;color:var(--t2);background:rgba(var(--ar),.07);border:1px solid rgba(var(--ar),.14);border-radius:10px;padding:10px;margin-top:10px}
+.course-ai{width:100%;border:1px solid rgba(var(--ar),.28);background:rgba(var(--ar),.1);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer;margin-top:10px}
+.mini-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--a);font-weight:850;margin-bottom:6px}
 .roadmap-wrap{display:flex;flex-direction:column;gap:8px}
 .rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
 .rm-overview::after{content:'';position:absolute;right:-34px;top:-42px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,.035)}
@@ -2279,8 +2282,8 @@ function rankOf(xp){return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[
 
 /* ══ NAV ══ */
 let tab='home';
-function goTab(n){
-  if(n==='chat'&&!hasChatAccess()){
+function goTab(n,allowPractice){
+  if(n==='chat'&&!hasChatAccess()&&!allowPractice){
     showChatPaywall();
     return;
   }
@@ -3356,6 +3359,68 @@ const VOCAB_DECK=[
   {id:64,w:'pattern',p:'/ˈpæt̬.ɚn/',tr:{ru:'шаблон, модель',en:'a repeated form or structure'},ex:'Notice the pattern in this sentence.'},
   {id:65,w:'attempt',p:'/əˈtempt/',tr:{ru:'попытка; пытаться',en:'to try to do something'},ex:'Make an attempt before checking the answer.'},
 ];
+VOCAB_DECK.push(
+  {id:66,w:'achieve',p:'/əˈtʃiːv/',tr:{ru:'достигать',en:'to successfully reach a goal'},ex:'You can achieve fluency with steady practice.',level:'A2',topic:'Goals'},
+  {id:67,w:'advice',p:'/ədˈvaɪs/',tr:{ru:'совет',en:'a helpful suggestion'},ex:'Her advice helped me improve.',level:'A2',topic:'Daily'},
+  {id:68,w:'afford',p:'/əˈfɔːrd/',tr:{ru:'позволить себе',en:'to have enough money or time'},ex:'I cannot afford to waste time.',level:'B1',topic:'Money'},
+  {id:69,w:'arrange',p:'/əˈreɪndʒ/',tr:{ru:'организовывать',en:'to plan or organize'},ex:'We arranged a meeting for Friday.',level:'B1',topic:'Work'},
+  {id:70,w:'available',p:'/əˈveɪ.lə.bəl/',tr:{ru:'доступный',en:'ready to be used or seen'},ex:'The course is available for free.',level:'A2',topic:'Study'},
+  {id:71,w:'avoid',p:'/əˈvɔɪd/',tr:{ru:'избегать',en:'to keep away from something'},ex:'Avoid translating every word.',level:'B1',topic:'Learning'},
+  {id:72,w:'benefit',p:'/ˈben.ə.fɪt/',tr:{ru:'польза; преимущество',en:'an advantage or good result'},ex:'Daily listening has a clear benefit.',level:'B1',topic:'Study'},
+  {id:73,w:'challenge',p:'/ˈtʃæl.ɪndʒ/',tr:{ru:'вызов, сложная задача',en:'a difficult but useful task'},ex:'Speaking is a challenge at first.',level:'B1',topic:'Motivation'},
+  {id:74,w:'compare',p:'/kəmˈper/',tr:{ru:'сравнивать',en:'to look at differences and similarities'},ex:'Compare these two sentences.',level:'A2',topic:'Grammar'},
+  {id:75,w:'complete',p:'/kəmˈpliːt/',tr:{ru:'завершать; полный',en:'to finish; whole'},ex:'Complete one lesson today.',level:'A2',topic:'Study'},
+  {id:76,w:'confuse',p:'/kənˈfjuːz/',tr:{ru:'путать',en:'to make unclear'},ex:'Do not confuse since and for.',level:'B1',topic:'Mistakes'},
+  {id:77,w:'consider',p:'/kənˈsɪd.ɚ/',tr:{ru:'рассматривать, обдумывать',en:'to think carefully about'},ex:'Consider the context before answering.',level:'B1',topic:'Thinking'},
+  {id:78,w:'deliver',p:'/dɪˈlɪv.ɚ/',tr:{ru:'доставлять; произносить',en:'to bring or give a speech'},ex:'She delivered a clear presentation.',level:'B2',topic:'Business'},
+  {id:79,w:'describe',p:'/dɪˈskraɪb/',tr:{ru:'описывать',en:'to say what something is like'},ex:'Describe your routine in English.',level:'A2',topic:'Speaking'},
+  {id:80,w:'develop',p:'/dɪˈvel.əp/',tr:{ru:'развивать',en:'to grow or improve'},ex:'You develop fluency through repetition.',level:'B1',topic:'Learning'},
+  {id:81,w:'discover',p:'/dɪˈskʌv.ɚ/',tr:{ru:'обнаруживать',en:'to find something new'},ex:'You will discover useful patterns.',level:'B1',topic:'Learning'},
+  {id:82,w:'effective',p:'/ɪˈfek.tɪv/',tr:{ru:'действенный',en:'successful and useful'},ex:'Short daily practice is effective.',level:'B1',topic:'Study'},
+  {id:83,w:'effort',p:'/ˈef.ɚt/',tr:{ru:'усилие',en:'hard work'},ex:'Small effort every day matters.',level:'A2',topic:'Motivation'},
+  {id:84,w:'environment',p:'/ɪnˈvaɪ.rən.mənt/',tr:{ru:'среда, окружение',en:'the situation around you'},ex:'Create an English environment.',level:'B1',topic:'Learning'},
+  {id:85,w:'essential',p:'/ɪˈsen.ʃəl/',tr:{ru:'важнейший',en:'very important and necessary'},ex:'Review is essential for memory.',level:'B2',topic:'Study'},
+  {id:86,w:'evidence',p:'/ˈev.ə.dəns/',tr:{ru:'доказательство',en:'facts that show something is true'},ex:'Give evidence for your opinion.',level:'B2',topic:'Writing'},
+  {id:87,w:'expect',p:'/ɪkˈspekt/',tr:{ru:'ожидать',en:'to think something will happen'},ex:'I expect to improve this month.',level:'A2',topic:'Plans'},
+  {id:88,w:'experience',p:'/ɪkˈspɪr.i.əns/',tr:{ru:'опыт',en:'knowledge from doing something'},ex:'Practice gives you experience.',level:'B1',topic:'Study'},
+  {id:89,w:'explain',p:'/ɪkˈspleɪn/',tr:{ru:'объяснять',en:'to make something clear'},ex:'Can you explain this rule?',level:'A2',topic:'Grammar'},
+  {id:90,w:'feature',p:'/ˈfiː.tʃɚ/',tr:{ru:'функция, особенность',en:'an important part of a product'},ex:'This feature helps beginners.',level:'B1',topic:'Tech'},
+  {id:91,w:'feedback',p:'/ˈfiːd.bæk/',tr:{ru:'обратная связь',en:'comments that help improve'},ex:'ALEX gives detailed feedback.',level:'B1',topic:'Learning'},
+  {id:92,w:'habit',p:'/ˈhæb.ɪt/',tr:{ru:'привычка',en:'something you do regularly'},ex:'Make English a daily habit.',level:'A2',topic:'Routine'},
+  {id:93,w:'improve',p:'/ɪmˈpruːv/',tr:{ru:'улучшать',en:'to become better'},ex:'Your listening will improve.',level:'A2',topic:'Learning'},
+  {id:94,w:'include',p:'/ɪnˈkluːd/',tr:{ru:'включать',en:'to have as a part'},ex:'The free plan includes lessons.',level:'A2',topic:'Product'},
+  {id:95,w:'increase',p:'/ɪnˈkriːs/',tr:{ru:'увеличивать',en:'to become bigger'},ex:'Increase your vocabulary step by step.',level:'B1',topic:'Study'},
+  {id:96,w:'independent',p:'/ˌɪn.dɪˈpen.dənt/',tr:{ru:'независимый',en:'not needing help'},ex:'Become an independent learner.',level:'B2',topic:'Learning'},
+  {id:97,w:'instruction',p:'/ɪnˈstrʌk.ʃən/',tr:{ru:'инструкция',en:'information about how to do something'},ex:'Read the instruction carefully.',level:'A2',topic:'Study'},
+  {id:98,w:'issue',p:'/ˈɪʃ.uː/',tr:{ru:'проблема, вопрос',en:'a problem or topic'},ex:'Let us discuss this issue.',level:'B1',topic:'Business'},
+  {id:99,w:'knowledge',p:'/ˈnɑː.lɪdʒ/',tr:{ru:'знание',en:'information and understanding'},ex:'Knowledge grows with practice.',level:'B1',topic:'Study'},
+  {id:100,w:'method',p:'/ˈmeθ.əd/',tr:{ru:'метод',en:'a way of doing something'},ex:'This method is based on repetition.',level:'B1',topic:'Learning'},
+  {id:101,w:'notice',p:'/ˈnoʊ.tɪs/',tr:{ru:'замечать',en:'to see or become aware of'},ex:'Notice the word order.',level:'A2',topic:'Grammar'},
+  {id:102,w:'opportunity',p:'/ˌɑː.pɚˈtuː.nə.ti/',tr:{ru:'возможность',en:'a chance to do something'},ex:'Every mistake is an opportunity.',level:'B1',topic:'Motivation'},
+  {id:103,w:'perform',p:'/pɚˈfɔːrm/',tr:{ru:'выполнять, выступать',en:'to do an action or present'},ex:'Perform the task without translating.',level:'B2',topic:'Study'},
+  {id:104,w:'prepare',p:'/prɪˈper/',tr:{ru:'готовиться',en:'to get ready'},ex:'Prepare for the speaking task.',level:'A2',topic:'Study'},
+  {id:105,w:'previous',p:'/ˈpriː.vi.əs/',tr:{ru:'предыдущий',en:'happening before'},ex:'Review the previous lesson.',level:'B1',topic:'Study'},
+  {id:106,w:'purpose',p:'/ˈpɝː.pəs/',tr:{ru:'цель',en:'the reason for doing something'},ex:'What is the purpose of this sentence?',level:'B1',topic:'Thinking'},
+  {id:107,w:'recommend',p:'/ˌrek.əˈmend/',tr:{ru:'рекомендовать',en:'to suggest something good'},ex:'I recommend listening every day.',level:'B1',topic:'Advice'},
+  {id:108,w:'reduce',p:'/rɪˈduːs/',tr:{ru:'уменьшать',en:'to make smaller'},ex:'Reduce mistakes by reviewing patterns.',level:'B1',topic:'Mistakes'},
+  {id:109,w:'regular',p:'/ˈreɡ.jə.lɚ/',tr:{ru:'регулярный',en:'happening often'},ex:'Regular practice beats long breaks.',level:'A2',topic:'Routine'},
+  {id:110,w:'require',p:'/rɪˈkwaɪr/',tr:{ru:'требовать',en:'to need something'},ex:'Fluency requires repetition.',level:'B2',topic:'Study'},
+  {id:111,w:'resource',p:'/ˈriː.sɔːrs/',tr:{ru:'ресурс',en:'something useful for learning'},ex:'Use every resource wisely.',level:'B1',topic:'Learning'},
+  {id:112,w:'review',p:'/rɪˈvjuː/',tr:{ru:'повторять; обзор',en:'to study again'},ex:'Review new words tomorrow.',level:'A2',topic:'Study'},
+  {id:113,w:'schedule',p:'/ˈskedʒ.uːl/',tr:{ru:'расписание',en:'a plan of times'},ex:'Put English in your schedule.',level:'B1',topic:'Time'},
+  {id:114,w:'separate',p:'/ˈsep.ɚ.ət/',tr:{ru:'отдельный',en:'not together'},ex:'Keep grammar and vocabulary in separate notes.',level:'B1',topic:'Study'},
+  {id:115,w:'solution',p:'/səˈluː.ʃən/',tr:{ru:'решение',en:'an answer to a problem'},ex:'Find a simple solution first.',level:'B1',topic:'Problem'},
+  {id:116,w:'specific',p:'/spəˈsɪf.ɪk/',tr:{ru:'конкретный',en:'clear and exact'},ex:'Ask a specific question.',level:'B1',topic:'Speaking'},
+  {id:117,w:'strategy',p:'/ˈstræt̬.ə.dʒi/',tr:{ru:'стратегия',en:'a plan for success'},ex:'Build a strategy for speaking.',level:'B2',topic:'Learning'},
+  {id:118,w:'structure',p:'/ˈstrʌk.tʃɚ/',tr:{ru:'структура',en:'the way parts are arranged'},ex:'Sentence structure matters.',level:'B1',topic:'Grammar'},
+  {id:119,w:'suitable',p:'/ˈsuː.t̬ə.bəl/',tr:{ru:'подходящий',en:'right for a purpose'},ex:'Choose a suitable answer.',level:'B1',topic:'Choice'},
+  {id:120,w:'support',p:'/səˈpɔːrt/',tr:{ru:'поддерживать',en:'to help or agree with'},ex:'Support your opinion with examples.',level:'B1',topic:'Writing'},
+  {id:121,w:'task',p:'/tæsk/',tr:{ru:'задание',en:'a piece of work'},ex:'Complete the task before checking.',level:'A2',topic:'Study'},
+  {id:122,w:'topic',p:'/ˈtɑː.pɪk/',tr:{ru:'тема',en:'a subject'},ex:'Choose one topic and practice it.',level:'A2',topic:'Study'},
+  {id:123,w:'transfer',p:'/trænsˈfɝː/',tr:{ru:'переносить',en:'to move from one place to another'},ex:'Transfer this pattern to new sentences.',level:'B2',topic:'Grammar'},
+  {id:124,w:'understand',p:'/ˌʌn.dɚˈstænd/',tr:{ru:'понимать',en:'to know the meaning'},ex:'I understand the rule now.',level:'A2',topic:'Learning'},
+  {id:125,w:'useful',p:'/ˈjuːs.fəl/',tr:{ru:'полезный',en:'helpful'},ex:'This phrase is useful in meetings.',level:'A2',topic:'Daily'}
+);
 let cards=[],cIdx=0,flipped=false;
 function vocabMeta(v){
   const topics=['Core','Speaking','Writing','Business','Travel','Study'];
@@ -3842,11 +3907,17 @@ let levelTestState=null;
 
 const GALAXY_COURSE=[
   {id:'a0-start',level:'A0',color:'#2ecc71',title:{ru:'Старт с нуля',en:'Start from zero'},sub:{ru:'to be, I am, you are',en:'to be, I am, you are'},rule:{ru:'В английском почти всегда нужен глагол. Для фраз “я студент”, “ты дома” используется to be: I am, you are, he is.',en:'English usually needs a verb. For “I am a student” and “you are home”, use to be: I am, you are, he is.'},examples:['I am ready.','You are right.','She is at home.'],words:['ready','right','home','student','today'],q:'Choose: She ___ ready.',o:['am','are','is','be'],a:2},
+  {id:'a0-time',level:'A0',color:'#2ecc71',title:{ru:'Время и дни',en:'Time and days'},sub:{ru:'today, tomorrow, at 7',en:'today, tomorrow, at 7'},rule:{ru:'Для времени используем at: at seven, at night. Для дней используем on: on Monday. Для месяцев и годов используем in.',en:'Use at for clock time: at seven. Use on for days: on Monday. Use in for months and years.'},examples:['I wake up at seven.','The lesson is on Monday.','I was born in 2005.'],words:['today','tomorrow','Monday','morning','evening'],q:'Choose: The class starts ___ 8:00.',o:['in','on','at','to'],a:2},
   {id:'a1-routine',level:'A1',color:'#3498db',title:{ru:'Ежедневные действия',en:'Daily actions'},sub:{ru:'Present Simple и привычки',en:'Present Simple habits'},rule:{ru:'Present Simple нужен для привычек и фактов. С he/she/it добавляем -s: I work, she works.',en:'Present Simple is for habits and facts. With he/she/it add -s: I work, she works.'},examples:['I study every day.','He speaks English.','They live in Minsk.'],words:['study','speak','live','every day','usually'],q:'Choose: He ___ English.',o:['speak','speaks','speaking','spoken'],a:1},
+  {id:'a1-questions',level:'A1',color:'#3498db',title:{ru:'Вопросы',en:'Questions'},sub:{ru:'do / does / where / when',en:'do / does / where / when'},rule:{ru:'В Present Simple вопрос строится через do/does: Do you work? Does she study? После does основной глагол без -s.',en:'Present Simple questions use do/does: Do you work? Does she study? After does, the main verb has no -s.'},examples:['Do you speak English?','Where does he live?','When do they study?'],words:['where','when','why','does','question'],q:'Choose: ___ she live here?',o:['Do','Does','Is','Are'],a:1},
   {id:'a2-past',level:'A2',color:'#9b59b6',title:{ru:'Прошлое',en:'Past events'},sub:{ru:'Past Simple без хаоса',en:'Past Simple clearly'},rule:{ru:'Past Simple описывает завершённые действия в прошлом. В утвердительных фразах часто -ed или вторая форма: worked, went.',en:'Past Simple describes finished past actions. Use -ed or the second form: worked, went.'},examples:['I watched a lesson yesterday.','She went home late.','We finished the task.'],words:['yesterday','finished','went','watched','late'],q:'Choose: I ___ the lesson yesterday.',o:['watch','watched','watching','watches'],a:1},
+  {id:'a2-plans',level:'A2',color:'#9b59b6',title:{ru:'Планы',en:'Plans'},sub:{ru:'going to и will',en:'going to and will'},rule:{ru:'Going to часто используется для планов, которые уже есть. Will часто используется для решений прямо сейчас или предсказаний.',en:'Going to is common for existing plans. Will is common for decisions made now or predictions.'},examples:['I am going to study tonight.','I will help you.','It will be difficult.'],words:['plan','tonight','help','probably','future'],q:'Choose: I ___ going to practice tonight.',o:['am','is','are','will'],a:0},
   {id:'b1-perfect',level:'B1',color:'#e67e22',title:{ru:'Опыт и результат',en:'Experience and result'},sub:{ru:'Present Perfect',en:'Present Perfect'},rule:{ru:'Present Perfect связывает прошлое с настоящим: have/has + V3. Часто используется для опыта и результата.',en:'Present Perfect connects the past with now: have/has + V3. It is common for experience and results.'},examples:['I have learned ten words.','She has already finished.','Have you ever been to London?'],words:['already','ever','never','learned','finished'],q:'Choose: She ___ already finished.',o:['have','has','is','did'],a:1},
+  {id:'b1-conditionals',level:'B1',color:'#e67e22',title:{ru:'Условия',en:'Conditionals'},sub:{ru:'if + will / would',en:'if + will / would'},rule:{ru:'First conditional: If + Present Simple, will + verb. Это реальное будущее условие: If I have time, I will call.',en:'First conditional: If + Present Simple, will + verb. It is a real future condition: If I have time, I will call.'},examples:['If I have time, I will call.','If it rains, we will stay home.','If you practice, you will improve.'],words:['if','rain','improve','condition','result'],q:'Choose: If it rains, we ___ stay home.',o:['will','would','are','did'],a:0},
   {id:'b2-flow',level:'B2',color:'#e74c3c',title:{ru:'Связная речь',en:'Connected speech'},sub:{ru:'linkers and structure',en:'linkers and structure'},rule:{ru:'На B2 важно связывать мысли: however, although, because of, as a result. Это делает речь взрослой и понятной.',en:'At B2, connect ideas with however, although, because of, as a result. This makes speech mature and clear.'},examples:['Although it was hard, I continued.','As a result, my English improved.','However, I need more practice.'],words:['although','however','as a result','because of','continue'],q:'Choose: ___ it was difficult, I kept going.',o:['Although','Because of','Despite of','However'],a:0},
+  {id:'b2-passive',level:'B2',color:'#e74c3c',title:{ru:'Пассив',en:'Passive voice'},sub:{ru:'is done, was built',en:'is done, was built'},rule:{ru:'Пассив нужен, когда важнее действие, а не исполнитель: The report was written yesterday.',en:'Passive voice is useful when the action matters more than the person: The report was written yesterday.'},examples:['The app was updated yesterday.','English is spoken here.','The task has been completed.'],words:['written','spoken','updated','completed','built'],q:'Choose: The report ___ written yesterday.',o:['is','was','did','has'],a:1},
   {id:'c1-precision',level:'C1',color:'#f1c40f',title:{ru:'Точность мысли',en:'Precision'},sub:{ru:'advanced phrasing',en:'advanced phrasing'},rule:{ru:'На C1 важны точные формулировки: tends to, is likely to, may have been. Они помогают звучать аккуратно и естественно.',en:'At C1, precise phrases matter: tends to, is likely to, may have been. They help you sound careful and natural.'},examples:['This approach tends to work well.','It is likely to change soon.','He may have misunderstood the point.'],words:['tends to','likely','approach','misunderstood','precise'],q:'Choose: It is ___ to change soon.',o:['like','likely','liked','liking'],a:1},
+  {id:'c1-style',level:'C1',color:'#f1c40f',title:{ru:'Стиль и аргументация',en:'Style and argument'},sub:{ru:'formal, clear, persuasive',en:'formal, clear, persuasive'},rule:{ru:'В сильной аргументации важно не только “что”, но и “как”: firstly, furthermore, nevertheless, therefore.',en:'Strong argument is not only what you say, but how you structure it: firstly, furthermore, nevertheless, therefore.'},examples:['Nevertheless, the idea is useful.','Furthermore, it saves time.','Therefore, I support this approach.'],words:['nevertheless','furthermore','therefore','argument','support'],q:'Choose: ___, I support this approach.',o:['Therefore','Although','Despite','Unless'],a:0},
 ];
 
 function courseIconSvg(){
@@ -3877,7 +3948,10 @@ function openCourseLesson(id){
     <div class="course-rule">${safeHTML(ls.rule[lang]||ls.rule.en)}</div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
+    <div class="course-note">${lang==='ru'?'Бесплатно: короткое правило, примеры, слова и мини-тест. Полный персональный разбор открывается с Basic.':'Free: short rule, examples, words and a mini test. Full personal AI breakdown starts with Basic.'}</div>
+    <button class="course-ai" onclick="courseAIBreakdown('${id}')">${lang==='ru'?'Полный AI-разбор правила':'Full AI rule breakdown'}</button>
     <div class="course-practice" id="course-q-${id}">
+      <div class="mini-type">${lang==='ru'?'Мини-тест':'Mini test'}</div>
       <div class="course-rule" style="font-weight:750;color:var(--t1)">${safeHTML(ls.q)}</div>
       ${ls.o.map((o,i)=>`<div class="course-opt" onclick="answerCourse('${id}',${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
     </div>
@@ -3902,10 +3976,20 @@ function answerCourse(id,picked){
     const done=LS.getJ('course_done')||{};
     if(!done[id]){done[id]=Date.now();LS.setJ('course_done',done);addLocalXP(25);bumpStat('tests');}
     toast('+25 XP','✓');
+    box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Верно. Повтори примеры вслух: так правило быстрее становится автоматическим.':'Correct. Repeat the examples aloud: this helps the rule become automatic.')+'</div>');
   }else{
     toast(lang==='ru'?'Посмотри правильный вариант':'Check the correct answer','');
+    box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Быстрая подсказка: верный вариант подсвечен зелёным. Перечитай правило выше и попробуй построить свой пример.':'Quick hint: the correct answer is highlighted in green. Reread the rule above and try making your own example.')+'</div>');
   }
-  renderCourse();
+}
+function courseAIBreakdown(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  if(!hasTier('basic')){showTierPaywall('basic',lang==='ru'?'Полный AI-разбор':'Full AI breakdown');return;}
+  goTab('chat',true);
+  const prompt=lang==='ru'
+    ?`Разбери правило "${ls.title.ru}" простыми словами. Дай 5 примеров, 3 типичные ошибки, мини-тренировку и проверь мой ответ.`
+    :`Explain "${ls.title.en}" in simple words. Give 5 examples, 3 common mistakes, a mini practice task and check my answer.`;
+  setTimeout(()=>sendChip(prompt),150);
 }
 
 function startLevelTest(targetLevel){
@@ -3913,7 +3997,7 @@ function startLevelTest(targetLevel){
   if(!test){toast('Test not available','⚠️');return;}
   haptic('medium');
   levelTestState={target:targetLevel,questions:[...test.questions].sort(()=>Math.random()-.5),current:0,correct:0,total:test.questions.length};
-  goTab('chat');
+  goTab('chat',true);
   const title=test.title[lang]||test.title.en;
   addMsg('bot',`<div class="lt-header">📝 <b>${title}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов · нужно 80% правильных':'questions · need 80% correct'}</span></div>`);
   setTimeout(showLevelQuestion,500);
@@ -4053,7 +4137,7 @@ function startRoadmapLesson(lessonId){
   LS.setJ('rm_progress',progress);
   try{trackM('path');}catch(e){}
   const path=rmGetPath();
-  goTab('chat');
+  goTab('chat',true);
   setTimeout(()=>sendChip(rmLessonPrompt(found.lesson,found.lvlData,path)),150);
 }
 
@@ -5500,6 +5584,33 @@ const DRILL_BANKS={
     {q:'broad (verb) = ?',o:['broaden','broadify','broadize','broading'],a:0},
     {q:'rely (adjective) = ?',o:['reliable','relyable','reliful','reliant'],a:0},
   ],
+  time_practice:[
+    {type:'time',q:'8:15',o:['It is quarter past eight.','It is quarter to eight.','It is half past eight.','It is eight fifty.'],a:0,tip:'quarter past = 15 minutes after'},
+    {type:'time',q:'6:30',o:['It is half past six.','It is quarter past six.','It is six thirteen.','It is half to six.'],a:0,tip:'half past = 30 minutes after'},
+    {type:'time',q:'9:45',o:['It is quarter to ten.','It is quarter past nine.','It is ten forty-five.','It is half past nine.'],a:0,tip:'quarter to ten = 15 minutes before ten'},
+    {type:'time',q:'12:00',o:['It is twelve o’clock.','It is half past twelve.','It is quarter to twelve.','It is twelve fifteen.'],a:0,tip:'o’clock = exact hour'},
+    {type:'time',q:'7:05',o:['It is five past seven.','It is seven fifty.','It is five to seven.','It is quarter past seven.'],a:0,tip:'five past seven = 7:05'},
+    {type:'time',q:'10:50',o:['It is ten to eleven.','It is ten past ten.','It is fifty to ten.','It is half past ten.'],a:0,tip:'ten to eleven = 10:50'},
+  ],
+  sentence_order:[
+    {type:'order',q:'Собери правильное предложение: usually / I / study / evening / in the',o:['I usually study in the evening.','Usually I in the evening study.','I study usually evening in the.','In the usually I study evening.'],a:0,tip:'frequency adverb usually goes before the main verb'},
+    {type:'order',q:'Собери: does / where / she / live',o:['Where does she live?','Where she does live?','Does where she live?','She where does live?'],a:0,tip:'question word + does + subject + verb'},
+    {type:'order',q:'Собери: have / never / I / London / visited',o:['I have never visited London.','I never have London visited.','I visited have never London.','Never I have visited London.'],a:0,tip:'never usually goes between have and V3'},
+    {type:'order',q:'Собери: if / rains / it / will / stay / we / home',o:['If it rains, we will stay home.','If rains it, will we stay home.','It if rains, we stay will home.','We will if it rains stay home.'],a:0,tip:'if + present, will + verb'},
+  ],
+  gap_fill:[
+    {type:'gap',q:'I have lived here ___ 2020.',o:['since','for','during','while'],a:0,tip:'since + starting point'},
+    {type:'gap',q:'She has studied English ___ three years.',o:['for','since','from','during'],a:0,tip:'for + period of time'},
+    {type:'gap',q:'I am looking forward ___ your reply.',o:['to','for','at','on'],a:0,tip:'look forward to + noun/-ing'},
+    {type:'gap',q:'This task is different ___ the previous one.',o:['from','than','to','with'],a:0,tip:'different from is the safest standard form'},
+    {type:'gap',q:'He is responsible ___ the project.',o:['for','of','to','about'],a:0,tip:'responsible for something'},
+  ],
+  translation_chunks:[
+    {type:'translate',q:'Мне нужно принять решение.',o:['I need to make a decision.','I need to do a decision.','I need make decision.','I must take decision.'],a:0,tip:'make a decision is the natural collocation'},
+    {type:'translate',q:'Она привыкла работать под давлением.',o:['She is used to working under pressure.','She used to work under pressure now.','She is use to work under pressure.','She used working under pressure.'],a:0,tip:'be used to + -ing'},
+    {type:'translate',q:'Если будет дождь, мы останемся дома.',o:['If it rains, we will stay home.','If it will rain, we stay home.','If rains, we would stay home.','If it rained, we will stay home.'],a:0,tip:'after if use present for real future conditions'},
+    {type:'translate',q:'Я уже закончил отчёт.',o:['I have already finished the report.','I already finished have the report.','I have finished already report.','I did already finished the report.'],a:0,tip:'already often goes between have and V3'},
+  ],
 };
 
 // Drill topic metadata for picker
@@ -5510,6 +5621,10 @@ const DRILL_TOPICS=[
   {id:'phrasal_verbs',icon:'🔗',color:'#ffb830',name:{ru:'Фразовые глаголы',en:'Phrasal Verbs'},desc:{ru:'take off, give up...',en:'take off, give up...'}},
   {id:'collocations',icon:'🤝',color:'#a78bfa',name:{ru:'Словосочетания',en:'Collocations'},desc:{ru:'make/do/take',en:'make/do/take'}},
   {id:'word_formation',icon:'🔤',color:'#f472b6',name:{ru:'Словообразование',en:'Word Formation'},desc:{ru:'decide → decision',en:'decide → decision'}},
+  {id:'time_practice',icon:'🕒',color:'#00d4aa',name:{ru:'Время',en:'Time'},desc:{ru:'8:15, quarter past...',en:'8:15, quarter past...'}},
+  {id:'sentence_order',icon:'↔️',color:'#4f8aff',name:{ru:'Порядок слов',en:'Word Order'},desc:{ru:'собери предложение',en:'build the sentence'}},
+  {id:'gap_fill',icon:'▣',color:'#ff6b6b',name:{ru:'Пропуски',en:'Gap Fill'},desc:{ru:'вставь нужное слово',en:'insert the right word'}},
+  {id:'translation_chunks',icon:'⇄',color:'#9b59b6',name:{ru:'Перевод фраз',en:'Phrase Translation'},desc:{ru:'без дословности',en:'natural chunks'}},
 ];
 
 function openDrillPicker(){
@@ -5610,7 +5725,8 @@ function startDrill(topic){
   const questions=bank.slice().sort(function(){return Math.random()-.5;}).slice(0,10);
   drillState={questions:questions,current:0,correct:0,total:questions.length,startTime:Date.now(),timeLimit:120,topic:topic};
   goTab('chat');
-  addMsg('bot','<div style="text-align:center;padding:8px 0"><div style="font-size:20px;margin-bottom:4px">🧠</div><div style="font-size:16px;font-weight:800">Grammar Drill</div><div style="font-size:12px;color:var(--t2)">'+drillState.total+' '+(lang==='ru'?'вопросов':'questions')+' - 2 min</div></div>');
+  const meta=DRILL_TOPICS.find(t=>t.id===topic)||DRILL_TOPICS[0];
+  addMsg('bot','<div style="text-align:center;padding:8px 0"><div class="mini-type">'+(meta.name[lang]||meta.name.en)+'</div><div style="font-size:16px;font-weight:800">Practice Drill</div><div style="font-size:12px;color:var(--t2)">'+drillState.total+' '+(lang==='ru'?'вопросов':'questions')+' - 2 min</div></div>');
   setTimeout(showDrillQ,600);
 }
 function showDrillQ(){
@@ -5619,14 +5735,20 @@ function showDrillQ(){
   if(remaining<=0||s.current>=s.total){finishDrill();return;}
   var q=s.questions[s.current],did='dq'+Date.now(),pct=Math.round(remaining/s.timeLimit*100);
   var opts='';for(var i=0;i<q.o.length;i++)opts+='<div class="drill-opt" data-i="'+i+'" data-a="'+q.a+'" data-did="'+did+'">'+q.o[i]+'</div>';
-  addMsg('bot','<div id="'+did+'"><div class="drill-timer"><div class="drill-timer-bar"><div class="drill-timer-fill" style="width:'+pct+'%"></div></div><div class="drill-timer-text">'+remaining+'s</div><div class="drill-score">'+s.correct+'/'+s.current+'</div></div><div class="drill-num">'+(s.current+1)+'/'+s.total+'</div><div class="drill-q">'+q.q+'</div><div class="drill-opts">'+opts+'</div></div>');
+  const typeLabel={time:{ru:'Который час?',en:'What time is it?'},order:{ru:'Порядок слов',en:'Word order'},gap:{ru:'Вставь слово',en:'Fill the gap'},translate:{ru:'Выбери естественный перевод',en:'Choose the natural translation'}}[q.type]||{ru:'Выбери ответ',en:'Choose the answer'};
+  addMsg('bot','<div id="'+did+'"><div class="drill-timer"><div class="drill-timer-bar"><div class="drill-timer-fill" style="width:'+pct+'%"></div></div><div class="drill-timer-text">'+remaining+'s</div><div class="drill-score">'+s.correct+'/'+s.current+'</div></div><div class="drill-num">'+(s.current+1)+'/'+s.total+'</div><div class="mini-type">'+(typeLabel[lang]||typeLabel.en)+'</div><div class="drill-q">'+q.q+'</div><div class="drill-opts">'+opts+'</div></div>');
   document.querySelectorAll('#'+did+' .drill-opt').forEach(function(el){el.onclick=function(){drillAnswer(did,parseInt(el.dataset.i),parseInt(el.dataset.a));};});
 }
 function drillAnswer(did,picked,correct){
   if(!drillState)return;
   if(picked===correct)drillState.correct++;
   haptic(picked===correct?'success':'error');
+  const q=drillState.questions[drillState.current];
   document.querySelectorAll('#'+did+' .drill-opt').forEach(function(o,i){o.style.pointerEvents='none';if(i===correct)o.classList.add('correct');if(i===picked&&picked!==correct)o.classList.add('wrong');});
+  const box=document.getElementById(did);
+  if(q&&q.tip&&box){
+    box.insertAdjacentHTML('beforeend','<div class="course-note">'+safeHTML(q.tip)+'</div>');
+  }
   drillState.current++;setTimeout(showDrillQ,800);
 }
 function finishDrill(){
@@ -5634,7 +5756,10 @@ function finishDrill(){
   var c=drillState.correct,t=drillState.total,pct=Math.round(c/t*100),xp=c*10;
   haptic(pct>=70?'success':'warning');
   if(pct>=80)try{fireConfetti();}catch(e){}
-  addMsg('bot','<div class="drill-result"><div class="drill-result-score">'+(pct>=90?'🏆':pct>=70?'🎯':pct>=50?'💪':'📚')+' '+c+'/'+t+'</div><div class="drill-result-label">'+pct+'% - +'+xp+' XP</div></div>');
+  const upgrade=!hasTier('basic')
+    ? `<button class="course-ai" onclick="showTierPaywall('basic','${lang==='ru'?'AI-разбор ошибок':'AI mistake review'}')">${lang==='ru'?'Разобрать ошибки с AI':'Review mistakes with AI'}</button>`
+    : '';
+  addMsg('bot','<div class="drill-result"><div class="drill-result-score">'+(pct>=90?'🏆':pct>=70?'🎯':pct>=50?'💪':'📚')+' '+c+'/'+t+'</div><div class="drill-result-label">'+pct+'% - +'+xp+' XP</div>'+upgrade+'</div>');
   try{addLocalXP(xp);bumpStat('tests');trackPerformance(drillState.topic||'tenses',c,t);trackM('drill');}catch(e){}
   drillState=null;
 }
