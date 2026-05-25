@@ -71,6 +71,9 @@ ADMIN_IDS: set = {
 FREE_TEST_IDS: set = {
     1738695057,
 }
+PAYMENT_TEST_IDS: set = {
+    1738695057,
+}
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
@@ -839,7 +842,7 @@ async def cmd_start(message: Message):
 
     is_prem = False
     try:
-        is_prem = False if uid in FREE_TEST_IDS else (await is_admin(uid) or await check_premium(uid))
+        is_prem = (await check_premium(uid)) if uid in FREE_TEST_IDS else (await is_admin(uid) or await check_premium(uid))
     except Exception:
         pass
     badge = " · 👑 Premium" if is_prem else ""
@@ -1642,7 +1645,12 @@ def tier_level(tier: str) -> int:
 
 async def get_access_tier(uid: int) -> str:
     if uid in FREE_TEST_IDS:
-        return "free"
+        try:
+            from database import get_premium_info
+            info = await get_premium_info(uid)
+            return info.get("tier") if info.get("is_premium") else "free"
+        except Exception:
+            return "free"
     if uid in ADMIN_IDS:
         return "ultimate"
     try:
@@ -1701,8 +1709,19 @@ async def cmd_premium(msg: Message):
         await msg.answer(text, parse_mode="HTML")
         return
 
+    if uid not in PAYMENT_TEST_IDS:
+        text = (
+            "<b>ALEX Subscriptions</b>\n\n"
+            "Оплата сейчас в закрытом тесте. Free-функции доступны в приложении, покупку откроем после проверки платежей."
+            if ru else
+            "<b>ALEX Subscriptions</b>\n\n"
+            "Payments are in closed testing right now. Free features are available in the app; purchases open after payment testing."
+        )
+        await msg.answer(text, parse_mode="HTML")
+        return
+
     # Check if already premium
-    is_prem = False if uid in FREE_TEST_IDS else await check_premium(uid)
+    is_prem = await check_premium(uid)
     prem_badge = ""
     if is_prem:
         prem_badge = ("\n\n✅ <i>У тебя уже есть Premium. Можешь продлить!</i>" if ru
@@ -1838,6 +1857,9 @@ async def cb_prem_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
+    if uid not in PAYMENT_TEST_IDS:
+        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
+        return
     label = plan["label_ru"] if ru else plan["label_en"]
 
     stars = plan["stars"]
@@ -1869,6 +1891,9 @@ async def cb_card_menu(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
+    if uid not in PAYMENT_TEST_IDS:
+        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
+        return
     await cb.answer()
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=f"Basic — $8.99/мес" if ru else "Basic — $8.99/mo", callback_data="prem_card:basic")],
@@ -1892,6 +1917,9 @@ async def cb_card_buy(cb: CallbackQuery):
     uid = cb.from_user.id
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
+    if uid not in PAYMENT_TEST_IDS:
+        await cb.answer("Оплата пока в закрытом тесте" if ru else "Payments are in closed testing", show_alert=True)
+        return
     label = plan["label_ru"] if ru else plan["label_en"]
     price_usd = plan["price_usd"]  # in cents
 

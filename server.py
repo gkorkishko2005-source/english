@@ -256,7 +256,7 @@ async def handle_user(request):
         due_words  = await get_due_words(uid, 10) or []
         profession = await get_profession(uid) or ""
         lang_db    = await get_lang(uid) or "ru"
-        is_prem    = False if uid in FREE_TEST_IDS else (uid in ADMIN_IDS or await check_premium(uid))
+        is_prem    = (await check_premium(uid)) if uid in FREE_TEST_IDS else (uid in ADMIN_IDS or await check_premium(uid))
         weekly = [0]*7
         return web.json_response({
             "uid": uid,
@@ -351,8 +351,14 @@ async def handle_chat(request):
     user_premium = False
     user_tier = ""
     if uid in FREE_TEST_IDS:
-        user_premium = False
-        user_tier = ""
+        try:
+            from database import get_premium_info
+            info = await get_premium_info(uid)
+            user_premium = info.get("is_premium", False)
+            user_tier = info.get("tier", "") if user_premium else ""
+        except Exception:
+            user_premium = False
+            user_tier = ""
     elif uid in ADMIN_IDS:
         user_premium = True
         user_tier = "ultimate"
@@ -682,6 +688,14 @@ async def handle_check_premium(request):
 
     # Check whitelist first (free lifetime premium for admins)
     if uid in FREE_TEST_IDS:
+        try:
+            from database import get_premium_info
+            info = await get_premium_info(uid)
+            if info.get("is_premium"):
+                info["source"] = "database_free_test"
+                return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
+        except Exception:
+            pass
         return web.json_response({
             "is_premium":False,"tier":"","until":None,"lifetime":False,"source":"free_test"
         }, headers={"Access-Control-Allow-Origin":"*"})

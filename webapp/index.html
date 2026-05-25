@@ -4351,11 +4351,26 @@ let premiumLifetime = false;
 async function checkPremiumStatus(uid){
   const ADMIN_IDS_CLIENT = [1738695057,5399839500,725259177,1241890707,1428437531];
   const FREE_TEST_IDS_CLIENT = [1738695057];
-  if(FREE_TEST_IDS_CLIENT.includes(uid)){
-    premiumTier='';premiumUntil=null;premiumLifetime=false;
-    setPremium(false,'free_test');return;
-  }
   if(ADMIN_IDS_CLIENT.includes(uid)){
+    try{
+      if(API){
+        const r=await fetch(`${API}/api/premium/${uid}`,{signal:AbortSignal.timeout(5000)});
+        if(r.ok){
+          const d=await r.json();
+          if(d.source==='free_test'){
+            premiumTier='';premiumUntil=null;premiumLifetime=false;setPremium(false,'free_test');return;
+          }
+          premiumTier=d.tier||'';
+          premiumUntil=d.until||null;
+          premiumLifetime=!!d.lifetime;
+          setPremium(d.is_premium===true,d.source||'database');
+          return;
+        }
+      }
+    }catch(e){}
+    if(FREE_TEST_IDS_CLIENT.includes(uid)){
+      premiumTier='';premiumUntil=null;premiumLifetime=false;setPremium(false,'free_test_fallback');return;
+    }
     premiumTier='ultimate';premiumLifetime=true;
     setPremium(true,'admin');return;
   }
