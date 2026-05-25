@@ -3421,16 +3421,410 @@ VOCAB_DECK.push(
   {id:124,w:'understand',p:'/ˌʌn.dɚˈstænd/',tr:{ru:'понимать',en:'to know the meaning'},ex:'I understand the rule now.',level:'A2',topic:'Learning'},
   {id:125,w:'useful',p:'/ˈjuːs.fəl/',tr:{ru:'полезный',en:'helpful'},ex:'This phrase is useful in meetings.',level:'A2',topic:'Daily'}
 );
+const EXTRA_VOCAB_PACK=`
+ability|способность|Core|A2
+absence|отсутствие|Core|B1
+accept|принимать|Core|A2
+access|доступ|Tech|B1
+account|аккаунт, счёт|Business|B1
+active|активный|Core|A2
+actual|фактический|Core|B1
+additional|дополнительный|Study|B1
+advance|продвигаться|Study|B2
+advantage|преимущество|Business|B1
+advertise|рекламировать|Business|B1
+agreement|соглашение|Business|B1
+allow|позволять|Core|A2
+alternative|альтернатива|Choice|B1
+amount|количество|Core|A2
+analysis|анализ|Study|B2
+announce|объявлять|Speaking|B1
+apply|применять, подавать заявку|Work|B1
+argument|аргумент, спор|Speaking|B1
+arrival|прибытие|Travel|A2
+article|статья|Reading|A2
+assessment|оценка|Study|B2
+assistant|помощник|Work|A2
+attach|прикреплять|Tech|B1
+attention|внимание|Study|A2
+audience|аудитория|Speaking|B1
+authority|полномочия, авторитет|Business|B2
+automatic|автоматический|Tech|B1
+average|средний|Core|B1
+avoidance|избегание|Core|B2
+balance|баланс|Core|B1
+basic|базовый|Study|A2
+behavior|поведение|Core|B1
+belief|убеждение|Thinking|B1
+belong|принадлежать|Core|B1
+brief|краткий|Speaking|B1
+budget|бюджет|Money|B1
+capacity|ёмкость, способность|Business|B2
+careful|осторожный, внимательный|Core|A2
+category|категория|Study|B1
+cause|причина, вызывать|Core|A2
+celebrate|праздновать|Daily|A2
+certain|определённый, уверенный|Core|B1
+certificate|сертификат|Study|B1
+choice|выбор|Core|A2
+circumstance|обстоятельство|Core|B2
+claim|утверждать, заявление|Writing|B2
+client|клиент|Business|B1
+collect|собирать|Core|A2
+comfort|комфорт|Daily|A2
+comment|комментарий|Writing|A2
+commercial|коммерческий|Business|B2
+commitment|обязательство|Business|B2
+common|общий, распространённый|Core|A2
+communicate|общаться|Speaking|B1
+community|сообщество|Social|B1
+competition|соревнование, конкуренция|Business|B1
+complaint|жалоба|Business|B1
+complex|сложный|Study|B2
+component|компонент|Tech|B2
+concept|понятие|Study|B1
+condition|условие|Core|B1
+confirm|подтверждать|Business|B1
+connection|связь|Core|B1
+conscious|осознанный|Thinking|B2
+contain|содержать|Core|B1
+content|контент, содержание|Study|B1
+contract|контракт|Business|B2
+contribute|вносить вклад|Business|B2
+conversation|разговор|Speaking|A2
+convince|убеждать|Speaking|B2
+cooperate|сотрудничать|Business|B1
+correct|исправлять, правильный|Study|A2
+cost|стоимость, стоить|Money|A2
+course|курс|Study|A2
+create|создавать|Core|A2
+criteria|критерии|Study|B2
+culture|культура|Social|B1
+customer|клиент|Business|A2
+data|данные|Tech|B1
+deadline|дедлайн|Work|B1
+debate|дебаты, обсуждать|Speaking|B2
+decrease|уменьшаться|Business|B1
+dedicate|посвящать|Study|B2
+define|определять|Study|B1
+delay|задержка, задерживать|Travel|B1
+demand|спрос, требование|Business|B1
+demonstrate|демонстрировать|Speaking|B2
+depend|зависеть|Core|A2
+destination|пункт назначения|Travel|B1
+detail|деталь|Core|A2
+determine|определять|Thinking|B2
+device|устройство|Tech|A2
+difference|разница|Core|A2
+direct|прямой, направлять|Core|B1
+discuss|обсуждать|Speaking|A2
+display|показывать, дисплей|Tech|B1
+distance|расстояние|Travel|A2
+document|документ|Business|A2
+domestic|внутренний, домашний|Travel|B2
+doubt|сомнение, сомневаться|Thinking|B1
+download|скачивать|Tech|A2
+duration|длительность|Time|B1
+economy|экономика|Business|B1
+educate|обучать|Study|B1
+element|элемент|Study|B1
+emergency|чрезвычайная ситуация|Travel|B1
+emphasis|акцент|Speaking|B2
+employ|нанимать|Work|B1
+enable|позволять, включать|Tech|B2
+encounter|сталкиваться|Travel|B2
+energy|энергия|Core|A2
+engage|вовлекать|Business|B2
+enhance|улучшать|Business|B2
+ensure|обеспечивать|Business|B2
+entire|весь, целый|Core|B1
+entry|вход, запись|Travel|B1
+equal|равный|Core|A2
+equipment|оборудование|Work|B1
+error|ошибка|Tech|A2
+especially|особенно|Core|A2
+establish|устанавливать|Business|B2
+event|событие|Social|A2
+exact|точный|Core|B1
+exchange|обменивать, обмен|Travel|B1
+excuse|извинение, оправдание|Speaking|A2
+exercise|упражнение|Study|A2
+exist|существовать|Core|B1
+expense|расход|Money|B1
+expert|эксперт|Work|B1
+explore|исследовать|Study|B1
+express|выражать|Speaking|B1
+external|внешний|Business|B2
+failure|неудача|Motivation|B1
+fair|справедливый|Core|B1
+familiar|знакомый|Core|B1
+fee|плата|Money|B1
+field|сфера, поле|Work|B1
+final|итоговый|Study|A2
+finance|финансы|Money|B1
+flexible|гибкий|Work|B1
+foreign|иностранный|Travel|A2
+formal|формальный|Business|B1
+forward|вперёд, пересылать|Tech|A2
+foundation|основа|Study|B1
+freedom|свобода|Core|B1
+function|функция|Tech|B1
+future|будущее|Core|A2
+gain|получать, выгода|Business|B1
+general|общий|Core|A2
+generate|генерировать|Tech|B1
+global|глобальный|Business|B1
+goal|цель|Study|A2
+gradual|постепенный|Study|B1
+grammar|грамматика|Study|A2
+guarantee|гарантия, гарантировать|Business|B2
+guidance|руководство, помощь|Study|B2
+handle|справляться, обрабатывать|Work|B1
+headline|заголовок|Reading|B1
+highlight|подчёркивать|Study|B1
+historical|исторический|Reading|B1
+identify|определять, распознавать|Study|B1
+ignore|игнорировать|Core|B1
+immediate|немедленный|Core|B1
+implement|внедрять|Tech|B2
+importance|важность|Study|B1
+impression|впечатление|Speaking|B1
+income|доход|Money|B1
+industry|индустрия|Business|B1
+influence|влияние, влиять|Business|B1
+inform|сообщать|Speaking|B1
+initial|начальный|Study|B1
+injury|травма|Health|B1
+inner|внутренний|Core|B2
+input|ввод, вклад|Tech|B1
+instance|пример, случай|Writing|B2
+instead|вместо этого|Core|A2
+insurance|страховка|Travel|B1
+intend|намереваться|Thinking|B1
+interaction|взаимодействие|Speaking|B2
+internal|внутренний|Business|B2
+interview|собеседование, интервью|Work|A2
+introduce|представлять|Speaking|A2
+invest|инвестировать|Money|B1
+involve|включать, вовлекать|Business|B1
+journey|путешествие|Travel|A2
+judge|судить, оценивать|Thinking|B1
+junior|младший|Work|B1
+key|ключевой|Core|A2
+label|метка, ярлык|Tech|B1
+language|язык|Study|A2
+launch|запускать|Business|B1
+layer|слой|Tech|B2
+leadership|лидерство|Business|B2
+legal|юридический|Business|B1
+lesson|урок|Study|A2
+license|лицензия|Business|B1
+limit|лимит, ограничивать|Core|B1
+local|местный|Travel|A2
+logical|логичный|Thinking|B1
+loyal|лояльный|Business|B2
+manage|управлять, справляться|Work|B1
+manual|ручной, инструкция|Tech|B1
+market|рынок|Business|A2
+material|материал|Study|B1
+measure|измерять, мера|Business|B1
+mention|упоминать|Speaking|B1
+message|сообщение|Speaking|A2
+minor|незначительный|Core|B1
+mobile|мобильный|Tech|A2
+moment|момент|Core|A2
+monitor|отслеживать|Tech|B2
+monthly|ежемесячный|Time|B1
+motivation|мотивация|Study|B1
+natural|естественный|Speaking|A2
+necessary|необходимый|Core|A2
+network|сеть|Tech|B1
+neutral|нейтральный|Speaking|B1
+normal|нормальный|Core|A2
+objective|цель, объективный|Business|B2
+observe|наблюдать|Study|B1
+obtain|получать|Business|B2
+occur|происходить|Core|B1
+offer|предложение, предлагать|Business|A2
+official|официальный|Business|B1
+operate|работать, управлять|Tech|B1
+option|вариант|Core|A2
+ordinary|обычный|Core|B1
+organize|организовывать|Work|A2
+original|оригинальный|Core|B1
+outcome|результат|Business|B2
+overall|в целом|Writing|B2
+package|пакет|Business|B1
+paragraph|абзац|Writing|A2
+participant|участник|Social|B1
+partner|партнёр|Business|A2
+passenger|пассажир|Travel|A2
+payment|оплата|Money|A2
+percentage|процент|Business|B1
+period|период|Time|A2
+permission|разрешение|Tech|B1
+personal|личный|Core|A2
+perspective|точка зрения|Thinking|B2
+platform|платформа|Tech|B1
+pleasant|приятный|Daily|B1
+policy|политика, правила|Business|B2
+popular|популярный|Social|A2
+position|позиция, должность|Work|B1
+possible|возможный|Core|A2
+potential|потенциальный|Business|B2
+practical|практичный|Study|B1
+predict|предсказывать|Thinking|B1
+preference|предпочтение|Choice|B1
+premium|премиум|Product|A2
+presentation|презентация|Business|B1
+prevent|предотвращать|Core|B1
+primary|основной|Core|B1
+principle|принцип|Study|B2
+priority|приоритет|Work|B1
+private|частный|Core|A2
+process|процесс|Business|B1
+professional|профессиональный|Work|B1
+profit|прибыль|Money|B1
+program|программа|Tech|A2
+progress|прогресс|Study|A2
+project|проект|Work|A2
+promise|обещание, обещать|Speaking|A2
+promote|продвигать|Business|B1
+proof|доказательство|Writing|B1
+proper|правильный|Core|B1
+protect|защищать|Core|A2
+provide|предоставлять|Business|B1
+public|публичный|Social|A2
+purchase|покупка, покупать|Money|B1
+quality|качество|Business|A2
+quantity|количество|Business|B1
+questionnaire|анкета|Study|B2
+quote|цитата|Writing|B1
+range|диапазон|Business|B1
+rapid|быстрый|Core|B2
+reaction|реакция|Social|B1
+realistic|реалистичный|Thinking|B2
+reason|причина|Core|A2
+receipt|чек, квитанция|Money|B1
+recognize|узнавать, признавать|Core|B1
+record|запись, записывать|Tech|A2
+reference|ссылка, справка|Study|B1
+reflect|отражать, размышлять|Thinking|B2
+refuse|отказываться|Speaking|B1
+region|регион|Travel|B1
+register|регистрироваться|Tech|A2
+relationship|отношение, связь|Social|B1
+release|выпускать, релиз|Tech|B1
+remind|напоминать|Daily|A2
+remote|удалённый|Work|B1
+replace|заменять|Tech|B1
+reply|ответ, отвечать|Speaking|A2
+request|запрос, просить|Business|B1
+research|исследование|Study|B1
+reservation|бронь|Travel|B1
+result|результат|Study|A2
+retain|сохранять, удерживать|Business|B2
+revenue|выручка|Money|B2
+reward|награда|Motivation|B1
+risk|риск|Business|B1
+route|маршрут|Travel|A2
+routine|рутина, распорядок|Daily|A2
+salary|зарплата|Money|B1
+sample|образец|Study|B1
+satisfaction|удовлетворение|Business|B2
+scenario|сценарий|Speaking|B1
+search|искать, поиск|Tech|A2
+section|раздел|Study|A2
+secure|безопасный, защищать|Tech|B1
+select|выбирать|Choice|A2
+senior|старший|Work|B1
+sequence|последовательность|Study|B2
+service|сервис, услуга|Business|A2
+session|сессия, занятие|Study|B1
+setting|настройка, окружение|Tech|B1
+share|делиться|Social|A2
+shipment|отправка, доставка|Business|B2
+shortcut|короткий путь|Tech|B1
+signal|сигнал|Tech|B1
+significant|значительный|Writing|B2
+similar|похожий|Core|A2
+simple|простой|Core|A2
+skill|навык|Study|A2
+smart|умный|Tech|A2
+smooth|плавный|Core|B1
+social|социальный|Social|A2
+source|источник|Study|B1
+standard|стандарт|Business|B1
+statement|утверждение|Writing|B1
+status|статус|Tech|A2
+steady|стабильный|Motivation|B1
+storage|хранилище|Tech|B1
+stress|стресс, ударение|Health|B1
+strict|строгий|Core|B1
+subject|тема, предмет|Study|A2
+submit|отправлять, подавать|Tech|B1
+subscription|подписка|Product|B1
+summary|краткое изложение|Writing|B1
+supply|поставка, снабжать|Business|B1
+survey|опрос|Business|B1
+systematic|системный|Study|B2
+target|цель|Business|B1
+technical|технический|Tech|B1
+template|шаблон|Tech|B1
+temporary|временный|Time|B1
+term|термин, срок|Study|B1
+theory|теория|Study|A2
+ticket|билет, заявка|Travel|A2
+timing|выбор времени|Time|B1
+tool|инструмент|Tech|A2
+traffic|трафик, движение|Travel|A2
+training|тренировка, обучение|Study|A2
+trial|пробный период|Product|B1
+typical|типичный|Core|B1
+update|обновление, обновлять|Tech|A2
+upload|загружать|Tech|A2
+usage|использование|Tech|B1
+user|пользователь|Tech|A2
+valid|действительный|Business|B1
+value|ценность|Business|A2
+version|версия|Tech|A2
+visible|видимый|Tech|B1
+volume|объём|Business|B1
+warning|предупреждение|Tech|B1
+weekly|еженедельный|Time|A2
+willing|готовый, согласный|Speaking|B1
+workflow|рабочий процесс|Work|B2
+yearly|ежегодный|Time|B1
+zero|ноль|Core|A2
+zone|зона|Travel|A2
+`;
+(function expandVocabDeck(){
+  const need=Math.max(0,500-VOCAB_DECK.length);
+  const start=VOCAB_DECK.length+1;
+  EXTRA_VOCAB_PACK.trim().split('\n').map(function(row){return row.trim();}).filter(Boolean).slice(0,need).forEach(function(row,i){
+    const parts=row.split('|').map(function(v){return (v||'').trim();});
+    const word=parts[0],ru=parts[1]||parts[0],topic=parts[2]||'Core',level=parts[3]||'B1';
+    if(!word)return;
+    VOCAB_DECK.push({id:start+i,w:word,p:'',tr:{ru:ru,en:word},ex:'Try to use "'+word+'" in your own sentence.',level:level,topic:topic});
+  });
+})();
 let cards=[],cIdx=0,flipped=false;
 function vocabMeta(v){
   const topics=['Core','Speaking','Writing','Business','Travel','Study'];
   const levels=['A2','B1','B1','B2','B2','C1'];
   return {topic:v.topic||topics[v.id%topics.length],level:v.level||levels[v.id%levels.length]};
 }
+function cardDailyLimit(){
+  if(hasTier('ultimate'))return 40;
+  if(hasTier('pro'))return 20;
+  if(hasTier('basic'))return 10;
+  return 5;
+}
 function buildDeckCards(){
+  var lim=cardDailyLimit();
   // Server-provided due words win if present (back-compat)
   var sv=(window._d||{}).due_words||[];
-  if(sv.length)return sv.slice();
+  if(sv.length)return sv.slice(0,lim);
   // Otherwise build from local deck via SM-2: new cards + cards whose review is due
   var sm=getSM2Data();var now=Date.now();var out=[];
   VOCAB_DECK.forEach(function(v){
@@ -3441,7 +3835,7 @@ function buildDeckCards(){
     }
   });
   out.sort(function(){return Math.random()-0.5;});
-  return out.slice(0,5);
+  return out.slice(0,lim);
 }
 function initLearn(){
   if(learnTab==='course')renderCourse();
@@ -4670,16 +5064,16 @@ function openPremium(highlightFeature){
   if(ladder){
     const items=lang==='ru'
       ?[
-        ['Free','Курс A0-C1 · карточки · drills · аудирование · путь · прогресс'],
-        ['Basic','ALEX Chat · Sonnet 4 · голосовые ответы · больше дневной практики'],
-        ['Pro','Roleplay · проверка текста · анализ ошибок · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · длинная история · максимум quota points']
+        ['Free','Курс A0-C1 · 500 слов · 5 карточек/день · drills · аудирование · путь'],
+        ['Basic','ALEX Chat · Sonnet 4 · 10 карточек/день · голосовые ответы'],
+        ['Pro','Roleplay · проверка текста · 20 карточек/день · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 40 карточек/день · длинная история']
       ]
       :[
-        ['Free','A0-C1 course · flashcards · drills · listening · roadmap · progress'],
-        ['Basic','ALEX Chat · Sonnet 4 · voice replies · more daily practice'],
-        ['Pro','Roleplay · text check · error analysis · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · long history · max quota points']
+        ['Free','A0-C1 course · 500 words · 5 cards/day · drills · listening'],
+        ['Basic','ALEX Chat · Sonnet 4 · 10 cards/day · voice replies'],
+        ['Pro','Roleplay · text check · 20 cards/day · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 40 cards/day · long history']
       ];
     ladder.innerHTML=items.map(i=>`<div class="lad-card"><strong>${i[0]}</strong><span>${i[1]}</span></div>`).join('');
   }
@@ -4689,13 +5083,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>Голосовые ответы';
-    if(proB)proB.innerHTML='110 quota points/день<br>Roleplay + проверка текста<br>Sonnet 4/4.6<br>Развёрнутые ответы';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>TOEFL + персональный план<br>Длинная история диалога';
+    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>10 карточек/день<br>Haiku 4.5 + Sonnet 4';
+    if(proB)proB.innerHTML='110 quota points/день<br>20 карточек/день<br>Roleplay + проверка текста<br>Sonnet 4/4.6';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>40 карточек/день<br>Opus 4.1/4.7<br>TOEFL + длинная история';
   } else {
-    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>Voice replies';
-    if(proB)proB.innerHTML='110 quota points/day<br>Roleplay + text check<br>Sonnet 4/4.6<br>Detailed replies';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>TOEFL + personal plan<br>Long chat history';
+    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>10 cards/day<br>Haiku 4.5 + Sonnet 4';
+    if(proB)proB.innerHTML='110 quota points/day<br>20 cards/day<br>Roleplay + text check<br>Sonnet 4/4.6';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>40 cards/day<br>Opus 4.1/4.7<br>TOEFL + long history';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -5613,6 +6007,122 @@ const DRILL_BANKS={
   ],
 };
 
+function addDrillQuestions(topic,items){
+  if(!DRILL_BANKS[topic])DRILL_BANKS[topic]=[];
+  items.forEach(function(q){DRILL_BANKS[topic].push(q);});
+}
+addDrillQuestions('tenses',[
+  {q:'I ___ this book twice.',o:['have read','readed','am read','was read'],a:0},
+  {q:'She ___ to Spain next month.',o:['is going','go','went','has gone'],a:0},
+  {q:'When I arrived, they ___ dinner.',o:['were having','had','have','are having'],a:0},
+  {q:'He ___ work at 8 every morning.',o:['starts','start','is start','started'],a:0},
+  {q:'They ___ here before they moved abroad.',o:['had lived','have lived','live','are living'],a:0},
+  {q:'Look at those clouds. It ___ rain.',o:['is going to','will have','has to','was'],a:0},
+  {q:'If she studies, she ___ pass.',o:['will','would','had','is'],a:0},
+  {q:'I ___ English for six months now.',o:['have been studying','study','studied','am study'],a:0}
+]);
+addDrillQuestions('articles',[
+  {q:'She works as ___ engineer.',o:['an','a','the','---'],a:0},
+  {q:'I had ___ breakfast at 8.',o:['---','a','an','the'],a:0},
+  {q:'Can you open ___ window?',o:['the','a','an','---'],a:0},
+  {q:'He lives in ___ United States.',o:['the','a','an','---'],a:0},
+  {q:'I need ___ information about the course.',o:['---','an','a','the'],a:0},
+  {q:'This is ___ useful app.',o:['a','an','the','---'],a:0},
+  {q:'She became ___ doctor.',o:['a','an','the','---'],a:0},
+  {q:'___ English is not impossible.',o:['---','The','A','An'],a:0}
+]);
+addDrillQuestions('prepositions',[
+  {q:'The file is attached ___ the email.',o:['to','on','at','in'],a:0},
+  {q:'We discussed it ___ lunch.',o:['during','on','at','to'],a:0},
+  {q:'She apologized ___ being late.',o:['for','about','to','on'],a:0},
+  {q:'This depends ___ your goal.',o:['on','in','at','from'],a:0},
+  {q:'He is afraid ___ making mistakes.',o:['of','for','to','with'],a:0},
+  {q:'The lesson starts ___ 7 pm.',o:['at','in','on','to'],a:0},
+  {q:'I prefer tea ___ coffee.',o:['to','than','from','over'],a:0},
+  {q:'She is married ___ an engineer.',o:['to','with','on','for'],a:0}
+]);
+addDrillQuestions('phrasal_verbs',[
+  {q:'I need to ___ the form online.',o:['fill in','fill on','fill at','fill out of'],a:0},
+  {q:'The company will ___ a new app.',o:['bring out','bring up','bring in','bring off'],a:0},
+  {q:'Do not ___ after one mistake.',o:['give up','give off','give away','give back'],a:0},
+  {q:'Please ___ the document before sending it.',o:['look over','look after','look up','look into'],a:0},
+  {q:'We ___ milk yesterday.',o:['ran out of','ran into','ran over','ran up'],a:0},
+  {q:'She ___ the invitation.',o:['turned down','turned on','turned up','turned into'],a:0},
+  {q:'Can you ___ this word in a dictionary?',o:['look up','look after','look over','look out'],a:0},
+  {q:'The teacher asked us to ___ the rule.',o:['go over','go out','go off','go by'],a:0}
+]);
+addDrillQuestions('collocations',[
+  {q:'___ progress',o:['make','do','take','have'],a:0},
+  {q:'___ a break',o:['take','make','do','set'],a:0},
+  {q:'___ business',o:['do','make','take','go'],a:0},
+  {q:'___ a promise',o:['make','do','take','get'],a:0},
+  {q:'___ your best',o:['do','make','take','have'],a:0},
+  {q:'___ a risk',o:['take','make','do','set'],a:0},
+  {q:'___ money',o:['earn','win','take','collect'],a:0},
+  {q:'___ a conversation',o:['have','make','do','take'],a:0}
+]);
+addDrillQuestions('word_formation',[
+  {q:'possible (opposite) = ?',o:['impossible','unpossible','dispossible','inpossible'],a:0},
+  {q:'appear (noun) = ?',o:['appearance','appearing','appearment','appearity'],a:0},
+  {q:'use (adjective) = ?',o:['useful','useablement','useness','usement'],a:0},
+  {q:'responsible (noun) = ?',o:['responsibility','responsibleness','responsion','responsiblement'],a:0},
+  {q:'improve (noun) = ?',o:['improvement','improval','improvingness','improvity'],a:0},
+  {q:'communicate (noun) = ?',o:['communication','communicatement','communicance','communicity'],a:0},
+  {q:'efficient (noun) = ?',o:['efficiency','efficientness','efficience','efficienty'],a:0},
+  {q:'motivate (noun) = ?',o:['motivation','motivance','motivatement','motivity'],a:0}
+]);
+addDrillQuestions('time_practice',[
+  {type:'time',q:'7:20',o:['It is twenty past seven.','It is twenty to seven.','It is seven twelve.','It is half past seven.'],a:0,tip:'twenty past seven = 7:20'},
+  {type:'time',q:'3:45',o:['It is quarter to four.','It is quarter past three.','It is half past three.','It is three fifteen.'],a:0,tip:'quarter to four = 3:45'},
+  {type:'time',q:'11:10',o:['It is ten past eleven.','It is ten to eleven.','It is eleven twenty.','It is quarter past eleven.'],a:0,tip:'ten past eleven = 11:10'},
+  {type:'time',q:'2:30',o:['It is half past two.','It is quarter past two.','It is two thirteen.','It is half to two.'],a:0,tip:'half past two = 2:30'},
+  {type:'time',q:'5:55',o:['It is five to six.','It is five past five.','It is fifty-five to five.','It is quarter to six.'],a:0,tip:'five to six = 5:55'},
+  {type:'time',q:'1:25',o:['It is twenty-five past one.','It is twenty-five to one.','It is one fifty.','It is half past one.'],a:0,tip:'twenty-five past one = 1:25'},
+  {type:'time',q:'4:40',o:['It is twenty to five.','It is twenty past four.','It is four fourteen.','It is quarter to four.'],a:0,tip:'twenty to five = 4:40'},
+  {type:'time',q:'9:05',o:['It is five past nine.','It is five to nine.','It is nine fifty.','It is quarter past nine.'],a:0,tip:'five past nine = 9:05'}
+]);
+addDrillQuestions('sentence_order',[
+  {type:'order',q:'Собери: often / he / coffee / drinks / in the morning',o:['He often drinks coffee in the morning.','Often he coffee drinks in the morning.','He drinks often coffee morning.','In the morning often he coffee drinks.'],a:0,tip:'often goes before the main verb'},
+  {type:'order',q:'Собери: did / what / you / yesterday / do',o:['What did you do yesterday?','What you did do yesterday?','Did what you do yesterday?','Yesterday what did do you?'],a:0,tip:'what + did + subject + verb'},
+  {type:'order',q:'Собери: has / she / finished / already / homework / her',o:['She has already finished her homework.','She already has finished homework her.','Has she finished already her homework.','She finished has already her homework.'],a:0,tip:'already usually goes between has and V3'},
+  {type:'order',q:'Собери: going / I / am / to / call / later / you',o:['I am going to call you later.','I going am to call later you.','I am to going call you later.','Later I going am call you.'],a:0,tip:'be going to + verb'},
+  {type:'order',q:'Собери: never / we / been / have / there',o:['We have never been there.','We never have there been.','Have we never there been.','We been have never there.'],a:0,tip:'never goes between have and V3'},
+  {type:'order',q:'Собери: should / more / you / slowly / speak',o:['You should speak more slowly.','You speak should more slowly.','Should you more slowly speak.','You should more speak slowly.'],a:0,tip:'modal + base verb'}
+]);
+addDrillQuestions('gap_fill',[
+  {type:'gap',q:'She is good ___ explaining grammar.',o:['at','in','on','for'],a:0,tip:'good at + noun/-ing'},
+  {type:'gap',q:'I am tired ___ repeating the same mistake.',o:['of','from','with','about'],a:0,tip:'tired of + noun/-ing'},
+  {type:'gap',q:'This app is useful ___ beginners.',o:['for','to','at','on'],a:0,tip:'useful for someone'},
+  {type:'gap',q:'He insisted ___ paying for dinner.',o:['on','in','for','to'],a:0,tip:'insist on + -ing'},
+  {type:'gap',q:'I am used ___ speaking English every day.',o:['to','for','with','at'],a:0,tip:'be used to + -ing'},
+  {type:'gap',q:'The answer depends ___ the context.',o:['on','from','at','in'],a:0,tip:'depend on'},
+  {type:'gap',q:'She succeeded ___ passing the exam.',o:['in','at','on','to'],a:0,tip:'succeed in + -ing'},
+  {type:'gap',q:'We are looking ___ a better solution.',o:['for','at','to','on'],a:0,tip:'look for = search'}
+]);
+addDrillQuestions('translation_chunks',[
+  {type:'translate',q:'Мне нужно привыкнуть к этому.',o:['I need to get used to it.','I need used to it.','I need to use to it.','I need get use it.'],a:0,tip:'get used to = привыкнуть'},
+  {type:'translate',q:'Она отвечает за команду.',o:['She is responsible for the team.','She is responsible of the team.','She answers for team.','She is in responsible team.'],a:0,tip:'responsible for'},
+  {type:'translate',q:'Мы обсудим это позже.',o:['We will discuss it later.','We will discuss about it later.','We discuss it after.','We will speak it later.'],a:0,tip:'discuss something, no about'},
+  {type:'translate',q:'Я с нетерпением жду ответа.',o:['I am looking forward to your reply.','I am waiting forward your reply.','I look forward for your reply.','I am looking to your reply.'],a:0,tip:'look forward to + noun/-ing'},
+  {type:'translate',q:'Это зависит от цены.',o:['It depends on the price.','It depends from the price.','It depends of price.','It is depend on price.'],a:0,tip:'depends on'},
+  {type:'translate',q:'Он сделал большой прогресс.',o:['He made great progress.','He did big progress.','He took strong progress.','He made a progress.'],a:0,tip:'progress is usually uncountable'},
+  {type:'translate',q:'Мне нужно заполнить форму.',o:['I need to fill in the form.','I need to fill the form in it.','I need fill form.','I need to make the form.'],a:0,tip:'fill in/fill out a form'},
+  {type:'translate',q:'Она говорит слишком быстро.',o:['She speaks too fast.','She says too fast.','She talks too quick.','She speak very quickly too.'],a:0,tip:'speak fast/naturally'}
+]);
+function drillQuestionKey(q){return (q.type||'mc')+'|'+q.q;}
+function pickDrillQuestions(topic,bank,count){
+  const recentKey='recent_drill_'+topic;
+  const recent=LS.getJ(recentKey)||[];
+  const shuffled=bank.slice().sort(function(){return Math.random()-.5;});
+  let picked=shuffled.filter(function(q){return recent.indexOf(drillQuestionKey(q))<0;}).slice(0,count);
+  if(picked.length<count){
+    const used=picked.map(drillQuestionKey);
+    picked=picked.concat(shuffled.filter(function(q){return used.indexOf(drillQuestionKey(q))<0;}).slice(0,count-picked.length));
+  }
+  LS.setJ(recentKey,picked.map(drillQuestionKey).concat(recent).slice(0,80));
+  return picked;
+}
+
 // Drill topic metadata for picker
 const DRILL_TOPICS=[
   {id:'tenses',icon:'⏰',color:'#4f8aff',name:{ru:'Времена',en:'Tenses'},desc:{ru:'Present, Past, Future',en:'Present, Past, Future'}},
@@ -5722,9 +6232,9 @@ function getAdaptiveLevel(topic){
 let drillState=null;
 function startDrill(topic){
   const bank=DRILL_BANKS[topic]||DRILL_BANKS.tenses;
-  const questions=bank.slice().sort(function(){return Math.random()-.5;}).slice(0,10);
+  const questions=pickDrillQuestions(topic,bank,10);
   drillState={questions:questions,current:0,correct:0,total:questions.length,startTime:Date.now(),timeLimit:120,topic:topic};
-  goTab('chat');
+  goTab('chat',true);
   const meta=DRILL_TOPICS.find(t=>t.id===topic)||DRILL_TOPICS[0];
   addMsg('bot','<div style="text-align:center;padding:8px 0"><div class="mini-type">'+(meta.name[lang]||meta.name.en)+'</div><div style="font-size:16px;font-weight:800">Practice Drill</div><div style="font-size:12px;color:var(--t2)">'+drillState.total+' '+(lang==='ru'?'вопросов':'questions')+' - 2 min</div></div>');
   setTimeout(showDrillQ,600);
