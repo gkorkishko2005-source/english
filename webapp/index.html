@@ -1158,6 +1158,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
 .pp-buffs{font-size:12px;color:var(--t2);line-height:1.65;padding-left:1px}
 .pp-year{margin-top:9px;padding:8px 10px;border-radius:9px;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.14);font-size:11px;font-weight:700;color:var(--a);display:flex;align-items:center;justify-content:space-between}
+.prem-depth{padding:0 17px 12px}
+.prem-depth-title{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:2px 0 8px}
+.prem-depth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prem-depth-card{background:var(--e1);border:1px solid var(--b1);border-radius:10px;padding:10px;min-height:72px}
+.prem-depth-ico{width:25px;height:25px;border-radius:8px;background:rgba(var(--ar),.11);display:flex;align-items:center;justify-content:center;margin-bottom:7px}
+.prem-depth-ico svg{width:15px;height:15px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.prem-depth-name{font-size:12px;font-weight:800;color:var(--t1);margin-bottom:3px}
+.prem-depth-sub{font-size:10.5px;line-height:1.35;color:var(--t2)}
 .prem-ladder{padding:0 17px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .lad-card{background:rgba(var(--ar),.055);border:1px solid var(--b1);border-radius:10px;padding:10px}
 .lad-card strong{display:block;font-size:12px;margin-bottom:5px;color:var(--t1)}
@@ -1845,6 +1853,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
         <div class="pp-buffs" id="pp-ult-buffs"></div>
         <div class="pp-year" id="pp-ult-year">42840 ⭐ / год <span>-15%</span></div>
       </div>
+    </div>
+    <div class="prem-depth">
+      <div class="prem-depth-title" id="prem-depth-title">Learning system</div>
+      <div class="prem-depth-grid" id="prem-depth-grid"></div>
     </div>
     <div class="prem-ladder" id="prem-ladder"></div>
     <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Continue free</div>
@@ -5086,20 +5098,39 @@ function openPremium(highlightFeature){
   if(by)by.innerHTML=lang==='ru'?'6630 ⭐ / год <span>-15%</span>':'6630 ⭐ / year <span>-15%</span>';
   if(py)py.innerHTML=lang==='ru'?'16320 ⭐ / год <span>-15%</span>':'16320 ⭐ / year <span>-15%</span>';
   if(uy)uy.innerHTML=lang==='ru'?'42840 ⭐ / год <span>-15%</span>':'42840 ⭐ / year <span>-15%</span>';
+  const depthTitle=document.getElementById('prem-depth-title');
+  const depthGrid=document.getElementById('prem-depth-grid');
+  if(depthTitle)depthTitle.textContent={ru:'Что усиливает обучение',en:'What gets upgraded',es:'Qué mejora',pt:'O que melhora'}[lang]||'What gets upgraded';
+  if(depthGrid){
+    const depth=lang==='ru'
+      ?[
+        ['M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z','AI-разбор','Пояснения ошибок, правил и примеров под тебя'],
+        ['M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2','Голос и аудио','Более приятная озвучка, shadowing и listening'],
+        ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2 M9 14l2 2 4-4','Экзамены','Переходные тесты, TOEFL и сертификаты'],
+        ['M3 12h18M12 3v18M5 5l14 14M19 5L5 19','Больше контента','Карточки, сценарии, тексты, истории и отчёты']
+      ]
+      :[
+        ['M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z','AI breakdown','Personal explanations for mistakes, rules and examples'],
+        ['M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2','Voice and audio','Smoother voices, shadowing and listening'],
+        ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2 M9 14l2 2 4-4','Exams','Level-up tests, TOEFL and certificates'],
+        ['M3 12h18M12 3v18M5 5l14 14M19 5L5 19','More content','Cards, roleplays, text checks, stories and reports']
+      ];
+    depthGrid.innerHTML=depth.map(d=>`<div class="prem-depth-card"><div class="prem-depth-ico"><svg viewBox="0 0 24 24"><path d="${d[0]}"/></svg></div><div class="prem-depth-name">${d[1]}</div><div class="prem-depth-sub">${d[2]}</div></div>`).join('');
+  }
   const ladder=document.getElementById('prem-ladder');
   if(ladder){
     const items=lang==='ru'
       ?[
-        ['Free','Курс A0-C1 · 500 слов · 5 карточек/день · drills · аудирование · путь'],
-        ['Basic','ALEX Chat · Sonnet 4 · 10 карточек/день · голосовые ответы'],
-        ['Pro','Roleplay · проверка текста · 20 карточек/день · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 40 карточек/день · длинная история']
+        ['Free','Курс A0-C2 · 500 слов · 5 карточек/день · drills · путь · переходные тесты'],
+        ['Basic','ALEX Chat · AI-подсказки · Sonnet 4 · 10 карточек/день · голосовые ответы'],
+        ['Pro','Roleplay · проверка текста · 20 карточек/день · отчёт ошибок · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 40 карточек/день · длинная история · сертификаты']
       ]
       :[
-        ['Free','A0-C1 course · 500 words · 5 cards/day · drills · listening'],
-        ['Basic','ALEX Chat · Sonnet 4 · 10 cards/day · voice replies'],
-        ['Pro','Roleplay · text check · 20 cards/day · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 40 cards/day · long history']
+        ['Free','A0-C2 course · 500 words · 5 cards/day · drills · path · level tests'],
+        ['Basic','ALEX Chat · AI hints · Sonnet 4 · 10 cards/day · voice replies'],
+        ['Pro','Roleplay · text check · 20 cards/day · error report · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 40 cards/day · long history · certificates']
       ];
     ladder.innerHTML=items.map(i=>`<div class="lad-card"><strong>${i[0]}</strong><span>${i[1]}</span></div>`).join('');
   }
@@ -5109,13 +5140,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>10 карточек/день<br>Haiku 4.5 + Sonnet 4';
-    if(proB)proB.innerHTML='110 quota points/день<br>20 карточек/день<br>Roleplay + проверка текста<br>Sonnet 4/4.6';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>40 карточек/день<br>Opus 4.1/4.7<br>TOEFL + длинная история';
+    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>10 карточек/день<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
+    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>20 карточек/день<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>40 карточек/день<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
   } else {
-    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>10 cards/day<br>Haiku 4.5 + Sonnet 4';
-    if(proB)proB.innerHTML='110 quota points/day<br>20 cards/day<br>Roleplay + text check<br>Sonnet 4/4.6';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>40 cards/day<br>Opus 4.1/4.7<br>TOEFL + long history';
+    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>10 cards/day<br>Voice replies + AI hints<br>Full course rule breakdown';
+    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>20 cards/day<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>40 cards/day<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
   }
 
   // Hide plans that are lower or equal to current tier
