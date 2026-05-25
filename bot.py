@@ -74,6 +74,7 @@ FREE_TEST_IDS: set = {
 PAYMENT_TEST_IDS: set = {
     1738695057,
 }
+TEST_STARS_PRICE = 1  # Telegram Stars invoices need a positive amount; use 1 ⭐ for owner payment QA.
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
@@ -1748,7 +1749,7 @@ async def cmd_premium(msg: Message):
     u_stars = int(PREMIUM_PLANS["ultimate"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["ultimate"]["stars"]
     by_stars = PREMIUM_PLANS["basic_year"]["stars"]
     py_stars = PREMIUM_PLANS["pro_year"]["stars"]
-    uy_stars = PREMIUM_PLANS["ultimate_year"]["stars"]
+    uy_stars = TEST_STARS_PRICE if uid in PAYMENT_TEST_IDS else PREMIUM_PLANS["ultimate_year"]["stars"]
 
     kb_rows = [
         [InlineKeyboardButton(
@@ -1772,7 +1773,7 @@ async def cmd_premium(msg: Message):
             callback_data="prem_buy:pro_year:n"
         )],
         [InlineKeyboardButton(
-            text=f"Ultimate год — {uy_stars} ⭐ (-15%)" if ru else f"Ultimate yearly — {uy_stars} ⭐ (-15%)",
+            text=(f"Ultimate год TEST — {uy_stars} ⭐" if uid in PAYMENT_TEST_IDS else f"Ultimate год — {uy_stars} ⭐ (-15%)") if ru else (f"Ultimate yearly TEST — {uy_stars} ⭐" if uid in PAYMENT_TEST_IDS else f"Ultimate yearly — {uy_stars} ⭐ (-15%)"),
             callback_data="prem_buy:ultimate_year:n"
         )],
     ]
@@ -1807,7 +1808,7 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + персональный план\n"
         "└ Длинная история диалога\n\n"
-        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
+        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐{' TEST' if uid in PAYMENT_TEST_IDS else ''}\n"
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
@@ -1834,7 +1835,7 @@ async def cmd_premium(msg: Message):
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL + personal study plan\n"
         "└ Long chat history\n\n"
-        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
+        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐{' TEST' if uid in PAYMENT_TEST_IDS else ''}\n"
         "<i>Quota points keep premium limits fair and sustainable.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
@@ -1865,6 +1866,8 @@ async def cb_prem_buy(cb: CallbackQuery):
     stars = plan["stars"]
     if has_discount:
         stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
+    if uid in PAYMENT_TEST_IDS and plan_id == "ultimate_year":
+        stars = TEST_STARS_PRICE
 
     period = "1 год" if (ru and plan["months"] == 12) else "1 year" if plan["months"] == 12 else "1 месяц" if ru else "1 month"
     desc = f"ALEX Subscriptions {plan['tier'].upper()} — {period}"
