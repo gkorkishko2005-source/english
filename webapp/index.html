@@ -2360,8 +2360,8 @@ function goTab(n,allowPractice){
 function hasChatAccess(){return !!isPremium;}
 function showChatPaywall(){
   try{sfx.warn();}catch(e){}haptic('light');
-  openPremium({ru:'Чат с ALEX доступен с Basic',en:'ALEX chat starts with Basic',es:'Chat con ALEX desde Basic',pt:'Chat com ALEX começa no Basic'}[lang]||'ALEX chat starts with Basic');
-  toast({ru:'ALEX Chat — с Basic',en:'ALEX Chat — Basic+',es:'ALEX Chat — Basic+',pt:'ALEX Chat — Basic+'}[lang]||'ALEX Chat — Basic+','🔒');
+  openPremium({ru:'Для чата с ALEX нужна подписка',en:'ALEX chat requires a subscription',es:'El chat con ALEX requiere suscripción',pt:'O chat com ALEX exige assinatura'}[lang]||'ALEX chat requires a subscription');
+  toast({ru:'Нужна подписка',en:'Subscription required',es:'Suscripción requerida',pt:'Assinatura necessária'}[lang]||'Subscription required','🔒');
 }
 /* Chat model picker — compact Claude choices gated per subscription.
    Server re-validates so a cheating client cannot bypass tier limits. */
@@ -2547,11 +2547,11 @@ function renderProgress(d){
   animateCount(document.getElementById('pxp'),d.xp||0,900,' XP total');
   animateCount(document.getElementById('pbc'),d.xp||0,900,' XP');
   if(hasTier('basic')){const e=document.getElementById('psess');if(e)e.classList.remove('premium-mask');animateCount(e,d.sessions||0,700);}
-  else{const e=document.getElementById('psess');if(e){e.textContent='Basic';e.classList.add('premium-mask');}}
+  else{const e=document.getElementById('psess');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
   animateCount(document.getElementById('pwrds'),d.words||0,700);
   animateCount(document.getElementById('ptsts'),d.tests||0,700);
   if(hasTier('basic')){const e=document.getElementById('perrs');if(e)e.classList.remove('premium-mask');animateCount(e,d.errors||0,700);}
-  else{const e=document.getElementById('perrs');if(e){e.textContent='Basic';e.classList.add('premium-mask');}}
+  else{const e=document.getElementById('perrs');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
   document.getElementById('pbm').textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
   setTimeout(()=>document.getElementById('pbfi').style.width=pct+'%',350);
   renderInterests(d.interests||[]);
@@ -2574,8 +2574,8 @@ function drawProgress(){
     ['psess','perrs'].forEach(id=>document.getElementById(id)?.classList.remove('premium-mask'));
     safe('psess',sess); safe('perrs',errors);
   }else{
-    const se=document.getElementById('psess');if(se){se.textContent='Basic';se.classList.add('premium-mask');}
-    const er=document.getElementById('perrs');if(er){er.textContent='Basic';er.classList.add('premium-mask');}
+    const se=document.getElementById('psess');if(se){se.textContent=lang==='ru'?'Подписка':'Subscription';se.classList.add('premium-mask');}
+    const er=document.getElementById('perrs');if(er){er.textContent=lang==='ru'?'Подписка':'Subscription';er.classList.add('premium-mask');}
   }
   safe('pwrds',words); safe('ptsts',tests);
 
@@ -2654,17 +2654,17 @@ function alexLockedCard(title,sub,feature){
   return `<div class="alex-locked">
     <div class="alex-lock-ico"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 00-5 5v3H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V8a5 5 0 00-5-5Z"/><path d="M9 11V8a3 3 0 016 0v3"/><path d="M12 15v2"/></svg></div>
     <div class="alex-lock-main"><div class="alex-lock-title">${safeHTML(title)}</div><div class="alex-lock-sub">${safeHTML(sub)}</div>
-    <button class="alex-lock-btn" onclick="showTierPaywall('basic','${feature||'ALEX'}')">${lang==='ru'?'Открыть Basic':'Unlock Basic'}</button></div>
+    <button class="alex-lock-btn" onclick="showTierPaywall('basic','${feature||'ALEX'}')">${lang==='ru'?'Выбрать подписку':'Choose plan'}</button></div>
   </div>`;
 }
 function renderInterests(ints){
   const w=document.getElementById('intwrap');if(!w)return;
   const edit=document.getElementById('int-edit-lbl');
   if(!hasTier('basic')){
-    if(edit)edit.textContent='Basic';
+    if(edit)edit.textContent=lang==='ru'?'Подписка':'Subscription';
     w.innerHTML=alexLockedCard(
       lang==='ru'?'Персональные интересы ALEX':'ALEX personal context',
-      lang==='ru'?'Расскажи о себе один раз, и ALEX будет подбирать примеры, задания и объяснения под тебя. Доступно с Basic.':'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Starts with Basic.',
+      lang==='ru'?'Расскажи о себе один раз, и ALEX будет подбирать примеры, задания и объяснения под тебя. Доступно с любой подпиской.':'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Available with any subscription.',
       lang==='ru'?'персональный контекст ALEX':'ALEX personal context'
     );
     return;
@@ -2683,12 +2683,12 @@ function updateProfileUI(d){
   const sl=document.getElementById('silv');if(sl)sl.textContent=d.level||'—';
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
   const mt=document.getElementById('prof-mtit');
-  if(mt)mt.textContent=(L.proft||'About you')+(hasTier('basic')?'':' · Basic');
+  if(mt)mt.textContent=(L.proft||'About you')+(hasTier('basic')?'':(lang==='ru'?' · подписка':' · subscription'));
   const box=document.getElementById('about-access');
   if(box&&!hasTier('basic')){
     box.innerHTML=alexLockedCard(
       lang==='ru'?'“О себе” работает с ALEX':'“About you” works with ALEX',
-      lang==='ru'?'Free оставляет курс, карточки и прогресс. Basic добавляет память о твоих целях, стиле и интересах для персональных ответов.':'Free keeps course, cards and progress. Basic adds memory for your goals, style and interests so ALEX can answer personally.',
+      lang==='ru'?'Free оставляет курс, карточки и прогресс. Любая подписка добавляет память о твоих целях, стиле и интересах для персональных ответов.':'Free keeps course, cards and progress. Any subscription adds memory for your goals, style and interests so ALEX can answer personally.',
       lang==='ru'?'память ALEX':'ALEX memory'
     );
     return;
@@ -2728,7 +2728,7 @@ function bumpStat(key,delta=1){
   const idMap={sessions:'psess',words:'pwrds',tests:'ptsts',errors:'perrs'};
   const el=document.getElementById(idMap[key]);
   if(el){
-    if((key==='sessions'||key==='errors')&&!hasTier('basic')){el.textContent='Basic';el.classList.add('premium-mask');}
+    if((key==='sessions'||key==='errors')&&!hasTier('basic')){el.textContent=lang==='ru'?'Подписка':'Subscription';el.classList.add('premium-mask');}
     else{el.textContent=s[key];el.classList.remove('premium-mask');}
   }
   // Also update home stats
@@ -4063,7 +4063,7 @@ function openExamPrep(){
   goTab('chat',true);
   addMsg('bot',`<div class="exam-hub">
     <div><div class="exam-title">${lang==='ru'?'TOEFL / IELTS тренажёр':'TOEFL / IELTS trainer'}</div>
-    <div class="exam-sub">${lang==='ru'?'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Basic+ добавляет разбор ответа и подсказки ALEX.':'Free: Reading, Listening, Writing and Speaking tasks without AI. Basic+ adds ALEX feedback and hints.'}</div></div>
+    <div class="exam-sub">${lang==='ru'?'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Подписка добавляет разбор ответа и подсказки ALEX.':'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.'}</div></div>
     <div class="exam-grid">
       <button class="exam-card" onclick="runExamTask('toefl','reading')"><strong>TOEFL Reading</strong><span>academic passages</span></button>
       <button class="exam-card" onclick="runExamTask('toefl','listening')"><strong>TOEFL Listening</strong><span>campus / lecture</span></button>
@@ -4798,7 +4798,7 @@ function openCourseLesson(id){
     <div class="course-rule">${safeHTML(ls.rule[lang]||ls.rule.en)}</div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
-    <div class="course-note">${lang==='ru'?'Бесплатно: короткое правило, примеры, слова и мини-тест. Полный персональный разбор открывается с Basic.':'Free: short rule, examples, words and a mini test. Full personal AI breakdown starts with Basic.'}</div>
+    <div class="course-note">${lang==='ru'?'Бесплатно: короткое правило, примеры, слова и мини-тест. Полный персональный разбор открывается с любой подпиской.':'Free: short rule, examples, words and a mini test. Full personal AI breakdown requires a subscription.'}</div>
     <button class="course-ai" onclick="courseAIBreakdown('${id}')">${lang==='ru'?'Полный AI-разбор правила':'Full AI rule breakdown'}</button>
     <div class="course-practice" id="course-q-${id}">
       <div class="mini-type">${lang==='ru'?'Мини-тест':'Mini test'}</div>
@@ -5115,7 +5115,7 @@ function openRoadmapOfflineLesson(found){
     <h3>${safeHTML(found.lvlData.level)} · ${safeHTML(title)}</h3>
     <div class="course-rule">${lang==='ru'?'Короткий офлайн-урок: прочитай правило, произнеси примеры вслух и пройди мини-проверку.':'Short offline lesson: read the rule, say examples aloud and complete the mini check.'}</div>
     <div class="course-ex"><div class="course-line"><span>${safeHTML(sub)}</span></div><div class="course-line"><span>I practise this topic every day.</span></div><div class="course-line"><span>This lesson helps me speak more clearly.</span></div></div>
-    <div class="course-note">${lang==='ru'?'Если застрял, Basic открывает ALEX-помощника для личного объяснения.':'If you get stuck, Basic unlocks ALEX for a personal explanation.'}</div>
+    <div class="course-note">${lang==='ru'?'Если застрял, подписка открывает ALEX-помощника для личного объяснения.':'If you get stuck, a subscription unlocks ALEX for a personal explanation.'}</div>
     <button class="course-ai" onclick="courseAIBreakdown('${cid||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
   </div>`;
 }
@@ -5364,12 +5364,12 @@ function renderErrorDiary(){
   const lbl=document.getElementById('errdiary-lbl');
   const cta=document.getElementById('errdiary-cta');
   if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary',es:'Diario de errores',de:'Fehlertagebuch',fr:'Journal des erreurs',pt:'Diário de erros',uk:'Щоденник помилок',tr:'Hata günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Error Diary';
-  if(cta)cta.textContent=hasTier('basic')?({ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →'):'Basic';
+  if(cta)cta.textContent=hasTier('basic')?({ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →'):(lang==='ru'?'Подписка':'Subscription');
   if(!wrap)return;
   if(!hasTier('basic')){
     wrap.innerHTML=alexLockedCard(
       lang==='ru'?'Дневник ошибок ALEX':'ALEX Error Diary',
-      lang==='ru'?'После подписки ALEX будет собирать типичные ошибки из чата, показывать недели и давать персональные упражнения.':'With Basic, ALEX collects common chat mistakes, groups them by week and gives targeted practice.',
+      lang==='ru'?'После подписки ALEX будет собирать типичные ошибки из чата, показывать недели и давать персональные упражнения.':'With a subscription, ALEX collects common chat mistakes, groups them by week and gives targeted practice.',
       lang==='ru'?'дневник ошибок':'error diary'
     );
     return;
@@ -5580,12 +5580,17 @@ function hasTier(minTier){
 }
 function showTierPaywall(minTier, feature){
   const names={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
-  const title={
+  const title=minTier==='basic'?({
+    ru:`${feature||'Функция'}: нужна подписка`,
+    en:`${feature||'Feature'}: subscription required`,
+    es:`${feature||'Función'}: suscripción requerida`,
+    pt:`${feature||'Recurso'}: assinatura necessária`
+  }[lang]||`${feature||'Feature'}: subscription required`):({
     ru:`${feature||'Функция'} доступно с ${names[minTier]||minTier}`,
     en:`${feature||'Feature'} starts with ${names[minTier]||minTier}`,
     es:`Disponible desde ${names[minTier]||minTier}`,
     pt:`Disponível a partir do ${names[minTier]||minTier}`
-  }[lang]||`${feature||'Feature'} starts with ${names[minTier]||minTier}`;
+  }[lang]||`${feature||'Feature'} starts with ${names[minTier]||minTier}`);
   try{sfx.warn();}catch(e){}haptic('light');
   openPremium(title);
   toast(title,'🔒');
@@ -5624,7 +5629,7 @@ function updatePremiumUI(){
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'чат с ALEX с Basic · Sonnet включён',en:'ALEX chat starts with Basic · Sonnet included',es:'chat con ALEX desde Basic · Sonnet incluido',pt:'chat com ALEX no Basic · Sonnet incluído'}[lang]||'ALEX chat starts with Basic'}</div>
+          <div style="font-size:12px;color:var(--t2)">${{ru:'чат с ALEX по подписке · Sonnet включён',en:'ALEX chat requires a subscription · Sonnet included',es:'chat con ALEX con suscripción · Sonnet incluido',pt:'chat com ALEX por assinatura · Sonnet incluído'}[lang]||'ALEX chat requires a subscription'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
@@ -5639,7 +5644,7 @@ function requirePremium(featureName, fn){
   if(isPremium){fn();return;}
   const msg={
     voice:{ru:'Голосовые ответы ALEX',en:'Voice replies from ALEX'},
-    chat:{ru:'Чат с ALEX доступен с Basic',en:'ALEX chat starts with Basic'},
+    chat:{ru:'Для чата с ALEX нужна подписка',en:'ALEX chat requires a subscription'},
     unlimited:{ru:'Больше дневной практики',en:'More daily practice'},
     personas:{ru:'Расширенные сценарии',en:'Advanced scenarios'},
     analysis:{ru:'Детальный анализ ошибок',en:'Detailed error analysis'},
@@ -5661,7 +5666,7 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent=highlightFeature||({ru:'Free живой, но ALEX Chat начинается с Basic. Годовой план даёт -15%.',en:'Free stays useful, ALEX Chat starts with Basic. Yearly saves 15%.',es:'Free sigue útil, chat desde Basic. Anual ahorra 15%.',pt:'Free continua útil, chat no Basic. Anual economiza 15%.'}[lang]||'Free practice. Basic+ chat.');
+  if(sub)sub.textContent=highlightFeature||({ru:'Free живой, но ALEX Chat требует подписку. Годовой план даёт -15%.',en:'Free stays useful, ALEX Chat requires a subscription. Yearly saves 15%.',es:'Free sigue útil, chat con suscripción. Anual ahorra 15%.',pt:'Free continua útil, chat por assinatura. Anual economiza 15%.'}[lang]||'Free practice. Subscription unlocks chat.');
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
   const pop=document.getElementById('pp-popular-lbl');
   if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
