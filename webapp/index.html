@@ -1232,8 +1232,19 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-level-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 2px 4px}
 .course-level-name{font-size:12px;font-weight:900;color:var(--t1);letter-spacing:.2px}
 .course-level-desc{font-size:10px;color:var(--t3);text-align:right}
-.course-card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center}
+.course-card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
 .course-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.course-card.done{border-color:rgba(0,212,170,.30);background:linear-gradient(135deg,rgba(0,212,170,.065),var(--e1));box-shadow:inset 3px 0 0 rgba(0,212,170,.72)}
+.course-card.done .course-ico{background:rgba(0,212,170,.12);color:var(--a2)!important}
+.course-status{width:28px;height:28px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.course-status svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-card.done .course-status{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.24);color:var(--a2)}
+.course-done-pill{font-size:10px;font-weight:850;color:var(--a2);background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.20);padding:4px 7px;border-radius:999px}
+.course-top-btn{position:fixed;right:max(18px,calc((100vw - 420px)/2 + 18px));bottom:calc(var(--nav) + var(--safe) + 18px);z-index:120;width:42px;height:42px;border-radius:15px;border:1px solid rgba(var(--ar),.26);background:rgba(22,27,39,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--a);box-shadow:0 12px 30px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(10px) scale(.94);transition:opacity .2s,transform .2s,border-color .2s}
+[data-mode=light] .course-top-btn{background:rgba(255,255,255,.88);box-shadow:0 12px 30px rgba(38,50,72,.13)}
+.course-top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+.course-top-btn:active{transform:scale(.94)}
+.course-top-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .course-system{background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.05));border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:13px 14px;margin-bottom:9px}
 .course-system-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .course-system-title{font-size:14px;font-weight:850;color:var(--t1)}
@@ -1544,6 +1555,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div id="learn-course-panel">
     <div class="course-grid" id="course-wrap"></div>
   </div>
+  <button class="course-top-btn" id="course-top-btn" type="button" onclick="scrollCourseTop()" aria-label="Back to top">
+    <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+  </button>
   <!-- CARDS panel -->
   <div id="learn-cards-panel" style="display:none">
     <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
@@ -2380,6 +2394,7 @@ function goTab(n,allowPractice){
   if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='settings'){try{updatePremiumUI();}catch(e){}}
   if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
+  try{updateCourseTopBtn();}catch(e){}
 }
 function hasChatAccess(){return !!isPremium;}
 function showChatPaywall(){
@@ -5078,17 +5093,21 @@ function renderCourse(){
     const meta=courseLevelLabel(ls.level);
     const header=ls.level!==lastLevel?`<div class="course-level-head"><div class="course-level-name">${safeHTML(ls.level)}</div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`:'';
     lastLevel=ls.level;
-    return `${header}<div class="course-card" onclick="openCourseLesson('${ls.id}')">
+    const statusIcon=isDone
+      ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
+    return `${header}<div class="course-card ${isDone?'done':''}" onclick="openCourseLesson('${ls.id}')">
       <div class="course-ico" style="color:${ls.color}">${courseIconSvg()}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
         <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
-        <div class="course-meta"><span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}</div>
+        <div class="course-meta"><span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}</div>
       </div>
-      <div class="course-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      <div class="course-status">${statusIcon}</div>
     </div>`;
   }).join('');
   wrap.innerHTML=system+lessons;
+  bindCourseTopBtn();
 }
 function openCourseLesson(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
@@ -5332,6 +5351,28 @@ function finishLevelTest(){
   levelTestState=null;
 }
 
+function updateCourseTopBtn(){
+  const btn=document.getElementById('course-top-btn');
+  const sc=document.getElementById('s-learn');
+  if(!btn||!sc)return;
+  const show=tab==='learn'&&learnTab==='course'&&sc.scrollTop>460;
+  btn.classList.toggle('show',show);
+}
+function bindCourseTopBtn(){
+  const sc=document.getElementById('s-learn');
+  if(sc&&!sc._courseTopBound){
+    sc.addEventListener('scroll',updateCourseTopBtn,{passive:true});
+    sc._courseTopBound=true;
+  }
+  updateCourseTopBtn();
+}
+function scrollCourseTop(){
+  const sc=document.getElementById('s-learn');
+  if(sc)sc.scrollTo({top:0,behavior:'smooth'});
+  try{sfx.tap();}catch(e){}
+  setTimeout(updateCourseTopBtn,280);
+}
+
 let learnTab='course';
 function switchLearnTab(tab){
   learnTab=tab;
@@ -5342,6 +5383,7 @@ function switchLearnTab(tab){
   document.getElementById('lt-'+tab)?.classList.add('on');
   if(tab==='course')renderCourse();
   if(tab==='road')renderRoadmap();
+  updateCourseTopBtn();
 }
 
 function rmStatusIcon(type){

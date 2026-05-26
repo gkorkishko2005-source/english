@@ -68,6 +68,14 @@ ADMIN_IDS: set = {
     1241890707,
     1428437531,
 }
+TEST_PAYMENT_USER_IDS: set = {
+    int(x) for x in os.getenv("TEST_PAYMENT_USER_IDS", "8702782202").split(",")
+    if x.strip().isdigit()
+}
+
+def is_test_payment_user(uid: int) -> bool:
+    return uid in ADMIN_IDS or uid in TEST_PAYMENT_USER_IDS
+
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
 # 3 плана с разными баффами
 PREMIUM_PLANS = {
@@ -112,6 +120,15 @@ PREMIUM_PLANS = {
 FIRST_TIME_DISCOUNT = 0.10
 STRIPE_TOKEN = os.getenv("STRIPE_PROVIDER_TOKEN", "")
 MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
+
+def plan_stars_for_user(plan_id: str, uid: int, has_discount: bool = False) -> int:
+    plan = PREMIUM_PLANS[plan_id]
+    if plan_id == "basic" and is_test_payment_user(uid):
+        return 1
+    stars = int(plan["stars"])
+    if has_discount:
+        stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
+    return max(1, stars)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -1796,17 +1813,18 @@ async def cmd_premium(msg: Message):
         discount_text = "\n\n🎁 <b>-10% на первую покупку!</b>" if ru else "\n\n🎁 <b>10% off your first purchase!</b>"
     year_text = "\n📅 <b>Годовой план: -15%</b>" if ru else "\n📅 <b>Annual plan: 15% off</b>"
 
-    # Prices with discount
-    b_stars = int(PREMIUM_PLANS["basic"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["basic"]["stars"]
-    p_stars = int(PREMIUM_PLANS["pro"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["pro"]["stars"]
-    u_stars = int(PREMIUM_PLANS["ultimate"]["stars"] * (1 - FIRST_TIME_DISCOUNT)) if is_first else PREMIUM_PLANS["ultimate"]["stars"]
-    by_stars = PREMIUM_PLANS["basic_year"]["stars"]
-    py_stars = PREMIUM_PLANS["pro_year"]["stars"]
-    uy_stars = PREMIUM_PLANS["ultimate_year"]["stars"]
+    # Prices with discount. Basic can be 1 Star only for configured test users.
+    is_test_payment = is_test_payment_user(uid)
+    b_stars = plan_stars_for_user("basic", uid, is_first)
+    p_stars = plan_stars_for_user("pro", uid, is_first)
+    u_stars = plan_stars_for_user("ultimate", uid, is_first)
+    by_stars = plan_stars_for_user("basic_year", uid, False)
+    py_stars = plan_stars_for_user("pro_year", uid, False)
+    uy_stars = plan_stars_for_user("ultimate_year", uid, False)
 
     kb_rows = [
         [InlineKeyboardButton(
-            text=f"Basic — {b_stars} ⭐/мес (~$9)" if ru else f"Basic — {b_stars} ⭐/mo (~$9)",
+            text=(f"Basic TEST — {b_stars} ⭐" if ru else f"Basic TEST — {b_stars} ⭐") if is_test_payment else (f"Basic — {b_stars} ⭐/мес (~$9)" if ru else f"Basic — {b_stars} ⭐/mo (~$9)"),
             callback_data=f"prem_buy:basic:{'d' if is_first else 'n'}"
         )],
         [InlineKeyboardButton(
@@ -1919,9 +1937,7 @@ async def cb_prem_buy(cb: CallbackQuery):
     ru = user_lang == "ru"
     label = plan["label_ru"] if ru else plan["label_en"]
 
-    stars = plan["stars"]
-    if has_discount:
-        stars = int(stars * (1 - FIRST_TIME_DISCOUNT))
+    stars = plan_stars_for_user(plan_id, uid, has_discount)
 
     period = "1 год" if (ru and plan["months"] == 12) else "1 year" if plan["months"] == 12 else "1 месяц" if ru else "1 month"
     desc = f"ALEX Subscriptions {plan['tier'].upper()} — {period}"
