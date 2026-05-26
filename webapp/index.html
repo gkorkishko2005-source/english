@@ -3944,26 +3944,48 @@ function vocabMeta(v){
   return {topic:v.topic||topics[v.id%topics.length],level:v.level||levels[v.id%levels.length]};
 }
 function cardDailyLimit(){
-  if(hasTier('ultimate'))return 40;
-  if(hasTier('pro'))return 20;
-  if(hasTier('basic'))return 10;
-  return 5;
+  return cardLimitConfig().limit;
 }
-function cardDailyKey(){
-  const d=new Date();
-  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  return 'cards_done_'+local;
+function cardLimitConfig(){
+  if(hasTier('ultimate'))return {limit:100,hours:4};
+  if(hasTier('pro'))return {limit:50,hours:4};
+  if(hasTier('basic'))return {limit:20,hours:5};
+  return {limit:10,hours:5};
+}
+function cardWindowInfo(){
+  const cfg=cardLimitConfig();
+  const ms=cfg.hours*60*60*1000;
+  const now=Date.now();
+  const tier=(premiumTier||'free').toLowerCase();
+  const uid=window._uid||'local';
+  const key=`cards_window_${uid}_${tier}`;
+  let state=LS.getJ(key)||{};
+  if(!state.start||now>=Number(state.start)+ms){
+    state={start:now,used:0};
+    LS.setJ(key,state);
+  }
+  const used=Math.max(0,Math.min(cfg.limit,parseInt(state.used||0,10)||0));
+  return {key,start:Number(state.start),used,limit:cfg.limit,hours:cfg.hours,resetAt:Number(state.start)+ms,remaining:Math.max(0,cfg.limit-used)};
 }
 function cardDailyUsed(){
-  return Math.max(0,parseInt(LS.get(cardDailyKey())||'0',10)||0);
+  return cardWindowInfo().used;
 }
 function cardDailyRemaining(){
-  return Math.max(0,cardDailyLimit()-cardDailyUsed());
+  return cardWindowInfo().remaining;
+}
+function cardResetText(){
+  const ms=Math.max(0,cardWindowInfo().resetAt-Date.now());
+  const totalMin=Math.max(1,Math.ceil(ms/60000));
+  const h=Math.floor(totalMin/60);
+  const m=totalMin%60;
+  if(h>0&&m>0)return lang==='ru'?`${h}ч ${m}м`:`${h}h ${m}m`;
+  if(h>0)return lang==='ru'?`${h}ч`:`${h}h`;
+  return lang==='ru'?`${totalMin}м`:`${totalMin}m`;
 }
 function recordCardDaily(){
-  const key=cardDailyKey();
-  const next=Math.min(cardDailyLimit(),cardDailyUsed()+1);
-  LS.set(key,String(next));
+  const info=cardWindowInfo();
+  const next=Math.min(info.limit,info.used+1);
+  LS.setJ(info.key,{start:info.start,used:next});
   return next;
 }
 function buildDeckCards(){
@@ -3991,8 +4013,8 @@ function initLearn(){
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
   document.getElementById('rrow').classList.add('hid');
   const cl=document.getElementById('fc-cnt-lbl');
-  const used=cardDailyUsed(),limit=cardDailyLimit(),left=cardDailyRemaining();
-  if(cl)cl.textContent=left>0?`${left} / ${limit} ${lang==='ru'?'сегодня':'today'}`:`${used} / ${limit}`;
+  const info=cardWindowInfo(),used=info.used,limit=info.limit,left=info.remaining;
+  if(cl)cl.textContent=left>0?`${left} / ${limit} · ${lang==='ru'?'сброс':'reset'} ${cardResetText()}`:`${used} / ${limit}`;
   // Fix: hide counter dash when no cards
   const fctr=document.getElementById('fctr');
   if(fctr)fctr.textContent=cards.length?`0 / ${cards.length}`:'';
@@ -4000,8 +4022,8 @@ function initLearn(){
     document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';
     const et=document.getElementById('em-t'),es=document.getElementById('em-s'),b1=document.getElementById('em-b1'),b2=document.getElementById('em-b2');
     if(left<=0){
-      if(et)et.textContent=lang==='ru'?'Лимит карточек на сегодня':'Daily card limit reached';
-      if(es)es.textContent=lang==='ru'?'Ты закрыл дневную норму. Завтра очередь обновится, а подписка даст больше карточек в день.':'You finished today’s card limit. Tomorrow it resets; a subscription gives more cards per day.';
+      if(et)et.textContent=lang==='ru'?'Лимит карточек':'Card limit reached';
+      if(es)es.textContent=lang==='ru'?`Ты закрыл норму. Сброс через ${cardResetText()}. Подписка даст больше карточек и более частые сбросы.`:`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`;
       if(b1)b1.textContent=lang==='ru'?'Выбрать подписку':'Choose plan';
       if(b2)b2.textContent=L.ffact||'English fun fact';
       if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(lang==='ru'?'Подписка даст больше карточек в день':'A subscription gives more cards per day');
@@ -4090,7 +4112,7 @@ function askAlexCardHelp(){
 async function rate(q){
   if(cardRateBusy)return;
   cardRateBusy=true;
-  if(cardDailyRemaining()<=0){toast(lang==='ru'?'Лимит карточек на сегодня':'Daily card limit reached','🔒');initLearn();return;}
+  if(cardDailyRemaining()<=0){toast(lang==='ru'?'Лимит карточек':'Card limit reached','🔒');initLearn();return;}
   haptic(q>=3?'success':'light');
   try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
   const c=cards[cIdx];
