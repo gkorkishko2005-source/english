@@ -393,28 +393,33 @@ async def set_reminder(uid: int, remind_time: str):
 
 async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
     """Grant premium access for given months with tier. 0 = revoke."""
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
+    await upsert_user(uid, "")
     if months <= 0:
         await db("UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='' WHERE uid=?", uid)
     else:
         months = min(int(months), 120)
         # Check if user already has active premium — extend from end date
         user = await get_user(uid)
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         current_until = None
         if user and user.get("premium_until"):
             try:
-                current_until = datetime.fromisoformat(str(user["premium_until"]))
+                raw_until = user["premium_until"]
+                current_until = raw_until if isinstance(raw_until, datetime) else datetime.fromisoformat(str(raw_until))
+                if current_until.tzinfo is None:
+                    current_until = current_until.replace(tzinfo=timezone.utc)
             except Exception as e:
                 logger.warning("premium_until parse failed uid=%s value=%r: %s", uid, user.get("premium_until"), e)
         # If current premium is still active, extend from its end
         base = current_until if (current_until and current_until > now) else now
         until = base + timedelta(days=30 * months)
-        await db("UPDATE users SET is_premium=TRUE, premium_until=?, premium_tier=? WHERE uid=?", until.isoformat(), tier, uid)
+        until_value = until if USE_POSTGRES else until.isoformat()
+        await db("UPDATE users SET is_premium=TRUE, premium_until=?, premium_tier=? WHERE uid=?", until_value, tier, uid)
 
 async def get_premium_info(uid: int) -> dict:
     """Returns detailed premium info for UI display."""
-    from datetime import datetime
+    from datetime import datetime, timezone
     user = await get_user(uid)
     if not user:
         return {"is_premium": False, "tier": "", "until": None, "lifetime": False}
@@ -427,8 +432,10 @@ async def get_premium_info(uid: int) -> dict:
     if is_prem:
         if until_str:
             try:
-                until = datetime.fromisoformat(str(until_str))
-                active = until > datetime.now()
+                until = until_str if isinstance(until_str, datetime) else datetime.fromisoformat(str(until_str))
+                if until.tzinfo is None:
+                    until = until.replace(tzinfo=timezone.utc)
+                active = until > datetime.now(timezone.utc)
             except Exception as e:
                 logger.warning("premium_until parse failed uid=%s value=%r: %s", uid, until_str, e)
                 active = False
@@ -441,14 +448,17 @@ async def get_premium_info(uid: int) -> dict:
 
 async def check_premium(uid: int) -> bool:
     """Returns True if user has active premium."""
-    from datetime import datetime
+    from datetime import datetime, timezone
     user = await get_user(uid)
     if not user: return False
     if not user.get("is_premium"): return False
     until = user.get("premium_until")
     if until is None: return False
     try:
-        return datetime.fromisoformat(str(until)) > datetime.now()
+        until_dt = until if isinstance(until, datetime) else datetime.fromisoformat(str(until))
+        if until_dt.tzinfo is None:
+            until_dt = until_dt.replace(tzinfo=timezone.utc)
+        return until_dt > datetime.now(timezone.utc)
     except Exception:
         return False
 

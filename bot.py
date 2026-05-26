@@ -1773,16 +1773,33 @@ async def send_upgrade_hint(message: Message, tier: str, lang: str, feature: str
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="ALEX Subscriptions", callback_data="open_premium")]])
     await message.answer(text, parse_mode="HTML", reply_markup=kb)
 
-async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate"):
-    """Call server API to grant premium."""
+async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate") -> bool:
+    """Grant premium after payment. Falls back to direct DB write if server API is unavailable."""
     try:
+        local_port = os.getenv("PORT", "8080")
         async with httpx.AsyncClient(timeout=10) as client:
-            await client.post(
-                f"http://localhost:8080/api/premium/grant",
+            r = await client.post(
+                f"http://127.0.0.1:{local_port}/api/premium/grant",
                 json={"uid": uid, "months": months, "tier": tier, "secret": BOT_SECRET}
             )
+            if r.status_code == 200:
+                try:
+                    data = r.json()
+                except Exception:
+                    data = {}
+                if data.get("ok") is True:
+                    return True
+            logger.error("grant_premium_via_server failed uid=%s status=%s body=%s", uid, r.status_code, r.text[:500])
     except Exception as e:
         logger.error(f"grant_premium_via_server error: {e}")
+    try:
+        from database import set_premium
+        await set_premium(uid, months, tier)
+        logger.info("premium granted directly uid=%s tier=%s months=%s", uid, tier, months)
+        return True
+    except Exception as e:
+        logger.error("direct premium grant failed uid=%s tier=%s months=%s error=%s", uid, tier, months, e)
+        return False
 
 # ══ /premium COMMAND ══════════════════════════════════════════════════════════
 @dp.message(Command("premium"))
@@ -2028,8 +2045,16 @@ async def on_payment_success(msg: Message):
         tier = plan.get("tier", "basic")
         tier_emoji = {"basic":"🟢","pro":"🔵","ultimate":"💎"}.get(tier,"🟢")
 
-        # Grant premium in database via server
-        await grant_premium_via_server(uid, months, tier)
+        # Grant premium in database via server, with direct DB fallback.
+        granted = await grant_premium_via_server(uid, months, tier)
+        if not granted:
+            await msg.answer(
+                "Оплата прошла, но доступ не активировался автоматически. Напиши /paysupport — я проверю подписку вручную."
+                if ru else
+                "Payment succeeded, but access was not activated automatically. Send /paysupport and I will check it manually.",
+                parse_mode="HTML",
+            )
+            return
 
         # Confirm to user
         text = (

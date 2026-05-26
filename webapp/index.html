@@ -5949,6 +5949,26 @@ function updatePremiumUI(){
   if(!banner)return;
   const tierNames={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
   const tierName=tierNames[premiumTier]||premiumTier||'Premium';
+  const activePlanLine={
+    basic:{
+      ru:'ALEX Chat · Sonnet 4 · 45 quota points/день',
+      en:'ALEX Chat · Sonnet 4 · 45 quota points/day',
+      es:'ALEX Chat · Sonnet 4 · 45 puntos/día',
+      pt:'ALEX Chat · Sonnet 4 · 45 pontos/dia'
+    },
+    pro:{
+      ru:'Sonnet 4/4.6 · 110 quota points/день · отчёты',
+      en:'Sonnet 4/4.6 · 110 quota points/day · reports',
+      es:'Sonnet 4/4.6 · 110 puntos/día · informes',
+      pt:'Sonnet 4/4.6 · 110 pontos/dia · relatórios'
+    },
+    ultimate:{
+      ru:'Haiku, Sonnet, Opus · 260 quota points/день · максимум',
+      en:'Haiku, Sonnet, Opus · 260 quota points/day · maximum',
+      es:'Haiku, Sonnet, Opus · 260 puntos/día · máximo',
+      pt:'Haiku, Sonnet, Opus · 260 pontos/dia · máximo'
+    }
+  };
 
   if(isPremium){
     let untilText='';
@@ -5961,12 +5981,14 @@ function updatePremiumUI(){
         untilText={ru:`Осталось ${days} дн · до ${d.toLocaleDateString('ru')}`,en:`${days} days left · until ${d.toLocaleDateString('en')}`}[lang]||`${days} days left`;
       }catch(e){untilText='';}
     }
+    const planLine=(activePlanLine[(premiumTier||'basic').toLowerCase()]||activePlanLine.basic)[lang]||(activePlanLine[(premiumTier||'basic').toLowerCase()]||activePlanLine.basic).en;
+    const detailLine=[planLine,untilText].filter(Boolean).join(' · ');
     banner.innerHTML=`
       <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
-        <div style="display:flex;align-items:center;gap:13px;margin-bottom:${untilText?'10':'0'}px">
+        <div style="display:flex;align-items:center;gap:13px;margin-bottom:${!premiumLifetime&&premiumTier!=='ultimate'?'10':'0'}px">
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName}</div>
-            <div style="font-size:12px;color:var(--t2)">${untilText}</div>
+            <div style="font-size:12px;color:var(--t2);line-height:1.35">${detailLine}</div>
           </div>
           <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
         </div>
@@ -5977,7 +5999,7 @@ function updatePremiumUI(){
       <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
-          <div style="font-size:12px;color:var(--t2)">${{ru:'чат с ALEX по подписке · Sonnet включён',en:'ALEX chat requires a subscription · Sonnet included',es:'chat con ALEX con suscripción · Sonnet incluido',pt:'chat com ALEX por assinatura · Sonnet incluído'}[lang]||'ALEX chat requires a subscription'}</div>
+          <div style="font-size:12px;color:var(--t2);line-height:1.35">${{ru:'ALEX Chat, модели и AI-разборы открываются после оплаты',en:'ALEX Chat, models and AI explanations unlock after payment',es:'ALEX Chat, modelos y explicaciones AI tras pagar',pt:'ALEX Chat, modelos e explicações AI após pagar'}[lang]||'ALEX Chat unlocks after payment'}</div>
         </div>
         <span style="color:var(--t3);font-size:18px">›</span>
       </div>`;
