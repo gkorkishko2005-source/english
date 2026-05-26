@@ -2048,11 +2048,12 @@ const tg  = window.Telegram?.WebApp;
 const API = window.API_URL || window.location.origin || 'https://english-production-f7af.up.railway.app';
 if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
 
+const _LS_MEM = {};
 const LS = {
-  get:  k=>{ try{return localStorage.getItem(k)}catch{return null} },
-  set:  (k,v)=>{ try{localStorage.setItem(k,v)}catch{} },
-  getJ: k=>{ try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null} },
-  setJ: (k,v)=>{ try{localStorage.setItem(k,JSON.stringify(v))}catch{} },
+  get:  k=>{ try{const v=localStorage.getItem(k);return v!==null?v:(_LS_MEM[k]??null)}catch{return _LS_MEM[k]??null} },
+  set:  (k,v)=>{ try{localStorage.setItem(k,v)}catch{_LS_MEM[k]=String(v)} },
+  getJ: k=>{ try{return JSON.parse(LS.get(k)||'null')}catch{return null} },
+  setJ: (k,v)=>{ LS.set(k,JSON.stringify(v)) },
 };
 
 const SUPPORTED_LANGS = ['ru','en','es','pt'];
@@ -3936,7 +3937,7 @@ zone|зона|Travel|A2
     VOCAB_DECK.push({id:start+i,w:word,p:'',tr:{ru:ru,en:word},ex:'Try to use "'+word+'" in your own sentence.',level:level,topic:topic});
   });
 })();
-let cards=[],cIdx=0,flipped=false,lastHelpCard=null;
+let cards=[],cIdx=0,flipped=false,lastHelpCard=null,cardRateBusy=false;
 function vocabMeta(v){
   const topics=['Core','Speaking','Writing','Business','Travel','Study'];
   const levels=['A2','B1','B1','B2','B2','C1'];
@@ -3948,8 +3949,26 @@ function cardDailyLimit(){
   if(hasTier('basic'))return 10;
   return 5;
 }
+function cardDailyKey(){
+  const d=new Date();
+  const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  return 'cards_done_'+local;
+}
+function cardDailyUsed(){
+  return Math.max(0,parseInt(LS.get(cardDailyKey())||'0',10)||0);
+}
+function cardDailyRemaining(){
+  return Math.max(0,cardDailyLimit()-cardDailyUsed());
+}
+function recordCardDaily(){
+  const key=cardDailyKey();
+  const next=Math.min(cardDailyLimit(),cardDailyUsed()+1);
+  LS.set(key,String(next));
+  return next;
+}
 function buildDeckCards(){
-  var lim=cardDailyLimit();
+  var lim=cardDailyRemaining();
+  if(lim<=0)return [];
   // Server-provided due words win if present (back-compat)
   var sv=(window._d||{}).due_words||[];
   if(sv.length)return sv.slice(0,lim);
@@ -3972,15 +3991,35 @@ function initLearn(){
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
   document.getElementById('rrow').classList.add('hid');
   const cl=document.getElementById('fc-cnt-lbl');
-  if(cl)cl.textContent=cards.length?`${cards.length} ${lang==='ru'?'карточек':lang==='uk'?'карток':'cards'}`:'';
+  const used=cardDailyUsed(),limit=cardDailyLimit(),left=cardDailyRemaining();
+  if(cl)cl.textContent=left>0?`${left} / ${limit} ${lang==='ru'?'сегодня':'today'}`:`${used} / ${limit}`;
   // Fix: hide counter dash when no cards
   const fctr=document.getElementById('fctr');
   if(fctr)fctr.textContent=cards.length?`0 / ${cards.length}`:'';
-  if(!cards.length){document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';}
+  if(!cards.length){
+    document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';
+    const et=document.getElementById('em-t'),es=document.getElementById('em-s'),b1=document.getElementById('em-b1'),b2=document.getElementById('em-b2');
+    if(left<=0){
+      if(et)et.textContent=lang==='ru'?'Лимит карточек на сегодня':'Daily card limit reached';
+      if(es)es.textContent=lang==='ru'?'Ты закрыл дневную норму. Завтра очередь обновится, а подписка даст больше карточек в день.':'You finished today’s card limit. Tomorrow it resets; a subscription gives more cards per day.';
+      if(b1)b1.textContent=lang==='ru'?'Выбрать подписку':'Choose plan';
+      if(b2)b2.textContent=L.ffact||'English fun fact';
+      if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(lang==='ru'?'Подписка даст больше карточек в день':'A subscription gives more cards per day');
+      if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
+    }else{
+      if(et)et.textContent=L.all_done;
+      if(es)es.textContent=L.all_done_s;
+      if(b1)b1.textContent=L.lnw;
+      if(b2)b2.textContent=L.ffact;
+      if(b1?.closest('button'))b1.closest('button').onclick=()=>openChat('words_new');
+      if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
+    }
+  }
   else{document.getElementById('lmain').style.display='block';document.getElementById('lempty').style.display='none';showCard(0);}
 }
 function showCard(i){
   document.getElementById('fc-help-box')?.remove();
+  cardRateBusy=false;
   if(i>=cards.length){toast(L.allrev,'🎉');initLearn();return;}
   const c=cards[i];flipped=false;
   const inn=document.getElementById('fci');
@@ -4049,12 +4088,16 @@ function askAlexCardHelp(){
   sendChip(req);
 }
 async function rate(q){
+  if(cardRateBusy)return;
+  cardRateBusy=true;
+  if(cardDailyRemaining()<=0){toast(lang==='ru'?'Лимит карточек на сегодня':'Daily card limit reached','🔒');initLearn();return;}
   haptic(q>=3?'success':'light');
   try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
   const c=cards[cIdx];
   toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
   trackM('words');trackM('dwords');
   bumpStat('words');
+  recordCardDaily();
   try{sm2Review(c.id,Math.max(0,q-1));}catch(e){}
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
   cIdx++;
