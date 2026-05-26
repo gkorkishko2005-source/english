@@ -123,29 +123,29 @@ scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
 BOT_PROFILE = {
     "name_default": "PolyGlotty English",
     "name_ru": "PolyGlotty English",
-    "short_default": "English tutor in Telegram: free practice, ALEX chat from Basic, grammar, TOEFL and streaks.",
-    "short_ru": "Репетитор английского в Telegram: бесплатная практика, чат ALEX с Basic, грамматика, TOEFL и стрик.",
+    "short_default": "English tutor in Telegram: free A0-C2 course, ALEX chat with subscription, grammar, TOEFL and streaks.",
+    "short_ru": "Репетитор английского в Telegram: бесплатный курс A0-C2, чат ALEX по подписке, грамматика, TOEFL и стрик.",
     "description_default": (
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
         "Practice English every day:\n"
-        "• Free A0-C1 course, flashcards, paths, drills and listening\n"
-        "• ALEX Chat with corrections from Basic\n"
+        "• Free A0-C2 course, flashcards, paths, drills and listening\n"
+        "• ALEX Chat with corrections with any subscription\n"
         "• Grammar games and spaced repetition\n"
         "• Pro roleplay: interview, travel, cafe, business\n"
         "• Ultimate TOEFL practice, progress and streaks\n\n"
-        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Open the app: the free course is available right away, ALEX Chat starts with Basic."
+        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms.\n\n"
+        "Open the app: the free course is available right away, ALEX Chat starts with a subscription."
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
         "Практикуй английский каждый день:\n"
-        "• бесплатный курс A0-C1, карточки, путь, drills и аудирование\n"
-        "• чат ALEX с исправлением ошибок от Basic\n"
+        "• бесплатный курс A0-C2, карточки, путь, drills и аудирование\n"
+        "• чат ALEX с исправлением ошибок по любой подписке\n"
         "• grammar games и интервальное повторение\n"
         "• Pro-сценки: интервью, путешествия, кафе, бизнес\n"
         "• Ultimate TOEFL, прогресс и стрик\n\n"
-        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay.\n\n"
-        "Открой приложение: бесплатный курс доступен сразу, чат ALEX начинается с Basic."
+        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms.\n\n"
+        "Открой приложение: бесплатный курс доступен сразу, чат ALEX начинается с подписки."
     ),
 }
 
@@ -750,6 +750,10 @@ async def setup_bot_profile():
         BotCommand(command="roleplay", description="Roleplay scenarios / Сценки"),
         BotCommand(command="story", description="Interactive stories / Истории"),
         BotCommand(command="help", description="How to use / Помощь"),
+        BotCommand(command="support", description="Support / Поддержка"),
+        BotCommand(command="paysupport", description="Payment support / Оплата"),
+        BotCommand(command="terms", description="Terms / Условия"),
+        BotCommand(command="privacy", description="Privacy / Данные"),
     ]
     app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
     try:
@@ -841,12 +845,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
         f"Тренируй английский каждый день без отдельного приложения.\n\n"
         f"<b>Что умеет бот:</b>\n"
-        f"• даёт бесплатный курс A0-C1, карточки, drills, аудирование и путь\n"
-        f"• открывает живой чат с ALEX на Basic\n"
+        f"• даёт бесплатный курс A0-C2, карточки, drills, аудирование и путь\n"
+        f"• открывает живой чат с ALEX по любой подписке\n"
         f"• исправляет ошибки и объясняет грамматику\n"
         f"• открывает roleplay и проверку текста на Pro\n"
         f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
-        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно проходить курс и копить прогресс, чат с ALEX — с Basic."
+        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно проходить курс и копить прогресс, чат с ALEX — по подписке."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
     ) if ru else (
@@ -854,12 +858,12 @@ async def cmd_start(message: Message):
         f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
         f"Practice English every day without installing another app.\n\n"
         f"<b>What it does:</b>\n"
-        f"• gives a free A0-C1 course, flashcards, drills, listening and paths\n"
-        f"• unlocks live ALEX chat with Basic\n"
+        f"• gives a free A0-C2 course, flashcards, drills, listening and paths\n"
+        f"• unlocks live ALEX chat with any subscription\n"
         f"• corrects mistakes and explains grammar\n"
         f"• unlocks roleplay and text check on Pro\n"
         f"• helps with TOEFL on Ultimate and tracks progress\n\n"
-        f"<b>Start:</b> open the app below. The free course is available, ALEX Chat starts with Basic."
+        f"<b>Start:</b> open the app below. The free course is available, ALEX Chat starts with a subscription."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
     )
@@ -1128,27 +1132,128 @@ async def cmd_help(m: Message):
     await m.answer(
         ("<b>ALEX — AI-репетитор английского</b>\n\n"
          "📱 Всё обучение в приложении:\n"
-         "• Чат с ALEX\n"
+         "• Бесплатный курс A0-C2\n"
          "• Карточки и повторение\n"
          "• Grammar games\n"
          "• Story Mode\n"
-         "• TOEFL практика\n\n"
+         "• TOEFL практика\n"
+         "• Чат с ALEX по подписке\n\n"
          "/premium — подписка\n"
          "/share — пригласить друга и получить XP\n"
+         "/support — поддержка\n"
+         "/terms — условия оплаты\n"
          "/start — главное меню\n\n"
          "👇 Открой приложение") if lang=="ru" else
         ("<b>ALEX — AI English Tutor</b>\n\n"
          "📱 All learning happens in the app:\n"
-         "• Chat with ALEX\n"
+         "• Free A0-C2 course\n"
          "• Flashcards & review\n"
          "• Grammar games\n"
          "• Story Mode\n"
-         "• TOEFL practice\n\n"
+         "• TOEFL practice\n"
+         "• ALEX chat with subscription\n\n"
          "/premium — subscription\n"
          "/share — invite a friend and earn XP\n"
+         "/support — support\n"
+         "/terms — payment terms\n"
          "/start — main menu\n\n"
          "👇 Open the app"),
         reply_markup=kb
+    )
+
+@dp.message(Command("support"))
+async def cmd_support(m: Message):
+    lang = await get_lang(m.from_user.id) or "ru"
+    ru = lang == "ru"
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
+                              web_app=WebAppInfo(url=f"https://{RAILWAY_URL}") if RAILWAY_URL and "localhost" not in RAILWAY_URL else None)]
+    ]) if RAILWAY_URL and "localhost" not in RAILWAY_URL else None
+    await m.answer(
+        ("<b>Поддержка PolyGlotty</b>\n\n"
+         "Если что-то не работает, напиши сюда одним сообщением:\n"
+         "• что произошло;\n"
+         "• твой тариф;\n"
+         "• примерное время ошибки;\n"
+         "• скриншот, если есть.\n\n"
+         "По оплатам используй /paysupport.\n"
+         "Обычно отвечаем вручную, поэтому лучше писать коротко и по делу.")
+        if ru else
+        ("<b>PolyGlotty Support</b>\n\n"
+         "If something does not work, send one message here with:\n"
+         "• what happened;\n"
+         "• your plan;\n"
+         "• approximate error time;\n"
+         "• a screenshot if available.\n\n"
+         "For payments, use /paysupport.\n"
+         "Support is handled manually, so short clear reports help most."),
+        reply_markup=kb
+    )
+
+@dp.message(Command("paysupport"))
+async def cmd_paysupport(m: Message):
+    lang = await get_lang(m.from_user.id) or "ru"
+    ru = lang == "ru"
+    await m.answer(
+        ("<b>Поддержка оплаты</b>\n\n"
+         "Подписки оплачиваются через Telegram Stars. После успешной оплаты доступ обычно появляется сразу.\n\n"
+         "Если доступ не появился:\n"
+         "1. Перезапусти мини-приложение.\n"
+         "2. Нажми /premium и проверь статус.\n"
+         "3. Напиши сюда: тариф, время оплаты и скрин платежа.\n\n"
+         "Возвраты и спорные платежи обрабатываются по правилам Telegram Stars.")
+        if ru else
+        ("<b>Payment Support</b>\n\n"
+         "Subscriptions are paid through Telegram Stars. After a successful payment, access normally appears immediately.\n\n"
+         "If access did not appear:\n"
+         "1. Restart the mini app.\n"
+         "2. Tap /premium and check your status.\n"
+         "3. Send the plan, payment time and payment screenshot here.\n\n"
+         "Refunds and disputed payments follow Telegram Stars rules.")
+    )
+
+@dp.message(Command("terms"))
+async def cmd_terms(m: Message):
+    lang = await get_lang(m.from_user.id) or "ru"
+    ru = lang == "ru"
+    await m.answer(
+        ("<b>Условия PolyGlotty</b>\n\n"
+         "PolyGlotty даёт бесплатный доступ к курсу, карточкам, заданиям, пути и прогрессу.\n"
+         "Подписка открывает ALEX Chat, AI-разборы, расширенные задания, модели и повышенные лимиты.\n\n"
+         "Оплата: Telegram Stars.\n"
+         "Период: 1 месяц или 1 год, в зависимости от выбранного плана.\n"
+         "Доступ привязан к Telegram ID пользователя.\n"
+         "AI-ответы могут ошибаться, поэтому важные учебные выводы стоит перепроверять.\n\n"
+         "Поддержка: /support\n"
+         "Оплата: /paysupport")
+        if ru else
+        ("<b>PolyGlotty Terms</b>\n\n"
+         "PolyGlotty provides free access to the course, flashcards, tasks, learning path and progress.\n"
+         "A subscription unlocks ALEX Chat, AI explanations, advanced tasks, models and higher limits.\n\n"
+         "Payment: Telegram Stars.\n"
+         "Period: 1 month or 1 year, depending on the selected plan.\n"
+         "Access is linked to the user's Telegram ID.\n"
+         "AI replies may be wrong, so important learning conclusions should be checked.\n\n"
+         "Support: /support\n"
+         "Payments: /paysupport")
+    )
+
+@dp.message(Command("privacy"))
+async def cmd_privacy(m: Message):
+    lang = await get_lang(m.from_user.id) or "ru"
+    ru = lang == "ru"
+    await m.answer(
+        ("<b>Данные и приватность</b>\n\n"
+         "Мы сохраняем данные, которые нужны для обучения: Telegram ID, имя/ник, язык, уровень, XP, прогресс, подписку, карточки, ошибки и настройки обучения.\n"
+         "Чат с ALEX используется для ответа и улучшения персонального контекста внутри продукта.\n"
+         "Мы не продаём персональные данные.\n\n"
+         "Чтобы запросить удаление данных, напиши /support и укажи свой Telegram ID.")
+        if ru else
+        ("<b>Data and Privacy</b>\n\n"
+         "We store data required for learning: Telegram ID, name/username, language, level, XP, progress, subscription, flashcards, mistakes and learning settings.\n"
+         "ALEX chat is used to answer and improve personal context inside the product.\n"
+         "We do not sell personal data.\n\n"
+         "To request deletion, contact /support and include your Telegram ID.")
     )
 
 @dp.message(Command("reset"))
@@ -1244,7 +1349,7 @@ async def cb_story(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = await get_lang(uid)
     if not await has_access(uid, "basic"):
-        await cb.answer("Нужен Basic" if lang == "ru" else "Basic required", show_alert=True)
+        await cb.answer("Нужна подписка" if lang == "ru" else "Subscription required", show_alert=True)
         await send_upgrade_hint(cb.message, "basic", lang, "Story Quest")
         return
     data = STORY_TYPES.get(cb.data)
@@ -1537,9 +1642,9 @@ async def handle_text(message: Message):
             [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
         ])
     await message.answer(
-        ("📱 Учись в приложении — Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается с Basic.\n\n"
+        ("📱 Учись в приложении — Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается по подписке.\n\n"
          "👇 Нажми кнопку ниже") if lang=="ru" else
-        ("📱 Learn in the app — Free includes flashcards, drills, games and progress. ALEX Chat starts with Basic.\n\n"
+        ("📱 Learn in the app — Free includes flashcards, drills, games and progress. ALEX Chat starts with a subscription.\n\n"
          "👇 Tap the button below"),
         reply_markup=kb
     )
@@ -1743,21 +1848,21 @@ async def cmd_premium(msg: Message):
         "├ Модели: Haiku 4.5 или Sonnet 4\n"
         "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Голосовые ответы + AI-подсказки\n"
-        "├ 10 карточек/день и полный разбор правил\n"
+        "├ 20 карточек / 5 часов и полный разбор правил\n"
         "└ Комфортный режим без пустого ожидания\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/мес\n"
         "├ 110 quota points/день\n"
         "├ Модели: Haiku 4.5, Sonnet 4 или Sonnet 4.6\n"
         "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
         "├ Roleplay, проверка текста, анализ ошибок\n"
-        "├ 20 карточек/день и персональные drills\n"
+        "├ 50 карточек / 4 часа и персональные drills\n"
         "└ Расширенные истории, сценарии и отчёты\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
         "├ 260 quota points/день\n"
         "├ Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL, персональный план и сертификаты\n"
-        "├ 40 карточек/день и максимум аудио\n"
+        "├ 100 карточек / 4 часа и максимум аудио\n"
         "└ Длинная история диалога\n\n"
         f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
@@ -1773,21 +1878,21 @@ async def cmd_premium(msg: Message):
         "├ Models: Haiku 4.5 or Sonnet 4\n"
         "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
         "├ Voice replies + AI hints\n"
-        "├ 10 cards/day and full rule breakdowns\n"
+        "├ 20 cards / 5 hours and full rule breakdowns\n"
         "└ Comfortable learning without empty waiting\n\n"
         f"<b>Pro</b> — {p_stars} ⭐/mo\n"
         "├ 110 quota points/day\n"
         "├ Models: Haiku 4.5, Sonnet 4 or Sonnet 4.6\n"
         "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
         "├ Roleplay, text check and error analysis\n"
-        "├ 20 cards/day and personal drills\n"
+        "├ 50 cards / 4 hours and personal drills\n"
         "└ More stories, scenarios and reports\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
         "├ 260 quota points/day\n"
         "├ Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
         "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
         "├ TOEFL, personal plan and certificates\n"
-        "├ 40 cards/day and max audio practice\n"
+        "├ 100 cards / 4 hours and max audio practice\n"
         "└ Long chat history\n\n"
         f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
         "<i>Quota points keep premium limits fair and sustainable.</i>"

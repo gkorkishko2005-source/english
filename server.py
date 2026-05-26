@@ -141,9 +141,9 @@ def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
     copy = {
         "ru": {
             "free": [
-                "ALEX Chat открывается с Basic. В Free остаются карточки, задания, путь и прогресс.",
-                "Бесплатная практика доступна без чата. Чтобы писать ALEX, открой Basic или выше.",
-                "Free помогает учиться каждый день, а живой чат с ALEX начинается с Basic.",
+                "ALEX Chat открывается по подписке. В Free остаются карточки, задания, путь и прогресс.",
+                "Бесплатная практика доступна без чата. Чтобы писать ALEX, открой любую подписку.",
+                "Free помогает учиться каждый день, а живой чат с ALEX начинается с подписки.",
             ],
             "paid": [
                 "Ты сегодня сделал много прогресса. Лимит quota points закончился — можно спокойно погулять, мозгу тоже нужно закрепление.",
@@ -156,9 +156,9 @@ def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
         },
         "en": {
             "free": [
-                "ALEX Chat starts with Basic. Free still includes cards, tasks, paths and progress.",
-                "Free practice is available without chat. Upgrade to Basic or higher to write to ALEX.",
-                "Free keeps daily study open; live ALEX chat starts with Basic.",
+                "ALEX Chat starts with a subscription. Free still includes cards, tasks, paths and progress.",
+                "Free practice is available without chat. Upgrade to any subscription to write to ALEX.",
+                "Free keeps daily study open; live ALEX chat starts with a subscription.",
             ],
             "paid": [
                 "You made a lot of progress today. Quota points are done — take a walk and let it settle.",
@@ -359,15 +359,15 @@ async def handle_chat(request):
         msg = (
             '<div class="limit-card">'
             '<div class="limit-kicker">ALEX Chat</div>'
-            '<div class="limit-title">Доступно с Basic</div>'
-            '<div class="limit-text">В бесплатном режиме доступны карточки, задания, путь и прогресс. Живой чат с ALEX открывается с подписки Basic.</div>'
+            '<div class="limit-title">Нужна подписка</div>'
+            '<div class="limit-text">В бесплатном режиме доступны карточки, задания, путь и прогресс. Живой чат с ALEX открывается с любой подписки.</div>'
             '<button class="chip" onclick="openPremium()">Открыть тарифы</button>'
             '</div>'
             if lang == "ru" else
             '<div class="limit-card">'
             '<div class="limit-kicker">ALEX Chat</div>'
-            '<div class="limit-title">Basic required</div>'
-            '<div class="limit-text">Free includes flashcards, tasks, learning path and progress. Live ALEX chat starts with Basic.</div>'
+            '<div class="limit-title">Subscription required</div>'
+            '<div class="limit-text">Free includes flashcards, tasks, learning path and progress. Live ALEX chat starts with any subscription.</div>'
             '<button class="chip" onclick="openPremium()">Open plans</button>'
             '</div>'
         )
