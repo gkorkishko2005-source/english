@@ -860,6 +860,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .fcmeta{display:flex;gap:6px;position:absolute;top:13px;left:13px;z-index:2}
 .fcmeta span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.55px;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);border-radius:100px;padding:3px 7px}
 .fcuse{margin-top:10px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.08);border:1px solid rgba(var(--ar),.09);font-size:11px;color:var(--t2);line-height:1.35;max-width:96%}
+.fc-help{background:var(--e1);border:1px solid rgba(var(--ar),.18);border-radius:var(--r);padding:13px;margin-bottom:12px;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+.fc-help-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.fc-help-word{font-size:17px;font-weight:900;color:var(--t1);line-height:1.2}
+.fc-help-tag{font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.65px;color:var(--a);background:rgba(var(--ar),.1);border:1px solid rgba(var(--ar),.16);border-radius:999px;padding:4px 7px;white-space:nowrap}
+.fc-help-meaning{font-size:12.5px;color:var(--t2);line-height:1.45;margin-bottom:9px}
+.fc-help-list{display:grid;gap:6px;margin:0 0 9px;padding:0;list-style:none}
+.fc-help-list li{font-size:12px;line-height:1.42;color:var(--t1);background:var(--e2);border:1px solid var(--b1);border-radius:9px;padding:8px 9px}
+.fc-help-tip{font-size:11.5px;color:var(--t2);line-height:1.45;background:rgba(0,212,170,.07);border:1px solid rgba(0,212,170,.16);border-radius:9px;padding:8px 9px;margin-bottom:9px}
+.fc-help-actions{display:flex;gap:8px;flex-wrap:wrap}
+.fc-help-btn{border:1px solid rgba(var(--ar),.22);background:rgba(var(--ar),.09);color:var(--a);border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850;font-family:var(--f);cursor:pointer}
+.fc-help-btn.secondary{background:var(--e2);border-color:var(--b1);color:var(--t2)}
 
 .rrow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px;transition:opacity .3s,transform .3s}
 .rrow.hid{opacity:0;pointer-events:none;transform:translateY(6px)}
@@ -3925,7 +3936,7 @@ zone|зона|Travel|A2
     VOCAB_DECK.push({id:start+i,w:word,p:'',tr:{ru:ru,en:word},ex:'Try to use "'+word+'" in your own sentence.',level:level,topic:topic});
   });
 })();
-let cards=[],cIdx=0,flipped=false;
+let cards=[],cIdx=0,flipped=false,lastHelpCard=null;
 function vocabMeta(v){
   const topics=['Core','Speaking','Writing','Business','Travel','Study'];
   const levels=['A2','B1','B1','B2','B2','C1'];
@@ -3969,6 +3980,7 @@ function initLearn(){
   else{document.getElementById('lmain').style.display='block';document.getElementById('lempty').style.display='none';showCard(0);}
 }
 function showCard(i){
+  document.getElementById('fc-help-box')?.remove();
   if(i>=cards.length){toast(L.allrev,'🎉');initLearn();return;}
   const c=cards[i];flipped=false;
   const inn=document.getElementById('fci');
@@ -3985,6 +3997,57 @@ function showCard(i){
   document.getElementById('rrow').classList.add('hid');
 }
 function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');try{sfx.flip();}catch(e){}}
+function cardHelpExamples(c){
+  const w=c.word||'word';
+  const ex=(c.example||'').trim();
+  const topic=(c.topic||'daily English').toLowerCase();
+  const base=[
+    ex||`I use ${w} in a sentence.`,
+    `This ${w} is useful in ${topic} conversations.`,
+    `Try to notice ${w} when you read or listen to English.`
+  ];
+  if(/^a|e|i|o|u/i.test(w))base[1]=`Can you make an example with ${w}?`;
+  return base.filter(Boolean).slice(0,3);
+}
+function cardHelpText(c){
+  const tr=c.translation||c.word||'';
+  const topic=c.topic||'Core';
+  return {
+    meaning:(lang==='ru'
+      ?`Слово значит: ${tr}. Запоминай его не отдельно, а вместе с ситуацией: ${topic}.`
+      :`Meaning: ${tr}. Learn it with a situation, not alone: ${topic}.`),
+    tip:(lang==='ru'
+      ?`Мини-правило: скажи вслух 2 своих предложения с “${c.word}”. Если не получается, начни с шаблона: “I need ${c.word} because...”`
+      :`Mini rule: say two of your own sentences with “${c.word}”. If it is hard, start with: “I need ${c.word} because...”`)
+  };
+}
+function showCardHelp(c,q){
+  const main=document.getElementById('lmain');if(!main||!c)return;
+  document.getElementById('fc-help-box')?.remove();
+  lastHelpCard=c;
+  const t=cardHelpText(c);
+  const examples=cardHelpExamples(c);
+  const box=document.createElement('div');
+  box.className='fc-help';box.id='fc-help-box';
+  box.innerHTML=`<div class="fc-help-top"><div><div class="fc-help-word">${safeHTML(c.word||'')}</div><div class="fc-help-meaning">${safeHTML(t.meaning)}</div></div><div class="fc-help-tag">${q<=1?(lang==='ru'?'ещё раз':'again'):(lang==='ru'?'сложно':'hard')}</div></div>
+    <ul class="fc-help-list">${examples.map(ex=>`<li>${safeHTML(ex)}</li>`).join('')}</ul>
+    <div class="fc-help-tip">${safeHTML(t.tip)}</div>
+    <div class="fc-help-actions">
+      ${hasChatAccess()?`<button class="fc-help-btn" onclick="askAlexCardHelp()">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>`:`<button class="fc-help-btn" onclick="showTierPaywall('basic','${lang==='ru'?'объяснение ALEX':'ALEX explanation'}')">${lang==='ru'?'Объяснение ALEX по подписке':'ALEX explanation with subscription'}</button>`}
+      <button class="fc-help-btn secondary" onclick="continueAfterCardHelp()">${lang==='ru'?'Продолжить':'Continue'}</button>
+    </div>`;
+  main.insertBefore(box,main.firstChild);
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function continueAfterCardHelp(){document.getElementById('fc-help-box')?.remove();showCard(cIdx);}
+function askAlexCardHelp(){
+  const c=lastHelpCard;if(!c)return;
+  const w=c.word||'';
+  const req=lang==='ru'
+    ?`Объясни простыми словами английское слово «${w}»: значение, когда использовать, 3 разных примера, частые ошибки и короткое упражнение.`
+    :`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`;
+  sendChip(req);
+}
 async function rate(q){
   haptic(q>=3?'success':'light');
   try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
@@ -3996,16 +4059,7 @@ async function rate(q){
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
   cIdx++;
   if(q<3){
-    const w=c.word||'';
-    if(!hasChatAccess()){
-      toast(lang==='ru'?'Повтори карточку ещё раз':'Review this card again','🃏');
-      setTimeout(()=>showCard(cIdx),450);
-      return;
-    }
-    const req=lang==='ru'
-      ?`Объясни простыми словами английское слово «${w}»: значение, как и когда его использовать, 2-3 примера предложений и типичные ошибки.`
-      :`Explain the English word "${w}" simply: its meaning, how and when to use it, 2-3 example sentences, and common mistakes.`;
-    sendChip(req);
+    showCardHelp(c,q);
     return;
   }
   showCard(cIdx);
