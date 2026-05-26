@@ -472,9 +472,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* ══ LEVEL TEST ══ */
 .lt-header{padding:4px 0;text-align:center}
-.lt-q{padding:4px 0}
-.lt-num{font-size:11px;font-weight:700;color:var(--a);margin-bottom:6px}
-.lt-text{font-size:14px;font-weight:600;margin-bottom:10px;line-height:1.5}
+.lt-q{padding:10px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2)}
+.lt-num{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:850;color:var(--a);background:rgba(var(--ar),.09);border:1px solid rgba(var(--ar),.14);border-radius:999px;padding:4px 8px;margin-bottom:8px}
+.lt-mini-bar{height:5px;background:var(--e3);border-radius:999px;overflow:hidden;margin:0 0 10px}
+.lt-mini-fill{height:100%;background:linear-gradient(90deg,var(--a),var(--a2));border-radius:999px}
+.lt-text{font-size:14px;font-weight:750;margin-bottom:10px;line-height:1.5;color:var(--t1)}
 .lt-opts{display:flex;flex-direction:column;gap:6px}
 .lt-opt{padding:10px 12px;background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);font-size:13px;cursor:pointer;transition:.2s}
 .lt-opt:active{transform:scale(.97)}
@@ -483,6 +485,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .lt-result{text-align:center;padding:20px 0}
 .lt-pass{background:rgba(0,212,170,.05);border-radius:var(--r);padding:24px 16px}
 .lt-fail{background:rgba(255,149,0,.05);border-radius:var(--r);padding:24px 16px}
+.exam-hub{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:12px;display:grid;gap:10px}
+.exam-title{font-size:15px;font-weight:900;color:var(--t1)}
+.exam-sub{font-size:12px;line-height:1.45;color:var(--t2)}
+.exam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.exam-card{border:1px solid var(--b1);background:var(--e2);border-radius:12px;padding:10px;text-align:left;color:var(--t1);font-family:var(--f);cursor:pointer;transition:.16s}
+.exam-card:active{transform:scale(.97)}
+.exam-card strong{display:block;font-size:13px;margin-bottom:3px}.exam-card span{font-size:10px;color:var(--t3)}
+.exam-task{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:12px;display:grid;gap:9px}
+.exam-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--a);font-weight:900}
+.exam-passage{font-size:13px;line-height:1.55;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px}
+.exam-prompt{font-size:14px;font-weight:800;color:var(--t1);line-height:1.45}
+.exam-actions{display:flex;gap:7px;flex-wrap:wrap}
+.exam-btn{border:1px solid rgba(var(--ar),.22);background:rgba(var(--ar),.08);color:var(--a);border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850;font-family:var(--f);cursor:pointer}
+.exam-area{width:100%;min-height:86px;resize:vertical;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:13px;padding:10px;outline:none}
 /* Roadmap test button */
 .rm-test-btn{display:flex;align-items:center;gap:10px;padding:14px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));border:1.5px dashed rgba(var(--ar),.3);border-radius:var(--r2);margin:4px 0 10px;cursor:pointer;transition:.2s}
 .rm-test-btn:active{transform:scale(.97)}
@@ -3138,6 +3154,19 @@ function clearSilent(){
 }
 
 function openChat(topic){
+  if(topic==='toefl'){openExamPrep();return;}
+  if(topic==='lesson'){goTab('learn');switchLearnTab('course');renderCourse();return;}
+  if(topic==='words_new'){goTab('learn');switchLearnTab('cards');initLearn();return;}
+  if(topic==='fun_fact'){
+    goTab('chat',true);
+    const facts=[
+      'English has many words from French, Latin and Old Norse.',
+      'The most useful English progress usually comes from repeated simple sentences.',
+      'Listening and reading together make vocabulary stick faster.'
+    ];
+    addMsg('bot','<div class="course-note">'+safeHTML(facts[Math.floor(Math.random()*facts.length)])+'</div>');
+    return;
+  }
   if(!hasChatAccess()){showChatPaywall();return;}
   const P={
     lesson:    lang==='ru'?'Дай урок грамматики.':'Teach me a grammar lesson.',
@@ -3915,6 +3944,11 @@ async function rate(q){
   cIdx++;
   if(q<3){
     const w=c.word||'';
+    if(!hasChatAccess()){
+      toast(lang==='ru'?'Повтори карточку ещё раз':'Review this card again','🃏');
+      setTimeout(()=>showCard(cIdx),450);
+      return;
+    }
     const req=lang==='ru'
       ?`Объясни простыми словами английское слово «${w}»: значение, как и когда его использовать, 2-3 примера предложений и типичные ошибки.`
       :`Explain the English word "${w}" simply: its meaning, how and when to use it, 2-3 example sentences, and common mistakes.`;
@@ -3924,24 +3958,112 @@ async function rate(q){
   showCard(cIdx);
 }
 
-/* ══ AUDIO TASK ══ */
-async function startAudio(){
-  if(!hasTier('ultimate')){showTierPaywall('ultimate','TOEFL');return;}
-  if(busy)return;goTab('chat');
-  const gd=document.createElement('div');gd.className='msg bot';gd.id='audgen';
-  const av=document.createElement('div');av.className='mav';
-  av.innerHTML=ALEX_SVG;
-  const mw=document.createElement('div');mw.className='mwrap';
-  const ag=document.createElement('div');ag.className='agen2';
-  ag.innerHTML=`<div class="agspin"></div><span style="font-size:13px;color:var(--t2)">${L.audgen}</span>`;
-  mw.appendChild(ag);gd.appendChild(av);gd.appendChild(mw);
-  document.getElementById('cmsgs').appendChild(gd);scrollMsgs();
-  try{
-    const r=await fetch(`${API}/api/audio_task`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid||0,lang}),signal:AbortSignal.timeout(45000)});
-    document.getElementById('audgen')?.remove();
-    if(!r.ok){addMsg('bot',L.errconn);return;}
-    renderAudio(await r.json());trackM('listen');
-  }catch(e){document.getElementById('audgen')?.remove();addMsg('bot',L.errconn);}
+/* ══ EXAM PREP: TOEFL / IELTS, offline-first ══ */
+const EXAM_BANK={
+  toefl:{
+    reading:[
+      {topic:'Campus ecology',passage:'A university notice explains that the campus will replace several lawns with native plants. The change is expected to reduce water use, support local insects and lower maintenance costs. Some students worry the new areas will look less formal, but the project team says signs will explain the environmental purpose.',q:'What is the main purpose of the project?',o:['To make the campus more formal','To reduce water use and support local ecology','To build new classrooms','To remove student signs'],a:1},
+      {topic:'Academic planning',passage:'A professor tells students that the final paper should compare two sources rather than summarize one article. Students must explain the authors’ positions, evaluate the evidence and include a short conclusion that states their own view.',q:'What does the professor want students to do?',o:['Only summarize one article','Compare sources and evaluate evidence','Avoid giving an opinion','Write without a conclusion'],a:1}
+    ],
+    listening:[
+      {topic:'Office hours',transcript:'A student asks a professor whether she can change her presentation topic. The professor agrees, but reminds her that the new topic must still connect to the course theme and include at least one academic source.',q:'What condition does the professor give?',o:['The topic must be shorter','The topic must connect to the course theme','The student must present alone','The student must use no sources'],a:1},
+      {topic:'Library announcement',transcript:'The library will close the second floor for repairs next week. Study rooms on the first floor will remain open, and students can reserve extra seats through the online system.',q:'What will remain available?',o:['Second-floor study rooms','First-floor study rooms','All repair areas','The closed reading hall'],a:1}
+    ],
+    writing:[
+      {topic:'Independent writing',prompt:'Do you agree or disagree? Students learn better when they study in small groups rather than alone. Use specific reasons and examples.'},
+      {topic:'Integrated-style response',prompt:'Read a short claim: “Online lectures are more efficient than classroom lectures.” Write a balanced response with one advantage, one limitation and a clear conclusion.'}
+    ],
+    speaking:[
+      {topic:'Independent speaking',prompt:'Describe a skill you want to improve. Explain why it matters and how you plan to practise it.'},
+      {topic:'Campus situation',prompt:'A friend is nervous about giving a presentation. Give two practical suggestions and explain why they would help.'}
+    ]
+  },
+  ielts:{
+    reading:[
+      {topic:'Urban transport',passage:'Many cities are investing in bicycle lanes because they reduce congestion and pollution. However, successful cycling networks require safe junctions, clear signs and reliable maintenance throughout the year.',q:'Which factor is mentioned as necessary for successful cycling networks?',o:['Higher parking prices','Safe junctions and maintenance','Fewer public buses','Longer car journeys'],a:1},
+      {topic:'Workplace learning',passage:'Companies increasingly offer short online courses to employees. These courses are flexible and inexpensive, but they work best when managers give employees time to complete them during working hours.',q:'When do online courses work best?',o:['When workers study only at night','When managers provide time for study','When courses are very long','When there is no manager support'],a:1}
+    ],
+    listening:[
+      {topic:'Booking a course',transcript:'A caller wants to book an evening English course. The receptionist says the Tuesday class is full, but there are places in the Thursday group. The caller chooses Thursday because it finishes earlier.',q:'Which class does the caller choose?',o:['Tuesday morning','Tuesday evening','Thursday evening','Friday afternoon'],a:2},
+      {topic:'Museum visit',transcript:'A guide explains that the museum tour starts at ten fifteen near the main desk. Visitors should keep their tickets because they need them for the workshop after lunch.',q:'Why should visitors keep their tickets?',o:['For the workshop after lunch','For a restaurant discount','For the bus home','For the gift shop'],a:0}
+    ],
+    writing:[
+      {topic:'IELTS Task 2',prompt:'Some people think children should start learning a foreign language at primary school. To what extent do you agree or disagree?'},
+      {topic:'IELTS Task 1',prompt:'Summarise a chart showing that online course enrolment rose steadily from 2019 to 2024 while classroom enrolment fell slightly.'}
+    ],
+    speaking:[
+      {topic:'IELTS Part 2',prompt:'Describe a useful app you use. You should say what it does, how often you use it and why it is useful.'},
+      {topic:'IELTS Part 3',prompt:'Do you think technology makes education more equal? Give reasons and examples.'}
+    ]
+  }
+};
+
+let examState={};
+function examTitle(exam){return exam==='ielts'?'IELTS':'TOEFL iBT';}
+function pickExamTask(exam,section){
+  const arr=(EXAM_BANK[exam]&&EXAM_BANK[exam][section])||[];
+  if(!arr.length)return null;
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+function startAudio(){openExamPrep();}
+function openExamPrep(){
+  goTab('chat',true);
+  addMsg('bot',`<div class="exam-hub">
+    <div><div class="exam-title">${lang==='ru'?'TOEFL / IELTS тренажёр':'TOEFL / IELTS trainer'}</div>
+    <div class="exam-sub">${lang==='ru'?'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Basic+ добавляет разбор ответа и подсказки ALEX.':'Free: Reading, Listening, Writing and Speaking tasks without AI. Basic+ adds ALEX feedback and hints.'}</div></div>
+    <div class="exam-grid">
+      <button class="exam-card" onclick="runExamTask('toefl','reading')"><strong>TOEFL Reading</strong><span>academic passages</span></button>
+      <button class="exam-card" onclick="runExamTask('toefl','listening')"><strong>TOEFL Listening</strong><span>campus / lecture</span></button>
+      <button class="exam-card" onclick="runExamTask('ielts','reading')"><strong>IELTS Reading</strong><span>skimming / detail</span></button>
+      <button class="exam-card" onclick="runExamTask('ielts','listening')"><strong>IELTS Listening</strong><span>dialogue / monologue</span></button>
+      <button class="exam-card" onclick="runExamTask('toefl','speaking')"><strong>TOEFL Speaking</strong><span>answer aloud</span></button>
+      <button class="exam-card" onclick="runExamTask('ielts','writing')"><strong>IELTS Writing</strong><span>plan + response</span></button>
+    </div>
+  </div>`);
+}
+function runExamTask(exam,section){
+  const task=pickExamTask(exam,section);if(!task)return;
+  const id='exam-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999);
+  examState[id]={exam,section,task};
+  const kicker=examTitle(exam)+' · '+section.toUpperCase();
+  let body='';
+  if(section==='reading'||section==='listening'){
+    body+=`<div class="exam-passage">${safeHTML(section==='listening'?task.transcript:task.passage)}</div>`;
+    if(section==='listening')body+=`<div class="exam-actions"><button class="exam-btn" onclick="speakExamTask('${id}')">${lang==='ru'?'Слушать':'Listen'}</button></div>`;
+    body+=`<div class="exam-prompt">${safeHTML(task.q)}</div><div class="lt-opts">${task.o.map((o,i)=>`<div class="lt-opt" onclick="answerExamTask('${id}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('')}</div>`;
+  }else{
+    body+=`<div class="exam-prompt">${safeHTML(task.prompt)}</div><textarea class="exam-area" id="${id}-txt" placeholder="${section==='writing'?(lang==='ru'?'Напиши ответ или план':'Write your response or plan'):(lang==='ru'?'Запиши краткий план ответа':'Write a short answer plan')}"></textarea>`;
+    body+=`<div class="exam-actions"><button class="exam-btn" onclick="localExamChecklist('${id}')">${lang==='ru'?'Чек-лист':'Checklist'}</button><button class="exam-btn" onclick="askExamAI('${id}')">${lang==='ru'?'Разбор с ALEX':'ALEX feedback'}</button></div><div class="course-result" id="${id}-res"></div>`;
+  }
+  addMsg('bot',`<div class="exam-task" id="${id}"><div class="exam-kicker">${safeHTML(kicker)}</div>${body}</div>`);
+  try{trackM(section==='listening'?'listen':'drill');}catch(e){}
+}
+function answerExamTask(id,picked){
+  const st=examState[id];if(!st)return;
+  const correct=st.task.a;
+  const box=document.getElementById(id);if(!box)return;
+  box.querySelectorAll('.lt-opt').forEach((o,i)=>{o.style.pointerEvents='none';if(i===correct)o.classList.add('lt-correct');if(i===picked&&picked!==correct)o.classList.add('lt-wrong');});
+  if(picked===correct){addLocalXP(10);bumpStat('tests');toast('+10 XP','✅');}
+  else toast(lang==='ru'?'Посмотри правильный ответ':'Check the correct answer','⚠️');
+}
+function speakExamTask(id){
+  const st=examState[id];if(!st||!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(st.task.transcript||st.task.prompt||'');
+  u.lang='en-US';u.rate=.86;speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function localExamChecklist(id){
+  const st=examState[id];const res=document.getElementById(id+'-res');if(!st||!res)return;
+  res.className='course-result ok';
+  res.textContent=st.section==='writing'
+    ?(lang==='ru'?'Проверь: тезис, 2 аргумента, пример, вывод, связки however/therefore.':'Check: thesis, two reasons, example, conclusion, linkers such as however/therefore.')
+    :(lang==='ru'?'Ответь 45-60 секунд: позиция, причина, пример, короткий вывод.':'Answer for 45-60 seconds: position, reason, example, short conclusion.');
+}
+function askExamAI(id){
+  const st=examState[id];if(!st)return;
+  if(!hasTier('basic')){showTierPaywall('basic',lang==='ru'?'AI-разбор экзамена':'AI exam feedback');return;}
+  const txt=(document.getElementById(id+'-txt')?.value||'').trim();
+  const prompt=`${examTitle(st.exam)} ${st.section} feedback. Task: ${st.task.prompt||st.task.q}. My answer: ${txt||'(I need guidance before answering)'}. Give a score-style review, corrections and a better sample answer.`;
+  sendChip(prompt);
 }
 
 function renderAudio(data){
@@ -4786,6 +4908,7 @@ function showLevelQuestion(){
   const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('');
   addMsg('bot',`<div class="lt-q" id="${qid}">
     <div class="lt-num">${current+1}/${total}</div>
+    <div class="lt-mini-bar"><div class="lt-mini-fill" style="width:${Math.round((current+1)/total*100)}%"></div></div>
     <div class="lt-text">${safeHTML(q.q)}</div>
     <div class="lt-opts">${opts}</div>
   </div>`);
@@ -4907,6 +5030,39 @@ function rmLessonPrompt(ls,lvlData,path){
     'Keep it practical and interactive.'
   ].join(' ');
 }
+function rmLinkedCourseId(lessonId,lesson){
+  if(String(lessonId||'').startsWith('rm-'))return String(lessonId).slice(3);
+  const title=(lesson&&lesson.title&&(lesson.title.en||lesson.title.ru)||'').toLowerCase();
+  const map=[
+    ['present simple','a1-routine'],['articles','a1-articles-basic'],['pronouns','a1-pronouns'],['numbers & time','a0-time'],
+    ['past simple','a2-past'],['future','a2-plans'],['comparatives','a2-comparatives-full'],['prepositions','a1-place-time'],
+    ['present perfect','b1-perfect'],['conditionals','b1-conditionals'],['modal verbs','b1-modals-deduction'],['passive voice','b1-passive-basic'],
+    ['reported speech','b1-reported-basic'],['infinitive','a2-gerund-infinitive-basic'],['phrasal','b1-phrasal-core'],['mixed conditionals','b2-mixed-conditionals'],
+    ['inversion','c1-inversion-full'],['subjunctive','c1-subjunctive-full'],['cleft','c1-cleft-full'],['discourse','c1-discourse-markers-full'],
+    ['stylistics','c2-registers'],['ellipsis','c1-ellipsis'],['hedging','c1-precision'],['academic writing','c2-rhetoric'],['native idioms','c2-idiomatic-depth']
+  ];
+  const hit=map.find(x=>title.includes(x[0]));
+  return hit?hit[1]:'';
+}
+function openRoadmapOfflineLesson(found){
+  const cid=rmLinkedCourseId(found.lesson.id,found.lesson);
+  if(cid&&GALAXY_COURSE.some(x=>x.id===cid)){
+    switchLearnTab('course');
+    openCourseLesson(cid);
+    return;
+  }
+  const title=found.lesson.title[lang]||found.lesson.title.en;
+  const sub=found.lesson.sub[lang]||found.lesson.sub.en;
+  const wrap=document.getElementById('roadmap-wrap');if(!wrap)return;
+  wrap.innerHTML=`<div class="course-lesson">
+    <button class="rm-action" type="button" onclick="renderRoadmap()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к пути':'Back to path'}</button>
+    <h3>${safeHTML(found.lvlData.level)} · ${safeHTML(title)}</h3>
+    <div class="course-rule">${lang==='ru'?'Короткий офлайн-урок: прочитай правило, произнеси примеры вслух и пройди мини-проверку.':'Short offline lesson: read the rule, say examples aloud and complete the mini check.'}</div>
+    <div class="course-ex"><div class="course-line"><span>${safeHTML(sub)}</span></div><div class="course-line"><span>I practise this topic every day.</span></div><div class="course-line"><span>This lesson helps me speak more clearly.</span></div></div>
+    <div class="course-note">${lang==='ru'?'Если застрял, Basic открывает ALEX-помощника для личного объяснения.':'If you get stuck, Basic unlocks ALEX for a personal explanation.'}</div>
+    <button class="course-ai" onclick="courseAIBreakdown('${cid||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
+  </div>`;
+}
 function startRoadmapLesson(lessonId){
   const progress=LS.getJ('rm_progress')||{};
   let found=null;
@@ -4918,9 +5074,7 @@ function startRoadmapLesson(lessonId){
   progress[lessonId]=Math.min(5,(progress[lessonId]||0)+1);
   LS.setJ('rm_progress',progress);
   try{trackM('path');}catch(e){}
-  const path=rmGetPath();
-  goTab('chat',true);
-  setTimeout(()=>sendChip(rmLessonPrompt(found.lesson,found.lvlData,path)),150);
+  openRoadmapOfflineLesson(found);
 }
 
 function renderRoadmap(){
