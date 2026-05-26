@@ -1243,6 +1243,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-step{background:rgba(255,255,255,.035);border:1px solid var(--b1);border-radius:10px;padding:8px 6px;text-align:center}
 .course-step strong{display:block;font-size:12px;color:var(--t1);margin-bottom:2px}.course-step span{font-size:9px;color:var(--t3)}
 .course-exam-btn{width:100%;margin-top:10px;border:1px solid rgba(var(--ar),.26);background:rgba(var(--ar),.10);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer}
+.level-pick-row{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:8px}
+.level-pick-btn{border:1px solid var(--b1);background:var(--e1);color:var(--t2);border-radius:9px;padding:8px 0;font-family:var(--f);font-size:11px;font-weight:850;cursor:pointer;transition:transform .16s,border-color .18s,color .18s,background .18s}
+.level-pick-btn:hover{border-color:rgba(var(--ar),.32);color:var(--a);background:rgba(var(--ar),.08)}
+.level-pick-btn:active{transform:scale(.96)}
 .course-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.11);color:var(--a)}
 .course-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-info{min-width:0;flex:1}
@@ -1276,6 +1280,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
 .course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
 .mini-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--a);font-weight:850;margin-bottom:6px}
+.word-pref-row{display:flex;gap:7px;overflow-x:auto;padding:0 1px 11px;margin-top:-4px;scrollbar-width:none}
+.word-pref-row::-webkit-scrollbar{display:none}
+.word-pref-chip{flex:0 0 auto;border:1px solid var(--b1);background:var(--e1);color:var(--t2);border-radius:999px;padding:8px 10px;font-family:var(--f);font-size:11px;font-weight:800;cursor:pointer;transition:transform .16s,border-color .18s,background .18s,color .18s}
+.word-pref-chip.on{color:var(--a);background:rgba(var(--ar),.10);border-color:rgba(var(--ar),.30);box-shadow:0 5px 14px rgba(var(--ar),.06)}
+.word-pref-chip:active{transform:scale(.96)}
 .roadmap-wrap{display:flex;flex-direction:column;gap:8px}
 .rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
 .rm-overview::after{content:'';position:absolute;right:-34px;top:-42px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,.035)}
@@ -1538,6 +1547,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <!-- CARDS panel -->
   <div id="learn-cards-panel" style="display:none">
     <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
+    <div class="word-pref-row" id="word-pref-row"></div>
     <div id="lmain">
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
       <div class="fcs" id="fcs" onclick="flipCard()">
@@ -2238,6 +2248,8 @@ const sfx=(function(){
     wrong:function(){tone(210,.13,'sawtooth',.07,.006,.07);tone(155,.16,'triangle',.06,.008,.08,.08);},
     xp:function(){seq([880,1175,1568,1760],44,'sine',.085,.08);noise(.09,.018,2200);},
     level:function(){seq([392,523,659,784,1047],76,'triangle',.14,.12);noise(.16,.025,1800);},
+    course:function(){seq([494,587,740],54,'triangle',.082,.075);},
+    select:function(){tone(540,.05,'triangle',.07,.004,.025);tone(720,.055,'sine',.045,.004,.03,.035);},
     send:function(){tone(620,.055,'triangle',.07,.004,.035);tone(980,.07,'sine',.055,.004,.045,.04);},
     theme:function(mode){mode==='light'?seq([440,660,880],62,'sine',.075,.085):seq([880,660,440],62,'triangle',.07,.09);},
   };
@@ -3943,6 +3955,52 @@ function vocabMeta(v){
   const levels=['A2','B1','B1','B2','B2','C1'];
   return {topic:v.topic||topics[v.id%topics.length],level:v.level||levels[v.id%levels.length]};
 }
+function getWordPrefs(){
+  const p=LS.getJ('word_prefs')||[];
+  return Array.isArray(p)?p.filter(Boolean).slice(0,6):[];
+}
+function setWordPrefs(prefs){
+  LS.setJ('word_prefs',(prefs||[]).filter(Boolean).slice(0,6));
+}
+function topWordTopics(){
+  const counts={};
+  VOCAB_DECK.forEach(function(v){const m=vocabMeta(v);counts[m.topic]=(counts[m.topic]||0)+1;});
+  return Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]||a.localeCompare(b);}).slice(0,14);
+}
+function toggleWordPref(topic){
+  const prefs=getWordPrefs();
+  const i=prefs.indexOf(topic);
+  if(i>=0)prefs.splice(i,1);
+  else prefs.push(topic);
+  setWordPrefs(prefs);
+  try{sfx.select();}catch(e){}
+  renderWordPrefs();
+  cards=buildDeckCards();cIdx=0;flipped=false;
+  if(cards.length)showCard(0);
+}
+function renderWordPrefs(){
+  const row=document.getElementById('word-pref-row');if(!row)return;
+  const prefs=getWordPrefs();
+  const topics=topWordTopics();
+  row.innerHTML=topics.map(function(t){
+    const on=prefs.includes(t);
+    return `<button class="word-pref-chip ${on?'on':''}" type="button" onclick="toggleWordPref(${JSON.stringify(t)})">${safeHTML(t)}</button>`;
+  }).join('');
+}
+function arrangeCardsByPrefs(out){
+  const prefs=getWordPrefs();
+  out.sort(function(){return Math.random()-0.5;});
+  if(!prefs.length)return out;
+  const pref=[],rest=[];
+  out.forEach(function(c){(prefs.includes(c.topic)?pref:rest).push(c);});
+  const mixed=[];
+  while(pref.length||rest.length){
+    if(pref.length)mixed.push(pref.shift());
+    if(pref.length)mixed.push(pref.shift());
+    if(rest.length)mixed.push(rest.shift());
+  }
+  return mixed;
+}
 function cardDailyLimit(){
   return cardLimitConfig().limit;
 }
@@ -4003,11 +4061,12 @@ function buildDeckCards(){
       out.push({id:'v_'+v.id,word:v.w,phonetic:v.p||'',translation:(v.tr&&(v.tr[lang]||v.tr.en))||'',example:v.ex||'',topic:meta.topic,level:meta.level});
     }
   });
-  out.sort(function(){return Math.random()-0.5;});
+  out=arrangeCardsByPrefs(out);
   return out.slice(0,lim);
 }
 function initLearn(){
   if(learnTab==='course')renderCourse();
+  renderWordPrefs();
   cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
@@ -4818,6 +4877,129 @@ GALAXY_COURSE.push(
   {id:'c2-literary-analysis',level:'C2',color:'#f1c40f',title:{ru:'Literary and hidden meaning',en:'Literary and hidden meaning'},sub:{ru:'ирония и подтекст',en:'irony and subtext'},rule:{ru:'На C2 чтение включает подтекст: автор может говорить одно, а подразумевать другое. Ирония часто видна по контрасту тона и ситуации.',en:'At C2, reading includes subtext: the author may say one thing and imply another. Irony often appears through contrast between tone and situation.'},examples:['The narrator sounds polite but bitter.','The praise may be ironic.','The silence reveals the conflict.'],words:['narrator','ironic','subtext','conflict','bitter'],q:'Choose: Hidden meaning in a text is called ___.',o:['subtext','subtitle','subway','subject'],a:0}
 );
 
+(function expandCefrCourse(){
+  const colors={A0:'#2ecc71',A1:'#3498db',A2:'#9b59b6',B1:'#e67e22',B2:'#e74c3c',C1:'#f1c40f',C2:'#00d4aa'};
+  const grammar={
+    A0:[
+      ['To be: I am / you are','To be: I am / you are','Use to be for identity, age and simple states.','Используй to be для имени, возраста и простых состояний.',['I am ready.','You are at home.','My name is Alex.'],'Choose: I ___ ready.',['am','are','is','be'],0],
+      ['Names and greetings','Имена и приветствия','Use short fixed phrases first: My name is..., Nice to meet you.','Сначала учи готовые короткие фразы: My name is..., Nice to meet you.',['Hello, my name is Kate.','Nice to meet you.','How are you today?'],'Choose: My name ___ Kate.',['am','are','is','be'],2],
+      ['Numbers and age','Числа и возраст','Use numbers for age, time, prices and addresses.','Числа нужны для возраста, времени, цен и адресов.',['I am twenty years old.','The ticket is ten dollars.','Room twelve is upstairs.'],'Choose: She is twenty years ___.',['old','age','year','time'],0],
+      ['Basic pronouns','Базовые местоимения','I, you, he, she, it, we and they replace people or things.','I, you, he, she, it, we и they заменяют людей или предметы.',['She is my friend.','They are students.','It is important.'],'Choose: Anna is here. ___ is ready.',['He','She','They','We'],1],
+      ['My / your / his / her','My / your / his / her','Possessive adjectives go before a noun: my phone, her bag.','Притяжательные слова ставятся перед существительным: my phone, her bag.',['This is my phone.','Her bag is blue.','Their class starts now.'],'Choose: This is ___ phone.',['I','me','my','mine'],2],
+      ['This and that','This and that','Use this for one thing near you and that for one thing far away.','This — один предмет рядом, that — один предмет далеко.',['This book is new.','That house is old.','These words are useful.'],'Choose: ___ books are useful.',['This','That','These','It'],2],
+      ['There is / there are','There is / there are','There is means one thing exists; there are means several things exist.','There is — один предмет существует; there are — несколько.',['There is a table.','There are two chairs.','There is a park nearby.'],'Choose: There ___ two chairs.',['is','are','am','be'],1],
+      ['Can for ability','Can для умения','After can, use the base verb without to.','После can используй глагол без to.',['I can read this word.','She can speak slowly.','Can you help me?'],'Choose: I can ___ English.',['speak','speaks','to speak','speaking'],0],
+      ['Like + -ing','Like + -ing','After like, love and hate, the -ing form is common.','После like, love и hate часто используется форма -ing.',['I like reading.','She loves cooking.','They hate waiting.'],'Choose: I like ___ books.',['read','reads','reading','to reading'],2],
+      ['In / on / at','In / on / at','Use at for exact time, on for days, and in for months, years or places.','At — точное время, on — дни, in — месяцы, годы или места.',['We meet at six.','The lesson is on Monday.','I live in Minsk.'],'Choose: We meet ___ six.',['in','on','at','under'],2]
+    ],
+    A1:[
+      ['Present Simple facts','Present Simple: факты','Present Simple describes facts and regular actions. Add -s with he, she and it.','Present Simple описывает факты и регулярные действия. С he, she, it добавляй -s.',['I study every day.','She speaks English.','They work from home.'],'Choose: She ___ English.',['speak','speaks','speaking','spoken'],1],
+      ['Do / does questions','Вопросы do / does','Use do or does to make Present Simple questions. After does, the main verb has no -s.','В вопросах Present Simple используй do/does. После does основной глагол без -s.',['Do you study?','Does he work here?','Where do they live?'],'Choose: ___ he work here?',['Do','Does','Is','Are'],1],
+      ['Frequency adverbs','Наречия частотности','Usually, often and never normally go before the main verb, but after to be.','Usually, often и never обычно стоят перед смысловым глаголом, но после to be.',['I often study at night.','She never drinks coffee.','He is always busy.'],'Choose: She ___ drinks coffee.',['never','not never','does never','never does'],0],
+      ['Articles a / an / the','Артикли a / an / the','Use a/an for one non-specific thing. Use the when the thing is clear.','A/an — один неконкретный предмет. The — когда понятно, о чём речь.',['I need a pen.','She eats an apple.','Open the door.'],'Choose: She eats ___ apple.',['a','an','the','no article'],1],
+      ['Plural nouns','Множественное число','Usually add -s. After s, sh, ch and x, add -es.','Обычно добавляй -s. После s, sh, ch и x добавляй -es.',['I see three cats.','There are two buses.','These boxes are heavy.'],'Choose: two ___.',['bus','buses','buss','busies'],1],
+      ['Object pronouns','Object pronouns','Use me, him, her, us and them after verbs and prepositions.','Me, him, her, us и them идут после глаголов и предлогов.',['Call me later.','I know him well.','She works with us.'],'Choose: Call ___ later.',['I','me','my','mine'],1],
+      ['Imperatives','Повелительное наклонение','Use the base verb for instructions: Open, listen, write.','Для инструкций используй базовый глагол: Open, listen, write.',['Open the app.','Listen carefully.','Write one sentence.'],'Choose: ___ carefully.',['Listens','Listening','Listen','To listen'],2],
+      ['Present Continuous now','Present Continuous: сейчас','Use am/is/are + -ing for actions happening now.','Используй am/is/are + -ing для действий сейчас.',['I am studying now.','She is reading.','They are listening.'],'Choose: She ___ reading now.',['am','is','are','be'],1],
+      ['Countable basics','Исчисляемые слова','Use many with countable plural nouns and much with uncountable nouns.','Many — с исчисляемыми во множественном числе, much — с неисчисляемыми.',['I have many books.','There is not much time.','Do you have any water?'],'Choose: I do not have ___ time.',['many','much','several','a few'],1],
+      ['Short answers','Короткие ответы','Use short answers to sound natural: Yes, I do. No, she does not.','Короткие ответы звучат естественно: Yes, I do. No, she does not.',['Do you like it? Yes, I do.','Is she ready? No, she is not.','Can they come? Yes, they can.'],'Choose: Do you like it? Yes, I ___.',['am','do','can','like'],1]
+    ],
+    A2:[
+      ['Past Simple events','Past Simple: события','Past Simple describes finished actions in the past.','Past Simple описывает завершённые действия в прошлом.',['I watched a lesson yesterday.','She went home late.','We finished the task.'],'Choose: I ___ the lesson yesterday.',['watch','watched','watching','watches'],1],
+      ['Past questions','Вопросы в прошлом','Use did for Past Simple questions. The main verb returns to base form.','В Past Simple вопросах используй did. Основной глагол возвращается в базовую форму.',['Did you watch the video?','Where did she go?','They did not understand.'],'Choose: Where did she ___?',['went','go','goes','going'],1],
+      ['Going to plans','Going to: планы','Use going to for plans and intentions.','Going to используется для планов и намерений.',['I am going to study tonight.','They are going to travel.','She is going to call later.'],'Choose: I ___ going to study.',['am','is','are','will'],0],
+      ['Will decisions','Will: решения','Use will for quick decisions, offers and predictions.','Will часто используется для быстрых решений, предложений и прогнозов.',['I will help you.','It will be difficult.','We will start soon.'],'Choose: I ___ help you.',['am','will','going','did'],1],
+      ['Comparatives','Сравнения','Use -er or more...than to compare two things.','Используй -er или more...than для сравнения двух вещей.',['This lesson is easier than the last one.','English is more useful now.','My answer is better.'],'Choose: This is ___ than before.',['easy','easier','easiest','more easy'],1],
+      ['Superlatives','Превосходная степень','Use the ...-est or the most ... for one item at the top.','Используй the ...-est или the most ... для самого сильного варианта.',['This is the best answer.','It was the most useful lesson.','She is the fastest reader.'],'Choose: This is ___ answer.',['good','better','the best','best than'],2],
+      ['Present Perfect experience','Present Perfect: опыт','Use have/has + V3 for life experience when exact time is not important.','Have/has + V3 используется для опыта, когда точное время не важно.',['I have visited London.','She has never tried sushi.','Have you ever flown?'],'Choose: She has never ___ sushi.',['try','tried','trying','tries'],1],
+      ['Should for advice','Should: совет','Use should to give advice or say what is a good idea.','Should используется для советов и хороших идей.',['You should review today.','He should sleep more.','Should I answer now?'],'Choose: You ___ review today.',['must to','should','have','are'],1],
+      ['Have to / must','Have to / must','Have to and must express obligation, but must often sounds stronger.','Have to и must выражают обязанность, но must часто звучит строже.',['I have to finish this task.','You must wear a seat belt.','We do not have to hurry.'],'Choose: I ___ to finish this task.',['must','have','should','can'],1],
+      ['First conditional','First Conditional','Use If + Present Simple, will + verb for real future conditions.','If + Present Simple, will + verb — реальное условие в будущем.',['If I have time, I will call.','If it rains, we will stay home.','If you practise, you will improve.'],'Choose: If it rains, we ___ stay home.',['will','would','are','did'],0]
+    ],
+    B1:[
+      ['Present Perfect result','Present Perfect: результат','Use Present Perfect when a past action has a present result.','Используй Present Perfect, когда прошлое действие даёт результат сейчас.',['I have lost my keys.','She has finished the report.','They have already left.'],'Choose: She ___ finished the report.',['have','has','is','did'],1],
+      ['For and since','For and since','Use for with a period of time and since with a starting point.','For — период времени, since — точка начала.',['I have studied for two years.','She has lived here since 2020.','We have waited for an hour.'],'Choose: I have studied ___ two years.',['since','for','during','from'],1],
+      ['Past Perfect','Past Perfect','Use had + V3 for an earlier past action before another past action.','Had + V3 показывает более раннее прошлое действие.',['I had finished before he arrived.','She had left when I called.','They had never met before.'],'Choose: She ___ left when I called.',['has','had','was','did'],1],
+      ['Passive basics','Пассив: база','Use be + V3 when the action matters more than the doer.','Be + V3 используется, когда действие важнее исполнителя.',['English is spoken here.','The report was written yesterday.','The task has been completed.'],'Choose: The report ___ written yesterday.',['is','was','did','has'],1],
+      ['Reported speech','Косвенная речь','Reported speech often moves the tense back: “I am tired” becomes “He said he was tired.”','В косвенной речи время часто сдвигается назад: “I am tired” -> “He said he was tired.”',['He said he was tired.','She told me she had finished.','They said they would call.'],'Choose: He said he ___ tired.',['is','was','be','has'],1],
+      ['Second conditional','Second Conditional','Use If + Past Simple, would + verb for imaginary present or future situations.','If + Past Simple, would + verb — воображаемая ситуация в настоящем/будущем.',['If I had more time, I would study more.','If she knew, she would help.','What would you do?'],'Choose: If I had time, I ___ study more.',['will','would','am','did'],1],
+      ['Modal deduction','Модальные догадки','Use must, might and can’t to make deductions.','Must, might и can’t помогают делать выводы и догадки.',['He must be tired.','She might be at work.','That cannot be true.'],'Choose: He ___ be tired; he worked all night.',['must','can','has','does'],0],
+      ['Question tags','Разделительные вопросы','Use question tags to check information: You are ready, aren’t you?','Разделительные вопросы проверяют информацию: You are ready, aren’t you?',['You are ready, aren’t you?','She works here, doesn’t she?','They left, didn’t they?'],'Choose: She works here, ___ she?',['does','doesn’t','is','isn’t'],1],
+      ['Linking words','Связки','Use however, although and therefore to connect ideas clearly.','However, although и therefore связывают мысли ясно.',['Although it was hard, I continued.','Therefore, I changed my plan.','However, I need more practice.'],'Choose: ___ it was hard, I continued.',['Although','Because of','Despite of','However'],0],
+      ['Phrasal verbs','Фразовые глаголы','Phrasal verbs combine a verb and a particle; meaning is often idiomatic.','Фразовые глаголы соединяют глагол и частицу; значение часто недословное.',['Please look up this word.','Do not give up.','We need to figure it out.'],'Choose: Do not ___.',['give up','give out','give to','give be'],0]
+    ],
+    B2:[
+      ['Future Perfect','Future Perfect','Use will have + V3 for something completed before a future time.','Will have + V3 — действие завершится до момента в будущем.',['By Friday, I will have finished the course.','She will have left by noon.','We will have learned the rule.'],'Choose: By Friday, I ___ finished.',['will have','will be','have will','am having'],0],
+      ['Mixed conditionals','Mixed Conditionals','Mixed conditionals connect an unreal past with a present result, or the opposite.','Смешанные условные связывают нереальное прошлое с результатом сейчас или наоборот.',['If I had studied harder, I would be more confident now.','If she were here, she would have helped.','I would be ready if I had practised.'],'Choose: If I had studied, I ___ more confident now.',['will be','would be','am','was'],1],
+      ['Past modals','Past modals','Use should have, could have and must have to discuss past possibilities or regrets.','Should have, could have и must have говорят о прошлом, возможностях и сожалениях.',['You should have called me.','She must have forgotten.','They could have arrived earlier.'],'Choose: You ___ called me.',['should have','should','must to','could to'],0],
+      ['Advanced passive','Продвинутый пассив','Use structures like have something done when another person does the work for you.','Have something done значит, что работу сделал кто-то другой для тебя.',['I had my phone repaired.','She got her hair cut.','The room needs to be cleaned.'],'Choose: I had my phone ___.',['repair','repaired','repairing','repairs'],1],
+      ['Wish / if only','Wish / if only','Use wish + Past Simple for a different present and wish + Past Perfect for past regret.','Wish + Past Simple — другое настоящее; wish + Past Perfect — сожаление о прошлом.',['I wish I knew the answer.','If only I had listened.','She wishes she lived closer.'],'Choose: I wish I ___ the answer.',['know','knew','known','knowing'],1],
+      ['Relative clauses','Relative clauses','Use who for people and which for things; that can often replace both in defining clauses.','Who — люди, which — вещи; that часто заменяет оба в определительных придаточных.',['The student who studies daily improves.','This is the book which helped me.','The app that I use is helpful.'],'Choose: The student ___ studies daily improves.',['who','which','where','when'],0],
+      ['Used to / be used to','Used to / be used to','Used to + verb is a past habit. Be used to + -ing means being accustomed to something.','Used to + verb — привычка в прошлом. Be used to + -ing — привыкнуть к чему-то.',['I used to play football.','I am used to working late.','She got used to the city.'],'Choose: I am used to ___ late.',['work','working','worked','works'],1],
+      ['Gerund or infinitive','Gerund or infinitive','Some verbs are followed by -ing, others by to + verb; meaning may change.','После одних глаголов идёт -ing, после других to + verb; иногда меняется смысл.',['I enjoy learning English.','I decided to continue.','Remember to check your answer.'],'Choose: I enjoy ___ English.',['learn','learning','to learning','learned'],1],
+      ['Emphasis with do','Усиление с do','Use do, does or did to add emphasis to a positive sentence.','Do, does или did усиливают утвердительное предложение.',['I do understand your point.','She did finish the task.','We do need more practice.'],'Choose: I ___ understand your point.',['do','am','have','was'],0],
+      ['Formal contrast','Формальный контраст','Use whereas, nevertheless and despite to build mature contrast.','Whereas, nevertheless и despite создают взрослый контраст.',['The idea is risky; nevertheless, it is useful.','Despite the delay, we finished.','Whereas one method is fast, the other is safer.'],'Choose: ___ the delay, we finished.',['Despite','Although','However','Whereas'],0]
+    ],
+    C1:[
+      ['Inversion','Инверсия','After negative or limiting adverbs at the start, use inversion.','После отрицательных или ограничительных наречий в начале используется инверсия.',['Never have I seen such progress.','Rarely do we notice small mistakes.','Only then did I understand.'],'Choose: Never ___ I seen such progress.',['did','have','do','am'],1],
+      ['Cleft sentences','Расщеплённые предложения','Use cleft sentences to emphasize one part of the message.','Расщеплённые предложения выделяют важную часть мысли.',['What I need is regular practice.','It was the deadline that worried me.','The thing I want is clarity.'],'Choose: What I need ___ regular practice.',['are','is','be','am'],1],
+      ['Subjunctive','Subjunctive','In formal English after suggest, demand and insist, use the base form.','В формальном английском после suggest, demand и insist используется базовая форма.',['I suggest that he be present.','They demanded that she leave.','It is vital that we act now.'],'Choose: I suggest that he ___ present.',['is','be','was','being'],1],
+      ['Advanced discourse markers','Продвинутые связки','Use markers such as in light of, on the contrary and consequently for academic flow.','In light of, on the contrary и consequently дают академичную связность.',['In light of the data, we changed the plan.','On the contrary, the method is efficient.','Consequently, the result improved.'],'Choose: ___ the data, we changed the plan.',['In light of','On contrary','Because to','Despite of'],0],
+      ['Advanced comparisons','Продвинутые сравнения','Use patterns like the more..., the better... and nowhere near as...as.','Используй модели the more..., the better... и nowhere near as...as.',['The more I practice, the better I speak.','This is nowhere near as hard as it looks.','The faster we start, the sooner we finish.'],'Choose: The more I practice, the ___ I speak.',['good','best','better','well'],2],
+      ['Ellipsis and substitution','Ellipsis and substitution','Use ellipsis and substitution to avoid unnecessary repetition.','Ellipsis и substitution помогают не повторяться.',['I can help if you want me to.','She studies more than I do.','I liked the first answer, but not the second.'],'Choose: She studies more than I ___.',['do','am','have','didn’t'],0],
+      ['Participle clauses','Participle clauses','Participle clauses make writing more concise and formal.','Participle clauses делают письмо плотнее и формальнее.',['Having finished the task, he left.','Feeling tired, she went home.','Written clearly, the text was easy to read.'],'Choose: ___ finished the task, he left.',['Having','Have','Had','Has'],0],
+      ['Hedging','Hedging','Use hedging to sound precise and careful instead of too absolute.','Hedging помогает звучать точно и аккуратно, не слишком категорично.',['This may suggest a wider problem.','The result appears to be reliable.','It is likely that costs will rise.'],'Choose: It is ___ that costs will rise.',['likely','like','liked','liking'],0],
+      ['Nominalisation','Nominalisation','Nominalisation turns actions into nouns and creates a formal style.','Nominalisation превращает действия в существительные и делает стиль формальнее.',['We investigated the issue.','The investigation took two weeks.','This decision affected the outcome.'],'Choose: The ___ took two weeks.',['investigate','investigation','investigating','investigated'],1],
+      ['Precision in tone','Точность тона','Advanced English depends on matching tone, register and intention.','Продвинутый английский зависит от тона, регистра и намерения.',['I partially agree with your point.','That claim requires evidence.','The tone is polite but firm.'],'Choose: That claim ___ evidence.',['requires','is requiring','require','has require'],0]
+    ],
+    C2:[
+      ['Register control','Управление регистром','C2 users can shift between formal, neutral and informal language.','На C2 нужно переключаться между формальным, нейтральным и разговорным стилем.',['I would appreciate your assistance.','Could you help me?','Give me a hand.'],'Choose the most formal: ___.',['Give me a hand','Help me','I would appreciate your assistance','You help'],2],
+      ['Idiomatic precision','Идиоматическая точность','Advanced idioms require context, tone and cultural awareness.','Продвинутые идиомы требуют контекста, тона и культурного понимания.',['The idea opened a can of worms.','He moved the goalposts.','That argument is a double-edged sword.'],'Choose: A double-edged sword has benefits and ___.',['risks','colors','prices','rooms'],0],
+      ['Rhetoric','Риторика','Strong argument needs a claim, evidence, counterargument and conclusion.','Сильная аргументация требует тезиса, доказательства, контраргумента и вывода.',['The evidence supports this claim.','A fair objection would be cost.','Therefore, the proposal is reasonable.'],'Choose: The evidence supports this ___.',['claim','noise','mistake','weather'],0],
+      ['Literary subtext','Литературный подтекст','Subtext is hidden meaning that is implied rather than stated directly.','Подтекст — скрытый смысл, который подразумевается, а не говорится напрямую.',['The narrator sounds polite but bitter.','The praise may be ironic.','The silence reveals the conflict.'],'Choose: Hidden meaning in a text is called ___.',['subtext','subtitle','subway','subject'],0],
+      ['Irony and stance','Ирония и позиция','Irony often appears when tone and situation point in opposite directions.','Ирония часто возникает, когда тон и ситуация противоречат друг другу.',['The compliment sounded oddly cold.','His polite reply carried clear criticism.','The cheerful tone made the scene darker.'],'Choose: Irony often depends on ___.',['contrast','grammar only','price','spelling'],0],
+      ['Nuanced vocabulary','Нюансы лексики','Near-synonyms differ in strength, register and implication.','Близкие синонимы различаются силой, регистром и оттенком смысла.',['Slim is usually kinder than skinny.','Assertive is not the same as aggressive.','Cheap and inexpensive differ in tone.'],'Choose: Inexpensive sounds more ___ than cheap.',['neutral','angry','past','plural'],0],
+      ['Academic synthesis','Академический синтез','Synthesis combines sources into one coherent argument.','Синтез соединяет источники в один связный аргумент.',['Both studies support the same conclusion.','The second source challenges the first.','Taken together, the evidence is persuasive.'],'Choose: Synthesis combines several ___.',['sources','chairs','sounds','prices'],0],
+      ['Debate framing','Структура дебатов','Frame a debate by defining the issue, limits and criteria for judgment.','В дебатах задай проблему, рамки и критерии оценки.',['The real issue is long-term value.','We should judge this by impact, not speed.','The strongest objection concerns cost.'],'Choose: The strongest ___ concerns cost.',['objection','object','objective','obey'],0],
+      ['Stylistic editing','Стилистическое редактирование','At C2, editing removes clutter while preserving meaning and tone.','На C2 редактирование убирает шум, сохраняя смысл и тон.',['The revised sentence is shorter and clearer.','Remove words that add no meaning.','A concise style is easier to trust.'],'Choose: A concise style is easier to ___.',['trust','trusted','trusting','trusts'],0],
+      ['Cultural references','Культурные отсылки','Cultural references work only when the listener shares the background knowledge.','Культурные отсылки работают, только если слушатель понимает общий контекст.',['The joke depends on a shared reference.','Without context, the line sounds confusing.','The allusion changes the tone.'],'Choose: An allusion is a kind of cultural ___.',['reference','receipt','repair','reason'],0]
+    ]
+  };
+  const situations={
+    A0:[['family and names','семья и имена',['family','name','mother','father','sister']],['food and drinks','еда и напитки',['water','coffee','apple','bread','tea']],['classroom objects','предметы в классе',['book','pen','desk','board','lesson']],['time and days','время и дни',['today','Monday','morning','evening','week']],['home and rooms','дом и комнаты',['home','room','kitchen','door','window']],['basic travel','базовые поездки',['ticket','bus','station','hotel','street']],['weather','погода',['sunny','cold','rain','wind','cloud']],['colors and size','цвета и размер',['blue','green','big','small','new']],['people and jobs','люди и работа',['student','teacher','doctor','friend','worker']],['simple shopping','простые покупки',['price','shop','bag','card','money']]],
+    A1:[['daily routine','ежедневная рутина',['wake up','breakfast','work','study','sleep']],['free time','свободное время',['movie','music','game','walk','hobby']],['school life','учёба',['class','homework','teacher','subject','test']],['city places','места в городе',['bank','park','station','cafe','museum']],['health basics','здоровье',['headache','doctor','medicine','tired','better']],['clothes','одежда',['shirt','jacket','shoes','size','wear']],['online life','онлайн-жизнь',['message','app','video','photo','call']],['friends','друзья',['friend','invite','party','meet','talk']],['simple work','простая работа',['office','task','meeting','email','manager']],['travel plans','планы поездки',['airport','train','hotel','map','luggage']]],
+    A2:[['past weekends','прошлые выходные',['yesterday','visited','watched','walked','finished']],['future plans','планы на будущее',['tonight','tomorrow','plan','meeting','trip']],['shopping choices','покупки и выбор',['cheaper','expensive','price','receipt','choice']],['home duties','домашние дела',['clean','cook','wash','repair','room']],['transport','транспорт',['bus','metro','flight','delay','platform']],['food habits','еда и привычки',['meal','recipe','healthy','restaurant','order']],['work schedule','рабочий график',['deadline','shift','project','schedule','colleague']],['study progress','прогресс в учёбе',['review','mistake','practice','progress','goal']],['travel problems','проблемы в поездке',['lost','ticket','passport','hotel','help']],['simple opinions','простые мнения',['prefer','agree','because','interesting','boring']]],
+    B1:[['personal stories','личные истории',['experience','memory','decision','reason','result']],['education','образование',['course','degree','exam','skill','feedback']],['technology','технологии',['device','software','update','privacy','screen']],['environment','экология',['climate','waste','energy','pollution','recycle']],['money','деньги',['budget','salary','bank','spend','save']],['media','медиа',['article','interview','series','review','audience']],['travel confidence','уверенные поездки',['route','booking','delay','complaint','option']],['work communication','рабочее общение',['proposal','deadline','client','report','team']],['health and sport','здоровье и спорт',['exercise','habit','stress','sleep','recovery']],['opinions and debate','мнения и спор',['opinion','evidence','argument','however','therefore']]],
+    B2:[['business cases','деловые ситуации',['strategy','market','client','risk','proposal']],['science and innovation','наука и инновации',['research','experiment','innovation','evidence','data']],['law and society','закон и общество',['rights','policy','crime','justice','rule']],['career growth','карьера',['interview','promotion','portfolio','leadership','salary']],['academic reading','академическое чтение',['source','paragraph','claim','evidence','summary']],['global issues','глобальные проблемы',['economy','climate','migration','conflict','resource']],['advanced travel','продвинутые поездки',['itinerary','insurance','reservation','customs','delay']],['negotiation','переговоры',['compromise','priority','deadline','terms','agreement']],['digital culture','цифровая культура',['algorithm','platform','privacy','content','community']],['critical thinking','критическое мышление',['assumption','bias','logic','reasoning','conclusion']]],
+    C1:[['academic writing','академическое письмо',['thesis','evidence','coherence','source','argument']],['professional tone','профессиональный тон',['proposal','stakeholder','outcome','constraint','scope']],['public speaking','публичные выступления',['audience','structure','emphasis','delivery','impact']],['psychology','психология',['motivation','identity','behaviour','emotion','perception']],['culture','культура',['tradition','identity','norm','reference','context']],['policy','политика и решения',['policy','regulation','incentive','impact','implementation']],['research methods','методы исследования',['sample','variable','finding','limitation','method']],['ethics','этика',['principle','responsibility','harm','benefit','choice']],['advanced media','продвинутые медиа',['narrative','framing','bias','source','interpretation']],['precision editing','точное редактирование',['tone','clarity','register','nuance','style']]],
+    C2:[['formal debate','формальные дебаты',['motion','rebuttal','premise','criterion','burden']],['literary analysis','литературный анализ',['narrator','imagery','symbol','irony','subtext']],['legal language','юридический стиль',['clause','liability','provision','breach','contract']],['philosophy','философия',['assumption','consciousness','truth','reason','value']],['high-level business','сложный бизнес',['valuation','leverage','stakeholder','margin','forecast']],['cultural nuance','культурные нюансы',['allusion','register','humour','reference','connotation']],['rhetorical writing','риторическое письмо',['claim','evidence','appeal','structure','conclusion']],['editorial style','редакторский стиль',['concise','rhythm','clarity','emphasis','voice']],['advanced idioms','сложные идиомы',['metaphor','idiom','undertone','phrase','context']],['expert synthesis','экспертный синтез',['source','framework','insight','pattern','interpretation']]]
+  };
+  const existing=new Set(GALAXY_COURSE.map(x=>x.id));
+  const targets={A0:100,A1:100,A2:100,B1:100,B2:100,C1:100,C2:100};
+  Object.keys(targets).forEach(function(level){
+    let count=GALAXY_COURSE.filter(x=>x.level===level).length;
+    const gs=grammar[level],ss=situations[level];
+    for(let gi=0;gi<gs.length&&count<targets[level];gi++){
+      for(let si=0;si<ss.length&&count<targets[level];si++){
+        const g=gs[gi],s=ss[si],id='cefr-'+level.toLowerCase()+'-'+(gi+1)+'-'+(si+1);
+        if(existing.has(id))continue;
+        GALAXY_COURSE.push({
+          id:id,level:level,color:colors[level],
+          title:{ru:g[1]+' · '+s[1],en:g[0]+' · '+s[0]},
+          sub:{ru:s[1],en:s[0]},
+          rule:{ru:g[3]+' Тема урока: '+s[1]+'.',en:g[2]+' Lesson context: '+s[0]+'.'},
+          examples:g[4],
+          words:s[2],
+          q:g[5],
+          o:g[6],
+          a:g[7]
+        });
+        existing.add(id);count++;
+      }
+    }
+  });
+})();
+
 (function extendRoadmapFromCourse(){
   const order=['A0','A1','A2','B1','B2','C1','C2'];
   const colors={A0:'#2ecc71',A1:'#3498db',A2:'#9b59b6',B1:'#e67e22',B2:'#e74c3c',C1:'#f1c40f',C2:'#00d4aa'};
@@ -4870,10 +5052,12 @@ function renderCourse(){
   const doneCount=Object.keys(done).length;
   const currentLevel=LS.get('ob_level')||window._d?.level||'A1';
   const nextExam=({A0:'A1',A1:'A2',A2:'B1',B1:'B2',B2:'C1',C1:'C2'})[String(currentLevel).replace(/\+/,'')]||'B1';
+  const levels=['A0','A1','A2','B1','B2','C1','C2'];
+  const levelPick=levels.map(l=>`<button class="level-pick-btn" type="button" onclick="startLevelTest('${l}')">${l}</button>`).join('');
   const system=`<div class="course-system">
     <div class="course-system-top">
       <div><div class="course-system-title">${lang==='ru'?'Системный курс A0-C2':'System course A0-C2'}</div>
-      <div class="course-system-sub">${lang==='ru'?'Темы, практика, аудирование и экзамены для перехода между уровнями.':'Rules, practice, listening and exams to unlock the next level.'}</div></div>
+      <div class="course-system-sub">${lang==='ru'?'700 уроков: темы, практика, аудирование и экзамены для перехода между уровнями.':'700 lessons: rules, practice, listening and exams to unlock the next level.'}</div></div>
       <div class="course-system-pill">${doneCount}/${GALAXY_COURSE.length}</div>
     </div>
     <div class="course-system-grid">
@@ -4882,6 +5066,8 @@ function renderCourse(){
       <div class="course-step"><strong>${lang==='ru'?'Слух':'Listen'}</strong><span>${lang==='ru'?'фразы':'phrases'}</span></div>
       <div class="course-step"><strong>${lang==='ru'?'Экзамен':'Exam'}</strong><span>80%</span></div>
     </div>
+    <div class="course-system-sub" style="margin-top:10px">${lang==='ru'?'Выбери уровень. Он подтвердится только после теста.':'Choose your level. It is confirmed only after a test.'}</div>
+    <div class="level-pick-row">${levelPick}</div>
     <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${lang==='ru'?'Сдать тест перехода на':'Take level-up test for'} ${nextExam}</button>
   </div>`;
   let lastLevel='';
@@ -4907,6 +5093,7 @@ function renderCourse(){
 function openCourseLesson(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  try{sfx.course();}catch(e){}
   const first=ls.examples[0]||'';
   const words=courseWords(first);
   const shuffled=shuffleCourseWords(words,id);
@@ -5816,16 +6003,16 @@ function openPremium(highlightFeature){
   if(ladder){
     const items=lang==='ru'
       ?[
-        ['Free','Курс A0-C2 · 500 слов · 5 карточек/день · drills · путь · переходные тесты'],
-        ['Basic','ALEX Chat · AI-подсказки · Sonnet 4 · 10 карточек/день · голосовые ответы'],
-        ['Pro','Roleplay · проверка текста · 20 карточек/день · отчёт ошибок · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 40 карточек/день · длинная история · сертификаты']
+        ['Free','700 уроков A0-C2 · 500 слов · 10 карточек / 5ч · drills · путь · тесты уровня'],
+        ['Basic','ALEX Chat · AI-подсказки · Sonnet 4 · 20 карточек / 5ч · голосовые ответы'],
+        ['Pro','Roleplay · проверка текста · 50 карточек / 4ч · отчёт ошибок · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 100 карточек / 4ч · длинная история · сертификаты']
       ]
       :[
-        ['Free','A0-C2 course · 500 words · 5 cards/day · drills · path · level tests'],
-        ['Basic','ALEX Chat · AI hints · Sonnet 4 · 10 cards/day · voice replies'],
-        ['Pro','Roleplay · text check · 20 cards/day · error report · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 40 cards/day · long history · certificates']
+        ['Free','700 A0-C2 lessons · 500 words · 10 cards / 5h · drills · path · level tests'],
+        ['Basic','ALEX Chat · AI hints · Sonnet 4 · 20 cards / 5h · voice replies'],
+        ['Pro','Roleplay · text check · 50 cards / 4h · error report · Sonnet 4.6'],
+        ['Ultimate','TOEFL · Opus · 100 cards / 4h · long history · certificates']
       ];
     ladder.innerHTML=items.map(i=>`<div class="lad-card"><strong>${i[0]}</strong><span>${i[1]}</span></div>`).join('');
   }
@@ -5835,13 +6022,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>10 карточек/день<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
-    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>20 карточек/день<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>40 карточек/день<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
+    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>20 карточек / 5 часов<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
+    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>50 карточек / 4 часа<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
+    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>100 карточек / 4 часа<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
   } else {
-    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>10 cards/day<br>Voice replies + AI hints<br>Full course rule breakdown';
-    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>20 cards/day<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>40 cards/day<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
+    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>20 cards / 5 hours<br>Voice replies + AI hints<br>Full course rule breakdown';
+    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>50 cards / 4 hours<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
+    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>100 cards / 4 hours<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
   }
 
   // Hide plans that are lower or equal to current tier
