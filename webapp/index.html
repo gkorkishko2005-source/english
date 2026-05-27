@@ -4989,6 +4989,113 @@ GALAXY_COURSE.push(
     C1:[['academic writing','академическое письмо',['thesis','evidence','coherence','source','argument']],['professional tone','профессиональный тон',['proposal','stakeholder','outcome','constraint','scope']],['public speaking','публичные выступления',['audience','structure','emphasis','delivery','impact']],['psychology','психология',['motivation','identity','behaviour','emotion','perception']],['culture','культура',['tradition','identity','norm','reference','context']],['policy','политика и решения',['policy','regulation','incentive','impact','implementation']],['research methods','методы исследования',['sample','variable','finding','limitation','method']],['ethics','этика',['principle','responsibility','harm','benefit','choice']],['advanced media','продвинутые медиа',['narrative','framing','bias','source','interpretation']],['precision editing','точное редактирование',['tone','clarity','register','nuance','style']]],
     C2:[['formal debate','формальные дебаты',['motion','rebuttal','premise','criterion','burden']],['literary analysis','литературный анализ',['narrator','imagery','symbol','irony','subtext']],['legal language','юридический стиль',['clause','liability','provision','breach','contract']],['philosophy','философия',['assumption','consciousness','truth','reason','value']],['high-level business','сложный бизнес',['valuation','leverage','stakeholder','margin','forecast']],['cultural nuance','культурные нюансы',['allusion','register','humour','reference','connotation']],['rhetorical writing','риторическое письмо',['claim','evidence','appeal','structure','conclusion']],['editorial style','редакторский стиль',['concise','rhythm','clarity','emphasis','voice']],['advanced idioms','сложные идиомы',['metaphor','idiom','undertone','phrase','context']],['expert synthesis','экспертный синтез',['source','framework','insight','pattern','interpretation']]]
   };
+  function cefrTopicExamples(level,g,s){
+    const topic=String(s[0]||'English').toLowerCase();
+    const w=s[2]||[];
+    const banks={
+      'weather':['It is sunny today.','The wind is cold.','Dark clouds are moving across the sky.'],
+      'family and names':['My mother is kind.','His sister is young.','Our family name is easy to spell.'],
+      'food and drinks':['I drink water every morning.','This apple is fresh.','Tea is popular in many countries.'],
+      'classroom objects':['The book is on the desk.','I write with a pen.','The lesson starts now.'],
+      'time and days':['The lesson is on Monday.','I wake up in the morning.','We meet at seven.'],
+      'home and rooms':['The kitchen is clean.','There is a window in my room.','The door is open.'],
+      'basic travel':['The bus is at the station.','I have a ticket for the trip.','The hotel is near the street.'],
+      'colors and size':['The bag is blue.','This room is small.','The new phone is green.'],
+      'people and jobs':['The teacher is friendly.','My friend is a doctor.','The worker is busy today.'],
+      'simple shopping':['The price is fair.','I pay by card.','The shop is open today.'],
+      'daily routine':['I wake up early.','She studies after breakfast.','They sleep at night.'],
+      'free time':['I watch a movie on Friday.','Music helps me relax.','We walk in the park.'],
+      'school life':['The homework is difficult.','My teacher explains the subject.','The test starts at nine.'],
+      'city places':['The cafe is near the bank.','We meet in the park.','The museum opens today.'],
+      'health basics':['I have a headache.','The doctor gives me medicine.','Rest helps me feel better.'],
+      'clothes':['This jacket is warm.','The shoes are the right size.','I wear a shirt to work.'],
+      'online life':['I send a message.','The app shows a video.','We make a quick call.'],
+      'friends':['I invite my friend.','We meet after school.','They talk at the party.'],
+      'simple work':['The manager sends an email.','I finish the task.','The meeting starts soon.'],
+      'travel plans':['The airport is busy.','I pack my luggage.','The map shows the hotel.']
+    };
+    if(banks[topic])return banks[topic];
+    const label=topic.replace(/\s+/g,' ');
+    const a=w[0]||'word',b=w[1]||'phrase',c=w[2]||'idea';
+    if(['B2','C1','C2'].includes(level)){
+      return [
+        `This lesson builds precise language for ${label}.`,
+        `A strong answer uses terms like ${a}, ${b} and ${c}.`,
+        `Clear structure makes ${label} easier to discuss.`
+      ];
+    }
+    return [
+      `I can talk about ${label} in English.`,
+      `This lesson uses words like ${a}, ${b} and ${c}.`,
+      `A short sentence about ${label} is easier to remember.`
+    ];
+  }
+  function cefrTopicPractice(level,g,s){
+    const title=String(g[0]||'').toLowerCase();
+    const topic=String(s[0]||'this topic').toLowerCase();
+    const capTopic=topic.charAt(0).toUpperCase()+topic.slice(1);
+    const base={q:`Choose the natural sentence about ${topic}:`,o:[`I can explain ${topic} clearly.`,`I can to explain ${topic} clearly.`,`I cans explain ${topic} clearly.`,`I can explaining ${topic} clearly.`],a:0};
+    if(topic==='weather'){
+      if(title.includes('to be')||title.includes('names')||title.includes('pronouns'))return {q:'Choose: The weather ___ sunny today.',o:['is','are','am','be'],a:0};
+      if(title.includes('present simple')||title.includes('frequency'))return {q:'Choose: It often ___ in autumn.',o:['rain','rains','raining','rained'],a:1};
+      if(title.includes('past'))return {q:'Choose: It ___ yesterday.',o:['rain','rained','raining','rains'],a:1};
+      if(title.includes('future')||title.includes('will')||title.includes('going to'))return {q:'Choose: It ___ be cold tomorrow.',o:['will','was','did','has'],a:0};
+    }
+    if(title.includes('to be')||title.includes('names')||title.includes('pronouns'))return {q:`Choose: ${capTopic} ___ useful for practice.`,o:['is','are','am','be'],a:0};
+    if(title.includes('there is'))return {q:`Choose: There ___ useful words in this lesson.`,o:['is','are','am','be'],a:1};
+    if(title.includes('can'))return {q:`Choose: I can ___ about ${topic}.`,o:['talk','talks','to talk','talking'],a:0};
+    if(title.includes('like'))return {q:`Choose: I like ___ about ${topic}.`,o:['learn','learns','learning','to learning'],a:2};
+    if(title.includes('in / on / at'))return {q:`Choose: We practise ___ Monday.`,o:['in','on','at','to'],a:1};
+    if(title.includes('present simple')||title.includes('frequency'))return {q:`Choose: She ___ about ${topic} every day.`,o:['talk','talks','talking','talked'],a:1};
+    if(title.includes('do / does'))return {q:`Choose: ___ she study ${topic}?`,o:['Do','Does','Is','Are'],a:1};
+    if(title.includes('articles'))return {q:`Choose: I need ___ example about ${topic}.`,o:['a','an','the','no article'],a:1};
+    if(title.includes('plural'))return {q:`Choose: two useful ___.`,o:['word','words','wordes','wording'],a:1};
+    if(title.includes('continuous'))return {q:`Choose: I ___ studying ${topic} now.`,o:['am','is','are','be'],a:0};
+    if(title.includes('past simple')||title.includes('past questions'))return {q:`Choose: We ___ ${topic} yesterday.`,o:['study','studied','studying','studies'],a:1};
+    if(title.includes('going to'))return {q:`Choose: I am ___ to study ${topic}.`,o:['go','going','went','gone'],a:1};
+    if(title.includes('will'))return {q:`Choose: I ___ practise ${topic} tomorrow.`,o:['am','will','did','have'],a:1};
+    if(title.includes('comparative'))return {q:`Choose: This explanation is ___ than before.`,o:['clear','clearer','clearest','more clear than'],a:1};
+    if(title.includes('superlative'))return {q:`Choose: This is ___ example.`,o:['good','better','the best','best than'],a:2};
+    if(title.includes('perfect'))return {q:`Choose: I have ___ this topic before.`,o:['study','studied','studying','studies'],a:1};
+    if(title.includes('should'))return {q:`Choose: You ___ review ${topic} today.`,o:['should','musted','to should','are should'],a:0};
+    if(title.includes('have to'))return {q:`Choose: I ___ to practise today.`,o:['must','have','should','can'],a:1};
+    if(title.includes('conditional'))return {q:`Choose: If you practise ${topic}, you ___ improve.`,o:['will','would','did','are'],a:0};
+    if(title.includes('passive'))return {q:`Choose: This topic ___ explained clearly.`,o:['is','are','did','has'],a:0};
+    if(title.includes('reported'))return {q:`Choose: She said she ___ the rule.`,o:['understands','understood','understanding','understand'],a:1};
+    if(title.includes('modal deduction'))return {q:`Choose: He practised all week. He ___ be ready.`,o:['must','can','does','has'],a:0};
+    if(title.includes('question tags'))return {q:`Choose: This is useful, ___?`,o:['is it','isn’t it','does it','did it'],a:1};
+    if(title.includes('linking')||title.includes('contrast'))return {q:`Choose: ___ it was difficult, I continued.`,o:['Although','Because of','Despite of','However'],a:0};
+    if(title.includes('phrasal'))return {q:`Choose: Do not ___ when practice feels hard.`,o:['give up','give to','give be','give on'],a:0};
+    if(title.includes('relative'))return {q:`Choose: The student ___ practises daily improves.`,o:['who','which','where','when'],a:0};
+    if(title.includes('used to'))return {q:`Choose: I am used to ___ regularly.`,o:['study','studying','studied','studies'],a:1};
+    if(title.includes('gerund'))return {q:`Choose: I enjoy ___ English.`,o:['learn','learning','to learning','learned'],a:1};
+    if(title.includes('inversion'))return {q:`Choose: Rarely ___ I seen faster progress.`,o:['did','have','do','am'],a:1};
+    if(title.includes('subjunctive'))return {q:`Choose: I suggest that he ___ present.`,o:['is','be','was','being'],a:1};
+    return base;
+  }
+  function cefrBuildLesson(level,g,s){
+    const topic=String(s[0]||'English').toLowerCase();
+    const examples=cefrTopicExamples(level,g,s);
+    const p=cefrTopicPractice(level,g,s);
+    const title=String(g[0]||'Grammar');
+    return {
+      examples:examples,
+      q:p.q,o:p.o,a:p.a,
+      build:`I can talk about ${topic} clearly.`,
+      dictation:`Talking about ${topic} gets easier with practice.`,
+      focus:[
+        `Use the rule in a real ${topic} sentence.`,
+        `Say one short example aloud before you answer.`,
+        `Check the verb form before you choose an option.`
+      ],
+      mistake:`Do not copy the example mechanically. Match the grammar rule to the topic: ${title}.`,
+      reading:`This lesson is about ${topic}. Read the examples, notice the grammar pattern, then answer without looking for a ready-made sentence.`
+    };
+  }
+  function cefrCapText(text){
+    text=String(text||'');
+    return text?text.charAt(0).toUpperCase()+text.slice(1):text;
+  }
   const existing=new Set(GALAXY_COURSE.map(x=>x.id));
   const targets={A0:100,A1:100,A2:100,B1:100,B2:100,C1:100,C2:100};
   Object.keys(targets).forEach(function(level){
@@ -4998,20 +5105,42 @@ GALAXY_COURSE.push(
       for(let si=0;si<ss.length&&count<targets[level];si++){
         const g=gs[gi],s=ss[si],id='cefr-'+level.toLowerCase()+'-'+(gi+1)+'-'+(si+1);
         if(existing.has(id))continue;
+        const built=cefrBuildLesson(level,g,s);
         GALAXY_COURSE.push({
           id:id,level:level,color:colors[level],
-          title:{ru:g[1]+' · '+s[1],en:g[0]+' · '+s[0]},
+          title:{ru:cefrCapText(s[1])+' · '+g[1],en:cefrCapText(s[0])+' · '+g[0]},
           sub:{ru:s[1],en:s[0]},
           rule:{ru:g[3]+' Тема урока: '+s[1]+'.',en:g[2]+' Lesson context: '+s[0]+'.'},
-          examples:g[4],
+          examples:built.examples,
           words:s[2],
-          q:g[5],
-          o:g[6],
-          a:g[7]
+          q:built.q,
+          o:built.o,
+          a:built.a,
+          build:built.build,
+          dictation:built.dictation,
+          focus:built.focus,
+          mistake:built.mistake,
+          reading:built.reading
         });
         existing.add(id);count++;
       }
     }
+  });
+})();
+
+(function normalizeCourseLessons(){
+  GALAXY_COURSE.forEach(function(ls){
+    const topic=(ls.title&&ls.title.en)||ls.sub?.en||'English';
+    const simpleTopic=String(topic).replace(/\s*·\s*/g,' and ').toLowerCase();
+    if(!ls.build)ls.build=`I can use this lesson in real English.`;
+    if(!ls.dictation)ls.dictation=`This topic becomes easier with practice.`;
+    if(!ls.focus)ls.focus=[
+      'Read the rule, then find the pattern in the examples.',
+      'Say one example aloud before you answer.',
+      'Check the verb form, word order and context.'
+    ];
+    if(!ls.mistake)ls.mistake='Do not choose by memory only. Match the form to the meaning of the sentence.';
+    if(!ls.reading)ls.reading=`This lesson trains ${simpleTopic}. Read the examples first, then answer the tasks without looking for a ready-made answer.`;
   });
 })();
 
@@ -5114,13 +5243,26 @@ function openCourseLesson(id){
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
   try{sfx.course();}catch(e){}
   const first=ls.examples[0]||'';
-  const words=courseWords(first);
+  const target=ls.build||first;
+  const dictation=ls.dictation||target;
+  const words=courseWords(target);
   const shuffled=shuffleCourseWords(words,id);
-  window['course_target_'+courseKey(id)]=first;
+  window['course_target_'+courseKey(id)]=target;
+  window['course_dictation_'+courseKey(id)]=dictation;
+  const focus=(ls.focus&&ls.focus.length)?ls.focus:[
+    lang==='ru'?'Прочитай правило и найди эту же структуру в примерах.':'Read the rule and find the same structure in the examples.',
+    lang==='ru'?'Скажи один пример вслух, затем переходи к практике.':'Say one example aloud, then move to practice.',
+    lang==='ru'?'Не ищи готовый ответ: проверь форму глагола и порядок слов.':'Do not hunt for a ready answer: check the verb form and word order.'
+  ];
   const html=`<div class="course-lesson">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
     <div class="course-rule">${safeHTML(ls.rule[lang]||ls.rule.en)}</div>
+    <div class="course-build">
+      <div class="course-lab">${lang==='ru'?'Что понять в этом уроке':'What to understand'}</div>
+      ${focus.map((x,i)=>`<div class="course-line"><span>${i+1}. ${safeHTML(x)}</span></div>`).join('')}
+      <div class="course-note">${safeHTML(ls.mistake||(lang==='ru'?'Главная ошибка — переносить шаблон без проверки темы и формы слова.':'The main mistake is copying a pattern without checking the topic and word form.'))}</div>
+    </div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
     <div class="course-note">${lang==='ru'?'Бесплатно: короткое правило, примеры, слова и мини-тест. Полный персональный разбор открывается с любой подпиской.':'Free: short rule, examples, words and a mini test. Full personal AI breakdown requires a subscription.'}</div>
@@ -5139,16 +5281,17 @@ function openCourseLesson(id){
     </div>
     <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
-      <div class="course-note">${lang==='ru'?'Нажми “Слушать” у первой фразы и запиши её по памяти.':'Tap “Listen” on the first phrase and type it from memory.'}</div>
+      <div class="course-note">${lang==='ru'?'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.':'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.'}</div>
       <input class="course-inp" id="cd-inp-${id}" placeholder="${lang==='ru'?'Напиши услышанную фразу':'Type what you heard'}">
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseLine('${id}',0)">${lang==='ru'?'Слушать':'Listen'}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${lang==='ru'?'Проверить':'Check'}</button></div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">${lang==='ru'?'Слушать':'Listen'}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${lang==='ru'?'Проверить':'Check'}</button></div>
       <div class="course-result" id="cd-res-${id}"></div>
     </div>
     <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Чтение и понимание':'Reading check'}</div>
       <div class="course-rule">${safeHTML(courseReadingText(ls))}</div>
-      <div class="course-opt" onclick="checkCourseReading('${id}',true)">${lang==='ru'?'Текст связан с правилом урока':'The text matches the lesson rule'}</div>
-      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Текст не связан с правилом урока':'The text is unrelated to the lesson rule'}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',true)">${lang==='ru'?'Нужно заметить правило и контекст примеров':'Notice the rule and the context of the examples'}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Нужно выбрать только самое длинное слово':'Choose only the longest word'}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Можно игнорировать форму глагола':'Ignore the verb form'}</div>
       <div class="course-result" id="cr-res-${id}"></div>
     </div>
   </div>`;
@@ -5164,6 +5307,9 @@ function shuffleCourseWords(words,id){
   return arr;
 }
 function courseReadingText(ls){
+  if(ls.reading)return lang==='ru'
+    ?`Текст для проверки: ${ls.reading}`
+    :`Reading check: ${ls.reading}`;
   const title=ls.title[lang]||ls.title.en;
   const ex=(ls.examples||[]).slice(0,2).join(' ');
   return lang==='ru'
@@ -5197,7 +5343,7 @@ function checkCourseBuilder(id){
   if(ok){awardCourseExtra(id,'builder',6);try{trackM('drill');}catch(e){}}
 }
 function checkCourseDictation(id){
-  const target=window['course_target_'+courseKey(id)]||'';
+  const target=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
   const inp=document.getElementById('cd-inp-'+id);
   const ok=normalizeCourseText(inp&&inp.value)===normalizeCourseText(target);
   const res=document.getElementById('cd-res-'+id);if(!res)return;
@@ -5209,13 +5355,20 @@ function checkCourseReading(id,picked){
   const ok=!!picked;
   const res=document.getElementById('cr-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Верно. Это чтение закрепляет тему урока. +5 XP':'Correct. This reading reinforces the lesson. +5 XP'):(lang==='ru'?'Здесь как раз используется структура урока.':'The text does use the lesson structure.');
+  res.textContent=ok?(lang==='ru'?'Верно. Сначала смотри на правило, потом на смысл темы. +5 XP':'Correct. First notice the rule, then the topic meaning. +5 XP'):(lang==='ru'?'Не совсем. В таких заданиях важны правило, контекст и форма слова.':'Not quite. These tasks depend on the rule, context and word form.');
   if(ok){awardCourseExtra(id,'reading',5);}
 }
 function speakCourseLine(id,idx){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
   const u=new SpeechSynthesisUtterance(ls.examples[idx]||'');
   u.lang='en-US';u.rate=.92;
+  speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function speakCourseDictation(id){
+  if(!('speechSynthesis' in window))return;
+  const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=.9;
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 function answerCourse(id,picked){
