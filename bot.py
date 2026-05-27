@@ -156,7 +156,7 @@ BOT_PROFILE = {
         "• Grammar games and spaced repetition\n"
         "• Pro roleplay: interview, travel, cafe, business\n"
         "• Ultimate TOEFL practice, progress and streaks\n\n"
-        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms.\n\n"
+        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules.\n\n"
         "Open the app: the free course is available right away, ALEX Chat starts with a subscription."
     ),
     "description_ru": (
@@ -167,7 +167,7 @@ BOT_PROFILE = {
         "• grammar games и интервальное повторение\n"
         "• Pro-сценки: интервью, путешествия, кафе, бизнес\n"
         "• Ultimate TOEFL, прогресс и стрик\n\n"
-        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms.\n\n"
+        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules.\n\n"
         "Открой приложение: бесплатный курс доступен сразу, чат ALEX начинается с подписки."
     ),
 }
@@ -778,6 +778,7 @@ async def setup_bot_profile():
         BotCommand(command="support", description="Support / Поддержка"),
         BotCommand(command="paysupport", description="Payment support / Оплата"),
         BotCommand(command="terms", description="Terms / Условия"),
+        BotCommand(command="rules", description="Service rules / Правила сервиса"),
         BotCommand(command="privacy", description="Privacy / Данные"),
     ]
     app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
@@ -1208,7 +1209,8 @@ async def cmd_help(m: Message):
          "/premium — подписка\n"
          "/share — пригласить друга и получить XP\n"
          "/support — поддержка\n"
-         "/terms — условия оплаты\n"
+         "/terms — условия и границы ответственности\n"
+         "/rules — правила сервиса\n"
          "/start — главное меню\n\n"
          "👇 Открой приложение") if lang=="ru" else
         ("<b>ALEX — AI English Tutor</b>\n\n"
@@ -1224,7 +1226,8 @@ async def cmd_help(m: Message):
          "/premium — subscription\n"
          "/share — invite a friend and earn XP\n"
          "/support — support\n"
-         "/terms — payment terms\n"
+         "/terms — terms and responsibility limits\n"
+         "/rules — service rules\n"
          "/start — main menu\n\n"
          "👇 Open the app"),
         reply_markup=kb
@@ -1288,29 +1291,30 @@ async def cmd_paysupport(m: Message):
     )
 
 @dp.message(Command("terms"))
+@dp.message(Command("rules"))
 async def cmd_terms(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
     ru = lang == "ru"
     await m.answer(
-        ("<b>Условия PolyGlotty</b>\n\n"
-         "PolyGlotty даёт бесплатный доступ к курсу, карточкам, заданиям, пути и прогрессу.\n"
-         "Подписка открывает ALEX Chat, AI-разборы, расширенные задания, модели и повышенные лимиты.\n\n"
-         "Оплата: Telegram Stars.\n"
-         "Период: 1 месяц или 1 год, в зависимости от выбранного плана.\n"
-         "Доступ привязан к Telegram ID пользователя.\n"
-         "AI-ответы могут ошибаться, поэтому важные учебные выводы стоит перепроверять.\n\n"
-         "Поддержка: /support\n"
-         "Оплата: /paysupport")
+        ("<b>Правила и условия PolyGlotty</b>\n\n"
+         "1. <b>Что это за сервис.</b> PolyGlotty помогает учить английский: курс, карточки, тесты, путь, прогресс и ALEX Chat по подписке. Это учебный продукт, а не официальная школа, экзаменационный центр или гарантия результата.\n\n"
+         "2. <b>AI может ошибаться.</b> ALEX объясняет, проверяет тексты и помогает практиковаться, но ответы AI не являются юридической, медицинской, финансовой или иной профессиональной консультацией. Важные выводы нужно перепроверять.\n\n"
+         "3. <b>Платежи.</b> Цифровые подписки оплачиваются через Telegram Stars. Доступ включается после успешного платежа и привязан к Telegram ID. Если платеж прошел, а доступ не появился, напиши /paysupport и приложи план, время оплаты и скриншот.\n\n"
+         "4. <b>Что не зависит от нас.</b> Мы не управляем Telegram, App Store, Google Play, Anthropic, Railway, интернетом, устройством пользователя и Telegram WebView. Из-за их сбоев, ограничений, налогов, комиссий, правил региона или обновлений отдельные функции могут временно работать иначе.\n\n"
+         "5. <b>Лимиты и честное использование.</b> Лимиты, модели, цены и набор функций могут меняться, чтобы сервис не уходил в минус и оставался доступным. Обход лимитов, фейковые аккаунты, автоматизация запросов, спам и попытки ломать оплату могут привести к блокировке доступа.\n\n"
+         "6. <b>Контент и данные.</b> Не отправляй пароли, документы, платежные данные и другую чувствительную информацию. Мы храним только данные, нужные для обучения и подписки. Подробнее: /privacy.\n\n"
+         "7. <b>Поддержка.</b> Проект ведет один разработчик, поэтому ответы поддержки не мгновенные. По вопросам приложения — /support, по оплате — /paysupport. Telegram Support не решает покупки внутри нашего бота.\n\n"
+         "Продолжая пользоваться ботом или покупая подписку, ты соглашаешься с этими правилами.")
         if ru else
-        ("<b>PolyGlotty Terms</b>\n\n"
-         "PolyGlotty provides free access to the course, flashcards, tasks, learning path and progress.\n"
-         "A subscription unlocks ALEX Chat, AI explanations, advanced tasks, models and higher limits.\n\n"
-         "Payment: Telegram Stars.\n"
-         "Period: 1 month or 1 year, depending on the selected plan.\n"
-         "Access is linked to the user's Telegram ID.\n"
-         "AI replies may be wrong, so important learning conclusions should be checked.\n\n"
-         "Support: /support\n"
-         "Payments: /paysupport")
+        ("<b>PolyGlotty Terms and Rules</b>\n\n"
+         "1. <b>Service scope.</b> PolyGlotty helps you learn English with a course, flashcards, tests, a learning path, progress tracking and subscription-based ALEX Chat. It is an educational product, not an official school, exam center or guarantee of results.\n\n"
+         "2. <b>AI can be wrong.</b> ALEX explains, checks texts and helps you practise, but AI replies are not legal, medical, financial or other professional advice. Important conclusions should be checked.\n\n"
+         "3. <b>Payments.</b> Digital subscriptions are paid through Telegram Stars. Access is activated after a successful payment and linked to your Telegram ID. If payment succeeded but access did not appear, contact /paysupport with the plan, payment time and screenshot.\n\n"
+         "4. <b>Outside our control.</b> We do not control Telegram, App Store, Google Play, Anthropic, Railway, your internet connection, device or Telegram WebView. Their outages, limits, taxes, fees, regional rules or updates may temporarily affect features.\n\n"
+         "5. <b>Limits and fair use.</b> Limits, models, prices and features may change so the service remains sustainable. Limit bypassing, fake accounts, automated requests, spam or payment abuse may lead to access restrictions.\n\n"
+         "6. <b>Content and data.</b> Do not send passwords, documents, payment details or other sensitive information. We store only data needed for learning and subscriptions. Details: /privacy.\n\n"
+         "7. <b>Support.</b> This is a solo-built project, so support is not instant. App questions: /support. Payment questions: /paysupport. Telegram Support does not handle purchases made inside this bot.\n\n"
+         "By continuing to use the bot or buying a subscription, you agree to these rules.")
     )
 
 @dp.message(Command("privacy"))
@@ -1320,15 +1324,15 @@ async def cmd_privacy(m: Message):
     await m.answer(
         ("<b>Данные и приватность</b>\n\n"
          "Мы сохраняем данные, которые нужны для обучения: Telegram ID, имя/ник, язык, уровень, XP, прогресс, подписку, карточки, ошибки и настройки обучения.\n"
-         "Чат с ALEX используется для ответа и улучшения персонального контекста внутри продукта.\n"
+         "Чат с ALEX используется для ответа и улучшения персонального контекста внутри продукта. Сообщения и голосовые запросы могут обрабатываться AI/TTS/STT-провайдерами только для работы функций.\n"
          "Мы не продаём персональные данные.\n\n"
-         "Чтобы запросить удаление данных, напиши /support и укажи свой Telegram ID.")
+         "Чтобы запросить удаление данных, напиши /support и укажи свой Telegram ID. Удаление данных может отключить прогресс, подписочные настройки и персонализацию.")
         if ru else
         ("<b>Data and Privacy</b>\n\n"
          "We store data required for learning: Telegram ID, name/username, language, level, XP, progress, subscription, flashcards, mistakes and learning settings.\n"
-         "ALEX chat is used to answer and improve personal context inside the product.\n"
+         "ALEX chat is used to answer and improve personal context inside the product. Messages and voice requests may be processed by AI/TTS/STT providers only to run the features.\n"
          "We do not sell personal data.\n\n"
-         "To request deletion, contact /support and include your Telegram ID.")
+         "To request deletion, contact /support and include your Telegram ID. Deleting data may disable progress, subscription settings and personalization.")
     )
 
 @dp.message(Command("reset"))
