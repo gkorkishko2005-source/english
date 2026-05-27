@@ -683,10 +683,12 @@ async def handle_grant_premium(request):
         body = await request.json()
         uid = int(body.get("uid",0))
         months = int(body.get("months",1))
-        tier = str(body.get("tier","pro"))
+        tier = str(body.get("tier","basic")).lower()
         secret = body.get("secret","")
     except Exception:
         return web.json_response({"error":"bad request"},status=400)
+    if tier not in {"basic", "pro", "ultimate"}:
+        return web.json_response({"error":"invalid tier"},status=400)
 
     BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
     if secret != BOT_SECRET:

@@ -9,6 +9,7 @@ import logging
 import os
 import random
 import re
+import html
 from urllib.parse import quote
 
 import httpx
@@ -57,6 +58,11 @@ ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
+SUPPORT_USER_ID = int(os.getenv("SUPPORT_USER_ID", "8702782202") or "8702782202")
+SUPPORT_USERNAME = (os.getenv("SUPPORT_USERNAME", "") or "").lstrip("@")
+
+def support_contact_url() -> str:
+    return f"https://t.me/{SUPPORT_USERNAME}" if SUPPORT_USERNAME else f"tg://user?id={SUPPORT_USER_ID}"
 
 # ══ ADMIN WHITELIST (admin tools only) ═══════════════════════════════════════
 # Добавь сюда Telegram UID админов. Premium больше не выдаётся автоматически.
@@ -758,6 +764,8 @@ async def setup_bot_profile():
     """Apply BotFather growth basics from prompt.rtf: searchable name, about text, commands, WebApp menu."""
     commands = [
         BotCommand(command="start", description="Open app / Главное меню"),
+        BotCommand(command="app", description="Open WebApp / Открыть приложение"),
+        BotCommand(command="menu", description="Button menu / Меню кнопок"),
         BotCommand(command="premium", description="Plans and limits / Подписки"),
         BotCommand(command="share", description="Invite friends / Пригласить друзей"),
         BotCommand(command="lesson", description="Grammar lesson / Урок грамматики"),
@@ -781,6 +789,7 @@ async def setup_bot_profile():
         await bot.set_my_description(BOT_PROFILE["description_default"])
         await bot.set_my_description(BOT_PROFILE["description_ru"], language_code="ru")
         await bot.set_my_commands(commands)
+        await bot.set_my_commands(commands, language_code="ru")
         if app_url:
             await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Open App", web_app=WebAppInfo(url=app_url)))
         logger.info("Bot profile metadata updated")
@@ -834,6 +843,15 @@ async def cmd_start(message: Message):
         text="💎 Premium",
         callback_data="open_premium"
     )])
+    kb_buttons.append([
+        InlineKeyboardButton(text="📚 Урок" if ru else "📚 Lesson", callback_data="quick_lesson"),
+        InlineKeyboardButton(text="📝 Слова" if ru else "📝 Vocab", callback_data="quick_vocab"),
+        InlineKeyboardButton(text="✅ Тест" if ru else "✅ Test", callback_data="quick_test"),
+    ])
+    kb_buttons.append([
+        InlineKeyboardButton(text="🧭 Меню" if ru else "🧭 Menu", callback_data="quick_menu"),
+        InlineKeyboardButton(text="Поддержка" if ru else "Support", callback_data="quick_support"),
+    ])
     ref_link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
     share_text = (
         "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty"
@@ -885,6 +903,36 @@ async def cmd_start(message: Message):
         f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+
+@dp.message(Command("menu"))
+async def cmd_menu(message: Message):
+    lang = await get_lang(message.from_user.id) or "ru"
+    await message.answer(
+        "Меню кнопок включено. Можно не помнить команды — просто нажимай нужный раздел."
+        if lang == "ru" else
+        "Button menu is enabled. You do not need to remember commands — just tap a section.",
+        reply_markup=main_kb(lang),
+    )
+
+@dp.callback_query(F.data.startswith("quick_"))
+async def cb_quick_menu(cb: CallbackQuery):
+    uid = cb.from_user.id
+    lang = await get_lang(uid) or "ru"
+    action = cb.data.replace("quick_", "")
+    await cb.answer()
+    if action == "lesson":
+        await cb.message.answer("📚 <b>Grammar Lessons:</b>", reply_markup=lesson_kb(lang))
+    elif action == "vocab":
+        await cb.message.answer("📝 <b>Vocabulary:</b>", reply_markup=vocab_kb(lang))
+    elif action == "test":
+        await cb.message.answer("✅ <b>Tests:</b>", reply_markup=test_kb(lang))
+    elif action == "support":
+        await send_support_prompt(cb.message, uid)
+    else:
+        await cb.message.answer(
+            "Меню кнопок включено." if lang == "ru" else "Button menu is enabled.",
+            reply_markup=main_kb(lang),
+        )
 
 @dp.message(Command("share"))
 async def cmd_share(message: Message):
@@ -1155,6 +1203,8 @@ async def cmd_help(m: Message):
          "• Story Mode\n"
          "• TOEFL практика\n"
          "• Чат с ALEX по подписке\n\n"
+         "/app — открыть приложение\n"
+         "/menu — кнопки без команд\n"
          "/premium — подписка\n"
          "/share — пригласить друга и получить XP\n"
          "/support — поддержка\n"
@@ -1169,6 +1219,8 @@ async def cmd_help(m: Message):
          "• Story Mode\n"
          "• TOEFL practice\n"
          "• ALEX chat with subscription\n\n"
+         "/app — open the app\n"
+         "/menu — buttons without commands\n"
          "/premium — subscription\n"
          "/share — invite a friend and earn XP\n"
          "/support — support\n"
@@ -1180,30 +1232,35 @@ async def cmd_help(m: Message):
 
 @dp.message(Command("support"))
 async def cmd_support(m: Message):
-    lang = await get_lang(m.from_user.id) or "ru"
+    await send_support_prompt(m, m.from_user.id)
+
+async def send_support_prompt(target, uid: int):
+    lang = await get_lang(uid) or "ru"
     ru = lang == "ru"
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
-                              web_app=WebAppInfo(url=f"https://{RAILWAY_URL}") if RAILWAY_URL and "localhost" not in RAILWAY_URL else None)]
-    ]) if RAILWAY_URL and "localhost" not in RAILWAY_URL else None
-    await m.answer(
+    waiting[uid] = "support_message"
+    kb_rows = [[InlineKeyboardButton(text="Написать Гордею" if ru else "Message Gordey", url=support_contact_url())]]
+    if RAILWAY_URL and "localhost" not in RAILWAY_URL:
+        kb_rows.append([InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
+                                             web_app=WebAppInfo(url=f"https://{RAILWAY_URL}"))])
+    kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
+    await target.answer(
         ("<b>Поддержка PolyGlotty</b>\n\n"
-         "Если что-то не работает, напиши сюда одним сообщением:\n"
+         "Сейчас поддержка ручная: проект ведёт один разработчик.\n\n"
+         "Ответь следующим сообщением сюда, и я перешлю его Гордею:\n"
          "• что произошло;\n"
          "• твой тариф;\n"
          "• примерное время ошибки;\n"
-         "• скриншот, если есть.\n\n"
-         "По оплатам используй /paysupport.\n"
-         "Обычно отвечаем вручную, поэтому лучше писать коротко и по делу.")
+         "• что ты нажимал перед ошибкой.\n\n"
+         "Можно также написать напрямую по кнопке ниже.")
         if ru else
         ("<b>PolyGlotty Support</b>\n\n"
-         "If something does not work, send one message here with:\n"
+         "Support is manual right now: the project is run by one developer.\n\n"
+         "Reply with one message here and I will forward it to Gordey:\n"
          "• what happened;\n"
          "• your plan;\n"
          "• approximate error time;\n"
-         "• a screenshot if available.\n\n"
-         "For payments, use /paysupport.\n"
-         "Support is handled manually, so short clear reports help most."),
+         "• what you tapped before the issue.\n\n"
+         "You can also message directly using the button below."),
         reply_markup=kb
     )
 
@@ -1211,6 +1268,7 @@ async def cmd_support(m: Message):
 async def cmd_paysupport(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
     ru = lang == "ru"
+    waiting[m.from_user.id] = "support_message"
     await m.answer(
         ("<b>Поддержка оплаты</b>\n\n"
          "Подписки оплачиваются через Telegram Stars. После успешной оплаты доступ обычно появляется сразу.\n\n"
@@ -1624,6 +1682,36 @@ async def handle_text(message: Message):
     state = waiting.get(uid,"")
 
     # Handle pending states (no AI, just data saving)
+    if state == "support_message":
+        waiting.pop(uid, None)
+        user = message.from_user
+        contact = user_display_name(user)
+        safe_text = html.escape(text[:3500])
+        safe_contact = html.escape(contact)
+        try:
+            await bot.send_message(
+                SUPPORT_USER_ID,
+                "<b>PolyGlotty support request</b>\n\n"
+                f"User: {safe_contact}\n"
+                f"UID: <code>{uid}</code>\n"
+                f"Lang: {lang}\n\n"
+                f"{safe_text}",
+                parse_mode="HTML",
+            )
+            await message.answer(
+                "Гордей получил сообщение. Если вопрос срочный, можно ещё написать напрямую через /support."
+                if lang == "ru" else
+                "Gordey received your message. If it is urgent, you can also message directly through /support."
+            )
+        except Exception as e:
+            logger.error("support forward failed uid=%s: %s", uid, e)
+            await message.answer(
+                "Не смог переслать сообщение автоматически. Нажми /support и напиши напрямую по кнопке."
+                if lang == "ru" else
+                "I could not forward it automatically. Tap /support and message directly with the button."
+            )
+        return
+
     if state == "set_interests":
         waiting.pop(uid, None)
         for interest in [i.strip() for i in text.split(",") if i.strip()]:
@@ -2044,6 +2132,16 @@ async def on_payment_success(msg: Message):
         label = plan["label_ru"] if ru else plan["label_en"]
         tier = plan.get("tier", "basic")
         tier_emoji = {"basic":"🟢","pro":"🔵","ultimate":"💎"}.get(tier,"🟢")
+        tier_scope_ru = {
+            "basic": "ALEX Chat, Sonnet 4, голосовые ответы и AI-подсказки активны.",
+            "pro": "Pro-функции, Sonnet 4.6, roleplay, проверка текста и отчёты активны.",
+            "ultimate": "Ultimate-функции, TOEFL, Opus, длинная история и максимум лимитов активны.",
+        }.get(tier, "Функции подписки активны.")
+        tier_scope_en = {
+            "basic": "ALEX Chat, Sonnet 4, voice replies and AI hints are active.",
+            "pro": "Pro features, Sonnet 4.6, roleplay, text check and reports are active.",
+            "ultimate": "Ultimate features, TOEFL, Opus, long history and max limits are active.",
+        }.get(tier, "Subscription features are active.")
 
         # Grant premium in database via server, with direct DB fallback.
         granted = await grant_premium_via_server(uid, months, tier)
@@ -2060,12 +2158,14 @@ async def on_payment_success(msg: Message):
         text = (
             f"🎉 <b>Оплата прошла!</b>\n\n"
             f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
-            f"Открой приложение — все функции разблокированы!\n\n"
+            f"{tier_scope_ru}\n\n"
+            f"Открой приложение — подписка уже синхронизирована.\n\n"
             f"Спасибо за поддержку! 🙏"
         ) if ru else (
             f"🎉 <b>Payment successful!</b>\n\n"
             f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
-            f"Open the app — all features unlocked!\n\n"
+            f"{tier_scope_en}\n\n"
+            f"Open the app — your subscription is already synced.\n\n"
             f"Thank you for your support! 🙏"
         )
         await msg.answer(text, parse_mode="HTML")

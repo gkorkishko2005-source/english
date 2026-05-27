@@ -394,6 +394,10 @@ async def set_reminder(uid: int, remind_time: str):
 async def set_premium(uid: int, months: int = 1, tier: str = "pro"):
     """Grant premium access for given months with tier. 0 = revoke."""
     from datetime import datetime, timedelta, timezone
+    tier = (tier or "basic").lower()
+    if tier not in {"basic", "pro", "ultimate"}:
+        logger.warning("invalid premium tier uid=%s tier=%r; falling back to basic", uid, tier)
+        tier = "basic"
     await upsert_user(uid, "")
     if months <= 0:
         await db("UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='' WHERE uid=?", uid)

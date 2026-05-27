@@ -1350,6 +1350,22 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rm-status svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .rm-lesson.done .rm-status{color:#00d4aa;background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.22)}
 .rm-lesson.active-lesson .rm-status{color:var(--a);background:rgba(var(--ar),.09);border-color:rgba(var(--ar),.22)}
+.rm-mission{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(var(--ar),.08),transparent 180px),var(--bg);min-height:100%;padding-bottom:12px}
+.rm-mission-head{background:var(--e1);border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:14px;margin-bottom:9px}
+.rm-mission-kicker{font-size:10px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;color:var(--a);margin-bottom:5px}
+.rm-mission-title{font-size:18px;font-weight:900;color:var(--t1);line-height:1.15}
+.rm-mission-sub{font-size:12px;color:var(--t2);line-height:1.4;margin-top:5px}
+.rm-mission-grid{display:grid;gap:8px;margin:10px 0}
+.rm-mission-card{background:var(--e1);border:1px solid var(--b1);border-radius:13px;padding:12px}
+.rm-mission-card.good{border-color:rgba(0,212,170,.22);background:linear-gradient(135deg,rgba(0,212,170,.06),var(--e1))}
+.rm-mission-label{font-size:10px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+.rm-mission-line{font-size:13px;color:var(--t1);line-height:1.45}
+.rm-mission-input{width:100%;box-sizing:border-box;margin-top:8px;background:var(--e2);border:1px solid var(--b1);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:13px;padding:10px 11px;outline:none}
+.rm-mission-input:focus{border-color:rgba(var(--ar),.45);box-shadow:0 0 0 3px rgba(var(--ar),.08)}
+.rm-mission-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rm-mission-complete{border:none;background:var(--gb);color:#fff;border-radius:12px;padding:12px;font-family:var(--f);font-size:13px;font-weight:850;cursor:pointer;box-shadow:0 10px 22px rgba(79,138,255,.18)}
+.rm-mission-ghost{border:1px solid var(--b1);background:var(--e1);color:var(--t1);border-radius:12px;padding:12px;font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer}
+.rm-mission-complete:active,.rm-mission-ghost:active{transform:scale(.98)}
 
 /* ══ TEXT CHECKER ══ */
 .tc-inp{width:100%;min-height:110px;background:var(--e1);border:1px solid var(--b2);border-radius:var(--r);padding:13px;color:var(--t1);font-family:var(--f);font-size:14px;line-height:1.6;resize:none;outline:none;transition:.2s}
@@ -2276,6 +2292,9 @@ const sfx=(function(){
     xp:function(){seq([880,1175,1568,1760],44,'sine',.085,.08);noise(.09,.018,2200);},
     level:function(){seq([392,523,659,784,1047],76,'triangle',.14,.12);noise(.16,.025,1800);},
     course:function(){seq([494,587,740],54,'triangle',.082,.075);},
+    path:function(){seq([392,494,587],70,'triangle',.095,.095);noise(.07,.012,1500);},
+    done:function(){seq([523,659,784,988],54,'triangle',.115,.095);noise(.11,.02,2200);},
+    warn:function(){tone(196,.11,'triangle',.07,.006,.06);tone(164,.13,'sine',.045,.006,.08,.07);},
     select:function(){tone(540,.05,'triangle',.07,.004,.025);tone(720,.055,'sine',.045,.004,.03,.035);},
     send:function(){tone(620,.055,'triangle',.07,.004,.035);tone(980,.07,'sine',.055,.004,.045,.04);},
     theme:function(mode){mode==='light'?seq([440,660,880],62,'sine',.075,.085):seq([880,660,440],62,'triangle',.07,.09);},
@@ -5834,38 +5853,128 @@ function rmLinkedCourseId(lessonId,lesson){
   return hit?hit[1]:'';
 }
 function openRoadmapOfflineLesson(found){
-  const cid=rmLinkedCourseId(found.lesson.id,found.lesson);
-  if(cid&&GALAXY_COURSE.some(x=>x.id===cid)){
-    switchLearnTab('course');
-    openCourseLesson(cid);
-    return;
-  }
   const title=found.lesson.title[lang]||found.lesson.title.en;
   const titleEn=found.lesson.title.en||found.lesson.title.ru||title;
   const sub=found.lesson.sub[lang]||found.lesson.sub.en;
   const topicWord=String(titleEn).replace(/[^a-zA-Z\s]/g,'').trim().toLowerCase()||'this topic';
+  const path=rmGetPath();
+  const pathName=path?(path.name[lang]||path.name.en):({ru:'Общий английский',en:'General English'}[lang]||'General English');
+  const pathDesc=path?(path.desc[lang]||path.desc.en):({ru:'Укрепи базу и используй тему в живом контексте',en:'Build the base and use the topic in real context'}[lang]||'General practice');
+  const progress=LS.getJ('rm_progress')||{};
+  const prog=Math.min(5,progress[found.lesson.id]||0);
+  const prompts=rmMissionLines(topicWord,path?.id||'core');
   const wrap=document.getElementById('roadmap-wrap');if(!wrap)return;
-  wrap.innerHTML=`<div class="course-lesson">
+  try{sfx.path();}catch(e){}
+  wrap.innerHTML=`<div class="rm-mission">
     <button class="rm-action" type="button" onclick="renderRoadmap()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к пути':'Back to path'}</button>
-    <h3>${safeHTML(found.lvlData.level)} · ${safeHTML(title)}</h3>
-    <div class="course-rule">${lang==='ru'?'Короткий офлайн-урок: прочитай правило, произнеси примеры вслух и пройди мини-проверку.':'Short offline lesson: read the rule, say examples aloud and complete the mini check.'}</div>
-    <div class="course-ex"><div class="course-line"><span>${safeHTML(sub)}</span></div><div class="course-line"><span>I practise ${safeHTML(topicWord)} in short answers.</span></div><div class="course-line"><span>I use ${safeHTML(topicWord)} when the context needs it.</span></div></div>
-    <div class="course-note">${lang==='ru'?'Если застрял, подписка открывает ALEX-помощника для личного объяснения.':'If you get stuck, a subscription unlocks ALEX for a personal explanation.'}</div>
-    <button class="course-ai" onclick="courseAIBreakdown('${cid||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
+    <div class="rm-mission-head">
+      <div class="rm-mission-kicker">${safeHTML(found.lvlData.level)} · ${safeHTML(pathName)} · ${prog}/5</div>
+      <div class="rm-mission-title">${safeHTML(title)}</div>
+      <div class="rm-mission-sub">${safeHTML(pathDesc)}. ${safeHTML(sub)}</div>
+    </div>
+    <div class="rm-mission-grid">
+      <div class="rm-mission-card">
+        <div class="rm-mission-label">${lang==='ru'?'Цель миссии':'Mission goal'}</div>
+        <div class="rm-mission-line">${safeHTML(prompts.goal)}</div>
+      </div>
+      <div class="rm-mission-card good">
+        <div class="rm-mission-label">${lang==='ru'?'Живой пример':'Real example'}</div>
+        <div class="rm-mission-line">${safeHTML(prompts.example)}</div>
+      </div>
+      <div class="rm-mission-card">
+        <div class="rm-mission-label">${lang==='ru'?'Мини-практика':'Mini practice'}</div>
+        <div class="rm-mission-line">${safeHTML(prompts.task)}</div>
+        <input class="rm-mission-input" id="rm-answer-${safeHTML(found.lesson.id)}" placeholder="${lang==='ru'?'Напиши 1 короткий ответ на английском':'Write 1 short answer in English'}">
+      </div>
+      <div class="rm-mission-card">
+        <div class="rm-mission-label">${lang==='ru'?'Проверка перед завершением':'Before you finish'}</div>
+        <div class="rm-mission-line">${safeHTML(prompts.check)}</div>
+      </div>
+    </div>
+    <div class="rm-mission-actions">
+      <button class="rm-mission-complete" onclick="completeRoadmapMission('${safeHTML(found.lesson.id)}')">${lang==='ru'?'Завершить миссию':'Complete mission'}</button>
+      <button class="rm-mission-ghost" onclick="courseAIBreakdown('${rmLinkedCourseId(found.lesson.id,found.lesson)||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
+    </div>
+    <div class="course-note">${lang==='ru'?'Курс даёт тему и правило. Путь превращает эту тему в практику под твою цель.':'Course gives the topic and rule. Path turns the topic into practice for your goal.'}</div>
   </div>`;
 }
+function rmMissionLines(topic,pathId){
+  const t=String(topic||'English').toLowerCase();
+  const use= t.includes('present simple')?'daily routines'
+    :t.includes('past')?'past events'
+    :t.includes('future')?'plans'
+    :t.includes('article')?'specific and general things'
+    :t.includes('pronoun')?'people without repeating names'
+    :t.includes('preposition')?'time and place'
+    :t.includes('conditional')?'conditions and results'
+    :t.includes('passive')?'actions when the doer is less important'
+    :t.includes('reported')?'what another person said'
+    :t;
+  const bank={
+    conversational:{
+      goal:{ru:`Используй тему “${t}” в коротком разговоре, будто отвечаешь человеку.`,en:`Use “${t}” in a short conversation, as if you are replying to someone.`},
+      example:`I use this pattern to talk about ${use} in a natural way.`,
+      task:{ru:`Ответь одной фразой про ${use}.`,en:`Write one sentence about ${use}.`},
+      check:{ru:'Проверь: есть подлежащее, глагол и понятный смысл.',en:'Check: subject, verb and clear meaning.'}
+    },
+    ielts:{
+      goal:{ru:`Сделай из темы “${t}” экзаменационный аргумент.`,en:`Turn “${t}” into an exam-style argument.`},
+      example:`From an exam perspective, ${use} can affect how people study, work or communicate.`,
+      task:{ru:`Напиши тезис с причиной по теме ${use}.`,en:`Write a claim with a reason about ${use}.`},
+      check:{ru:'Проверь: тезис + причина, без слишком длинного предложения.',en:'Check: claim + reason, not too long.'}
+    },
+    business:{
+      goal:{ru:`Используй тему “${t}” как деловую ситуацию.`,en:`Use “${t}” as a business situation.`},
+      example:`In a business context, a sentence about ${use} should be clear, polite and specific.`,
+      task:{ru:`Напиши деловую фразу с “could”, “please” или “I would like”.`,en:`Write a business sentence with “could”, “please” or “I would like”.`},
+      check:{ru:'Проверь тон: спокойно, вежливо, конкретно.',en:'Check tone: calm, polite and specific.'}
+    },
+    it:{
+      goal:{ru:`Свяжи тему “${t}” с IT/работой за компьютером.`,en:`Connect “${t}” with IT or computer work.`},
+      example:`In a tech team, clear language about ${use} makes tasks easier to follow.`,
+      task:{ru:`Напиши фразу про баг, задачу, документацию или приложение.`,en:`Write a sentence about a bug, task, documentation or app.`},
+      check:{ru:'Проверь: термин звучит естественно и не перегружает фразу.',en:'Check: the term sounds natural and the sentence is not overloaded.'}
+    },
+    travel:{
+      goal:{ru:`Используй тему “${t}” в поездке: аэропорт, отель, кафе или город.`,en:`Use “${t}” while travelling: airport, hotel, cafe or city.`},
+      example:`When travelling, language about ${use} is useful because you often need quick, polite phrases.`,
+      task:{ru:`Напиши фразу, которую можно сказать сотруднику отеля или аэропорта.`,en:`Write a sentence you could say to hotel or airport staff.`},
+      check:{ru:'Проверь: фраза короткая и её реально можно сказать вслух.',en:'Check: the sentence is short and speakable.'}
+    }
+  };
+  const picked=bank[pathId]||bank.conversational;
+  return {
+    goal:picked.goal[lang]||picked.goal.en,
+    example:picked.example,
+    task:picked.task[lang]||picked.task.en,
+    check:picked.check[lang]||picked.check.en
+  };
+}
 function startRoadmapLesson(lessonId){
-  const progress=LS.getJ('rm_progress')||{};
   let found=null;
   ROADMAP_DATA.some(lvl=>lvl.lessons.some(ls=>{
     if(ls.id===lessonId){found={lvlData:lvl,lesson:ls};return true;}
     return false;
   }));
   if(!found)return;
+  openRoadmapOfflineLesson(found);
+}
+function completeRoadmapMission(lessonId){
+  const inp=document.getElementById('rm-answer-'+lessonId);
+  const answer=(inp&&inp.value||'').trim();
+  if(inp&&answer.length<8){
+    try{sfx.warn();}catch(e){}
+    toast(lang==='ru'?'Сначала напиши короткий ответ':'Write a short answer first','⚠️');
+    inp.focus();
+    return;
+  }
+  const progress=LS.getJ('rm_progress')||{};
   progress[lessonId]=Math.min(5,(progress[lessonId]||0)+1);
   LS.setJ('rm_progress',progress);
   try{trackM('path');}catch(e){}
-  openRoadmapOfflineLesson(found);
+  try{sfx.done();}catch(e){}
+  toast(lang==='ru'?'Миссия пути закрыта':'Path mission complete','✅');
+  renderRoadmap();
 }
 
 function renderRoadmap(){
@@ -5934,7 +6043,7 @@ function renderRoadmap(){
         <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}">${rmLessonSvg(ls.icon)}</div>
         <div class="rm-info">
           <div class="rm-title">${ls.title[lang]||ls.title.en}</div>
-          <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'уроков':'lessons'}</div>
+          <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'миссий':'missions'}</div>
           <div class="rm-tags"><span class="rm-tag">${lvlData.level}</span><span class="rm-tag">${path?(path.name[lang]||path.name.en):'Core'}</span></div>
           <div class="rm-bar"><div class="rm-fill" style="width:${done?100:prog*20}%"></div></div>
         </div>
