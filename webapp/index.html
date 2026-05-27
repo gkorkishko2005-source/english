@@ -1238,7 +1238,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-level-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 2px 4px}
 .course-level-name{font-size:12px;font-weight:900;color:var(--t1);letter-spacing:.2px}
 .course-level-desc{font-size:10px;color:var(--t3);text-align:right}
-.course-card{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
+.course-card{background:linear-gradient(135deg,var(--e1),rgba(var(--ar),.025));border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
+.course-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lesson-color,var(--a));opacity:.75}
+.course-card::after{content:'';position:absolute;right:-42px;top:-48px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.10),transparent 68%);opacity:0;transition:opacity .25s,transform .25s}
+.course-card:hover::after{opacity:1;transform:scale(1.06)}
 .course-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
 .course-card.done{border-color:rgba(0,212,170,.30);background:linear-gradient(135deg,rgba(0,212,170,.065),var(--e1));box-shadow:inset 3px 0 0 rgba(0,212,170,.72)}
 .course-card.done .course-ico{background:rgba(0,212,170,.12);color:var(--a2)!important}
@@ -1273,19 +1276,37 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-pill{font-size:10px;font-weight:750;color:var(--t2);background:var(--e2);border:1px solid var(--b1);padding:4px 7px;border-radius:999px}
 .course-go{width:26px;height:26px;border-radius:9px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center}
 .course-go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.course-lesson{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:12px;margin-bottom:10px}
+.course-lesson{background:linear-gradient(180deg,rgba(var(--ar),.07),transparent 260px),var(--bg);border:1px solid rgba(var(--ar),.13);border-radius:var(--r2);padding:12px;margin-bottom:10px}
 .course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
 .course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
+.course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.14),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.20);border-radius:15px;padding:14px;margin-bottom:10px}
+.course-hero::after{content:'';position:absolute;right:-34px;top:-44px;width:126px;height:126px;border-radius:50%;border:26px solid rgba(255,255,255,.035)}
+.course-hero-top{display:flex;align-items:center;gap:10px;position:relative;z-index:1}
+.course-hero-ico{width:42px;height:42px;border-radius:14px;background:rgba(var(--ar),.14);display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));box-shadow:0 10px 24px rgba(79,138,255,.10)}
+.course-hero-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-hero-title{font-size:18px;font-weight:950;color:var(--t1);line-height:1.1}
+.course-hero-sub{font-size:11px;color:var(--t2);line-height:1.4;margin-top:3px}
+.course-track{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}
+.course-track-step{height:6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--ar),.08);overflow:hidden}
+.course-track-step.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 12px rgba(0,212,170,.20)}
 .course-rule{font-size:13px;line-height:1.5;color:var(--t2)}
 .course-rule-compact{display:flex;gap:8px;align-items:flex-start;background:rgba(var(--ar),.065);border:1px solid rgba(var(--ar),.14);border-radius:11px;padding:9px 10px;margin-bottom:9px;font-size:12px;line-height:1.38}
 .course-rule-compact b{font-size:10px;text-transform:uppercase;letter-spacing:.45px;color:var(--a);white-space:nowrap;margin-top:1px}
+.course-insight{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
+.course-insight-card{background:var(--e1);border:1px solid var(--b1);border-radius:12px;padding:9px 10px}
+.course-insight-label{font-size:9px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
+.course-insight-text{font-size:11.5px;color:var(--t1);line-height:1.35}
 .course-focus-row{display:grid;grid-template-columns:1fr;gap:6px;margin:8px 0}
 .course-focus-chip{font-size:11px;line-height:1.35;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:9px;padding:7px 9px}
 .course-ex{display:grid;gap:6px;margin:12px 0}
 .course-line{font-size:12px;color:var(--t1);background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .course-line button{border:0;background:rgba(var(--ar),.12);color:var(--a);border-radius:8px;padding:5px 7px;cursor:pointer}
-.course-practice{display:grid;gap:7px;margin-top:10px}
-.course-practice-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:8px}
+.course-practice{display:grid;gap:8px;margin-top:10px;background:rgba(var(--ar),.045);border:1px solid rgba(var(--ar),.13);border-radius:15px;padding:10px}
+.course-practice-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.course-practice-title{font-size:12px;font-weight:950;color:var(--t1)}
+.course-practice-sub{font-size:10px;font-weight:800;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.18);border-radius:999px;padding:4px 7px;white-space:nowrap}
+.course-practice-card{background:var(--e1);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:0;transition:border-color .18s,transform .18s,background .18s}
+.course-practice-card:hover{border-color:rgba(var(--ar),.20)}
 .course-practice-card.done{border-color:rgba(0,212,170,.28)}
 .course-qtext{font-size:12px;font-weight:800;color:var(--t1);line-height:1.35;margin-bottom:7px}
 .course-opt{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px;font-size:12px;color:var(--t1);cursor:pointer;transition:.18s}
@@ -1293,6 +1314,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
 .course-note{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-top:8px}
+.course-hint{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(255,184,48,.075);border:1px solid rgba(255,184,48,.18);border-radius:10px;padding:8px 9px;margin-top:7px}
 .course-ai{width:100%;border:1px solid rgba(var(--ar),.28);background:rgba(var(--ar),.1);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer;margin-top:10px}
 .course-lab{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:11px 0 7px}
 .course-build{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:8px}
@@ -1316,7 +1338,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .word-pref-chip.on{color:var(--a);background:rgba(var(--ar),.10);border-color:rgba(var(--ar),.30);box-shadow:0 5px 14px rgba(var(--ar),.06)}
 .word-pref-chip:active{transform:scale(.96)}
 .roadmap-wrap{display:flex;flex-direction:column;gap:8px}
-.rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.12),rgba(0,212,170,.07));border:1px solid rgba(var(--ar),.22);border-radius:var(--r2);padding:14px;margin-bottom:4px}
+.rm-overview{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.08));border:1px solid rgba(var(--ar),.25);border-radius:16px;padding:15px;margin-bottom:6px;box-shadow:0 14px 34px rgba(0,0,0,.08)}
 .rm-overview::after{content:'';position:absolute;right:-34px;top:-42px;width:110px;height:110px;border-radius:50%;border:24px solid rgba(255,255,255,.035)}
 .rm-over-top{display:flex;align-items:center;gap:12px;position:relative}
 .rm-path-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.12)}
@@ -1336,7 +1358,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rm-level-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 4px rgba(255,255,255,.03)}
 .rm-level-name{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--t2)}
 .rm-level-meta{margin-left:auto;font-size:11px;color:var(--t3);font-weight:650}
-.rm-lesson{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:7px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s,box-shadow .2s}
+.rm-lesson{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;background:linear-gradient(135deg,var(--e1),rgba(var(--ar),.02));border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:7px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s,box-shadow .2s;overflow:hidden}
+.rm-lesson::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:999px;background:var(--rm-color,var(--a));opacity:.75}
+.rm-lesson::after{content:'';position:absolute;right:-50px;top:-52px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.09),transparent 68%);opacity:0;transition:.24s}
+.rm-lesson:hover::after,.rm-lesson.active-lesson::after{opacity:1;transform:scale(1.06)}
 .rm-lesson:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
 .rm-lesson:active{transform:scale(.98)}
 .rm-lesson.done{border-color:rgba(0,212,170,.28);background:rgba(0,212,170,.045)}
@@ -1356,16 +1381,24 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rm-status svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .rm-lesson.done .rm-status{color:#00d4aa;background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.22)}
 .rm-lesson.active-lesson .rm-status{color:var(--a);background:rgba(var(--ar),.09);border-color:rgba(var(--ar),.22)}
-.rm-mission{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(var(--ar),.08),transparent 180px),var(--bg);min-height:100%;padding-bottom:12px}
-.rm-mission-head{background:var(--e1);border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:14px;margin-bottom:9px}
+.rm-mission{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(var(--ar),.10),transparent 240px),var(--bg);min-height:100%;padding-bottom:12px}
+.rm-mission-head{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.14),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.22);border-radius:16px;padding:15px;margin-bottom:9px}
+.rm-mission-head::after{content:'';position:absolute;right:-38px;top:-44px;width:124px;height:124px;border-radius:50%;border:26px solid rgba(255,255,255,.035)}
 .rm-mission-kicker{font-size:10px;font-weight:900;letter-spacing:.7px;text-transform:uppercase;color:var(--a);margin-bottom:5px}
 .rm-mission-title{font-size:18px;font-weight:900;color:var(--t1);line-height:1.15}
 .rm-mission-sub{font-size:12px;color:var(--t2);line-height:1.4;margin-top:5px}
+.rm-mission-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px}
+.rm-mission-step{height:6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--ar),.08)}
+.rm-mission-step.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 12px rgba(0,212,170,.18)}
 .rm-mission-grid{display:grid;gap:8px;margin:10px 0}
-.rm-mission-card{background:var(--e1);border:1px solid var(--b1);border-radius:13px;padding:12px}
+.rm-mission-card{background:var(--e1);border:1px solid var(--b1);border-radius:13px;padding:12px;transition:border-color .18s,transform .18s}
+.rm-mission-card:hover{border-color:rgba(var(--ar),.22);transform:translateY(-1px)}
 .rm-mission-card.good{border-color:rgba(0,212,170,.22);background:linear-gradient(135deg,rgba(0,212,170,.06),var(--e1))}
 .rm-mission-label{font-size:10px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
 .rm-mission-line{font-size:13px;color:var(--t1);line-height:1.45}
+.rm-mission-task-list{display:grid;gap:7px;margin-top:8px}
+.rm-mission-task{display:flex;gap:8px;align-items:flex-start;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:8px 9px;font-size:12px;color:var(--t1);line-height:1.35}
+.rm-mission-task b{color:var(--a);font-size:10px;margin-top:1px}
 .rm-mission-input{width:100%;box-sizing:border-box;margin-top:8px;background:var(--e2);border:1px solid var(--b1);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:13px;padding:10px 11px;outline:none}
 .rm-mission-input:focus{border-color:rgba(var(--ar),.45);box-shadow:0 0 0 3px rgba(var(--ar),.08)}
 .rm-mission-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -5440,7 +5473,7 @@ function renderCourse(){
     const statusIcon=isDone
       ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
       :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
-    return `${header}<div class="course-card ${isDone?'done':''}" onclick="openCourseLesson('${ls.id}')">
+    return `${header}<div class="course-card ${isDone?'done':''}" style="--lesson-color:${ls.color}" onclick="openCourseLesson('${ls.id}')">
       <div class="course-ico" style="color:${ls.color}">${courseIconSvg()}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
@@ -5459,10 +5492,38 @@ function courseShortRule(ls){
   const first=raw.split(/(?<=[.!?])\s+/)[0]||raw;
   return first.length>170?first.slice(0,167).trim()+'...':first;
 }
+function courseLessonInsight(ls){
+  const title=(ls.title&&((ls.title.en||ls.title.ru)||''))||'this pattern';
+  const words=(ls.words||[]).slice(0,3).join(', ');
+  return {
+    pattern:{ru:`Сначала найди форму в примере, потом меняй только нужное слово: ${words||title}.`,en:`First notice the form in the example, then change only the needed word: ${words||title}.`},
+    mistake:{ru:'Типичная ошибка — угадать по переводу и пропустить порядок слов или форму глагола.',en:'A common mistake is guessing from translation and missing word order or verb form.'}
+  };
+}
 function coursePracticeSet(ls){
   const base=Array.isArray(ls.practice)?ls.practice:[];
-  const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,4);
+  const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,5);
   if(!out.length&&ls.q)out.push({q:ls.q,o:ls.o,a:ls.a});
+  const examples=(ls.examples||[]).filter(Boolean);
+  const words=(ls.words||[]).filter(Boolean);
+  const title=(ls.title&&(ls.title.en||ls.title.ru))||'English';
+  const target=ls.build||examples[0]||'I use English every day.';
+  const clozeBank=['am','is','are','do','does','did','will','can','should','have','has','had','a','an','the','in','on','at','for','to'];
+  const clozeMatch=target.match(new RegExp('\\b('+clozeBank.join('|')+')\\b','i'));
+  const clozeAnswer=(clozeMatch&&clozeMatch[0].toLowerCase())||'in';
+  const clozeOptions=[clozeAnswer,...clozeBank.filter(x=>x!==clozeAnswer)].slice(0,4);
+  const clozeSentence=clozeMatch?target.replace(new RegExp('\\b'+clozeAnswer+'\\b','i'),'___'):`${target} ___`;
+  const fallback=[
+    {q:`Choose the correct word: ${clozeSentence}`,o:clozeOptions,a:0},
+    {q:`Choose the natural sentence for ${title}.`,o:[examples[0]||target,'I using this rule.','This rule use me.','I am use this.'],a:0},
+    {q:`Fill the gap: ${words[0]||'English'} is useful ___ daily practice.`,o:['for','to','at','by'],a:0},
+    {q:`Pick the best study habit.`,o:['Read the example, answer, then check.','Look at the answer first.','Skip the form.','Guess every time.'],a:0},
+    {q:`Choose the clear sentence.`,o:[examples[1]||target,'The words is wrong order.','I no understand this.','This are example.'],a:0}
+  ];
+  for(const q of fallback){
+    if(out.length>=5)break;
+    if(q&&Array.isArray(q.o))out.push(q);
+  }
   return out;
 }
 function openCourseLesson(id){
@@ -5483,21 +5544,36 @@ function openCourseLesson(id){
   ];
   const grammarLabel=(ls.grammar&&(ls.grammar[lang]||ls.grammar.en))||(ls.sub&&((ls.sub[lang]||ls.sub.en)))||'Rule';
   const ruleText=courseShortRule(ls);
+  const insight=courseLessonInsight(ls);
   const practice=coursePracticeSet(ls);
   window['course_practice_'+courseKey(id)]=practice;
-  const html=`<div class="course-lesson">
+  const partState=LS.getJ(coursePartsKey(id))||{};
+  const completedSteps=['practice_0','practice_1','builder','dictation','reading'].filter(k=>partState[k]).length;
+  const trackHtml=[0,1,2,3,4].map(i=>`<div class="course-track-step ${i<completedSteps?'done':''}"></div>`).join('');
+  const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
-    <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
-    <div class="course-lesson-sub">${safeHTML(grammarLabel)}</div>
-    <div class="course-time-pill">${lang==='ru'?'Около 5 минут':'About 5 minutes'}</div>
+    <div class="course-hero">
+      <div class="course-hero-top">
+        <div class="course-hero-ico">${courseIconSvg()}</div>
+        <div style="min-width:0;flex:1">
+          <div class="course-hero-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
+          <div class="course-hero-sub">${safeHTML(grammarLabel)} · ${lang==='ru'?'около 5 минут':'about 5 minutes'}</div>
+        </div>
+      </div>
+      <div class="course-track" id="course-track-${id}">${trackHtml}</div>
+    </div>
     <div class="course-rule-compact"><b>${lang==='ru'?'Правило':'Rule'}</b><span>${safeHTML(ruleText)}</span></div>
+    <div class="course-insight">
+      <div class="course-insight-card"><div class="course-insight-label">${lang==='ru'?'Паттерн':'Pattern'}</div><div class="course-insight-text">${safeHTML(insight.pattern[lang]||insight.pattern.en)}</div></div>
+      <div class="course-insight-card"><div class="course-insight-label">${lang==='ru'?'Не попадайся':'Watch out'}</div><div class="course-insight-text">${safeHTML(insight.mistake[lang]||insight.mistake.en)}</div></div>
+    </div>
     <div class="course-focus-row">
       ${focus.slice(0,2).map((x,i)=>`<div class="course-focus-chip">${i+1}. ${safeHTML(x)}</div>`).join('')}
     </div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
     <div class="course-practice" id="course-q-${id}">
-      <div class="mini-type">${lang==='ru'?'Практика':'Practice'}</div>
+      <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
       ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
         <div class="course-qtext">${safeHTML(q.q)}</div>
         ${q.o.map((o,i)=>`<div class="course-opt" onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
@@ -5560,6 +5636,13 @@ function courseRequiredParts(id){
   const practice=window['course_practice_'+courseKey(id)]||[];
   return ['builder','dictation','reading',...practice.map((_,i)=>'practice_'+i)];
 }
+function updateCourseTrack(id){
+  const el=document.getElementById('course-track-'+id);if(!el)return;
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  const required=courseRequiredParts(id);
+  const done=required.filter(k=>parts[k]).length;
+  [...el.children].forEach((node,i)=>node.classList.toggle('done',i<Math.min(5,Math.ceil(done/Math.max(1,required.length)*5))));
+}
 function renderCourseCompleteCard(id,already){
   const box=document.getElementById('course-complete-'+id);
   if(!box)return;
@@ -5587,6 +5670,7 @@ function courseMarkPart(id,type,ok){
   const parts=LS.getJ(coursePartsKey(id))||{};
   parts[type]=ok?'ok':'try';
   LS.setJ(coursePartsKey(id),parts);
+  updateCourseTrack(id);
   return maybeCompleteCourse(id);
 }
 function awardCourseExtra(id,type,amount){
@@ -5610,7 +5694,14 @@ function checkCourseBuilder(id){
   const ok=normalizeCourseText(answer)===normalizeCourseText(target);
   const res=document.getElementById('cb-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Собрано правильно. XP начислим за полный урок.':'Correct sentence. XP comes after the full lesson.'):(lang==='ru'?'Почти. Правильно: ':'Almost. Correct: ')+target;
+  const attemptsKey='course_attempt_builder_'+id;
+  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
+  if(!ok)LS.set(attemptsKey,String(attempts));
+  res.textContent=ok
+    ?(lang==='ru'?'Собрано правильно. XP начислим за полный урок.':'Correct sentence. XP comes after the full lesson.')
+    :(attempts<2
+      ?(lang==='ru'?'Пока нет. Проверь порядок слов и попробуй ещё раз.':'Not yet. Check word order and try again.')
+      :(lang==='ru'?'Подсказка: начни так: ':'Hint: start with: ')+target.split(' ').slice(0,2).join(' ')+' ...');
   if(ok){courseMarkPart(id,'builder',true);try{trackM('drill');}catch(e){}}
 }
 function checkCourseDictation(id){
@@ -5619,7 +5710,14 @@ function checkCourseDictation(id){
   const ok=normalizeCourseText(inp&&inp.value)===normalizeCourseText(target);
   const res=document.getElementById('cd-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Слух отлично сработал. Идём дальше.':'Good listening. Keep going.'):(lang==='ru'?'Проверь фразу: ':'Check the phrase: ')+target;
+  const attemptsKey='course_attempt_dictation_'+id;
+  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
+  if(!ok)LS.set(attemptsKey,String(attempts));
+  res.textContent=ok
+    ?(lang==='ru'?'Слух отлично сработал. Идём дальше.':'Good listening. Keep going.')
+    :(attempts<2
+      ?(lang==='ru'?'Не совсем. Послушай ещё раз и проверь артикли/окончания.':'Not quite. Listen again and check articles/endings.')
+      :(lang==='ru'?'Подсказка: фраза начинается с “':'Hint: the phrase starts with “')+target.split(' ').slice(0,3).join(' ')+'...”');
   if(ok){courseMarkPart(id,'dictation',true);try{trackM('listen');}catch(e){}}
 }
 function checkCourseReading(id,picked){
@@ -5647,19 +5745,27 @@ function answerCoursePractice(id,qi,picked){
   const q=practice[qi];if(!q)return;
   const box=document.getElementById('course-q-'+id+'-'+qi);if(!box)return;
   const isRight=picked===q.a;
-  box.classList.add('done');
-  box.querySelectorAll('.course-opt').forEach((el,i)=>{
-    el.style.pointerEvents='none';
-    if(i===q.a)el.classList.add('ok');
-    if(i===picked&&!isRight)el.classList.add('bad');
-  });
+  const attemptsKey='course_attempt_'+id+'_'+qi;
+  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!isRight?1:0);
+  if(!isRight)LS.set(attemptsKey,String(attempts));
+  const opts=box.querySelectorAll('.course-opt');
+  opts.forEach((el,i)=>{el.classList.remove('bad');if(isRight&&i===q.a)el.classList.add('ok');});
+  if(isRight){box.classList.add('done');opts.forEach(el=>el.style.pointerEvents='none');}
+  else{
+    opts[picked]?.classList.add('bad');
+    let hint=box.querySelector('.course-hint');
+    if(!hint){hint=document.createElement('div');hint.className='course-hint';box.appendChild(hint);}
+    hint.textContent=attempts<2
+      ?(q.tip|| (lang==='ru'?'Проверь правило выше и попробуй ещё раз. Ответ пока не показываем.':'Check the rule above and try again. The answer is not shown yet.'))
+      :((lang==='ru'?'Сильная подсказка: смотри на вариант ':'Strong hint: look at option ')+String.fromCharCode(65+q.a)+'.');
+  }
   if(isRight)try{trackM('drill');}catch(e){}
   const stateKey='course_practice_state_'+id;
   const state=LS.getJ(stateKey)||{};
   state[qi]=isRight?'ok':'bad';
   LS.setJ(stateKey,state);
-  const completed=courseMarkPart(id,'practice_'+qi,isRight);
-  if(!completed)toast(isRight?(lang==='ru'?'Хорошо, дальше':'Good, keep going'):(lang==='ru'?'Ничего, продолжаем':'Keep going'),isRight?'✅':'');
+  const completed=isRight?courseMarkPart(id,'practice_'+qi,true):false;
+  if(!completed)toast(isRight?(lang==='ru'?'Хорошо, дальше':'Good, keep going'):(lang==='ru'?'Попробуй ещё раз':'Try again'),isRight?'✅':'');
 }
 function answerCourse(id,picked){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
@@ -5912,6 +6018,8 @@ function openRoadmapOfflineLesson(found){
   const progress=LS.getJ('rm_progress')||{};
   const prog=Math.min(5,progress[found.lesson.id]||0);
   const prompts=rmMissionLines(topicWord,path?.id||'core');
+  const missionSteps=[0,1,2,3,4].map(i=>`<div class="rm-mission-step ${i<prog?'done':''}"></div>`).join('');
+  const missionTasks=rmPracticeTasks(topicWord,path?.id||'core');
   const wrap=document.getElementById('roadmap-wrap');if(!wrap)return;
   try{sfx.path();}catch(e){}
   wrap.innerHTML=`<div class="rm-mission">
@@ -5920,6 +6028,7 @@ function openRoadmapOfflineLesson(found){
       <div class="rm-mission-kicker">${safeHTML(found.lvlData.level)} · ${safeHTML(pathName)} · ${prog}/5</div>
       <div class="rm-mission-title">${safeHTML(title)}</div>
       <div class="rm-mission-sub">${safeHTML(pathDesc)}. ${safeHTML(sub)}</div>
+      <div class="rm-mission-steps">${missionSteps}</div>
     </div>
     <div class="rm-mission-grid">
       <div class="rm-mission-card">
@@ -5933,6 +6042,7 @@ function openRoadmapOfflineLesson(found){
       <div class="rm-mission-card">
         <div class="rm-mission-label">${lang==='ru'?'Мини-практика':'Mini practice'}</div>
         <div class="rm-mission-line">${safeHTML(prompts.task)}</div>
+        <div class="rm-mission-task-list">${missionTasks.map((t,i)=>`<div class="rm-mission-task"><b>${i+1}</b><span>${safeHTML(t)}</span></div>`).join('')}</div>
         <input class="rm-mission-input" id="rm-answer-${safeHTML(found.lesson.id)}" placeholder="${lang==='ru'?'Напиши 1 короткий ответ на английском':'Write 1 short answer in English'}">
       </div>
       <div class="rm-mission-card">
@@ -5999,6 +6109,55 @@ function rmMissionLines(topic,pathId){
     check:picked.check[lang]||picked.check.en
   };
 }
+function rmPracticeTasks(topic,pathId){
+  const t=String(topic||'english').toLowerCase();
+  const base={
+    conversational:[
+      `Write one natural sentence about ${t}.`,
+      `Change it into a question.`,
+      `Add one detail: time, place or reason.`,
+      `Make the sentence shorter and clearer.`,
+      `Say it aloud once before finishing.`
+    ],
+    ielts:[
+      `Write a clear claim about ${t}.`,
+      `Add one reason with because.`,
+      `Add one example from real life.`,
+      `Avoid slang and make the sentence formal.`,
+      `Check that your idea has one main point.`
+    ],
+    business:[
+      `Write one polite work sentence about ${t}.`,
+      `Add please, could or would like if it fits.`,
+      `Make the request specific.`,
+      `Remove emotional or vague words.`,
+      `Check that it sounds calm and professional.`
+    ],
+    it:[
+      `Write one sentence about ${t} in a tech context.`,
+      `Use one clear noun: bug, task, update or feature.`,
+      `Add what happened or what you need.`,
+      `Keep it short enough for a work chat.`,
+      `Check that the technical word is necessary.`
+    ],
+    travel:[
+      `Write one travel sentence about ${t}.`,
+      `Make it polite enough for staff.`,
+      `Add one concrete detail: time, room, ticket or place.`,
+      `Remove extra words that slow the phrase down.`,
+      `Say it aloud like you are at the desk.`
+    ]
+  };
+  const ru={
+    conversational:[`Напиши одно естественное предложение про ${t}.`,`Переделай его в вопрос.`,`Добавь деталь: время, место или причину.`,`Сделай фразу короче и яснее.`,`Произнеси её вслух перед завершением.`],
+    ielts:[`Напиши чёткий тезис про ${t}.`,`Добавь причину через because.`,`Добавь один пример из жизни.`,`Убери сленг и сделай фразу формальнее.`,`Проверь, что в мысли один главный смысл.`],
+    business:[`Напиши вежливую рабочую фразу про ${t}.`,`Добавь please, could или would like, если подходит.`,`Сделай просьбу конкретной.`,`Убери эмоциональные и размытые слова.`,`Проверь, что тон спокойный и профессиональный.`],
+    it:[`Напиши фразу про ${t} в IT-контексте.`,`Используй одно точное слово: bug, task, update или feature.`,`Добавь, что случилось или что нужно.`,`Сделай фразу короткой для рабочего чата.`,`Проверь, что техническое слово реально нужно.`],
+    travel:[`Напиши фразу про ${t} в поездке.`,`Сделай её вежливой для сотрудника.`,`Добавь конкретику: время, номер, билет или место.`,`Убери лишние слова, которые тормозят фразу.`,`Произнеси вслух как на ресепшене.`]
+  };
+  const bank=lang==='ru'?ru:base;
+  return bank[pathId]||bank.conversational;
+}
 function startRoadmapLesson(lessonId){
   let found=null;
   ROADMAP_DATA.some(lvl=>lvl.lessons.some(ls=>{
@@ -6011,9 +6170,11 @@ function startRoadmapLesson(lessonId){
 function completeRoadmapMission(lessonId){
   const inp=document.getElementById('rm-answer-'+lessonId);
   const answer=(inp&&inp.value||'').trim();
-  if(inp&&answer.length<8){
+  const words=answer.split(/\s+/).filter(Boolean);
+  const hasEnglish=/[a-zA-Z]/.test(answer);
+  if(inp&&(answer.length<14||words.length<4||!hasEnglish)){
     try{sfx.warn();}catch(e){}
-    toast(lang==='ru'?'Сначала напиши короткий ответ':'Write a short answer first','⚠️');
+    toast(lang==='ru'?'Нужен ответ на английском: минимум 4 слова':'Write an English answer: at least 4 words','⚠️');
     inp.focus();
     return;
   }
@@ -6087,6 +6248,7 @@ function renderRoadmap(){
       const card=document.createElement('div');
       card.className='rm-lesson'+(done?' done':isActive?' active-lesson':locked?' locked':'');
       const icoColor=done?'#2ecc71':isActive?'var(--a)':lvlData.color;
+      card.style.setProperty('--rm-color', icoColor);
       const status=locked?'locked':done?'done':isActive?'active':'idle';
       card.innerHTML=`
         <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}">${rmLessonSvg(ls.icon)}</div>
