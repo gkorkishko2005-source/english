@@ -1286,9 +1286,32 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-hero-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-hero-title{font-size:18px;font-weight:950;color:var(--t1);line-height:1.1}
 .course-hero-sub{font-size:11px;color:var(--t2);line-height:1.4;margin-top:3px}
-.course-track{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}
+.course-track{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}
 .course-track-step{height:6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--ar),.08);overflow:hidden}
 .course-track-step.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 12px rgba(0,212,170,.20)}
+.course-section{background:var(--e1);border:1px solid var(--b1);border-radius:15px;padding:10px;margin-top:9px;position:relative;overflow:hidden}
+.course-section.done{border-color:rgba(0,212,170,.25);background:linear-gradient(135deg,rgba(0,212,170,.055),var(--e1))}
+.course-section::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:999px;background:var(--lesson-color,var(--a));opacity:.68}
+.course-section-head{display:flex;align-items:flex-start;gap:9px;margin-bottom:8px;padding-left:2px}
+.course-section-index{width:24px;height:24px;border-radius:9px;background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);color:var(--a);font-size:11px;font-weight:950;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.course-section-title{font-size:12px;font-weight:950;color:var(--t1);line-height:1.2}
+.course-section-sub{font-size:10.5px;color:var(--t3);line-height:1.35;margin-top:2px}
+.course-section-done{margin-left:auto;font-size:9px;font-weight:900;color:var(--a2);background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.20);padding:3px 7px;border-radius:999px;white-space:nowrap}
+.course-vocab-grid{display:grid;gap:7px}
+.course-vocab-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px}
+.course-vocab-card.done{border-color:rgba(0,212,170,.25)}
+.course-vocab-word{font-size:15px;font-weight:950;color:var(--t1);margin-bottom:2px}
+.course-vocab-sub{font-size:10.5px;color:var(--t3);line-height:1.3;margin-bottom:7px}
+.course-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.course-choice{border:1px solid var(--b1);background:var(--e1);color:var(--t1);border-radius:10px;padding:9px 8px;font-family:var(--f);font-size:12px;font-weight:760;text-align:left;cursor:pointer;transition:transform .14s,border-color .16s,background .16s}
+.course-choice:hover{border-color:rgba(var(--ar),.24);background:rgba(var(--ar),.055)}
+.course-choice:active{transform:scale(.97)}
+.course-choice.ok{border-color:rgba(0,212,170,.48);background:rgba(0,212,170,.10);color:var(--a2)}
+.course-choice.bad{border-color:rgba(255,107,107,.48);background:rgba(255,107,107,.09);color:var(--rd)}
+.course-puzzle-prompt{font-size:12px;line-height:1.45;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-bottom:8px}
+.course-error-list{display:grid;gap:7px}
+.course-error-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px}
+.course-error-sentence{font-size:12px;font-weight:850;color:var(--t1);line-height:1.35;margin-bottom:7px}
 .course-rule{font-size:13px;line-height:1.5;color:var(--t2)}
 .course-rule-compact{display:flex;gap:8px;align-items:flex-start;background:rgba(var(--ar),.065);border:1px solid rgba(var(--ar),.14);border-radius:11px;padding:9px 10px;margin-bottom:9px;font-size:12px;line-height:1.38}
 .course-rule-compact b{font-size:10px;text-transform:uppercase;letter-spacing:.45px;color:var(--a);white-space:nowrap;margin-top:1px}
@@ -5500,6 +5523,138 @@ function courseLessonInsight(ls){
     mistake:{ru:'Типичная ошибка — угадать по переводу и пропустить порядок слов или форму глагола.',en:'A common mistake is guessing from translation and missing word order or verb form.'}
   };
 }
+const COURSE_WORD_I18N={
+  ready:{ru:'готовый',es:'listo',pt:'pronto'},right:{ru:'правый / правильный',es:'correcto',pt:'certo'},home:{ru:'дом',es:'casa',pt:'casa'},student:{ru:'студент',es:'estudiante',pt:'estudante'},today:{ru:'сегодня',es:'hoy',pt:'hoje'},tomorrow:{ru:'завтра',es:'mañana',pt:'amanhã'},monday:{ru:'понедельник',es:'lunes',pt:'segunda-feira'},morning:{ru:'утро',es:'mañana',pt:'manhã'},evening:{ru:'вечер',es:'tarde/noche',pt:'noite'},name:{ru:'имя',es:'nombre',pt:'nome'},country:{ru:'страна',es:'país',pt:'país'},age:{ru:'возраст',es:'edad',pt:'idade'},mother:{ru:'мама',es:'madre',pt:'mãe'},father:{ru:'папа',es:'padre',pt:'pai'},sister:{ru:'сестра',es:'hermana',pt:'irmã'},brother:{ru:'брат',es:'hermano',pt:'irmão'},family:{ru:'семья',es:'familia',pt:'família'},food:{ru:'еда',es:'comida',pt:'comida'},water:{ru:'вода',es:'agua',pt:'água'},coffee:{ru:'кофе',es:'café',pt:'café'},tea:{ru:'чай',es:'té',pt:'chá'},book:{ru:'книга',es:'libro',pt:'livro'},pen:{ru:'ручка',es:'bolígrafo',pt:'caneta'},desk:{ru:'парта',es:'escritorio',pt:'mesa'},classroom:{ru:'класс',es:'aula',pt:'sala de aula'},room:{ru:'комната',es:'habitación',pt:'quarto'},house:{ru:'дом',es:'casa',pt:'casa'},ticket:{ru:'билет',es:'billete',pt:'bilhete'},airport:{ru:'аэропорт',es:'aeropuerto',pt:'aeroporto'},hotel:{ru:'отель',es:'hotel',pt:'hotel'},weather:{ru:'погода',es:'tiempo',pt:'tempo'},rain:{ru:'дождь',es:'lluvia',pt:'chuva'},sun:{ru:'солнце',es:'sol',pt:'sol'},big:{ru:'большой',es:'grande',pt:'grande'},small:{ru:'маленький',es:'pequeño',pt:'pequeno'},work:{ru:'работа',es:'trabajo',pt:'trabalho'},job:{ru:'работа',es:'trabajo',pt:'trabalho'},shop:{ru:'магазин',es:'tienda',pt:'loja'},price:{ru:'цена',es:'precio',pt:'preço'},money:{ru:'деньги',es:'dinero',pt:'dinheiro'},schedule:{ru:'расписание',es:'horario',pt:'horário'},lesson:{ru:'урок',es:'lección',pt:'lição'},english:{ru:'английский',es:'inglés',pt:'inglês'},practice:{ru:'практика',es:'práctica',pt:'prática'},business:{ru:'бизнес',es:'negocios',pt:'negócios'},meeting:{ru:'встреча',es:'reunión',pt:'reunião'},email:{ru:'письмо',es:'correo',pt:'email'},bug:{ru:'ошибка',es:'error',pt:'erro'},task:{ru:'задача',es:'tarea',pt:'tarefa'},update:{ru:'обновление',es:'actualización',pt:'atualização'},feature:{ru:'функция',es:'función',pt:'recurso'},health:{ru:'здоровье',es:'salud',pt:'saúde'},doctor:{ru:'врач',es:'médico',pt:'médico'},travel:{ru:'путешествие',es:'viaje',pt:'viagem'},plan:{ru:'план',es:'plan',pt:'plano'},opinion:{ru:'мнение',es:'opinión',pt:'opinião'},problem:{ru:'проблема',es:'problema',pt:'problema'},solution:{ru:'решение',es:'solución',pt:'solução'},environment:{ru:'окружающая среда',es:'medio ambiente',pt:'meio ambiente'},technology:{ru:'технологии',es:'tecnología',pt:'tecnologia'}
+};
+function courseT(key){
+  const m={
+    vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras'},
+    vocabSub:{ru:'Выбери перевод. Ошибки попадут в повторение.',en:'Choose the translation. Missed words come back later.',es:'Elige la traducción. Los errores vuelven después.',pt:'Escolha a tradução. Erros voltam depois.'},
+    reverse:{ru:'Обратный перевод',en:'Reverse translation',es:'Traducción inversa',pt:'Tradução inversa'},
+    reverseSub:{ru:'С родного языка в английский.',en:'From your interface language into English.',es:'De tu idioma al inglés.',pt:'Do seu idioma para inglês.'},
+    grammar:{ru:'Грамматика и выбор',en:'Grammar choice',es:'Gramática',pt:'Gramática'},
+    puzzle:{ru:'Пазл на английском',en:'English puzzle',es:'Puzzle en inglés',pt:'Puzzle em inglês'},
+    nativePuzzle:{ru:'Пазл с перевода',en:'Translation puzzle',es:'Puzzle de traducción',pt:'Puzzle de tradução'},
+    errors:{ru:'Найди ошибку',en:'Find the mistake',es:'Encuentra el error',pt:'Encontre o erro'},
+    listen:{ru:'Слух и чтение',en:'Listening and reading',es:'Escucha y lectura',pt:'Escuta e leitura'},
+    done:{ru:'готово',en:'done',es:'listo',pt:'feito'},
+    choose:{ru:'Выбери перевод:',en:'Choose the translation:',es:'Elige la traducción:',pt:'Escolha a tradução:'},
+    chooseWord:{ru:'Выбери английское слово:',en:'Choose the English word:',es:'Elige la palabra en inglés:',pt:'Escolha a palavra em inglês:'},
+    correct:{ru:'Верно. Слово закреплено.',en:'Correct. The word is reinforced.',es:'Correcto. Palabra reforzada.',pt:'Correto. Palavra reforçada.'},
+    miss:{ru:'Не раскрываю ответ. Слово вернётся в следующих уроках.',en:'No answer revealed. This word will return in later lessons.',es:'No revelo la respuesta. La palabra volverá.',pt:'Sem revelar a resposta. A palavra voltará.'},
+    allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.'}
+  };
+  return (m[key]&&m[key][lang])||m[key]?.en||key;
+}
+function courseWordTranslation(word){
+  const key=String(word||'').toLowerCase().replace(/[^a-z-]/g,'');
+  if(lang==='en')return key||String(word||'');
+  return COURSE_WORD_I18N[key]?.[lang]||COURSE_WORD_I18N[key]?.ru||key||String(word||'');
+}
+function courseMistakes(){
+  const q=LS.getJ('course_word_mistakes')||[];
+  return Array.isArray(q)?q.filter(Boolean).slice(0,30):[];
+}
+function courseSetMistakes(list){
+  const out=[];
+  (list||[]).forEach(w=>{w=String(w||'').toLowerCase().trim();if(w&&!out.includes(w))out.push(w);});
+  LS.setJ('course_word_mistakes',out.slice(0,30));
+}
+function courseAddMistake(word){const q=courseMistakes();word=String(word||'').toLowerCase().trim();if(word&&!q.includes(word)){q.unshift(word);courseSetMistakes(q);}}
+function courseClearMistake(word){word=String(word||'').toLowerCase().trim();courseSetMistakes(courseMistakes().filter(w=>w!==word));}
+function courseVocabWords(ls){
+  const queue=courseMistakes();
+  const own=(ls.words||[]).map(w=>String(w||'').toLowerCase()).filter(w=>/^[a-z-]{2,}$/.test(w));
+  const merged=[];
+  [...queue,...own].forEach(w=>{if(w&&!merged.includes(w))merged.push(w);});
+  return merged.slice(0,5);
+}
+function courseWordOptions(correct,mode){
+  const words=Object.keys(COURSE_WORD_I18N).filter(w=>w!==correct);
+  const seed=String(correct||'word').split('').reduce((a,c)=>a+c.charCodeAt(0),11);
+  const picks=[];
+  for(let i=0;i<words.length&&picks.length<3;i++){
+    const w=words[(seed+i*7)%words.length];
+    if(!picks.includes(w))picks.push(w);
+  }
+  const raw=[correct,...picks].map(w=>({word:w,label:mode==='reverse'?w:courseWordTranslation(w),ok:w===correct}));
+  for(let i=raw.length-1;i>0;i--){
+    const j=(seed+i*3)%raw.length;
+    const t=raw[i];raw[i]=raw[j];raw[j]=t;
+  }
+  return {opts:raw.map(x=>x.label),answer:raw.findIndex(x=>x.ok)};
+}
+function courseChoiceState(id,part){return LS.getJ('course_choice_'+id+'_'+part)||{};}
+function courseSaveChoiceState(id,part,state){LS.setJ('course_choice_'+id+'_'+part,state||{});}
+function renderCourseVocabSection(ls,id,part,index,reverse){
+  const words=courseVocabWords(ls);
+  const state=courseChoiceState(id,part);
+  const done=LS.getJ(coursePartsKey(id))?.[part];
+  const title=reverse?courseT('reverse'):courseT('vocab');
+  const sub=reverse?courseT('reverseSub'):courseT('vocabSub');
+  return `<div class="course-section ${done?'done':''}" id="course-section-${part}">
+    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${title}</div><div class="course-section-sub">${sub}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+    <div class="course-vocab-grid">${words.map((w,i)=>{
+      const prompt=reverse?courseWordTranslation(w):w;
+      const data=courseWordOptions(w,reverse?'reverse':'native');
+      const picked=state[i];
+      return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
+        <div class="course-vocab-word">${safeHTML(prompt)}</div>
+        <div class="course-vocab-sub">${reverse?courseT('chooseWord'):courseT('choose')}</div>
+        <div class="course-choice-grid">${data.opts.map((o,oi)=>`<button class="course-choice ${picked===oi?(oi===data.answer?'ok':'bad'):''}" ${picked!==undefined?'disabled':''} onclick="answerCourseWord('${id}','${part}',${i},${oi},${data.answer},'${safeHTML(w)}')">${safeHTML(o)}</button>`).join('')}</div>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+}
+function courseSentenceTranslation(sentence){
+  if(lang==='en')return sentence;
+  const raw=String(sentence||'').trim();
+  const phraseKey=raw.toLowerCase().replace(/[.!?]/g,'').replace(/\s+/g,' ');
+  const phraseMap={
+    'i am ready':{ru:'я готов / готова',es:'estoy listo / lista',pt:'estou pronto / pronta'},
+    'you are right':{ru:'ты прав / права',es:'tienes razón',pt:'você está certo / certa'},
+    'she is at home':{ru:'она дома',es:'ella está en casa',pt:'ela está em casa'},
+    'i wake up at seven':{ru:'я просыпаюсь в семь',es:'me despierto a las siete',pt:'eu acordo às sete'},
+    'the lesson is on monday':{ru:'урок в понедельник',es:'la clase es el lunes',pt:'a aula é na segunda-feira'},
+    'i was born in 2005':{ru:'я родился / родилась в 2005 году',es:'nací en 2005',pt:'nasci em 2005'}
+  };
+  if(phraseMap[phraseKey]?.[lang])return phraseMap[phraseKey][lang];
+  const simple=raw.toLowerCase().replace(/[.!?]/g,'').split(/\s+/).map(w=>{
+    if(['i','you','he','she','we','they'].includes(w))return {ru:{i:'я',you:'ты',he:'он',she:'она',we:'мы',they:'они'},es:{i:'yo',you:'tú',he:'él',she:'ella',we:'nosotros',they:'ellos'},pt:{i:'eu',you:'você',he:'ele',she:'ela',we:'nós',they:'eles'}}[lang]?.[w]||w;
+    if(['am','is','are'].includes(w))return lang==='ru'?'':({es:'es/está',pt:'é/está'}[lang]||w);
+    if(w==='at'&&lang==='ru')return 'в';
+    if(['a','an','the'].includes(w))return '';
+    return courseWordTranslation(w);
+  }).filter(Boolean).join(' ');
+  return simple||sentence;
+}
+function courseErrorSet(ls){
+  const base=(ls.examples&&ls.examples[0])||ls.build||'I am ready.';
+  const out=[];
+  const add=(bad,type)=>{if(bad&&bad!==base&&!out.some(x=>x.bad===bad))out.push({bad,type});};
+  add(base.replace(/\bis\b/i,'are'),'verb');
+  add(base.replace(/\bare\b/i,'is'),'verb');
+  add(base.replace(/\bam\b/i,'are'),'verb');
+  add(base.replace(/\bin\b/i,'on'),'prep');
+  add(base.replace(/\bon\b/i,'at'),'prep');
+  const words=base.split(/\s+/);if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '),'order');
+  while(out.length<3)add('I can to use this lesson.','verb');
+  return out.slice(0,3);
+}
+function renderCourseErrorSection(ls,id,index){
+  const part='errors';
+  const state=courseChoiceState(id,part);
+  const done=LS.getJ(coursePartsKey(id))?.[part];
+  const labels={verb:{ru:'форма глагола',en:'verb form',es:'forma verbal',pt:'forma verbal'},prep:{ru:'предлог',en:'preposition',es:'preposición',pt:'preposição'},order:{ru:'порядок слов',en:'word order',es:'orden de palabras',pt:'ordem das palavras'}};
+  const opts=['verb','prep','order'];
+  return `<div class="course-section ${done?'done':''}" id="course-section-errors">
+    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ не показывается сразу.':'Choose the mistake type. The answer is not revealed immediately.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+    <div class="course-error-list">${courseErrorSet(ls).map((q,i)=>`<div class="course-error-card" id="course-choice-errors-${i}">
+      <div class="course-error-sentence">${safeHTML(q.bad)}</div>
+      <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${state[i]===oi?(o===q.type?'ok':'bad'):''}" ${state[i]!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
+    </div>`).join('')}</div>
+  </div>`;
+}
 function coursePracticeSet(ls){
   const base=Array.isArray(ls.practice)?ls.practice:[];
   const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,5);
@@ -5548,8 +5703,13 @@ function openCourseLesson(id){
   const practice=coursePracticeSet(ls);
   window['course_practice_'+courseKey(id)]=practice;
   const partState=LS.getJ(coursePartsKey(id))||{};
-  const completedSteps=['practice_0','practice_1','builder','dictation','reading'].filter(k=>partState[k]).length;
-  const trackHtml=[0,1,2,3,4].map(i=>`<div class="course-track-step ${i<completedSteps?'done':''}"></div>`).join('');
+  const requiredParts=courseRequiredParts(id);
+  const completedSteps=requiredParts.filter(k=>partState[k]).length;
+  const trackHtml=[0,1,2,3,4,5].map(i=>`<div class="course-track-step ${i<Math.ceil(completedSteps/Math.max(1,requiredParts.length)*6)?'done':''}"></div>`).join('');
+  const grammarDone=practice.every((_,i)=>partState['practice_'+i]);
+  const builderDone=partState.builder;
+  const nativeBuilderDone=partState.builder_native;
+  const listenDone=partState.dictation&&partState.reading;
   const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <div class="course-hero">
@@ -5572,34 +5732,56 @@ function openCourseLesson(id){
     </div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
-    <div class="course-practice" id="course-q-${id}">
-      <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
-      ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
-        <div class="course-qtext">${safeHTML(q.q)}</div>
-        ${q.o.map((o,i)=>`<div class="course-opt" onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
-      </div>`).join('')}
+    ${renderCourseVocabSection(ls,id,'vocab_native',1,false)}
+    ${renderCourseVocabSection(ls,id,'vocab_reverse',2,true)}
+    <div class="course-section ${grammarDone?'done':''}" id="course-section-grammar">
+      <div class="course-section-head"><div class="course-section-index">3</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-practice" id="course-q-${id}">
+        <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
+        ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
+          <div class="course-qtext">${safeHTML(q.q)}</div>
+          ${q.o.map((o,i)=>`<div class="course-opt" onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
+        </div>`).join('')}
+      </div>
     </div>
-    <div class="course-build">
+    <div class="course-section ${builderDone?'done':''}" id="course-section-builder">
+      <div class="course-section-head"><div class="course-section-index">4</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английское предложение из слов.':'Build the English sentence from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
       <div class="course-slots" id="cb-slots-${id}"></div>
-      <div class="course-pool" id="cb-pool-${id}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}',this)">${safeHTML(w)}</button>`).join('')}</div>
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}')">${lang==='ru'?'Сброс':'Reset'}</button></div>
+      <div class="course-pool" id="cb-pool-${id}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','',this)">${safeHTML(w)}</button>`).join('')}</div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','')">${lang==='ru'?'Сброс':'Reset'}</button></div>
       <div class="course-result" id="cb-res-${id}"></div>
+      </div>
     </div>
-    <div class="course-build">
+    <div class="course-section ${nativeBuilderDone?'done':''}" id="course-section-builder-native">
+      <div class="course-section-head"><div class="course-section-index">5</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-build">
+      <div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>
+      <div class="course-slots" id="cb-slots-${id}-native"></div>
+      <div class="course-pool" id="cb-pool-${id}-native">${shuffleCourseWords(words,id+'native').map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','native',this)">${safeHTML(w)}</button>`).join('')}</div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','native')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','native')">${lang==='ru'?'Сброс':'Reset'}</button></div>
+      <div class="course-result" id="cb-res-${id}-native"></div>
+      </div>
+    </div>
+    ${renderCourseErrorSection(ls,id,6)}
+    <div class="course-section ${listenDone?'done':''}" id="course-section-listen">
+      <div class="course-section-head"><div class="course-section-index">7</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${lang==='ru'?'Диктант и короткая проверка понимания.':'Dictation and a short comprehension check.'}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
       <div class="course-note">${lang==='ru'?'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.':'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.'}</div>
       <input class="course-inp" id="cd-inp-${id}" placeholder="${lang==='ru'?'Напиши услышанную фразу':'Type what you heard'}">
       <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">${lang==='ru'?'Слушать':'Listen'}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${lang==='ru'?'Проверить':'Check'}</button></div>
       <div class="course-result" id="cd-res-${id}"></div>
-    </div>
-    <div class="course-build">
+      </div>
+      <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Чтение и понимание':'Reading check'}</div>
       <div class="course-rule">${safeHTML(courseReadingText(ls))}</div>
       <div class="course-opt" onclick="checkCourseReading('${id}',true)">${lang==='ru'?'Нужно заметить правило и контекст примеров':'Notice the rule and the context of the examples'}</div>
       <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Нужно выбрать только самое длинное слово':'Choose only the longest word'}</div>
       <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Можно игнорировать форму глагола':'Ignore the verb form'}</div>
       <div class="course-result" id="cr-res-${id}"></div>
+      </div>
     </div>
     <div id="course-complete-${id}"></div>
   </div>`;
@@ -5634,14 +5816,14 @@ function courseWarmLine(){
 function coursePartsKey(id){return 'course_parts_'+id;}
 function courseRequiredParts(id){
   const practice=window['course_practice_'+courseKey(id)]||[];
-  return ['builder','dictation','reading',...practice.map((_,i)=>'practice_'+i)];
+  return ['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading',...practice.map((_,i)=>'practice_'+i)];
 }
 function updateCourseTrack(id){
   const el=document.getElementById('course-track-'+id);if(!el)return;
   const parts=LS.getJ(coursePartsKey(id))||{};
   const required=courseRequiredParts(id);
   const done=required.filter(k=>parts[k]).length;
-  [...el.children].forEach((node,i)=>node.classList.toggle('done',i<Math.min(5,Math.ceil(done/Math.max(1,required.length)*5))));
+  [...el.children].forEach((node,i)=>node.classList.toggle('done',i<Math.min(6,Math.ceil(done/Math.max(1,required.length)*6))));
 }
 function renderCourseCompleteCard(id,already){
   const box=document.getElementById('course-complete-'+id);
@@ -5676,25 +5858,81 @@ function courseMarkPart(id,type,ok){
 function awardCourseExtra(id,type,amount){
   return courseMarkPart(id,type,true);
 }
-function coursePickWord(id,btn){
-  const slots=document.getElementById('cb-slots-'+id);if(!slots||!btn)return;
+function maybeCompleteChoicePart(id,part,total){
+  const state=courseChoiceState(id,part);
+  const answered=Object.keys(state).length;
+  if(answered>=total){
+    courseMarkPart(id,part,true);
+    toast(courseT('allAttempted'),'');
+  }
+}
+function answerCourseWord(id,part,idx,picked,answer,word){
+  const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
+  const state=courseChoiceState(id,part);
+  if(state[idx]!==undefined)return;
+  state[idx]=picked;
+  courseSaveChoiceState(id,part,state);
+  const ok=picked===answer;
+  card.querySelectorAll('.course-choice').forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===picked)btn.classList.add(ok?'ok':'bad');
+  });
+  if(ok){
+    courseClearMistake(word);
+    toast(courseT('correct'),'');
+  }else{
+    courseAddMistake(word);
+    let hint=document.createElement('div');
+    hint.className='course-hint';
+    hint.textContent=courseT('miss');
+    card.appendChild(hint);
+    try{sfx.warn();}catch(e){}
+  }
+  maybeCompleteChoicePart(id,part,courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length);
+}
+function answerCourseError(id,idx,type,picked,chosen){
+  const part='errors';
+  const card=document.getElementById('course-choice-errors-'+idx);if(!card)return;
+  const state=courseChoiceState(id,part);
+  if(state[idx]!==undefined)return;
+  state[idx]=picked;
+  courseSaveChoiceState(id,part,state);
+  const ok=chosen===type;
+  card.querySelectorAll('.course-choice').forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===picked)btn.classList.add(ok?'ok':'bad');
+  });
+  if(!ok){
+    const hint=document.createElement('div');
+    hint.className='course-hint';
+    hint.textContent=lang==='ru'?'Ошибка засчитана. В следующем похожем задании проверь форму, порядок слов и предлог.':'Miss saved. In the next similar task, check form, word order and preposition.';
+    card.appendChild(hint);
+  }
+  maybeCompleteChoicePart(id,part,3);
+}
+function coursePickWord(id,suffix,btn){
+  suffix=suffix?'-'+suffix:'';
+  const slots=document.getElementById('cb-slots-'+id+suffix);if(!slots||!btn)return;
   btn.classList.add('used');
   const w=document.createElement('button');
   w.className='course-word';w.textContent=btn.dataset.word||btn.textContent;w.onclick=function(){btn.classList.remove('used');w.remove();};
   slots.appendChild(w);
 }
-function resetCourseBuilder(id){
-  const slots=document.getElementById('cb-slots-'+id);if(slots)slots.innerHTML='';
-  document.querySelectorAll('#cb-pool-'+id+' .course-word').forEach(b=>b.classList.remove('used'));
-  const res=document.getElementById('cb-res-'+id);if(res){res.textContent='';res.className='course-result';}
+function resetCourseBuilder(id,suffix){
+  suffix=suffix?'-'+suffix:'';
+  const slots=document.getElementById('cb-slots-'+id+suffix);if(slots)slots.innerHTML='';
+  document.querySelectorAll('#cb-pool-'+id+suffix+' .course-word').forEach(b=>b.classList.remove('used'));
+  const res=document.getElementById('cb-res-'+id+suffix);if(res){res.textContent='';res.className='course-result';}
 }
-function checkCourseBuilder(id){
+function checkCourseBuilder(id,suffix){
+  const part=suffix==='native'?'builder_native':'builder';
+  suffix=suffix?'-'+suffix:'';
   const target=window['course_target_'+courseKey(id)]||'';
-  const answer=[...document.querySelectorAll('#cb-slots-'+id+' .course-word')].map(x=>x.textContent).join(' ');
+  const answer=[...document.querySelectorAll('#cb-slots-'+id+suffix+' .course-word')].map(x=>x.textContent).join(' ');
   const ok=normalizeCourseText(answer)===normalizeCourseText(target);
-  const res=document.getElementById('cb-res-'+id);if(!res)return;
+  const res=document.getElementById('cb-res-'+id+suffix);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  const attemptsKey='course_attempt_builder_'+id;
+  const attemptsKey='course_attempt_builder_'+id+suffix;
   const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
   if(!ok)LS.set(attemptsKey,String(attempts));
   res.textContent=ok
@@ -5702,7 +5940,7 @@ function checkCourseBuilder(id){
     :(attempts<2
       ?(lang==='ru'?'Пока нет. Проверь порядок слов и попробуй ещё раз.':'Not yet. Check word order and try again.')
       :(lang==='ru'?'Подсказка: начни так: ':'Hint: start with: ')+target.split(' ').slice(0,2).join(' ')+' ...');
-  if(ok){courseMarkPart(id,'builder',true);try{trackM('drill');}catch(e){}}
+  if(ok){courseMarkPart(id,part,true);try{trackM('drill');}catch(e){}}
 }
 function checkCourseDictation(id){
   const target=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
@@ -5727,17 +5965,25 @@ function checkCourseReading(id,picked){
   res.textContent=ok?(lang==='ru'?'Верно. Сначала смотри на правило, потом на смысл темы.':'Correct. First notice the rule, then the topic meaning.'):(lang==='ru'?'Не совсем. В таких заданиях важны правило, контекст и форма слова.':'Not quite. These tasks depend on the rule, context and word form.');
   if(ok){courseMarkPart(id,'reading',true);}
 }
+function courseUtterance(text){
+  const u=new SpeechSynthesisUtterance(text||'');
+  u.lang='en-GB';u.rate=.86;u.pitch=.96;u.volume=1;
+  try{
+    const voices=speechSynthesis.getVoices?.()||[];
+    const preferred=voices.find(v=>/sonia|libby|serena|google uk english female/i.test(v.name))||voices.find(v=>/^en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang));
+    if(preferred)u.voice=preferred;
+  }catch(e){}
+  return u;
+}
 function speakCourseLine(id,idx){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
-  const u=new SpeechSynthesisUtterance(ls.examples[idx]||'');
-  u.lang='en-US';u.rate=.92;
+  const u=courseUtterance(ls.examples[idx]||'');
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 function speakCourseDictation(id){
   if(!('speechSynthesis' in window))return;
   const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-US';u.rate=.9;
+  const u=courseUtterance(text);
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 function answerCoursePractice(id,qi,picked){

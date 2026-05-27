@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY")
 OPENAI_KEY     = os.getenv("OPENAI_API_KEY")  # для Whisper STT
 TTS_PROVIDER   = (os.getenv("TTS_PROVIDER") or "auto").lower()
-TTS_RATE       = os.getenv("TTS_RATE", "-10%")
+TTS_RATE       = os.getenv("TTS_RATE", "-12%")
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -87,11 +87,11 @@ def _edge_voice(lang: str = "en") -> str:
     if env_voice:
         return env_voice
     return {
-        "en": "en-US-JennyNeural",
+        "en": "en-GB-SoniaNeural",
         "ru": "ru-RU-SvetlanaNeural",
         "es": "es-ES-ElviraNeural",
         "pt": "pt-BR-FranciscaNeural",
-    }.get(base, "en-US-AriaNeural")
+    }.get(base, "en-GB-SoniaNeural")
 
 
 async def _edge_tts(text: str, lang: str = "en") -> bytes | None:
