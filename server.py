@@ -791,7 +791,7 @@ async def handle_sync_stats(request):
     except Exception:
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     try:
-        from database import db, update_streak, upsert_user
+        from database import db, upsert_user
         # Ensure user exists
         try:
             await upsert_user(uid, "Student")
@@ -809,10 +809,6 @@ async def handle_sync_stats(request):
             await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),?), sessions=GREATEST(COALESCE(sessions,0),?), words=GREATEST(COALESCE(words,0),?), tests=GREATEST(COALESCE(tests,0),?), mistakes=GREATEST(COALESCE(mistakes,0),?), streak=GREATEST(COALESCE(streak,0),?), level=?, last_active=CURRENT_DATE WHERE uid=?", xp, sessions, words, tests, errors, streak, level, uid)
         except Exception as e:
             logger.debug(f"sync update: {e}")
-        try:
-            await update_streak(uid)
-        except Exception:
-            pass
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         logger.error(f"sync_stats error: {e}")

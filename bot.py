@@ -1291,27 +1291,17 @@ async def cmd_paysupport(m: Message):
 @dp.message(Command("terms"))
 @dp.message(Command("rules"))
 async def cmd_terms(m: Message):
-    lang = await get_lang(m.from_user.id) or "ru"
-    ru = lang == "ru"
     await m.answer(
-        ("<b>Правила и условия PolyGlotty</b>\n\n"
-         "1. <b>Что это за сервис.</b> PolyGlotty помогает учить английский: курс, карточки, тесты, путь, прогресс и ALEX Chat по подписке. Это учебный продукт, а не официальная школа, экзаменационный центр или гарантия результата.\n\n"
-         "2. <b>AI может ошибаться.</b> ALEX объясняет, проверяет тексты и помогает практиковаться, но ответы AI не являются юридической, медицинской, финансовой или иной профессиональной консультацией. Важные выводы нужно перепроверять.\n\n"
-         "3. <b>Платежи.</b> Цифровые подписки оплачиваются через Telegram Stars. Доступ включается после успешного платежа и привязан к Telegram ID. Если платеж прошел, а доступ не появился, напиши /paysupport и приложи план, время оплаты и скриншот.\n\n"
-         "4. <b>Что не зависит от нас.</b> Мы не управляем Telegram, App Store, Google Play, Anthropic, Railway, интернетом, устройством пользователя и Telegram WebView. Из-за их сбоев, ограничений, налогов, комиссий, правил региона или обновлений отдельные функции могут временно работать иначе.\n\n"
-         "5. <b>Лимиты и честное использование.</b> Лимиты, модели, цены и набор функций могут меняться, чтобы сервис не уходил в минус и оставался доступным. Обход лимитов, фейковые аккаунты, автоматизация запросов, спам и попытки ломать оплату могут привести к блокировке доступа.\n\n"
-         "6. <b>Контент и данные.</b> Не отправляй пароли, документы, платежные данные и другую чувствительную информацию. Мы храним только данные, нужные для обучения и подписки. Подробнее: /privacy.\n\n"
-         "7. <b>Поддержка.</b> Запросы обрабатываются в порядке очереди, поэтому ответ может быть не мгновенным. По вопросам приложения — /support, по оплате — /paysupport. Telegram Support не решает покупки внутри нашего бота.\n\n"
-         "Продолжая пользоваться ботом или покупая подписку, ты соглашаешься с этими правилами.")
-        if ru else
         ("<b>PolyGlotty Terms and Rules</b>\n\n"
-         "1. <b>Service scope.</b> PolyGlotty helps you learn English with a course, flashcards, tests, a learning path, progress tracking and subscription-based ALEX Chat. It is an educational product, not an official school, exam center or guarantee of results.\n\n"
-         "2. <b>AI can be wrong.</b> ALEX explains, checks texts and helps you practise, but AI replies are not legal, medical, financial or other professional advice. Important conclusions should be checked.\n\n"
-         "3. <b>Payments.</b> Digital subscriptions are paid through Telegram Stars. Access is activated after a successful payment and linked to your Telegram ID. If payment succeeded but access did not appear, contact /paysupport with the plan, payment time and screenshot.\n\n"
-         "4. <b>Outside our control.</b> We do not control Telegram, App Store, Google Play, Anthropic, Railway, your internet connection, device or Telegram WebView. Their outages, limits, taxes, fees, regional rules or updates may temporarily affect features.\n\n"
-         "5. <b>Limits and fair use.</b> Limits, models, prices and features may change so the service remains sustainable. Limit bypassing, fake accounts, automated requests, spam or payment abuse may lead to access restrictions.\n\n"
-         "6. <b>Content and data.</b> Do not send passwords, documents, payment details or other sensitive information. We store only data needed for learning and subscriptions. Details: /privacy.\n\n"
-         "7. <b>Support.</b> Requests are handled in queue, so replies may not be instant. App questions: /support. Payment questions: /paysupport. Telegram Support does not handle purchases made inside this bot.\n\n"
+         "1. <b>Service scope.</b> PolyGlotty is an educational Telegram WebApp for English learning. It is not an official school, exam center, legal advisor, medical service, financial advisor or government institution.\n\n"
+         "2. <b>No guaranteed results.</b> PolyGlotty helps users study consistently, but does not guarantee admission, employment, exam scores, fluent speaking within a fixed time, or the same progress speed for every user.\n\n"
+         "3. <b>AI can be wrong.</b> ALEX can explain, check texts and help users practise, but AI may make mistakes, miss context or give inaccurate wording. Important information should be verified. AI replies are not professional advice.\n\n"
+         "4. <b>Payments.</b> Digital subscriptions are paid through Telegram Stars and linked to the user's Telegram ID. If payment succeeded but access did not appear, contact /paysupport with the plan, payment time and screenshot.\n\n"
+         "5. <b>Outside our control.</b> PolyGlotty does not control Telegram, Telegram WebView, Telegram Stars, App Store, Google Play, banks, Anthropic, AI models, TTS/STT providers, Railway, internet connection, devices, operating systems or regional restrictions.\n\n"
+         "6. <b>Limits and sustainability.</b> Limits, models, quota costs, XP rewards, prices, plan contents and feature access may change to keep the service sustainable, prevent abuse and adapt to provider pricing.\n\n"
+         "7. <b>Fair use.</b> Users must not bypass limits, create fake accounts, automate requests, scrape content, abuse payments, attack APIs, send spam, or present internal progress certificates as official accredited documents.\n\n"
+         "8. <b>Data and safety.</b> Do not send passwords, bank details, documents, private conversations, medical records, addresses or other sensitive data. Details: /privacy.\n\n"
+         "9. <b>Support.</b> Requests are handled in queue, so replies may not be instant. App questions: /support. Payment questions: /paysupport.\n\n"
          "By continuing to use the bot or buying a subscription, you agree to these rules.")
     )
 

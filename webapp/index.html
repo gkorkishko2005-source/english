@@ -567,6 +567,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .tool-card.export .tool-ico{background:rgba(0,212,170,.12)}.tool-card.export .tool-ico svg{stroke:var(--a2)}
 .tool-card.cert .tool-ico{background:rgba(255,184,48,.13)}.tool-card.cert .tool-ico svg{stroke:var(--gd)}
 .tool-card.gift .tool-ico{background:rgba(167,139,250,.13)}.tool-card.gift .tool-ico svg{stroke:#a78bfa}
+.tool-card.terms .tool-ico{background:rgba(96,165,250,.13)}.tool-card.terms .tool-ico svg{stroke:#60a5fa}
+.terms-box{padding:4px 16px 18px;color:var(--t2);font-size:12px;line-height:1.48}
+.terms-box h3{font-size:13px;color:var(--t1);margin:14px 0 6px}
+.terms-box p{margin:0 0 8px}
+.terms-box ul{margin:0 0 8px 18px;padding:0}
+.terms-box li{margin:3px 0}
 @media(max-width:350px){.tools-grid{grid-template-columns:1fr}.tool-card{min-height:76px;display:flex;align-items:center;gap:11px}.tool-ico{margin-bottom:0;flex:0 0 34px}}
 .alex-locked{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.075),rgba(0,212,170,.045));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);padding:13px;display:flex;gap:11px;align-items:flex-start;margin-bottom:10px}
 .alex-locked::after{content:'';position:absolute;right:-38px;top:-45px;width:120px;height:120px;border-radius:999px;background:radial-gradient(circle,rgba(var(--ar),.16),transparent 67%);pointer-events:none}
@@ -1473,10 +1479,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
-    <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp" id="mxp1">+20 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc2"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt2"></div><div class="mxp" id="mxp2">+25 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc3"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt3"></div><div class="mxp" id="mxp3">+35 XP</div></div>
-    <div class="mrow" style="border-bottom:none"><div class="mchk" id="mc4"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt4"></div><div class="mxp" id="mxp4">+30 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp" id="mxp1">+5 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc2"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt2"></div><div class="mxp" id="mxp2">+7 XP</div></div>
+    <div class="mrow"><div class="mchk" id="mc3"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt3"></div><div class="mxp" id="mxp3">+8 XP</div></div>
+    <div class="mrow" style="border-bottom:none"><div class="mchk" id="mc4"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt4"></div><div class="mxp" id="mxp4">+10 XP</div></div>
   </div>
   <div class="sec"><span id="qs-lbl"></span></div>
   <div class="qg">
@@ -1714,6 +1720,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8v12M4 12h16"/><path d="M12 8s-1.4-4-4-4c-1.4 0-2.2 1.1-1.6 2.2C7 7.4 9.3 8 12 8Zm0 0s1.4-4 4-4c1.4 0 2.2 1.1 1.6 2.2C17 7.4 14.7 8 12 8Z"/></svg></div>
       <div class="tool-title" id="gift-lbl">Gift Premium</div><div class="tool-sub" id="gift-sub">Invite link</div>
     </button>
+    <button class="tool-card terms" onclick="openTermsRules()" type="button">
+      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 012 2v16l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
+      <div class="tool-title" id="terms-lbl">Terms & Rules</div><div class="tool-sub" id="terms-sub">Service policy</div>
+    </button>
   </div>
 
   <!-- Compact quick-toggles row: Dark + Sound -->
@@ -1870,6 +1880,41 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
 </div>
 
+<!-- TERMS AND RULES MODAL -->
+<div class="mov" id="termsm" style="display:none" onclick="closeMod('termsm')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit">PolyGlotty Terms and Rules</div>
+    <div class="terms-box">
+      <p><b>Last updated:</b> 2026-05-27</p>
+      <p>These rules define what PolyGlotty does, what it does not promise, and which situations are outside PolyGlotty's control.</p>
+      <h3>1. Service Scope</h3>
+      <p>PolyGlotty is a Telegram WebApp for learning English. It includes a course, flashcards, tests, a learning path, progress tracking, practice tasks, and the subscription-based ALEX AI assistant.</p>
+      <p>PolyGlotty is an educational product. It is not an official school, university, exam center, legal advisor, medical service, financial advisor, or government institution. Certificates, levels, XP, streaks, badges, and achievements show progress inside the product and are not official accredited qualifications.</p>
+      <h3>2. Learning Results Are Not Guaranteed</h3>
+      <p>PolyGlotty helps users study consistently, but it cannot guarantee admission, employment, exam scores, fluent speaking within a fixed period, correction of every possible mistake, or the same progress speed for every user.</p>
+      <h3>3. AI Can Be Wrong</h3>
+      <p>ALEX can explain grammar, check texts, generate examples, and help with practice. AI models can still make mistakes, miss context, oversimplify, hallucinate, or provide inaccurate wording. Important information should be verified. AI replies are not legal, medical, financial, immigration, tax, or other professional advice.</p>
+      <h3>4. Payments and Subscriptions</h3>
+      <p>Digital subscriptions are paid through Telegram Stars. Access is activated after a successful payment and linked to the user's Telegram ID. If payment succeeded but access did not appear, contact payment support through /paysupport with the selected plan, payment time, screenshot, and Telegram ID if known.</p>
+      <p>Refunds, disputed payments, fees, regional restrictions, taxes, and payment availability are governed by Telegram Stars, Telegram, App Store, Google Play, banks, and other payment providers.</p>
+      <h3>5. Third-Party Services and Availability</h3>
+      <p>PolyGlotty does not control Telegram, Telegram WebView, Telegram Stars, App Store, Google Play, banks, Anthropic, AI models, TTS/STT providers, Railway, DNS, CDN, internet connection, devices, operating systems, browser updates, or regional restrictions. These may temporarily affect product features.</p>
+      <h3>6. Limits, Models, Pricing, and Sustainability</h3>
+      <p>Limits, models, quota point costs, prices, plan contents, XP rewards, and feature access may change to keep the service sustainable, prevent abuse, handle load, adapt to provider pricing, and keep subscriptions fair for paying users.</p>
+      <h3>7. Fair Use and Abuse Prevention</h3>
+      <p>Users must not bypass limits, create fake accounts, automate requests, overload the server, scrape product content, attempt to receive paid access without payment, interfere with APIs or payments, send spam or harmful content, impersonate PolyGlotty, or present internal progress certificates as official accredited documents.</p>
+      <h3>8. User Content and Safety</h3>
+      <p>Users are responsible for the text, voice, files, and materials they send. Do not send passwords, bank card details, documents, private conversations, medical records, addresses, third-party personal data, confidential business information, or anything you are not allowed to share.</p>
+      <h3>9. Privacy and Data Deletion</h3>
+      <p>PolyGlotty stores data required for learning and subscriptions, including Telegram ID, name or username, language, level, XP, streak, progress, subscription status, flashcards, mistakes, settings, and learning context. PolyGlotty does not sell personal data. To request deletion, contact /support and include your Telegram ID.</p>
+      <h3>10. Support</h3>
+      <p>PolyGlotty Support tries to respond quickly, but requests are handled in queue and instant replies are not guaranteed. App questions: /support. Payment questions: /paysupport.</p>
+      <h3>11. Changes to These Rules</h3>
+      <p>PolyGlotty may update these rules, prices, limits, features, and plan contents. By continuing to use PolyGlotty or buying a subscription, the user agrees to the current version of these rules.</p>
+    </div>
+  </div>
+</div>
+
 <!-- DRILL TOPIC PICKER MODAL -->
 <div class="mov" id="drillm" style="display:none" onclick="closeMod('drillm')">
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
@@ -2000,7 +2045,7 @@ const THEMES=[
 const LANGS = {
   ru:{greet:h=>h<12?'Доброе утро,':h<18?'Добрый день,':h<23?'Добрый вечер,':'Доброй ночи,',
     streak_t:'Дней подряд',streak:'Стрик',words:'Слова',tests:'Тесты',
-    missions:'Задания дня',m1:'Отправить 3 сообщения ALEX',m2:'Повторить 5 карточек',m3:'Аудио-задание TOEFL',m4:'Изучить 5 слов дня',
+    missions:'Задания дня · 2 для стрика',m1:'Отправить 3 сообщения ALEX',m2:'Повторить 5 карточек',m3:'Аудио-задание TOEFL',m4:'Изучить 5 слов дня',
     qs:'Быстрый старт',gr:'Грамматика',grs:'Изучить правило',fc:'Карточки',fcs:'Повторить слова',tfs:'Аудирование',sp:'Разговор',sps:'Свободный диалог',
     dw:'Слова дня',dwa:'+ Ещё',rev:'Очередь повторений',tap_flip:'Нажми чтобы перевернуть',translation:'ПЕРЕВОД',
     again:'Снова',hard:'Сложно',good:'Хорошо',easy:'Легко',
@@ -2024,7 +2069,7 @@ const LANGS = {
   },
   en:{greet:h=>h<12?'Good morning,':h<18?'Good afternoon,':h<23?'Good evening,':'Good night,',
     streak_t:'Day streak',streak:'Streak',words:'Words',tests:'Tests',
-    missions:'Daily missions',m1:'Send 3 messages to ALEX',m2:'Review 5 flashcards',m3:'Complete audio task',m4:"Learn today's 5 words",
+    missions:'Daily missions · 2 for streak',m1:'Send 3 messages to ALEX',m2:'Review 5 flashcards',m3:'Complete audio task',m4:"Learn today's 5 words",
     qs:'Quick start',gr:'Grammar',grs:'Learn a rule',fc:'Flashcards',fcs:'Review words',tfs:'Listening practice',sp:'Speaking',sps:'Free conversation',
     dw:"Today's words",dwa:'+ Add more',rev:'Review queue',tap_flip:'Tap to flip',translation:'TRANSLATION',
     again:'Again',hard:'Hard',good:'Good',easy:'Easy',
@@ -2048,7 +2093,7 @@ const LANGS = {
   },
   es:{greet:h=>h<12?'Buenos días,':h<18?'Buenas tardes,':'Buenas noches,',
     streak_t:'Días seguidos',streak:'Racha',words:'Palabras',tests:'Pruebas',
-    missions:'Misiones del día',m1:'Enviar 3 mensajes a ALEX',m2:'Repasar 5 tarjetas',m3:'Completar tarea de audio',m4:'Aprender 5 palabras de hoy',
+    missions:'Misiones del día · 2 para racha',m1:'Enviar 3 mensajes a ALEX',m2:'Repasar 5 tarjetas',m3:'Completar tarea de audio',m4:'Aprender 5 palabras de hoy',
     qs:'Inicio rápido',gr:'Gramática',grs:'Aprender una regla',fc:'Tarjetas',fcs:'Repasar palabras',tfs:'Práctica de escucha',sp:'Hablar',sps:'Conversación libre',
     dw:'Palabras de hoy',dwa:'+ Más',rev:'Cola de repaso',tap_flip:'Toca para voltear',translation:'TRADUCCIÓN',
     again:'De nuevo',hard:'Difícil',good:'Bien',easy:'Fácil',
@@ -2072,7 +2117,7 @@ const LANGS = {
   },
   pt:{greet:h=>h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,',
     streak_t:'Dias seguidos',streak:'Sequência',words:'Palavras',tests:'Testes',
-    missions:'Missões diárias',m1:'Enviar 3 mensagens ao ALEX',m2:'Revisar 5 cartões',m3:'Completar tarefa de áudio',m4:'Aprender 5 palavras do dia',
+    missions:'Missões diárias · 2 para sequência',m1:'Enviar 3 mensagens ao ALEX',m2:'Revisar 5 cartões',m3:'Completar tarefa de áudio',m4:'Aprender 5 palavras do dia',
     qs:'Início rápido',gr:'Gramática',grs:'Aprender uma regra',fc:'Cartões',fcs:'Revisar palavras',tfs:'Prática de escuta',sp:'Falar',sps:'Conversa livre',
     dw:'Palavras do dia',dwa:'+ Mais',rev:'Fila de revisão',tap_flip:'Toque para virar',translation:'TRADUÇÃO',
     again:'Novamente',hard:'Difícil',good:'Bom',easy:'Fácil',
@@ -2667,11 +2712,13 @@ function drawProgress(){
     var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
     var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
     var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium',es:'Regalar Premium',de:'Premium verschenken',fr:'Offrir Premium',pt:'Dar Premium',uk:'Подарувати Premium',tr:'Premium hediye et',zh:'赠送Premium',ar:'إهداء Premium'}[lang]||'Gift Premium';
+    var termsLbl=document.getElementById('terms-lbl');if(termsLbl)termsLbl.textContent='Terms & Rules';
     var ttl=document.getElementById('tools-toggle-lbl');if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
     var ss=document.getElementById('share-sub');if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',pt:'Post para Telegram'}[lang]||'Telegram post';
     var es=document.getElementById('export-sub');if(es)es.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',pt:'Copiar ou baixar'}[lang]||'Copy or download';
     var cs=document.getElementById('cert-sub');if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',pt:'Cartão de conquista'}[lang]||'Achievement card';
     var gs=document.getElementById('gift-sub');if(gs)gs.textContent={ru:'Ссылка-приглашение',en:'Invite link',es:'Enlace de invitación',pt:'Link de convite'}[lang]||'Invite link';
+    var ts=document.getElementById('terms-sub');if(ts)ts.textContent='Service policy';
   }catch(e){}
 
   // Achievements
@@ -2827,26 +2874,26 @@ function updateXPBar(xp){
 const MK=['1','2','3','4'];
 /* Mission pool — 4 of these are picked daily (deterministic by date). */
 const MISSION_POOL=[
-  {id:'chat3', key:'chat',  target:3, xp:8, label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
-  {id:'chat5', key:'chat',  target:5, xp:12, label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
-  {id:'chat7', key:'chat',  target:7, xp:16, label:{ru:'Проведи 7 реплик в чате',en:'Send 7 chat messages',es:'Envía 7 mensajes',pt:'Envie 7 mensagens'}},
-  {id:'words5',key:'words', target:5, xp:10, label:{ru:'Повтори 5 карточек',en:'Review 5 cards',es:'Repasa 5 tarjetas',pt:'Revise 5 cartões'}},
-  {id:'words8',key:'words', target:8, xp:14, label:{ru:'Повтори 8 карточек',en:'Review 8 cards',es:'Repasa 8 tarjetas',pt:'Revise 8 cartões'}},
-  {id:'words10',key:'words',target:10,xp:18,label:{ru:'Закрой 10 карточек',en:'Finish 10 cards',es:'Completa 10 tarjetas',pt:'Conclua 10 cartões'}},
-  {id:'listen',key:'listen',target:1, xp:18, label:{ru:'Аудио-задание TOEFL',en:'TOEFL listening task',es:'Tarea de escucha TOEFL',pt:'Tarefa de escuta TOEFL'}},
-  {id:'listen2',key:'listen',target:2, xp:28, label:{ru:'Сделай 2 задания на слух',en:'Complete 2 listening tasks',es:'Completa 2 escuchas',pt:'Complete 2 escutas'}},
-  {id:'drill', key:'drill', target:1, xp:14, label:{ru:'Пройди один drill по грамматике',en:'Complete one grammar drill',es:'Completa un drill de gramática',pt:'Complete um drill de gramática'}},
-  {id:'drill2',key:'drill', target:2, xp:24, label:{ru:'Пройди 2 grammar drills',en:'Complete 2 grammar drills',es:'Completa 2 drills',pt:'Complete 2 drills'}},
-  {id:'game',  key:'game',  target:1, xp:8, label:{ru:'Выиграй в любую мини-игру',en:'Win any mini-game',es:'Gana cualquier mini-juego',pt:'Vença qualquer mini-jogo'}},
-  {id:'game2', key:'game',  target:2, xp:16, label:{ru:'Выиграй 2 мини-игры',en:'Win 2 mini-games',es:'Gana 2 mini-juegos',pt:'Vença 2 mini-jogos'}},
-  {id:'rolep', key:'roleplay',target:1,xp:18,label:{ru:'Поговори в ролевой сценке',en:'Try a roleplay scenario',es:'Prueba un escenario de roleplay',pt:'Experimente um cenário de roleplay'}},
-  {id:'rolep2',key:'roleplay',target:2,xp:30,label:{ru:'Сыграй 2 ролевые сценки',en:'Play 2 roleplay scenes',es:'Haz 2 roleplays',pt:'Faça 2 roleplays'}},
-  {id:'story', key:'story', target:1, xp:16, label:{ru:'Пройди одну историю',en:'Finish one story',es:'Termina una historia',pt:'Termine uma história'}},
-  {id:'story2',key:'story', target:2, xp:28, label:{ru:'Пройди 2 истории',en:'Finish 2 stories',es:'Termina 2 historias',pt:'Termine 2 histórias'}},
-  {id:'check', key:'check', target:1, xp:12, label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
-  {id:'check2',key:'check', target:2, xp:22, label:{ru:'Проверь 2 текста',en:'Check 2 texts',es:'Revisa 2 textos',pt:'Revise 2 textos'}},
-  {id:'mix_chat_words',key:'chat',target:4,xp:12,label:{ru:'Спроси ALEX о 4 новых словах',en:'Ask ALEX about 4 new words',es:'Pregunta 4 palabras nuevas',pt:'Pergunte 4 palavras novas'}},
-  {id:'mix_error',key:'check',target:1,xp:14,label:{ru:'Найди и исправь ошибку',en:'Find and fix one mistake',es:'Corrige un error',pt:'Corrija um erro'}},
+  {id:'chat3', key:'chat',  target:3, xp:6,  diff:'easy',   label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
+  {id:'chat5', key:'chat',  target:5, xp:8,  diff:'medium', label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
+  {id:'chat7', key:'chat',  target:7, xp:10, diff:'hard',   label:{ru:'Проведи 7 реплик в чате',en:'Send 7 chat messages',es:'Envía 7 mensajes',pt:'Envie 7 mensagens'}},
+  {id:'words5',key:'words', target:5, xp:5,  diff:'easy',   label:{ru:'Повтори 5 карточек',en:'Review 5 cards',es:'Repasa 5 tarjetas',pt:'Revise 5 cartões'}},
+  {id:'words8',key:'words', target:8, xp:7,  diff:'medium', label:{ru:'Повтори 8 карточек',en:'Review 8 cards',es:'Repasa 8 tarjetas',pt:'Revise 8 cartões'}},
+  {id:'words10',key:'words',target:10,xp:9,  diff:'hard',   label:{ru:'Закрой 10 карточек',en:'Finish 10 cards',es:'Completa 10 tarjetas',pt:'Conclua 10 cartões'}},
+  {id:'listen',key:'listen',target:1, xp:8,  diff:'medium', label:{ru:'Аудио-задание TOEFL',en:'TOEFL listening task',es:'Tarea de escucha TOEFL',pt:'Tarefa de escuta TOEFL'}},
+  {id:'listen2',key:'listen',target:2, xp:10, diff:'hard',  label:{ru:'Сделай 2 задания на слух',en:'Complete 2 listening tasks',es:'Completa 2 escuchas',pt:'Complete 2 escutas'}},
+  {id:'drill', key:'drill', target:1, xp:6,  diff:'easy',   label:{ru:'Пройди один drill по грамматике',en:'Complete one grammar drill',es:'Completa un drill de gramática',pt:'Complete um drill de gramática'}},
+  {id:'drill2',key:'drill', target:2, xp:9,  diff:'hard',   label:{ru:'Пройди 2 grammar drills',en:'Complete 2 grammar drills',es:'Completa 2 drills',pt:'Complete 2 drills'}},
+  {id:'game',  key:'game',  target:1, xp:5,  diff:'easy',   label:{ru:'Выиграй в любую мини-игру',en:'Win any mini-game',es:'Gana cualquier mini-juego',pt:'Vença qualquer mini-jogo'}},
+  {id:'game2', key:'game',  target:2, xp:8,  diff:'medium', label:{ru:'Выиграй 2 мини-игры',en:'Win 2 mini-games',es:'Gana 2 mini-juegos',pt:'Vença 2 mini-jogos'}},
+  {id:'rolep', key:'roleplay',target:1,xp:8, diff:'medium', label:{ru:'Поговори в ролевой сценке',en:'Try a roleplay scenario',es:'Prueba un escenario de roleplay',pt:'Experimente um cenário de roleplay'}},
+  {id:'rolep2',key:'roleplay',target:2,xp:10,diff:'hard',   label:{ru:'Сыграй 2 ролевые сценки',en:'Play 2 roleplay scenes',es:'Haz 2 roleplays',pt:'Faça 2 roleplays'}},
+  {id:'story', key:'story', target:1, xp:7,  diff:'medium', label:{ru:'Пройди одну историю',en:'Finish one story',es:'Termina una historia',pt:'Termine uma história'}},
+  {id:'story2',key:'story', target:2, xp:10, diff:'hard',   label:{ru:'Пройди 2 истории',en:'Finish 2 stories',es:'Termina 2 historias',pt:'Termine 2 histórias'}},
+  {id:'check', key:'check', target:1, xp:7,  diff:'medium', label:{ru:'Проверь свой английский в чате',en:'Check your English in chat',es:'Revisa tu inglés en el chat',pt:'Revise seu inglês no chat'}},
+  {id:'check2',key:'check', target:2, xp:10, diff:'hard',   label:{ru:'Проверь 2 текста',en:'Check 2 texts',es:'Revisa 2 textos',pt:'Revise seus textos'}},
+  {id:'mix_chat_words',key:'chat',target:4,xp:7,diff:'medium',label:{ru:'Спроси ALEX о 4 новых словах',en:'Ask ALEX about 4 new words',es:'Pregunta 4 palabras nuevas',pt:'Pergunte 4 palavras novas'}},
+  {id:'mix_error',key:'check',target:1,xp:8,diff:'medium',label:{ru:'Найди и исправь ошибку',en:'Find and fix one mistake',es:'Corrige un error',pt:'Corrija um erro'}},
 ];
 function _todaySeed(){const d=new Date();return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate();}
 function localDayKey(d=new Date()){
@@ -2868,9 +2915,12 @@ function todayMissions(){
   }
   return idx.slice(0,4).map(i=>pool[i]);
 }
-function allMissionsDone(sv){
+function dailyMissionDoneCount(sv){
   const done=(sv&&sv.done)||{};
-  return todayMissions().every(m=>!!done[m.id]);
+  return todayMissions().filter(m=>!!done[m.id]).length;
+}
+function enoughMissionsForStreak(sv){
+  return dailyMissionDoneCount(sv)>=2;
 }
 function completeDailyStreak(){
   const today=localDayKey();
@@ -2881,7 +2931,6 @@ function completeDailyStreak(){
   window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
   LS.set('streak_done_date',today);
   LS.set('local_streak',String(window._d.streak));
-  addLocalXP(5);
   renderHome(window._d);
   try{animateStreakComplete(window._d.streak);}catch(e){}
   try{renderBadges();renderAchievements();}catch(e){}
@@ -2889,7 +2938,7 @@ function completeDailyStreak(){
   return true;
 }
 function checkDailyStreakCompletion(sv){
-  if(!allMissionsDone(sv))return;
+  if(!enoughMissionsForStreak(sv))return;
   completeDailyStreak();
 }
 function animateStreakComplete(streak){
@@ -7888,6 +7937,11 @@ function openGiftSub(){
   else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
   else{try{navigator.clipboard.writeText(link);}catch(e){}}
   toast(lang==='ru'?'Ссылка готова':'Link ready','✅');
+}
+
+function openTermsRules(){
+  haptic('light');
+  openMod('termsm');
 }
 
 /* ══ EXPORT PROGRESS ══ */
