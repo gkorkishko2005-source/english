@@ -1299,6 +1299,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-inp{width:100%;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:13px;outline:none}
 .course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
 .course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
+.course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(var(--ar),.08));border-radius:12px;padding:11px 12px;color:var(--t1)}
+.course-complete-title{font-size:13px;font-weight:900;margin-bottom:3px}
+.course-complete-sub{font-size:11px;color:var(--t2);line-height:1.4}
+.course-time-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(var(--ar),.18);background:rgba(var(--ar),.08);color:var(--a);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850;margin-bottom:8px}
 .mini-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--a);font-weight:850;margin-bottom:6px}
 .word-pref-row{display:flex;gap:7px;overflow-x:auto;padding:0 1px 11px;margin-top:-4px;scrollbar-width:none}
 .word-pref-row::-webkit-scrollbar{display:none}
@@ -4724,12 +4728,12 @@ const LEVEL_TESTS={
 };
 
 const LEVEL_TEST_CONFIG={
-  A1:{pass:80,count:8,minSeconds:12,cooldownMin:3},
-  A2:{pass:80,count:10,minSeconds:15,cooldownMin:4},
-  B1:{pass:82,count:10,minSeconds:18,cooldownMin:5},
-  B2:{pass:84,count:12,minSeconds:22,cooldownMin:6},
-  C1:{pass:86,count:12,minSeconds:25,cooldownMin:7},
-  C2:{pass:88,count:12,minSeconds:25,cooldownMin:8},
+  A1:{pass:80,count:8,minSeconds:12,cooldownMin:3,timeLimitSec:300},
+  A2:{pass:80,count:10,minSeconds:15,cooldownMin:4,timeLimitSec:300},
+  B1:{pass:82,count:10,minSeconds:18,cooldownMin:5,timeLimitSec:300},
+  B2:{pass:84,count:12,minSeconds:22,cooldownMin:6,timeLimitSec:300},
+  C1:{pass:86,count:12,minSeconds:25,cooldownMin:7,timeLimitSec:300},
+  C2:{pass:88,count:12,minSeconds:25,cooldownMin:8,timeLimitSec:300},
 };
 
 const LEVEL_TEST_VARIANTS={
@@ -4796,7 +4800,7 @@ const LEVEL_TEST_VARIANTS={
 };
 
 function levelTestCfg(target){
-  return LEVEL_TEST_CONFIG[target]||{pass:80,count:10,minSeconds:15,cooldownMin:4};
+  return LEVEL_TEST_CONFIG[target]||{pass:80,count:10,minSeconds:15,cooldownMin:4,timeLimitSec:300};
 }
 function levelTestPool(target){
   const test=LEVEL_TESTS[target]||{};
@@ -5028,15 +5032,15 @@ GALAXY_COURSE.push(
     const a=w[0]||'word',b=w[1]||'phrase',c=w[2]||'idea';
     if(['B2','C1','C2'].includes(level)){
       return [
-        `This lesson builds precise language for ${label}.`,
-        `A strong answer uses terms like ${a}, ${b} and ${c}.`,
-        `Clear structure makes ${label} easier to discuss.`
+        `The term ${a} matters when discussing ${label}.`,
+        `A strong answer about ${label} can include ${b}.`,
+        `${c.charAt(0).toUpperCase()+c.slice(1)} helps make the point more precise.`
       ];
     }
     return [
-      `I can talk about ${label} in English.`,
-      `This lesson uses words like ${a}, ${b} and ${c}.`,
-      `A short sentence about ${label} is easier to remember.`
+      `The word ${a} is useful for ${label}.`,
+      `I use ${b} in a short ${label} sentence.`,
+      `${c.charAt(0).toUpperCase()+c.slice(1)} appears in this topic.`
     ];
   }
   function cefrTopicPractice(level,g,s){
@@ -5149,6 +5153,24 @@ GALAXY_COURSE.push(
     };
     return map[topic]||['receipt','passport','schedule'];
   }
+  function cefrNaturalOptions(sentence){
+    const s=String(sentence||'I study English every day.').trim();
+    const wrong=[];
+    const add=x=>{x=String(x||'').trim();if(x&&x!==s&&!wrong.includes(x))wrong.push(x);};
+    add(s.replace(/\bis\b/i,'are'));
+    add(s.replace(/\bare\b/i,'is'));
+    add(s.replace(/\bam\b/i,'are'));
+    add(s.replace(/\bhas\b/i,'have'));
+    add(s.replace(/\bhave\b/i,'has'));
+    add(s.replace(/\bat\b/i,'in'));
+    add(s.replace(/\bin\b/i,'on'));
+    add(s.replace(/\bon\b/i,'at'));
+    add(s.replace(/\.$/,' yesterday.'));
+    const words=s.split(/\s+/);
+    if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '));
+    while(wrong.length<3)wrong.push(`I can to ${words.slice(1).join(' ').replace(/\.$/,'')}.`);
+    return [s,...wrong.slice(0,3)];
+  }
   function cefrBuildLesson(level,g,s){
     const topic=String(s[0]||'English').toLowerCase();
     const examples=cefrTopicExamples(level,g,s);
@@ -5162,17 +5184,17 @@ GALAXY_COURSE.push(
       practice:[
         p,
         {q:`Choose a word connected with ${topic}:`,o:[s[2][0]||'word',...cefrDistractors(topic)],a:0},
-        {q:`Choose the natural sentence:`,o:[`I can talk about ${topic}.`,`I can to talk about ${topic}.`,`I talking about ${topic}.`,`I talks about ${topic}.`],a:0}
+        {q:`Choose the natural sentence:`,o:cefrNaturalOptions(examples[0]),a:0}
       ],
-      build:`I can talk about ${topic} clearly.`,
-      dictation:`Talking about ${topic} gets easier with practice.`,
+      build:examples[0],
+      dictation:examples[1]||examples[0],
       focus:[
         `Use the rule in a real ${topic} sentence.`,
         `Say one short example aloud before you answer.`,
         `Check the verb form before you choose an option.`
       ],
       mistake:`Do not copy the example mechanically. Match the pattern to the topic: ${grammar.en}.`,
-      reading:`This lesson is about ${topic}. Read the examples, notice the grammar pattern, then answer without looking for a ready-made sentence.`
+      reading:`Key examples for ${topic}: ${examples.slice(0,2).join(' ')} Notice the grammar pattern, then answer without guessing.`
     };
   }
   function cefrCapText(text){
@@ -5214,23 +5236,56 @@ GALAXY_COURSE.push(
 })();
 
 (function normalizeCourseLessons(){
+  function lessonSentence(ls,idx){
+    const examples=Array.isArray(ls.examples)?ls.examples.filter(Boolean):[];
+    if(examples[idx])return examples[idx];
+    if(examples[0])return examples[0];
+    if(ls.q&&Array.isArray(ls.o)&&typeof ls.a==='number')return String(ls.q).replace(/_{2,}|___/g,ls.o[ls.a]||'').replace(/^Choose:\s*/i,'').trim();
+    const title=(ls.title&&ls.title.en)||'English';
+    return `I practise ${title.toLowerCase()} today.`;
+  }
+  function sentenceDistractors(sentence){
+    const s=String(sentence||'').trim();
+    const wrong=[];
+    const add=x=>{x=String(x||'').trim();if(x&&x!==s&&!wrong.includes(x))wrong.push(x);};
+    add(s.replace(/\bis\b/i,'are'));
+    add(s.replace(/\bare\b/i,'is'));
+    add(s.replace(/\bam\b/i,'are'));
+    add(s.replace(/\bhas\b/i,'have'));
+    add(s.replace(/\bhave\b/i,'has'));
+    add(s.replace(/\bat\b/i,'in'));
+    add(s.replace(/\bin\b/i,'on'));
+    add(s.replace(/\bon\b/i,'at'));
+    add(s.replace(/\bthe\b/i,'a'));
+    add(s.replace(/\ba\b/i,'the'));
+    const words=s.split(/\s+/);
+    if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '));
+    add(s.replace(/\.$/,'')+' yesterday.');
+    add(s.replace(/^I\b/,'Me'));
+    add(s.replace(/\.$/,'')+' tomorrow yesterday.');
+    while(wrong.length<3)wrong.push(`I can to ${s.charAt(0).toLowerCase()+s.slice(1).replace(/\.$/,'')}.`);
+    return [s,...wrong.slice(0,3)];
+  }
   GALAXY_COURSE.forEach(function(ls){
     const topic=(ls.title&&ls.title.en)||ls.sub?.en||'English';
-    const simpleTopic=String(topic).replace(/\s*·\s*/g,' and ').toLowerCase();
-    if(!ls.build)ls.build=`I can use this lesson in real English.`;
-    if(!ls.dictation)ls.dictation=`This topic becomes easier with practice.`;
+    const examples=Array.isArray(ls.examples)?ls.examples.filter(Boolean):[];
+    if(!ls.build)ls.build=lessonSentence(ls,0);
+    if(!ls.dictation)ls.dictation=lessonSentence(ls,1);
     if(!ls.focus)ls.focus=[
       'Read the rule, then find the pattern in the examples.',
       'Say one example aloud before you answer.',
       'Check the verb form, word order and context.'
     ];
     if(!ls.mistake)ls.mistake='Do not choose by memory only. Match the form to the meaning of the sentence.';
-    if(!ls.reading)ls.reading=`This lesson trains ${simpleTopic}. Read the examples first, then answer the tasks without looking for a ready-made answer.`;
+    if(!ls.reading)ls.reading=`Key examples for ${topic}: ${(examples.length?examples:[ls.build]).slice(0,2).join(' ')} Use the same pattern when you answer.`;
     if(!ls.grammar)ls.grammar={ru:ls.sub?.ru||'Правило',en:ls.sub?.en||'Rule'};
     if(!Array.isArray(ls.practice)||!ls.practice.length){
+      const word=(Array.isArray(ls.words)&&ls.words[0])||String(topic).split(/\s+/)[0]||'English';
+      const other=['airport','receipt','weather','schedule','teacher','family','message','journey'].filter(w=>!String(word).toLowerCase().includes(w)).slice(0,3);
       ls.practice=[
         {q:ls.q,o:ls.o,a:ls.a},
-        {q:'Choose the natural sentence:',o:[ls.build||'I can use this lesson in real English.','I can to use this lesson.','I using this lesson.','I uses this lesson.'],a:0}
+        {q:'Choose a word from this lesson:',o:[word,...other],a:0},
+        {q:'Choose the natural sentence:',o:sentenceDistractors(ls.build),a:0}
       ];
     }
   });
@@ -5366,6 +5421,7 @@ function openCourseLesson(id){
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
     <div class="course-lesson-sub">${safeHTML(grammarLabel)}</div>
+    <div class="course-time-pill">${lang==='ru'?'Около 5 минут':'About 5 minutes'}</div>
     <div class="course-rule-compact"><b>${lang==='ru'?'Правило':'Rule'}</b><span>${safeHTML(ruleText)}</span></div>
     <div class="course-focus-row">
       ${focus.slice(0,2).map((x,i)=>`<div class="course-focus-chip">${i+1}. ${safeHTML(x)}</div>`).join('')}
@@ -5401,8 +5457,10 @@ function openCourseLesson(id){
       <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Можно игнорировать форму глагола':'Ignore the verb form'}</div>
       <div class="course-result" id="cr-res-${id}"></div>
     </div>
+    <div id="course-complete-${id}"></div>
   </div>`;
   wrap.innerHTML=html;
+  maybeCompleteCourse(id);
 }
 function courseKey(id){return String(id).replace(/[^a-z0-9_]/gi,'_');}
 function courseWords(s){return String(s||'').replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);}
@@ -5423,10 +5481,48 @@ function courseReadingText(ls){
     ?`Этот короткий текст тренирует тему “${title}”. Прочитай примеры и найди знакомую структуру: ${ex}`
     :`This short text trains “${title}”. Read the examples and notice the target structure: ${ex}`;
 }
+function courseWarmLine(){
+  const lines=lang==='ru'
+    ?['Спокойно, маленькими шагами язык реально собирается в систему.','Хороший темп. Один короткий урок сегодня лучше, чем большой план на потом.','Ты закрыл кусок базы. Завтра это будет вспоминаться легче.','Нормальный прогресс выглядит именно так: немного правила, много практики.']
+    :['Good pace. One short lesson today beats a huge plan for later.','A small step, but it makes the language feel more automatic.','You closed one piece of the system. Tomorrow it will feel easier.','Real progress is simple: a little rule, a lot of practice.'];
+  return lines[Math.floor(Math.random()*lines.length)];
+}
+function coursePartsKey(id){return 'course_parts_'+id;}
+function courseRequiredParts(id){
+  const practice=window['course_practice_'+courseKey(id)]||[];
+  return ['builder','dictation','reading',...practice.map((_,i)=>'practice_'+i)];
+}
+function renderCourseCompleteCard(id,already){
+  const box=document.getElementById('course-complete-'+id);
+  if(!box)return;
+  box.innerHTML=`<div class="course-complete-card">
+    <div class="course-complete-title">${already?(lang==='ru'?'Урок уже закрыт':'Lesson already complete'):(lang==='ru'?'Урок закрыт · +10 XP':'Lesson complete · +10 XP')}</div>
+    <div class="course-complete-sub">${safeHTML(courseWarmLine())}</div>
+  </div>`;
+}
+function maybeCompleteCourse(id){
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  const required=courseRequiredParts(id);
+  if(required.some(k=>!parts[k]))return false;
+  const done=LS.getJ('course_done')||{};
+  if(done[id]){renderCourseCompleteCard(id,true);return true;}
+  done[id]=Date.now();
+  LS.setJ('course_done',done);
+  addLocalXP(10);
+  bumpStat('tests');
+  try{trackM('lesson');}catch(e){}
+  renderCourseCompleteCard(id,false);
+  toast('+10 XP · '+(lang==='ru'?'урок закрыт':'lesson complete'),'⭐');
+  return true;
+}
+function courseMarkPart(id,type,ok){
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  parts[type]=ok?'ok':'try';
+  LS.setJ(coursePartsKey(id),parts);
+  return maybeCompleteCourse(id);
+}
 function awardCourseExtra(id,type,amount){
-  const key='course_extra_'+id+'_'+type;
-  if(LS.get(key))return;
-  LS.set(key,'1');addLocalXP(amount);bumpStat('tests');
+  return courseMarkPart(id,type,true);
 }
 function coursePickWord(id,btn){
   const slots=document.getElementById('cb-slots-'+id);if(!slots||!btn)return;
@@ -5446,8 +5542,8 @@ function checkCourseBuilder(id){
   const ok=normalizeCourseText(answer)===normalizeCourseText(target);
   const res=document.getElementById('cb-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Собрано правильно. +6 XP':'Correct sentence. +6 XP'):(lang==='ru'?'Почти. Правильно: ':'Almost. Correct: ')+target;
-  if(ok){awardCourseExtra(id,'builder',6);try{trackM('drill');}catch(e){}}
+  res.textContent=ok?(lang==='ru'?'Собрано правильно. XP начислим за полный урок.':'Correct sentence. XP comes after the full lesson.'):(lang==='ru'?'Почти. Правильно: ':'Almost. Correct: ')+target;
+  if(ok){courseMarkPart(id,'builder',true);try{trackM('drill');}catch(e){}}
 }
 function checkCourseDictation(id){
   const target=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
@@ -5455,15 +5551,15 @@ function checkCourseDictation(id){
   const ok=normalizeCourseText(inp&&inp.value)===normalizeCourseText(target);
   const res=document.getElementById('cd-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Слух отлично сработал. +8 XP':'Good listening. +8 XP'):(lang==='ru'?'Проверь фразу: ':'Check the phrase: ')+target;
-  if(ok){awardCourseExtra(id,'dictation',8);try{trackM('listen');}catch(e){}}
+  res.textContent=ok?(lang==='ru'?'Слух отлично сработал. Идём дальше.':'Good listening. Keep going.'):(lang==='ru'?'Проверь фразу: ':'Check the phrase: ')+target;
+  if(ok){courseMarkPart(id,'dictation',true);try{trackM('listen');}catch(e){}}
 }
 function checkCourseReading(id,picked){
   const ok=!!picked;
   const res=document.getElementById('cr-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Верно. Сначала смотри на правило, потом на смысл темы. +5 XP':'Correct. First notice the rule, then the topic meaning. +5 XP'):(lang==='ru'?'Не совсем. В таких заданиях важны правило, контекст и форма слова.':'Not quite. These tasks depend on the rule, context and word form.');
-  if(ok){awardCourseExtra(id,'reading',5);}
+  res.textContent=ok?(lang==='ru'?'Верно. Сначала смотри на правило, потом на смысл темы.':'Correct. First notice the rule, then the topic meaning.'):(lang==='ru'?'Не совсем. В таких заданиях важны правило, контекст и форма слова.':'Not quite. These tasks depend on the rule, context and word form.');
+  if(ok){courseMarkPart(id,'reading',true);}
 }
 function speakCourseLine(id,idx){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
@@ -5489,28 +5585,13 @@ function answerCoursePractice(id,qi,picked){
     if(i===q.a)el.classList.add('ok');
     if(i===picked&&!isRight)el.classList.add('bad');
   });
-  if(isRight){
-    awardCourseExtra(id,'practice_'+qi,4);
-    try{trackM('drill');}catch(e){}
-  }
+  if(isRight)try{trackM('drill');}catch(e){}
   const stateKey='course_practice_state_'+id;
   const state=LS.getJ(stateKey)||{};
   state[qi]=isRight?'ok':'bad';
   LS.setJ(stateKey,state);
-  const correct=Object.values(state).filter(x=>x==='ok').length;
-  const needed=Math.min(2,Math.max(1,practice.length));
-  if(correct>=needed){
-    const done=LS.getJ('course_done')||{};
-    if(!done[id]){
-      done[id]=Date.now();
-      LS.setJ('course_done',done);
-      addLocalXP(8);
-      bumpStat('tests');
-      toast('+8 XP','✓');
-    }
-  }else{
-    toast(isRight?'+4 XP':(lang==='ru'?'Ещё попытка в следующем блоке':'Try the next block'),isRight?'✓':'');
-  }
+  const completed=courseMarkPart(id,'practice_'+qi,isRight);
+  if(!completed)toast(isRight?(lang==='ru'?'Хорошо, дальше':'Good, keep going'):(lang==='ru'?'Ничего, продолжаем':'Keep going'),isRight?'✅':'');
 }
 function answerCourse(id,picked){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
@@ -5521,9 +5602,8 @@ function answerCourse(id,picked){
     if(i===picked&&picked!==ls.a)el.classList.add('bad');
   });
   if(picked===ls.a){
-    const done=LS.getJ('course_done')||{};
-    if(!done[id]){done[id]=Date.now();LS.setJ('course_done',done);addLocalXP(12);bumpStat('tests');}
-    toast('+12 XP','✓');
+    courseMarkPart(id,'practice_0',true);
+    toast(lang==='ru'?'Верно. Продолжай урок до конца.':'Correct. Finish the full lesson.','✅');
     box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Верно. Повтори примеры вслух: так правило быстрее становится автоматическим.':'Correct. Repeat the examples aloud: this helps the rule become automatic.')+'</div>');
   }else{
     toast(lang==='ru'?'Посмотри правильный вариант':'Check the correct answer','');
@@ -5553,6 +5633,8 @@ function startLevelTest(targetLevel){
   const questions=buildLevelQuestions(targetLevel);
   if(!questions.length){toast('Test not available','⚠️');return;}
   haptic('medium');
+  const session='lt-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999);
+  const timeLimitSec=cfg.timeLimitSec||300;
   levelTestState={
     target:targetLevel,
     questions,
@@ -5561,28 +5643,34 @@ function startLevelTest(targetLevel){
     total:questions.length,
     pass:cfg.pass,
     minSeconds:cfg.minSeconds,
+    timeLimitSec,
+    deadlineAt:Date.now()+timeLimitSec*1000,
     startedAt:Date.now(),
-    session:'lt-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
+    session,
     answers:{},
-    answered:{}
+    answered:{},
+    timeoutId:setTimeout(()=>{if(levelTestState&&levelTestState.session===session)finishLevelTest(true);},timeLimitSec*1000+250)
   };
   goTab('chat',true);
   const title=test.title[lang]||test.title.en;
-  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов':'questions'} · ${lang==='ru'?'проходной балл':'passing score'} ${cfg.pass}% · ${lang==='ru'?'варианты каждый раз новые':'new mix every attempt'}</span></div>`);
+  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов':'questions'} · ${lang==='ru'?'5 минут':'5 minutes'} · ${lang==='ru'?'проходной балл':'passing score'} ${cfg.pass}%</span></div>`);
   setTimeout(showLevelQuestion,500);
 }
 
 function showLevelQuestion(){
   if(!levelTestState)return;
   const {questions,current,total}=levelTestState;
+  if(Date.now()>levelTestState.deadlineAt){finishLevelTest(true);return;}
   if(current>=total){finishLevelTest();return;}
   const q=questions[current];
+  const left=Math.max(0,Math.ceil((levelTestState.deadlineAt-Date.now())/1000));
+  const leftText=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
   const qid=levelTestState.session+'-'+current+'-'+Date.now();
   levelTestState.answers[qid]=q.a;
   levelTestState.answered[qid]=false;
   const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('');
   addMsg('bot',`<div class="lt-q" id="${qid}">
-    <div class="lt-num">${current+1}/${total}</div>
+    <div class="lt-num">${current+1}/${total} · ${leftText}</div>
     <div class="lt-mini-bar"><div class="lt-mini-fill" style="width:${Math.round((current+1)/total*100)}%"></div></div>
     <div class="lt-text">${safeHTML(q.q)}</div>
     <div class="lt-opts">${opts}</div>
@@ -5591,6 +5679,7 @@ function showLevelQuestion(){
 
 function answerLevelQ(qid,picked){
   if(!levelTestState)return;
+  if(Date.now()>levelTestState.deadlineAt){finishLevelTest(true);return;}
   if(levelTestState.answered[qid])return;
   const correct=levelTestState.answers[qid];
   if(typeof correct!=='number')return;
@@ -5608,12 +5697,14 @@ function answerLevelQ(qid,picked){
   setTimeout(showLevelQuestion,1200);
 }
 
-function finishLevelTest(){
-  const {target,correct,total,pass,minSeconds,startedAt}=levelTestState;
+function finishLevelTest(timedOut=false){
+  const {target,correct,total,pass,minSeconds,startedAt,timeLimitSec,timeoutId}=levelTestState;
+  if(timeoutId)clearTimeout(timeoutId);
   const pct=Math.round(correct/total*100);
   const elapsed=Math.round((Date.now()-startedAt)/1000);
   const tooFast=elapsed<minSeconds;
-  const passed=pct>=pass&&!tooFast;
+  const overTime=timedOut||elapsed>(timeLimitSec||300);
+  const passed=pct>=pass&&!tooFast&&!overTime;
   if(passed){
     haptic('success');
     LS.set('ob_level',target);
@@ -5629,7 +5720,7 @@ function finishLevelTest(){
     addMsg('bot',`<div class="lt-result lt-pass">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Тест пройден!':'Test passed!'}</div>
       <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${lang==='ru'?'нужно':'required'} ${pass}%</div>
-      <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>`:`Your new level: <b>${target}</b>`}</div>
+      <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>. Спокойно, база становится крепче.`:`Your new level: <b>${target}</b>. Steady work, stronger base.`}</div>
     </div>`);
     if(!alreadyPassed){addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'⭐');}
     else toast(`Level ${target}`,'✅');
@@ -5639,7 +5730,7 @@ function finishLevelTest(){
     addMsg('bot',`<div class="lt-result lt-fail">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Пока не прошёл':'Not yet'}</div>
       <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${lang==='ru'?'нужно':'need'} ${pass}%</div>
-      <div style="font-size:13px;color:var(--t2)">${tooFast?(lang==='ru'?`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`:`Attempt too fast to validate: minimum ${minSeconds} sec.`):(lang==='ru'?'Повтори слабые темы и попробуй снова после короткой паузы.':'Review weak topics and try again after a short pause.')}</div>
+      <div style="font-size:13px;color:var(--t2)">${overTime?(lang==='ru'?'Время вышло: тест рассчитан на 5 минут.':'Time is up: the test is designed for 5 minutes.'):tooFast?(lang==='ru'?`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`:`Attempt too fast to validate: minimum ${minSeconds} sec.`):(lang==='ru'?'Это не провал. Повтори слабые темы и зайди ещё раз спокойно.':'This is not a failure. Review weak topics and try again calmly.')}</div>
     </div>`);
   }
   levelTestState=null;
@@ -5750,13 +5841,15 @@ function openRoadmapOfflineLesson(found){
     return;
   }
   const title=found.lesson.title[lang]||found.lesson.title.en;
+  const titleEn=found.lesson.title.en||found.lesson.title.ru||title;
   const sub=found.lesson.sub[lang]||found.lesson.sub.en;
+  const topicWord=String(titleEn).replace(/[^a-zA-Z\s]/g,'').trim().toLowerCase()||'this topic';
   const wrap=document.getElementById('roadmap-wrap');if(!wrap)return;
   wrap.innerHTML=`<div class="course-lesson">
     <button class="rm-action" type="button" onclick="renderRoadmap()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к пути':'Back to path'}</button>
     <h3>${safeHTML(found.lvlData.level)} · ${safeHTML(title)}</h3>
     <div class="course-rule">${lang==='ru'?'Короткий офлайн-урок: прочитай правило, произнеси примеры вслух и пройди мини-проверку.':'Short offline lesson: read the rule, say examples aloud and complete the mini check.'}</div>
-    <div class="course-ex"><div class="course-line"><span>${safeHTML(sub)}</span></div><div class="course-line"><span>I practise this topic every day.</span></div><div class="course-line"><span>This lesson helps me speak more clearly.</span></div></div>
+    <div class="course-ex"><div class="course-line"><span>${safeHTML(sub)}</span></div><div class="course-line"><span>I practise ${safeHTML(topicWord)} in short answers.</span></div><div class="course-line"><span>I use ${safeHTML(topicWord)} when the context needs it.</span></div></div>
     <div class="course-note">${lang==='ru'?'Если застрял, подписка открывает ALEX-помощника для личного объяснения.':'If you get stuck, a subscription unlocks ALEX for a personal explanation.'}</div>
     <button class="course-ai" onclick="courseAIBreakdown('${cid||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
   </div>`;
