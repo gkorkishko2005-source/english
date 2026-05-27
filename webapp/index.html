@@ -782,10 +782,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ CHIPS — icon + text ══ */
 .chips{display:flex;gap:6px;overflow-x:auto;padding:8px 15px 6px;flex-shrink:0;-webkit-overflow-scrolling:touch}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:100px;border:1px solid var(--b2);background:var(--e2);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:.18s;white-space:nowrap}
-.chip:active{transform:scale(.93);background:rgba(var(--ar),.12);border-color:rgba(var(--ar),.3);color:var(--a)}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 12px;border-radius:100px;border:1px solid rgba(var(--ar),.13);background:linear-gradient(135deg,var(--e2),rgba(var(--ar),.035));font-size:13px;font-weight:650;color:var(--t2);cursor:pointer;transition:transform .18s,border-color .2s,background .2s,color .2s,box-shadow .2s;white-space:nowrap}
+.chip:hover{border-color:rgba(var(--ar),.30);color:var(--a);box-shadow:0 7px 18px rgba(var(--ar),.06)}
 .chip:active{border-color:var(--a);color:var(--a);transform:scale(.96);background:rgba(var(--ar),.08)}
 .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.chip-smart{border-radius:13px;background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.045));border-color:rgba(var(--ar),.18);font-weight:800}
+.chip-smart svg{width:15px;height:15px;stroke-width:2.2}
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
@@ -1174,9 +1176,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* ══ PREMIUM ══ */
 .premium-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;background:linear-gradient(135deg,#4f8aff,#00d4aa);font-size:10px;font-weight:800;color:#fff;letter-spacing:.5px}
-.prem-hero{text-align:left;padding:20px 18px 14px;margin-bottom:8px;border-bottom:1px solid var(--b1)}
-.prem-title{font-size:19px;font-weight:800;margin-bottom:4px}
-.prem-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-bottom:0}
+.prem-hero{text-align:left;padding:20px 18px 14px;margin-bottom:8px;border-bottom:1px solid var(--b1);background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.045))}
+.prem-title{font-size:20px;font-weight:950;margin-bottom:5px;letter-spacing:0}
+.prem-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-bottom:0;max-width:330px}
 .prem-feats{display:flex;flex-direction:column;gap:8px;padding:0 17px 16px}
 .prem-feat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e2);border-radius:var(--r2)}
 .prem-feat-ico{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#d4a843,#ffb830);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1188,18 +1190,23 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
 /* Premium plan cards */
 .prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
-.prem-plan{background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2);padding:14px 14px 12px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
+.prem-plan{background:linear-gradient(135deg,var(--e2),rgba(var(--ar),.03));border:1px solid var(--b1);border-radius:16px;padding:14px 14px 12px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
 .prem-plan::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--a),var(--a2));opacity:.75}
+.prem-plan::after{content:'';position:absolute;right:-42px;top:-48px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.14),transparent 68%);opacity:.65;pointer-events:none}
 .prem-plan:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35)}
 .prem-plan:active{transform:scale(.97)}
-.prem-plan.pp-pop{border-color:rgba(var(--ar),.36);background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));box-shadow:0 4px 20px rgba(79,138,255,.08)}
+.prem-plan.pp-pop{border-color:rgba(0,212,170,.36);background:linear-gradient(135deg,rgba(var(--ar),.11),rgba(0,212,170,.07));box-shadow:0 12px 30px rgba(79,138,255,.10)}
 .pp-popular{position:absolute;top:10px;right:12px;font-size:9px;font-weight:800;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.2);padding:2px 8px;border-radius:100px;letter-spacing:.35px}
 .pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.pp-badge{font-size:12px;font-weight:800;color:var(--t1);padding:3px 9px;border-radius:7px;background:var(--e3);border:1px solid var(--b1)}
+.pp-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:900;color:var(--t1);padding:5px 9px;border-radius:10px;background:var(--e3);border:1px solid var(--b1)}
+.pp-badge svg{width:15px;height:15px;stroke:var(--a);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .pp-price{font-size:16px;font-weight:800;color:var(--t1)}
 .pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
-.pp-buffs{font-size:12px;color:var(--t2);line-height:1.65;padding-left:1px}
+.pp-buffs{font-size:12px;color:var(--t2);line-height:1.62;padding-left:1px;position:relative;z-index:1}
+.pp-buffs b{color:var(--t1);font-weight:900}
 .pp-year{margin-top:9px;padding:8px 10px;border-radius:9px;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.14);font-size:11px;font-weight:700;color:var(--a);display:flex;align-items:center;justify-content:space-between}
+.prem-proof{margin:0 17px 12px;padding:11px 12px;border-radius:13px;background:rgba(0,212,170,.065);border:1px solid rgba(0,212,170,.16);font-size:11px;line-height:1.45;color:var(--t2)}
+.prem-proof b{color:var(--a2)}
 .prem-depth{padding:0 17px 12px}
 .prem-depth-title{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:2px 0 8px}
 .prem-depth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1289,6 +1296,22 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-track{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}
 .course-track-step{height:6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--ar),.08);overflow:hidden}
 .course-track-step.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 12px rgba(0,212,170,.20)}
+.course-stage-list{display:grid;gap:8px;margin:10px 0}
+.course-stage-card{display:flex;align-items:center;gap:12px;background:var(--e1);border:1px solid var(--b1);border-radius:15px;padding:12px 12px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s,box-shadow .2s;position:relative;overflow:hidden}
+.course-stage-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:999px;background:var(--lesson-color,var(--a));opacity:.68}
+.course-stage-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.28);box-shadow:0 10px 22px rgba(0,0,0,.08)}
+.course-stage-card.active{border-color:rgba(var(--ar),.38);background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.04))}
+.course-stage-card.done{border-color:rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.06),var(--e1))}
+.course-stage-ring{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:conic-gradient(var(--a) var(--pct,0%),rgba(255,255,255,.08) 0);padding:3px}
+.course-stage-ring-in{width:100%;height:100%;border-radius:50%;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;color:var(--a);font-size:11px;font-weight:950}
+.course-stage-info{min-width:0;flex:1}
+.course-stage-title{font-size:13px;font-weight:950;color:var(--t1);line-height:1.2}
+.course-stage-sub{font-size:11px;color:var(--t2);line-height:1.3;margin-top:3px}
+.course-stage-go{width:31px;height:31px;border-radius:11px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.course-stage-go svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.course-section{display:none}
+.course-section.active{display:block;animation:stageIn .22s ease-out}
+@keyframes stageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .course-section{background:var(--e1);border:1px solid var(--b1);border-radius:15px;padding:10px;margin-top:9px;position:relative;overflow:hidden}
 .course-section.done{border-color:rgba(0,212,170,.25);background:linear-gradient(135deg,rgba(0,212,170,.055),var(--e1))}
 .course-section::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:999px;background:var(--lesson-color,var(--a));opacity:.68}
@@ -2042,22 +2065,23 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="prem-plans" id="prem-plans">
       <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge">Basic</span><span class="pp-price">650 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Basic</span><span class="pp-price">650 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-basic-buffs"></div>
         <div class="pp-year" id="pp-basic-year">6630 ⭐ / год <span>-15%</span></div>
       </div>
       <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
         <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge">Pro</span><span class="pp-price">1600 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8L12 3z"/></svg>Pro</span><span class="pp-price">1600 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-pro-buffs"></div>
         <div class="pp-year" id="pp-pro-year">16320 ⭐ / год <span>-15%</span></div>
       </div>
       <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge">Ultimate</span><span class="pp-price">4200 ⭐<small>/мес</small></span></div>
+        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M4 7l4 4 4-7 4 7 4-4v11H4V7z"/><path d="M4 18h16"/></svg>Ultimate</span><span class="pp-price">4200 ⭐<small>/мес</small></span></div>
         <div class="pp-buffs" id="pp-ult-buffs"></div>
         <div class="pp-year" id="pp-ult-year">42840 ⭐ / год <span>-15%</span></div>
       </div>
     </div>
+    <div class="prem-proof" id="prem-proof"></div>
     <div class="prem-depth">
       <div class="prem-depth-title" id="prem-depth-title">Learning system</div>
       <div class="prem-depth-grid" id="prem-depth-grid"></div>
@@ -3408,6 +3432,20 @@ function openChat(topic){
     explain_simple: lang==='ru'?'Объясни мне как ребёнку последнее правило грамматики. Используй простые примеры.':'Explain the last grammar topic to me like I\'m 5 years old. Use very simple examples.',
   };
   goTab('chat');if(P[topic]&&!busy)setTimeout(()=>sendChip(P[topic]),150);
+}
+function quickHintChips(){
+  const labels=lang==='ru'
+    ?[
+      ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0','О ALEX'],
+      ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16','Грамматика'],
+      ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z','Проверка']
+    ]
+    :[
+      ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0','About ALEX'],
+      ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16','Grammar'],
+      ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z','Text check']
+    ];
+  return `<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:5px">${labels.map(x=>`<button class="chip chip-smart" onclick="sendChip('${safeHTML(x[0])}')"><svg viewBox="0 0 24 24"><path d="${x[1]}"/></svg>${safeHTML(x[2])}</button>`).join('')}</div>`;
 }
 
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
@@ -5586,13 +5624,49 @@ function courseWordOptions(correct,mode){
 }
 function courseChoiceState(id,part){return LS.getJ('course_choice_'+id+'_'+part)||{};}
 function courseSaveChoiceState(id,part,state){LS.setJ('course_choice_'+id+'_'+part,state||{});}
+function courseStageMeta(id,ls,practice,parts){
+  const done=k=>!!parts[k];
+  const practiceDone=practice.filter((_,i)=>done('practice_'+i)).length;
+  return [
+    {key:'vocab_native',n:1,title:courseT('vocab'),sub:courseT('vocabSub'),pct:done('vocab_native')?100:0},
+    {key:'vocab_reverse',n:2,title:courseT('reverse'),sub:courseT('reverseSub'),pct:done('vocab_reverse')?100:0},
+    {key:'grammar',n:3,title:courseT('grammar'),sub:lang==='ru'?'5 заданий на правило и естественную фразу':'5 tasks for rule and natural phrasing',pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
+    {key:'builder',n:4,title:courseT('puzzle'),sub:lang==='ru'?'Собери фразу из английских слов':'Build the phrase from English tiles',pct:done('builder')?100:0},
+    {key:'builder_native',n:5,title:courseT('nativePuzzle'),sub:lang==='ru'?'Собери английский по переводу':'Build English from translation',pct:done('builder_native')?100:0},
+    {key:'errors',n:6,title:courseT('errors'),sub:lang==='ru'?'Найди тип ошибки в предложении':'Find the mistake type in a sentence',pct:done('errors')?100:0},
+    {key:'listen',n:7,title:courseT('listen'),sub:lang==='ru'?'Диктант и понимание текста':'Dictation and reading check',pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
+  ];
+}
+function renderCourseStageList(id,ls,practice,parts){
+  return `<div class="course-stage-list" id="course-stage-list-${id}">
+    ${courseStageMeta(id,ls,practice,parts).map(s=>`<div class="course-stage-card ${s.pct>=100?'done':''}" data-stage="${s.key}" onclick="openCourseStage('${id}','${s.key}')">
+      <div class="course-stage-ring" style="--pct:${s.pct}%"><div class="course-stage-ring-in">${s.pct>=100?'✓':s.n}</div></div>
+      <div class="course-stage-info"><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
+      <div class="course-stage-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>`).join('')}
+  </div>`;
+}
+function openCourseStage(id,stage){
+  document.querySelectorAll('#course-wrap [data-course-stage]').forEach(el=>el.classList.toggle('active',el.dataset.courseStage===stage));
+  document.querySelectorAll('#course-stage-list-'+id+' .course-stage-card').forEach(el=>el.classList.toggle('active',el.dataset.stage===stage));
+  const active=document.querySelector('#course-wrap [data-course-stage="'+stage+'"]');
+  if(active)active.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function refreshCourseStageList(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const list=document.getElementById('course-stage-list-'+id);if(!list)return;
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  const active=list.querySelector('.course-stage-card.active')?.dataset.stage;
+  list.outerHTML=renderCourseStageList(id,ls,practice,LS.getJ(coursePartsKey(id))||{});
+  if(active)openCourseStage(id,active);
+}
 function renderCourseVocabSection(ls,id,part,index,reverse){
   const words=courseVocabWords(ls);
   const state=courseChoiceState(id,part);
   const done=LS.getJ(coursePartsKey(id))?.[part];
   const title=reverse?courseT('reverse'):courseT('vocab');
   const sub=reverse?courseT('reverseSub'):courseT('vocabSub');
-  return `<div class="course-section ${done?'done':''}" id="course-section-${part}">
+  return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${title}</div><div class="course-section-sub">${sub}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
     <div class="course-vocab-grid">${words.map((w,i)=>{
       const prompt=reverse?courseWordTranslation(w):w;
@@ -5647,7 +5721,7 @@ function renderCourseErrorSection(ls,id,index){
   const done=LS.getJ(coursePartsKey(id))?.[part];
   const labels={verb:{ru:'форма глагола',en:'verb form',es:'forma verbal',pt:'forma verbal'},prep:{ru:'предлог',en:'preposition',es:'preposición',pt:'preposição'},order:{ru:'порядок слов',en:'word order',es:'orden de palabras',pt:'ordem das palavras'}};
   const opts=['verb','prep','order'];
-  return `<div class="course-section ${done?'done':''}" id="course-section-errors">
+  return `<div class="course-section ${done?'done':''}" data-course-stage="errors" id="course-section-errors">
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ не показывается сразу.':'Choose the mistake type. The answer is not revealed immediately.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
     <div class="course-error-list">${courseErrorSet(ls).map((q,i)=>`<div class="course-error-card" id="course-choice-errors-${i}">
       <div class="course-error-sentence">${safeHTML(q.bad)}</div>
@@ -5710,6 +5784,7 @@ function openCourseLesson(id){
   const builderDone=partState.builder;
   const nativeBuilderDone=partState.builder_native;
   const listenDone=partState.dictation&&partState.reading;
+  const defaultStage=(courseStageMeta(id,ls,practice,partState).find(s=>s.pct<100)||{key:'vocab_native'}).key;
   const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <div class="course-hero">
@@ -5732,9 +5807,10 @@ function openCourseLesson(id){
     </div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
+    ${renderCourseStageList(id,ls,practice,partState)}
     ${renderCourseVocabSection(ls,id,'vocab_native',1,false)}
     ${renderCourseVocabSection(ls,id,'vocab_reverse',2,true)}
-    <div class="course-section ${grammarDone?'done':''}" id="course-section-grammar">
+    <div class="course-section ${grammarDone?'done':''}" data-course-stage="grammar" id="course-section-grammar">
       <div class="course-section-head"><div class="course-section-index">3</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
         <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
@@ -5744,7 +5820,7 @@ function openCourseLesson(id){
         </div>`).join('')}
       </div>
     </div>
-    <div class="course-section ${builderDone?'done':''}" id="course-section-builder">
+    <div class="course-section ${builderDone?'done':''}" data-course-stage="builder" id="course-section-builder">
       <div class="course-section-head"><div class="course-section-index">4</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английское предложение из слов.':'Build the English sentence from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
@@ -5754,7 +5830,7 @@ function openCourseLesson(id){
       <div class="course-result" id="cb-res-${id}"></div>
       </div>
     </div>
-    <div class="course-section ${nativeBuilderDone?'done':''}" id="course-section-builder-native">
+    <div class="course-section ${nativeBuilderDone?'done':''}" data-course-stage="builder_native" id="course-section-builder-native">
       <div class="course-section-head"><div class="course-section-index">5</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>
@@ -5765,7 +5841,7 @@ function openCourseLesson(id){
       </div>
     </div>
     ${renderCourseErrorSection(ls,id,6)}
-    <div class="course-section ${listenDone?'done':''}" id="course-section-listen">
+    <div class="course-section ${listenDone?'done':''}" data-course-stage="listen" id="course-section-listen">
       <div class="course-section-head"><div class="course-section-index">7</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${lang==='ru'?'Диктант и короткая проверка понимания.':'Dictation and a short comprehension check.'}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
@@ -5786,6 +5862,7 @@ function openCourseLesson(id){
     <div id="course-complete-${id}"></div>
   </div>`;
   wrap.innerHTML=html;
+  openCourseStage(id,defaultStage);
   maybeCompleteCourse(id);
 }
 function courseKey(id){return String(id).replace(/[^a-z0-9_]/gi,'_');}
@@ -5824,6 +5901,7 @@ function updateCourseTrack(id){
   const required=courseRequiredParts(id);
   const done=required.filter(k=>parts[k]).length;
   [...el.children].forEach((node,i)=>node.classList.toggle('done',i<Math.min(6,Math.ceil(done/Math.max(1,required.length)*6))));
+  refreshCourseStageList(id);
 }
 function renderCourseCompleteCard(id,already){
   const box=document.getElementById('course-complete-'+id);
@@ -6989,8 +7067,12 @@ function openPremium(highlightFeature){
   const free=document.getElementById('prem-free');
 
   if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent=highlightFeature||({ru:'Free живой, но ALEX Chat требует подписку. Годовой план даёт -15%.',en:'Free stays useful, ALEX Chat requires a subscription. Yearly saves 15%.',es:'Free sigue útil, chat con suscripción. Anual ahorra 15%.',pt:'Free continua útil, chat por assinatura. Anual economiza 15%.'}[lang]||'Free practice. Subscription unlocks chat.');
+  if(sub)sub.textContent=highlightFeature||({ru:'Учись бесплатно сколько хочешь. Подписка открывает AI-репетитора, голос, сценарии и быстрый разбор ошибок.',en:'Learn free as long as you want. A subscription unlocks the AI tutor, voice, roleplay and faster mistake review.',es:'Aprende gratis. La suscripción abre tutor AI, voz, roleplay y análisis.',pt:'Aprenda grátis. A assinatura libera tutor AI, voz, roleplay e análise.'}[lang]||'Subscription unlocks AI tutor.');
   if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
+  const proof=document.getElementById('prem-proof');
+  if(proof)proof.innerHTML=lang==='ru'
+    ?'<b>Оплата только Telegram Stars.</b> Free остаётся полезным: курс, путь, карточки и тесты доступны без оплаты. Подписка нужна, когда хочется личного AI-разбора и больше практики каждый день.'
+    :'<b>Telegram Stars only.</b> Free remains useful: course, path, cards and tests work without payment. Subscribe when you want personal AI explanations and more daily practice.';
   const pop=document.getElementById('pp-popular-lbl');
   if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
   const by=document.getElementById('pp-basic-year'),py=document.getElementById('pp-pro-year'),uy=document.getElementById('pp-ult-year');
@@ -7039,13 +7121,13 @@ function openPremium(highlightFeature){
   const proB=document.getElementById('pp-pro-buffs');
   const ultB=document.getElementById('pp-ult-buffs');
   if(lang==='ru'){
-    if(basicB)basicB.innerHTML='ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>20 карточек / 5 часов<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
-    if(proB)proB.innerHTML='110 quota points/день<br>Sonnet 4/4.6<br>50 карточек / 4 часа<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
-    if(ultB)ultB.innerHTML='260 quota points/день<br>Opus 4.1/4.7<br>100 карточек / 4 часа<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
+    if(basicB)basicB.innerHTML='<b>Старт с AI-репетитором</b><br>ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>20 карточек / 5 часов<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
+    if(proB)proB.innerHTML='<b>Лучший баланс цены и силы</b><br>110 quota points/день<br>Sonnet 4/4.6<br>50 карточек / 4 часа<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
+    if(ultB)ultB.innerHTML='<b>Максимум для интенсивного режима</b><br>260 quota points/день<br>Opus 4.1/4.7<br>100 карточек / 4 часа<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
   } else {
-    if(basicB)basicB.innerHTML='ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>20 cards / 5 hours<br>Voice replies + AI hints<br>Full course rule breakdown';
-    if(proB)proB.innerHTML='110 quota points/day<br>Sonnet 4/4.6<br>50 cards / 4 hours<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
-    if(ultB)ultB.innerHTML='260 quota points/day<br>Opus 4.1/4.7<br>100 cards / 4 hours<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
+    if(basicB)basicB.innerHTML='<b>Start with an AI tutor</b><br>ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>20 cards / 5 hours<br>Voice replies + AI hints<br>Full course rule breakdown';
+    if(proB)proB.innerHTML='<b>Best balance of price and power</b><br>110 quota points/day<br>Sonnet 4/4.6<br>50 cards / 4 hours<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
+    if(ultB)ultB.innerHTML='<b>Maximum for intensive learning</b><br>260 quota points/day<br>Opus 4.1/4.7<br>100 cards / 4 hours<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
   }
 
   // Hide plans that are lower or equal to current tier
@@ -8530,11 +8612,7 @@ async function init(){
         addMsg('bot',L.welcome||'Привет! Я ALEX 👋');
         // Add quick action hints
         setTimeout(function(){
-          var hints={
-            ru:'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"><button class="chip" onclick="sendChip(\'Tell me about yourself\')" style="font-size:12px">👋 Расскажи о себе</button><button class="chip" onclick="sendChip(\'Give me a grammar quiz\')" style="font-size:12px">📝 Тест грамматики</button><button class="chip" onclick="sendChip(\'Fix my text: I go to school yesterday\')" style="font-size:12px">✏️ Проверь текст</button></div>',
-            en:'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"><button class="chip" onclick="sendChip(\'Tell me about yourself\')" style="font-size:12px">👋 About you</button><button class="chip" onclick="sendChip(\'Give me a grammar quiz\')" style="font-size:12px">📝 Grammar quiz</button><button class="chip" onclick="sendChip(\'Fix my text: I go to school yesterday\')" style="font-size:12px">✏️ Fix my text</button></div>',
-          };
-          addMsg('bot',hints[lang]||hints.en);
+          addMsg('bot',quickHintChips());
         },400);
       }
     }catch(e){

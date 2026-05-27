@@ -1945,13 +1945,6 @@ async def cmd_premium(msg: Message):
             callback_data="prem_buy:ultimate_year:n"
         )],
     ]
-    # Add card payment option if Stripe is configured
-    if STRIPE_TOKEN:
-        kb_rows.append([InlineKeyboardButton(
-            text="💳 Оплатить картой" if ru else "💳 Pay by card",
-            callback_data="prem_card_menu"
-        )])
-
     plans_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
 
     text = (
@@ -1983,7 +1976,7 @@ async def cmd_premium(msg: Message):
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Stars или 💳 карта"
+        "⭐ Оплата только Telegram Stars"
     ) if ru else (
         "<b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
@@ -2013,7 +2006,7 @@ async def cmd_premium(msg: Message):
         "<i>Quota points keep premium limits fair and sustainable.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Stars or 💳 card"
+        "⭐ Telegram Stars only"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
@@ -2058,50 +2051,11 @@ async def cb_prem_buy(cb: CallbackQuery):
 # ══ CARD PAYMENT MENU ════════════════════════════════════════════════════
 @dp.callback_query(F.data == "prem_card_menu")
 async def cb_card_menu(cb: CallbackQuery):
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
-    await cb.answer()
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"Basic — $8.99/мес" if ru else "Basic — $8.99/mo", callback_data="prem_card:basic")],
-        [InlineKeyboardButton(text=f"Pro — $19.99/мес" if ru else "Pro — $19.99/mo", callback_data="prem_card:pro")],
-        [InlineKeyboardButton(text=f"Ultimate — $49.99/мес" if ru else "Ultimate — $49.99/mo", callback_data="prem_card:ultimate")],
-        [InlineKeyboardButton(text=f"Basic год — $91.69 (-15%)" if ru else "Basic yearly — $91.69 (-15%)", callback_data="prem_card:basic_year")],
-        [InlineKeyboardButton(text=f"Pro год — $203.89 (-15%)" if ru else "Pro yearly — $203.89 (-15%)", callback_data="prem_card:pro_year")],
-        [InlineKeyboardButton(text=f"Ultimate год — $509.89 (-15%)" if ru else "Ultimate yearly — $509.89 (-15%)", callback_data="prem_card:ultimate_year")],
-    ])
-    await cb.message.answer("💳 " + ("Выбери план для оплаты картой:" if ru else "Choose a plan to pay by card:"), reply_markup=kb)
+    await cb.answer("Оплата доступна только через Telegram Stars." if (await get_lang(cb.from_user.id) or "ru") == "ru" else "Payment is available through Telegram Stars only.", show_alert=True)
 
 @dp.callback_query(F.data.startswith("prem_card:"))
 async def cb_card_buy(cb: CallbackQuery):
-    from aiogram.types import LabeledPrice
-    plan_id = cb.data.split(":")[1]
-    plan = PREMIUM_PLANS.get(plan_id)
-    if not plan or not STRIPE_TOKEN:
-        await cb.answer("Card payments not configured" if not STRIPE_TOKEN else "Invalid plan", show_alert=True)
-        return
-
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
-    label = plan["label_ru"] if ru else plan["label_en"]
-    price_usd = plan["price_usd"]  # in cents
-
-    await cb.answer()
-    try:
-        await bot.send_invoice(
-            chat_id=uid,
-            title=f"ALEX Subscriptions {label}",
-            description=f"ALEX Subscriptions {plan['tier'].upper()} — {('1 год' if ru else '1 year') if plan['months']==12 else ('1 месяц' if ru else '1 month')}",
-            payload=f"premium:{plan_id}:{uid}",
-            provider_token=STRIPE_TOKEN,
-            currency="USD",
-            prices=[LabeledPrice(label=f"Premium {label}", amount=price_usd)],
-            protect_content=False,
-        )
-    except Exception as e:
-        logger.error(f"card invoice error: {e}")
-        await bot.send_message(uid, "⚠️ " + ("Ошибка. Попробуй оплату через Stars." if ru else "Error. Try Stars payment."))
+    await cb.answer("Оплата доступна только через Telegram Stars." if (await get_lang(cb.from_user.id) or "ru") == "ru" else "Payment is available through Telegram Stars only.", show_alert=True)
 
 # ══ PRE-CHECKOUT ══════════════════════════════════════════════════════════
 @dp.pre_checkout_query()
