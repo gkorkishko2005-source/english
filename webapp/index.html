@@ -1267,20 +1267,29 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-pill{font-size:10px;font-weight:750;color:var(--t2);background:var(--e2);border:1px solid var(--b1);padding:4px 7px;border-radius:999px}
 .course-go{width:26px;height:26px;border-radius:9px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center}
 .course-go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.course-lesson{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:14px;margin-bottom:10px}
-.course-lesson h3{margin:0 0 6px;font-size:16px;color:var(--t1)}
+.course-lesson{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:12px;margin-bottom:10px}
+.course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
+.course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
 .course-rule{font-size:13px;line-height:1.5;color:var(--t2)}
+.course-rule-compact{display:flex;gap:8px;align-items:flex-start;background:rgba(var(--ar),.065);border:1px solid rgba(var(--ar),.14);border-radius:11px;padding:9px 10px;margin-bottom:9px;font-size:12px;line-height:1.38}
+.course-rule-compact b{font-size:10px;text-transform:uppercase;letter-spacing:.45px;color:var(--a);white-space:nowrap;margin-top:1px}
+.course-focus-row{display:grid;grid-template-columns:1fr;gap:6px;margin:8px 0}
+.course-focus-chip{font-size:11px;line-height:1.35;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:9px;padding:7px 9px}
 .course-ex{display:grid;gap:6px;margin:12px 0}
 .course-line{font-size:12px;color:var(--t1);background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .course-line button{border:0;background:rgba(var(--ar),.12);color:var(--a);border-radius:8px;padding:5px 7px;cursor:pointer}
 .course-practice{display:grid;gap:7px;margin-top:10px}
+.course-practice-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:8px}
+.course-practice-card.done{border-color:rgba(0,212,170,.28)}
+.course-qtext{font-size:12px;font-weight:800;color:var(--t1);line-height:1.35;margin-bottom:7px}
 .course-opt{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px;font-size:12px;color:var(--t1);cursor:pointer;transition:.18s}
+.course-practice-card .course-opt{background:var(--e1);padding:9px;margin-top:6px}
 .course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
-.course-note{font-size:12px;line-height:1.45;color:var(--t2);background:rgba(var(--ar),.07);border:1px solid rgba(var(--ar),.14);border-radius:10px;padding:10px;margin-top:10px}
+.course-note{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-top:8px}
 .course-ai{width:100%;border:1px solid rgba(var(--ar),.28);background:rgba(var(--ar),.1);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer;margin-top:10px}
-.course-lab{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:14px 0 7px}
-.course-build{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:10px;margin-top:9px}
+.course-lab{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:11px 0 7px}
+.course-build{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:8px}
 .course-slots,.course-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:38px}
 .course-slots{background:var(--e1);border:1px dashed var(--b2);border-radius:10px;padding:8px;margin-bottom:8px}
 .course-word{border:1px solid var(--b1);background:var(--e3);color:var(--t1);border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700;cursor:pointer}
@@ -5035,6 +5044,11 @@ GALAXY_COURSE.push(
     const topic=String(s[0]||'this topic').toLowerCase();
     const capTopic=topic.charAt(0).toUpperCase()+topic.slice(1);
     const base={q:`Choose the natural sentence about ${topic}:`,o:[`I can explain ${topic} clearly.`,`I can to explain ${topic} clearly.`,`I cans explain ${topic} clearly.`,`I can explaining ${topic} clearly.`],a:0};
+    if(title.includes('future perfect'))return {q:`Choose: By Friday, I will have ___ ${topic}.`,o:['reviewed','review','reviewing','reviews'],a:0};
+    if(title.includes('mixed conditional'))return {q:`Choose: If I had practised ${topic}, I ___ more confident now.`,o:['will feel','would feel','felt','am feeling'],a:1};
+    if(title.includes('past modals'))return {q:`Choose: I should have ___ ${topic} earlier.`,o:['reviewed','review','reviewing','reviews'],a:0};
+    if(title.includes('advanced passive'))return {q:`Choose: This ${topic} task needs to be ___.`,o:['review','reviewed','reviewing','reviews'],a:1};
+    if(title.includes('wish'))return {q:`Choose: I wish I ___ ${topic} better.`,o:['understand','understood','understanding','understands'],a:1};
     if(topic==='weather'){
       if(title.includes('to be')||title.includes('names')||title.includes('pronouns'))return {q:'Choose: The weather ___ sunny today.',o:['is','are','am','be'],a:0};
       if(title.includes('present simple')||title.includes('frequency'))return {q:'Choose: It often ___ in autumn.',o:['rain','rains','raining','rained'],a:1};
@@ -5073,14 +5087,83 @@ GALAXY_COURSE.push(
     if(title.includes('subjunctive'))return {q:`Choose: I suggest that he ___ present.`,o:['is','be','was','being'],a:1};
     return base;
   }
+  function cefrGrammarTag(level,g){
+    const title=String(g[0]||'').toLowerCase();
+    const tags=[
+      ['names','Core phrases','Базовые фразы'],
+      ['to be','To be practice','Практика to be'],
+      ['numbers','Numbers','Числа'],
+      ['pronouns','Pronouns','Местоимения'],
+      ['my / your','Possessives','Притяжательные слова'],
+      ['this','This / that','This / that'],
+      ['there is','There is / are','There is / are'],
+      ['can','Can','Can'],
+      ['like','Like + ing','Like + ing'],
+      ['in / on / at','Prepositions','Предлоги'],
+      ['present simple','Present Simple','Present Simple'],
+      ['do / does','Questions','Вопросы'],
+      ['frequency','Frequency','Частотность'],
+      ['articles','Articles','Артикли'],
+      ['plural','Plurals','Множественное число'],
+      ['continuous','Continuous','Continuous'],
+      ['past simple','Past Simple','Past Simple'],
+      ['going to','Going to','Going to'],
+      ['will','Will','Will'],
+      ['comparative','Comparatives','Сравнения'],
+      ['superlative','Superlatives','Превосходная степень'],
+      ['future perfect','Future Perfect','Future Perfect'],
+      ['perfect','Perfect forms','Perfect forms'],
+      ['should','Advice','Совет'],
+      ['have to','Obligation','Обязанность'],
+      ['conditional','Conditionals','Условные'],
+      ['passive','Passive voice','Пассив'],
+      ['reported','Reported speech','Косвенная речь'],
+      ['modal','Modal verbs','Модальные глаголы'],
+      ['question tags','Question tags','Разделительные вопросы'],
+      ['linking','Linking words','Связки'],
+      ['phrasal','Phrasal verbs','Фразовые глаголы'],
+      ['inversion','Inversion','Инверсия'],
+      ['subjunctive','Subjunctive','Subjunctive']
+    ];
+    const hit=tags.find(x=>title.includes(x[0]));
+    return hit?{en:hit[1],ru:hit[2]}:{en:g[0]||`${level} practice`,ru:g[1]||`${level} практика`};
+  }
+  function cefrRuleText(level,g,s){
+    const tag=cefrGrammarTag(level,g);
+    const topic=String(s[0]||'this topic').toLowerCase();
+    return {
+      en:`${tag.en}: use the pattern in short sentences about ${topic}.`,
+      ru:`${tag.ru}: используй модель в коротких фразах по теме “${s[1]}”.`
+    };
+  }
+  function cefrDistractors(topic){
+    const map={
+      'weather':['receipt','teacher','password'],
+      'business cases':['headache','passport','jacket'],
+      'simple opinions':['platform','medicine','luggage'],
+      'daily routine':['contract','pollution','customs'],
+      'shopping choices':['climate','homework','privacy'],
+      'health basics':['ticket','museum','salary'],
+      'travel plans':['medicine','homework','budget'],
+      'school life':['passport','receipt','insurance']
+    };
+    return map[topic]||['receipt','passport','schedule'];
+  }
   function cefrBuildLesson(level,g,s){
     const topic=String(s[0]||'English').toLowerCase();
     const examples=cefrTopicExamples(level,g,s);
     const p=cefrTopicPractice(level,g,s);
-    const title=String(g[0]||'Grammar');
+    const grammar=cefrGrammarTag(level,g);
     return {
       examples:examples,
       q:p.q,o:p.o,a:p.a,
+      grammar:grammar,
+      rule:cefrRuleText(level,g,s),
+      practice:[
+        p,
+        {q:`Choose a word connected with ${topic}:`,o:[s[2][0]||'word',...cefrDistractors(topic)],a:0},
+        {q:`Choose the natural sentence:`,o:[`I can talk about ${topic}.`,`I can to talk about ${topic}.`,`I talking about ${topic}.`,`I talks about ${topic}.`],a:0}
+      ],
       build:`I can talk about ${topic} clearly.`,
       dictation:`Talking about ${topic} gets easier with practice.`,
       focus:[
@@ -5088,7 +5171,7 @@ GALAXY_COURSE.push(
         `Say one short example aloud before you answer.`,
         `Check the verb form before you choose an option.`
       ],
-      mistake:`Do not copy the example mechanically. Match the grammar rule to the topic: ${title}.`,
+      mistake:`Do not copy the example mechanically. Match the pattern to the topic: ${grammar.en}.`,
       reading:`This lesson is about ${topic}. Read the examples, notice the grammar pattern, then answer without looking for a ready-made sentence.`
     };
   }
@@ -5108,9 +5191,9 @@ GALAXY_COURSE.push(
         const built=cefrBuildLesson(level,g,s);
         GALAXY_COURSE.push({
           id:id,level:level,color:colors[level],
-          title:{ru:cefrCapText(s[1])+' · '+g[1],en:cefrCapText(s[0])+' · '+g[0]},
-          sub:{ru:s[1],en:s[0]},
-          rule:{ru:g[3]+' Тема урока: '+s[1]+'.',en:g[2]+' Lesson context: '+s[0]+'.'},
+          title:{ru:cefrCapText(s[1]),en:cefrCapText(s[0])},
+          sub:built.grammar,
+          rule:built.rule,
           examples:built.examples,
           words:s[2],
           q:built.q,
@@ -5120,7 +5203,9 @@ GALAXY_COURSE.push(
           dictation:built.dictation,
           focus:built.focus,
           mistake:built.mistake,
-          reading:built.reading
+          reading:built.reading,
+          grammar:built.grammar,
+          practice:built.practice
         });
         existing.add(id);count++;
       }
@@ -5141,6 +5226,13 @@ GALAXY_COURSE.push(
     ];
     if(!ls.mistake)ls.mistake='Do not choose by memory only. Match the form to the meaning of the sentence.';
     if(!ls.reading)ls.reading=`This lesson trains ${simpleTopic}. Read the examples first, then answer the tasks without looking for a ready-made answer.`;
+    if(!ls.grammar)ls.grammar={ru:ls.sub?.ru||'Правило',en:ls.sub?.en||'Rule'};
+    if(!Array.isArray(ls.practice)||!ls.practice.length){
+      ls.practice=[
+        {q:ls.q,o:ls.o,a:ls.a},
+        {q:'Choose the natural sentence:',o:[ls.build||'I can use this lesson in real English.','I can to use this lesson.','I using this lesson.','I uses this lesson.'],a:0}
+      ];
+    }
   });
 })();
 
@@ -5238,6 +5330,18 @@ function renderCourse(){
   wrap.innerHTML=system+lessons;
   bindCourseTopBtn();
 }
+function courseShortRule(ls){
+  const raw=String((ls.rule&&(ls.rule[lang]||ls.rule.en))||'').trim();
+  if(!raw)return '';
+  const first=raw.split(/(?<=[.!?])\s+/)[0]||raw;
+  return first.length>170?first.slice(0,167).trim()+'...':first;
+}
+function coursePracticeSet(ls){
+  const base=Array.isArray(ls.practice)?ls.practice:[];
+  const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,4);
+  if(!out.length&&ls.q)out.push({q:ls.q,o:ls.o,a:ls.a});
+  return out;
+}
 function openCourseLesson(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
@@ -5254,23 +5358,26 @@ function openCourseLesson(id){
     lang==='ru'?'Скажи один пример вслух, затем переходи к практике.':'Say one example aloud, then move to practice.',
     lang==='ru'?'Не ищи готовый ответ: проверь форму глагола и порядок слов.':'Do not hunt for a ready answer: check the verb form and word order.'
   ];
+  const grammarLabel=(ls.grammar&&(ls.grammar[lang]||ls.grammar.en))||(ls.sub&&((ls.sub[lang]||ls.sub.en)))||'Rule';
+  const ruleText=courseShortRule(ls);
+  const practice=coursePracticeSet(ls);
+  window['course_practice_'+courseKey(id)]=practice;
   const html=`<div class="course-lesson">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <h3>${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</h3>
-    <div class="course-rule">${safeHTML(ls.rule[lang]||ls.rule.en)}</div>
-    <div class="course-build">
-      <div class="course-lab">${lang==='ru'?'Что понять в этом уроке':'What to understand'}</div>
-      ${focus.map((x,i)=>`<div class="course-line"><span>${i+1}. ${safeHTML(x)}</span></div>`).join('')}
-      <div class="course-note">${safeHTML(ls.mistake||(lang==='ru'?'Главная ошибка — переносить шаблон без проверки темы и формы слова.':'The main mistake is copying a pattern without checking the topic and word form.'))}</div>
+    <div class="course-lesson-sub">${safeHTML(grammarLabel)}</div>
+    <div class="course-rule-compact"><b>${lang==='ru'?'Правило':'Rule'}</b><span>${safeHTML(ruleText)}</span></div>
+    <div class="course-focus-row">
+      ${focus.slice(0,2).map((x,i)=>`<div class="course-focus-chip">${i+1}. ${safeHTML(x)}</div>`).join('')}
     </div>
     <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
-    <div class="course-note">${lang==='ru'?'Бесплатно: короткое правило, примеры, слова и мини-тест. Полный персональный разбор открывается с любой подпиской.':'Free: short rule, examples, words and a mini test. Full personal AI breakdown requires a subscription.'}</div>
-    <button class="course-ai" onclick="courseAIBreakdown('${id}')">${lang==='ru'?'Полный AI-разбор правила':'Full AI rule breakdown'}</button>
     <div class="course-practice" id="course-q-${id}">
-      <div class="mini-type">${lang==='ru'?'Мини-тест':'Mini test'}</div>
-      <div class="course-rule" style="font-weight:750;color:var(--t1)">${safeHTML(ls.q)}</div>
-      ${ls.o.map((o,i)=>`<div class="course-opt" onclick="answerCourse('${id}',${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
+      <div class="mini-type">${lang==='ru'?'Практика':'Practice'}</div>
+      ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
+        <div class="course-qtext">${safeHTML(q.q)}</div>
+        ${q.o.map((o,i)=>`<div class="course-opt" onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
+      </div>`).join('')}
     </div>
     <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
@@ -5370,6 +5477,40 @@ function speakCourseDictation(id){
   const u=new SpeechSynthesisUtterance(text);
   u.lang='en-US';u.rate=.9;
   speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function answerCoursePractice(id,qi,picked){
+  const practice=window['course_practice_'+courseKey(id)]||[];
+  const q=practice[qi];if(!q)return;
+  const box=document.getElementById('course-q-'+id+'-'+qi);if(!box)return;
+  const isRight=picked===q.a;
+  box.classList.add('done');
+  box.querySelectorAll('.course-opt').forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===q.a)el.classList.add('ok');
+    if(i===picked&&!isRight)el.classList.add('bad');
+  });
+  if(isRight){
+    awardCourseExtra(id,'practice_'+qi,4);
+    try{trackM('drill');}catch(e){}
+  }
+  const stateKey='course_practice_state_'+id;
+  const state=LS.getJ(stateKey)||{};
+  state[qi]=isRight?'ok':'bad';
+  LS.setJ(stateKey,state);
+  const correct=Object.values(state).filter(x=>x==='ok').length;
+  const needed=Math.min(2,Math.max(1,practice.length));
+  if(correct>=needed){
+    const done=LS.getJ('course_done')||{};
+    if(!done[id]){
+      done[id]=Date.now();
+      LS.setJ('course_done',done);
+      addLocalXP(8);
+      bumpStat('tests');
+      toast('+8 XP','✓');
+    }
+  }else{
+    toast(isRight?'+4 XP':(lang==='ru'?'Ещё попытка в следующем блоке':'Try the next block'),isRight?'✓':'');
+  }
 }
 function answerCourse(id,picked){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
