@@ -84,7 +84,7 @@ PolyGlotty хранит данные, необходимые для работы
 
 ### 10. Поддержка
 
-PolyGlotty ведет один разработчик. Поддержка старается отвечать быстро, но не гарантирует мгновенный ответ.
+Поддержка PolyGlotty старается отвечать быстро, но обрабатывает обращения в порядке очереди и не гарантирует мгновенный ответ.
 
 Вопросы приложения: `/support`.
 
@@ -176,7 +176,7 @@ Data is not sold. To request deletion, use `/support` and include your Telegram 
 
 ### 10. Support
 
-PolyGlotty is built by one developer. Support tries to respond quickly, but instant replies are not guaranteed.
+PolyGlotty Support tries to respond quickly, but requests are handled in queue and instant replies are not guaranteed.
 
 App questions: `/support`.
 

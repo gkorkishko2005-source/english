@@ -92,7 +92,7 @@ Release PolyGlotty as a Telegram-first English learning product:
 - Analyze logs if pasted or available locally.
 - Help calculate pricing and model limits.
 
-## What Gordey Must Do
+## Owner Checklist
 
 - Verify Telegram Stars payments from a real Telegram account.
 - Decide final public prices.
@@ -163,4 +163,3 @@ Launch publicly only when:
 - plan texts match real limits;
 - no obvious debug/test text remains;
 - the first 10 organic testers can use the app without explanation.
-

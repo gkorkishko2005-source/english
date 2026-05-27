@@ -1241,15 +1241,14 @@ async def send_support_prompt(target, uid: int):
     lang = await get_lang(uid) or "ru"
     ru = lang == "ru"
     waiting[uid] = "support_message"
-    kb_rows = [[InlineKeyboardButton(text="Написать Гордею" if ru else "Message Gordey", url=support_contact_url())]]
+    kb_rows = [[InlineKeyboardButton(text="Написать в поддержку" if ru else "Message support", url=support_contact_url())]]
     if RAILWAY_URL and "localhost" not in RAILWAY_URL:
         kb_rows.append([InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
                                              web_app=WebAppInfo(url=f"https://{RAILWAY_URL}"))])
     kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
     await target.answer(
         ("<b>Поддержка PolyGlotty</b>\n\n"
-         "Сейчас поддержка ручная: проект ведёт один разработчик.\n\n"
-         "Ответь следующим сообщением сюда, и я перешлю его Гордею:\n"
+         "Опиши проблему одним сообщением, и мы передадим её в поддержку:\n"
          "• что произошло;\n"
          "• твой тариф;\n"
          "• примерное время ошибки;\n"
@@ -1257,8 +1256,7 @@ async def send_support_prompt(target, uid: int):
          "Можно также написать напрямую по кнопке ниже.")
         if ru else
         ("<b>PolyGlotty Support</b>\n\n"
-         "Support is manual right now: the project is run by one developer.\n\n"
-         "Reply with one message here and I will forward it to Gordey:\n"
+         "Describe the issue in one message and we will send it to support:\n"
          "• what happened;\n"
          "• your plan;\n"
          "• approximate error time;\n"
@@ -1303,7 +1301,7 @@ async def cmd_terms(m: Message):
          "4. <b>Что не зависит от нас.</b> Мы не управляем Telegram, App Store, Google Play, Anthropic, Railway, интернетом, устройством пользователя и Telegram WebView. Из-за их сбоев, ограничений, налогов, комиссий, правил региона или обновлений отдельные функции могут временно работать иначе.\n\n"
          "5. <b>Лимиты и честное использование.</b> Лимиты, модели, цены и набор функций могут меняться, чтобы сервис не уходил в минус и оставался доступным. Обход лимитов, фейковые аккаунты, автоматизация запросов, спам и попытки ломать оплату могут привести к блокировке доступа.\n\n"
          "6. <b>Контент и данные.</b> Не отправляй пароли, документы, платежные данные и другую чувствительную информацию. Мы храним только данные, нужные для обучения и подписки. Подробнее: /privacy.\n\n"
-         "7. <b>Поддержка.</b> Проект ведет один разработчик, поэтому ответы поддержки не мгновенные. По вопросам приложения — /support, по оплате — /paysupport. Telegram Support не решает покупки внутри нашего бота.\n\n"
+         "7. <b>Поддержка.</b> Запросы обрабатываются в порядке очереди, поэтому ответ может быть не мгновенным. По вопросам приложения — /support, по оплате — /paysupport. Telegram Support не решает покупки внутри нашего бота.\n\n"
          "Продолжая пользоваться ботом или покупая подписку, ты соглашаешься с этими правилами.")
         if ru else
         ("<b>PolyGlotty Terms and Rules</b>\n\n"
@@ -1313,7 +1311,7 @@ async def cmd_terms(m: Message):
          "4. <b>Outside our control.</b> We do not control Telegram, App Store, Google Play, Anthropic, Railway, your internet connection, device or Telegram WebView. Their outages, limits, taxes, fees, regional rules or updates may temporarily affect features.\n\n"
          "5. <b>Limits and fair use.</b> Limits, models, prices and features may change so the service remains sustainable. Limit bypassing, fake accounts, automated requests, spam or payment abuse may lead to access restrictions.\n\n"
          "6. <b>Content and data.</b> Do not send passwords, documents, payment details or other sensitive information. We store only data needed for learning and subscriptions. Details: /privacy.\n\n"
-         "7. <b>Support.</b> This is a solo-built project, so support is not instant. App questions: /support. Payment questions: /paysupport. Telegram Support does not handle purchases made inside this bot.\n\n"
+         "7. <b>Support.</b> Requests are handled in queue, so replies may not be instant. App questions: /support. Payment questions: /paysupport. Telegram Support does not handle purchases made inside this bot.\n\n"
          "By continuing to use the bot or buying a subscription, you agree to these rules.")
     )
 
@@ -1703,9 +1701,9 @@ async def handle_text(message: Message):
                 parse_mode="HTML",
             )
             await message.answer(
-                "Гордей получил сообщение. Если вопрос срочный, можно ещё написать напрямую через /support."
+                "Сообщение отправлено в поддержку PolyGlotty. Если вопрос срочный, можно ещё написать напрямую через /support."
                 if lang == "ru" else
-                "Gordey received your message. If it is urgent, you can also message directly through /support."
+                "Your message was sent to PolyGlotty Support. If it is urgent, you can also message directly through /support."
             )
         except Exception as e:
             logger.error("support forward failed uid=%s: %s", uid, e)
