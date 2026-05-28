@@ -5093,12 +5093,12 @@ function setLevelTestCooldown(target,passed){
 let levelTestState=null;
 
 const GALAXY_COURSE=[
-  {id:'a0-start',level:'A0',color:'#2ecc71',title:{ru:'Старт с нуля',en:'Start from zero'},sub:{ru:'to be, I am, you are',en:'to be, I am, you are'},rule:{ru:'В английском почти всегда нужен глагол. Для фраз «я студент», «ты дома» используется to be: I am, you are, he is, she is, it is, we are, they are.',en:'English usually needs a verb. For "I am a student" and "you are home", use to be: I am, you are, he is, she is, it is, we are, they are.'},examples:['I am a student.','You are ready.','She is at home.','We are friends.','It is a book.'],words:['ready','right','home','student','today','book','here','friend'],q:'Choose: She ___ ready.',o:['am','are','is','be'],a:2,build:'She is at home today.',dictation:'I am a student. You are my friend. She is ready. We are at home today.',focus:['Each subject has its own form of to be (am / is / are).','Short forms are natural: I’m, you’re, she’s.','Read one example out loud.'],focus_ru:['У каждого подлежащего своя форма to be (am / is / are).','Краткие формы естественны: I’m, you’re, she’s.','Произнеси один пример вслух.'],practice:[
+  {id:'a0-iam',level:'A0',color:'#2ecc71',title:{ru:'Я / ты / он',en:'I / you / he'},sub:{ru:'am, are, is',en:'am, are, is'},rule:{ru:'В английском нужен глагол даже там, где в русском мы его не говорим. Для "я студент", "ты дома" используем to be: I am, you are, he is.',en:'English needs a verb even where Russian skips it. For "I am a student" and "you are home" use to be: I am, you are, he is.'},examples:['I am a student.','You are at home.','He is my friend.','She is here.','It is a book.'],words:['student','home','friend','here','book','ready','today','name'],q:'Choose: She ___ here.',o:['am','are','is','be'],a:2,build:'I am a student and he is my friend.',dictation:'I am a student and he is my friend.',focus:['Each subject has its own form: I am, you are, he is, she is, it is, we are, they are.','English needs the verb even in short answers: I am ready, not just I ready.','Read one example out loud before moving on.'],focus_ru:['У каждого подлежащего своя форма: I am, you are, he is, she is, it is, we are, they are.','Глагол to be обязателен даже в коротких фразах: I am ready, а не просто I ready.','Прочитай один пример вслух перед следующим шагом.'],practice:[
     {q:'Choose: I ___ a student.',o:['am','is','are','be'],a:0},
-    {q:'Choose: They ___ ready.',o:['am','is','are','be'],a:2},
-    {q:'Choose: It ___ a book.',o:['am','is','are','do'],a:1},
-    {q:'Pick the natural sentence.',o:['I am at home today.','I at home today.','I be at home today.','I home today.'],a:0},
-    {q:'Choose the correct short form: ___ ready.',o:['I’m','I are','I be','Me am'],a:0}
+    {q:'Choose: You ___ at home.',o:['am','is','are','be'],a:2},
+    {q:'Choose: He ___ my friend.',o:['am','is','are','be'],a:1},
+    {q:'Pick the natural sentence.',o:['I am ready today.','I ready today.','I be ready today.','Me am ready today.'],a:0},
+    {q:'Choose: They ___ here.',o:['am','is','are','be'],a:2}
   ]},
   {id:'a0-time',level:'A0',color:'#2ecc71',title:{ru:'Время и дни',en:'Time and days'},sub:{ru:'today, tomorrow, at 7',en:'today, tomorrow, at 7'},rule:{ru:'Для времени используем at: at seven, at night. Для дней — on: on Monday. Для месяцев и годов — in: in May, in 2024.',en:'Use at for clock time: at seven. Use on for days: on Monday. Use in for months and years: in May, in 2024.'},examples:['I wake up at seven.','The lesson is on Monday.','I was born in 2005.','We meet on Friday morning.','See you in October.'],words:['today','tomorrow','Monday','morning','evening','night','weekend','May'],q:'Choose: The class starts ___ 8:00.',o:['in','on','at','to'],a:2,build:'The class is on Monday at eight.',dictation:'I have a lesson on Tuesday at six in the evening. Tomorrow I work in the morning. See you in May.',focus:['at for clock time, on for days, in for months and years.','Days of the week are always capitalised: Monday, Friday.','Apply at/on/in to your real plan for tomorrow.'],focus_ru:['at — для времени, on — для дней, in — для месяцев и годов.','Дни недели всегда с большой буквы: Monday, Friday.','Подставь at/on/in в свой график на завтра.'],practice:[
     {q:'Choose: I will see you ___ Friday.',o:['at','on','in','to'],a:1},
@@ -6099,22 +6099,31 @@ function openCourseLesson(id){
   try{unlocked=isCourseUnlocked(id);}catch(e){_diagLog('isCourseUnlocked ERR '+e.message);return;}
   _diagLog('unlocked='+unlocked);
   if(!unlocked){handleLockedCourseTap(id);return;}
-  try{ _openCourseLessonInner(id); _diagLog('lesson rendered'); }
-  catch(err){
-    _diagLog('OPEN ERR '+(err&&err.message));
-    console.error('openCourseLesson failed for',id,err&&err.message,err&&err.stack);
-    const wrap=document.getElementById('course-wrap');
-    if(wrap){
-      wrap.innerHTML=`<div class="course-lesson">
-        <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
-        <div class="course-hero"><div class="course-hero-top"><div class="course-hero-title">${lang==='ru'?'Не удалось загрузить урок':'Could not load this lesson'}</div></div></div>
-        <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок.':'A data error was found in this lesson. Tap Back and pick another lesson.'}</span></div>
-        <button class="course-mini-btn" type="button" onclick="renderCourse()" style="margin-top:14px">${lang==='ru'?'Вернуться к списку':'Back to list'}</button>
-        <div style="margin-top:14px;font-size:11px;color:var(--t3);font-family:monospace">${safeHTML(String(err&&err.message||err||''))}</div>
-      </div>`;
-    }
-    try{toast(lang==='ru'?'Не удалось открыть урок':'Could not open lesson','⚠️');}catch(_){}
+  /* Defer the DOM swap so the originating touch event finishes BEFORE we
+     replace the course list. Otherwise the touch-end can land on whatever
+     interactive element happens to be at the same coordinates in the new
+     DOM (e.g. the "Назад к курсу" button) and instantly bounce the user
+     back to the list — which is exactly what the diag log showed. */
+  requestAnimationFrame(()=>{
+    try{ _openCourseLessonInner(id); _diagLog('lesson rendered'); }
+    catch(err){_handleOpenLessonErr(id,err);}
+  });
+  return;
+}
+function _handleOpenLessonErr(id,err){
+  _diagLog('OPEN ERR '+(err&&err.message));
+  console.error('openCourseLesson failed for',id,err&&err.message,err&&err.stack);
+  const wrap=document.getElementById('course-wrap');
+  if(wrap){
+    wrap.innerHTML=`<div class="course-lesson">
+      <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+      <div class="course-hero"><div class="course-hero-top"><div class="course-hero-title">${lang==='ru'?'Не удалось загрузить урок':'Could not load this lesson'}</div></div></div>
+      <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок.':'A data error was found in this lesson. Tap Back and pick another lesson.'}</span></div>
+      <button class="course-mini-btn" type="button" onclick="renderCourse()" style="margin-top:14px">${lang==='ru'?'Вернуться к списку':'Back to list'}</button>
+      <div style="margin-top:14px;font-size:11px;color:var(--t3);font-family:monospace">${safeHTML(String(err&&err.message||err||''))}</div>
+    </div>`;
   }
+  try{toast(lang==='ru'?'Не удалось открыть урок':'Could not open lesson','⚠️');}catch(_){}
 }
 function _openCourseLessonInner(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
