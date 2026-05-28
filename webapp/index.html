@@ -5512,6 +5512,18 @@ function courseLevelLabel(level){
   })[level]||{ru:'Уровень',en:'Level'};
 }
 const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2'];
+/* The rendered course list sorts lessons by CEFR level (stable sort within a
+   level). Lock + previous-lesson logic must use the SAME order, not the
+   raw GALAXY_COURSE index — otherwise a0-hello (15th in the array, 3rd on
+   screen) thinks its previous lesson is c2-nuance (14th in the array). */
+let _sortedCourseCache=null;
+function sortedGalaxyCourse(){
+  if(_sortedCourseCache)return _sortedCourseCache;
+  const map={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
+  _sortedCourseCache=GALAXY_COURSE.slice().sort((a,b)=>(map[a.level]??99)-(map[b.level]??99));
+  return _sortedCourseCache;
+}
+function sortedCourseIdx(id){return sortedGalaxyCourse().findIndex(x=>x.id===id);}
 function courseLessonComplete(id){
   /* Minimum bar to unlock the next lesson: the two vocab stages.
      The track UI still shows 8 stages, and full completion still grants
@@ -5554,30 +5566,32 @@ function provenLevelIdx(){
   return best;
 }
 function isCourseUnlocked(id){
-  const idx=GALAXY_COURSE.findIndex(x=>x.id===id);
+  const sorted=sortedGalaxyCourse();
+  const idx=sortedCourseIdx(id);
   if(idx<0)return false;
-  const ls=GALAXY_COURSE[idx];
+  const ls=sorted[idx];
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
   const proven=provenLevelIdx();
   /* Levels strictly below the proven one are mastered → all open. */
   if(lessonLvlIdx<proven)return true;
   /* Levels above proven+1 are entirely locked behind a placement test. */
   if(lessonLvlIdx>proven+1)return false;
-  /* At the proven level (or one above) we go strictly lesson-by-lesson. */
+  /* At the proven level (or one above) we go strictly lesson-by-lesson —
+     "previous" means previous in the user-visible sorted list. */
   if(idx===0)return true;
-  return courseLessonComplete(GALAXY_COURSE[idx-1].id);
+  return courseLessonComplete(sorted[idx-1].id);
 }
 function courseLockReason(id){
-  const idx=GALAXY_COURSE.findIndex(x=>x.id===id);
+  const sorted=sortedGalaxyCourse();
+  const idx=sortedCourseIdx(id);
   if(idx<0)return null;
-  const ls=GALAXY_COURSE[idx];
+  const ls=sorted[idx];
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
   if(lessonLvlIdx>provenLevelIdx()+1){
-    /* Lesson is more than one level above proven → need to test up to that level first. */
     const targetLvl=COURSE_LEVEL_ORDER[provenLevelIdx()+1];
     return {kind:'level',target:targetLvl};
   }
-  const prev=idx>0?GALAXY_COURSE[idx-1]:null;
+  const prev=idx>0?sorted[idx-1]:null;
   if(prev&&!courseLessonComplete(prev.id))return {kind:'prev',prevId:prev.id,prevTitle:(prev.title&&(prev.title[lang]||prev.title.en))||prev.id};
   return null;
 }
@@ -6728,7 +6742,8 @@ function currentCourseLessonId(){
   if(Date.now()-_ccLessonId.t<400)return _ccLessonId.id;
   const done=LS.getJ('course_done')||{};
   let result=null;
-  for(const ls of GALAXY_COURSE){
+  /* Walk the sorted order so "current lesson" matches the user-visible flow. */
+  for(const ls of sortedGalaxyCourse()){
     if(done[ls.id])continue;
     if(isCourseUnlocked(ls.id)){result=ls.id;break;}
   }
