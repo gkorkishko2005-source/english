@@ -1353,8 +1353,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-section-sub{font-size:10.5px;color:var(--t3);line-height:1.35;margin-top:2px}
 .course-section-done{margin-left:auto;font-size:9px;font-weight:900;color:var(--a2);background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.20);padding:3px 7px;border-radius:999px;white-space:nowrap}
 .course-vocab-grid{display:grid;gap:7px}
-.course-vocab-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px}
+.course-vocab-card{background:var(--e2);border:1px solid var(--b1);border-radius:14px;padding:14px 12px}
 .course-vocab-card.done{border-color:rgba(0,212,170,.25)}
+.course-card-flow{position:relative}
+.course-card-flow .course-vocab-card{display:none;animation:cardSlide .25s ease-out}
+.course-card-flow .course-vocab-card.active{display:block}
+@keyframes cardSlide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.course-card-progress{display:flex;align-items:center;gap:6px;margin:8px 2px 10px;padding:0 2px}
+.course-card-dot{width:18px;height:5px;border-radius:3px;background:rgba(255,255,255,.10);flex:0 0 auto;transition:background .2s,box-shadow .2s,transform .2s}
+.course-card-dot.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 8px rgba(0,212,170,.25)}
+.course-card-dot.active{background:var(--lesson-color,var(--a));transform:scaleY(1.4);box-shadow:0 0 8px color-mix(in srgb,var(--lesson-color,var(--a)) 50%,transparent)}
+.course-card-counter{margin-left:auto;font-size:11px;color:var(--t3);font-weight:700}
+.course-choice.hinted{opacity:.32;filter:grayscale(.6);text-decoration:line-through}
+.course-hint-btn{margin-top:8px;padding:5px 11px;border-radius:8px;background:transparent;color:var(--t2);border:1px dashed rgba(255,255,255,.18);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.02em;transition:color .15s,border-color .15s}
+.course-hint-btn:hover{color:var(--a);border-color:rgba(var(--ar),.30)}
 .course-vocab-word{font-size:15px;font-weight:950;color:var(--t1);margin-bottom:2px}
 .course-vocab-sub{font-size:10.5px;color:var(--t3);line-height:1.3;margin-bottom:7px}
 .course-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -5520,14 +5532,16 @@ function addCourseSkippedLevel(level){
   LS.setJ('course_skipped_levels',[...set]);
 }
 function isLevelSkipped(level){return courseSkippedLevels().indexOf(level)>=0;}
+let _provenMemo={t:0,v:0};
 function provenLevelIdx(){
-  /* Proven level = highest of (a) passed placement tests and (b) explicitly
-     skipped-with-warning levels. ob_level alone never proves a level — the
-     user must either pass the test or knowingly skip it. */
+  /* Memoized for 500ms so a list render that calls isCourseUnlocked 65 times
+     does not re-read LS 65 times. Updated on test pass / skip via LS.set. */
+  if(Date.now()-_provenMemo.t<500)return _provenMemo.v;
   const passed=LS.getJ('passed_level_tests')||{};
   const skipped=new Set(courseSkippedLevels());
   let best=0;
   COURSE_LEVEL_ORDER.forEach((l,i)=>{if((passed[l]||skipped.has(l))&&i>best)best=i;});
+  _provenMemo={t:Date.now(),v:best};
   return best;
 }
 function isCourseUnlocked(id){
@@ -5603,6 +5617,7 @@ function tapSkipLevelTest(target,evt){
   try{ok=window.confirm(warn);}catch(_){ok=true;}
   if(!ok)return false;
   addCourseSkippedLevel(target);
+  _provenMemo.t=0; _ccLessonId.t=0;
   try{haptic('medium');}catch(_){}
   try{toast(lang==='ru'?`Уровень ${target} открыт без теста.`:`Level ${target} opened without the test.`,'⚠️');}catch(_){}
   /* Re-render the list so newly-unlocked lessons appear. */
@@ -5861,6 +5876,25 @@ function refreshCourseStageList(id){
   list.outerHTML=renderCourseStageList(id,ls,practice,LS.getJ(coursePartsKey(id))||{});
   if(active)openCourseStage(id,active);
 }
+function _firstUnansweredIdx(state,total){
+  for(let i=0;i<total;i++)if(state[i]===undefined)return i;
+  return total-1;
+}
+/* Hint: grey out one wrong option. One use per card. Available before any answer. */
+function useCourseHint(id,part,idx,answerIdx){
+  const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
+  if(card.dataset.hinted)return;
+  const state=courseChoiceState(id,part);
+  if(state[idx]!==undefined)return; // already answered
+  const btns=Array.from(card.querySelectorAll('.course-choice'));
+  const wrong=btns.map((b,i)=>i).filter(i=>i!==answerIdx);
+  if(!wrong.length)return;
+  const pick=wrong[Math.floor(Math.random()*wrong.length)];
+  if(btns[pick]){btns[pick].classList.add('hinted');btns[pick].disabled=true;}
+  card.dataset.hinted='1';
+  const hb=card.querySelector('.course-hint-btn');
+  if(hb)hb.style.display='none';
+}
 function renderCourseVocabSection(ls,id,part,index,reverse){
   const words=courseVocabWords(ls);
   const state=courseChoiceState(id,part);
@@ -5868,13 +5902,17 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
   const failed=courseStageFailed(id,part);
   const title=reverse?courseT('reverse'):courseT('vocab');
   const sub=reverse?courseT('reverseSub'):courseT('vocabSub');
+  const activeIdx=_firstUnansweredIdx(state,words.length);
+  const answered=Object.keys(state).filter(k=>!isNaN(+k)).length;
   return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${title}</div><div class="course-section-sub">${sub}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
-    <div class="course-vocab-grid">${words.map((w,i)=>{
+    <div class="course-card-progress">${words.map((_,i)=>`<div class="course-card-dot ${state[i]!==undefined?'done':''} ${i===activeIdx&&state[i]===undefined?'active':''}"></div>`).join('')}<span class="course-card-counter">${Math.min(activeIdx+1,words.length)} / ${words.length}</span></div>
+    <div class="course-card-flow">${words.map((w,i)=>{
       const prompt=reverse?courseWordTranslation(w):w;
       const data=courseWordOptions(w,reverse?'reverse':'native');
       const picked=state[i];
-      return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
+      const isActive=i===activeIdx;
+      return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(prompt)}</div>
         <div class="course-vocab-sub">${reverse?courseT('chooseWord'):courseT('choose')}</div>
         <div class="course-choice-grid">${data.opts.map((o,oi)=>{
@@ -5882,6 +5920,7 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
           const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==data.answer&&isAns?'ok-reveal':'');
           return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseWord('${id}','${part}',${i},${oi},${data.answer},'${safeHTML(w)}')">${safeHTML(o)}</button>`;
         }).join('')}</div>
+        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${data.answer})">${lang==='ru'?'Подсказка':'Hint'}</button>`:''}
       </div>`;
     }).join('')}</div>
     ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
@@ -5972,11 +6011,14 @@ function renderCourseSynonymSection(ls,id,index){
   const state=courseChoiceState(id,part);
   const done=LS.getJ(coursePartsKey(id))?.[part];
   const failed=courseStageFailed(id,part);
+  const activeIdx=_firstUnansweredIdx(state,items.length);
   return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('synonym')}</div><div class="course-section-sub">${courseT('synonymSub')}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
-    <div class="course-vocab-grid">${items.map((it,i)=>{
+    <div class="course-card-progress">${items.map((_,i)=>`<div class="course-card-dot ${state[i]!==undefined?'done':''} ${i===activeIdx&&state[i]===undefined?'active':''}"></div>`).join('')}<span class="course-card-counter">${Math.min(activeIdx+1,items.length)} / ${items.length}</span></div>
+    <div class="course-card-flow">${items.map((it,i)=>{
       const picked=state[i];
-      return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
+      const isActive=i===activeIdx;
+      return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(it.word)}</div>
         <div class="course-vocab-sub">${safeHTML(courseT('synonymHead'))} <b>${safeHTML(it.word)}</b>?</div>
         <div class="course-choice-grid">${it.options.map((o,oi)=>{
@@ -5984,6 +6026,7 @@ function renderCourseSynonymSection(ls,id,index){
           const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==it.answer&&isAns?'ok-reveal':'');
           return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseSynonym('${id}',${i},${oi},${it.answer},'${safeHTML(it.word)}')">${safeHTML(o)}</button>`;
         }).join('')}</div>
+        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${it.answer})">${lang==='ru'?'Подсказка':'Hint'}</button>`:''}
       </div>`;
     }).join('')}</div>
     ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
@@ -6030,7 +6073,15 @@ function _openCourseLessonInner(id){
   try{sfx.course();}catch(e){}
   const first=(ls.examples&&ls.examples[0])||'';
   const target=ls.build||first;
-  const dictation=ls.dictation||target;
+  /* Dictation must be exactly one sentence. If the lesson's dictation field
+     carries several sentences (legacy data), pick the first complete one. */
+  function _firstSentence(s){
+    const t=String(s||'').trim();
+    if(!t)return '';
+    const m=t.match(/^[^.!?]+[.!?]/);
+    return (m?m[0]:t).trim();
+  }
+  const dictation=_firstSentence(ls.dictation)||target;
   const words=courseWords(target);
   const shuffled=shuffleCourseWords(words,id);
   window['course_target_'+courseKey(id)]=target;
@@ -6114,7 +6165,7 @@ function _openCourseLessonInner(id){
                 const lock=st?'style="pointer-events:none"':'';
                 return `<div class="course-opt ${cls}" ${lock} onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`;
               }).join('')}
-              ${failed?`<div class="course-hint">${lang==='ru'?'Правильный ответ выделен зелёным. Этот вопрос не засчитан — нажми <b>Перепройти</b>, чтобы повторить.':'The correct answer is highlighted. This question failed — tap <b>Retry</b> to redo it.'}</div><button class="course-retry-btn" type="button" onclick="courseRetryPracticeQuestion('${id}',${qi})">${lang==='ru'?'Перепройти вопрос':'Retry question'}</button>`:''}
+              ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryPracticeQuestion('${id}',${qi})">${lang==='ru'?'Перепройти':'Retry'}</button>`:''}
             </div>`;
           }).join('');
         })()}
@@ -6277,15 +6328,12 @@ function maybeCompleteChoicePart(id,part,total){
   const answered=Object.keys(state).length;
   if(answered<total)return;
   /* Stage closes only when every answer in it was correct. A single wrong tap
-     blocks the part — the user has to Retry and redo it cleanly. */
+     blocks the part — Retry is required. */
   if(courseStageFailed(id,part)){
-    try{toast(lang==='ru'?'Не сдано — нажми Retry и пройди снова.':'Not passed — tap Retry and redo the stage.','⚠️');}catch(_){}
-    /* Refresh so the Retry button shows up. */
     try{const ls=GALAXY_COURSE.find(x=>x.id===id);if(ls)openCourseLesson(id);}catch(_){}
     return;
   }
   courseMarkPart(id,part,true);
-  toast(courseT('allAttempted'),'');
 }
 function answerCourseWord(id,part,idx,picked,answer,word){
   const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
@@ -6301,17 +6349,34 @@ function answerCourseWord(id,part,idx,picked,answer,word){
   });
   if(ok){
     courseClearMistake(word);
-    toast(courseT('correct'),'');
   }else{
     courseAddMistake(word);
     courseMarkStageFailed(id,part,true);
-    const hint=document.createElement('div');
-    hint.className='course-hint';
-    hint.innerHTML=safeHTML(courseT('miss'))+'<br><b style="color:var(--a2)">'+(lang==='ru'?'Правильный ответ выделен.':'Correct answer highlighted.')+'</b>';
-    card.appendChild(hint);
     try{sfx.warn();}catch(e){}
   }
-  maybeCompleteChoicePart(id,part,courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length);
+  /* Slide to the next card after a brief reveal, or finish the stage. */
+  const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
+  setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?700:1400);
+}
+function _advanceCourseCard(id,part,idx,total){
+  const cur=document.getElementById('course-choice-'+part+'-'+idx);
+  if(cur)cur.classList.remove('active');
+  const next=document.getElementById('course-choice-'+part+'-'+(idx+1));
+  if(next){
+    next.classList.add('active');
+    /* Bump the dots strip. */
+    const sec=document.getElementById('course-section-'+part);
+    if(sec){
+      const dots=sec.querySelectorAll('.course-card-dot');
+      const cnt=sec.querySelector('.course-card-counter');
+      if(dots[idx])dots[idx].classList.add('done');
+      if(dots[idx+1])dots[idx+1].classList.add('active');
+      if(cnt)cnt.textContent=(idx+2)+' / '+total;
+    }
+  } else {
+    /* Last card answered — finalize the stage. */
+    maybeCompleteChoicePart(id,part,total);
+  }
 }
 function answerCourseSynonym(id,idx,picked,answer,word){
   const part='synonym';
@@ -6328,18 +6393,14 @@ function answerCourseSynonym(id,idx,picked,answer,word){
   });
   if(ok){
     courseClearMistake(word);
-    try{toast(courseT('correct'),'');}catch(_){}
   }else{
     courseAddMistake(word);
     courseMarkStageFailed(id,part,true);
-    const hint=document.createElement('div');
-    hint.className='course-hint';
-    hint.innerHTML=safeHTML(courseT('miss'))+'<br><b style="color:var(--a2)">'+(lang==='ru'?'Правильный ответ выделен.':'Correct answer highlighted.')+'</b>';
-    card.appendChild(hint);
     try{sfx.warn();}catch(_){}
   }
   const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
-  maybeCompleteChoicePart(id,part,courseSynonymItems(ls).length);
+  const total=courseSynonymItems(ls).length;
+  setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?700:1400);
 }
 function answerCourseError(id,idx,type,picked,chosen){
   const part='errors';
@@ -6359,10 +6420,6 @@ function answerCourseError(id,idx,type,picked,chosen){
   });
   if(!ok){
     courseMarkStageFailed(id,part,true);
-    const hint=document.createElement('div');
-    hint.className='course-hint';
-    hint.innerHTML=(lang==='ru'?'Ошибка засчитана. ':'Miss saved. ')+'<b style="color:var(--a2)">'+(lang==='ru'?'Правильный тип выделен.':'Correct type highlighted.')+'</b>';
-    card.appendChild(hint);
   }
   maybeCompleteChoicePart(id,part,3);
 }
@@ -6466,18 +6523,14 @@ function answerCoursePractice(id,qi,picked){
     toast(lang==='ru'?'Хорошо, дальше':'Good, keep going','✅');
   }else{
     courseMarkStageFailed(id,'practice_'+qi,true);
-    let hint=box.querySelector('.course-hint');
-    if(!hint){hint=document.createElement('div');hint.className='course-hint';box.appendChild(hint);}
-    hint.innerHTML=(lang==='ru'?'Правильный ответ выделен зелёным. Этот вопрос не засчитан — нажми <b>Перепройти</b>, чтобы повторить.':'The correct answer is highlighted. This question failed — tap <b>Retry</b> to redo it.');
     if(!box.querySelector('.course-retry-btn')){
       const btn=document.createElement('button');
       btn.className='course-retry-btn';
       btn.type='button';
-      btn.textContent=lang==='ru'?'Перепройти вопрос':'Retry question';
+      btn.textContent=lang==='ru'?'Перепройти':'Retry';
       btn.onclick=function(ev){ev.stopPropagation();courseRetryPracticeQuestion(id,qi);};
       box.appendChild(btn);
     }
-    toast(lang==='ru'?'Не сдано — нажми Перепройти.':'Not passed — tap Retry.','⚠️');
   }
 }
 function courseRetryPracticeQuestion(id,qi){
@@ -6611,6 +6664,7 @@ function finishLevelTest(timedOut=false){
     const alreadyPassed=!!pt[target];
     pt[target]=Date.now();
     LS.setJ('passed_level_tests',pt);
+    try{_provenMemo.t=0;_ccLessonId.t=0;}catch(_){}
     setLevelTestCooldown(target,true);
     // Sync to server
     if(API&&window._uid)fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,message:`/setlevel ${target}`})}).catch(()=>{});
@@ -6633,19 +6687,33 @@ function finishLevelTest(timedOut=false){
   levelTestState=null;
 }
 
-function updateCourseTopBtn(){
+/* Performance: every scroll tick was walking 65 lessons through
+   coursePracticeSet, which froze the WebView after a lesson exit.
+   Throttle the visibility check + memoize the current-lesson id. */
+let _ccLessonId={t:0,id:null};
+let _topBtnRaf=0;
+function currentCourseLessonId(){
+  if(Date.now()-_ccLessonId.t<400)return _ccLessonId.id;
+  const done=LS.getJ('course_done')||{};
+  let result=null;
+  for(const ls of GALAXY_COURSE){
+    if(done[ls.id])continue;
+    if(isCourseUnlocked(ls.id)){result=ls.id;break;}
+  }
+  _ccLessonId={t:Date.now(),id:result};
+  return result;
+}
+function _updateCourseTopBtnNow(){
   const btn=document.getElementById('course-top-btn');
   const jump=document.getElementById('course-jump-btn');
   const sc=document.getElementById('s-learn');
   if(!sc)return;
   const onCourse=tab==='learn'&&learnTab==='course';
   if(btn)btn.classList.toggle('show',onCourse&&sc.scrollTop>460);
-  /* Jump button stays visible whenever a current lesson exists and the user
-     isn't already near it. Cheap: a few DOM lookups. */
   if(jump){
-    const target=currentCourseLessonId();
+    const target=onCourse?currentCourseLessonId():null;
     let show=false;
-    if(onCourse&&target){
+    if(target){
       const el=document.querySelector(`.course-card[onclick*="'${target}'"]`);
       if(el){
         const r=el.getBoundingClientRect();
@@ -6656,14 +6724,10 @@ function updateCourseTopBtn(){
     jump.classList.toggle('show',show);
   }
 }
-function currentCourseLessonId(){
-  /* First unlocked lesson the user hasn't completed yet. */
-  const done=LS.getJ('course_done')||{};
-  for(const ls of GALAXY_COURSE){
-    if(done[ls.id])continue;
-    if(isCourseUnlocked(ls.id))return ls.id;
-  }
-  return null;
+function updateCourseTopBtn(){
+  /* rAF-coalesce so a burst of scroll events runs the check once per frame. */
+  if(_topBtnRaf)return;
+  _topBtnRaf=requestAnimationFrame(()=>{_topBtnRaf=0;_updateCourseTopBtnNow();});
 }
 function jumpToCurrentLesson(){
   const id=currentCourseLessonId();if(!id)return;
