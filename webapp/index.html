@@ -4307,7 +4307,6 @@ function buildDeckCards(){
   return out.slice(0,lim);
 }
 function initLearn(){
-  try{_diagLog('initLearn tab='+learnTab);}catch(_){}
   if(learnTab==='course')renderCourse();
   renderWordPrefs();
   cards=buildDeckCards();cIdx=0;flipped=false;
@@ -5607,38 +5606,12 @@ function courseLockText(reason){
     ?`Сначала пройди слова в уроке: ${reason.prevTitle}.`
     :`First finish the vocabulary in: ${reason.prevTitle}.`;
 }
-/* Diagnostic ring buffer — shows the last few course events in a floating
-   pill so we can see what actually happens when the user taps. */
-const _diag=[];
-let _wrapObserver=null;
-function _attachWrapObserver(){
-  if(_wrapObserver)return;
-  const wrap=document.getElementById('course-wrap');if(!wrap||typeof MutationObserver!=='function')return;
-  _wrapObserver=new MutationObserver(muts=>{
-    let added=0,removed=0;muts.forEach(m=>{added+=m.addedNodes.length;removed+=m.removedNodes.length;});
-    _diagLog('wrap MUT +'+added+'/-'+removed+' by '+((new Error().stack||'').split('\n')[2]||'?').trim().slice(0,60));
-  });
-  _wrapObserver.observe(wrap,{childList:true,subtree:false});
-}
-function _diagLog(msg){
-  _diag.unshift(new Date().toISOString().slice(11,19)+' '+msg);
-  while(_diag.length>8)_diag.pop();
-  let el=document.getElementById('diag-bar');
-  if(!el){
-    el=document.createElement('div');
-    el.id='diag-bar';
-    el.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:rgba(0,0,0,.85);color:#9aebbc;font:10px/1.32 monospace;padding:6px 8px;border-radius:8px;border:1px solid #1f5;pointer-events:none;white-space:pre-wrap;max-height:140px;overflow:hidden';
-    document.body.appendChild(el);
-  }
-  el.textContent=_diag.join('\n');
-}
+function _diagLog(){}
 function handleLockedCourseTap(id){
-  _diagLog('LOCKED tap '+id);
   let reason=null;
-  try{reason=courseLockReason(id);}catch(e){_diagLog('lockReason ERR '+e.message);return false;}
-  _diagLog('lock reason: '+(reason?reason.kind+(reason.prevId?' prev='+reason.prevId:''):'null'));
+  try{reason=courseLockReason(id);}catch(_){return false;}
   if(!reason)return false;
-  try{toast(courseLockText(reason),'🔒');}catch(e){_diagLog('toast ERR '+e.message);}
+  try{toast(courseLockText(reason),'🔒');}catch(_){}
   return false;
 }
 function tapLockedLevelTest(target,evt){
@@ -5666,9 +5639,13 @@ function tapSkipLevelTest(target,evt){
   return false;
 }
 function renderCourse(){
-  try{_diagLog('renderCourse called by '+(new Error()).stack.split('\n')[2].trim().slice(0,60));}catch(_){}
+  /* Hard guard: if a lesson is currently open, ignore any indirect
+     renderCourse() call (tab refresh, scroll, lifecycle events). The user
+     must explicitly press "Назад к курсу" to come back. This stops the
+     "lesson opens then list snaps back" bug regardless of who is calling
+     renderCourse out of band. */
+  if(_inCourseLesson)return;
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
-  _attachWrapObserver();
   const done=LS.getJ('course_done')||{};
   const doneCount=Object.keys(done).length;
   const currentLevel=LS.get('ob_level')||window._d?.level||'A1';
@@ -5690,7 +5667,6 @@ function renderCourse(){
     <div class="course-system-sub" style="margin-top:10px">${lang==='ru'?'Выбери уровень. Он подтвердится только после теста.':'Choose your level. It is confirmed only after a test.'}</div>
     <div class="level-pick-row">${levelPick}</div>
     <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${lang==='ru'?'Сдать тест перехода на':'Take level-up test for'} ${nextExam}</button>
-    <button class="course-exam-btn" style="margin-top:6px;background:rgba(255,165,0,.10);color:#ffa500;border-color:rgba(255,165,0,.30)" onclick="_diagLog('TEST btn clicked');document.getElementById('course-wrap').innerHTML='<h2 style=&quot;color:#ffa500;padding:60px 20px;text-align:center;font:24px monospace&quot;>TEST OK<br><br>If you see this, DOM works.</h2>';_diagLog('TEST DOM written');">⚠ DEBUG TEST</button>
   </div>`;
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
@@ -6105,37 +6081,33 @@ function coursePracticeSet(ls){
   }
   return out;
 }
+let _inCourseLesson=false;
 function openCourseLesson(id){
-  _diagLog('openCourseLesson '+id);
   let unlocked=false;
-  try{unlocked=isCourseUnlocked(id);}catch(e){_diagLog('isCourseUnlocked ERR '+e.message);return;}
-  _diagLog('unlocked='+unlocked);
+  try{unlocked=isCourseUnlocked(id);}catch(_){return;}
   if(!unlocked){handleLockedCourseTap(id);return;}
-  /* Defer the DOM swap so the originating touch event finishes BEFORE we
-     replace the course list. Otherwise the touch-end can land on whatever
-     interactive element happens to be at the same coordinates in the new
-     DOM (e.g. the "Назад к курсу" button) and instantly bounce the user
-     back to the list — which is exactly what the diag log showed. */
-  requestAnimationFrame(()=>{
-    try{ _openCourseLessonInner(id); _diagLog('lesson rendered'); }
-    catch(err){_handleOpenLessonErr(id,err);}
-  });
-  return;
-}
-function _handleOpenLessonErr(id,err){
-  _diagLog('OPEN ERR '+(err&&err.message));
-  console.error('openCourseLesson failed for',id,err&&err.message,err&&err.stack);
-  const wrap=document.getElementById('course-wrap');
-  if(wrap){
-    wrap.innerHTML=`<div class="course-lesson">
-      <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
-      <div class="course-hero"><div class="course-hero-top"><div class="course-hero-title">${lang==='ru'?'Не удалось загрузить урок':'Could not load this lesson'}</div></div></div>
-      <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок.':'A data error was found in this lesson. Tap Back and pick another lesson.'}</span></div>
-      <button class="course-mini-btn" type="button" onclick="renderCourse()" style="margin-top:14px">${lang==='ru'?'Вернуться к списку':'Back to list'}</button>
-      <div style="margin-top:14px;font-size:11px;color:var(--t3);font-family:monospace">${safeHTML(String(err&&err.message||err||''))}</div>
-    </div>`;
+  try{
+    _inCourseLesson=true;
+    _openCourseLessonInner(id);
   }
-  try{toast(lang==='ru'?'Не удалось открыть урок':'Could not open lesson','⚠️');}catch(_){}
+  catch(err){
+    console.error('openCourseLesson failed for',id,err);
+    _inCourseLesson=false;
+    const wrap=document.getElementById('course-wrap');
+    if(wrap){
+      wrap.innerHTML=`<div class="course-lesson">
+        <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+        <div class="course-rule-compact"><span>${lang==='ru'?'Не удалось загрузить урок. Нажми «Назад» и выбери другой.':'Could not load lesson. Tap Back and pick another.'}</span></div>
+      </div>`;
+    }
+  }
+}
+/* Explicit exit point — the ONLY way to leave a lesson and go back to the
+   course list. Anything that called renderCourse() indirectly (lifecycle
+   events, scroll handlers, etc.) is now ignored while a lesson is open. */
+function leaveCourseLesson(){
+  _inCourseLesson=false;
+  renderCourse();
 }
 function _openCourseLessonInner(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
@@ -6190,7 +6162,7 @@ function _openCourseLessonInner(id){
   const errorsIdx=nativeBuilderIdx+1;
   const listenIdx=errorsIdx+1;
   const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
-    <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+    <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <div class="course-hero">
       <div class="course-hero-top">
         <div class="course-hero-ico">${lessonThemeIcon(ls)}</div>
@@ -6834,7 +6806,6 @@ function scrollCourseTop(){
 
 let learnTab='course';
 function switchLearnTab(tab){
-  try{_diagLog('switchLearnTab '+tab);}catch(_){}
   learnTab=tab;
   document.getElementById('learn-course-panel').style.display=tab==='course'?'':'none';
   document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';
