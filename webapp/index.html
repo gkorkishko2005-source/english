@@ -1266,11 +1266,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-lock-cta:hover{background:rgba(var(--ar),.22);transform:translateY(-1px)}
 .course-lock-cta-skip{background:rgba(255,149,0,.10);color:#ff9500;border-color:rgba(255,149,0,.30)}
 .course-lock-cta-skip:hover{background:rgba(255,149,0,.18)}
-.course-lock-badge{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ff9500,#ff6a00);border:2px solid rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;box-shadow:0 4px 12px rgba(255,149,0,.35)}
-.course-lock-badge svg{width:14px;height:14px}
 .course-card.locked .course-ico{background:rgba(120,130,150,.10)!important;color:#7a869a!important}
-.course-card.locked .course-ico svg{width:26px;height:26px;stroke:currentColor!important}
-.course-card.locked{padding-right:42px}
+.course-card-flash{animation:cardFlash 1.1s ease-out}
+@keyframes cardFlash{0%{box-shadow:0 0 0 0 rgba(var(--ar),.55);transform:translateY(0)}30%{box-shadow:0 0 0 6px rgba(var(--ar),.0);transform:translateY(-2px)}100%{box-shadow:0 0 0 0 rgba(var(--ar),0);transform:none}}
 .course-status{width:28px;height:28px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .course-status svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-card.done .course-status{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.24);color:var(--a2)}
@@ -1278,6 +1276,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-top-btn{position:fixed;right:max(18px,calc((100vw - 420px)/2 + 18px));bottom:calc(var(--nav) + var(--safe) + 18px);z-index:120;width:42px;height:42px;border-radius:15px;border:1px solid rgba(var(--ar),.26);background:rgba(22,27,39,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--a);box-shadow:0 12px 30px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transform:translateY(10px) scale(.94);transition:opacity .2s,transform .2s,border-color .2s}
 [data-mode=light] .course-top-btn{background:rgba(255,255,255,.88);box-shadow:0 12px 30px rgba(38,50,72,.13)}
 .course-top-btn.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+.course-jump-btn{bottom:calc(var(--nav) + var(--safe) + 72px);background:rgba(var(--ar),.95);color:#fff;border-color:rgba(255,255,255,.18)}
+[data-mode=light] .course-jump-btn{background:rgba(var(--ar),.95);color:#fff}
+.course-jump-btn:hover{transform:translateY(-1px) scale(1.03)}
 .course-top-btn:active{transform:scale(.94)}
 .course-top-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .course-system{background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.05));border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:13px 14px;margin-bottom:9px}
@@ -1306,13 +1307,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
 .course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
 .course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 22%,transparent),rgba(0,212,170,.06));border:1px solid color-mix(in srgb,var(--lesson-color,var(--a)) 32%,transparent);border-radius:18px;padding:16px 14px;margin-bottom:10px;isolation:isolate}
-.course-hero::before{content:'';position:absolute;inset:-30% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lesson-color,var(--a)) 55%,transparent),transparent 72%);filter:blur(18px);opacity:.55;animation:heroBlob 9s ease-in-out infinite alternate;z-index:-1}
-.course-hero::after{content:'';position:absolute;left:-22%;bottom:-44%;width:62%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(0,212,170,.42),transparent 70%);filter:blur(20px);opacity:.42;animation:heroBlob 11s ease-in-out infinite alternate-reverse;z-index:-1}
-@keyframes heroBlob{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10px,8px) scale(1.08)}}
+.course-hero::before{content:'';position:absolute;inset:-30% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lesson-color,var(--a)) 45%,transparent),transparent 72%);opacity:.5;z-index:-1}
+.course-hero::after{content:'';position:absolute;left:-22%;bottom:-44%;width:62%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(0,212,170,.32),transparent 70%);opacity:.4;z-index:-1}
 .course-hero-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
 .course-hero-ico{position:relative;width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 28%,transparent),rgba(0,212,170,.10));display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));box-shadow:0 10px 24px color-mix(in srgb,var(--lesson-color,var(--a)) 30%,transparent),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden}
-.course-hero-ico::after{content:'';position:absolute;inset:0;border-radius:16px;background:conic-gradient(from 0deg,transparent 0deg,color-mix(in srgb,var(--lesson-color,var(--a)) 60%,transparent) 35deg,transparent 70deg);animation:heroIcoSweep 5.5s linear infinite;opacity:.55;mix-blend-mode:overlay;pointer-events:none}
-@keyframes heroIcoSweep{to{transform:rotate(360deg)}}
+.course-hero-ico::after{content:'';position:absolute;inset:0;border-radius:16px;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.10),transparent 60%);pointer-events:none}
 .course-hero-ico svg{position:relative;z-index:1;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-hero-title{font-size:18px;font-weight:950;color:var(--t1);line-height:1.1}
 .course-hero-sub{font-size:11px;color:var(--t2);line-height:1.4;margin-top:3px}
@@ -1364,6 +1363,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-choice:active{transform:scale(.97)}
 .course-choice.ok{border-color:rgba(0,212,170,.48);background:rgba(0,212,170,.10);color:var(--a2)}
 .course-choice.bad{border-color:rgba(255,107,107,.48);background:rgba(255,107,107,.09);color:var(--rd)}
+.course-choice.ok-reveal{border-color:rgba(0,212,170,.65)!important;background:rgba(0,212,170,.16)!important;color:var(--a2)!important;box-shadow:0 0 0 2px rgba(0,212,170,.30) inset;position:relative}
+.course-choice.ok-reveal::after{content:'✓';position:absolute;right:8px;top:50%;transform:translateY(-50%);font-weight:900;color:var(--a2)}
+.course-opt.ok-reveal{border-color:rgba(0,212,170,.65)!important;background:rgba(0,212,170,.16)!important;color:var(--a2);box-shadow:0 0 0 2px rgba(0,212,170,.30) inset}
+.course-retry-btn{display:inline-block;margin-top:8px;padding:7px 12px;border-radius:10px;background:rgba(var(--ar),.16);color:var(--a);border:1px solid rgba(var(--ar),.34);font-size:13px;font-weight:800;cursor:pointer;transition:background .15s,transform .15s}
+.course-retry-btn:hover{background:rgba(var(--ar),.24);transform:translateY(-1px)}
 .course-puzzle-prompt{font-size:12px;line-height:1.45;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-bottom:8px}
 .course-error-list{display:grid;gap:7px}
 .course-error-card{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px}
@@ -1704,6 +1708,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   </div>
   <button class="course-top-btn" id="course-top-btn" type="button" onclick="scrollCourseTop()" aria-label="Back to top">
     <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+  </button>
+  <button class="course-top-btn course-jump-btn" id="course-jump-btn" type="button" onclick="jumpToCurrentLesson()" aria-label="Jump to current lesson">
+    <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
   </button>
   <!-- CARDS panel -->
   <div id="learn-cards-panel" style="display:none">
@@ -5731,9 +5738,12 @@ function isCourseUnlocked(id){
   if(idx<0)return false;
   const ls=GALAXY_COURSE[idx];
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
-  /* Everything at or below the proven CEFR level is freely accessible. */
-  if(lessonLvlIdx<=provenLevelIdx())return true;
-  /* Above proven level: strictly sequential — previous lesson must be fully done. */
+  const proven=provenLevelIdx();
+  /* Levels strictly below the proven one are mastered → all open. */
+  if(lessonLvlIdx<proven)return true;
+  /* Levels above proven+1 are entirely locked behind a placement test. */
+  if(lessonLvlIdx>proven+1)return false;
+  /* At the proven level (or one above) we go strictly lesson-by-lesson. */
   if(idx===0)return true;
   return courseLessonComplete(GALAXY_COURSE[idx-1].id);
 }
@@ -5829,7 +5839,6 @@ function renderCourse(){
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
   const sortedCourse=GALAXY_COURSE.slice().sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
-  const lockIconBig='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor" stroke="none"/></svg>';
   const lockIconSmall='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const lessons=sortedCourse.map(function(ls){
     const isDone=!!done[ls.id];
@@ -5845,11 +5854,8 @@ function renderCourse(){
         :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>');
     const onClick=unlocked?`openCourseLesson('${ls.id}')`:`handleLockedCourseTap('${ls.id}')`;
     const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${lang==='ru'?'Сдать тест':'Take the test'} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${lang==='ru'?'Открыть без теста':'Skip the test'}</button></div>`:''}`:'';
-    const iconHtml=unlocked?lessonThemeIcon(ls):lockIconBig;
-    const lockBadge=!unlocked?`<div class="course-lock-badge">${lockIconSmall}</div>`:'';
     return `${header}<div class="course-card ${isDone?'done':''} ${unlocked?'':'locked'}" style="--lesson-color:${ls.color}" onclick="${onClick}">
-      ${lockBadge}
-      <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${iconHtml}</div>
+      <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${lessonThemeIcon(ls)}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
         <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
@@ -6062,6 +6068,7 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
   const words=courseVocabWords(ls);
   const state=courseChoiceState(id,part);
   const done=LS.getJ(coursePartsKey(id))?.[part];
+  const failed=courseStageFailed(id,part);
   const title=reverse?courseT('reverse'):courseT('vocab');
   const sub=reverse?courseT('reverseSub'):courseT('vocabSub');
   return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
@@ -6073,9 +6080,14 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
       return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(prompt)}</div>
         <div class="course-vocab-sub">${reverse?courseT('chooseWord'):courseT('choose')}</div>
-        <div class="course-choice-grid">${data.opts.map((o,oi)=>`<button class="course-choice ${picked===oi?(oi===data.answer?'ok':'bad'):''}" ${picked!==undefined?'disabled':''} onclick="answerCourseWord('${id}','${part}',${i},${oi},${data.answer},'${safeHTML(w)}')">${safeHTML(o)}</button>`).join('')}</div>
+        <div class="course-choice-grid">${data.opts.map((o,oi)=>{
+          const isAns=oi===data.answer;
+          const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==data.answer&&isAns?'ok-reveal':'');
+          return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseWord('${id}','${part}',${i},${oi},${data.answer},'${safeHTML(w)}')">${safeHTML(o)}</button>`;
+        }).join('')}</div>
       </div>`;
     }).join('')}</div>
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
   </div>`;
 }
 function courseSentenceTranslation(sentence){
@@ -6123,8 +6135,9 @@ function renderCourseErrorSection(ls,id,index){
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ не показывается сразу.':'Choose the mistake type. The answer is not revealed immediately.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
     <div class="course-error-list">${courseErrorSet(ls).map((q,i)=>`<div class="course-error-card" id="course-choice-errors-${i}">
       <div class="course-error-sentence">${safeHTML(q.bad)}</div>
-      <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${state[i]===oi?(o===q.type?'ok':'bad'):''}" ${state[i]!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
+      <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${state[i]===oi?(o===q.type?'ok':'bad'):(state[i]!==undefined&&o===q.type?'ok-reveal':'')}" data-type="${o}" ${state[i]!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
     </div>`).join('')}</div>
+    ${courseStageFailed(id,part)?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
   </div>`;
 }
 /* Pick up to 4 synonym tasks for a lesson. Prefer the lesson's own words,
@@ -6161,6 +6174,7 @@ function renderCourseSynonymSection(ls,id,index){
   const part='synonym';
   const state=courseChoiceState(id,part);
   const done=LS.getJ(coursePartsKey(id))?.[part];
+  const failed=courseStageFailed(id,part);
   return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
     <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('synonym')}</div><div class="course-section-sub">${courseT('synonymSub')}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
     <div class="course-vocab-grid">${items.map((it,i)=>{
@@ -6168,9 +6182,14 @@ function renderCourseSynonymSection(ls,id,index){
       return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(it.word)}</div>
         <div class="course-vocab-sub">${safeHTML(courseT('synonymHead'))} <b>${safeHTML(it.word)}</b>?</div>
-        <div class="course-choice-grid">${it.options.map((o,oi)=>`<button class="course-choice ${picked===oi?(oi===it.answer?'ok':'bad'):''}" ${picked!==undefined?'disabled':''} onclick="answerCourseSynonym('${id}',${i},${oi},${it.answer},'${safeHTML(it.word)}')">${safeHTML(o)}</button>`).join('')}</div>
+        <div class="course-choice-grid">${it.options.map((o,oi)=>{
+          const isAns=oi===it.answer;
+          const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==it.answer&&isAns?'ok-reveal':'');
+          return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseSynonym('${id}',${i},${oi},${it.answer},'${safeHTML(it.word)}')">${safeHTML(o)}</button>`;
+        }).join('')}</div>
       </div>`;
     }).join('')}</div>
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
   </div>`;
 }
 function coursePracticeSet(ls){
@@ -6282,10 +6301,26 @@ function _openCourseLessonInner(id){
       <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
         <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
-        ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
-          <div class="course-qtext">${safeHTML(q.q)}</div>
-          ${q.o.map((o,i)=>`<div class="course-opt" onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`).join('')}
-        </div>`).join('')}
+        ${(function(){
+          const pState=LS.getJ('course_practice_state_'+id)||{};
+          return practice.map((q,qi)=>{
+            const st=pState[qi];const done=st==='ok';const failed=st==='bad';
+            return `<div class="course-practice-card ${done?'done':''}" id="course-q-${id}-${qi}">
+              <div class="course-qtext">${safeHTML(q.q)}</div>
+              ${q.o.map((o,i)=>{
+                const isAns=i===q.a;
+                /* On retry-fresh the renderer doesn't know which option the
+                   user had tapped — we only know it was wrong and the right
+                   one is q.a. Reveal the answer in green, do not paint a red
+                   "bad" anywhere (state is reset by Retry). */
+                const cls=done&&isAns?'ok':(failed&&isAns?'ok-reveal':'');
+                const lock=st?'style="pointer-events:none"':'';
+                return `<div class="course-opt ${cls}" ${lock} onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`;
+              }).join('')}
+              ${failed?`<div class="course-hint">${lang==='ru'?'Правильный ответ выделен зелёным. Этот вопрос не засчитан — нажми <b>Перепройти</b>, чтобы повторить.':'The correct answer is highlighted. This question failed — tap <b>Retry</b> to redo it.'}</div><button class="course-retry-btn" type="button" onclick="courseRetryPracticeQuestion('${id}',${qi})">${lang==='ru'?'Перепройти вопрос':'Retry question'}</button>`:''}
+            </div>`;
+          }).join('');
+        })()}
       </div>
     </div>
     <div class="course-section ${builderDone?'done':''}" data-course-stage="builder" id="course-section-builder">
@@ -6427,13 +6462,33 @@ function courseMarkPart(id,type,ok){
 function awardCourseExtra(id,type,amount){
   return courseMarkPart(id,type,true);
 }
+function courseStageFailedKey(id,part){return 'course_failed_'+id+'_'+part;}
+function courseStageFailed(id,part){return LS.get(courseStageFailedKey(id,part))==='1';}
+function courseMarkStageFailed(id,part,v){LS.set(courseStageFailedKey(id,part),v?'1':'0');}
+function courseRetryStage(id,part){
+  /* Wipe answers + failure flag, then re-render the lesson page so the stage
+     re-renders fresh. The user has to redo every question in this stage. */
+  courseSaveChoiceState(id,part,{});
+  courseMarkStageFailed(id,part,false);
+  /* Also wipe the part-done flag if it was somehow set. */
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  if(parts[part]){delete parts[part];LS.setJ(coursePartsKey(id),parts);}
+  try{openCourseLesson(id);}catch(_){try{renderCourse();}catch(_){}}
+}
 function maybeCompleteChoicePart(id,part,total){
   const state=courseChoiceState(id,part);
   const answered=Object.keys(state).length;
-  if(answered>=total){
-    courseMarkPart(id,part,true);
-    toast(courseT('allAttempted'),'');
+  if(answered<total)return;
+  /* Stage closes only when every answer in it was correct. A single wrong tap
+     blocks the part — the user has to Retry and redo it cleanly. */
+  if(courseStageFailed(id,part)){
+    try{toast(lang==='ru'?'Не сдано — нажми Retry и пройди снова.':'Not passed — tap Retry and redo the stage.','⚠️');}catch(_){}
+    /* Refresh so the Retry button shows up. */
+    try{const ls=GALAXY_COURSE.find(x=>x.id===id);if(ls)openCourseLesson(id);}catch(_){}
+    return;
   }
+  courseMarkPart(id,part,true);
+  toast(courseT('allAttempted'),'');
 }
 function answerCourseWord(id,part,idx,picked,answer,word){
   const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
@@ -6445,15 +6500,17 @@ function answerCourseWord(id,part,idx,picked,answer,word){
   card.querySelectorAll('.course-choice').forEach((btn,i)=>{
     btn.disabled=true;
     if(i===picked)btn.classList.add(ok?'ok':'bad');
+    else if(!ok&&i===answer)btn.classList.add('ok-reveal');
   });
   if(ok){
     courseClearMistake(word);
     toast(courseT('correct'),'');
   }else{
     courseAddMistake(word);
-    let hint=document.createElement('div');
+    courseMarkStageFailed(id,part,true);
+    const hint=document.createElement('div');
     hint.className='course-hint';
-    hint.textContent=courseT('miss');
+    hint.innerHTML=safeHTML(courseT('miss'))+'<br><b style="color:var(--a2)">'+(lang==='ru'?'Правильный ответ выделен.':'Correct answer highlighted.')+'</b>';
     card.appendChild(hint);
     try{sfx.warn();}catch(e){}
   }
@@ -6470,15 +6527,17 @@ function answerCourseSynonym(id,idx,picked,answer,word){
   card.querySelectorAll('.course-choice').forEach((btn,i)=>{
     btn.disabled=true;
     if(i===picked)btn.classList.add(ok?'ok':'bad');
+    else if(!ok&&i===answer)btn.classList.add('ok-reveal');
   });
   if(ok){
     courseClearMistake(word);
     try{toast(courseT('correct'),'');}catch(_){}
   }else{
     courseAddMistake(word);
+    courseMarkStageFailed(id,part,true);
     const hint=document.createElement('div');
     hint.className='course-hint';
-    hint.textContent=courseT('miss');
+    hint.innerHTML=safeHTML(courseT('miss'))+'<br><b style="color:var(--a2)">'+(lang==='ru'?'Правильный ответ выделен.':'Correct answer highlighted.')+'</b>';
     card.appendChild(hint);
     try{sfx.warn();}catch(_){}
   }
@@ -6493,14 +6552,19 @@ function answerCourseError(id,idx,type,picked,chosen){
   state[idx]=picked;
   courseSaveChoiceState(id,part,state);
   const ok=chosen===type;
-  card.querySelectorAll('.course-choice').forEach((btn,i)=>{
+  /* Find the index of the right answer by reading data-type on the buttons. */
+  const buttons=Array.from(card.querySelectorAll('.course-choice'));
+  const rightIdx=buttons.findIndex(b=>b.dataset.type===type);
+  buttons.forEach((btn,i)=>{
     btn.disabled=true;
     if(i===picked)btn.classList.add(ok?'ok':'bad');
+    else if(!ok&&i===rightIdx)btn.classList.add('ok-reveal');
   });
   if(!ok){
+    courseMarkStageFailed(id,part,true);
     const hint=document.createElement('div');
     hint.className='course-hint';
-    hint.textContent=lang==='ru'?'Ошибка засчитана. В следующем похожем задании проверь форму, порядок слов и предлог.':'Miss saved. In the next similar task, check form, word order and preposition.';
+    hint.innerHTML=(lang==='ru'?'Ошибка засчитана. ':'Miss saved. ')+'<b style="color:var(--a2)">'+(lang==='ru'?'Правильный тип выделен.':'Correct type highlighted.')+'</b>';
     card.appendChild(hint);
   }
   maybeCompleteChoicePart(id,part,3);
@@ -6585,28 +6649,49 @@ function answerCoursePractice(id,qi,picked){
   const practice=window['course_practice_'+courseKey(id)]||[];
   const q=practice[qi];if(!q)return;
   const box=document.getElementById('course-q-'+id+'-'+qi);if(!box)return;
-  const isRight=picked===q.a;
-  const attemptsKey='course_attempt_'+id+'_'+qi;
-  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!isRight?1:0);
-  if(!isRight)LS.set(attemptsKey,String(attempts));
-  const opts=box.querySelectorAll('.course-opt');
-  opts.forEach((el,i)=>{el.classList.remove('bad');if(isRight&&i===q.a)el.classList.add('ok');});
-  if(isRight){box.classList.add('done');opts.forEach(el=>el.style.pointerEvents='none');}
-  else{
-    opts[picked]?.classList.add('bad');
-    let hint=box.querySelector('.course-hint');
-    if(!hint){hint=document.createElement('div');hint.className='course-hint';box.appendChild(hint);}
-    hint.textContent=attempts<2
-      ?(q.tip|| (lang==='ru'?'Проверь правило выше и попробуй ещё раз. Ответ пока не показываем.':'Check the rule above and try again. The answer is not shown yet.'))
-      :((lang==='ru'?'Сильная подсказка: смотри на вариант ':'Strong hint: look at option ')+String.fromCharCode(65+q.a)+'.');
-  }
-  if(isRight)try{trackM('drill');}catch(e){}
   const stateKey='course_practice_state_'+id;
   const state=LS.getJ(stateKey)||{};
+  /* Lock the answer once chosen — no swapping. */
+  if(state[qi]!=='undefined'&&(state[qi]==='ok'||state[qi]==='bad'))return;
+  const isRight=picked===q.a;
+  const opts=box.querySelectorAll('.course-opt');
+  opts.forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===picked)el.classList.add(isRight?'ok':'bad');
+    else if(!isRight&&i===q.a)el.classList.add('ok-reveal');
+  });
   state[qi]=isRight?'ok':'bad';
   LS.setJ(stateKey,state);
-  const completed=isRight?courseMarkPart(id,'practice_'+qi,true):false;
-  if(!completed)toast(isRight?(lang==='ru'?'Хорошо, дальше':'Good, keep going'):(lang==='ru'?'Попробуй ещё раз':'Try again'),isRight?'✅':'');
+  if(isRight){
+    box.classList.add('done');
+    courseMarkPart(id,'practice_'+qi,true);
+    try{trackM('drill');}catch(e){}
+    toast(lang==='ru'?'Хорошо, дальше':'Good, keep going','✅');
+  }else{
+    courseMarkStageFailed(id,'practice_'+qi,true);
+    let hint=box.querySelector('.course-hint');
+    if(!hint){hint=document.createElement('div');hint.className='course-hint';box.appendChild(hint);}
+    hint.innerHTML=(lang==='ru'?'Правильный ответ выделен зелёным. Этот вопрос не засчитан — нажми <b>Перепройти</b>, чтобы повторить.':'The correct answer is highlighted. This question failed — tap <b>Retry</b> to redo it.');
+    if(!box.querySelector('.course-retry-btn')){
+      const btn=document.createElement('button');
+      btn.className='course-retry-btn';
+      btn.type='button';
+      btn.textContent=lang==='ru'?'Перепройти вопрос':'Retry question';
+      btn.onclick=function(ev){ev.stopPropagation();courseRetryPracticeQuestion(id,qi);};
+      box.appendChild(btn);
+    }
+    toast(lang==='ru'?'Не сдано — нажми Перепройти.':'Not passed — tap Retry.','⚠️');
+  }
+}
+function courseRetryPracticeQuestion(id,qi){
+  const stateKey='course_practice_state_'+id;
+  const state=LS.getJ(stateKey)||{};
+  delete state[qi];
+  LS.setJ(stateKey,state);
+  courseMarkStageFailed(id,'practice_'+qi,false);
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  if(parts['practice_'+qi]){delete parts['practice_'+qi];LS.setJ(coursePartsKey(id),parts);}
+  try{openCourseLesson(id);}catch(_){}
 }
 function answerCourse(id,picked){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
@@ -6753,10 +6838,49 @@ function finishLevelTest(timedOut=false){
 
 function updateCourseTopBtn(){
   const btn=document.getElementById('course-top-btn');
+  const jump=document.getElementById('course-jump-btn');
   const sc=document.getElementById('s-learn');
-  if(!btn||!sc)return;
-  const show=tab==='learn'&&learnTab==='course'&&sc.scrollTop>460;
-  btn.classList.toggle('show',show);
+  if(!sc)return;
+  const onCourse=tab==='learn'&&learnTab==='course';
+  if(btn)btn.classList.toggle('show',onCourse&&sc.scrollTop>460);
+  /* Jump button stays visible whenever a current lesson exists and the user
+     isn't already near it. Cheap: a few DOM lookups. */
+  if(jump){
+    const target=currentCourseLessonId();
+    let show=false;
+    if(onCourse&&target){
+      const el=document.querySelector(`.course-card[onclick*="'${target}'"]`);
+      if(el){
+        const r=el.getBoundingClientRect();
+        const scR=sc.getBoundingClientRect();
+        show=r.bottom<scR.top+60||r.top>scR.bottom-60;
+      } else show=true;
+    }
+    jump.classList.toggle('show',show);
+  }
+}
+function currentCourseLessonId(){
+  /* First unlocked lesson the user hasn't completed yet. */
+  const done=LS.getJ('course_done')||{};
+  for(const ls of GALAXY_COURSE){
+    if(done[ls.id])continue;
+    if(isCourseUnlocked(ls.id))return ls.id;
+  }
+  return null;
+}
+function jumpToCurrentLesson(){
+  const id=currentCourseLessonId();if(!id)return;
+  const sc=document.getElementById('s-learn');
+  const el=document.querySelector(`.course-card[onclick*="'${id}'"]`);
+  if(sc&&el){
+    const scR=sc.getBoundingClientRect();
+    const r=el.getBoundingClientRect();
+    sc.scrollTo({top:sc.scrollTop+(r.top-scR.top)-80,behavior:'smooth'});
+    el.classList.add('course-card-flash');
+    setTimeout(()=>el.classList.remove('course-card-flash'),900);
+  }
+  try{sfx.tap();}catch(_){}
+  setTimeout(updateCourseTopBtn,320);
 }
 function bindCourseTopBtn(){
   const sc=document.getElementById('s-learn');
