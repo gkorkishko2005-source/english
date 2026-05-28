@@ -5535,13 +5535,15 @@ function courseLessonComplete(id){
      The track UI still shows 8 stages, and full completion still grants
      the bonus XP via maybeCompleteCourse — but the user is no longer
      trapped if they did the vocab cleanly and want to move on. */
-  const parts=LS.getJ('course_parts_'+id)||{};
+  const done=LS.getJ('course_done')||{};
+  if(done[id])return true;
+  const parts=courseStoredParts(id);
   return !!parts.vocab_native&&!!parts.vocab_reverse;
 }
 function courseLessonFullyComplete(id){
   /* Strict definition for XP completion + the "done" green ring on the
      course-card. Kept separate from the unlock gate. */
-  const parts=LS.getJ('course_parts_'+id)||{};
+  const parts=courseStoredParts(id);
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return false;
   const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
   const base=['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading'];
@@ -5895,14 +5897,16 @@ function openCourseStage(id,stage){
   document.querySelectorAll('#course-wrap [data-course-stage]').forEach(el=>el.classList.toggle('active',el.dataset.courseStage===stage));
   document.querySelectorAll('#course-stage-list-'+id+' .course-stage-card').forEach(el=>el.classList.toggle('active',el.dataset.stage===stage));
   const active=document.querySelector('#course-wrap [data-course-stage="'+stage+'"]');
-  if(active)active.scrollIntoView({block:'nearest',behavior:'smooth'});
+  if(active){
+    try{active.scrollIntoView({block:'nearest'});}catch(e){}
+  }
 }
 function refreshCourseStageList(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const list=document.getElementById('course-stage-list-'+id);if(!list)return;
   const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
   const active=list.querySelector('.course-stage-card.active')?.dataset.stage;
-  list.outerHTML=renderCourseStageList(id,ls,practice,LS.getJ(coursePartsKey(id))||{});
+  list.outerHTML=renderCourseStageList(id,ls,practice,courseStoredParts(id,practice));
   if(active)openCourseStage(id,active);
 }
 function _firstUnansweredIdx(state,total){
@@ -5927,7 +5931,7 @@ function useCourseHint(id,part,idx,answerIdx){
 function renderCourseVocabSection(ls,id,part,index,reverse){
   const words=courseVocabWords(ls);
   const state=courseChoiceState(id,part);
-  const done=LS.getJ(coursePartsKey(id))?.[part];
+  const done=courseStoredParts(id)?.[part];
   const failed=courseStageFailed(id,part);
   const title=reverse?courseT('reverse'):courseT('vocab');
   const sub=reverse?courseT('reverseSub'):courseT('vocabSub');
@@ -5993,7 +5997,7 @@ function courseErrorSet(ls){
 function renderCourseErrorSection(ls,id,index){
   const part='errors';
   const state=courseChoiceState(id,part);
-  const done=LS.getJ(coursePartsKey(id))?.[part];
+  const done=courseStoredParts(id)?.[part];
   const labels={verb:{ru:'форма глагола',en:'verb form',es:'forma verbal',pt:'forma verbal'},prep:{ru:'предлог',en:'preposition',es:'preposición',pt:'preposição'},order:{ru:'порядок слов',en:'word order',es:'orden de palabras',pt:'ordem das palavras'}};
   const opts=['verb','prep','order'];
   return `<div class="course-section ${done?'done':''}" data-course-stage="errors" id="course-section-errors">
@@ -6038,7 +6042,7 @@ function renderCourseSynonymSection(ls,id,index){
   if(!items.length)return '';
   const part='synonym';
   const state=courseChoiceState(id,part);
-  const done=LS.getJ(coursePartsKey(id))?.[part];
+  const done=courseStoredParts(id)?.[part];
   const failed=courseStageFailed(id,part);
   const activeIdx=_firstUnansweredIdx(state,items.length);
   return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
@@ -6116,8 +6120,8 @@ function leaveCourseLesson(){
   renderCourse();
 }
 function _openCourseLessonInner(id){
-  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
-  const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls){_inCourseLesson=false;return;}
+  const wrap=document.getElementById('course-wrap');if(!wrap){_inCourseLesson=false;return;}
   try{sfx.course();}catch(e){}
   const first=(ls.examples&&ls.examples[0])||'';
   const target=ls.build||first;
@@ -6144,7 +6148,7 @@ function _openCourseLessonInner(id){
   const insight=courseLessonInsight(ls);
   const practice=coursePracticeSet(ls);
   window['course_practice_'+courseKey(id)]=practice;
-  const partState=LS.getJ(coursePartsKey(id))||{};
+  const partState=courseStoredParts(id,practice);
   const requiredParts=courseRequiredParts(id);
   const stageMeta=courseStageMeta(id,ls,practice,partState);
   const activeStageKey=(stageMeta.find(s=>s.pct<100)||stageMeta[stageMeta.length-1]).key;
@@ -6290,17 +6294,29 @@ function courseWarmLine(){
   return lines[Math.floor(Math.random()*lines.length)];
 }
 function coursePartsKey(id){return 'course_parts_'+id;}
-function courseRequiredParts(id){
-  const practice=window['course_practice_'+courseKey(id)]||[];
+function courseRequiredParts(id,practiceOverride){
+  const practice=practiceOverride||window['course_practice_'+courseKey(id)]||[];
   const ls=GALAXY_COURSE.find(x=>x.id===id);
   const base=['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading'];
   if(ls&&courseSynonymItems(ls).length)base.push('synonym');
   return [...base,...practice.map((_,i)=>'practice_'+i)];
 }
+function courseStoredParts(id,practiceOverride){
+  const parts=LS.getJ(coursePartsKey(id))||{};
+  const done=LS.getJ('course_done')||{};
+  if(!done[id])return parts;
+  const required=courseRequiredParts(id,practiceOverride);
+  let changed=false;
+  required.forEach(k=>{
+    if(!parts[k]){parts[k]='ok';changed=true;}
+  });
+  if(changed)LS.setJ(coursePartsKey(id),parts);
+  return parts;
+}
 function updateCourseTrack(id){
   const el=document.getElementById('course-track-'+id);if(!el)return;
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
-  const parts=LS.getJ(coursePartsKey(id))||{};
+  const parts=courseStoredParts(id);
   const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
   const stageMeta=courseStageMeta(id,ls,practice,parts);
   const activeKey=(stageMeta.find(s=>s.pct<100)||stageMeta[stageMeta.length-1]).key;
@@ -6379,7 +6395,7 @@ function renderCourseCompleteCard(id,already){
   </div>`;
 }
 function maybeCompleteCourse(id){
-  const parts=LS.getJ(coursePartsKey(id))||{};
+  const parts=courseStoredParts(id);
   const required=courseRequiredParts(id);
   if(required.some(k=>!parts[k]))return false;
   const done=LS.getJ('course_done')||{};
@@ -6393,8 +6409,31 @@ function maybeCompleteCourse(id){
   toast('+10 XP · '+(lang==='ru'?'урок закрыт':'lesson complete'),'⭐');
   return true;
 }
+function courseStageFromPart(part){
+  if(part.indexOf('practice_')===0)return 'grammar';
+  if(part==='dictation'||part==='reading')return 'listen';
+  return part;
+}
+function courseAutoOpenNextStage(id,fromPart){
+  if(!_inCourseLesson)return;
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  const parts=courseStoredParts(id,practice);
+  const meta=courseStageMeta(id,ls,practice,parts);
+  const fromStage=courseStageFromPart(fromPart);
+  const fromIdx=Math.max(0,meta.findIndex(s=>s.key===fromStage));
+  const next=meta.slice(fromIdx+1).find(s=>s.pct<100)||meta.find(s=>s.pct<100);
+  if(!next||next.key===fromStage)return;
+  setTimeout(()=>{try{openCourseStage(id,next.key);}catch(e){}},180);
+}
+function maybeAutoOpenNextAfterPractice(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  const parts=courseStoredParts(id,practice);
+  if(practice.every((_,i)=>parts['practice_'+i]))courseAutoOpenNextStage(id,'grammar');
+}
 function courseMarkPart(id,type,ok){
-  const parts=LS.getJ(coursePartsKey(id))||{};
+  const parts=courseStoredParts(id);
   parts[type]=ok?'ok':'try';
   LS.setJ(coursePartsKey(id),parts);
   /* Bust the memoized "current lesson id" so the FAB and lock state pick up
@@ -6415,7 +6454,7 @@ function courseRetryStage(id,part){
   courseSaveChoiceState(id,part,{});
   courseMarkStageFailed(id,part,false);
   /* Also wipe the part-done flag if it was somehow set. */
-  const parts=LS.getJ(coursePartsKey(id))||{};
+  const parts=courseStoredParts(id);
   if(parts[part]){delete parts[part];LS.setJ(coursePartsKey(id),parts);}
   try{openCourseLesson(id);}catch(_){try{renderCourse();}catch(_){}}
 }
@@ -6426,7 +6465,8 @@ function maybeCompleteChoicePart(id,part,total){
   /* Stage now always closes after every card is answered. Wrong answers
      drop the lesson's average score but no longer block progression —
      Retry is offered as an option, not a requirement. */
-  courseMarkPart(id,part,true);
+  const completed=courseMarkPart(id,part,true);
+  if(!completed)courseAutoOpenNextStage(id,part);
 }
 function answerCourseWord(id,part,idx,picked,answer,word){
   const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
@@ -6611,7 +6651,8 @@ function answerCoursePractice(id,qi,picked){
   LS.setJ(stateKey,state);
   if(isRight){
     box.classList.add('done');
-    courseMarkPart(id,'practice_'+qi,true);
+    const completed=courseMarkPart(id,'practice_'+qi,true);
+    if(!completed)maybeAutoOpenNextAfterPractice(id);
     try{trackM('drill');}catch(e){}
     toast(lang==='ru'?'Хорошо, дальше':'Good, keep going','✅');
   }else{
