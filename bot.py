@@ -58,6 +58,25 @@ ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
+
+# Cache-bust the WebApp URL by appending the index.html mtime as ?v=.
+# Telegram caches WebView contents per URL, and "no-cache" headers alone
+# aren't always honoured by the Telegram client. Changing the URL on
+# every deploy guarantees the WebView fetches the new HTML.
+def _webapp_version() -> str:
+    try:
+        from pathlib import Path as _P
+        p = _P(__file__).resolve().parent / "webapp" / "index.html"
+        if p.exists():
+            return str(int(p.stat().st_mtime))
+    except Exception:
+        pass
+    return "1"
+
+def webapp_url() -> str:
+    if not RAILWAY_URL or "localhost" in RAILWAY_URL:
+        return ""
+    return f"https://{RAILWAY_URL}/?v={_webapp_version()}"
 SUPPORT_USER_ID = int(os.getenv("SUPPORT_USER_ID", "8702782202") or "8702782202")
 SUPPORT_USERNAME = (os.getenv("SUPPORT_USERNAME", "") or "").lstrip("@")
 
@@ -619,7 +638,7 @@ async def send_reminder(uid: int):
     if due_cnt:    text += f"\n📅 <b>{due_cnt}</b> {'слов для повторения' if lang=='ru' else 'words due'} → /vocab"
     if due_idioms: text += f"\n🗣 <b>{due_idioms}</b> {'идиом для повторения' if lang=='ru' else 'idioms due'} → /vocab"
     text += f"\n\n<i>{motivation_line(lang)}</i>"
-    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    app_url = webapp_url()
     kb = None
     if app_url:
         kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -684,7 +703,7 @@ async def send_daily_word(uid: int):
     w = random.choice(DAILY_WORDS)
     try:
         from aiogram.types import WebAppInfo
-        app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+        app_url = webapp_url()
         kb = None
         if app_url:
             kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -781,7 +800,7 @@ async def setup_bot_profile():
         BotCommand(command="rules", description="Service rules / Правила сервиса"),
         BotCommand(command="privacy", description="Privacy / Данные"),
     ]
-    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    app_url = webapp_url()
     try:
         await bot.set_my_name(BOT_PROFILE["name_default"])
         await bot.set_my_name(BOT_PROFILE["name_ru"], language_code="ru")
@@ -832,7 +851,7 @@ async def cmd_start(message: Message):
     ru = lang == "ru"
 
     # WebApp button
-    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    app_url = webapp_url()
 
     kb_buttons = []
     if app_url:
@@ -1187,7 +1206,7 @@ async def cmd_remind(m: Message):
 @dp.message(Command("help"))
 async def cmd_help(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
-    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    app_url = webapp_url()
     kb = None
     if app_url:
         kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -1244,7 +1263,7 @@ async def send_support_prompt(target, uid: int):
     kb_rows = [[InlineKeyboardButton(text="Написать в поддержку" if ru else "Message support", url=support_contact_url())]]
     if RAILWAY_URL and "localhost" not in RAILWAY_URL:
         kb_rows.append([InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
-                                             web_app=WebAppInfo(url=f"https://{RAILWAY_URL}"))])
+                                             web_app=WebAppInfo(url=webapp_url()))])
     kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
     await target.answer(
         ("<b>Поддержка PolyGlotty</b>\n\n"
@@ -1730,7 +1749,7 @@ async def handle_text(message: Message):
 
     # Redirect to WebApp
     from aiogram.types import WebAppInfo
-    app_url = f"https://{RAILWAY_URL}" if RAILWAY_URL and "localhost" not in RAILWAY_URL else ""
+    app_url = webapp_url()
     kb = None
     if app_url:
         kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -1763,7 +1782,7 @@ async def cmd_app(m: Message):
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
             InlineKeyboardButton(
                 text="🚀 Открыть приложение" if lang=="ru" else "🚀 Open App",
-                web_app=WebAppInfo(url=f"https://{domain}")
+                web_app=WebAppInfo(url=webapp_url() or f"https://{domain}")
             )
         ]])
     )
