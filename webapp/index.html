@@ -5606,21 +5606,28 @@ function courseLockText(reason){
     ?`Сначала пройди слова в уроке: ${reason.prevTitle}.`
     :`First finish the vocabulary in: ${reason.prevTitle}.`;
 }
-let _lockTapAt=0;
+/* Diagnostic ring buffer — shows the last few course events in a floating
+   pill so we can see what actually happens when the user taps. */
+const _diag=[];
+function _diagLog(msg){
+  _diag.unshift(new Date().toISOString().slice(11,19)+' '+msg);
+  while(_diag.length>4)_diag.pop();
+  let el=document.getElementById('diag-bar');
+  if(!el){
+    el=document.createElement('div');
+    el.id='diag-bar';
+    el.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:rgba(0,0,0,.78);color:#9aebbc;font:11px/1.35 monospace;padding:6px 8px;border-radius:8px;border:1px solid #1f5;pointer-events:none;white-space:pre-wrap;max-height:80px;overflow:hidden';
+    document.body.appendChild(el);
+  }
+  el.textContent=_diag.join('\n');
+}
 function handleLockedCourseTap(id){
-  /* Hard throttle: a flood of taps on a locked card was queueing Telegram
-     HapticFeedback + toast DOM writes and eventually freezing the WebView.
-     Drop everything for 500 ms after a tap is registered. */
-  const now=Date.now();
-  if(now-_lockTapAt<500)return false;
-  _lockTapAt=now;
-  const reason=courseLockReason(id);
+  _diagLog('LOCKED tap '+id);
+  let reason=null;
+  try{reason=courseLockReason(id);}catch(e){_diagLog('lockReason ERR '+e.message);return false;}
+  _diagLog('lock reason: '+(reason?reason.kind+(reason.prevId?' prev='+reason.prevId:''):'null'));
   if(!reason)return false;
-  /* Defer the toast/haptic to the next frame so the click handler can finish
-     instantly — Telegram WebView keeps the event loop responsive. */
-  requestAnimationFrame(()=>{
-    try{toast(courseLockText(reason),'🔒');}catch(_){}
-  });
+  try{toast(courseLockText(reason),'🔒');}catch(e){_diagLog('toast ERR '+e.message);}
   return false;
 }
 function tapLockedLevelTest(target,evt){
@@ -6085,18 +6092,21 @@ function coursePracticeSet(ls){
   return out;
 }
 function openCourseLesson(id){
-  if(!isCourseUnlocked(id)){handleLockedCourseTap(id);return;}
-  try{ return _openCourseLessonInner(id); }
+  _diagLog('openCourseLesson '+id);
+  let unlocked=false;
+  try{unlocked=isCourseUnlocked(id);}catch(e){_diagLog('isCourseUnlocked ERR '+e.message);return;}
+  _diagLog('unlocked='+unlocked);
+  if(!unlocked){handleLockedCourseTap(id);return;}
+  try{ _openCourseLessonInner(id); _diagLog('lesson rendered'); }
   catch(err){
+    _diagLog('OPEN ERR '+(err&&err.message));
     console.error('openCourseLesson failed for',id,err&&err.message,err&&err.stack);
-    /* Render an in-place fallback so the user is not stuck on a frozen
-       screen and can navigate back to the course list. */
     const wrap=document.getElementById('course-wrap');
     if(wrap){
       wrap.innerHTML=`<div class="course-lesson">
         <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
         <div class="course-hero"><div class="course-hero-top"><div class="course-hero-title">${lang==='ru'?'Не удалось загрузить урок':'Could not load this lesson'}</div></div></div>
-        <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок — мы это починим.':'A data error was found in this lesson. Tap Back and pick another lesson — we will fix this.'}</span></div>
+        <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок.':'A data error was found in this lesson. Tap Back and pick another lesson.'}</span></div>
         <button class="course-mini-btn" type="button" onclick="renderCourse()" style="margin-top:14px">${lang==='ru'?'Вернуться к списку':'Back to list'}</button>
         <div style="margin-top:14px;font-size:11px;color:var(--t3);font-family:monospace">${safeHTML(String(err&&err.message||err||''))}</div>
       </div>`;
