@@ -1422,9 +1422,15 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-inp{width:100%;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:13px;outline:none}
 .course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
 .course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
-.course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(var(--ar),.08));border-radius:12px;padding:11px 12px;color:var(--t1)}
-.course-complete-title{font-size:13px;font-weight:900;margin-bottom:3px}
+.course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(var(--ar),.08));border-radius:14px;padding:14px;color:var(--t1)}
+.course-complete-title{font-size:14px;font-weight:900;margin-bottom:8px}
 .course-complete-sub{font-size:11px;color:var(--t2);line-height:1.4}
+.course-complete-score{display:flex;align-items:center;gap:12px;padding:10px;margin:8px 0;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+.course-complete-ring{width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--ring,var(--a2)) var(--pct,0%),rgba(255,255,255,.08) 0);padding:4px;flex-shrink:0}
+.course-complete-ring-in{width:100%;height:100%;border-radius:50%;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--t1)}
+.course-complete-score-meta{flex:1;min-width:0}
+.course-complete-score-label{font-size:13px;font-weight:800;color:var(--t1);line-height:1.25}
+.course-complete-score-sub{font-size:11px;color:var(--t3);margin-top:2px}
 .course-time-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(var(--ar),.18);background:rgba(var(--ar),.08);color:var(--a);border-radius:999px;padding:4px 8px;font-size:10px;font-weight:850;margin-bottom:8px}
 .mini-type{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--a);font-weight:850;margin-bottom:6px}
 .word-pref-row{display:flex;gap:7px;overflow-x:auto;padding:0 1px 11px;margin-top:-4px;scrollbar-width:none}
@@ -6319,11 +6325,56 @@ function updateCourseTrack(id){
   });
   refreshCourseStageList(id);
 }
+function courseStageScore(id,part){
+  const state=courseChoiceState(id,part);
+  const ls=GALAXY_COURSE.find(x=>x.id===id);
+  if(!ls)return {correct:0,total:0};
+  let correct=0,total=0;
+  if(part==='vocab_native'||part==='vocab_reverse'){
+    const words=courseVocabWords(ls);
+    const reverse=part==='vocab_reverse';
+    words.forEach((w,i)=>{total++;const data=courseWordOptions(w,reverse?'reverse':'native');if(state[i]===data.answer)correct++;});
+  } else if(part==='synonym'){
+    courseSynonymItems(ls).forEach((it,i)=>{total++;if(state[i]===it.answer)correct++;});
+  } else if(part==='errors'){
+    const opts=['verb','prep','order'];
+    courseErrorSet(ls).forEach((q,i)=>{total++;if(state[i]===opts.indexOf(q.type))correct++;});
+  } else if(part.indexOf('practice_')===0){
+    const pState=LS.getJ('course_practice_state_'+id)||{};
+    const qi=parseInt(part.replace('practice_',''),10);
+    total=1;if(pState[qi]==='ok')correct=1;
+  }
+  return {correct,total};
+}
+function courseLessonScore(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);
+  if(!ls)return {correct:0,total:0,pct:0};
+  const parts=['vocab_native','vocab_reverse','errors'];
+  if(courseSynonymItems(ls).length)parts.push('synonym');
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  practice.forEach((_,i)=>parts.push('practice_'+i));
+  let c=0,t=0;
+  parts.forEach(p=>{const s=courseStageScore(id,p);c+=s.correct;t+=s.total;});
+  return {correct:c,total:t,pct:t?Math.round(c/t*100):0};
+}
 function renderCourseCompleteCard(id,already){
   const box=document.getElementById('course-complete-'+id);
   if(!box)return;
+  const score=courseLessonScore(id);
+  const tier=score.pct>=90?'excellent':score.pct>=75?'good':score.pct>=50?'ok':'weak';
+  const tierLabel=lang==='ru'
+    ?{excellent:'Отлично',good:'Хорошо',ok:'Норм',weak:'Слабо'}[tier]
+    :{excellent:'Excellent',good:'Good',ok:'OK',weak:'Weak'}[tier];
+  const ringColor=score.pct>=75?'var(--a2)':score.pct>=50?'#ffb830':'#ff6b6b';
   box.innerHTML=`<div class="course-complete-card">
     <div class="course-complete-title">${already?(lang==='ru'?'Урок уже закрыт':'Lesson already complete'):(lang==='ru'?'Урок закрыт · +10 XP':'Lesson complete · +10 XP')}</div>
+    <div class="course-complete-score" style="--pct:${score.pct}%;--ring:${ringColor}">
+      <div class="course-complete-ring"><div class="course-complete-ring-in">${score.pct}%</div></div>
+      <div class="course-complete-score-meta">
+        <div class="course-complete-score-label">${lang==='ru'?'Средний балл':'Average score'} · ${safeHTML(tierLabel)}</div>
+        <div class="course-complete-score-sub">${score.correct} / ${score.total} ${lang==='ru'?'верно':'correct'}</div>
+      </div>
+    </div>
     <div class="course-complete-sub">${safeHTML(courseWarmLine())}</div>
   </div>`;
 }
@@ -6372,12 +6423,9 @@ function maybeCompleteChoicePart(id,part,total){
   const state=courseChoiceState(id,part);
   const answered=Object.keys(state).length;
   if(answered<total)return;
-  /* Stage closes only when every answer in it was correct. A single wrong tap
-     blocks the part — Retry is required. */
-  if(courseStageFailed(id,part)){
-    try{const ls=GALAXY_COURSE.find(x=>x.id===id);if(ls)openCourseLesson(id);}catch(_){}
-    return;
-  }
+  /* Stage now always closes after every card is answered. Wrong answers
+     drop the lesson's average score but no longer block progression —
+     Retry is offered as an option, not a requirement. */
   courseMarkPart(id,part,true);
 }
 function answerCourseWord(id,part,idx,picked,answer,word){
