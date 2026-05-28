@@ -190,7 +190,11 @@ async def handle_index(request):
         return web.Response(text="WebApp not found", status=404)
     html = html_path.read_text(encoding="utf-8")
     return web.Response(text=html, content_type="text/html", charset="utf-8",
-                        headers={"Cache-Control": "no-cache"})
+                        headers={
+                            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                            "Pragma": "no-cache",
+                            "Expires": "0",
+                        })
 
 # Долгий кэш для редко меняющейся статики (иконки, аватарка, шрифты).
 # index.html и /api/* не трогаем — они должны быть всегда свежими.

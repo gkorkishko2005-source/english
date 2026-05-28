@@ -5513,9 +5513,18 @@ function courseLevelLabel(level){
 }
 const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2'];
 function courseLessonComplete(id){
+  /* Minimum bar to unlock the next lesson: the two vocab stages.
+     The track UI still shows 8 stages, and full completion still grants
+     the bonus XP via maybeCompleteCourse — but the user is no longer
+     trapped if they did the vocab cleanly and want to move on. */
+  const parts=LS.getJ('course_parts_'+id)||{};
+  return !!parts.vocab_native&&!!parts.vocab_reverse;
+}
+function courseLessonFullyComplete(id){
+  /* Strict definition for XP completion + the "done" green ring on the
+     course-card. Kept separate from the unlock gate. */
   const parts=LS.getJ('course_parts_'+id)||{};
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return false;
-  /* Same definition used by the per-lesson track. */
   const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
   const base=['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading'];
   if(courseSynonymItems(ls).length)base.push('synonym');
@@ -5580,8 +5589,8 @@ function courseLockText(reason){
       :`Pass the ${reason.target} level test first — it unlocks this branch.`;
   }
   return lang==='ru'
-    ?`Сначала закрой урок: ${reason.prevTitle}.`
-    :`Finish the previous lesson first: ${reason.prevTitle}.`;
+    ?`Сначала пройди слова в уроке: ${reason.prevTitle}.`
+    :`First finish the vocabulary in: ${reason.prevTitle}.`;
 }
 let _lockTapAt=0;
 function handleLockedCourseTap(id){
@@ -5665,7 +5674,10 @@ function renderCourse(){
         ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
         :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>');
     const onClick=unlocked?`openCourseLesson('${ls.id}')`:`handleLockedCourseTap('${ls.id}')`;
-    const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${lang==='ru'?'Сдать тест':'Take the test'} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${lang==='ru'?'Открыть без теста':'Skip the test'}</button></div>`:''}`:'';
+    const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${
+      reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${lang==='ru'?'Сдать тест':'Take the test'} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${lang==='ru'?'Открыть без теста':'Skip the test'}</button></div>`:
+      reason&&reason.kind==='prev'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="event.stopPropagation();openCourseLesson('${reason.prevId}')">${lang==='ru'?'Открыть нужный урок':'Open the required lesson'}</button></div>`:''
+    }`:'';
     return `${header}<div class="course-card ${isDone?'done':''} ${unlocked?'':'locked'}" style="--lesson-color:${ls.color}" onclick="${onClick}">
       <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${lessonThemeIcon(ls)}</div>
       <div class="course-info">
@@ -6062,9 +6074,20 @@ function openCourseLesson(id){
   if(!isCourseUnlocked(id)){handleLockedCourseTap(id);return;}
   try{ return _openCourseLessonInner(id); }
   catch(err){
-    console.error('openCourseLesson failed',id,err);
-    try{toast(lang==='ru'?'Не удалось открыть урок. Попробуй ещё раз.':'Could not open lesson. Try again.','⚠️');}catch(_){}
-    try{renderCourse();}catch(_){}
+    console.error('openCourseLesson failed for',id,err&&err.message,err&&err.stack);
+    /* Render an in-place fallback so the user is not stuck on a frozen
+       screen and can navigate back to the course list. */
+    const wrap=document.getElementById('course-wrap');
+    if(wrap){
+      wrap.innerHTML=`<div class="course-lesson">
+        <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+        <div class="course-hero"><div class="course-hero-top"><div class="course-hero-title">${lang==='ru'?'Не удалось загрузить урок':'Could not load this lesson'}</div></div></div>
+        <div class="course-rule-compact"><span>${lang==='ru'?'В уроке найдена ошибка данных. Нажми «Назад» и выбери другой урок — мы это починим.':'A data error was found in this lesson. Tap Back and pick another lesson — we will fix this.'}</span></div>
+        <button class="course-mini-btn" type="button" onclick="renderCourse()" style="margin-top:14px">${lang==='ru'?'Вернуться к списку':'Back to list'}</button>
+        <div style="margin-top:14px;font-size:11px;color:var(--t3);font-family:monospace">${safeHTML(String(err&&err.message||err||''))}</div>
+      </div>`;
+    }
+    try{toast(lang==='ru'?'Не удалось открыть урок':'Could not open lesson','⚠️');}catch(_){}
   }
 }
 function _openCourseLessonInner(id){
@@ -6212,9 +6235,15 @@ function _openCourseLessonInner(id){
     </div>
     <div id="course-complete-${id}"></div>
   </div>`;
+  /* Clear first so any stale event handlers / fragments from the previous
+     lesson are detached before the new DOM is inserted. */
+  wrap.innerHTML='';
   wrap.innerHTML=html;
-  openCourseStage(id,defaultStage);
-  maybeCompleteCourse(id);
+  try{openCourseStage(id,defaultStage);}catch(e){console.error('openCourseStage',e);}
+  try{maybeCompleteCourse(id);}catch(e){console.error('maybeCompleteCourse',e);}
+  /* Scroll to top of the lesson so it's not stuck mid-page. */
+  const sc=document.getElementById('s-learn');
+  if(sc)sc.scrollTo({top:0,behavior:'auto'});
 }
 function courseKey(id){return String(id).replace(/[^a-z0-9_]/gi,'_');}
 function courseWords(s){return String(s||'').replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);}
@@ -6304,6 +6333,9 @@ function courseMarkPart(id,type,ok){
   const parts=LS.getJ(coursePartsKey(id))||{};
   parts[type]=ok?'ok':'try';
   LS.setJ(coursePartsKey(id),parts);
+  /* Bust the memoized "current lesson id" so the FAB and lock state pick up
+     the new unlock immediately. */
+  try{_ccLessonId.t=0;}catch(_){}
   updateCourseTrack(id);
   return maybeCompleteCourse(id);
 }
