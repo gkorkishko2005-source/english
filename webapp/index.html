@@ -5610,6 +5610,16 @@ function courseLockText(reason){
 /* Diagnostic ring buffer — shows the last few course events in a floating
    pill so we can see what actually happens when the user taps. */
 const _diag=[];
+let _wrapObserver=null;
+function _attachWrapObserver(){
+  if(_wrapObserver)return;
+  const wrap=document.getElementById('course-wrap');if(!wrap||typeof MutationObserver!=='function')return;
+  _wrapObserver=new MutationObserver(muts=>{
+    let added=0,removed=0;muts.forEach(m=>{added+=m.addedNodes.length;removed+=m.removedNodes.length;});
+    _diagLog('wrap MUT +'+added+'/-'+removed+' by '+((new Error().stack||'').split('\n')[2]||'?').trim().slice(0,60));
+  });
+  _wrapObserver.observe(wrap,{childList:true,subtree:false});
+}
 function _diagLog(msg){
   _diag.unshift(new Date().toISOString().slice(11,19)+' '+msg);
   while(_diag.length>8)_diag.pop();
@@ -5658,6 +5668,7 @@ function tapSkipLevelTest(target,evt){
 function renderCourse(){
   try{_diagLog('renderCourse called by '+(new Error()).stack.split('\n')[2].trim().slice(0,60));}catch(_){}
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
+  _attachWrapObserver();
   const done=LS.getJ('course_done')||{};
   const doneCount=Object.keys(done).length;
   const currentLevel=LS.get('ob_level')||window._d?.level||'A1';
@@ -5679,6 +5690,7 @@ function renderCourse(){
     <div class="course-system-sub" style="margin-top:10px">${lang==='ru'?'Выбери уровень. Он подтвердится только после теста.':'Choose your level. It is confirmed only after a test.'}</div>
     <div class="level-pick-row">${levelPick}</div>
     <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${lang==='ru'?'Сдать тест перехода на':'Take level-up test for'} ${nextExam}</button>
+    <button class="course-exam-btn" style="margin-top:6px;background:rgba(255,165,0,.10);color:#ffa500;border-color:rgba(255,165,0,.30)" onclick="_diagLog('TEST btn clicked');document.getElementById('course-wrap').innerHTML='<h2 style=&quot;color:#ffa500;padding:60px 20px;text-align:center;font:24px monospace&quot;>TEST OK<br><br>If you see this, DOM works.</h2>';_diagLog('TEST DOM written');">⚠ DEBUG TEST</button>
   </div>`;
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
