@@ -4307,6 +4307,7 @@ function buildDeckCards(){
   return out.slice(0,lim);
 }
 function initLearn(){
+  try{_diagLog('initLearn tab='+learnTab);}catch(_){}
   if(learnTab==='course')renderCourse();
   renderWordPrefs();
   cards=buildDeckCards();cIdx=0;flipped=false;
@@ -5611,12 +5612,12 @@ function courseLockText(reason){
 const _diag=[];
 function _diagLog(msg){
   _diag.unshift(new Date().toISOString().slice(11,19)+' '+msg);
-  while(_diag.length>4)_diag.pop();
+  while(_diag.length>8)_diag.pop();
   let el=document.getElementById('diag-bar');
   if(!el){
     el=document.createElement('div');
     el.id='diag-bar';
-    el.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:rgba(0,0,0,.78);color:#9aebbc;font:11px/1.35 monospace;padding:6px 8px;border-radius:8px;border:1px solid #1f5;pointer-events:none;white-space:pre-wrap;max-height:80px;overflow:hidden';
+    el.style.cssText='position:fixed;left:8px;right:8px;bottom:64px;z-index:9999;background:rgba(0,0,0,.85);color:#9aebbc;font:10px/1.32 monospace;padding:6px 8px;border-radius:8px;border:1px solid #1f5;pointer-events:none;white-space:pre-wrap;max-height:140px;overflow:hidden';
     document.body.appendChild(el);
   }
   el.textContent=_diag.join('\n');
@@ -5655,6 +5656,7 @@ function tapSkipLevelTest(target,evt){
   return false;
 }
 function renderCourse(){
+  try{_diagLog('renderCourse called by '+(new Error()).stack.split('\n')[2].trim().slice(0,60));}catch(_){}
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
   const done=LS.getJ('course_done')||{};
   const doneCount=Object.keys(done).length;
@@ -6259,15 +6261,9 @@ function _openCourseLessonInner(id){
     </div>
     <div id="course-complete-${id}"></div>
   </div>`;
-  /* Clear first so any stale event handlers / fragments from the previous
-     lesson are detached before the new DOM is inserted. */
-  wrap.innerHTML='';
   wrap.innerHTML=html;
   try{openCourseStage(id,defaultStage);}catch(e){console.error('openCourseStage',e);}
   try{maybeCompleteCourse(id);}catch(e){console.error('maybeCompleteCourse',e);}
-  /* Scroll to top of the lesson so it's not stuck mid-page. */
-  const sc=document.getElementById('s-learn');
-  if(sc)sc.scrollTo({top:0,behavior:'auto'});
 }
 function courseKey(id){return String(id).replace(/[^a-z0-9_]/gi,'_');}
 function courseWords(s){return String(s||'').replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);}
@@ -6817,6 +6813,7 @@ function scrollCourseTop(){
 
 let learnTab='course';
 function switchLearnTab(tab){
+  try{_diagLog('switchLearnTab '+tab);}catch(_){}
   learnTab=tab;
   document.getElementById('learn-course-panel').style.display=tab==='course'?'':'none';
   document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';
