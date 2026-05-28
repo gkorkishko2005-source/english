@@ -1252,6 +1252,25 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.25);box-shadow:0 8px 20px rgba(0,0,0,.08)}
 .course-card.done{border-color:rgba(0,212,170,.30);background:linear-gradient(135deg,rgba(0,212,170,.065),var(--e1));box-shadow:inset 3px 0 0 rgba(0,212,170,.72)}
 .course-card.done .course-ico{background:rgba(0,212,170,.12);color:var(--a2)!important}
+.course-card.locked{cursor:default;opacity:.78;background:linear-gradient(135deg,rgba(120,130,150,.06),var(--e1))}
+.course-card.locked::before{opacity:.22;background:#7a869a}
+.course-card.locked:hover{transform:none;border-color:var(--b1);box-shadow:none}
+.course-card.locked:hover::after{opacity:0;transform:none}
+.course-card.locked .course-ico{color:#7a869a!important;background:rgba(120,130,150,.10)}
+.course-card.locked .course-title,.course-card.locked .course-sub{color:var(--t2)}
+.course-card.locked .course-status{color:#7a869a;background:rgba(120,130,150,.08);border-color:rgba(120,130,150,.18)}
+.course-card.locked .course-status svg{width:18px;height:18px}
+.course-lock-hint{display:inline-block;color:var(--t2);font-size:12px;line-height:1.35;font-weight:500;background:rgba(120,130,150,.10);border:1px solid rgba(120,130,150,.18);padding:4px 8px;border-radius:8px;margin-top:2px}
+.course-lock-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.course-lock-cta{display:inline-block;padding:6px 10px;border-radius:9px;background:rgba(var(--ar),.14);color:var(--a);border:1px solid rgba(var(--ar),.32);font-size:12px;font-weight:800;cursor:pointer;transition:background .15s,transform .15s}
+.course-lock-cta:hover{background:rgba(var(--ar),.22);transform:translateY(-1px)}
+.course-lock-cta-skip{background:rgba(255,149,0,.10);color:#ff9500;border-color:rgba(255,149,0,.30)}
+.course-lock-cta-skip:hover{background:rgba(255,149,0,.18)}
+.course-lock-badge{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ff9500,#ff6a00);border:2px solid rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none;box-shadow:0 4px 12px rgba(255,149,0,.35)}
+.course-lock-badge svg{width:14px;height:14px}
+.course-card.locked .course-ico{background:rgba(120,130,150,.10)!important;color:#7a869a!important}
+.course-card.locked .course-ico svg{width:26px;height:26px;stroke:currentColor!important}
+.course-card.locked{padding-right:42px}
 .course-status{width:28px;height:28px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);color:var(--t3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .course-status svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-card.done .course-status{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.24);color:var(--a2)}
@@ -1286,16 +1305,30 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-lesson{background:linear-gradient(180deg,rgba(var(--ar),.07),transparent 260px),var(--bg);border:1px solid rgba(var(--ar),.13);border-radius:var(--r2);padding:12px;margin-bottom:10px}
 .course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
 .course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
-.course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(var(--ar),.14),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.20);border-radius:15px;padding:14px;margin-bottom:10px}
-.course-hero::after{content:'';position:absolute;right:-34px;top:-44px;width:126px;height:126px;border-radius:50%;border:26px solid rgba(255,255,255,.035)}
-.course-hero-top{display:flex;align-items:center;gap:10px;position:relative;z-index:1}
-.course-hero-ico{width:42px;height:42px;border-radius:14px;background:rgba(var(--ar),.14);display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));box-shadow:0 10px 24px rgba(79,138,255,.10)}
-.course-hero-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 22%,transparent),rgba(0,212,170,.06));border:1px solid color-mix(in srgb,var(--lesson-color,var(--a)) 32%,transparent);border-radius:18px;padding:16px 14px;margin-bottom:10px;isolation:isolate}
+.course-hero::before{content:'';position:absolute;inset:-30% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lesson-color,var(--a)) 55%,transparent),transparent 72%);filter:blur(18px);opacity:.55;animation:heroBlob 9s ease-in-out infinite alternate;z-index:-1}
+.course-hero::after{content:'';position:absolute;left:-22%;bottom:-44%;width:62%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(0,212,170,.42),transparent 70%);filter:blur(20px);opacity:.42;animation:heroBlob 11s ease-in-out infinite alternate-reverse;z-index:-1}
+@keyframes heroBlob{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-10px,8px) scale(1.08)}}
+.course-hero-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.course-hero-ico{position:relative;width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 28%,transparent),rgba(0,212,170,.10));display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));box-shadow:0 10px 24px color-mix(in srgb,var(--lesson-color,var(--a)) 30%,transparent),inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden}
+.course-hero-ico::after{content:'';position:absolute;inset:0;border-radius:16px;background:conic-gradient(from 0deg,transparent 0deg,color-mix(in srgb,var(--lesson-color,var(--a)) 60%,transparent) 35deg,transparent 70deg);animation:heroIcoSweep 5.5s linear infinite;opacity:.55;mix-blend-mode:overlay;pointer-events:none}
+@keyframes heroIcoSweep{to{transform:rotate(360deg)}}
+.course-hero-ico svg{position:relative;z-index:1;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-hero-title{font-size:18px;font-weight:950;color:var(--t1);line-height:1.1}
 .course-hero-sub{font-size:11px;color:var(--t2);line-height:1.4;margin-top:3px}
-.course-track{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:12px;position:relative;z-index:1}
-.course-track-step{height:6px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(var(--ar),.08);overflow:hidden}
-.course-track-step.done{background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 12px rgba(0,212,170,.20)}
+.course-track{position:relative;display:flex;align-items:center;justify-content:space-between;margin:14px 2px 4px;padding:0 4px;min-height:28px;z-index:1}
+.course-track-rail{position:absolute;left:8px;right:8px;top:50%;height:3px;border-radius:999px;background:rgba(255,255,255,.07);transform:translateY(-50%);overflow:hidden;z-index:0}
+.course-track-rail-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--a),var(--a2));box-shadow:0 0 14px rgba(0,212,170,.32);border-radius:999px;transition:width .5s cubic-bezier(.4,1,.4,1)}
+.course-track-node{position:relative;z-index:1;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;font-weight:900;color:var(--t2);background:var(--e2);border:2px solid rgba(255,255,255,.18);transition:transform .2s,box-shadow .2s,border-color .2s,background .2s}
+.course-track-node:hover{transform:scale(1.12)}
+.course-track-node.done{color:#fff;background:linear-gradient(135deg,var(--a),var(--a2));border-color:rgba(255,255,255,.55);box-shadow:0 0 0 4px rgba(0,212,170,.10),0 4px 12px rgba(0,212,170,.34)}
+.course-track-node.done::after{content:'';position:absolute;width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(.5px,-1.5px)}
+.course-track-node.active{color:#fff;background:var(--lesson-color,var(--a));border-color:#fff;box-shadow:0 0 0 5px rgba(var(--ar),.16),0 6px 16px rgba(var(--ar),.36);animation:courseTrackPulse 1.6s ease-in-out infinite}
+.course-track-node.active::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(var(--ar),.45);animation:courseTrackRipple 1.8s ease-out infinite;pointer-events:none}
+.course-track-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%) translateY(2px);background:var(--e2);border:1px solid var(--b2);color:var(--t1);font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 6px 16px rgba(0,0,0,.18);z-index:5}
+.course-track-node:hover .course-track-tip{opacity:1;transform:translateX(-50%) translateY(0)}
+@keyframes courseTrackPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.10)}}
+@keyframes courseTrackRipple{0%{opacity:.7;transform:scale(.7)}100%{opacity:0;transform:scale(1.6)}}
 .course-stage-list{display:grid;gap:8px;margin:10px 0}
 .course-stage-card{display:flex;align-items:center;gap:12px;background:var(--e1);border:1px solid var(--b1);border-radius:15px;padding:12px 12px;cursor:pointer;transition:transform .18s,border-color .2s,background .2s,box-shadow .2s;position:relative;overflow:hidden}
 .course-stage-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:999px;background:var(--lesson-color,var(--a));opacity:.68}
@@ -5621,6 +5654,36 @@ GALAXY_COURSE.push(
 function courseIconSvg(){
   return '<svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v16H6.5A2.5 2.5 0 014 16.5z"/><path d="M4 16.5A2.5 2.5 0 016.5 14H20"/><path d="M8 8h7M8 11h5"/></svg>';
 }
+/* Topical SVGs for lesson hero — match by id/title keywords so each lesson
+   reads visually as its actual topic instead of a generic book. */
+const LESSON_THEME_ICONS=[
+  {test:/start|to be|hello/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 21c0-4.2 3.1-7 7-7s7 2.8 7 7"/><path d="M3 12l2 1M19 12l2 1" stroke-dasharray="2 3"/></svg>'},
+  {test:/family/i,svg:'<svg viewBox="0 0 24 24"><path d="M3 20V11l9-6 9 6v9"/><path d="M3 20h18"/><circle cx="9" cy="14" r="1.6"/><circle cx="15" cy="14" r="1.6"/><path d="M9 17.5c.8.6 4.2.6 6 0"/></svg>'},
+  {test:/numbers|number|time/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><path d="M12 3v1M12 20v1M21 12h-1M4 12H3"/></svg>'},
+  {test:/direction/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6l3 6-3 6-3-6z" fill="currentColor" stroke="none"/></svg>'},
+  {test:/pronoun|possessive|articles|this-that|plurals/i,svg:'<svg viewBox="0 0 24 24"><circle cx="8" cy="9" r="2.4"/><circle cx="16" cy="9" r="2.4"/><path d="M3 19c.6-2.6 2.7-4 5-4s4.4 1.4 5 4"/><path d="M11 19c.6-2.6 2.7-4 5-4s4.4 1.4 5 4"/></svg>'},
+  {test:/there|frequency|plurals/i,svg:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.7-7-12a7 7 0 0114 0c0 5.3-7 12-7 12z"/><circle cx="12" cy="9" r="2.6"/></svg>'},
+  {test:/place|prepositions/i,svg:'<svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18"/><path d="M9 3l3 4 3-4"/></svg>'},
+  {test:/can|modals|advice/i,svg:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.4-8 9-4.6-.6-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>'},
+  {test:/like|gerund|infinitive|love|hate/i,svg:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-5-9-10c-1-3 1-6 4-6 1.7 0 3.3.8 5 3 1.7-2.2 3.3-3 5-3 3 0 5 3 4 6-2 5-9 10-9 10z"/></svg>'},
+  {test:/countables|comparatives|comparison/i,svg:'<svg viewBox="0 0 24 24"><path d="M5 19V9M12 19V5M19 19v-7"/><path d="M3 19h18"/></svg>'},
+  {test:/present continuous|past continuous|future continuous|continuous/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/></svg>'},
+  {test:/past|yesterday/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l-3 2"/><path d="M4.5 8.5l-1.5-1M19.5 15.5l1.5 1" stroke-dasharray="2 2"/></svg>'},
+  {test:/perfect|experience/i,svg:'<svg viewBox="0 0 24 24"><path d="M8 3h8"/><path d="M8 21h8"/><path d="M9 3c0 5 6 6 6 9s-6 4-6 9"/><path d="M15 3c0 5-6 6-6 9s6 4 6 9"/></svg>'},
+  {test:/future|will|going to/i,svg:'<svg viewBox="0 0 24 24"><path d="M4 12h14"/><path d="M13 6l6 6-6 6"/><circle cx="3.5" cy="12" r=".8" fill="currentColor"/></svg>'},
+  {test:/conditional|wish|if only|zero|first|second|third/i,svg:'<svg viewBox="0 0 24 24"><path d="M6 4v6a4 4 0 004 4h4"/><path d="M14 10l4 4-4 4"/><circle cx="6" cy="3" r="1.4" fill="currentColor"/></svg>'},
+  {test:/passive/i,svg:'<svg viewBox="0 0 24 24"><path d="M7 8h11"/><path d="M11 4l-4 4 4 4"/><path d="M17 16H6"/><path d="M13 20l4-4-4-4"/></svg>'},
+  {test:/reported|deduction|question tags|tag/i,svg:'<svg viewBox="0 0 24 24"><path d="M4 5h11a3 3 0 013 3v6a3 3 0 01-3 3H8l-4 3z"/><path d="M9 9.5c0-1 .8-1.8 1.8-1.8s1.8.8 1.8 1.8c0 1.4-1.8 1.4-1.8 2.7"/><circle cx="10.8" cy="14.3" r=".9" fill="currentColor"/></svg>'},
+  {test:/linking|discourse|markers|relative|emphasis/i,svg:'<svg viewBox="0 0 24 24"><path d="M9 8a4 4 0 010 8h-3a4 4 0 010-8z"/><path d="M15 16a4 4 0 010-8h3a4 4 0 010 8z"/></svg>'},
+  {test:/phrasal|inversion|cleft|ellipsis|participle|subjunctive|used to/i,svg:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.4"/><rect x="13" y="4" width="7" height="7" rx="1.4"/><rect x="4" y="13" width="7" height="7" rx="1.4"/><rect x="13" y="13" width="7" height="7" rx="1.4"/><circle cx="11" cy="13" r="2" fill="currentColor"/></svg>'},
+  {test:/nuance|precision|style|registers|idiomatic|rhetoric|literary/i,svg:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg>'},
+  {test:/routine|questions|plans|every day/i,svg:'<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/><circle cx="9" cy="14" r="1" fill="currentColor"/><circle cx="13" cy="14" r="1" fill="currentColor"/><circle cx="17" cy="14" r="1" fill="currentColor"/></svg>'}
+];
+function lessonThemeIcon(ls){
+  const probe=((ls&&ls.id)||'')+' '+((ls&&ls.title&&(ls.title.en||ls.title.ru))||'')+' '+((ls&&ls.sub&&(ls.sub.en||ls.sub.ru))||'');
+  for(const item of LESSON_THEME_ICONS){if(item.test.test(probe))return item.svg;}
+  return courseIconSvg();
+}
 function courseLevelLabel(level){
   return ({
     A0:{ru:'Starter · самые первые фразы',en:'Starter · first phrases'},
@@ -5631,6 +5694,113 @@ function courseLevelLabel(level){
     C1:{ru:'Advanced · академичный и точный язык',en:'Advanced · precise academic language'},
     C2:{ru:'Proficiency · стиль, нюансы, риторика',en:'Proficiency · style, nuance and rhetoric'}
   })[level]||{ru:'Уровень',en:'Level'};
+}
+const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2'];
+function courseLessonComplete(id){
+  const parts=LS.getJ('course_parts_'+id)||{};
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return false;
+  /* Same definition used by the per-lesson track. */
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  const base=['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading'];
+  if(courseSynonymItems(ls).length)base.push('synonym');
+  const required=[...base,...practice.map((_,i)=>'practice_'+i)];
+  return required.every(k=>parts[k]);
+}
+function courseSkippedLevels(){
+  const arr=LS.getJ('course_skipped_levels');
+  return Array.isArray(arr)?arr.filter(Boolean):[];
+}
+function addCourseSkippedLevel(level){
+  if(!level)return;
+  const set=new Set(courseSkippedLevels());set.add(level);
+  LS.setJ('course_skipped_levels',[...set]);
+}
+function isLevelSkipped(level){return courseSkippedLevels().indexOf(level)>=0;}
+function provenLevelIdx(){
+  /* Proven level = highest of (a) passed placement tests and (b) explicitly
+     skipped-with-warning levels. ob_level alone never proves a level — the
+     user must either pass the test or knowingly skip it. */
+  const passed=LS.getJ('passed_level_tests')||{};
+  const skipped=new Set(courseSkippedLevels());
+  let best=0;
+  COURSE_LEVEL_ORDER.forEach((l,i)=>{if((passed[l]||skipped.has(l))&&i>best)best=i;});
+  return best;
+}
+function isCourseUnlocked(id){
+  const idx=GALAXY_COURSE.findIndex(x=>x.id===id);
+  if(idx<0)return false;
+  const ls=GALAXY_COURSE[idx];
+  const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
+  /* Everything at or below the proven CEFR level is freely accessible. */
+  if(lessonLvlIdx<=provenLevelIdx())return true;
+  /* Above proven level: strictly sequential — previous lesson must be fully done. */
+  if(idx===0)return true;
+  return courseLessonComplete(GALAXY_COURSE[idx-1].id);
+}
+function courseLockReason(id){
+  const idx=GALAXY_COURSE.findIndex(x=>x.id===id);
+  if(idx<0)return null;
+  const ls=GALAXY_COURSE[idx];
+  const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
+  if(lessonLvlIdx>provenLevelIdx()+1){
+    /* Lesson is more than one level above proven → need to test up to that level first. */
+    const targetLvl=COURSE_LEVEL_ORDER[provenLevelIdx()+1];
+    return {kind:'level',target:targetLvl};
+  }
+  const prev=idx>0?GALAXY_COURSE[idx-1]:null;
+  if(prev&&!courseLessonComplete(prev.id))return {kind:'prev',prevId:prev.id,prevTitle:(prev.title&&(prev.title[lang]||prev.title.en))||prev.id};
+  return null;
+}
+function courseLockText(reason){
+  if(!reason)return '';
+  if(reason.kind==='level'){
+    return lang==='ru'
+      ?`Сначала сдай тест уровня ${reason.target} — это разблокирует ветку.`
+      :`Pass the ${reason.target} level test first — it unlocks this branch.`;
+  }
+  return lang==='ru'
+    ?`Сначала закрой урок: ${reason.prevTitle}.`
+    :`Finish the previous lesson first: ${reason.prevTitle}.`;
+}
+let _lockTapAt=0;
+function handleLockedCourseTap(id){
+  /* Hard throttle: a flood of taps on a locked card was queueing Telegram
+     HapticFeedback + toast DOM writes and eventually freezing the WebView.
+     Drop everything for 500 ms after a tap is registered. */
+  const now=Date.now();
+  if(now-_lockTapAt<500)return false;
+  _lockTapAt=now;
+  const reason=courseLockReason(id);
+  if(!reason)return false;
+  /* Defer the toast/haptic to the next frame so the click handler can finish
+     instantly — Telegram WebView keeps the event loop responsive. */
+  requestAnimationFrame(()=>{
+    try{toast(courseLockText(reason),'🔒');}catch(_){}
+  });
+  return false;
+}
+function tapLockedLevelTest(target,evt){
+  if(evt){try{evt.stopPropagation();evt.preventDefault();}catch(_){}}
+  /* Defer too — startLevelTest swaps the chat and is heavy. */
+  setTimeout(()=>{try{startLevelTest(target);}catch(_){}}, 30);
+  return false;
+}
+function tapSkipLevelTest(target,evt){
+  if(evt){try{evt.stopPropagation();evt.preventDefault();}catch(_){}}
+  /* "I want to skip the test" path. There must be friction so it isn't a
+     one-tap bypass; users acknowledge they may struggle. */
+  const warn=lang==='ru'
+    ?`Открыть ${target} без теста?\n\nТы сам выбираешь уровень. Если он слишком сложный — уроки будут идти медленно, без проверки понимания базы. В прогрессе они отметятся как «без теста».`
+    :`Open ${target} without the test?\n\nYou pick the level yourself. If it is too hard, lessons will be slow and the base will not be checked. They will be marked "not verified" in your progress.`;
+  let ok=false;
+  try{ok=window.confirm(warn);}catch(_){ok=true;}
+  if(!ok)return false;
+  addCourseSkippedLevel(target);
+  try{haptic('medium');}catch(_){}
+  try{toast(lang==='ru'?`Уровень ${target} открыт без теста.`:`Level ${target} opened without the test.`,'⚠️');}catch(_){}
+  /* Re-render the list so newly-unlocked lessons appear. */
+  requestAnimationFrame(()=>{try{renderCourse();}catch(_){}});
+  return false;
 }
 function renderCourse(){
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
@@ -5659,20 +5829,31 @@ function renderCourse(){
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
   const sortedCourse=GALAXY_COURSE.slice().sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
+  const lockIconBig='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.2" fill="currentColor" stroke="none"/></svg>';
+  const lockIconSmall='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const lessons=sortedCourse.map(function(ls){
     const isDone=!!done[ls.id];
+    const unlocked=isCourseUnlocked(ls.id);
+    const reason=unlocked?null:courseLockReason(ls.id);
     const meta=courseLevelLabel(ls.level);
     const header=ls.level!==lastLevel?`<div class="course-level-head"><div class="course-level-name">${safeHTML(ls.level)}</div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`:'';
     lastLevel=ls.level;
-    const statusIcon=isDone
-      ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
-      :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>';
-    return `${header}<div class="course-card ${isDone?'done':''}" style="--lesson-color:${ls.color}" onclick="openCourseLesson('${ls.id}')">
-      <div class="course-ico" style="color:${ls.color}">${courseIconSvg()}</div>
+    const statusIcon=!unlocked
+      ?lockIconSmall
+      :(isDone
+        ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+        :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>');
+    const onClick=unlocked?`openCourseLesson('${ls.id}')`:`handleLockedCourseTap('${ls.id}')`;
+    const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${lang==='ru'?'Сдать тест':'Take the test'} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${lang==='ru'?'Открыть без теста':'Skip the test'}</button></div>`:''}`:'';
+    const iconHtml=unlocked?lessonThemeIcon(ls):lockIconBig;
+    const lockBadge=!unlocked?`<div class="course-lock-badge">${lockIconSmall}</div>`:'';
+    return `${header}<div class="course-card ${isDone?'done':''} ${unlocked?'':'locked'}" style="--lesson-color:${ls.color}" onclick="${onClick}">
+      ${lockBadge}
+      <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${iconHtml}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
         <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
-        <div class="course-meta"><span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}</div>
+        <div class="course-meta">${unlocked?`<span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}`:lockedMeta}</div>
       </div>
       <div class="course-status">${statusIcon}</div>
     </div>`;
@@ -5695,8 +5876,71 @@ function courseLessonInsight(ls){
   };
 }
 const COURSE_WORD_I18N={
-  ready:{ru:'готовый',es:'listo',pt:'pronto'},right:{ru:'правый / правильный',es:'correcto',pt:'certo'},home:{ru:'дом',es:'casa',pt:'casa'},student:{ru:'студент',es:'estudiante',pt:'estudante'},today:{ru:'сегодня',es:'hoy',pt:'hoje'},tomorrow:{ru:'завтра',es:'mañana',pt:'amanhã'},monday:{ru:'понедельник',es:'lunes',pt:'segunda-feira'},morning:{ru:'утро',es:'mañana',pt:'manhã'},evening:{ru:'вечер',es:'tarde/noche',pt:'noite'},name:{ru:'имя',es:'nombre',pt:'nome'},country:{ru:'страна',es:'país',pt:'país'},age:{ru:'возраст',es:'edad',pt:'idade'},mother:{ru:'мама',es:'madre',pt:'mãe'},father:{ru:'папа',es:'padre',pt:'pai'},sister:{ru:'сестра',es:'hermana',pt:'irmã'},brother:{ru:'брат',es:'hermano',pt:'irmão'},family:{ru:'семья',es:'familia',pt:'família'},food:{ru:'еда',es:'comida',pt:'comida'},water:{ru:'вода',es:'agua',pt:'água'},coffee:{ru:'кофе',es:'café',pt:'café'},tea:{ru:'чай',es:'té',pt:'chá'},book:{ru:'книга',es:'libro',pt:'livro'},pen:{ru:'ручка',es:'bolígrafo',pt:'caneta'},desk:{ru:'парта',es:'escritorio',pt:'mesa'},classroom:{ru:'класс',es:'aula',pt:'sala de aula'},room:{ru:'комната',es:'habitación',pt:'quarto'},house:{ru:'дом',es:'casa',pt:'casa'},ticket:{ru:'билет',es:'billete',pt:'bilhete'},airport:{ru:'аэропорт',es:'aeropuerto',pt:'aeroporto'},hotel:{ru:'отель',es:'hotel',pt:'hotel'},weather:{ru:'погода',es:'tiempo',pt:'tempo'},rain:{ru:'дождь',es:'lluvia',pt:'chuva'},sun:{ru:'солнце',es:'sol',pt:'sol'},big:{ru:'большой',es:'grande',pt:'grande'},small:{ru:'маленький',es:'pequeño',pt:'pequeno'},work:{ru:'работа',es:'trabajo',pt:'trabalho'},job:{ru:'работа',es:'trabajo',pt:'trabalho'},shop:{ru:'магазин',es:'tienda',pt:'loja'},price:{ru:'цена',es:'precio',pt:'preço'},money:{ru:'деньги',es:'dinero',pt:'dinheiro'},schedule:{ru:'расписание',es:'horario',pt:'horário'},lesson:{ru:'урок',es:'lección',pt:'lição'},english:{ru:'английский',es:'inglés',pt:'inglês'},practice:{ru:'практика',es:'práctica',pt:'prática'},business:{ru:'бизнес',es:'negocios',pt:'negócios'},meeting:{ru:'встреча',es:'reunión',pt:'reunião'},email:{ru:'письмо',es:'correo',pt:'email'},bug:{ru:'ошибка',es:'error',pt:'erro'},task:{ru:'задача',es:'tarea',pt:'tarefa'},update:{ru:'обновление',es:'actualización',pt:'atualização'},feature:{ru:'функция',es:'función',pt:'recurso'},health:{ru:'здоровье',es:'salud',pt:'saúde'},doctor:{ru:'врач',es:'médico',pt:'médico'},travel:{ru:'путешествие',es:'viaje',pt:'viagem'},plan:{ru:'план',es:'plan',pt:'plano'},opinion:{ru:'мнение',es:'opinión',pt:'opinião'},problem:{ru:'проблема',es:'problema',pt:'problema'},solution:{ru:'решение',es:'solución',pt:'solução'},environment:{ru:'окружающая среда',es:'medio ambiente',pt:'meio ambiente'},technology:{ru:'технологии',es:'tecnología',pt:'tecnologia'}
+  ready:{ru:'готовый',es:'listo',pt:'pronto'},right:{ru:'правый / правильный',es:'correcto',pt:'certo'},home:{ru:'дом',es:'casa',pt:'casa'},student:{ru:'студент',es:'estudiante',pt:'estudante'},today:{ru:'сегодня',es:'hoy',pt:'hoje'},tomorrow:{ru:'завтра',es:'mañana',pt:'amanhã'},monday:{ru:'понедельник',es:'lunes',pt:'segunda-feira'},morning:{ru:'утро',es:'mañana',pt:'manhã'},evening:{ru:'вечер',es:'tarde/noche',pt:'noite'},name:{ru:'имя',es:'nombre',pt:'nome'},country:{ru:'страна',es:'país',pt:'país'},age:{ru:'возраст',es:'edad',pt:'idade'},mother:{ru:'мама',es:'madre',pt:'mãe'},father:{ru:'папа',es:'padre',pt:'pai'},sister:{ru:'сестра',es:'hermana',pt:'irmã'},brother:{ru:'брат',es:'hermano',pt:'irmão'},family:{ru:'семья',es:'familia',pt:'família'},food:{ru:'еда',es:'comida',pt:'comida'},water:{ru:'вода',es:'agua',pt:'água'},coffee:{ru:'кофе',es:'café',pt:'café'},tea:{ru:'чай',es:'té',pt:'chá'},book:{ru:'книга',es:'libro',pt:'livro'},pen:{ru:'ручка',es:'bolígrafo',pt:'caneta'},desk:{ru:'парта',es:'escritorio',pt:'mesa'},classroom:{ru:'класс',es:'aula',pt:'sala de aula'},room:{ru:'комната',es:'habitación',pt:'quarto'},house:{ru:'дом',es:'casa',pt:'casa'},ticket:{ru:'билет',es:'billete',pt:'bilhete'},airport:{ru:'аэропорт',es:'aeropuerto',pt:'aeroporto'},hotel:{ru:'отель',es:'hotel',pt:'hotel'},weather:{ru:'погода',es:'tiempo',pt:'tempo'},rain:{ru:'дождь',es:'lluvia',pt:'chuva'},sun:{ru:'солнце',es:'sol',pt:'sol'},big:{ru:'большой',es:'grande',pt:'grande'},small:{ru:'маленький',es:'pequeño',pt:'pequeno'},work:{ru:'работа',es:'trabajo',pt:'trabalho'},job:{ru:'работа',es:'trabajo',pt:'trabalho'},shop:{ru:'магазин',es:'tienda',pt:'loja'},price:{ru:'цена',es:'precio',pt:'preço'},money:{ru:'деньги',es:'dinero',pt:'dinheiro'},schedule:{ru:'расписание',es:'horario',pt:'horário'},lesson:{ru:'урок',es:'lección',pt:'lição'},english:{ru:'английский',es:'inglés',pt:'inglês'},practice:{ru:'практика',es:'práctica',pt:'prática'},business:{ru:'бизнес',es:'negocios',pt:'negócios'},meeting:{ru:'встреча',es:'reunión',pt:'reunião'},email:{ru:'письмо',es:'correo',pt:'email'},bug:{ru:'ошибка',es:'error',pt:'erro'},task:{ru:'задача',es:'tarea',pt:'tarefa'},update:{ru:'обновление',es:'actualización',pt:'atualização'},feature:{ru:'функция',es:'función',pt:'recurso'},health:{ru:'здоровье',es:'salud',pt:'saúde'},doctor:{ru:'врач',es:'médico',pt:'médico'},travel:{ru:'путешествие',es:'viaje',pt:'viagem'},plan:{ru:'план',es:'plan',pt:'plano'},opinion:{ru:'мнение',es:'opinión',pt:'opinião'},problem:{ru:'проблема',es:'problema',pt:'problema'},solution:{ru:'решение',es:'solución',pt:'solução'},environment:{ru:'окружающая среда',es:'medio ambiente',pt:'meio ambiente'},technology:{ru:'технологии',es:'tecnología',pt:'tecnologia'},
+  study:{ru:'учиться, заниматься',es:'estudiar',pt:'estudar'},speak:{ru:'говорить',es:'hablar',pt:'falar'},live:{ru:'жить',es:'vivir',pt:'morar'},answer:{ru:'ответ',es:'respuesta',pt:'resposta'},question:{ru:'вопрос',es:'pregunta',pt:'pergunta'},friend:{ru:'друг',es:'amigo',pt:'amigo'},help:{ru:'помогать',es:'ayudar',pt:'ajudar'},future:{ru:'будущее',es:'futuro',pt:'futuro'},late:{ru:'поздно',es:'tarde',pt:'tarde'},night:{ru:'ночь',es:'noche',pt:'noite'},weekend:{ru:'выходные',es:'fin de semana',pt:'fim de semana'},soon:{ru:'скоро',es:'pronto',pt:'em breve'},tonight:{ru:'сегодня вечером',es:'esta noche',pt:'hoje à noite'},yesterday:{ru:'вчера',es:'ayer',pt:'ontem'},went:{ru:'пошёл / пошла (past of go)',es:'fui / fue',pt:'fui / foi'},saw:{ru:'увидел / увидела (past of see)',es:'vi / vio',pt:'vi / viu'},watched:{ru:'смотрел / смотрела',es:'miró / miraba',pt:'assistiu'},called:{ru:'позвонил / позвонила',es:'llamó',pt:'ligou'},finished:{ru:'закончил',es:'terminó',pt:'terminou'},completed:{ru:'выполнен / завершён',es:'completado',pt:'concluído'},built:{ru:'построен / построил',es:'construido',pt:'construído'},designed:{ru:'разработан',es:'diseñado',pt:'projetado'},updated:{ru:'обновлён',es:'actualizado',pt:'atualizado'},reviewed:{ru:'проверен',es:'revisado',pt:'revisado'},launched:{ru:'запущен',es:'lanzado',pt:'lançado'},written:{ru:'написан',es:'escrito',pt:'escrito'},spoken:{ru:'произнесён, разговорный',es:'hablado',pt:'falado'},corner:{ru:'угол',es:'esquina',pt:'esquina'},block:{ru:'квартал',es:'cuadra',pt:'quarteirão'},left:{ru:'левый',es:'izquierda',pt:'esquerda'},straight:{ru:'прямо',es:'recto',pt:'reto'},between:{ru:'между',es:'entre',pt:'entre'},approach:{ru:'подход',es:'enfoque',pt:'abordagem'},argument:{ru:'аргумент',es:'argumento',pt:'argumento'},support:{ru:'поддержка, поддерживать',es:'apoyo / apoyar',pt:'apoio / apoiar'},result:{ru:'результат',es:'resultado',pt:'resultado'},condition:{ru:'условие',es:'condición',pt:'condição'},continue:{ru:'продолжать',es:'continuar',pt:'continuar'},improve:{ru:'улучшать',es:'mejorar',pt:'melhorar'},premature:{ru:'преждевременный',es:'prematuro',pt:'prematuro'},remarkable:{ru:'замечательный',es:'notable',pt:'notável'},resilience:{ru:'устойчивость',es:'resiliencia',pt:'resiliência'},contested:{ru:'спорный',es:'disputado',pt:'contestado'},precise:{ru:'точный',es:'preciso',pt:'preciso'},misunderstood:{ru:'неправильно понял',es:'malinterpretado',pt:'mal interpretado'},
+  /* Function words and grammar markers used across A0–C2 lessons. */
+  hello:{ru:'привет',es:'hola',pt:'olá'},here:{ru:'здесь',es:'aquí',pt:'aqui'},kind:{ru:'добрый / вид',es:'amable / tipo',pt:'gentil / tipo'},
+  one:{ru:'один',es:'uno',pt:'um'},two:{ru:'два',es:'dos',pt:'dois'},ten:{ru:'десять',es:'diez',pt:'dez'},twenty:{ru:'двадцать',es:'veinte',pt:'vinte'},hundred:{ru:'сто',es:'cien',pt:'cem'},second:{ru:'второй',es:'segundo',pt:'segundo'},
+  he:{ru:'он',es:'él',pt:'ele'},she:{ru:'она',es:'ella',pt:'ela'},we:{ru:'мы',es:'nosotros',pt:'nós'},they:{ru:'они',es:'ellos',pt:'eles'},
+  my:{ru:'мой / моя',es:'mi',pt:'meu / minha'},your:{ru:'твой / ваш',es:'tu',pt:'seu / teu'},his:{ru:'его',es:'su (de él)',pt:'dele'},her:{ru:'её',es:'su (de ella)',pt:'dela'},their:{ru:'их',es:'su (de ellos)',pt:'deles'},
+  this:{ru:'этот / эта',es:'este / esta',pt:'este / esta'},that:{ru:'тот / что',es:'ese / que',pt:'esse / que'},these:{ru:'эти',es:'estos',pt:'estes'},those:{ru:'те',es:'esos',pt:'esses'},which:{ru:'который',es:'cuál',pt:'qual'},who:{ru:'кто',es:'quién',pt:'quem'},what:{ru:'что',es:'qué',pt:'o que'},where:{ru:'где',es:'dónde',pt:'onde'},when:{ru:'когда',es:'cuándo',pt:'quando'},why:{ru:'почему',es:'por qué',pt:'por que'},how:{ru:'как',es:'cómo',pt:'como'},near:{ru:'близко / рядом',es:'cerca',pt:'perto'},
+  an:{ru:'неопр. артикль (перед гласной)',es:'un / una',pt:'um / uma'},the:{ru:'опр. артикль',es:'el / la',pt:'o / a'},
+  in:{ru:'в (внутри)',es:'en',pt:'em'},on:{ru:'на (поверхности)',es:'en (sobre)',pt:'em (sobre)'},at:{ru:'в (точка времени / места)',es:'a / en',pt:'em / a'},under:{ru:'под',es:'debajo de',pt:'sob'},from:{ru:'из / от',es:'de / desde',pt:'de / desde'},for:{ru:'для / в течение',es:'para / por',pt:'para / por'},since:{ru:'с (момента)',es:'desde',pt:'desde'},than:{ru:'чем (сравн.)',es:'que (compar.)',pt:'do que'},before:{ru:'до / перед',es:'antes',pt:'antes'},
+  always:{ru:'всегда',es:'siempre',pt:'sempre'},often:{ru:'часто',es:'a menudo',pt:'muitas vezes'},usually:{ru:'обычно',es:'normalmente',pt:'normalmente'},sometimes:{ru:'иногда',es:'a veces',pt:'às vezes'},never:{ru:'никогда',es:'nunca',pt:'nunca'},rarely:{ru:'редко',es:'raramente',pt:'raramente'},ever:{ru:'когда-либо',es:'alguna vez',pt:'alguma vez'},already:{ru:'уже',es:'ya',pt:'já'},yet:{ru:'ещё / уже (вопр./отриц.)',es:'todavía / aún',pt:'ainda'},just:{ru:'только что',es:'justo / recién',pt:'agora mesmo'},recently:{ru:'недавно',es:'recientemente',pt:'recentemente'},now:{ru:'сейчас',es:'ahora',pt:'agora'},earlier:{ru:'раньше',es:'antes',pt:'antes'},sooner:{ru:'раньше / скорее',es:'antes',pt:'mais cedo'},so:{ru:'так / итак',es:'así / entonces',pt:'então'},indeed:{ru:'действительно',es:'ciertamente',pt:'de fato'},
+  busy:{ru:'занятый',es:'ocupado',pt:'ocupado'},careful:{ru:'осторожный',es:'cuidadoso',pt:'cuidadoso'},serious:{ru:'серьёзный',es:'serio',pt:'sério'},helpful:{ru:'полезный',es:'útil',pt:'útil'},closer:{ru:'ближе',es:'más cerca',pt:'mais perto'},bigger:{ru:'больше',es:'más grande',pt:'maior'},better:{ru:'лучше',es:'mejor',pt:'melhor'},more:{ru:'больше',es:'más',pt:'mais'},many:{ru:'много (счит.)',es:'muchos',pt:'muitos'},much:{ru:'много (несч.)',es:'mucho',pt:'muito'},some:{ru:'несколько',es:'algunos',pt:'alguns'},any:{ru:'любой / какой-либо',es:'cualquier',pt:'qualquer'},
+  apple:{ru:'яблоко',es:'manzana',pt:'maçã'},door:{ru:'дверь',es:'puerta',pt:'porta'},table:{ru:'стол',es:'mesa',pt:'mesa'},chair:{ru:'стул',es:'silla',pt:'cadeira'},park:{ru:'парк',es:'parque',pt:'parque'},city:{ru:'город',es:'ciudad',pt:'cidade'},keys:{ru:'ключи',es:'llaves',pt:'chaves'},light:{ru:'свет',es:'luz',pt:'luz'},cats:{ru:'кошки',es:'gatos',pt:'gatos'},buses:{ru:'автобусы',es:'autobuses',pt:'ônibus'},boxes:{ru:'коробки',es:'cajas',pt:'caixas'},people:{ru:'люди',es:'gente',pt:'pessoas'},children:{ru:'дети',es:'niños',pt:'crianças'},
+  be:{ru:'быть',es:'ser / estar',pt:'ser / estar'},was:{ru:'был / была',es:'era / fue',pt:'era / foi'},were:{ru:'были',es:'eran / fueron',pt:'eram / foram'},have:{ru:'иметь',es:'tener',pt:'ter'},had:{ru:'имел',es:'tenía',pt:'tinha'},do:{ru:'делать',es:'hacer',pt:'fazer'},does:{ru:'делает (3л.)',es:'hace',pt:'faz'},did:{ru:'делал',es:'hizo',pt:'fez'},done:{ru:'сделан',es:'hecho',pt:'feito'},made:{ru:'сделан',es:'hecho',pt:'feito'},got:{ru:'получил',es:'consiguió',pt:'obteve'},come:{ru:'приходить',es:'venir',pt:'vir'},swim:{ru:'плавать',es:'nadar',pt:'nadar'},leave:{ru:'уходить',es:'irse',pt:'sair'},rest:{ru:'отдыхать',es:'descansar',pt:'descansar'},start:{ru:'начинать',es:'empezar',pt:'começar'},finish:{ru:'заканчивать',es:'terminar',pt:'terminar'},decide:{ru:'решать',es:'decidir',pt:'decidir'},enjoy:{ru:'наслаждаться',es:'disfrutar',pt:'gostar'},like:{ru:'нравиться',es:'gustar',pt:'gostar de'},love:{ru:'любить',es:'amar',pt:'amar'},hate:{ru:'ненавидеть',es:'odiar',pt:'odiar'},wish:{ru:'желать',es:'desear',pt:'desejar'},understand:{ru:'понимать',es:'entender',pt:'entender'},repeat:{ru:'повторять',es:'repetir',pt:'repetir'},suggest:{ru:'предлагать',es:'sugerir',pt:'sugerir'},demand:{ru:'требовать',es:'exigir',pt:'exigir'},assume:{ru:'предполагать',es:'suponer',pt:'supor'},freeze:{ru:'замерзать',es:'congelar',pt:'congelar'},
+  knew:{ru:'знал',es:'sabía',pt:'sabia'},said:{ru:'сказал',es:'dijo',pt:'disse'},told:{ru:'рассказал',es:'contó',pt:'contou'},reported:{ru:'сообщил',es:'informó',pt:'relatou'},arrived:{ru:'прибыл',es:'llegó',pt:'chegou'},visited:{ru:'посетил',es:'visitó',pt:'visitou'},tried:{ru:'пробовал',es:'intentó',pt:'tentou'},flown:{ru:'летал (3 форма)',es:'volado',pt:'voado'},forgotten:{ru:'забыт',es:'olvidado',pt:'esquecido'},passed:{ru:'прошёл',es:'pasó',pt:'passou'},cleaned:{ru:'убрал',es:'limpió',pt:'limpou'},repaired:{ru:'отремонтирован',es:'reparado',pt:'reparado'},cut:{ru:'резать / разрезан',es:'cortar / cortado',pt:'cortar / cortado'},argued:{ru:'спорил',es:'discutió',pt:'discutiu'},studying:{ru:'учиться (-ing)',es:'estudiando',pt:'estudando'},working:{ru:'работающий',es:'trabajando',pt:'trabalhando'},waiting:{ru:'ожидающий',es:'esperando',pt:'esperando'},sleeping:{ru:'спящий',es:'durmiendo',pt:'dormindo'},playing:{ru:'играющий',es:'jugando',pt:'brincando'},reading:{ru:'чтение / читая',es:'leyendo',pt:'lendo'},flying:{ru:'летающий',es:'volando',pt:'voando'},feeling:{ru:'чувство',es:'sentimiento',pt:'sentimento'},
+  can:{ru:'мочь',es:'poder',pt:'poder'},cannot:{ru:'не мочь',es:'no poder',pt:'não poder'},could:{ru:'мог бы',es:'podría',pt:'poderia'},may:{ru:'возможно (модал.)',es:'puede que',pt:'pode (talvez)'},maybe:{ru:'может быть',es:'quizás',pt:'talvez'},might:{ru:'мог бы',es:'podría',pt:'poderia'},should:{ru:'следует',es:'debería',pt:'deveria'},must:{ru:'должен',es:'deber',pt:'dever'},will:{ru:'будет (вспом.)',es:'-rá (futuro)',pt:'-rá (futuro)'},would:{ru:'бы (условн.)',es:'-ría (condic.)',pt:'-ria (condic.)'},likely:{ru:'вероятно',es:'probable',pt:'provável'},probably:{ru:'вероятно',es:'probablemente',pt:'provavelmente'},rather:{ru:'скорее / довольно',es:'más bien',pt:'em vez disso'},hard:{ru:'трудный / тяжело',es:'difícil',pt:'difícil'},
+  if:{ru:'если',es:'si',pt:'se'},unless:{ru:'если не',es:'a menos que',pt:'a menos que'},although:{ru:'хотя',es:'aunque',pt:'embora'},however:{ru:'однако',es:'sin embargo',pt:'no entanto'},whereas:{ru:'тогда как',es:'mientras que',pt:'enquanto que'},despite:{ru:'несмотря на',es:'a pesar de',pt:'apesar de'},nevertheless:{ru:'тем не менее',es:'sin embargo',pt:'no entanto'},furthermore:{ru:'более того',es:'además',pt:'além disso'},therefore:{ru:'поэтому',es:'por lo tanto',pt:'portanto'},consequently:{ru:'следовательно',es:'en consecuencia',pt:'consequentemente'},contrary:{ru:'противоположный',es:'contrario',pt:'contrário'},arguably:{ru:'возможно (с аргументами)',es:'posiblemente',pt:'possivelmente'},opposite:{ru:'напротив / противоположный',es:'opuesto / enfrente',pt:'oposto / em frente'},bitter:{ru:'горький',es:'amargo',pt:'amargo'},braver:{ru:'смелее',es:'más valiente',pt:'mais corajoso'},clearly:{ru:'ясно',es:'claramente',pt:'claramente'},efficient:{ru:'эффективный',es:'eficiente',pt:'eficiente'},vital:{ru:'жизненно важный',es:'vital',pt:'vital'},
+  assistance:{ru:'помощь',es:'asistencia',pt:'assistência'},assumption:{ru:'предположение',es:'suposición',pt:'suposição'},claim:{ru:'утверждение',es:'afirmación',pt:'afirmação'},clarity:{ru:'ясность',es:'claridad',pt:'clareza'},conclusion:{ru:'вывод',es:'conclusión',pt:'conclusão'},conflict:{ru:'конфликт',es:'conflicto',pt:'conflito'},context:{ru:'контекст',es:'contexto',pt:'contexto'},counterargument:{ru:'контраргумент',es:'contraargumento',pt:'contra-argumento'},data:{ru:'данные',es:'datos',pt:'dados'},emphasis:{ru:'акцент',es:'énfasis',pt:'ênfase'},evidence:{ru:'доказательство',es:'evidencia',pt:'evidência'},formal:{ru:'формальный',es:'formal',pt:'formal'},informal:{ru:'неформальный',es:'informal',pt:'informal'},neutral:{ru:'нейтральный',es:'neutral',pt:'neutro'},image:{ru:'образ',es:'imagen',pt:'imagem'},ironic:{ru:'ироничный',es:'irónico',pt:'irônico'},narrator:{ru:'рассказчик',es:'narrador',pt:'narrador'},proposal:{ru:'предложение',es:'propuesta',pt:'proposta'},subtext:{ru:'подтекст',es:'subtexto',pt:'subtexto'},tag:{ru:'вопрос-tag',es:'pregunta cola',pt:'pergunta cauda'},tone:{ru:'тон',es:'tono',pt:'tom'}
 };
+/* Words for the vocab stage are restricted to entries we can actually translate. */
+function courseHasTranslation(word){
+  const key=String(word||'').toLowerCase();
+  return /^[a-z-]{2,}$/.test(key) && Object.prototype.hasOwnProperty.call(COURSE_WORD_I18N,key);
+}
+/* Synonym bank — used by the new "Close in meaning" stage.
+   Each entry: word → [closest synonym, ok-ish, far meaning, opposite/unrelated]; index 0 is the correct pick. */
+const COURSE_SYNONYMS={
+  big:{ok:'large',others:['small','quick','wet']},small:{ok:'tiny',others:['big','loud','sharp']},
+  study:{ok:'learn',others:['ignore','forget','sleep']},speak:{ok:'talk',others:['listen','write','silent']},
+  live:{ok:'reside',others:['leave','visit','build']},help:{ok:'assist',others:['ignore','block','watch']},
+  finished:{ok:'completed',others:['started','began','forgot']},late:{ok:'delayed',others:['early','fast','ready']},
+  improve:{ok:'enhance',others:['worsen','remove','start']},soon:{ok:'shortly',others:['later','rarely','never']},
+  remarkable:{ok:'outstanding',others:['ordinary','dull','tiny']},precise:{ok:'exact',others:['vague','rough','broad']},
+  approach:{ok:'method',others:['result','question','goal']},argument:{ok:'reasoning',others:['agreement','silence','question']},
+  support:{ok:'back',others:['oppose','ignore','attack']},continue:{ok:'proceed',others:['stop','pause','quit']},
+  question:{ok:'query',others:['answer','reply','silence']},answer:{ok:'reply',others:['question','silence','noise']},
+  travel:{ok:'journey',others:['stay','rest','sleep']},plan:{ok:'strategy',others:['mess','luck','chance']},
+  meeting:{ok:'gathering',others:['silence','split','exit']},problem:{ok:'issue',others:['answer','prize','plan']},
+  solution:{ok:'fix',others:['issue','problem','question']},opinion:{ok:'view',others:['fact','rule','test']},
+  bug:{ok:'glitch',others:['feature','design','plan']},feature:{ok:'capability',others:['bug','flaw','error']},
+  task:{ok:'assignment',others:['holiday','rest','game']},update:{ok:'upgrade',others:['rollback','delete','ignore']},
+  business:{ok:'commerce',others:['hobby','game','vacation']},
+  shop:{ok:'store',others:['library','museum','park']},price:{ok:'cost',others:['gift','discount','tax']},
+  /* High-level vocabulary appearing in B2–C2 lessons. */
+  remarkable:{ok:'outstanding',others:['ordinary','dull','tiny']},
+  contested:{ok:'disputed',others:['agreed','settled','obvious']},
+  resilience:{ok:'toughness',others:['weakness','fragility','panic']},
+  arguably:{ok:'possibly',others:['certainly','never','rarely']},
+  furthermore:{ok:'moreover',others:['however','despite','rarely']},
+  nevertheless:{ok:'still',others:['therefore','because','firstly']},
+  therefore:{ok:'so',others:['although','before','unless']},
+  consequently:{ok:'thus',others:['otherwise','meanwhile','suddenly']},
+  although:{ok:'though',others:['because','therefore','so']},
+  despite:{ok:'regardless of',others:['because of','thanks to','due to']},
+  efficient:{ok:'effective',others:['wasteful','slow','random']},
+  vital:{ok:'essential',others:['minor','optional','rare']},
+  clarity:{ok:'clearness',others:['confusion','noise','doubt']},
+  context:{ok:'setting',others:['ignore','detail','random']},
+  evidence:{ok:'proof',others:['rumor','guess','opinion']},
+  claim:{ok:'assertion',others:['answer','reply','silence']},
+  conclusion:{ok:'finding',others:['question','intro','prompt']},
+  conflict:{ok:'clash',others:['agreement','peace','silence']},
+  proposal:{ok:'suggestion',others:['order','demand','refusal']}
+};
+function courseSynonymKeys(){return Object.keys(COURSE_SYNONYMS);}
 function courseT(key){
   const m={
     vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras'},
@@ -5713,7 +5957,10 @@ function courseT(key){
     chooseWord:{ru:'Выбери английское слово:',en:'Choose the English word:',es:'Elige la palabra en inglés:',pt:'Escolha a palavra em inglês:'},
     correct:{ru:'Верно. Слово закреплено.',en:'Correct. The word is reinforced.',es:'Correcto. Palabra reforzada.',pt:'Correto. Palavra reforçada.'},
     miss:{ru:'Не раскрываю ответ. Слово вернётся в следующих уроках.',en:'No answer revealed. This word will return in later lessons.',es:'No revelo la respuesta. La palabra volverá.',pt:'Sem revelar a resposta. A palavra voltará.'},
-    allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.'}
+    allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.'},
+    synonym:{ru:'Близкие по смыслу',en:'Close in meaning',es:'Cercanos en significado',de:'Bedeutungsnah',fr:'Sens proche',pt:'Próximos em significado',uk:'Близькі за змістом',tr:'Anlamca yakın',zh:'近义词',ar:'قريبة في المعنى'},
+    synonymSub:{ru:'Выбери английское слово ближе всего по смыслу.',en:'Pick the English word closest in meaning.',es:'Elige la palabra inglesa más cercana en significado.',de:'Wähle das englische Wort mit der nächsten Bedeutung.',fr:'Choisis le mot anglais le plus proche par le sens.',pt:'Escolha a palavra inglesa mais próxima em significado.',uk:'Обери англійське слово, найближче за змістом.',tr:'Anlamı en yakın İngilizce kelimeyi seç.',zh:'选择含义最接近的英文单词。',ar:'اختر الكلمة الإنجليزية الأقرب في المعنى.'},
+    synonymHead:{ru:'Какое слово ближе по смыслу к',en:'Which word is closest in meaning to',es:'¿Cuál es más cercana a',de:'Welches Wort ist am nächsten zu',fr:'Quel mot est le plus proche de',pt:'Qual é mais próximo de',uk:'Яке слово ближче за змістом до',tr:'Hangi kelime şuna en yakın:',zh:'哪个词最接近',ar:'أي كلمة أقرب إلى'}
   };
   return (m[key]&&m[key][lang])||m[key]?.en||key;
 }
@@ -5734,10 +5981,23 @@ function courseSetMistakes(list){
 function courseAddMistake(word){const q=courseMistakes();word=String(word||'').toLowerCase().trim();if(word&&!q.includes(word)){q.unshift(word);courseSetMistakes(q);}}
 function courseClearMistake(word){word=String(word||'').toLowerCase().trim();courseSetMistakes(courseMistakes().filter(w=>w!==word));}
 function courseVocabWords(ls){
-  const queue=courseMistakes();
-  const own=(ls.words||[]).map(w=>String(w||'').toLowerCase()).filter(w=>/^[a-z-]{2,}$/.test(w));
+  /* Vocab quiz only works for words present in COURSE_WORD_I18N; everything else
+     would render as English-on-English (e.g. prompt "from" with English options).
+     Filter aggressively and top up from the dictionary if the lesson is light. */
+  const queue=courseMistakes().filter(courseHasTranslation);
+  const own=(ls.words||[])
+    .map(w=>String(w||'').toLowerCase())
+    .filter(courseHasTranslation);
   const merged=[];
   [...queue,...own].forEach(w=>{if(w&&!merged.includes(w))merged.push(w);});
+  if(merged.length<5){
+    const seed=String((ls&&ls.id)||'pool').split('').reduce((a,c)=>a+c.charCodeAt(0),31);
+    const pool=Object.keys(COURSE_WORD_I18N);
+    for(let i=0;i<pool.length&&merged.length<5;i++){
+      const w=pool[(seed+i*11)%pool.length];
+      if(w&&!merged.includes(w))merged.push(w);
+    }
+  }
   return merged.slice(0,5);
 }
 function courseWordOptions(correct,mode){
@@ -5760,15 +6020,20 @@ function courseSaveChoiceState(id,part,state){LS.setJ('course_choice_'+id+'_'+pa
 function courseStageMeta(id,ls,practice,parts){
   const done=k=>!!parts[k];
   const practiceDone=practice.filter((_,i)=>done('practice_'+i)).length;
-  return [
-    {key:'vocab_native',n:1,title:courseT('vocab'),sub:courseT('vocabSub'),pct:done('vocab_native')?100:0},
-    {key:'vocab_reverse',n:2,title:courseT('reverse'),sub:courseT('reverseSub'),pct:done('vocab_reverse')?100:0},
-    {key:'grammar',n:3,title:courseT('grammar'),sub:lang==='ru'?'5 заданий на правило и естественную фразу':'5 tasks for rule and natural phrasing',pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
-    {key:'builder',n:4,title:courseT('puzzle'),sub:lang==='ru'?'Собери фразу из английских слов':'Build the phrase from English tiles',pct:done('builder')?100:0},
-    {key:'builder_native',n:5,title:courseT('nativePuzzle'),sub:lang==='ru'?'Собери английский по переводу':'Build English from translation',pct:done('builder_native')?100:0},
-    {key:'errors',n:6,title:courseT('errors'),sub:lang==='ru'?'Найди тип ошибки в предложении':'Find the mistake type in a sentence',pct:done('errors')?100:0},
-    {key:'listen',n:7,title:courseT('listen'),sub:lang==='ru'?'Диктант и понимание текста':'Dictation and reading check',pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
+  const hasSynonym=courseSynonymItems(ls).length>0;
+  const stages=[
+    {key:'vocab_native',title:courseT('vocab'),sub:courseT('vocabSub'),pct:done('vocab_native')?100:0},
+    {key:'vocab_reverse',title:courseT('reverse'),sub:courseT('reverseSub'),pct:done('vocab_reverse')?100:0}
   ];
+  if(hasSynonym)stages.push({key:'synonym',title:courseT('synonym'),sub:courseT('synonymSub'),pct:done('synonym')?100:0});
+  stages.push(
+    {key:'grammar',title:courseT('grammar'),sub:lang==='ru'?'5 заданий на правило и естественную фразу':'5 tasks for rule and natural phrasing',pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
+    {key:'builder',title:courseT('puzzle'),sub:lang==='ru'?'Собери фразу из английских слов':'Build the phrase from English tiles',pct:done('builder')?100:0},
+    {key:'builder_native',title:courseT('nativePuzzle'),sub:lang==='ru'?'Собери английский по переводу':'Build English from translation',pct:done('builder_native')?100:0},
+    {key:'errors',title:courseT('errors'),sub:lang==='ru'?'Найди тип ошибки в предложении':'Find the mistake type in a sentence',pct:done('errors')?100:0},
+    {key:'listen',title:courseT('listen'),sub:lang==='ru'?'Диктант и понимание текста':'Dictation and reading check',pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
+  );
+  return stages.map((s,i)=>Object.assign({n:i+1},s));
 }
 function renderCourseStageList(id,ls,practice,parts){
   return `<div class="course-stage-list" id="course-stage-list-${id}">
@@ -5862,6 +6127,52 @@ function renderCourseErrorSection(ls,id,index){
     </div>`).join('')}</div>
   </div>`;
 }
+/* Pick up to 4 synonym tasks for a lesson. Prefer the lesson's own words,
+   then top up from the global pool. Stage is hidden if no items remain. */
+function courseSynonymItems(ls){
+  const own=(ls&&Array.isArray(ls.words)?ls.words:[])
+    .map(w=>String(w||'').toLowerCase())
+    .filter(w=>Object.prototype.hasOwnProperty.call(COURSE_SYNONYMS,w));
+  const merged=[];
+  own.forEach(w=>{if(!merged.includes(w))merged.push(w);});
+  if(merged.length<4){
+    const seed=String((ls&&ls.id)||'syn').split('').reduce((a,c)=>a+c.charCodeAt(0),23);
+    const pool=courseSynonymKeys();
+    for(let i=0;i<pool.length&&merged.length<4;i++){
+      const w=pool[(seed+i*5)%pool.length];
+      if(!merged.includes(w))merged.push(w);
+    }
+  }
+  return merged.slice(0,4).map(word=>{
+    const entry=COURSE_SYNONYMS[word]||{ok:word,others:[]};
+    const choices=[entry.ok,...(entry.others||[])].slice(0,4);
+    const seed=word.split('').reduce((a,c)=>a+c.charCodeAt(0),7);
+    const shuffled=choices.map((label,i)=>({label,ok:i===0}));
+    for(let i=shuffled.length-1;i>0;i--){
+      const j=(seed+i*3)%shuffled.length;
+      const t=shuffled[i];shuffled[i]=shuffled[j];shuffled[j]=t;
+    }
+    return {word,options:shuffled.map(x=>x.label),answer:shuffled.findIndex(x=>x.ok),correct:entry.ok};
+  });
+}
+function renderCourseSynonymSection(ls,id,index){
+  const items=courseSynonymItems(ls);
+  if(!items.length)return '';
+  const part='synonym';
+  const state=courseChoiceState(id,part);
+  const done=LS.getJ(coursePartsKey(id))?.[part];
+  return `<div class="course-section ${done?'done':''}" data-course-stage="${part}" id="course-section-${part}">
+    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('synonym')}</div><div class="course-section-sub">${courseT('synonymSub')}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+    <div class="course-vocab-grid">${items.map((it,i)=>{
+      const picked=state[i];
+      return `<div class="course-vocab-card ${picked!==undefined?'done':''}" id="course-choice-${part}-${i}">
+        <div class="course-vocab-word">${safeHTML(it.word)}</div>
+        <div class="course-vocab-sub">${safeHTML(courseT('synonymHead'))} <b>${safeHTML(it.word)}</b>?</div>
+        <div class="course-choice-grid">${it.options.map((o,oi)=>`<button class="course-choice ${picked===oi?(oi===it.answer?'ok':'bad'):''}" ${picked!==undefined?'disabled':''} onclick="answerCourseSynonym('${id}',${i},${oi},${it.answer},'${safeHTML(it.word)}')">${safeHTML(o)}</button>`).join('')}</div>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+}
 function coursePracticeSet(ls){
   const base=Array.isArray(ls.practice)?ls.practice:[];
   const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,5);
@@ -5889,6 +6200,7 @@ function coursePracticeSet(ls){
   return out;
 }
 function openCourseLesson(id){
+  if(!isCourseUnlocked(id)){handleLockedCourseTap(id);return;}
   try{ return _openCourseLessonInner(id); }
   catch(err){
     console.error('openCourseLesson failed',id,err);
@@ -5919,18 +6231,32 @@ function _openCourseLessonInner(id){
   window['course_practice_'+courseKey(id)]=practice;
   const partState=LS.getJ(coursePartsKey(id))||{};
   const requiredParts=courseRequiredParts(id);
-  const completedSteps=requiredParts.filter(k=>partState[k]).length;
-  const trackHtml=[0,1,2,3,4,5].map(i=>`<div class="course-track-step ${i<Math.ceil(completedSteps/Math.max(1,requiredParts.length)*6)?'done':''}"></div>`).join('');
+  const stageMeta=courseStageMeta(id,ls,practice,partState);
+  const activeStageKey=(stageMeta.find(s=>s.pct<100)||stageMeta[stageMeta.length-1]).key;
+  const completedStages=stageMeta.filter(s=>s.pct>=100).length;
+  const fillPct=stageMeta.length>1?Math.round(completedStages/(stageMeta.length-1)*100):0;
+  const trackHtml=`<div class="course-track-rail"><div class="course-track-rail-fill" id="course-track-fill-${id}" style="width:${Math.min(100,fillPct)}%"></div></div>`+
+    stageMeta.map(s=>{
+      const cls=s.pct>=100?'done':(s.key===activeStageKey?'active':'');
+      const label=safeHTML(s.title);
+      return `<div class="course-track-node ${cls}" data-stage="${s.key}" onclick="openCourseStage('${id}','${s.key}')" title="${label}"><span class="course-track-tip">${label}</span>${s.pct>=100?'':s.n}</div>`;
+    }).join('');
   const grammarDone=practice.every((_,i)=>partState['practice_'+i]);
   const builderDone=partState.builder;
   const nativeBuilderDone=partState.builder_native;
   const listenDone=partState.dictation&&partState.reading;
   const defaultStage=(courseStageMeta(id,ls,practice,partState).find(s=>s.pct<100)||{key:'vocab_native'}).key;
+  const synonymHtml=renderCourseSynonymSection(ls,id,3);
+  const grammarIdx=synonymHtml?4:3;
+  const builderIdx=grammarIdx+1;
+  const nativeBuilderIdx=builderIdx+1;
+  const errorsIdx=nativeBuilderIdx+1;
+  const listenIdx=errorsIdx+1;
   const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
     <button class="rm-action" type="button" onclick="renderCourse()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
     <div class="course-hero">
       <div class="course-hero-top">
-        <div class="course-hero-ico">${courseIconSvg()}</div>
+        <div class="course-hero-ico">${lessonThemeIcon(ls)}</div>
         <div style="min-width:0;flex:1">
           <div class="course-hero-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
           <div class="course-hero-sub">${safeHTML(grammarLabel)} · ${lang==='ru'?'около 5 минут':'about 5 minutes'}</div>
@@ -5951,8 +6277,9 @@ function _openCourseLessonInner(id){
     ${renderCourseStageList(id,ls,practice,partState)}
     ${renderCourseVocabSection(ls,id,'vocab_native',1,false)}
     ${renderCourseVocabSection(ls,id,'vocab_reverse',2,true)}
+    ${synonymHtml}
     <div class="course-section ${grammarDone?'done':''}" data-course-stage="grammar" id="course-section-grammar">
-      <div class="course-section-head"><div class="course-section-index">3</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
         <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
         ${practice.map((q,qi)=>`<div class="course-practice-card" id="course-q-${id}-${qi}">
@@ -5962,7 +6289,7 @@ function _openCourseLessonInner(id){
       </div>
     </div>
     <div class="course-section ${builderDone?'done':''}" data-course-stage="builder" id="course-section-builder">
-      <div class="course-section-head"><div class="course-section-index">4</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английское предложение из слов.':'Build the English sentence from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${builderIdx}</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английское предложение из слов.':'Build the English sentence from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
       <div class="course-slots" id="cb-slots-${id}"></div>
@@ -5972,7 +6299,7 @@ function _openCourseLessonInner(id){
       </div>
     </div>
     <div class="course-section ${nativeBuilderDone?'done':''}" data-course-stage="builder_native" id="course-section-builder-native">
-      <div class="course-section-head"><div class="course-section-index">5</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${nativeBuilderIdx}</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>
       <div class="course-slots" id="cb-slots-${id}-native"></div>
@@ -5981,9 +6308,9 @@ function _openCourseLessonInner(id){
       <div class="course-result" id="cb-res-${id}-native"></div>
       </div>
     </div>
-    ${renderCourseErrorSection(ls,id,6)}
+    ${renderCourseErrorSection(ls,id,errorsIdx)}
     <div class="course-section ${listenDone?'done':''}" data-course-stage="listen" id="course-section-listen">
-      <div class="course-section-head"><div class="course-section-index">7</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${lang==='ru'?'Диктант и короткая проверка понимания.':'Dictation and a short comprehension check.'}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${listenIdx}</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${lang==='ru'?'Диктант и короткая проверка понимания.':'Dictation and a short comprehension check.'}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
       <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
       <div class="course-note">${lang==='ru'?'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.':'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.'}</div>
@@ -6034,14 +6361,37 @@ function courseWarmLine(){
 function coursePartsKey(id){return 'course_parts_'+id;}
 function courseRequiredParts(id){
   const practice=window['course_practice_'+courseKey(id)]||[];
-  return ['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading',...practice.map((_,i)=>'practice_'+i)];
+  const ls=GALAXY_COURSE.find(x=>x.id===id);
+  const base=['vocab_native','vocab_reverse','builder','builder_native','errors','dictation','reading'];
+  if(ls&&courseSynonymItems(ls).length)base.push('synonym');
+  return [...base,...practice.map((_,i)=>'practice_'+i)];
 }
 function updateCourseTrack(id){
   const el=document.getElementById('course-track-'+id);if(!el)return;
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const parts=LS.getJ(coursePartsKey(id))||{};
-  const required=courseRequiredParts(id);
-  const done=required.filter(k=>parts[k]).length;
-  [...el.children].forEach((node,i)=>node.classList.toggle('done',i<Math.min(6,Math.ceil(done/Math.max(1,required.length)*6))));
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  const stageMeta=courseStageMeta(id,ls,practice,parts);
+  const activeKey=(stageMeta.find(s=>s.pct<100)||stageMeta[stageMeta.length-1]).key;
+  const completed=stageMeta.filter(s=>s.pct>=100).length;
+  const fillPct=stageMeta.length>1?Math.round(completed/(stageMeta.length-1)*100):0;
+  const fill=document.getElementById('course-track-fill-'+id);
+  if(fill)fill.style.width=Math.min(100,fillPct)+'%';
+  const nodes=el.querySelectorAll('.course-track-node');
+  nodes.forEach((node,i)=>{
+    const meta=stageMeta[i];if(!meta)return;
+    const isDone=meta.pct>=100;
+    const isActive=!isDone&&meta.key===activeKey;
+    node.classList.toggle('done',isDone);
+    node.classList.toggle('active',isActive);
+    /* Number is hidden once the node is done (CSS draws the check). */
+    const tip=node.querySelector('.course-track-tip');
+    const numText=isDone?'':String(meta.n);
+    /* Preserve the tip child; replace any plain text node. */
+    Array.from(node.childNodes).forEach(c=>{if(c.nodeType===3)node.removeChild(c);});
+    if(numText){const t=document.createTextNode(numText);node.appendChild(t);}
+    if(tip){tip.textContent=meta.title;}
+  });
   refreshCourseStageList(id);
 }
 function renderCourseCompleteCard(id,already){
@@ -6108,6 +6458,32 @@ function answerCourseWord(id,part,idx,picked,answer,word){
     try{sfx.warn();}catch(e){}
   }
   maybeCompleteChoicePart(id,part,courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length);
+}
+function answerCourseSynonym(id,idx,picked,answer,word){
+  const part='synonym';
+  const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
+  const state=courseChoiceState(id,part);
+  if(state[idx]!==undefined)return;
+  state[idx]=picked;
+  courseSaveChoiceState(id,part,state);
+  const ok=picked===answer;
+  card.querySelectorAll('.course-choice').forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===picked)btn.classList.add(ok?'ok':'bad');
+  });
+  if(ok){
+    courseClearMistake(word);
+    try{toast(courseT('correct'),'');}catch(_){}
+  }else{
+    courseAddMistake(word);
+    const hint=document.createElement('div');
+    hint.className='course-hint';
+    hint.textContent=courseT('miss');
+    card.appendChild(hint);
+    try{sfx.warn();}catch(_){}
+  }
+  const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
+  maybeCompleteChoicePart(id,part,courseSynonymItems(ls).length);
 }
 function answerCourseError(id,idx,type,picked,chosen){
   const part='errors';
