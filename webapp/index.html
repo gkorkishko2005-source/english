@@ -5574,20 +5574,20 @@ function provenLevelIdx(){
   return best;
 }
 function isCourseUnlocked(id){
+  /* Simplified: lessons are unlocked by LEVEL only. No more lesson-by-lesson
+     gating inside a level. The user can take any lesson at their proven
+     CEFR level (or any lower level) in any order they like. Higher CEFR
+     bands still require passing the placement test or explicitly skipping
+     it via the lock card. */
   const sorted=sortedGalaxyCourse();
   const idx=sortedCourseIdx(id);
   if(idx<0)return false;
   const ls=sorted[idx];
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
   const proven=provenLevelIdx();
-  /* Levels strictly below the proven one are mastered → all open. */
-  if(lessonLvlIdx<proven)return true;
-  /* Levels above proven+1 are entirely locked behind a placement test. */
-  if(lessonLvlIdx>proven+1)return false;
-  /* At the proven level (or one above) we go strictly lesson-by-lesson —
-     "previous" means previous in the user-visible sorted list. */
-  if(idx===0)return true;
-  return courseLessonComplete(sorted[idx-1].id);
+  if(lessonLvlIdx<=proven)return true;
+  /* One level above proven is still locked until the user proves the level. */
+  return false;
 }
 function courseLockReason(id){
   const sorted=sortedGalaxyCourse();
@@ -5595,12 +5595,11 @@ function courseLockReason(id){
   if(idx<0)return null;
   const ls=sorted[idx];
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
-  if(lessonLvlIdx>provenLevelIdx()+1){
-    const targetLvl=COURSE_LEVEL_ORDER[provenLevelIdx()+1];
+  if(lessonLvlIdx>provenLevelIdx()){
+    /* The user has not proven this level yet — surface the test as the next step. */
+    const targetLvl=ls.level;
     return {kind:'level',target:targetLvl};
   }
-  const prev=idx>0?sorted[idx-1]:null;
-  if(prev&&!courseLessonComplete(prev.id))return {kind:'prev',prevId:prev.id,prevTitle:(prev.title&&(prev.title[lang]||prev.title.en))||prev.id};
   return null;
 }
 function courseLockText(reason){
