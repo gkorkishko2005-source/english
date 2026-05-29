@@ -5817,36 +5817,29 @@ function courseWordTranslation(word){
   if(lang==='en')return key||String(word||'');
   return COURSE_WORD_I18N[key]?.[lang]||COURSE_WORD_I18N[key]?.ru||key||String(word||'');
 }
-function courseMistakes(){
-  const q=LS.getJ('course_word_mistakes')||[];
-  return Array.isArray(q)?q.filter(Boolean).slice(0,30):[];
-}
-function courseSetMistakes(list){
-  const out=[];
-  (list||[]).forEach(w=>{w=String(w||'').toLowerCase().trim();if(w&&!out.includes(w))out.push(w);});
-  LS.setJ('course_word_mistakes',out.slice(0,30));
-}
-function courseAddMistake(word){const q=courseMistakes();word=String(word||'').toLowerCase().trim();if(word&&!q.includes(word)){q.unshift(word);courseSetMistakes(q);}}
-function courseClearMistake(word){word=String(word||'').toLowerCase().trim();courseSetMistakes(courseMistakes().filter(w=>w!==word));}
+/* mistakes queue removed — per user request, words don't follow you between
+   lessons. These remain as no-ops for backward compat with old call sites. */
+function courseMistakes(){return [];}
+function courseSetMistakes(){}
+function courseAddMistake(){}
+function courseClearMistake(){}
+const COURSE_VOCAB_TARGET=10;
 function courseVocabWords(ls){
-  /* Vocab quiz only works for words present in COURSE_WORD_I18N; everything else
-     would render as English-on-English (e.g. prompt "from" with English options).
-     Filter aggressively and top up from the dictionary if the lesson is light. */
-  const queue=courseMistakes().filter(courseHasTranslation);
+  /* Pull words from the lesson, top up from the global dictionary until 10. */
   const own=(ls.words||[])
     .map(w=>String(w||'').toLowerCase())
     .filter(courseHasTranslation);
   const merged=[];
-  [...queue,...own].forEach(w=>{if(w&&!merged.includes(w))merged.push(w);});
-  if(merged.length<5){
+  own.forEach(w=>{if(w&&!merged.includes(w))merged.push(w);});
+  if(merged.length<COURSE_VOCAB_TARGET){
     const seed=String((ls&&ls.id)||'pool').split('').reduce((a,c)=>a+c.charCodeAt(0),31);
     const pool=Object.keys(COURSE_WORD_I18N);
-    for(let i=0;i<pool.length&&merged.length<5;i++){
+    for(let i=0;i<pool.length&&merged.length<COURSE_VOCAB_TARGET;i++){
       const w=pool[(seed+i*11)%pool.length];
       if(w&&!merged.includes(w))merged.push(w);
     }
   }
-  return merged.slice(0,5);
+  return merged.slice(0,COURSE_VOCAB_TARGET);
 }
 function courseWordOptions(correct,mode){
   const words=Object.keys(COURSE_WORD_I18N).filter(w=>w!==correct);
@@ -5980,49 +5973,114 @@ function courseSentenceTranslation(sentence){
   }).filter(Boolean).join(' ');
   return simple||sentence;
 }
-function courseErrorSet(ls){
-  const base=(ls.examples&&ls.examples[0])||ls.build||'I am ready.';
+function coursePuzzleTargets(ls){
+  /* Multiple sentences for the builder stage. Prefer the explicit ls.builds
+     array, fall back to ls.build + every ls.example. Always at least one. */
+  if(Array.isArray(ls.builds)&&ls.builds.length)return ls.builds.filter(Boolean).slice(0,7);
   const out=[];
-  const add=(bad,type)=>{if(bad&&bad!==base&&!out.some(x=>x.bad===bad))out.push({bad,type});};
-  add(base.replace(/\bis\b/i,'are'),'verb');
-  add(base.replace(/\bare\b/i,'is'),'verb');
-  add(base.replace(/\bam\b/i,'are'),'verb');
-  add(base.replace(/\bhas\b/i,'have'),'verb');
-  add(base.replace(/\bhave\b/i,'has'),'verb');
-  add(base.replace(/\bin\b/i,'on'),'prep');
-  add(base.replace(/\bon\b/i,'at'),'prep');
-  add(base.replace(/\bat\b/i,'in'),'prep');
-  const words=base.split(/\s+/);
-  if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '),'order');
-  /* Topic-up to 3 with a small bank of generic-but-distinct fallback errors.
-     The previous version pushed the SAME sentence in a while-loop, and when
-     no per-base distractor fired (e.g. examples[0]="I have a book." has
-     neither is/are/am/in/on) the dedup check inside add() blocked every
-     subsequent push, so out.length stayed below 3 and the loop spun
-     forever — freezing the whole lesson page. */
+  const add=s=>{s=String(s||'').trim();if(s&&!out.includes(s))out.push(s);};
+  if(ls.build)add(ls.build);
+  if(Array.isArray(ls.examples))ls.examples.forEach(add);
+  if(!out.length)add('I am ready today.');
+  return out.slice(0,7);
+}
+function renderBuilderMulti(id,targets,mode){
+  /* Render a flat list of mini-puzzle cards, one per target sentence. The
+     existing coursePickWord / checkCourseBuilder / resetCourseBuilder API
+     already takes a suffix — we extend it with "_i" for each sentence. */
+  return targets.map((target,i)=>{
+    const suffix=(mode?mode:'')+'_'+i;
+    const words=courseWords(target);
+    const shuffled=shuffleCourseWords(words,id+suffix);
+    const promptHtml=mode==='native'
+      ?`<div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>`
+      :'';
+    const label=mode==='native'
+      ?(lang==='ru'?`Перевод #${i+1}`:`Translation #${i+1}`)
+      :(lang==='ru'?`Предложение #${i+1}`:`Sentence #${i+1}`);
+    return `<div class="course-build">
+      <div class="course-lab">${label}</div>
+      ${promptHtml}
+      <div class="course-slots" id="cb-slots-${id}-${suffix}"></div>
+      <div class="course-pool" id="cb-pool-${id}-${suffix}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','${suffix}',this)">${safeHTML(w)}</button>`).join('')}</div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','${suffix}')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','${suffix}')">${lang==='ru'?'Сброс':'Reset'}</button></div>
+      <div class="course-result" id="cb-res-${id}-${suffix}"></div>
+    </div>`;
+  }).join('');
+}
+function courseErrorSet(ls){
+  /* Build up to 8 unique mistake-spotting items: per-base verb/prep/order
+     substitutions over every example we have, plus a curated bank of
+     generic-but-distinct fallbacks so the loop always terminates. */
+  const bases=[];
+  if(Array.isArray(ls.examples))ls.examples.forEach(e=>{if(e)bases.push(e);});
+  if(ls.build&&!bases.includes(ls.build))bases.push(ls.build);
+  if(!bases.length)bases.push('I am ready.');
+  const out=[];
+  const seen=new Set();
+  const add=(bad,type)=>{
+    bad=String(bad||'').trim();
+    if(!bad||seen.has(bad))return;
+    /* Skip if it matches any base verbatim (i.e. the substitution didn't fire). */
+    for(const b of bases)if(bad===b)return;
+    seen.add(bad);out.push({bad,type});
+  };
+  for(const base of bases){
+    if(out.length>=8)break;
+    add(base.replace(/\bis\b/i,'are'),'verb');
+    add(base.replace(/\bare\b/i,'is'),'verb');
+    add(base.replace(/\bam\b/i,'are'),'verb');
+    add(base.replace(/\bhas\b/i,'have'),'verb');
+    add(base.replace(/\bhave\b/i,'has'),'verb');
+    add(base.replace(/\bdo\b/i,'does'),'verb');
+    add(base.replace(/\bdoes\b/i,'do'),'verb');
+    add(base.replace(/\bin\b/i,'on'),'prep');
+    add(base.replace(/\bon\b/i,'at'),'prep');
+    add(base.replace(/\bat\b/i,'in'),'prep');
+    add(base.replace(/\bfor\b/i,'since'),'prep');
+    add(base.replace(/\bsince\b/i,'for'),'prep');
+    add(base.replace(/\bthe\b/i,'a'),'prep');
+    const words=base.replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);
+    if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' ')+'.','order');
+    if(words.length>3)add([words[0],words[2],words[1],...words.slice(3)].join(' ')+'.','order');
+  }
+  /* Bounded fallback bank. */
   const filler=[
     {bad:'I can to use this lesson.',type:'verb'},
-    {bad:'She do not know.',type:'verb'},
+    {bad:'She do not know it.',type:'verb'},
     {bad:'We meeting now.',type:'verb'},
-    {bad:'He is the home.',type:'prep'},
-    {bad:'Book the on table.',type:'order'}
+    {bad:'He is at the home.',type:'prep'},
+    {bad:'Book the on table.',type:'order'},
+    {bad:'I am go to school.',type:'verb'},
+    {bad:'They lives in Paris.',type:'verb'},
+    {bad:'She not is here.',type:'order'},
+    {bad:'We meet in Monday.',type:'prep'},
+    {bad:'I do not has time.',type:'verb'}
   ];
-  for(let i=0;i<filler.length&&out.length<3;i++)add(filler[i].bad,filler[i].type);
-  return out.slice(0,3);
+  for(let i=0;i<filler.length&&out.length<8;i++)add(filler[i].bad,filler[i].type);
+  return out.slice(0,8);
 }
 function renderCourseErrorSection(ls,id,index){
   const part='errors';
+  const items=courseErrorSet(ls);
   const state=courseChoiceState(id,part);
   const done=courseStoredParts(id)?.[part];
+  const failed=courseStageFailed(id,part);
   const labels={verb:{ru:'форма глагола',en:'verb form',es:'forma verbal',pt:'forma verbal'},prep:{ru:'предлог',en:'preposition',es:'preposición',pt:'preposição'},order:{ru:'порядок слов',en:'word order',es:'orden de palabras',pt:'ordem das palavras'}};
   const opts=['verb','prep','order'];
+  const activeIdx=_firstUnansweredIdx(state,items.length);
   return `<div class="course-section ${done?'done':''}" data-course-stage="errors" id="course-section-errors">
-    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ не показывается сразу.':'Choose the mistake type. The answer is not revealed immediately.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
-    <div class="course-error-list">${courseErrorSet(ls).map((q,i)=>`<div class="course-error-card" id="course-choice-errors-${i}">
-      <div class="course-error-sentence">${safeHTML(q.bad)}</div>
-      <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${state[i]===oi?(o===q.type?'ok':'bad'):(state[i]!==undefined&&o===q.type?'ok-reveal':'')}" data-type="${o}" ${state[i]!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
-    </div>`).join('')}</div>
-    ${courseStageFailed(id,part)?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
+    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ подсветится после нажатия.':'Choose the mistake type. The correct answer is revealed after you tap.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+    <div class="course-card-progress">${items.map((_,i)=>`<div class="course-card-dot ${state[i]!==undefined?'done':''} ${i===activeIdx&&state[i]===undefined?'active':''}"></div>`).join('')}<span class="course-card-counter">${Math.min(activeIdx+1,items.length)} / ${items.length}</span></div>
+    <div class="course-card-flow">${items.map((q,i)=>{
+      const picked=state[i];const isActive=i===activeIdx;
+      return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-errors-${i}">
+        <div class="course-vocab-word">${safeHTML(q.bad)}</div>
+        <div class="course-vocab-sub">${lang==='ru'?'Какая ошибка?':'What kind of mistake?'}</div>
+        <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${picked===oi?(o===q.type?'ok':'bad'):(picked!==undefined&&o===q.type?'ok-reveal':'')}" data-type="${o}" ${picked!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
+      </div>`;
+    }).join('')}</div>
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
   </div>`;
 }
 /* Pick up to 4 synonym tasks for a lesson. Prefer the lesson's own words,
@@ -6033,15 +6091,16 @@ function courseSynonymItems(ls){
     .filter(w=>Object.prototype.hasOwnProperty.call(COURSE_SYNONYMS,w));
   const merged=[];
   own.forEach(w=>{if(!merged.includes(w))merged.push(w);});
-  if(merged.length<4){
+  const TARGET=10;
+  if(merged.length<TARGET){
     const seed=String((ls&&ls.id)||'syn').split('').reduce((a,c)=>a+c.charCodeAt(0),23);
     const pool=courseSynonymKeys();
-    for(let i=0;i<pool.length&&merged.length<4;i++){
+    for(let i=0;i<pool.length&&merged.length<TARGET;i++){
       const w=pool[(seed+i*5)%pool.length];
       if(!merged.includes(w))merged.push(w);
     }
   }
-  return merged.slice(0,4).map(word=>{
+  return merged.slice(0,TARGET).map(word=>{
     const entry=COURSE_SYNONYMS[word]||{ok:word,others:[]};
     const choices=[entry.ok,...(entry.others||[])].slice(0,4);
     const seed=word.split('').reduce((a,c)=>a+c.charCodeAt(0),7);
@@ -6153,6 +6212,7 @@ function _openCourseLessonInner(id){
   const words=courseWords(target);
   const shuffled=shuffleCourseWords(words,id);
   window['course_target_'+courseKey(id)]=target;
+  window['course_targets_'+courseKey(id)]=coursePuzzleTargets(ls);
   window['course_dictation_'+courseKey(id)]=dictation;
   const focus=(ls.focus&&ls.focus.length)?ls.focus:[
     lang==='ru'?'Прочитай правило и найди эту же структуру в примерах.':'Read the rule and find the same structure in the examples.',
@@ -6240,24 +6300,12 @@ function _openCourseLessonInner(id){
       </div>
     </div>
     <div class="course-section ${builderDone?'done':''}" data-course-stage="builder" id="course-section-builder">
-      <div class="course-section-head"><div class="course-section-index">${builderIdx}</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английское предложение из слов.':'Build the English sentence from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
-      <div class="course-build">
-      <div class="course-lab">${lang==='ru'?'Конструктор предложения':'Sentence builder'}</div>
-      <div class="course-slots" id="cb-slots-${id}"></div>
-      <div class="course-pool" id="cb-pool-${id}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','',this)">${safeHTML(w)}</button>`).join('')}</div>
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','')">${lang==='ru'?'Сброс':'Reset'}</button></div>
-      <div class="course-result" id="cb-res-${id}"></div>
-      </div>
+      <div class="course-section-head"><div class="course-section-index">${builderIdx}</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английские предложения из слов.':'Build the English sentences from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      ${renderBuilderMulti(id,coursePuzzleTargets(ls),'')}
     </div>
     <div class="course-section ${nativeBuilderDone?'done':''}" data-course-stage="builder_native" id="course-section-builder-native">
       <div class="course-section-head"><div class="course-section-index">${nativeBuilderIdx}</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
-      <div class="course-build">
-      <div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>
-      <div class="course-slots" id="cb-slots-${id}-native"></div>
-      <div class="course-pool" id="cb-pool-${id}-native">${shuffleCourseWords(words,id+'native').map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','native',this)">${safeHTML(w)}</button>`).join('')}</div>
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','native')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','native')">${lang==='ru'?'Сброс':'Reset'}</button></div>
-      <div class="course-result" id="cb-res-${id}-native"></div>
-      </div>
+      ${renderBuilderMulti(id,coursePuzzleTargets(ls),'native')}
     </div>
     ${renderCourseErrorSection(ls,id,errorsIdx)}
     <div class="course-section ${listenDone?'done':''}" data-course-stage="listen" id="course-section-listen">
@@ -6570,7 +6618,9 @@ function answerCourseError(id,idx,type,picked,chosen){
   if(!ok){
     courseMarkStageFailed(id,part,true);
   }
-  maybeCompleteChoicePart(id,part,3);
+  const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
+  const total=courseErrorSet(ls).length;
+  setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?700:1400);
 }
 function coursePickWord(id,suffix,btn){
   suffix=suffix?'-'+suffix:'';
@@ -6586,23 +6636,39 @@ function resetCourseBuilder(id,suffix){
   document.querySelectorAll('#cb-pool-'+id+suffix+' .course-word').forEach(b=>b.classList.remove('used'));
   const res=document.getElementById('cb-res-'+id+suffix);if(res){res.textContent='';res.className='course-result';}
 }
+function _builderTargetFor(id,suffix){
+  /* suffix is "_i" or "native_i" — pull the right sentence from the array. */
+  const arr=window['course_targets_'+courseKey(id)]||[];
+  const m=(suffix||'').match(/_(\d+)$/);
+  const i=m?parseInt(m[1],10):0;
+  return arr[i]||window['course_target_'+courseKey(id)]||'';
+}
+function _builderIsNativeSuffix(suffix){return /^native/.test(String(suffix||''));}
 function checkCourseBuilder(id,suffix){
-  const part=suffix==='native'?'builder_native':'builder';
-  suffix=suffix?'-'+suffix:'';
-  const target=window['course_target_'+courseKey(id)]||'';
-  const answer=[...document.querySelectorAll('#cb-slots-'+id+suffix+' .course-word')].map(x=>x.textContent).join(' ');
+  const part=_builderIsNativeSuffix(suffix)?'builder_native':'builder';
+  const target=_builderTargetFor(id,suffix);
+  const sfx=suffix?'-'+suffix:'';
+  const answer=[...document.querySelectorAll('#cb-slots-'+id+sfx+' .course-word')].map(x=>x.textContent).join(' ');
   const ok=normalizeCourseText(answer)===normalizeCourseText(target);
-  const res=document.getElementById('cb-res-'+id+suffix);if(!res)return;
+  const res=document.getElementById('cb-res-'+id+sfx);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  const attemptsKey='course_attempt_builder_'+id+suffix;
-  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
-  if(!ok)LS.set(attemptsKey,String(attempts));
   res.textContent=ok
-    ?(lang==='ru'?'Собрано правильно. XP начислим за полный урок.':'Correct sentence. XP comes after the full lesson.')
-    :(attempts<2
-      ?(lang==='ru'?'Пока нет. Проверь порядок слов и попробуй ещё раз.':'Not yet. Check word order and try again.')
-      :(lang==='ru'?'Подсказка: начни так: ':'Hint: start with: ')+target.split(' ').slice(0,2).join(' ')+' ...');
-  if(ok){courseMarkPart(id,part,true);try{trackM('drill');}catch(e){}}
+    ?(lang==='ru'?'Верно.':'Correct.')
+    :(lang==='ru'?'Не так — проверь порядок слов.':'Not yet — check word order.');
+  if(ok){
+    /* Mark this specific sentence as done. The stage closes once every
+       sentence in the builder is correctly assembled. */
+    const flagKey='course_builder_done_'+id+'_'+suffix;
+    LS.set(flagKey,'1');
+    const total=(window['course_targets_'+courseKey(id)]||[]).length||1;
+    let allDone=true;
+    for(let i=0;i<total;i++){
+      const sf=(_builderIsNativeSuffix(suffix)?'native':'')+'_'+i;
+      if(LS.get('course_builder_done_'+id+'_'+sf)!=='1'){allDone=false;break;}
+    }
+    if(allDone){courseMarkPart(id,part,true);}
+    try{trackM('drill');}catch(e){}
+  }
 }
 function checkCourseDictation(id){
   const target=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
