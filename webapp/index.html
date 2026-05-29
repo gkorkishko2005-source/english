@@ -1365,6 +1365,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-card-dot.active{background:var(--lesson-color,var(--a));transform:scaleY(1.4);box-shadow:0 0 8px color-mix(in srgb,var(--lesson-color,var(--a)) 50%,transparent)}
 .course-card-counter{margin-left:auto;font-size:11px;color:var(--t3);font-weight:700}
 .course-choice.hinted{opacity:.32;filter:grayscale(.6);text-decoration:line-through}
+.course-vocab-card.hard-mode{border-color:rgba(255,165,0,.32);background:linear-gradient(135deg,rgba(255,149,0,.08),var(--e2))}
+.course-vocab-card.hard-mode .course-vocab-sub{color:#ffa500;font-weight:700}
+.course-input-hard{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--b2);background:var(--e1);color:var(--t1);font-size:15px;font-weight:600;margin:8px 0 6px;outline:none;transition:border-color .15s}
+.course-input-hard:focus{border-color:rgba(var(--ar),.55);background:var(--e2)}
 .course-hint-btn{margin-top:8px;padding:5px 11px;border-radius:8px;background:transparent;color:var(--t2);border:1px dashed rgba(255,255,255,.18);font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.02em;transition:color .15s,border-color .15s}
 .course-hint-btn:hover{color:var(--a);border-color:rgba(var(--ar),.30)}
 .course-vocab-word{font-size:15px;font-weight:950;color:var(--t1);margin-bottom:2px}
@@ -4440,7 +4444,16 @@ async function rate(q){
   trackM('words');trackM('dwords');
   bumpStat('words');
   recordCardDaily();
-  try{sm2Review(c.id,Math.max(0,q-1));}catch(e){}
+  let nextInfo=null;
+  try{nextInfo=sm2Review(c.id,Math.max(0,q-1));}catch(e){}
+  if(nextInfo&&q>=3){
+    /* Show the SRS interval so the user sees the algorithm working. */
+    const days=Math.max(1,Math.round(nextInfo.interval));
+    const txt=days===1
+      ?(lang==='ru'?'Следующий показ — завтра.':'Next review tomorrow.')
+      :(lang==='ru'?`Следующий показ через ${days} дн.`:`Next review in ${days} days.`);
+    setTimeout(()=>{try{toast(txt,'📅');}catch(_){}},900);
+  }
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
   cIdx++;
   if(q<3){
@@ -6565,6 +6578,15 @@ function _firstUnansweredIdx(state,total){
   for(let i=0;i<total;i++)if(state[i]===undefined)return i;
   return total-1;
 }
+/* Adaptive difficulty: count consecutive correct answers inside a stage. Once
+   the user reaches three in a row, the next card switches from multiple-choice
+   to free input — they have to type the answer. Wrong answer or stage exit
+   resets the streak. State is held in LS so it survives reload. */
+function _adaptiveStreakKey(id,part){return 'course_streak_'+id+'_'+part;}
+function getAdaptiveStreak(id,part){return parseInt(LS.get(_adaptiveStreakKey(id,part))||'0',10)||0;}
+function setAdaptiveStreak(id,part,v){LS.set(_adaptiveStreakKey(id,part),String(Math.max(0,v|0)));}
+function _shouldUseHardMode(id,part){return getAdaptiveStreak(id,part)>=3;}
+function normalizeInput(s){return String(s||'').trim().toLowerCase().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ');}
 /* Hint: grey out one wrong option. One use per card. Available before any answer. */
 function useCourseHint(id,part,idx,answerIdx){
   const card=document.getElementById('course-choice-'+part+'-'+idx);if(!card)return;
@@ -6597,6 +6619,21 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
       const data=courseWordOptions(w,reverse?'reverse':'native');
       const picked=state[i];
       const isActive=i===activeIdx;
+      /* Adaptive: when streak >=3 and this is the active card, switch to
+         free-input mode (user must type the answer). */
+      const hardMode=isActive&&picked===undefined&&_shouldUseHardMode(id,part);
+      const correctText=data.opts[data.answer]||'';
+      if(hardMode){
+        return `<div class="course-vocab-card active hard-mode" data-card-idx="${i}" id="course-choice-${part}-${i}">
+          <div class="course-vocab-word">${safeHTML(prompt)}</div>
+          <div class="course-vocab-sub">${lang==='ru'?'Сложный режим — впишите ответ.':'Hard mode — type the answer.'}</div>
+          <input type="text" class="course-input-hard" id="course-input-${part}-${i}" placeholder="${lang==='ru'?'твой ответ':'your answer'}" autocomplete="off" autocapitalize="off" />
+          <div class="course-mini-actions">
+            <button class="course-mini-btn" onclick="answerCourseWordInput('${id}','${part}',${i},${data.answer},'${safeHTML(w)}','${safeHTML(correctText).replace(/'/g,'&#39;')}')">${lang==='ru'?'Проверить':'Check'}</button>
+            <button class="course-hint-btn" onclick="answerCourseWordSkipHard('${id}','${part}')">${lang==='ru'?'Слишком сложно':'Too hard'}</button>
+          </div>
+        </div>`;
+      }
       return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(prompt)}</div>
         <div class="course-vocab-sub">${reverse?courseT('chooseWord'):courseT('choose')}</div>
@@ -7249,15 +7286,52 @@ function answerCourseWord(id,part,idx,picked,answer,word){
     else if(!ok&&i===answer)btn.classList.add('ok-reveal');
   });
   if(ok){
-    courseClearMistake(word);
+    /* Adaptive: bump streak; when it crosses 3 the next card flips to hard mode. */
+    const newStreak=getAdaptiveStreak(id,part)+1;
+    setAdaptiveStreak(id,part,newStreak);
+    if(newStreak===3){try{toast(lang==='ru'?'Включён сложный режим.':'Hard mode unlocked.','💪');}catch(_){}}
   }else{
-    courseAddMistake(word);
+    setAdaptiveStreak(id,part,0);
     courseMarkStageFailed(id,part,true);
     try{sfx.warn();}catch(e){}
   }
-  /* Slide to the next card after a brief reveal, or finish the stage. */
   const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
   setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?700:1400);
+}
+function answerCourseWordInput(id,part,idx,answerIdx,word,correctText){
+  /* Hard-mode submit: typed answer is compared against the expected option
+     after normalisation. Counts as picked=answerIdx on success, picked=-1 on
+     failure (still records that the question was answered). */
+  const input=document.getElementById('course-input-'+part+'-'+idx);
+  const card=document.getElementById('course-choice-'+part+'-'+idx);
+  if(!input||!card)return;
+  const state=courseChoiceState(id,part);
+  if(state[idx]!==undefined)return;
+  const typed=normalizeInput(input.value);
+  const correct=normalizeInput(correctText);
+  /* Accept also if the typed string is contained in the correct phrase or the
+     reverse — translations sometimes include parentheses or alternates. */
+  const ok=typed===correct||(typed.length>2&&(correct.indexOf(typed)>=0||typed.indexOf(correct)>=0));
+  state[idx]=ok?answerIdx:-1;
+  courseSaveChoiceState(id,part,state);
+  if(ok){
+    setAdaptiveStreak(id,part,getAdaptiveStreak(id,part)+1);
+    card.classList.add('answered');
+    card.innerHTML+=`<div class="course-hint" style="color:var(--a2);font-weight:800">✓ ${safeHTML(correctText)}</div>`;
+  }else{
+    setAdaptiveStreak(id,part,0);
+    courseMarkStageFailed(id,part,true);
+    card.innerHTML+=`<div class="course-hint" style="color:var(--rd)">${lang==='ru'?'Не совсем. Правильно:':'Not quite. The answer:'} <b style="color:var(--a2)">${safeHTML(correctText)}</b></div>`;
+    try{sfx.warn();}catch(_){}
+  }
+  const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
+  setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?900:1700);
+}
+function answerCourseWordSkipHard(id,part){
+  /* User taps "Too hard" — drop the streak so the next card returns to the
+     multiple-choice layout. Re-render to apply. */
+  setAdaptiveStreak(id,part,0);
+  try{openCourseLesson(id);}catch(_){}
 }
 function _advanceCourseCard(id,part,idx,total){
   const cur=document.getElementById('course-choice-'+part+'-'+idx);
