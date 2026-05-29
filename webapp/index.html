@@ -6358,7 +6358,23 @@ function openCourseLesson(id){
    events, scroll handlers, etc.) is now ignored while a lesson is open. */
 function leaveCourseLesson(){
   _inCourseLesson=false;
+  /* If the lesson came from the Exam Hub, drop back there instead of the
+     CEFR course list. */
+  if(_examLessonReturn){
+    _examLessonReturn=false;
+    try{switchLearnTab('road');return;}catch(_){}
+  }
   renderCourse();
+}
+let _examLessonReturn=false;
+function openExamLessonFromHub(id){
+  /* The Exam Hub lives in #roadmap-wrap, but openCourseLesson renders into
+     #course-wrap. Switch the visible learn-tab first so the lesson is
+     actually on screen, then open it. */
+  _examLessonReturn=true;
+  try{switchLearnTab('course');}catch(_){}
+  /* Defer so the tab switch settles before the lesson HTML is injected. */
+  setTimeout(()=>{try{openCourseLesson(id);}catch(_){}},0);
 }
 function _openCourseLessonInner(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls){_inCourseLesson=false;return;}
@@ -7420,7 +7436,7 @@ function renderRoadmap(){
     const items=sorted.filter(l=>l.level===ex.level);
     if(!items.length)return '';
     const doneCount=items.filter(l=>done[l.id]).length;
-    const cards=items.map(ls=>`<div class="course-card" style="--lesson-color:${ex.color}" onclick="openCourseLesson('${ls.id}')">
+    const cards=items.map(ls=>`<div class="course-card" style="--lesson-color:${ex.color}" onclick="openExamLessonFromHub('${ls.id}')">
       <div class="course-ico" style="color:${ex.color}">${lessonThemeIcon(ls)}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.title[lang]||ls.title.en)}</div>
