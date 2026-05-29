@@ -5987,10 +5987,27 @@ function courseErrorSet(ls){
   add(base.replace(/\bis\b/i,'are'),'verb');
   add(base.replace(/\bare\b/i,'is'),'verb');
   add(base.replace(/\bam\b/i,'are'),'verb');
+  add(base.replace(/\bhas\b/i,'have'),'verb');
+  add(base.replace(/\bhave\b/i,'has'),'verb');
   add(base.replace(/\bin\b/i,'on'),'prep');
   add(base.replace(/\bon\b/i,'at'),'prep');
-  const words=base.split(/\s+/);if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '),'order');
-  while(out.length<3)add('I can to use this lesson.','verb');
+  add(base.replace(/\bat\b/i,'in'),'prep');
+  const words=base.split(/\s+/);
+  if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' '),'order');
+  /* Topic-up to 3 with a small bank of generic-but-distinct fallback errors.
+     The previous version pushed the SAME sentence in a while-loop, and when
+     no per-base distractor fired (e.g. examples[0]="I have a book." has
+     neither is/are/am/in/on) the dedup check inside add() blocked every
+     subsequent push, so out.length stayed below 3 and the loop spun
+     forever — freezing the whole lesson page. */
+  const filler=[
+    {bad:'I can to use this lesson.',type:'verb'},
+    {bad:'She do not know.',type:'verb'},
+    {bad:'We meeting now.',type:'verb'},
+    {bad:'He is the home.',type:'prep'},
+    {bad:'Book the on table.',type:'order'}
+  ];
+  for(let i=0;i<filler.length&&out.length<3;i++)add(filler[i].bad,filler[i].type);
   return out.slice(0,3);
 }
 function renderCourseErrorSection(ls,id,index){
