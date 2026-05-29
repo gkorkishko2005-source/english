@@ -1423,6 +1423,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
 .course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
 .course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(var(--ar),.08));border-radius:14px;padding:14px;color:var(--t1)}
+.rp-passage{background:var(--e1);border:1px solid var(--b1);border-radius:14px;padding:14px;margin-top:8px;line-height:1.55;font-size:14px;color:var(--t1)}
+.rp-para{margin:0 0 12px}
+.rp-para:last-child{margin-bottom:0}
+.rp-slot{display:inline-block;font-weight:900;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.28);border-radius:6px;padding:1px 6px;font-size:11px;letter-spacing:.04em}
+.rp-questions{display:grid;gap:10px;margin-top:14px}
+.rp-q{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:12px}
+.rp-q-tag{font-size:10px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--a);margin-bottom:4px}
+.rp-q-text{font-size:13.5px;font-weight:600;color:var(--t1);margin-bottom:10px;line-height:1.4}
+.rp-opt{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border:1px solid var(--b1);border-radius:9px;font-size:13px;color:var(--t1);cursor:pointer;margin-bottom:6px;transition:background .15s,border-color .15s;line-height:1.4}
+.rp-opt:hover{border-color:rgba(var(--ar),.36)}
+.rp-opt.on{background:rgba(var(--ar),.10);border-color:rgba(var(--ar),.36)}
+.rp-opt.ok{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.55);color:var(--a2)}
+.rp-opt.bad{background:rgba(255,107,107,.10);border-color:rgba(255,107,107,.55);color:var(--rd)}
+.rp-opt.ok-reveal{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.55);color:var(--a2);position:relative}
+.rp-opt-tag{display:inline-block;min-width:18px;font-weight:900;color:var(--a);font-size:12px}
 .course-complete-title{font-size:14px;font-weight:900;margin-bottom:8px}
 .course-complete-sub{font-size:11px;color:var(--t2);line-height:1.4}
 .course-complete-score{display:flex;align-items:center;gap:12px;padding:10px;margin:8px 0;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(255,255,255,.06)}
@@ -4515,6 +4530,112 @@ const EXAM_BANK={
   }
 };
 
+/* ══════════════════════════════════════════════════════════════════
+   TOEFL Reading passages — full ETS-style academic texts (650-750 words)
+   followed by ten typed questions: factual, negative factual,
+   vocabulary-in-context, inference, insert text, prose summary.
+   Original content, not copied from ETS materials. The first wave covers
+   the three highest-frequency exam topics: History, Life Sciences and
+   Earth Sciences. More to be added in follow-up passes.
+   ══════════════════════════════════════════════════════════════════ */
+const TOEFL_READING_PASSAGES=[
+  {
+    id:'toefl-r-maya',
+    topic:'History',
+    title:{ru:'Упадок классической цивилизации Майя',en:'The Collapse of the Classic Maya'},
+    sub:{ru:'История · засуха, перенаселение, политика',en:'History · drought, overpopulation, politics'},
+    paragraphs:[
+      "Between roughly 250 and 900 C.E., the lowland Maya of present-day Mexico, Guatemala and Belize sustained one of the most architecturally elaborate civilizations of the pre-Columbian Americas. Their stone cities — Tikal, Palenque and Copán among them — supported large populations, a refined hieroglyphic script and a calendar of extraordinary precision. Yet within a span of roughly a century, the great southern lowland centers were largely abandoned. Plazas that had hosted royal ceremonies fell silent, and the dense rainforest gradually reclaimed pyramids that had taken generations to build. The question of why such a coherent and dynamic society would cease to function on this scale has occupied archaeologists for more than a hundred years.",
+      "Older accounts attributed the collapse to a single catastrophic event such as an epidemic or a foreign invasion. Modern research, drawing on lake-sediment cores, dental isotopes and high-resolution surveys of ancient field systems, paints a more nuanced picture. The data point to a prolonged climatic shift: between roughly 800 and 1000 C.E., the central lowlands experienced repeated multi-decade droughts, with rainfall reductions estimated at forty to seventy percent during the worst intervals. For a population that depended on rain-fed maize agriculture and on shallow reservoirs called aguadas to capture the wet-season runoff, this represented an existential challenge.",
+      "Drought alone, however, does not fully explain the collapse. The same lowlands had endured dry periods in earlier centuries without disintegrating. What distinguished the ninth-century crisis was the scale and rigidity of the political system that confronted it. By the late Classic period, individual cities supported populations of fifty to one hundred thousand inhabitants, and the elite class had grown to consume a disproportionate share of agricultural surplus through monument construction, warfare and ritual feasting. When yields fell, the inherent fragility of this top-heavy structure became apparent. Royal authority was bound to the king's ability to facilitate rain through ceremony; sustained failure undermined the legitimacy of the entire institution.",
+      "Compounding these pressures was an environmental degradation that the Maya themselves had set in motion. Pollen records show that the centuries leading up to the collapse witnessed extensive deforestation as forests were cleared for fields and for the limestone-firing operations that produced lime plaster, the white skin of Maya cities. Removing the forest canopy lowered local humidity, accelerated topsoil erosion and reduced the recharge of the very reservoirs that drought relief depended upon. In effect, the same activities that signaled prosperity also progressively degraded the conditions that prosperity required.",
+      "Recent excavations at sites such as Cahal Pech and Ceibal indicate that the collapse was neither uniform nor instantaneous. Some communities reorganized into smaller, more dispersed settlements oriented toward subsistence rather than monumental display. Others, particularly in the northern Yucatán where groundwater was accessible through natural sinkholes called cenotes, continued to thrive into the Postclassic period. The collapse, in other words, was less a single event than a regional differentiation driven by which communities could adapt their economic and political arrangements to a harsher climatic reality. The Maya did not vanish — millions of their descendants live in the region today — but the particular political form of the Classic kingdoms proved unable to absorb the combined stresses of drought, overextension and ecological decline."
+    ],
+    questions:[
+      {type:'factual',q:'According to paragraph 1, what aspect of Classic Maya civilization is emphasized?',o:['Their use of metal tools','The sophistication of their script and calendar','Their reliance on long-distance trade','Their use of horse-drawn vehicles'],a:1},
+      {type:'vocab',q:'The word "cease" in paragraph 1 is closest in meaning to',o:['expand','stop','migrate','rebuild'],a:1},
+      {type:'factual',q:'According to paragraph 2, what evidence has reshaped the modern understanding of the collapse?',o:['Discovery of a single epidemic outbreak','Decoded royal inscriptions naming an invader','Lake-sediment, isotope and field-system data','A previously unknown migration route'],a:2},
+      {type:'inference',q:'It can be inferred from paragraph 3 that earlier droughts did not destroy the lowland Maya because',o:['Earlier droughts were not as severe','Earlier populations were smaller and politically less top-heavy','The earlier Maya practiced irrigation','The earlier Maya migrated to the coast'],a:1},
+      {type:'vocab',q:'The phrase "set in motion" in paragraph 4 is closest in meaning to',o:['observed','initiated','reversed','documented'],a:1},
+      {type:'factual',q:'Paragraph 4 identifies all of the following consequences of deforestation EXCEPT',o:['reduced local humidity','accelerated soil erosion','reduced reservoir recharge','loss of pottery clay'],a:3},
+      {type:'negative',q:'According to the passage, which of the following is NOT cited as a factor in the collapse?',o:['Prolonged drought','Population growth and elite overconsumption','Deforestation by the Maya themselves','A volcanic eruption that buried major cities'],a:3},
+      {type:'inference',q:'It can be inferred from paragraph 5 that northern Yucatán communities fared better because',o:['They had abandoned monumental construction earlier','They could access groundwater through cenotes when surface rains failed','They received aid from Aztec neighbors','Their kings renounced ritual ceremonies'],a:1},
+      {type:'insert',q:'Where in paragraph 3 would the sentence best fit? "Royal ceremonies, in particular, demanded steady tribute that an unstable harvest could no longer guarantee."',positions:['[A]','[B]','[C]','[D]'],o:['Position A — after the first sentence','Position B — after "without disintegrating."','Position C — after "monument construction, warfare and ritual feasting."','Position D — at the end of the paragraph'],a:2},
+      {type:'summary',q:'Choose the THREE statements that best summarize the passage.',o:[
+        'The Classic Maya collapse was the result of multiple, interacting pressures rather than a single cause.',
+        'Climatic drying interacted with a politically rigid system to push lowland centers past their breaking point.',
+        'Maya civilization was destroyed in a single year by an unknown disease.',
+        'Different regions experienced different outcomes; northern groundwater access allowed some communities to continue.',
+        'The Maya never built cities larger than small villages.',
+        'Spanish conquerors triggered the collapse before 900 C.E.'
+      ],a:[0,1,3]}
+    ]
+  },
+  {
+    id:'toefl-r-bats',
+    topic:'Life Sciences',
+    title:{ru:'Эхолокация у летучих мышей',en:'Echolocation in Bats'},
+    sub:{ru:'Зоология · адаптация и поведение',en:'Zoology · adaptation and behaviour'},
+    paragraphs:[
+      "Among mammals, bats are unusual in two respects: they are the only group capable of true powered flight, and they navigate and forage in complete darkness using an acoustic sense rather than vision. This sense, known as echolocation, allows a bat to emit a sound pulse and to construct a detailed acoustic image of the surrounding environment from the returning echoes. The system is so refined that some species can distinguish a moth from a falling leaf and can capture flying insects at a rate of one every few seconds.",
+      "A bat's echolocation call typically falls in the ultrasonic range, between twenty and one hundred and twenty kilohertz — frequencies inaudible to the human ear. The high frequency is not arbitrary. Short wavelengths reflect efficiently off small objects, which is essential for detecting the bodies of insects only millimetres across. The pulses themselves are extremely brief, often less than ten milliseconds, and are produced with great intensity: a foraging little brown bat emits calls comparable in loudness to a smoke alarm at close range. To avoid deafening itself, the bat contracts the muscles of its middle ear during each call, reopening them in time to detect the echo a fraction of a second later.",
+      "The information returning to the bat is remarkably rich. The delay between call and echo encodes distance: a one-millisecond gap corresponds roughly to seventeen centimetres of range. Subtle shifts in the echo's frequency reveal motion — a moving insect compresses the returning wave when it approaches, lengthening it when it retreats, an acoustic analogue of the Doppler effect that police radar exploits. The shape of the echo, its rise time and the small distortions introduced by the geometry of the prey provide a kind of texture map. Laboratory experiments have shown that a bat can distinguish two flat targets that differ in depth by only a few micrometres, an acuity that approaches the theoretical limits of acoustic resolution.",
+      "Although all echolocating bats share these basic principles, the structure of their calls varies in ways that reflect different ecological niches. Bats that hunt in open air, such as the European noctule, emit long, narrow-band calls that travel far but provide relatively coarse detail; this design favours detection over discrimination. Bats that forage in dense vegetation, by contrast, produce broadband sweeps that yield finer spatial detail but only over short distances. A few species, including some of the horseshoe bats, use a constant-frequency signal punctuated by short frequency-modulated sweeps; this hybrid design lets them detect the rapid wing-beat of a fluttering insect against a background of vegetation that would otherwise mask the prey.",
+      "Echolocation has also influenced the evolution of bat prey. Many species of moth have evolved tympanal ears that are most sensitive precisely in the ultrasonic range used by their predators, and they perform evasive flight manoeuvres — sudden dives, spirals or unpredictable loops — within milliseconds of detecting an approaching bat. Some moths go further, producing their own ultrasonic clicks that appear to jam the bat's sonar or to advertise an unpalatable chemical defence. The bat-moth interaction has thus become a textbook example of evolutionary arms race, in which a sensory innovation in one lineage drives counter-adaptations in another, with both sides refined over tens of millions of years."
+    ],
+    questions:[
+      {type:'factual',q:'According to paragraph 1, what makes bats unique among mammals?',o:['They sleep upside down','They are the only mammals to fly and to navigate by sound','They have the largest ears','They migrate continuously'],a:1},
+      {type:'vocab',q:'The word "refined" in paragraph 1 is closest in meaning to',o:['rough','sophisticated','outdated','random'],a:1},
+      {type:'factual',q:'According to paragraph 2, why do bats use very high-frequency calls?',o:['To communicate with each other over long distances','Because short wavelengths reflect well off small objects','To avoid bird predators','Because their throats cannot produce lower tones'],a:1},
+      {type:'inference',q:'It can be inferred from paragraph 2 that without the middle-ear muscle contraction a bat would',o:['Lose its sense of smell','Damage its own hearing with every call','Be unable to fly','Detect lower-frequency sounds'],a:1},
+      {type:'vocab',q:'The word "acuity" in paragraph 3 is closest in meaning to',o:['weakness','accuracy','speed','colour'],a:1},
+      {type:'factual',q:'Paragraph 3 explains that the delay between call and echo tells the bat',o:['the temperature of the air','the distance to the target','the species of the prey','the time of day'],a:1},
+      {type:'negative',q:'All of the following call designs are mentioned in paragraph 4 EXCEPT',o:['Long, narrow-band calls for open-air hunting','Broadband sweeps for dense vegetation','Constant-frequency signals with FM sweeps','Pure subsonic pulses below twenty kilohertz'],a:3},
+      {type:'inference',q:'It can be inferred from paragraph 5 that moth ultrasonic clicks',o:['Attract more bats to the area','Either jam the bat sonar or signal that the moth tastes bad','Are used only during the day','Help moths find mates'],a:1},
+      {type:'insert',q:'Where in paragraph 4 would this sentence best fit? "The choice of waveform is therefore a compromise between range and the level of detail required."',positions:['[A]','[B]','[C]','[D]'],o:['Position A — after the first sentence','Position B — after "detection over discrimination."','Position C — after "only over short distances."','Position D — at the end of the paragraph'],a:1},
+      {type:'summary',q:'Choose the THREE statements that best summarize the passage.',o:[
+        'Bats use ultrasonic echolocation that delivers detailed information about distance, motion and target shape.',
+        'Call design varies with hunting habitat — open air, vegetation or a mix.',
+        'Bats hunt only in the daytime when light is plentiful.',
+        'The system has co-evolved with prey defences such as moth ultrasonic ears and jamming clicks.',
+        'Bats use vision rather than hearing for prey detection.',
+        'Echolocation calls are inaudible to other bats.'
+      ],a:[0,1,3]}
+    ]
+  },
+  {
+    id:'toefl-r-tectonics',
+    topic:'Earth Sciences',
+    title:{ru:'Дрейф материков и тектоника плит',en:'Continental Drift and Plate Tectonics'},
+    sub:{ru:'Геология · теория и доказательства',en:'Geology · theory and evidence'},
+    paragraphs:[
+      "When the German meteorologist Alfred Wegener proposed in 1912 that the continents had once been joined in a single supercontinent he called Pangaea, his idea was met with widespread skepticism. The fit between the Atlantic coastlines of Africa and South America had been noted since at least the seventeenth century, but most geologists of Wegener's time considered the continents to be permanently fixed. Wegener gathered an unusually broad range of evidence — geological, biological and climatic — in support of his proposal, yet he could offer no convincing mechanism by which something as massive as a continent could move. Without such a mechanism, the theory of continental drift remained on the fringe of accepted science for nearly half a century.",
+      "Wegener's case rested on several mutually reinforcing observations. Rock formations of the same age and composition appeared on coasts now separated by thousands of kilometres of ocean. Fossils of the freshwater reptile Mesosaurus turned up in both southern Brazil and southern Africa, although the animal could not plausibly have crossed the salt waters of the modern Atlantic. Glacial striations carved during a Carboniferous-Permian ice age pointed in coherent directions only when the southern continents were reassembled into a single landmass. Coal seams formed in tropical swamps lay beneath the polar regions of Antarctica, suggesting that the continent had once stood near the equator. Taken individually, each clue could be explained away; taken together, they were difficult to dismiss.",
+      "The missing mechanism finally emerged in the 1950s and 1960s with two parallel discoveries. The first was the mid-ocean ridge system: a continuous chain of underwater volcanoes, more than sixty thousand kilometres long, that bisects the world's oceans. The second was the recognition that the ocean floor itself records reversals of the Earth's magnetic field. As fresh basalt erupts at a ridge and cools, the iron-bearing minerals in the rock lock in the orientation of the magnetic field at that moment. Surveys revealed a striking pattern: parallel stripes of alternating magnetic polarity, symmetrical on either side of every ridge. The only coherent interpretation was that new ocean floor was being created at the ridges and was spreading outward — at typical rates of two to ten centimetres per year — like a slow-motion conveyor belt.",
+      "If new ocean floor is being produced, an equivalent area must be consumed elsewhere, or the planet would have to be expanding. The destination of the moving plates turned out to be the deep-sea trenches that ring the Pacific. There, dense oceanic lithosphere bends downward and descends into the mantle in a process called subduction. The descending slab triggers the partial melting that fuels volcanic arcs such as those of Japan, the Andes and the Cascades. Subduction zones are also responsible for the planet's most powerful earthquakes, including the magnitude-9.5 event that struck southern Chile in 1960. The recognition of mid-ocean spreading on one side and subduction on the other completed the cycle and turned continental drift into the modern theory of plate tectonics.",
+      "Plate tectonics now provides a unifying framework for an enormous range of geological observations. It explains the global distribution of earthquakes and volcanoes, the formation of mountain ranges through continental collision, the renewal of the ocean floor on a timescale of about two hundred million years and even the long-term evolution of climate, since the arrangement of continents influences ocean currents and atmospheric circulation. Wegener did not live to see his idea vindicated — he died in Greenland in 1930 — but his insistence on treating the surface of the Earth as dynamic rather than static is now a cornerstone of the geosciences."
+    ],
+    questions:[
+      {type:'factual',q:'According to paragraph 1, why was Wegener\'s theory rejected by his contemporaries?',o:['His evidence was fabricated','He proposed no plausible mechanism for continental motion','The fit between Africa and South America was unknown','He published in an obscure language'],a:1},
+      {type:'vocab',q:'The word "mutually reinforcing" in paragraph 2 is closest in meaning to',o:['contradictory','supporting one another','translated','very rare'],a:1},
+      {type:'factual',q:'Which observation in paragraph 2 is presented as evidence for a former southern supercontinent?',o:['Coal seams beneath modern Antarctica','Coastal cities of equal age','Identical river systems on both sides of the Atlantic','Salt deposits under modern Brazil'],a:0},
+      {type:'inference',q:'It can be inferred from paragraph 3 that the magnetic stripe pattern on the seafloor',o:['Records the Earth\'s past magnetic reversals as ocean floor spreads','Was caused by ancient meteor impacts','Disappeared during recent ice ages','Is found only near coastlines'],a:0},
+      {type:'vocab',q:'The word "bisects" in paragraph 3 is closest in meaning to',o:['encloses','divides into two halves','warms','colours'],a:1},
+      {type:'factual',q:'According to paragraph 4, what process balances the creation of new ocean floor at the ridges?',o:['Continental erosion','Subduction of oceanic plates into the mantle','Volcanic eruption on land','Sea-level rise'],a:1},
+      {type:'negative',q:'All of the following are described in the passage as consequences of plate tectonics EXCEPT',o:['The Andean volcanic arc','The 1960 Chilean earthquake','The formation of mountain ranges by collision','The Sahara desert sand dunes'],a:3},
+      {type:'inference',q:'It can be inferred from paragraph 5 that the arrangement of continents',o:['Stays exactly the same over hundreds of millions of years','Can influence climate through its effect on ocean currents','Has no effect on biological evolution','Determines the length of a year'],a:1},
+      {type:'insert',q:'Where in paragraph 3 would this sentence best fit? "The width of each stripe therefore corresponds to how long the field held that orientation."',positions:['[A]','[B]','[C]','[D]'],o:['Position A — after the first sentence','Position B — after "magnetic field at that moment."','Position C — after "symmetrical on either side of every ridge."','Position D — at the end of the paragraph'],a:2},
+      {type:'summary',q:'Choose the THREE statements that best summarize the passage.',o:[
+        'Wegener proposed continental drift in 1912 with geological, fossil and climatic evidence, but lacked a mechanism.',
+        'Mid-ocean spreading and subduction, discovered in the mid-twentieth century, supplied the missing mechanism.',
+        'The theory was confirmed only after Wegener\'s death in 1930.',
+        'Plate tectonics now unifies the explanation of earthquakes, volcanoes, mountains and even long-term climate.',
+        'The continents have always been in their current positions.',
+        'Antarctica was the original location of all life on Earth.'
+      ],a:[0,1,3]}
+    ]
+  }
+];
 let examState={};
 function examTitle(exam){return exam==='ielts'?'IELTS':'TOEFL iBT';}
 function pickExamTask(exam,section){
@@ -5831,7 +5952,8 @@ function renderCourse(){
   </div>`;
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
-  const sortedCourse=GALAXY_COURSE.slice().sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
+  /* Exam-prep lessons live in their own tab (Exam Hub) — hide them here. */
+  const sortedCourse=GALAXY_COURSE.slice().filter(x=>!isExamLevel(x.level)).sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
   const lockIconSmall='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const lessons=sortedCourse.map(function(ls){
     const isDone=!!done[ls.id];
@@ -7435,6 +7557,8 @@ function completeRoadmapMission(lessonId){
 function renderRoadmap(){
   const wrap=document.getElementById('roadmap-wrap');
   if(!wrap)return;
+  /* If a reading passage is currently open, do not redraw the hub on top. */
+  if(_inReadingPassage)return;
   const sorted=sortedGalaxyCourse();
   const examUnlocked=hasTier('basic');
   const exams=[
@@ -7468,7 +7592,162 @@ function renderRoadmap(){
     </div>`).join('');
     return `<div class="course-level-head"><div class="course-level-name" style="color:${ex.color}">${safeHTML(ex.name[lang]||ex.name.en)}</div><div class="course-level-desc">${safeHTML(ex.desc[lang]||ex.desc.en)} · ${doneCount}/${items.length}</div></div>${cards}`;
   }).join('');
-  wrap.innerHTML=head+groups;
+  /* Reading-passage block (full ETS-format texts with 10 questions each). */
+  const readingHead=`<div class="course-level-head"><div class="course-level-name" style="color:#4f8aff">${lang==='ru'?'TOEFL Reading · академические тексты':'TOEFL Reading · academic passages'}</div><div class="course-level-desc">${lang==='ru'?'700 слов · 10 вопросов на текст · стиль ETS':'700 words · 10 questions per passage · ETS style'}</div></div>`;
+  const readingCards=TOEFL_READING_PASSAGES.map(p=>`<div class="course-card" style="--lesson-color:#4f8aff" onclick="openReadingPassageFromHub('${p.id}')">
+    <div class="course-ico" style="color:#4f8aff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12"/><path d="M9 8h7M9 11h5"/></svg></div>
+    <div class="course-info">
+      <div class="course-title">${safeHTML(p.title[lang]||p.title.en)}</div>
+      <div class="course-sub">${safeHTML(p.sub[lang]||p.sub.en)}</div>
+      <div class="course-meta"><span class="course-pill">~700 ${lang==='ru'?'слов':'words'}</span><span class="course-pill">10 ${lang==='ru'?'вопросов':'questions'}</span></div>
+    </div>
+    <div class="course-status"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+  </div>`).join('');
+  wrap.innerHTML=head+groups+readingHead+readingCards;
+}
+/* ── Reading passage viewer ────────────────────────────────────────── */
+let _inReadingPassage=false;
+function openReadingPassageFromHub(id){
+  if(!hasTier('basic')){
+    showTierPaywall('basic',lang==='ru'?'TOEFL Reading':'TOEFL Reading');
+    return;
+  }
+  const p=TOEFL_READING_PASSAGES.find(x=>x.id===id);
+  if(!p)return;
+  _inReadingPassage=true;
+  /* State per passage stored in LS so progress survives reload. */
+  LS.set('reading_current',id);
+  const wrap=document.getElementById('roadmap-wrap');if(!wrap)return;
+  wrap.innerHTML=renderReadingPassageHTML(p);
+  const sc=document.getElementById('s-learn');if(sc)sc.scrollTo({top:0,behavior:'auto'});
+}
+function leaveReadingPassage(){
+  _inReadingPassage=false;
+  LS.set('reading_current','');
+  try{renderRoadmap();}catch(_){}
+}
+function readingPassageStateKey(id){return 'reading_state_'+id;}
+function readingPassageState(id){return LS.getJ(readingPassageStateKey(id))||{};}
+function readingPassageSaveState(id,st){LS.setJ(readingPassageStateKey(id),st||{});}
+function renderReadingPassageHTML(p){
+  const title=p.title[lang]||p.title.en;
+  const passageHtml=p.paragraphs.map((t,i)=>{
+    /* For Insert-Text questions, embed [A] [B] [C] [D] markers inside the
+       target paragraph so the user sees the candidate positions. */
+    const q=(p.questions||[]).find(x=>x.type==='insert');
+    if(!q||i!==(p.paragraphs.length-3)&&i!==(p.paragraphs.length-2)&&i!==2)return `<p class="rp-para">${safeHTML(t)}</p>`;
+    /* Simple marker injection: split into sentences and place A B C D between them. */
+    const sentences=t.match(/[^.!?]+[.!?]+/g)||[t];
+    if(sentences.length<4)return `<p class="rp-para">${safeHTML(t)}</p>`;
+    const slots=['[A]','[B]','[C]','[D]'];
+    let html='';
+    for(let s=0;s<sentences.length;s++){
+      html+=safeHTML(sentences[s]);
+      if(slots.length)html+=' <span class="rp-slot">'+slots.shift()+'</span> ';
+    }
+    return `<p class="rp-para">${html}</p>`;
+  }).join('');
+  const state=readingPassageState(p.id);
+  const qHtml=(p.questions||[]).map((q,qi)=>renderReadingQuestion(p.id,q,qi,state)).join('');
+  const correctCount=(p.questions||[]).filter((q,qi)=>readingQuestionIsCorrect(q,state[qi])).length;
+  const total=(p.questions||[]).length;
+  return `<div class="course-lesson">
+    <button class="rm-action" type="button" onclick="leaveReadingPassage()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к Exam Hub':'Back to Exam Hub'}</button>
+    <div class="course-hero" style="--lesson-color:#4f8aff">
+      <div class="course-hero-top">
+        <div class="course-hero-ico" style="color:#4f8aff"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M9 8h7M9 11h5"/></svg></div>
+        <div style="min-width:0;flex:1">
+          <div class="course-hero-title">${safeHTML(title)}</div>
+          <div class="course-hero-sub">TOEFL Reading · ~700 ${lang==='ru'?'слов':'words'} · ${total} ${lang==='ru'?'вопросов':'questions'}</div>
+        </div>
+      </div>
+    </div>
+    <div class="rp-passage">${passageHtml}</div>
+    <div class="rp-questions">${qHtml}</div>
+    <div class="course-complete-card" style="margin-top:14px">
+      <div class="course-complete-title">${lang==='ru'?'Результат':'Score'}: ${correctCount} / ${total}</div>
+      <div class="course-complete-sub">${lang==='ru'?'Перепроходи — это лучший способ закрепить навык.':'Re-attempts are the best way to consolidate the skill.'}</div>
+    </div>
+  </div>`;
+}
+function readingQuestionIsCorrect(q,picked){
+  if(picked===undefined||picked===null)return false;
+  if(q.type==='summary'){
+    if(!Array.isArray(picked)||!Array.isArray(q.a))return false;
+    if(picked.length!==q.a.length)return false;
+    const s=new Set(picked);return q.a.every(x=>s.has(x));
+  }
+  return picked===q.a;
+}
+function renderReadingQuestion(pid,q,qi,state){
+  const picked=state[qi];
+  const labels=['A','B','C','D','E','F'];
+  const head=({
+    factual:{ru:'Фактический вопрос',en:'Factual Information'},
+    negative:{ru:'Что НЕ упоминается',en:'Negative Factual'},
+    vocab:{ru:'Лексика в контексте',en:'Vocabulary in Context'},
+    inference:{ru:'Вывод',en:'Inference'},
+    insert:{ru:'Вставка предложения',en:'Insert Text'},
+    summary:{ru:'Резюме текста (выбери 3)',en:'Prose Summary (pick 3)'}
+  })[q.type]||{ru:'Вопрос',en:'Question'};
+  if(q.type==='summary'){
+    const sel=Array.isArray(picked)?picked:[];
+    return `<div class="rp-q" data-qi="${qi}">
+      <div class="rp-q-tag">${qi+1}. ${safeHTML(head[lang]||head.en)}</div>
+      <div class="rp-q-text">${safeHTML(q.q)}</div>
+      ${q.o.map((o,oi)=>{
+        const on=sel.indexOf(oi)>=0;
+        const submitted=Array.isArray(picked);
+        const isAns=Array.isArray(q.a)&&q.a.indexOf(oi)>=0;
+        const cls=submitted?(isAns?'ok':(on?'bad':'')):'';
+        return `<div class="rp-opt ${cls} ${on?'on':''}" onclick="readingToggleSummary('${pid}',${qi},${oi},3)"><span class="rp-opt-tag">${labels[oi]}</span>${safeHTML(o)}</div>`;
+      }).join('')}
+      ${Array.isArray(picked)?'':`<button class="course-mini-btn" onclick="readingSubmitSummary('${pid}',${qi})">${lang==='ru'?'Проверить':'Submit'}</button>`}
+    </div>`;
+  }
+  return `<div class="rp-q" data-qi="${qi}">
+    <div class="rp-q-tag">${qi+1}. ${safeHTML(head[lang]||head.en)}</div>
+    <div class="rp-q-text">${safeHTML(q.q)}</div>
+    ${q.o.map((o,oi)=>{
+      const isAns=oi===q.a;
+      const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&isAns?'ok-reveal':'');
+      const click=picked!==undefined?'':`onclick="readingPickAnswer('${pid}',${qi},${oi})"`;
+      return `<div class="rp-opt ${cls}" ${click}><span class="rp-opt-tag">${labels[oi]}</span>${safeHTML(o)}</div>`;
+    }).join('')}
+  </div>`;
+}
+function readingPickAnswer(pid,qi,oi){
+  const state=readingPassageState(pid);
+  if(state[qi]!==undefined)return;
+  state[qi]=oi;
+  readingPassageSaveState(pid,state);
+  const p=TOEFL_READING_PASSAGES.find(x=>x.id===pid);if(!p)return;
+  const wrap=document.getElementById('roadmap-wrap');if(wrap)wrap.innerHTML=renderReadingPassageHTML(p);
+}
+function readingToggleSummary(pid,qi,oi,max){
+  const state=readingPassageState(pid);
+  if(Array.isArray(state[qi]))return; /* already submitted */
+  const cur=Array.isArray(state['__sum_'+qi])?state['__sum_'+qi]:[];
+  const idx=cur.indexOf(oi);
+  if(idx>=0)cur.splice(idx,1);
+  else if(cur.length<max)cur.push(oi);
+  state['__sum_'+qi]=cur;
+  readingPassageSaveState(pid,state);
+  const p=TOEFL_READING_PASSAGES.find(x=>x.id===pid);if(!p)return;
+  /* Visual toggle without full re-render to keep scroll position. */
+  const wrap=document.querySelector(`.rp-q[data-qi="${qi}"]`);
+  if(wrap){
+    wrap.querySelectorAll('.rp-opt').forEach((el,i)=>el.classList.toggle('on',cur.indexOf(i)>=0));
+  }
+}
+function readingSubmitSummary(pid,qi){
+  const state=readingPassageState(pid);
+  const cur=state['__sum_'+qi]||[];
+  state[qi]=cur.slice().sort((a,b)=>a-b);
+  delete state['__sum_'+qi];
+  readingPassageSaveState(pid,state);
+  const p=TOEFL_READING_PASSAGES.find(x=>x.id===pid);if(!p)return;
+  const wrap=document.getElementById('roadmap-wrap');if(wrap)wrap.innerHTML=renderReadingPassageHTML(p);
 }
 
 
