@@ -1718,7 +1718,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="learn-tabs">
     <div class="learn-tab on" id="lt-course" onclick="switchLearnTab('course')"><span id="lt-course-lbl">Course</span></div>
     <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
-    <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Roadmap</span></div>
+    <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Exams</span></div>
   </div>
   <!-- COURSE panel -->
   <div id="learn-course-panel">
@@ -5441,6 +5441,109 @@ GALAXY_COURSE.push(
     {q:'On average, each question deserves about ___.',o:['10 seconds','one minute','five minutes','no limit'],a:1},
     {q:'Pick the natural sentence.',o:['I eliminated two options and made an educated guess.','I eliminate two option and make educated guess.','I eliminating two options and making educated guess.','I to eliminate two options and to make educated guess.'],a:0},
     {q:'"Educated guess" means a guess based on ___.',o:['random choice','partial knowledge and elimination','dictionary lookup','copying'],a:1}
+  ]},
+  /* ── IELTS prep — Listening (4) + Reading (2) + Writing (2). Same lesson
+     shape as the rest of the course; content mirrors IELTS format and
+     register without reusing Cambridge / IDP material. */
+  {id:'ielts-listen-1',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Section 1',en:'IELTS · Section 1'},sub:{ru:'разговор в быту',en:'everyday conversation'},rule:{ru:'Часть 1 — диалог двух человек о бытовой ситуации (бронь, заявка, аренда). Чаще всего нужно вписать слово или цифру. Пиши строго то, что услышал: спеллинг важен.',en:'Section 1 is a two-speaker dialogue about a daily situation (booking, application, rental). Most items need a word or number filled in. Spell exactly what you hear; spelling counts.'},examples:['The booking reference is BX seven two four.','Please write your surname in block letters.','The deposit is fifty pounds, due on Friday.','Office hours are from nine thirty to five.','Postcode is N one, six A B.'],words:['booking','reference','surname','deposit','postcode','application','address','reception','rental','enrolment'],q:'In IELTS Section 1, answers most often are ___.',o:['paragraphs','single words or numbers','full sentences','translations'],a:1,build:'The booking reference is BX seven two four.',dictation:'The booking reference is BX seven two four.',focus:['Spell carefully — wrong spelling loses the point.','Predict the type of answer (number, name, time) before listening.','Numbers in IELTS are read digit-by-digit.'],focus_ru:['Спеллинг важен — ошибка теряет балл.','До прослушивания угадай формат ответа: число, имя, время.','Числа в IELTS читают по одной цифре.'],practice:[
+    {q:'In IELTS Section 1, "N1 6AB" is most likely a ___.',o:['phone number','postcode','date','price'],a:1},
+    {q:'A "deposit" is a ___.',o:['full payment','sum held as guarantee','refund','discount'],a:1},
+    {q:'"Block letters" means ___.',o:['cursive','large capital letters','small letters','italics'],a:1},
+    {q:'Pick the natural sentence.',o:['The application form must be signed in pen.','The application form must signed in pen.','The application form must to be signed in pen.','The application form to sign in pen.'],a:0},
+    {q:'"Reference number" is used for ___.',o:['tracking the booking','paying tuition','grading','spelling'],a:0}
+  ]},
+  {id:'ielts-listen-2',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Section 2',en:'IELTS · Section 2'},sub:{ru:'монолог о месте/событии',en:'monologue · place / event'},rule:{ru:'Часть 2 — один говорящий описывает место, тур, программу. Часто задачи: соединить пункты с карты, выбрать из списка, указать стрелкой. Слушай ориентиры: next to, opposite, across from.',en:'Section 2 is a monologue describing a place, tour, or programme. Common tasks: match map labels, multiple choice, arrows. Listen for landmarks: next to, opposite, across from.'},examples:['The library is opposite the main entrance.','The café is on your left as you walk in.','Tours start every half hour from the reception desk.','Children under five are not allowed in the lab.','The exit is located at the far end of the corridor.'],words:['opposite','entrance','reception','corridor','exhibit','venue','signpost','floor','gallery','tour'],q:'"Opposite the entrance" means ___.',o:['next to the entrance','facing the entrance','behind the entrance','through the entrance'],a:1,build:'The library is opposite the main entrance, next to the gallery.',dictation:'The library is opposite the main entrance, next to the gallery.',focus:['Map tasks: keep your finger on the speaker — follow movement in real time.','"Across from" = opposite. "Next to" = beside.','Pay attention to ordering words: first, then, after that, finally.'],focus_ru:['В заданиях с картой "веди" пальцем по говорящему — следуй движению.','"Across from" = напротив. "Next to" = рядом.','Слушай порядковые слова: first, then, after that, finally.'],practice:[
+    {q:'"Across from the gallery" means ___.',o:['inside the gallery','opposite the gallery','behind the gallery','past the gallery'],a:1},
+    {q:'"At the far end" means ___.',o:['near the entrance','at the most distant point','outside','in the middle'],a:1},
+    {q:'"On your left as you walk in" — speaker uses ___.',o:['ordering words','spatial directions','time references','price terms'],a:1},
+    {q:'Pick the natural sentence.',o:['Tours start every half hour from reception.','Tours start every half hour from reception desk every.','Tours starting every half hour from reception.','Tours start every half hours from the receptions.'],a:0},
+    {q:'A "signpost" helps you with ___.',o:['cooking','navigation','translation','printing'],a:1}
+  ]},
+  {id:'ielts-listen-3',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Section 3',en:'IELTS · Section 3'},sub:{ru:'академическая дискуссия',en:'academic discussion'},rule:{ru:'Часть 3 — двое или трое студентов или студент с тьютором обсуждают проект, эссе, исследование. Задания: множественный выбор, соединение мнений с людьми, заполнение схемы. Лови mood-маркеры: surely, I think, but actually.',en:'Section 3 is a 2-3 person academic discussion about an essay, project or study. Tasks: multiple choice, matching opinions to speakers, flow chart. Listen for mood markers: surely, I think, but actually.'},examples:['I think the data sample is too small.','Actually, the methodology section needs more detail.','Surely we should add a control group.','My tutor suggested a different approach.','We finally agreed on the structure of the report.'],words:['methodology','sample','control','tutor','draft','approach','analysis','consent','outcome','feedback'],q:'"Surely we should add..." signals the speaker is ___.',o:['unsure','strongly proposing','asking permission','quoting someone'],a:1,build:'My tutor suggested a different approach to the methodology.',dictation:'My tutor suggested a different approach to the methodology.',focus:['Identify each speaker fast — write S1, S2, T for tutor.','Watch for "but" / "actually" — they often mark the correct opinion.','Soft hedging like the phrase I would say usually wraps the real view.'],focus_ru:['Сразу пометь говорящих: S1, S2, T (tutor).','Слова "but" / "actually" часто маркируют правильное мнение.','Мягкие "I would say" обычно обрамляют настоящее мнение.'],practice:[
+    {q:'"Actually, the methodology needs more detail." closest to:',o:['The methodology is perfect.','The methodology requires expansion.','The methodology should be deleted.','The methodology is unimportant.'],a:1},
+    {q:'"Control group" is used in ___.',o:['marketing','scientific experiments','painting','farming'],a:1},
+    {q:'"Draft" means ___.',o:['final published version','preliminary version','title page','reference list'],a:1},
+    {q:'Pick the natural sentence.',o:['We finally agreed on the structure of the report.','We finally agreed about the structure of the report.','We finally agreed for the structure of the report.','We finally agreed of the structure of the report.'],a:0},
+    {q:'"Consent" in research means ___.',o:['refusal','informed permission','payment','grading'],a:1}
+  ]},
+  {id:'ielts-listen-4',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Section 4',en:'IELTS · Section 4'},sub:{ru:'академическая лекция',en:'academic lecture'},rule:{ru:'Часть 4 — монолог-лекция по академической теме. Записи нет паузы. Часто это заполнение конспекта. Слушай signposts: first, in addition, however, in summary.',en:'Section 4 is a single-speaker academic lecture. No internal pause. Often a fill-the-notes task. Listen for signposts: first, in addition, however, in summary.'},examples:['First, the researchers measured the surface temperature.','In addition, satellite imagery confirmed the pattern.','However, deeper layers showed a different result.','In summary, the model is reliable only at the surface.','The conclusion challenges the original hypothesis.'],words:['surface','imagery','pattern','reliable','layer','sample','approach','findings','figure','hypothesis'],q:'"In summary" comes near the ___ of a lecture.',o:['start','middle','end','title'],a:2,build:'In summary, the model is reliable only at the surface.',dictation:'In summary, the model is reliable only at the surface.',focus:['Use abbreviations while taking notes — speed matters.','Note structure words; they outline the lecture.','Fill the gap with the EXACT word said, with spelling.'],focus_ru:['Используй сокращения — скорость записи важна.','Помечай слова-связки: они показывают структуру лекции.','В пропуск записывай ТОЧНОЕ слово, с правильным спеллингом.'],practice:[
+    {q:'"In addition" signals ___.',o:['a contrast','an extra point on the same idea','a question','a summary'],a:1},
+    {q:'"Findings" means ___.',o:['questions','results of research','footnotes','formulae'],a:1},
+    {q:'"Reliable model" is one that ___.',o:['fails often','produces consistent results','changes randomly','was discarded'],a:1},
+    {q:'Pick the natural sentence.',o:['The data challenges the original hypothesis.','The data challenge to the original hypothesis.','The data challenging the original hypothesis.','The data challenge for the original hypothesis.'],a:0},
+    {q:'"Imagery" refers to ___.',o:['written quotes','visual or photographic data','audio recordings','grading rubric'],a:1}
+  ]},
+  {id:'ielts-read-general',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Reading General',en:'IELTS · Reading General'},sub:{ru:'инструкции и объявления',en:'instructions & ads'},rule:{ru:'General Reading включает короткие тексты — объявления, инструкции, описания услуг. Задачи: True / False / Not Given, заполнение слов, выбор заголовков. Если факта в тексте нет → Not Given (не False!).',en:'General Reading includes short texts — ads, instructions, service descriptions. Tasks: True / False / Not Given, sentence completion, headings. If a fact is absent → Not Given (NOT False!).'},examples:['The library opens at nine and closes at six on weekdays.','Residents must register before using the gym.','A late return fee applies after five days.','The course requires no prior experience.','Parking is free for the first two hours.'],words:['register','requirement','prior','fee','resident','notice','available','permit','renewal','enquiry'],q:'In True/False/Not Given: a fact NOT mentioned in the text is ___.',o:['True','False','Not Given','Trick'],a:2,build:'The course requires no prior experience and is free for residents.',dictation:'The course requires no prior experience and is free for residents.',focus:['Read the question, then scan for keyword — do not pre-read the text.','"Not Given" means the text is silent — neither confirms nor denies.','"False" needs a direct contradiction in the text.'],focus_ru:['Сначала вопрос, потом скан по ключевому слову — не читай текст целиком.','"Not Given" = текст молчит — ни да, ни нет.','"False" = прямое противоречие в тексте.'],practice:[
+    {q:'"Residents must register before using the gym." This means ___.',o:['registration is optional','registration is required first','only guests must register','registration is for swimming'],a:1},
+    {q:'"A late return fee applies after five days." closest to:',o:['No fee ever','Fee charged from day six','Fee charged immediately','Fee only on holidays'],a:1},
+    {q:'If the text says nothing about a claim, the answer is ___.',o:['True','False','Not Given','Yes'],a:2},
+    {q:'Pick the natural sentence.',o:['Parking is free for the first two hours.','Parking is freely for the first two hours.','Parking is free for first two hour.','Parking are free for the first two hours.'],a:0},
+    {q:'"Renewal" of a library card means ___.',o:['cancellation','extending its validity','swap with another card','printing a copy'],a:1}
+  ]},
+  {id:'ielts-read-academic',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Reading Academic',en:'IELTS · Reading Academic'},sub:{ru:'академический текст',en:'academic passage'},rule:{ru:'Academic Reading — длинные тексты (700-900 слов). Скимминг для общей идеи, скан для деталей. Главное — не читать каждое слово. Headings-задания решаются по первым/последним предложениям абзаца.',en:'Academic Reading uses long passages (700-900 words). Skim for gist, scan for detail. Do NOT read every word. Heading tasks are solved by first/last sentences of each paragraph.'},examples:['The author argues that wetlands act as natural carbon stores.','The study contrasts urban and rural sleep patterns.','Researchers documented a forty-percent decline in pollinators.','The passage describes three competing theories of language origin.','The data challenges long-held assumptions about coral resilience.'],words:['argue','contrast','decline','competing','assumption','resilience','evidence','documented','passage','heading'],q:'For an IELTS Reading "headings" task you should ___.',o:['read the whole passage word by word','match each heading to the gist of each paragraph','translate to your language','count the syllables'],a:1,build:'The author argues that wetlands act as natural carbon stores.',dictation:'The author argues that wetlands act as natural carbon stores.',focus:['Skim once for general idea before any task.','Headings: first and last sentence of a paragraph usually hold the gist.','Do not let an unknown word stop you — context usually helps.'],focus_ru:['Сначала прочитай по диагонали для общей идеи.','В headings-задании главное обычно в первом или последнем предложении.','Незнакомое слово не должно останавливать — обычно помогает контекст.'],practice:[
+    {q:'"Contrasts urban and rural patterns" means the passage ___.',o:['agrees they are the same','shows their differences','ignores them','translates them'],a:1},
+    {q:'"A forty-percent decline" means ___.',o:['a 40% rise','a 40% drop','no change','exactly 40 units'],a:1},
+    {q:'For a fast IELTS read you should ___.',o:['read every word twice','skim and scan strategically','re-read each paragraph','translate sentence by sentence'],a:1},
+    {q:'Pick the natural sentence.',o:['The data challenges long-held assumptions.','The data challenge to long-held assumptions.','The data challenging long-held assumptions.','The data challenge for long-held assumptions.'],a:0},
+    {q:'"Heading" in a reading task is ___.',o:['the title of the whole passage','a short label that captures the paragraph idea','the author name','a footnote'],a:1}
+  ]},
+  {id:'ielts-write-task1',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Writing Task 1',en:'IELTS · Writing Task 1'},sub:{ru:'график или письмо',en:'chart or letter'},rule:{ru:'Task 1 Academic — описать график или диаграмму (≥150 слов, ~20 мин). Task 1 General — формальное письмо. Структура: 1) overview (общая тенденция), 2) ключевые цифры, 3) сравнение, 4) короткое заключение.',en:'Task 1 Academic — describe a chart (≥150 words, ~20 min). Task 1 General — a formal letter. Structure: 1) overview of the trend, 2) key figures, 3) comparison, 4) brief conclusion.'},examples:['Overall, the number of visitors rose steadily between 2015 and 2022.','The figure peaked at around twenty thousand in 2019.','In contrast, the rural figure remained nearly flat.','By the end of the period, the urban figure was twice as high.','Despite a brief dip in 2020, the trend recovered.'],words:['overall','peak','steadily','remained','contrast','figure','approximately','recover','trend','period'],q:'A Task 1 chart description starts with ___.',o:['the author name','an overview of the main trend','a personal opinion','a question'],a:1,build:'Overall, the number of visitors rose steadily between 2015 and 2022.',dictation:'Overall, the number of visitors rose steadily between 2015 and 2022.',focus:['Do NOT give personal opinion in Task 1 — only data.','Approximate numbers if exact values are hard to read.','Use a range of comparison structures: more than, twice as, in contrast.'],focus_ru:['В Task 1 не давай личное мнение — только данные.','Если точное число не видно — пиши approximately.','Чередуй сравнения: more than, twice as, in contrast.'],practice:[
+    {q:'"The figure peaked at" means the value ___.',o:['stayed flat','reached its highest point','dropped','disappeared'],a:1},
+    {q:'"In contrast" introduces a ___.',o:['similar pattern','different pattern','question','title'],a:1},
+    {q:'Personal opinion in Task 1 is ___.',o:['required','optional','not appropriate','worth bonus points'],a:2},
+    {q:'Pick the natural sentence.',o:['Overall, the urban figure rose steadily.','Overall, the urban figure rises steadily.','Overall, the urban figure was rose steadily.','The urban figure rose steadily overall is.'],a:0},
+    {q:'A Task 1 description should be at least ___ words.',o:['100','150','250','400'],a:1}
+  ]},
+  {id:'ielts-write-task2',level:'IELTS',color:'#e74c3c',title:{ru:'IELTS · Writing Task 2',en:'IELTS · Writing Task 2'},sub:{ru:'эссе с аргументами',en:'argument essay'},rule:{ru:'Task 2 — эссе ≥250 слов, ~40 мин. Четыре абзаца: 1) вступление с тезисом, 2) аргумент с примером, 3) контраргумент или второй аргумент, 4) заключение с уверенной позицией.',en:'Task 2 — essay of ≥250 words, ~40 min. Four paragraphs: 1) introduction with thesis, 2) argument with example, 3) counter-argument or second point, 4) conclusion with a clear stand.'},examples:['Some people argue that homework strengthens learning, while others claim it harms wellbeing.','In my opinion, moderate homework is beneficial when paired with feedback.','For example, brief daily practice improves retention more than weekend marathons.','On the other hand, excessive workloads can lead to burnout.','In conclusion, the quality of homework matters more than its quantity.'],words:['claim','argue','wellbeing','moderate','feedback','retention','workload','burnout','conclusion','quality'],q:'Task 2 essay length must be at least ___.',o:['100 words','150 words','250 words','400 words'],a:2,build:'In conclusion, the quality of homework matters more than its quantity.',dictation:'In conclusion, the quality of homework matters more than its quantity.',focus:['State your thesis in the introduction — do not delay the position.','One paragraph = one main idea, supported by one example.','Avoid memorised phrases; examiners detect them.'],focus_ru:['Тезис уже во вступлении — не откладывай позицию.','Один абзац = одна мысль с одним примером.','Не используй шаблонные фразы — экзаменаторы их видят.'],practice:[
+    {q:'A Task 2 thesis goes in the ___.',o:['conclusion','introduction','middle paragraph','title'],a:1},
+    {q:'"On the other hand" introduces ___.',o:['additional support','a counter-point','a question','a summary'],a:1},
+    {q:'A four-paragraph Task 2 typically includes ___.',o:['intro, body, body, conclusion','three bodies, no intro','one long paragraph','intro and conclusion only'],a:0},
+    {q:'Pick the natural sentence.',o:['In conclusion, quality matters more than quantity.','In conclusion, the quality more matter than quantity.','In conclusion, more quality matter than quantity.','In conclusion, quality is more matters than quantity.'],a:0},
+    {q:'"Burnout" means ___.',o:['fresh energy','severe exhaustion','sudden success','clean record'],a:1}
+  ]},
+  /* ── Cambridge CAE / CPE prep — six advanced units mirroring Cambridge
+     C1 Advanced and C2 Proficiency formats. */
+  {id:'cae-use-english',level:'CAE',color:'#16a085',title:{ru:'CAE · Use of English',en:'CAE · Use of English'},sub:{ru:'cloze + word formation',en:'cloze + word formation'},rule:{ru:'Use of English — главная часть CAE/CPE. Open cloze: одно слово в пропуск. Word formation: преобразование корня (CARE → carelessness). Multiple-choice cloze: 4 близких варианта. Различия — в коллокациях и регистре.',en:'Use of English is the core CAE/CPE section. Open cloze: one word per gap. Word formation: derive from a root (CARE → carelessness). Multiple-choice cloze: 4 near-synonyms differing by collocation and register.'},examples:['It was ___ a controversial decision (open cloze: such).','The ___ of the report was widely praised (formation: clarity).','Her response was ___ honest (cloze: refreshingly).','He ___ in his ability to solve the puzzle (verb: succeeded).','The committee ___ careful consideration to the case (collocation: gave).'],words:['cloze','collocation','derivation','register','prefix','suffix','particle','idiomatic','phrasal','transformation'],q:'In open cloze, each gap takes ___.',o:['any phrase','exactly one word','a full sentence','a translation'],a:1,build:'The clarity of her response was widely praised by the committee.',dictation:'The clarity of her response was widely praised by the committee.',focus:['Read the whole sentence first; meaning fixes the missing word.','Word formation: identify part of speech needed (noun/adj/adv).','Collocation memory beats grammar guessing on multi-choice cloze.'],focus_ru:['Прочитай предложение целиком — смысл подскажет слово.','В word formation сначала определи часть речи.','В multi-choice cloze коллокация важнее грамматики.'],practice:[
+    {q:'"CARE" → noun for negligence = ___.',o:['careful','careless','carelessness','caringly'],a:2},
+    {q:'Collocation: "give careful ___ to the case."',o:['consideration','consider','considerate','consideredly'],a:0},
+    {q:'Open cloze accepts ___.',o:['only one word per gap','up to three words','phrases','translations'],a:0},
+    {q:'"PROUD" → adverb meaning "in a proud manner" = ___.',o:['pride','prouder','proudly','proudness'],a:2},
+    {q:'Multi-choice cloze distractors differ mainly by ___.',o:['letter count','collocation and register','translation','rhyme'],a:1}
+  ]},
+  {id:'cae-reading',level:'CAE',color:'#16a085',title:{ru:'CAE · Reading',en:'CAE · Reading'},sub:{ru:'gapped text + multi-match',en:'gapped text + multi-match'},rule:{ru:'CAE Reading: 1) gapped text (вставь параграф в пропуск), 2) multi-match (соедини утверждение с одним из 4-6 текстов), 3) multiple choice. Ключ к gapped text — связки и кореферентность.',en:'CAE Reading: 1) gapped text (insert a paragraph into a gap), 2) multi-match (link a statement to one of 4-6 texts), 3) multiple choice. Cohesion devices and reference words are the key to gapped text.'},examples:['The paragraph begins with "Despite this", suggesting it follows a contrasting idea.','"Her", "she", "this approach" — track reference words across paragraphs.','The author challenges a common assumption in the second section.','Multi-match: scan each text for keywords from the statement.','Detail questions often paraphrase the passage — match meaning, not words.'],words:['cohesion','reference','assumption','paraphrase','infer','contrast','attitude','tone','irony','gist'],q:'A paragraph that opens with "Despite this" probably follows ___.',o:['an example','a contrasting idea','a list','a quotation'],a:1,build:'The paragraph begins with "Despite this", suggesting it follows a contrasting idea.',dictation:'The paragraph begins with "Despite this", suggesting it follows a contrasting idea.',focus:['Track pronouns (it, this, her) — they tether paragraphs together.','In multi-match, work with one text at a time, not one statement.','Beware paraphrase: same meaning in different words is usually correct.'],focus_ru:['Следи за местоимениями (it, this, her) — они связывают абзацы.','В multi-match работай по одному тексту, не по одному вопросу.','Парафраз — частая стратегия CAE: то же значение, другие слова.'],practice:[
+    {q:'"Cohesion" in a text refers to ___.',o:['how it sounds','how its parts connect','its title','its length'],a:1},
+    {q:'A "reference word" like "this" points to ___.',o:['the next page','a previously mentioned idea','the title','a footnote'],a:1},
+    {q:'In gapped text the gap is usually a ___.',o:['single word','single paragraph','title','table'],a:1},
+    {q:'Pick the natural sentence.',o:['The author challenges a common assumption.','The author challenge to a common assumption.','The author challenging a common assumption.','The author challenge for a common assumption.'],a:0},
+    {q:'Multi-match works best when you ___.',o:['read each text once and tag candidate answers','read every statement before the texts','translate the questions','only skim the first paragraph'],a:0}
+  ]},
+  {id:'cae-writing',level:'CAE',color:'#16a085',title:{ru:'CAE · Writing',en:'CAE · Writing'},sub:{ru:'эссе + report / proposal',en:'essay + report / proposal'},rule:{ru:'CAE Writing — два задания. Part 1: обязательное эссе на основе двух мнений + одной собственной идеи (220-260 слов). Part 2: на выбор — letter, report, proposal, review (220-260 слов). Регистр должен соответствовать жанру.',en:'CAE Writing has two parts. Part 1: a required essay weighing two given views plus one of your own (220-260 words). Part 2: choose a letter, report, proposal or review (220-260 words). Register must match the genre.'},examples:['In this essay I will weigh the importance of culture against economic growth.','The data clearly show that public transport reduces congestion.','I would therefore recommend extending the cycle network across the district.','In my view, balance is preferable to a strict choice.','Although both arguments have merit, the second is more compelling.'],words:['weigh','compelling','merit','recommend','therefore','preferable','assert','justify','outline','register'],q:'CAE Part 1 essay length is around ___.',o:['100-150 words','150-200 words','220-260 words','400+ words'],a:2,build:'I would therefore recommend extending the cycle network across the district.',dictation:'I would therefore recommend extending the cycle network across the district.',focus:['Part 1 essay MUST address two given prompts plus one of your own.','Match register: a report is neutral; a proposal is persuasive.','Use a clear linking word at every paragraph boundary.'],focus_ru:['В Part 1 — обязательно две данные мысли + одна твоя.','Регистр: report — нейтральный; proposal — убедительный.','Связки на каждой границе абзаца.'],practice:[
+    {q:'"I would therefore recommend" fits which genre?',o:['casual email','report or proposal','review of a film','personal letter to a friend'],a:1},
+    {q:'"Both arguments have merit" means ___.',o:['both are wrong','both have value','only one is valid','none can be used'],a:1},
+    {q:'A proposal asks the reader to ___.',o:['translate','take an action','ignore','rate a film'],a:1},
+    {q:'Pick the natural sentence.',o:['Although both arguments have merit, the second is more compelling.','Although both arguments has merit, the second is more compelling.','Although both arguments have merit, the second more compelling is.','Although both arguments have merit, the second is more compelled.'],a:0},
+    {q:'"Justify" your answer means ___.',o:['hide your reasons','give clear reasons for your choice','translate','repeat the question'],a:1}
+  ]},
+  {id:'cae-listening',level:'CAE',color:'#16a085',title:{ru:'CAE · Listening',en:'CAE · Listening'},sub:{ru:'опыт и мнения',en:'experience & opinion'},rule:{ru:'CAE Listening — четыре части: короткие отрывки на множественный выбор, монологи на заполнение пропусков, интервью, многоговорящее обсуждение. Лови mood-маркеры и оттенки уверенности.',en:'CAE Listening — four parts: short extracts with multiple choice, monologues with sentence completion, interviews, and multi-speaker discussions. Listen for mood markers and shades of certainty.'},examples:['She sounded reluctant when she agreed to the change.','He emphasised that the result was unexpected.','They were divided on the practical value of the method.','Her tone hinted at frustration despite her polite words.','Most participants agreed, though one remained sceptical.'],words:['reluctant','emphasised','divided','frustration','sceptical','tentative','dismissive','assertive','tone','attitude'],q:'"She sounded reluctant" tells you about her ___.',o:['vocabulary','attitude','grammar','spelling'],a:1,build:'She sounded reluctant when she agreed to the change.',dictation:'She sounded reluctant when she agreed to the change.',focus:['Tone-of-voice questions reward inference — go beyond the literal words.','In multi-speaker tasks, write a one-letter tag for each speaker.','"Reluctant", "tentative", "dismissive" are common right-answer adjectives.'],focus_ru:['Tone-of-voice вопросы про вывод — не буквальные слова.','В multi-speaker задаче помечай говорящих одной буквой.','Reluctant, tentative, dismissive — частые правильные ответы.'],practice:[
+    {q:'"Sceptical" means ___.',o:['enthusiastic','doubtful','confused','exhausted'],a:1},
+    {q:'"Tentative agreement" is agreement that is ___.',o:['firm and final','partial and cautious','aggressive','random'],a:1},
+    {q:'"She emphasised" means she ___.',o:['ignored','stressed strongly','translated','denied'],a:1},
+    {q:'Pick the natural sentence.',o:['Her tone hinted at frustration despite her polite words.','Her tone hinted on frustration despite her polite words.','Her tone hinted of frustration despite her polite words.','Her tone hinted to frustration despite her polite words.'],a:0},
+    {q:'"Dismissive" attitude treats the topic as ___.',o:['urgent','unimportant','impressive','dangerous'],a:1}
+  ]},
+  {id:'cae-speaking',level:'CAE',color:'#16a085',title:{ru:'CAE · Speaking',en:'CAE · Speaking'},sub:{ru:'long turn + collaborative',en:'long turn + collaborative'},rule:{ru:'CAE Speaking — четыре части на двоих кандидатов: interview, long turn (1 мин по фото), collaborative discussion, follow-up. Оценивают: грамматика, словарь, произношение, интерактивная коммуникация.',en:'CAE Speaking has four parts with two candidates: interview, long turn (1 min on a photo), collaborative discussion, follow-up. Examiners rate grammar, vocabulary, pronunciation and interactive communication.'},examples:['The first picture shows a couple deciding on a holiday destination.','I would say the main challenge here is uncertainty.','That is a fair point — I would add that personal taste also matters.','Could I just come in here? I think we are missing one aspect.','To sum up, I would prioritise safety over cost.'],words:['challenge','prioritise','aspect','uncertainty','perspective','fair','clarify','interject','elaborate','consensus'],q:'In the CAE collaborative task you should ___.',o:['talk only about yourself','interact with your partner and reach a decision','remain silent','read from notes'],a:1,build:'To sum up, I would prioritise safety over cost in this scenario.',dictation:'To sum up, I would prioritise safety over cost in this scenario.',focus:['Long turn: 1 minute — compare, contrast, speculate.','In collaborative task, invite your partner: "What do you think?"','Hedge politely: "I would say...", "Could it be...?"'],focus_ru:['Long turn — 1 минута: сравни, противопоставь, предположи.','В collaborative приглашай партнёра: "What do you think?"','Смягчай: "I would say...", "Could it be...?"'],practice:[
+    {q:'"Could I just come in here?" is used to ___.',o:['leave the room','politely interrupt','order food','translate'],a:1},
+    {q:'"Prioritise safety over cost" means safety is ___.',o:['less important than cost','more important than cost','equal to cost','irrelevant'],a:1},
+    {q:'In a long turn (1 min) you should ___.',o:['list every detail','compare, contrast and speculate','translate','read from cue'],a:1},
+    {q:'Pick the natural sentence.',o:['That is a fair point — I would add that personal taste matters.','That is a fair point — I would adding personal taste matter.','That is fairly point — I would add personal taste matter.','That is a fair point — I added personal taste mattered.'],a:0},
+    {q:'"To sum up" signals you are ___.',o:['starting','wrapping up','quoting','laughing'],a:1}
+  ]},
+  {id:'cae-strategy',level:'CAE',color:'#16a085',title:{ru:'CAE · стратегия',en:'CAE · strategy'},sub:{ru:'time + register',en:'time + register'},rule:{ru:'CAE — экзамен высокого уровня. Главные ловушки: register mismatch (формальный вместо нейтрального), buzzword answers (слишком "красивые" фразы), и time pressure в Use of English.',en:'CAE is a high-level exam. Major pitfalls: register mismatch (too formal where neutral is needed), buzzword answers (overly polished phrases), and time pressure in Use of English.'},examples:['Match register: a complaint letter is neutral, not aggressive.','Avoid memorised phrases — examiners spot them instantly.','Use of English is the densest part; allocate time carefully.','Read every option in cloze before deciding — distractors look identical.','Strong test-takers redraft for one minute at the end.'],words:['register','allocate','memorised','distractor','redraft','pitfall','assess','adjust','prioritise','revise'],q:'A "register mismatch" in CAE means ___.',o:['the wrong page','using a tone unsuited to the genre','a forgotten signature','a missing word'],a:1,build:'Avoid memorised phrases — examiners spot them instantly.',dictation:'Avoid memorised phrases — examiners spot them instantly.',focus:['Allocate Use of English time: ~45s per item, no longer.','Plan writing for 5 minutes before drafting.','Reserve 1-2 minutes per part for re-reading and correction.'],focus_ru:['В Use of English — ~45 секунд на пункт, не больше.','В Writing — 5 минут на план до текста.','Резерв 1-2 минуты на проверку и правку.'],practice:[
+    {q:'In a complaint letter you should sound ___.',o:['aggressive','neutral and clear','sarcastic','poetic'],a:1},
+    {q:'"Allocate time" means ___.',o:['skip the test','divide it among tasks','give it to the examiner','translate it'],a:1},
+    {q:'Examiners spot memorised phrases because they ___.',o:['help your grade','do not fit the prompt naturally','are usually banned','contain spelling errors'],a:1},
+    {q:'Pick the natural sentence.',o:['Strong test-takers redraft for one minute at the end.','Strong test-takers redraft for one minute on the end.','Strong test-takers redraft for one minute in the end of.','Strong test-takers redraft for one minute by the end of.'],a:0},
+    {q:'"Distractor" in multi-choice means ___.',o:['the correct answer','a plausible wrong option','a hint','a translation'],a:1}
   ]}
 );
 
@@ -5576,10 +5679,14 @@ function courseLevelLabel(level){
     B2:{ru:'Upper-Intermediate · сложные тексты',en:'Upper-Intermediate · complex texts'},
     C1:{ru:'Advanced · академичный и точный язык',en:'Advanced · precise academic language'},
     C2:{ru:'Proficiency · стиль, нюансы, риторика',en:'Proficiency · style, nuance and rhetoric'},
-    TOEFL:{ru:'TOEFL Prep · подготовка к экзамену',en:'TOEFL Prep · exam preparation'}
+    TOEFL:{ru:'TOEFL Prep · подготовка к экзамену',en:'TOEFL Prep · exam preparation'},
+    IELTS:{ru:'IELTS Prep · подготовка к экзамену',en:'IELTS Prep · exam preparation'},
+    CAE:{ru:'Cambridge CAE / CPE · продвинутый экзамен',en:'Cambridge CAE / CPE · advanced exam'}
   })[level]||{ru:'Уровень',en:'Level'};
 }
-const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2','TOEFL'];
+const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2','TOEFL','IELTS','CAE'];
+const COURSE_EXAM_LEVELS=['TOEFL','IELTS','CAE'];
+function isExamLevel(lvl){return COURSE_EXAM_LEVELS.indexOf(lvl)>=0;}
 /* The rendered course list sorts lessons by CEFR level (stable sort within a
    level). Lock + previous-lesson logic must use the SAME order, not the
    raw GALAXY_COURSE index — otherwise a0-hello (15th in the array, 3rd on
@@ -5642,7 +5749,7 @@ function isCourseUnlocked(id){
   const idx=sortedCourseIdx(id);
   if(idx<0)return false;
   const ls=sorted[idx];
-  if(ls.level==='TOEFL')return true;
+  if(isExamLevel(ls.level))return true;
   const lessonLvlIdx=COURSE_LEVEL_ORDER.indexOf(ls.level);
   const proven=provenLevelIdx();
   if(lessonLvlIdx<=proven)return true;
@@ -7289,86 +7396,44 @@ function completeRoadmapMission(lessonId){
   renderRoadmap();
 }
 
+/* The Roadmap tab is repurposed as the Exam Hub: grouped TOEFL / IELTS / CAE
+   prep lessons with a one-tap entry into the same lesson UI as the main
+   course. This replaces the old grammar roadmap, which duplicated the CEFR
+   course content. */
 function renderRoadmap(){
   const wrap=document.getElementById('roadmap-wrap');
   if(!wrap)return;
-  const progress=LS.getJ('rm_progress')||{};
-  const userLevel=LS.get('ob_level')||window._d?.level||'A1';
-  const levelOrder=['A0','A1','A2','B1','B2','C1','C2'];
-  const userLvlIdx=Math.max(0,levelOrder.indexOf(String(userLevel).replace(/\+/,'')));
-  const passedTests=LS.getJ('passed_level_tests')||{};
-  const stats=rmProgressStats(progress);
-  const path=rmGetPath();
-  const next=rmFindNext(progress,userLevel,passedTests);
-  wrap.innerHTML='';
-
-  const ov=document.createElement('div');
-  ov.className='rm-overview';
-  const ovTitle=path?(path.name[lang]||path.name.en):({ru:'Выбери цель обучения',en:'Choose a learning goal',es:'Elige una meta',pt:'Escolha uma meta'}[lang]||'Choose a learning goal');
-  const ovSub=path?(path.desc[lang]||path.desc.en):({ru:'Путь адаптирует примеры и задания ALEX под твою цель',en:'The path adapts ALEX examples and tasks to your goal',es:'El camino adapta ejemplos y tareas',pt:'O caminho adapta exemplos e tarefas'}[lang]||'Personalized lessons');
-  const nextLabel=next?(next.lesson.title[lang]||next.lesson.title.en):({ru:'Путь завершён',en:'Path complete',es:'Ruta completa',pt:'Caminho completo'}[lang]||'Path complete');
-  ov.innerHTML=`
-    <div class="rm-over-top">
-      <div class="rm-path-ico" style="color:${path?path.color:'var(--a)'}">${path?path.icon:'<svg viewBox="0 0 24 24"><path d="M6 21V4"/><path d="M6 5h11l-2.3 3.2L17 11.5H6"/><circle cx="6" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg>'}</div>
-      <div style="min-width:0;flex:1"><div class="rm-over-title">${safeHTML(ovTitle)}</div><div class="rm-over-sub">${safeHTML(ovSub)} · ${safeHTML(nextLabel)}</div></div>
-      <div class="rm-over-pct">${stats.pct}%</div>
+  const sorted=sortedGalaxyCourse();
+  const exams=[
+    {level:'TOEFL',color:'#9c27b0',name:{ru:'TOEFL ITP',en:'TOEFL ITP'},desc:{ru:'Listening · Structure · Reading',en:'Listening · Structure · Reading'}},
+    {level:'IELTS',color:'#e74c3c',name:{ru:'IELTS Academic / General',en:'IELTS Academic / General'},desc:{ru:'Listening · Reading · Writing',en:'Listening · Reading · Writing'}},
+    {level:'CAE',color:'#16a085',name:{ru:'Cambridge CAE / CPE',en:'Cambridge CAE / CPE'},desc:{ru:'Use of English · Reading · Speaking',en:'Use of English · Reading · Speaking'}}
+  ];
+  const done=LS.getJ('course_done')||{};
+  const head=`<div class="course-system">
+    <div class="course-system-top">
+      <div><div class="course-system-title">${lang==='ru'?'Подготовка к экзаменам':'Exam preparation'}</div>
+      <div class="course-system-sub">${lang==='ru'?'Полные уроки в формате реального экзамена: задания, словарь, стратегия.':'Full lessons in real-exam format: tasks, vocabulary, strategy.'}</div></div>
     </div>
-    <div class="rm-over-bar"><div class="rm-over-fill" style="width:${stats.pct}%"></div></div>
-    <div class="rm-actions">
-      <button class="rm-action primary" type="button" ${next?`onclick="startRoadmapLesson('${next.lesson.id}')"`:'onclick="openPathPicker()"'}><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5"/></svg>${next?({ru:'Продолжить',en:'Continue',es:'Continuar',pt:'Continuar'}[lang]||'Continue'):({ru:'Выбрать путь',en:'Choose path',es:'Elegir',pt:'Escolher'}[lang]||'Choose path')}</button>
-      <button class="rm-action" type="button" onclick="openPathPicker()"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>${lang==='ru'?'Цель':'Goal'}</button>
-    </div>`;
-  wrap.appendChild(ov);
-
-  ROADMAP_DATA.forEach((lvlData,li)=>{
-    const div=document.createElement('div');div.className='rm-level';
-    const lvlIdx=levelOrder.indexOf(lvlData.level);
-    const isUnlocked=lvlIdx<=userLvlIdx;
-    const isNext=lvlIdx===userLvlIdx+1;
-    const levelDone=lvlData.lessons.filter(ls=>(progress[ls.id]||0)>=5).length;
-    const hdr=document.createElement('div');hdr.className='rm-level-hdr';
-    hdr.innerHTML=`<div class="rm-level-dot" style="background:${lvlData.color}"></div><div class="rm-level-name" style="color:${lvlData.color}">${lvlData.level}</div><div class="rm-level-meta">${levelDone}/${lvlData.lessons.length}</div>`;
-    div.appendChild(hdr);
-
-    // Add level-up test button at start of next level
-    if(isNext&&!passedTests[lvlData.level]){
-      const testBtn=document.createElement('div');testBtn.className='rm-test-btn';
-      testBtn.innerHTML=`
-        <div class="rm-test-ico"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/><path d="M9 14l2 2 4-4"/></svg></div>
-        <div><div class="rm-test-title">${lang==='ru'?'Тест перехода на':'Level-up test for'} ${lvlData.level}</div>
-        <div class="rm-test-sub">${lang==='ru'?'Пройди тест чтобы разблокировать':'Pass the test to unlock'}</div></div>`;
-      testBtn.onclick=()=>startLevelTest(lvlData.level);
-      div.appendChild(testBtn);
-    }
-
-    lvlData.lessons.forEach((ls,idx)=>{
-      const prog=Math.min(5,progress[ls.id]||0);
-      const done=prog>=5;
-      const lessonUnlocked=isUnlocked||(isNext&&passedTests[lvlData.level]);
-      const isActive=!done&&lessonUnlocked&&(idx===0||(progress[lvlData.lessons[idx-1]?.id]||0)>=5);
-      const locked=!lessonUnlocked&&!done;
-      const card=document.createElement('div');
-      card.className='rm-lesson'+(done?' done':isActive?' active-lesson':locked?' locked':'');
-      const icoColor=done?'#2ecc71':isActive?'var(--a)':lvlData.color;
-      card.style.setProperty('--rm-color', icoColor);
-      const status=locked?'locked':done?'done':isActive?'active':'idle';
-      card.innerHTML=`
-        <div class="rm-lesson-ico" style="background:${locked?'var(--e3)':icoColor}">${rmLessonSvg(ls.icon)}</div>
-        <div class="rm-info">
-          <div class="rm-title">${ls.title[lang]||ls.title.en}</div>
-          <div class="rm-prog">${ls.sub[lang]||ls.sub.en} · ${prog}/5 ${lang==='ru'?'миссий':'missions'}</div>
-          <div class="rm-tags"><span class="rm-tag">${lvlData.level}</span><span class="rm-tag">${path?(path.name[lang]||path.name.en):'Core'}</span></div>
-          <div class="rm-bar"><div class="rm-fill" style="width:${done?100:prog*20}%"></div></div>
-        </div>
-        <div class="rm-status">${rmStatusIcon(status)}</div>`;
-      if(!locked){
-        card.onclick=()=>startRoadmapLesson(ls.id);
-      }
-      div.appendChild(card);
-    });
-    wrap.appendChild(div);
-  });
+  </div>`;
+  const groups=exams.map(ex=>{
+    const items=sorted.filter(l=>l.level===ex.level);
+    if(!items.length)return '';
+    const doneCount=items.filter(l=>done[l.id]).length;
+    const cards=items.map(ls=>`<div class="course-card" style="--lesson-color:${ex.color}" onclick="openCourseLesson('${ls.id}')">
+      <div class="course-ico" style="color:${ex.color}">${lessonThemeIcon(ls)}</div>
+      <div class="course-info">
+        <div class="course-title">${safeHTML(ls.title[lang]||ls.title.en)}</div>
+        <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
+        <div class="course-meta">${done[ls.id]?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:`<span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span>`}</div>
+      </div>
+      <div class="course-status"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div>`).join('');
+    return `<div class="course-level-head"><div class="course-level-name" style="color:${ex.color}">${safeHTML(ex.name[lang]||ex.name.en)}</div><div class="course-level-desc">${safeHTML(ex.desc[lang]||ex.desc.en)} · ${doneCount}/${items.length}</div></div>${cards}`;
+  }).join('');
+  wrap.innerHTML=head+groups;
 }
+
 
 /* ══════════════════════════════════════════════════
    🎭  ROLEPLAY SCENARIOS
@@ -7972,7 +8037,7 @@ function updateNewLabels(){
   const ltr=document.getElementById('lt-road-lbl');
   if(ltco)ltco.textContent={ru:'Курс',en:'Course',es:'Curso',de:'Kurs',fr:'Cours'}[lang]||'Course';
   if(ltc)ltc.textContent={ru:'Карточки',en:'Flashcards',es:'Tarjetas',de:'Karten',fr:'Cartes'}[lang]||'Flashcards';
-  if(ltr)ltr.textContent={ru:'Путь',en:'Roadmap',es:'Camino',de:'Weg',fr:'Parcours'}[lang]||'Roadmap';
+  if(ltr)ltr.textContent={ru:'Экзамены',en:'Exams',es:'Exámenes',de:'Prüfungen',fr:'Examens',pt:'Exames',uk:'Іспити',tr:'Sınavlar',zh:'考试',ar:'اختبارات'}[lang]||'Exams';
   // Quick start buttons
   const qb2=document.getElementById('qb2t');if(qb2)qb2.textContent={ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes'}[lang]||'Roleplay';
   const qb2s=document.getElementById('qb2s');if(qb2s)qb2s.textContent={ru:'Живые диалоги',en:'Live dialogues',es:'Diálogos vivos',de:'Live-Dialoge',fr:'Dialogues vivants',pt:'Diálogos ao vivo',uk:'Живі діалоги',tr:'Canlı diyaloglar',zh:'实时对话',ar:'حوارات حية'}[lang]||'Live dialogues';
