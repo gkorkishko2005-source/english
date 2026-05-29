@@ -2156,13 +2156,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* ══ LOADER VARIETY ══ */
 try{(function(){
-  var q0=['Учиться никогда не поздно','Practice makes perfect','Один язык — одна личность','Каждый день — новый шанс','Маленькие шаги — большие результаты','Знание — сила','Повторение — мать учения'];
-  var q1=['Learning never exhausts the mind','Practice makes perfect','A new language is a new life','Every expert was once a beginner','Small steps lead to big changes','Knowledge is power','The more you practice, the better you get'];
-  var emojis=['📚','🎯','✨','🧠','🌟','🚀','💡','🔥'];
+  /* Loader sub-line: brand caption instead of inspirational quote. */
   var lang0=localStorage.getItem('app_lang')||'ru';
-  var qs=lang0==='ru'?q0:q1;
+  var captions={ru:'PolyGlotty · загрузка',en:'PolyGlotty · loading',es:'PolyGlotty · cargando',de:'PolyGlotty · lädt',fr:'PolyGlotty · chargement',pt:'PolyGlotty · carregando',uk:'PolyGlotty · завантаження',tr:'PolyGlotty · yükleniyor',zh:'PolyGlotty · 加载中',ar:'PolyGlotty · جارٍ التحميل'};
   var q=document.getElementById('loader-quote');
-  if(q){var ri=Math.floor(Math.random()*qs.length);q.textContent=emojis[ri%emojis.length]+' "'+qs[ri]+'"';}
+  if(q)q.textContent=captions[lang0]||captions.en;
   var anim=document.getElementById('loader-anim');
   if(!anim)return;
   var v=Math.floor(Math.random()*4);
@@ -2751,25 +2749,22 @@ function telegramDisplayName(){
 function displayName(d){
   return telegramDisplayName()||cleanDisplayName(d?.name)||({ru:'Ученик',en:'Learner',es:'Estudiante',de:'Lernender',fr:'Apprenant',pt:'Aluno',uk:'Учень',tr:'Öğrenci',zh:'学习者',ar:'متعلم'}[lang]||'Learner');
 }
-const HERO_MOTIVATIONS={
-  ru:['один урок сегодня уже победа','маленький шаг сильнее нуля','английский растёт от регулярности','пять минут лучше, чем завтра','сделай одну фразу увереннее','сегодня тренируем живой English','не идеально, а стабильно'],
-  en:['one lesson today is a win','small steps beat zero','consistency builds English','five minutes beats tomorrow','make one sentence clearer','practice real English today','steady beats perfect'],
-  es:['una lección hoy ya cuenta','un paso pequeño supera cero','la constancia crea inglés','cinco minutos mejor que mañana','haz una frase más clara','practica inglés real hoy','constancia antes que perfección'],
-  de:['eine Lektion heute zählt','kleine Schritte schlagen null','Regelmäßigkeit baut Englisch auf','fünf Minuten sind besser als morgen','mach einen Satz klarer','übe heute echtes Englisch','stetig schlägt perfekt'],
-  fr:["une leçon aujourd'hui compte",'un petit pas vaut mieux que rien',"la régularité construit l'anglais",'cinq minutes valent mieux que demain','clarifie une phrase','pratique un anglais réel aujourd’hui','régulier vaut mieux que parfait'],
-  pt:['uma lição hoje já conta','um passo pequeno vence o zero','consistência constrói inglês','cinco minutos é melhor que amanhã','deixe uma frase mais clara','pratique inglês real hoje','constante vence perfeito'],
-  uk:['один урок сьогодні вже перемога','малий крок кращий за нуль','регулярність будує англійську','п’ять хвилин краще, ніж завтра','зроби одну фразу впевненішою','сьогодні тренуємо живу English','стабільно краще за ідеально'],
-  tr:['bugün bir ders kazançtır','küçük adım sıfırdan iyidir','düzen İngilizceyi büyütür','beş dakika yarından iyidir','bir cümleyi daha net yap','bugün gerçek İngilizce çalış','istikrar mükemmelden iyidir'],
-  zh:['今天一课就是进步','小步也比零步强','坚持会长出英语感','五分钟胜过明天再说','把一句话说清楚','今天练真实英语','稳定胜过完美'],
-  ar:['درس واحد اليوم انتصار','خطوة صغيرة أفضل من لا شيء','الاستمرار يبني الإنجليزية','خمس دقائق أفضل من التأجيل','اجعل جملة واحدة أوضح','تدرّب على إنجليزية حقيقية اليوم','الثبات أفضل من الكمال']
+const HERO_SUBTITLES={
+  ru:'Курс A0–C2 · Exam Hub · ALEX Chat',
+  en:'A0–C2 Course · Exam Hub · ALEX Chat',
+  es:'Curso A0–C2 · Exam Hub · Chat ALEX',
+  de:'A0–C2 Kurs · Exam Hub · ALEX Chat',
+  fr:'Cours A0–C2 · Exam Hub · Chat ALEX',
+  pt:'Curso A0–C2 · Exam Hub · Chat ALEX',
+  uk:'Курс A0–C2 · Exam Hub · ALEX Chat',
+  tr:'A0–C2 Kursu · Exam Hub · ALEX Chat',
+  zh:'A0–C2 课程 · 考试中心 · ALEX 聊天',
+  ar:'دورة A0–C2 · مركز الاختبارات · محادثة ALEX'
 };
 function heroGreeting(){
   const h=new Date().getHours();
   const base=(L.greet?L.greet(h):'Hello,').replace(/[,،]\s*$/,'');
-  const arr=HERO_MOTIVATIONS[lang]||HERO_MOTIVATIONS.en;
-  const day=Math.floor(Date.now()/86400000);
-  const uid=parseInt(window._uid||0,10)||0;
-  return base+' · '+arr[(day+uid)%arr.length];
+  return base+' · '+(HERO_SUBTITLES[lang]||HERO_SUBTITLES.en);
 }
 function refreshSub(){
   const el=document.getElementById('greet');if(el)el.textContent=heroGreeting();
@@ -4761,19 +4756,9 @@ function startReminderTimer(){
   },delay);
 }
 
-const REMINDER_MOTIVATIONS={
-  ru:['Начни сейчас: потом легче не станет, но ты станешь сильнее.','Пять минут сегодня лучше, чем идеальный план на завтра.','Двигайся дальше: английский растёт от повторений.','Одна фраза сегодня уже меняет траекторию.','Не идеально, а стабильно. Открой практику.'],
-  en:['Start now: later will not be easier, but you will be stronger.','Five minutes today beats a perfect plan tomorrow.','Keep moving: English grows through repetition.','One sentence today can change the path.','Steady beats perfect. Open practice.'],
-  es:['Empieza ahora: luego no será más fácil, pero tú serás más fuerte.','Cinco minutos hoy valen más que un plan perfecto mañana.','Sigue: el inglés crece con repetición.','Una frase hoy cambia el camino.','Constancia antes que perfección.'],
-  pt:['Comece agora: depois não fica mais fácil, mas você fica mais forte.','Cinco minutos hoje vencem um plano perfeito amanhã.','Continue: inglês cresce com repetição.','Uma frase hoje muda o caminho.','Constância vence perfeição.']
-};
-function reminderMotivation(){
-  const arr=REMINDER_MOTIVATIONS[lang]||REMINDER_MOTIVATIONS.en;
-  const day=Math.floor(Date.now()/86400000);
-  return arr[day%arr.length];
-}
+function reminderMotivation(){return '';}
 function fireReminder(){
-  const msg=(lang==='ru'?'Время английского. ':'Time for English. ')+reminderMotivation();
+  const msg=({ru:'Время практики английского.',en:'Time for English practice.',es:'Hora de practicar inglés.',de:'Zeit für Englisch-Übung.',fr:"Heure de la pratique d'anglais.",pt:'Hora de praticar inglês.',uk:'Час практики англійської.',tr:'İngilizce pratiği zamanı.',zh:'英语练习时间。',ar:'وقت ممارسة الإنجليزية.'}[lang])||'Time for English practice.';
   // Telegram WebApp notification (vibrate)
   if(tg?.HapticFeedback)tg.HapticFeedback.notificationOccurred('success');
   // Browser notification
@@ -5958,7 +5943,7 @@ function courseSynonymKeys(){return Object.keys(COURSE_SYNONYMS);}
 function courseT(key){
   const m={
     vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras'},
-    vocabSub:{ru:'Выбери перевод. Ошибки попадут в повторение.',en:'Choose the translation. Missed words come back later.',es:'Elige la traducción. Los errores vuelven después.',pt:'Escolha a tradução. Erros voltam depois.'},
+    vocabSub:{ru:'Выберите перевод слова.',en:'Select the correct translation.',es:'Selecciona la traducción.',pt:'Selecione a tradução.'},
     reverse:{ru:'Обратный перевод',en:'Reverse translation',es:'Traducción inversa',pt:'Tradução inversa'},
     reverseSub:{ru:'С родного языка в английский.',en:'From your interface language into English.',es:'De tu idioma al inglés.',pt:'Do seu idioma para inglês.'},
     grammar:{ru:'Грамматика и выбор',en:'Grammar choice',es:'Gramática',pt:'Gramática'},
@@ -5969,8 +5954,8 @@ function courseT(key){
     done:{ru:'готово',en:'done',es:'listo',pt:'feito'},
     choose:{ru:'Выбери перевод:',en:'Choose the translation:',es:'Elige la traducción:',pt:'Escolha a tradução:'},
     chooseWord:{ru:'Выбери английское слово:',en:'Choose the English word:',es:'Elige la palabra en inglés:',pt:'Escolha a palavra em inglês:'},
-    correct:{ru:'Верно. Слово закреплено.',en:'Correct. The word is reinforced.',es:'Correcto. Palabra reforzada.',pt:'Correto. Palavra reforçada.'},
-    miss:{ru:'Не раскрываю ответ. Слово вернётся в следующих уроках.',en:'No answer revealed. This word will return in later lessons.',es:'No revelo la respuesta. La palabra volverá.',pt:'Sem revelar a resposta. A palavra voltará.'},
+    correct:{ru:'Верно.',en:'Correct.',es:'Correcto.',pt:'Correto.'},
+    miss:{ru:'Неверно.',en:'Incorrect.',es:'Incorrecto.',pt:'Incorreto.'},
     allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.'},
     synonym:{ru:'Близкие по смыслу',en:'Close in meaning',es:'Cercanos en significado',de:'Bedeutungsnah',fr:'Sens proche',pt:'Próximos em significado',uk:'Близькі за змістом',tr:'Anlamca yakın',zh:'近义词',ar:'قريبة في المعنى'},
     synonymSub:{ru:'Выбери английское слово ближе всего по смыслу.',en:'Pick the English word closest in meaning.',es:'Elige la palabra inglesa más cercana en significado.',de:'Wähle das englische Wort mit der nächsten Bedeutung.',fr:'Choisis le mot anglais le plus proche par le sens.',pt:'Escolha a palavra inglesa mais próxima em significado.',uk:'Обери англійське слово, найближче за змістом.',tr:'Anlamı en yakın İngilizce kelimeyi seç.',zh:'选择含义最接近的英文单词。',ar:'اختر الكلمة الإنجليزية الأقرب في المعنى.'},
@@ -6534,10 +6519,19 @@ function courseReadingText(ls){
     :`This short text trains “${title}”. Read the examples and notice the target structure: ${ex}`;
 }
 function courseWarmLine(){
-  const lines=lang==='ru'
-    ?['Спокойно, маленькими шагами язык реально собирается в систему.','Хороший темп. Один короткий урок сегодня лучше, чем большой план на потом.','Ты закрыл кусок базы. Завтра это будет вспоминаться легче.','Нормальный прогресс выглядит именно так: немного правила, много практики.']
-    :['Good pace. One short lesson today beats a huge plan for later.','A small step, but it makes the language feel more automatic.','You closed one piece of the system. Tomorrow it will feel easier.','Real progress is simple: a little rule, a lot of practice.'];
-  return lines[Math.floor(Math.random()*lines.length)];
+  /* Short factual sub-line on the lesson complete card. No slogans. */
+  return ({
+    ru:'Урок добавлен в список пройденных.',
+    en:'Lesson added to your completed list.',
+    es:'Lección añadida a la lista completada.',
+    de:'Lektion zur Liste der abgeschlossenen hinzugefügt.',
+    fr:'Leçon ajoutée à la liste des leçons terminées.',
+    pt:'Lição adicionada à lista de concluídas.',
+    uk:'Урок додано до списку пройдених.',
+    tr:'Ders tamamlananlar listesine eklendi.',
+    zh:'课程已加入已完成列表。',
+    ar:'تمت إضافة الدرس إلى قائمة المكتملة.'
+  })[lang]||'Lesson added to your completed list.';
 }
 function coursePartsKey(id){return 'course_parts_'+id;}
 function courseRequiredParts(id,practiceOverride){
@@ -6918,7 +6912,7 @@ function answerCoursePractice(id,qi,picked){
     const completed=courseMarkPart(id,'practice_'+qi,true);
     if(!completed)maybeAutoOpenNextAfterPractice(id);
     try{trackM('drill');}catch(e){}
-    toast(lang==='ru'?'Хорошо, дальше':'Good, keep going','✅');
+    toast(lang==='ru'?'Верно.':'Correct.','✅');
   }else{
     courseMarkStageFailed(id,'practice_'+qi,true);
     if(!box.querySelector('.course-retry-btn')){

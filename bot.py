@@ -590,32 +590,11 @@ def pronunciation_kb(lang: str):
 #  ПЛАНИРОВЩИК
 # ══════════════════════════════════════════════════════════════════
 
-MOTIVATION_LINES = {
-    "ru": [
-        "Начни сейчас: завтра легче не станет, но ты станешь сильнее.",
-        "Пять минут сегодня лучше, чем идеальный план на потом.",
-        "Двигайся дальше. Английский растёт от повторений, а не от ожидания.",
-        "Одна новая фраза в день — и через месяц ты уже говоришь увереннее.",
-        "Не жди мотивации. Сделай маленький шаг, и она появится по дороге.",
-        "Пока кто-то откладывает, ты можешь стать на один урок ближе к цели.",
-        "Сегодня не нужно идеально. Нужно просто продолжить.",
-        "Будущий ты скажет спасибо за эти 5 минут практики.",
-    ],
-    "en": [
-        "Start now: tomorrow will not get easier, but you will get stronger.",
-        "Five minutes today beats a perfect plan for later.",
-        "Keep moving. English grows through repetition, not waiting.",
-        "One new phrase a day makes you noticeably more confident in a month.",
-        "Do not wait for motivation. Take a small step and it will follow.",
-        "While others postpone, you can get one lesson closer.",
-        "It does not have to be perfect today. It just has to continue.",
-        "Your future self will thank you for these five minutes.",
-    ],
-}
-
+# Motivational quotes removed per design decision — the reminder now ships
+# only with factual information (streak count, due words). This keeps the
+# tone professional and avoids the "child-friendly slogan" feel.
 def motivation_line(lang: str = "ru") -> str:
-    lines = MOTIVATION_LINES.get(lang) or MOTIVATION_LINES["en"]
-    return random.choice(lines)
+    return ""
 
 async def send_reminder(uid: int):
     user = await get_user(uid)
@@ -631,13 +610,12 @@ async def send_reminder(uid: int):
         first = interests.split(",")[0].strip()
         interest_hint = f"\n💡 {'Сегодня разберём тему' if lang=='ru' else 'Today: topic'}: <b>{first}</b>"
 
-    msgs_ru = ["<b>Время английского.</b>","<b>Твой ежедневный шаг ждёт.</b>","<b>Пора сделать английский чуть сильнее.</b>"]
-    msgs_en = ["<b>Time for English.</b>","<b>Your daily step is waiting.</b>","<b>Make your English a little stronger today.</b>"]
-    text = random.choice(msgs_ru if lang=="ru" else msgs_en) + interest_hint
-    if streak > 2: text += f"\n\n🔥 Streak: <b>{streak}</b>!"
-    if due_cnt:    text += f"\n📅 <b>{due_cnt}</b> {'слов для повторения' if lang=='ru' else 'words due'} → /vocab"
-    if due_idioms: text += f"\n🗣 <b>{due_idioms}</b> {'идиом для повторения' if lang=='ru' else 'idioms due'} → /vocab"
-    text += f"\n\n<i>{motivation_line(lang)}</i>"
+    header_ru = "<b>Практика английского.</b>"
+    header_en = "<b>English practice.</b>"
+    text = (header_ru if lang=="ru" else header_en) + interest_hint
+    if streak > 2: text += f"\n\n🔥 Streak: <b>{streak}</b>"
+    if due_cnt:    text += f"\n📅 <b>{due_cnt}</b> {'слов на повторение' if lang=='ru' else 'words due'} → /vocab"
+    if due_idioms: text += f"\n🗣 <b>{due_idioms}</b> {'идиом на повторение' if lang=='ru' else 'idioms due'} → /vocab"
     app_url = webapp_url()
     kb = None
     if app_url:
