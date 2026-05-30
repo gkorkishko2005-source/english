@@ -824,6 +824,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .micb:active{transform:scale(.9)}
 .micb svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 .micb.rec{background:rgba(255,107,107,.14);border-color:var(--rd);color:var(--rd);animation:flicker .6s ease-in-out infinite}
+.micb.voice-mode{background:rgba(var(--ar),.14);border-color:rgba(var(--ar),.55);color:var(--a)}
+.micb.voice-mode.rec{background:rgba(255,107,107,.14);border-color:var(--rd);color:var(--rd)}
+.micb.voice-mode::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:var(--a);bottom:-2px;right:-2px;border:2px solid var(--bg)}
+.micb{position:relative}
 .sndb{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#4f8aff,#00d4aa);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .18s,filter .2s;color:#fff;box-shadow:0 2px 8px rgba(79,138,255,.28)}
 .sndb:hover{box-shadow:0 4px 14px rgba(79,138,255,.42);transform:translateY(-1px)}
 .sndb:active{transform:scale(.9)}
@@ -1740,10 +1744,37 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .mt-arr{stroke:var(--t3)}
 
 /* ── Toggle / switch (Dark + Sound) — flatten ──────────────────── */
-.dl-switch{width:34px;height:20px;border-radius:100px;background:var(--e3);border:1px solid var(--b1);position:relative;transition:background .15s,border-color .15s}
-.dl-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--t3);transition:transform .15s,background .15s}
+/* Track width 34, padding 2px each side, thumb 14px → max travel 14px.
+   The legacy `.dl-switch.on::after{left:22px}` rule (built for the
+   wider 44px track) must be neutralised or the thumb overshoots the
+   right edge. We pin `left:2px` and rely purely on `translateX`. */
+.dl-switch{width:34px!important;height:20px!important;border-radius:100px;background:var(--e3);border:1px solid var(--b1);position:relative;transition:background .15s,border-color .15s;box-shadow:none}
+.dl-switch::after{content:'';position:absolute;top:2px!important;left:2px!important;width:14px!important;height:14px!important;border-radius:50%;background:var(--t3);transform:translateX(0);transition:transform .18s,background .18s;box-shadow:none}
 .dl-switch.on{background:rgba(var(--ar),.18);border-color:rgba(var(--ar),.45)}
-.dl-switch.on::after{transform:translateX(14px);background:var(--a)}
+.dl-switch.on::after{left:2px!important;transform:translateX(14px);background:var(--a)}
+/* .set-grid-2 used to shrink the switch via scale(.85) which made the
+   thumb's translate look mis-aligned; reset to the natural size. */
+.set-grid-2 .dl-switch{transform:none;margin-left:auto}
+
+/* ── Toggle icons — stop the 180° rotation that made them "jump" ── */
+/* The legacy `.dl-toggle-icon.light/.muted{transform:rotate(±180deg)}`
+   rules rotated the entire 30×30 chip, which in a flex row reads as
+   the icon visibly jumping up or down. Hold the chip steady and let
+   the inner SVGs do the state animation via opacity only. */
+.dl-toggle-icon,
+.dl-toggle-icon.light,
+.dl-toggle-icon.muted{transform:none!important;transition:background .15s,border-color .15s}
+.theme-orb svg,.sound-orb svg{filter:none;transition:opacity .2s ease}
+.theme-orb .moon,.theme-orb .sun,
+.sound-orb .sound-on,.sound-orb .sound-off{transform:none!important}
+.theme-orb .moon{opacity:1}
+.theme-orb .sun{opacity:0}
+.dl-toggle-icon.light .moon{opacity:0}
+.dl-toggle-icon.light .sun{opacity:1}
+.sound-orb .sound-on{opacity:1}
+.sound-orb .sound-off{opacity:0}
+.dl-toggle-icon.muted .sound-on{opacity:0}
+.dl-toggle-icon.muted .sound-off{opacity:1}
 </style>
 </head>
 <body>
@@ -3896,7 +3927,7 @@ async function doChat(text){
     const r=await fetch(`${API}/api/chat`,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
-      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel(),init_data:tg?.initData||''}),
+      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel(),voice:!!window._voicePending,init_data:tg?.initData||''}),
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
@@ -3907,6 +3938,17 @@ async function doChat(text){
     if(typeof data.chat_credits==='number'){
       chatCredits=data.chat_credits;
       try{updateCreditChip();}catch(_){}
+    }
+    /* Voice-to-voice loop: speak the reply through TTS, then clear
+       the one-shot pending flag so the next text-typed message
+       doesn't get charged the voice surcharge by accident. */
+    if(window._voicePending){
+      window._voicePending=false;
+      try{
+        const replyEl=document.querySelector('#cmsgs .msg.bot:last-child .mbub');
+        const replyText=replyEl?replyEl.innerText:(data.reply||'');
+        if(replyText)setTimeout(()=>{try{speakText(replyText);}catch(_){}},120);
+      }catch(_){}
     }
     if(data.premium_required){
       try{sfx.warn();}catch(e){}
@@ -4063,12 +4105,60 @@ async function _uploadVoice(blob,mime){
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.text){toast((d&&d.error)||_micT('empty'),'⚠️');return;}
     const inp=document.getElementById('cinp');
-    inp.value=d.text.trim();
+    const text=d.text.trim();
+    inp.value=text;
     try{grow(inp);}catch(_){}
-    inp.focus?.();
+    /* Voice-to-voice mode: auto-send the transcript and read the reply
+       back through TTS. Server charges the +5 credit voice surcharge
+       because we set voice:true on the /api/chat payload. */
+    if(window._voiceMode){
+      _voicePending=true;
+      try{sfx.tap();}catch(_){}
+      setTimeout(()=>{try{sendMsg();}catch(_){_voicePending=false;}},120);
+    } else {
+      inp.focus?.();
+    }
   }catch(e){
     toast(_micT('failed'),'⚠️');
   }
+}
+
+/* ── Voice-to-voice mode ────────────────────────────────────────────
+   Long-press the mic button to toggle. When ON the mic flow becomes:
+     tap mic → record → transcribe → auto-send (+5 credit voice fee)
+     → ALEX replies → TTS reads the reply out loud.
+   The flag survives a page reload (LS) so users who prefer voice-only
+   conversations don't re-toggle every session. */
+window._voiceMode = (typeof window!=='undefined' && (LS.get('voice_mode')||'')==='1');
+window._voicePending = false;
+function toggleVoiceMode(){
+  window._voiceMode = !window._voiceMode;
+  LS.set('voice_mode', window._voiceMode ? '1' : '0');
+  const btn=document.getElementById('micb');
+  if(btn)btn.classList.toggle('voice-mode',window._voiceMode);
+  try{sfx.tap();}catch(_){}haptic('medium');
+  toast(window._voiceMode
+    ?({ru:'Голосовой режим: ALEX отвечает голосом (+5 кр)',en:'Voice mode: ALEX speaks back (+5 cr)',es:'Modo voz: ALEX responde con voz (+5 cr)',de:'Sprachmodus: ALEX spricht (+5 Cr)',fr:'Mode vocal : ALEX répond à voix haute (+5 cr)',pt:'Modo voz: ALEX responde por voz (+5 cr)',uk:'Голосовий режим: ALEX відповідає голосом (+5 кр)',tr:'Sesli mod: ALEX sesle yanıtlar (+5 kr)',zh:'语音模式：ALEX 用语音回复 (+5 信用)',ar:'وضع الصوت: يرد ALEX بالصوت (+5 رصيد)'}[lang]||'Voice mode on')
+    :({ru:'Голосовой режим выключен',en:'Voice mode off',es:'Modo voz desactivado',pt:'Modo voz desativado'}[lang]||'Voice mode off'),
+    window._voiceMode?'🎙️':'⌨️');
+}
+function _bindMicLongPress(){
+  const btn=document.getElementById('micb');
+  if(!btn||btn._lpBound)return;
+  btn._lpBound=true;
+  let timer=null,fired=false;
+  const start=(e)=>{fired=false;timer=setTimeout(()=>{fired=true;toggleVoiceMode();},520);};
+  const cancel=(e)=>{if(timer){clearTimeout(timer);timer=null;}};
+  btn.addEventListener('touchstart',start,{passive:true});
+  btn.addEventListener('mousedown',start);
+  btn.addEventListener('touchend',cancel);
+  btn.addEventListener('mouseup',cancel);
+  btn.addEventListener('mouseleave',cancel);
+  btn.addEventListener('touchcancel',cancel);
+  /* Intercept click so a long-press doesn't immediately also start
+     recording. */
+  btn.addEventListener('click',(e)=>{if(fired){e.preventDefault();e.stopPropagation();fired=false;}},true);
+  if(window._voiceMode)btn.classList.add('voice-mode');
 }
 async function _startMediaMic(btn){
   if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast(_micT('notsup'),'⚠️');return;}
@@ -11148,6 +11238,9 @@ async function init(){
     if(!LS.get('onboarded')&&!localXP){
       setTimeout(()=>{try{startPlacementTest();}catch(e){console.warn('placement',e);}},900);
     }
+
+    // Voice-to-voice mode: long-press the mic button to toggle
+    try{_bindMicLongPress();}catch(e){console.warn('voice mode',e);}
 
     setTimeout(()=>{try{showNotif();}catch{}},3000);
 
