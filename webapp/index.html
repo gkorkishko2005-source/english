@@ -1228,6 +1228,42 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-info-list .row span:last-child{color:var(--t2);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .prem-info-foot{font-size:11px;color:var(--t3);line-height:1.5;margin-top:8px}
 .prem-info-foot b{color:var(--t2);font-weight:600}
+
+/* ══════════════════════════════════════════════════════════════════
+   PLACEMENT TEST (onboarding)
+   8-question CEFR estimator. Minimal flat look — same design grammar
+   as the paywall: one accent colour, hairline separators.
+   ══════════════════════════════════════════════════════════════════ */
+.place-msh{padding:22px 0 16px;max-height:88vh;overflow-y:auto}
+.place-hero{padding:0 22px 12px;text-align:left}
+.place-kicker{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--a);margin-bottom:6px}
+.place-h{font-size:20px;font-weight:800;letter-spacing:-.2px;color:var(--t1);margin-bottom:6px;line-height:1.25}
+.place-sub{font-size:13px;color:var(--t2);line-height:1.45;max-width:340px}
+.place-dots{display:flex;gap:6px;padding:0 22px 14px;margin-top:4px}
+.place-dot{flex:1;height:3px;border-radius:3px;background:var(--b1);transition:background .25s}
+.place-dot.on{background:var(--a)}
+.place-dot.done{background:var(--a2)}
+.place-q{padding:6px 22px 14px;font-size:16px;font-weight:600;line-height:1.45;color:var(--t1);min-height:64px}
+.place-opts{display:flex;flex-direction:column;gap:8px;padding:0 22px 14px}
+.place-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;color:var(--t1);cursor:pointer;font-family:var(--f);text-align:left;transition:.15s}
+.place-opt:active{transform:scale(.98)}
+.place-opt:hover{border-color:rgba(var(--ar),.4)}
+.place-opt.correct{background:rgba(0,200,150,.12);border-color:rgba(0,200,150,.45);color:var(--a2)}
+.place-opt.wrong{background:rgba(255,90,90,.10);border-color:rgba(255,90,90,.40);color:#ff6b6b}
+.place-opt[disabled]{opacity:.55;pointer-events:none}
+.place-foot{padding:0 22px 6px;display:flex;justify-content:center}
+.place-skip{background:transparent;border:0;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;padding:8px 14px;font-family:var(--f)}
+.place-skip:active{opacity:.5}
+.place-trophy{display:flex;justify-content:center;padding:8px 0 14px;color:var(--a)}
+.place-trophy svg{width:54px;height:54px}
+.place-score-rows{padding:14px 22px 16px;display:flex;flex-direction:column;gap:6px}
+.place-score-rows .row{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--b1)}
+.place-score-rows .row:last-child{border-bottom:0}
+.place-score-rows .row span:first-child{color:var(--t2)}
+.place-score-rows .row span:last-child{color:var(--t1);font-weight:700;font-variant-numeric:tabular-nums}
+.place-cta{margin:6px 22px 4px;width:calc(100% - 44px);padding:13px;border-radius:12px;border:0;background:var(--a);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--f);letter-spacing:.1px}
+.place-cta:active{opacity:.85}
+.place-cta[disabled]{opacity:.4;pointer-events:none}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -2173,6 +2209,34 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="text-check-count"><span id="tc-count">0</span> / 500</div>
       <button class="msav" onclick="submitTextCheck()" id="tc-btn">Analyze →</button>
       <button class="moff" onclick="closeMod('textcheckm')" id="tc-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLACEMENT TEST MODAL -->
+<div class="mov" id="placem" style="display:none">
+  <div class="msh place-msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="place-hero">
+      <div class="place-kicker" id="place-kicker">Quick placement</div>
+      <div class="place-h" id="place-h">Find your level in 1 minute</div>
+      <div class="place-sub" id="place-sub">Eight short questions. We pick the right starting lesson for you.</div>
+    </div>
+    <div class="place-dots" id="place-dots"></div>
+    <div class="place-q" id="place-q"></div>
+    <div class="place-opts" id="place-opts"></div>
+    <div class="place-foot">
+      <button class="place-skip" id="place-skip" onclick="finishPlacement(true)">Skip · pick later</button>
+    </div>
+    <!-- Result view -->
+    <div id="place-result" style="display:none">
+      <div class="place-trophy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v3a6 6 0 01-12 0V3z"/><path d="M3 6h3"/><path d="M18 6h3"/><path d="M9 21h6"/><path d="M12 17v4"/></svg>
+      </div>
+      <div class="place-h" id="place-result-h"></div>
+      <div class="place-sub" id="place-result-sub"></div>
+      <div class="place-score-rows" id="place-score-rows"></div>
+      <button class="place-cta" id="place-cta" onclick="acceptPlacementResult()">Start my course</button>
+      <button class="place-skip" onclick="finishPlacement(true)" style="margin-top:6px">Choose a different level</button>
     </div>
   </div>
 </div>
@@ -9144,6 +9208,194 @@ function selectPlan(planId){
 
 function activatePremium(){ selectPlan('plat_1m'); }
 
+/* ══════════════════════════════════════════════════════════════════
+   PLACEMENT TEST
+   8 questions ranging A1 → C1. Each correct answer earns points
+   weighted by difficulty, then we map total points to a CEFR band
+   and the user lands on the first lesson of that band.
+   ══════════════════════════════════════════════════════════════════ */
+const PLACEMENT_QUESTIONS=[
+  {level:'A1',w:1,q:'She ___ a teacher.',  o:['is','am','are','be'],            a:0},
+  {level:'A1',w:1,q:'I ___ apples every day.',o:['eat','eats','eating','ate'],  a:0},
+  {level:'A2',w:2,q:'Yesterday I ___ to the cinema.',o:['go','went','gone','going'],a:1},
+  {level:'A2',w:2,q:'There ___ many books on the shelf.',o:['is','are','be','was'],a:1},
+  {level:'B1',w:3,q:'If I had time, I ___ help you.',o:['will','would','can','must'],a:1},
+  {level:'B1',w:3,q:'She has been working here ___ 2010.',o:['for','since','from','in'],a:1},
+  {level:'B2',w:4,q:'By next summer she ___ this project for five years.',o:['will work','will have worked','has worked','works'],a:1},
+  {level:'C1',w:5,q:'Rarely ___ such a remarkable performance.',o:['have we seen','we have seen','we saw','did we see'],a:0},
+];
+const PLACEMENT_BANDS=[
+  /* Threshold ≤ pts ⇒ result level. Max possible = 21. */
+  {max:3,  level:'A0'},
+  {max:7,  level:'A1'},
+  {max:12, level:'A2'},
+  {max:16, level:'B1'},
+  {max:19, level:'B2'},
+  {max:21, level:'C1'},
+];
+
+let _placeState=null;
+
+function _placementCopy(){
+  return {
+    kicker:{ru:'Быстрый тест',en:'Quick placement',es:'Prueba rápida',pt:'Teste rápido'}[lang]||'Quick placement',
+    h:{ru:'Определим твой уровень за минуту',en:'Find your level in 1 minute',es:'Encuentra tu nivel en 1 minuto',pt:'Encontre seu nível em 1 minuto'}[lang]||'Find your level in 1 minute',
+    sub:{ru:'Восемь коротких вопросов. Подберём первый урок под твой уровень.',en:'Eight short questions. We pick the right starting lesson for you.',es:'Ocho preguntas cortas. Elegimos la primera lección para ti.',pt:'Oito perguntas curtas. Escolhemos a primeira lição.'}[lang]||'Eight short questions.',
+    skip:{ru:'Пропустить · выберу сам',en:'Skip · pick later',es:'Saltar · elegir luego',pt:'Pular · escolher depois'}[lang]||'Skip · pick later',
+    yourLevel:{ru:'Твой уровень',en:'Your level',es:'Tu nivel',pt:'Seu nível'}[lang]||'Your level',
+    accept:{ru:'Начать курс с этого уровня',en:'Start my course',es:'Empezar mi curso',pt:'Começar meu curso'}[lang]||'Start my course',
+    score:{ru:'Правильных ответов',en:'Correct answers',es:'Respuestas correctas',pt:'Respostas corretas'}[lang]||'Correct answers',
+    points:{ru:'Баллы',en:'Points',es:'Puntos',pt:'Pontos'}[lang]||'Points',
+    band:{ru:'Уровень CEFR',en:'CEFR band',es:'Nivel CEFR',pt:'Nível CEFR'}[lang]||'CEFR band',
+    intro:{
+      A0:{ru:'Лучше начать с основ — ты быстро поймёшь, что к чему.',en:"You'll start at the basics and pick up speed quickly."}[lang],
+      A1:{ru:'Хороший старт — повторим базу и пойдём дальше.',en:'Solid start — we review the basics and move on.'}[lang],
+      A2:{ru:'Уверенная база. Берём первый A2-урок.',en:'Confident foundation. We begin with the first A2 lesson.'}[lang],
+      B1:{ru:'Средний уровень — самое время разогнаться.',en:"Intermediate level — time to accelerate."}[lang],
+      B2:{ru:'Сильный B2 — добавим сложные конструкции.',en:'Strong B2 — we add advanced structures.'}[lang],
+      C1:{ru:'Высокий уровень — переходим к нюансам и регистрам.',en:'High level — we move into nuance and register.'}[lang],
+    }
+  };
+}
+
+function startPlacementTest(){
+  /* Don't show the test if the user already finished it or has any
+     progress on the course (= clearly not a first-launch). */
+  if(LS.get('onboarded'))return;
+  if((LS.getJ('course_done')||{})&&Object.keys(LS.getJ('course_done')||{}).length>0){LS.set('onboarded','1');return;}
+  const c=_placementCopy();
+  const set=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt;};
+  set('place-kicker',c.kicker);
+  set('place-h',c.h);
+  set('place-sub',c.sub);
+  set('place-skip',c.skip);
+  document.getElementById('place-result').style.display='none';
+  document.querySelectorAll('#placem .place-hero,#placem .place-dots,#placem .place-q,#placem .place-opts,#placem .place-foot').forEach(el=>{el.style.display=''});
+  _placeState={i:0,score:0,points:0,answers:[]};
+  /* Render the progress dots once — eight equal segments. */
+  const dotsHost=document.getElementById('place-dots');
+  if(dotsHost){
+    dotsHost.innerHTML='';
+    for(let i=0;i<PLACEMENT_QUESTIONS.length;i++){
+      const dot=document.createElement('div');dot.className='place-dot';
+      dotsHost.appendChild(dot);
+    }
+  }
+  _renderPlacementQ();
+  openMod('placem');
+  try{sfx.tap();}catch(_){}
+}
+
+function _renderPlacementQ(){
+  if(!_placeState)return;
+  const i=_placeState.i;
+  const q=PLACEMENT_QUESTIONS[i];
+  const dots=document.querySelectorAll('#placem .place-dot');
+  dots.forEach((d,idx)=>{
+    d.classList.toggle('on',idx===i);
+    d.classList.toggle('done',idx<i);
+  });
+  const qEl=document.getElementById('place-q');
+  if(qEl)qEl.textContent=`${i+1}/${PLACEMENT_QUESTIONS.length}  ·  ${q.q}`;
+  const opts=document.getElementById('place-opts');
+  if(opts){
+    opts.innerHTML=q.o.map((opt,k)=>`<button class="place-opt" type="button" onclick="_placementAnswer(${k})">${safeHTML(opt)}</button>`).join('');
+  }
+}
+
+function _placementAnswer(k){
+  if(!_placeState)return;
+  const i=_placeState.i;
+  const q=PLACEMENT_QUESTIONS[i];
+  const opts=document.querySelectorAll('#placem .place-opt');
+  if(!opts.length||opts[0].hasAttribute('disabled'))return;
+  const correct=q.a===k;
+  if(correct){_placeState.score++;_placeState.points+=q.w;}
+  _placeState.answers.push({i,k,correct});
+  /* Flash colour briefly, then advance. */
+  opts.forEach((b,bi)=>{
+    b.setAttribute('disabled','disabled');
+    if(bi===q.a)b.classList.add('correct');
+    else if(bi===k&&!correct)b.classList.add('wrong');
+  });
+  try{correct?sfx.right():sfx.warn();}catch(_){}
+  setTimeout(()=>{
+    _placeState.i++;
+    if(_placeState.i>=PLACEMENT_QUESTIONS.length){_finishPlacement();return;}
+    _renderPlacementQ();
+  },650);
+}
+
+function _finishPlacement(){
+  if(!_placeState)return;
+  const pts=_placeState.points;
+  let band=PLACEMENT_BANDS[0].level;
+  for(const b of PLACEMENT_BANDS){if(pts<=b.max){band=b.level;break;}}
+  _placeState.band=band;
+  const c=_placementCopy();
+  /* Hide quiz, show result panel. */
+  document.querySelectorAll('#placem .place-hero,#placem .place-dots,#placem .place-q,#placem .place-opts,#placem .place-foot').forEach(el=>{el.style.display='none'});
+  const res=document.getElementById('place-result');
+  if(res)res.style.display='block';
+  const rh=document.getElementById('place-result-h');
+  if(rh)rh.textContent=`${c.yourLevel}: ${band}`;
+  const rs=document.getElementById('place-result-sub');
+  if(rs)rs.textContent=c.intro[band]||'';
+  const rows=document.getElementById('place-score-rows');
+  if(rows){
+    rows.innerHTML=
+      `<div class="row"><span>${c.score}</span><span>${_placeState.score}/${PLACEMENT_QUESTIONS.length}</span></div>`+
+      `<div class="row"><span>${c.points}</span><span>${pts}/21</span></div>`+
+      `<div class="row"><span>${c.band}</span><span>${band}</span></div>`;
+  }
+  try{sfx.win();}catch(_){}
+  try{haptic('medium');}catch(_){}
+}
+
+function acceptPlacementResult(){
+  if(!_placeState){closeMod('placem');return;}
+  const band=_placeState.band||'A1';
+  LS.set('ob_level',band);
+  LS.set('onboarded','1');
+  /* Mark all earlier bands as proven so the lock logic treats this as
+     a real placement (otherwise B1+ users would be gated by A0 lessons). */
+  const order=['A0','A1','A2','B1','B2','C1','C2'];
+  const reached=order.indexOf(band);
+  if(reached>0){
+    const passed=LS.getJ('passed_level_tests')||{};
+    for(let i=0;i<reached;i++)passed[order[i]]=Date.now();
+    LS.setJ('passed_level_tests',passed);
+    const skipped=LS.getJ('course_skipped_levels')||{};
+    for(let i=0;i<reached;i++)skipped[order[i]]=true;
+    LS.setJ('course_skipped_levels',skipped);
+  }
+  /* Update the in-memory user object and persist server-side. */
+  if(window._d)window._d.level=band;
+  try{syncToServer();}catch(_){}
+  closeMod('placem');
+  try{renderHome(window._d||{});}catch(_){}
+  /* Jump straight to the first available lesson of the new band. */
+  setTimeout(()=>{
+    try{
+      if(typeof currentCourseLessonId==='function'){
+        const id=currentCourseLessonId();
+        if(id){
+          goTab('learn');
+          try{switchLearnTab('course');}catch(_){}
+          setTimeout(()=>{try{openCourseLesson(id);}catch(_){}},200);
+        }
+      }
+    }catch(_){}
+  },120);
+}
+
+function finishPlacement(skip){
+  /* Skip path — let the user pick a level later without forcing it. */
+  if(skip){LS.set('onboarded','1');}
+  closeMod('placem');
+  _placeState=null;
+}
+
 /* ══ Update applyLang for new labels ══ */
 function updateNewLabels(){
   // Learn tabs
@@ -10595,9 +10847,9 @@ async function init(){
       checkPremiumStatus(uid);
     }
 
-    // Onboarding for truly new users
+    // Onboarding for truly new users — 8-question placement test
     if(!LS.get('onboarded')&&!localXP){
-      setTimeout(()=>{try{startOnboarding();}catch{}},1000);
+      setTimeout(()=>{try{startPlacementTest();}catch(e){console.warn('placement',e);}},900);
     }
 
     setTimeout(()=>{try{showNotif();}catch{}},3000);
