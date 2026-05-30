@@ -1628,6 +1628,119 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pron-score-lbl{font-size:11px;color:var(--t2)}
 .pron-bar{height:5px;background:var(--e3);border-radius:100px;overflow:hidden;flex:1}
 .pron-bar-fill{height:100%;border-radius:100px;transition:width 1s ease}
+
+/* ══════════════════════════════════════════════════════════════════
+   MINIMAL DESIGN REFRESH
+   Aligns the Settings screen, Home quick tiles, modals and the model
+   picker with the paywall / placement-test grammar:
+     · one accent colour (--a), no decorative gradients;
+     · hairline borders (1px var(--b1)) instead of shadows;
+     · uppercase section headers with letter-spacing;
+     · flat option rows with subtle :active feedback only.
+   Selectors are intentionally specific enough to override earlier
+   rules without rewriting any of the existing markup.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Section headers: small + uppercase across the app. */
+.sec{font-size:10.5px!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin:14px 2px 8px;padding:0}
+.sec .seca{font-size:10.5px;color:var(--a);font-weight:700;letter-spacing:.5px;text-transform:none;cursor:pointer}
+
+/* Screen header — slightly tighter. */
+.shdr{margin-bottom:18px}
+.shdr .stit{font-size:22px;font-weight:800;letter-spacing:-.4px}
+
+/* ── Settings · quick toggles (Dark / Sound) ───────────────────── */
+.dl-toggle{background:transparent;border:1px solid var(--b1);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s}
+.dl-toggle:active{background:var(--e2);transform:none}
+.dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1)}
+.dl-toggle-icon{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center}
+.dl-toggle-icon svg{width:18px;height:18px}
+.dl-switch{flex-shrink:0}
+
+/* ── Settings · language pickers ───────────────────────────────── */
+.lang-picker-btn{background:transparent;border:1px solid var(--b1);padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s}
+.lang-picker-btn:active{background:var(--e2)}
+.lang-picker-name{font-size:13px;font-weight:600;color:var(--t1)}
+.lang-picker-arr{color:var(--t3);font-size:14px;font-weight:300}
+
+/* ── Settings · "Tools" toggle + tool cards ────────────────────── */
+.tools-toggle{background:transparent;border:1px solid var(--b1);padding:13px 14px;border-radius:12px;font-size:13px;font-weight:600;color:var(--t1);transition:background .15s}
+.tools-toggle:active{background:var(--e2);transform:none}
+.tools-toggle-ico{width:28px;height:28px;border-radius:9px;background:var(--e2);border:1px solid var(--b1)}
+.tools-toggle-ico svg,.tools-arrow{stroke:var(--t2)}
+.tools-grid{gap:8px}
+.tool-card{background:transparent;border:1px solid var(--b1);padding:14px 12px;min-height:88px;border-radius:12px;font-weight:600;color:var(--t1);transition:background .15s,border-color .15s,transform 0s}
+.tool-card:hover{transform:none;background:var(--e2);border-color:var(--b1)}
+.tool-card:active{background:var(--e2);transform:none}
+.tool-ico{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);margin-bottom:9px}
+.tool-ico svg{stroke:var(--t2);width:17px;height:17px}
+.tool-card.export .tool-ico,.tool-card.cert .tool-ico,.tool-card.gift .tool-ico,.tool-card.terms .tool-ico{background:var(--e2)}
+.tool-card.export .tool-ico svg,.tool-card.cert .tool-ico svg,.tool-card.gift .tool-ico svg,.tool-card.terms .tool-ico svg{stroke:var(--t2)}
+.tool-title{font-size:13px;font-weight:700}
+.tool-sub{font-size:11px;color:var(--t3);font-weight:500}
+
+/* ── Settings · About-you accordion ────────────────────────────── */
+.set-acc{background:transparent;border:1px solid var(--b1);border-radius:12px;padding:0;overflow:hidden;margin-bottom:10px}
+.set-acc summary{padding:13px 14px;font-size:13px;font-weight:600;cursor:pointer;list-style:none;color:var(--t1)}
+.set-acc summary::-webkit-details-marker{display:none}
+.set-acc-ico{width:28px;height:28px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);margin-right:10px;display:inline-flex;align-items:center;justify-content:center}
+.set-acc-ico svg{stroke:var(--t2);width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.set-acc-bd{padding:0 14px 14px;border-top:1px solid var(--b1)}
+.set-acc[open] summary{border-bottom:0}
+
+/* ── Settings · reminder row ───────────────────────────────────── */
+.srow{padding:14px 14px;border-bottom:1px solid var(--b1);transition:background .15s}
+.srow:active{background:var(--e2)}
+.srow::after{font-size:14px;color:var(--t3)}
+.sric{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center}
+.sric svg{stroke:var(--t2);width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sric-rem-dot{fill:var(--a);stroke:none}
+.srt{font-size:13px;font-weight:600;color:var(--t1)}
+.srs{font-size:11.5px;color:var(--t3);margin-top:2px}
+.slist{background:transparent;border:1px solid var(--b1);border-radius:12px;overflow:hidden}
+
+/* ── Home · big 4-quad cards (kill the gradient bar on top) ────── */
+.s4c{background:transparent;border:1px solid var(--b1);box-shadow:none;border-radius:12px;padding:13px}
+.s4c::before{display:none}
+.s4c:active{transform:scale(.98);box-shadow:none}
+
+/* ── Home · daily missions card flat look ──────────────────────── */
+#mcard.card{background:transparent;border:1px solid var(--b1);border-radius:12px}
+
+/* ── Home · quick-grid tiles ───────────────────────────────────── */
+.qg .qb{background:transparent;border:1px solid var(--b1);box-shadow:none}
+.qg .qb:active{background:var(--e2)}
+.qg .qb::before,.qg .qb::after{display:none}
+.qg .qbi{background:var(--e2);border:1px solid var(--b1);color:var(--t2)}
+.qg .qbi svg{stroke:var(--t2)}
+
+/* ── Model picker (mpop) flat look ─────────────────────────────── */
+.mpop{background:var(--bg);border:1px solid var(--b1);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.mpop-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);padding:10px 14px 6px}
+.mopt{background:transparent;border:0;border-bottom:1px solid var(--b1);padding:12px 14px;transition:background .12s}
+.mopt:last-child{border-bottom:0}
+.mopt:hover{background:var(--e2)}
+.mopt:active{background:var(--e3)}
+.mopt.on{background:rgba(var(--ar),.05)}
+.mopt.locked{opacity:.45}
+.mopt-name{font-size:13px;font-weight:700;color:var(--t1)}
+.mopt-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.mt-cell{width:24px;height:24px;border-radius:7px;background:var(--e2);border:1px solid var(--b1);color:var(--t1);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.mt-low,.mt-mid,.mt-hi{background:var(--e2);color:var(--t1)}
+.mopt-lock{font-size:9.5px;font-weight:700;color:var(--t3);background:var(--e2);border:1px solid var(--b1);padding:2px 7px;border-radius:7px;margin-left:6px;letter-spacing:.4px}
+.mopt-check{color:var(--a)}
+
+/* ── Chat header bar with the credit chip is already minimal; keep
+       the model toggle (.mtoggle) in sync. */
+.mtoggle{background:var(--e2);border:1px solid var(--b1);border-radius:9px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--t1);display:inline-flex;align-items:center;gap:5px}
+.mtoggle:active{background:var(--e3)}
+.mt-arr{stroke:var(--t3)}
+
+/* ── Toggle / switch (Dark + Sound) — flatten ──────────────────── */
+.dl-switch{width:34px;height:20px;border-radius:100px;background:var(--e3);border:1px solid var(--b1);position:relative;transition:background .15s,border-color .15s}
+.dl-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--t3);transition:transform .15s,background .15s}
+.dl-switch.on{background:rgba(var(--ar),.18);border-color:rgba(var(--ar),.45)}
+.dl-switch.on::after{transform:translateX(14px);background:var(--a)}
 </style>
 </head>
 <body>
@@ -1797,7 +1910,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       </button>
       <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
         <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">18</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      </button>
+      <button class="mopt" data-m="opus48" onclick="selectModel('opus48')" type="button">
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.8</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">22</div><span class="mopt-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
     </div>
@@ -2732,7 +2850,7 @@ function showChatPaywall(){
    Server re-validates so a cheating client cannot bypass tier limits. */
 function modelChoicesForTier(){
   const tier=(premiumTier||'').toLowerCase();
-  if(tier==='ultimate')return ['haiku','sonnet4','sonnet','opus41','opus'];
+  if(tier==='ultimate')return ['haiku','sonnet4','sonnet','opus41','opus','opus48'];
   if(tier==='pro')return ['haiku','sonnet4','sonnet'];
   if(tier==='basic')return ['haiku','sonnet4'];
   return [];
@@ -2749,11 +2867,11 @@ function getChosenModel(){
 function pickModel(m){
   if(!isPremium){openPremium();return;}
   if(!modelAllowedForTier(m)){openPremium();return;}
-  if(!['haiku','sonnet4','sonnet','opus41','opus'].includes(m))return;
+  if(!['haiku','sonnet4','sonnet','opus41','opus','opus48'].includes(m))return;
   LS.set('app_model_choice',m);
   try{sfx.tap();}catch(e){}haptic('light');
   updateChatModelStrip();
-  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7'};
+  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
   toast((lang==='ru'?'Модель: ':'Model: ')+names[m],'⚙️');
 }
 function selectModel(m){
@@ -2771,26 +2889,27 @@ function updateModelOptions(){
   const T={
     ru:{title:'Model',
         fast:'быстро',classic:'стабильно',smart:'умно',deep:'глубоко',max:'макс',
-        haiku:'Быстро и экономно',sonnet4:'Старая рабочая версия',sonnet:'Разборы и исправления',opus41:'Глубокие задачи',opus:'Максимум качества'},
+        haiku:'Быстро и экономно',sonnet4:'Старая рабочая версия',sonnet:'Разборы и исправления',opus41:'Глубокие задачи',opus:'Глубокая аналитика',opus48:'Максимум качества'},
     en:{title:'Model',
         fast:'fast',classic:'classic',smart:'smart',deep:'deep',max:'max',
-        haiku:'Fast and efficient',sonnet4:'Older stable version',sonnet:'Corrections and reasoning',opus41:'Deep tasks',opus:'Maximum quality'},
+        haiku:'Fast and efficient',sonnet4:'Older stable version',sonnet:'Corrections and reasoning',opus41:'Deep tasks',opus:'Deep analysis',opus48:'Maximum quality'},
     es:{title:'Model',
         fast:'rápido',classic:'clásico',smart:'listo',deep:'profundo',max:'máx.',
-        haiku:'Rápido y eficiente',sonnet4:'Versión estable anterior',sonnet:'Correcciones y razonamiento',opus41:'Tareas profundas',opus:'Máxima calidad'},
+        haiku:'Rápido y eficiente',sonnet4:'Versión estable anterior',sonnet:'Correcciones y razonamiento',opus41:'Tareas profundas',opus:'Análisis profundo',opus48:'Máxima calidad'},
     pt:{title:'Model',
         fast:'rápido',classic:'clássico',smart:'inteligente',deep:'profundo',max:'máx.',
-        haiku:'Rápido e eficiente',sonnet4:'Versão estável anterior',sonnet:'Correções e raciocínio',opus41:'Tarefas profundas',opus:'Qualidade máxima'},
+        haiku:'Rápido e eficiente',sonnet4:'Versão estável anterior',sonnet:'Correções e raciocínio',opus41:'Tarefas profundas',opus:'Análise profunda',opus48:'Qualidade máxima'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setT('model-mtit',t.title);
   const data={
     haiku:{name:'Haiku 4.5',tag:t.fast,sub:t.haiku,pts:'1'},
-    sonnet4:{name:'Sonnet 4',tag:t.classic,sub:t.sonnet4,pts:'4'},
-    sonnet:{name:'Sonnet 4.6',tag:t.smart,sub:t.sonnet,pts:'5'},
-    opus41:{name:'Opus 4.1',tag:t.deep,sub:t.opus41,pts:'12'},
-    opus:{name:'Opus 4.7',tag:t.max,sub:t.opus,pts:'14'}
+    sonnet4:{name:'Sonnet 4',tag:t.classic,sub:t.sonnet4,pts:'5'},
+    sonnet:{name:'Sonnet 4.6',tag:t.smart,sub:t.sonnet,pts:'6'},
+    opus41:{name:'Opus 4.1',tag:t.deep,sub:t.opus41,pts:'14'},
+    opus:{name:'Opus 4.7',tag:t.deep,sub:t.opus,pts:'18'},
+    opus48:{name:'Opus 4.8',tag:t.max,sub:t.opus48||t.opus,pts:'22'}
   };
   document.querySelectorAll('#modelm .mopt').forEach(row=>{
     const m=row.dataset.m,ok=modelAllowedForTier(m),meta=data[m]||data.haiku;
@@ -2809,7 +2928,7 @@ function updateChatModelStrip(){
   bar.style.display=isPremium?'flex':'none';
   if(!isPremium)return;
   const cur=getChosenModel();
-  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7'};
+  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
   const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
 }
 document.addEventListener('click',function(e){
@@ -9033,14 +9152,16 @@ function _credCopy(){
         ['Haiku 4.5 — быстрый','1 кр / сообщение'],
         ['Sonnet 4 — умный','5 кр'],
         ['Sonnet 4.6 — точный','6 кр'],
-        ['Opus 4.7 — максимум','18 кр'],
+        ['Opus 4.7 — глубокий','18 кр'],
+        ['Opus 4.8 — максимум','22 кр'],
         ['Голос ALEX (TTS+STT)','+5 кр'],
       ],
       en:[
         ['Haiku 4.5 — fast','1 cr / message'],
         ['Sonnet 4 — smart','5 cr'],
         ['Sonnet 4.6 — precise','6 cr'],
-        ['Opus 4.7 — max','18 cr'],
+        ['Opus 4.7 — deep','18 cr'],
+        ['Opus 4.8 — max','22 cr'],
         ['Voice ALEX (TTS+STT)','+5 cr'],
       ]
     }[lang]||[],

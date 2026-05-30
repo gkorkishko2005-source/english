@@ -19,6 +19,7 @@ SONNET_MODEL = os.getenv("CLAUDE_BASIC_SONNET_MODEL", "claude-sonnet-4-20250514"
 SONNET_PLUS_MODEL = os.getenv("CLAUDE_PRO_SONNET_MODEL", "claude-sonnet-4-6")
 OPUS_MODEL   = os.getenv("CLAUDE_OPUS_MODEL", "claude-opus-4-1-20250805")
 OPUS_PLUS_MODEL = os.getenv("CLAUDE_OPUS_PLUS_MODEL", "claude-opus-4-7")
+OPUS_MAX_MODEL  = os.getenv("CLAUDE_OPUS_MAX_MODEL", "claude-opus-4-8")
 
 MODEL_ECONOMY = {
     "haiku": {
@@ -57,13 +58,20 @@ MODEL_ECONOMY = {
         "input_per_m": 15.00,
         "output_per_m": 75.00,
     },
+    "opus48": {
+        "model": OPUS_MAX_MODEL,
+        "weight": 18,
+        "max_tokens": {"ultimate": 1200},
+        "input_per_m": 15.00,
+        "output_per_m": 75.00,
+    },
 }
 
 TIER_ECONOMY = {
-    "free":     {"quota": 5,   "models": ("haiku",),                                      "daily_budget": 0.025, "history": 18, "burst_gap": 5.0},
-    "basic":    {"quota": 45,  "models": ("haiku", "sonnet4"),                            "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
-    "pro":      {"quota": 110, "models": ("haiku", "sonnet4", "sonnet"),                  "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
-    "ultimate": {"quota": 260, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus"), "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
+    "free":     {"quota": 5,   "models": ("haiku",),                                                   "daily_budget": 0.025, "history": 18, "burst_gap": 5.0},
+    "basic":    {"quota": 45,  "models": ("haiku", "sonnet4"),                                         "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
+    "pro":      {"quota": 110, "models": ("haiku", "sonnet4", "sonnet"),                               "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
+    "ultimate": {"quota": 260, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus", "opus48"),    "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
 }
 
 # ══ ADMIN WHITELIST ══════════════════════════════════════════════════════════

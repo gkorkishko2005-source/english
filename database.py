@@ -636,6 +636,7 @@ ALEX_CREDIT_COST = {
     "sonnet":  6,
     "opus41":  14,
     "opus":    18,
+    "opus48":  22,
 }
 VOICE_CREDIT_SURCHARGE = 5
 
