@@ -347,35 +347,53 @@ async def handle_chat(request):
     # Check premium for model selection and limits
     user_premium = False
     user_tier = ""
+    chat_credits = 0
+    grandfathered = ""
+    uses_credits = False    # True = new modular path; False = legacy bundle path
     if uid:
         try:
-            from database import check_premium, get_premium_info
+            from database import check_premium, get_premium_info, get_credits, grandfather_legacy_tier
             info = await get_premium_info(uid)
             user_premium = info.get("is_premium", False)
             user_tier = info.get("tier", "")
+            try:
+                grandfathered = await grandfather_legacy_tier(uid)
+            except Exception:
+                grandfathered = ""
+            chat_credits = await get_credits(uid)
         except Exception:
             pass
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
     tier_key = user_tier if user_tier in TIER_ECONOMY else "free"
-    if tier_key == "free":
-        msg = (
-            '<div class="limit-card">'
-            '<div class="limit-kicker">ALEX Chat</div>'
-            '<div class="limit-title">Нужна подписка</div>'
-            '<div class="limit-text">В бесплатном режиме доступны карточки, задания, путь и прогресс. Живой чат с ALEX открывается с любой подписки.</div>'
-            '<button class="chip" onclick="openPremium()">Открыть тарифы</button>'
-            '</div>'
-            if lang == "ru" else
-            '<div class="limit-card">'
-            '<div class="limit-kicker">ALEX Chat</div>'
-            '<div class="limit-title">Subscription required</div>'
-            '<div class="limit-text">Free includes flashcards, tasks, learning path and progress. Live ALEX chat starts with any subscription.</div>'
-            '<button class="chip" onclick="openPremium()">Open plans</button>'
-            '</div>'
-        )
-        return web.json_response({"reply": msg, "premium_required": True}, headers={"Access-Control-Allow-Origin":"*"})
+
+    # ── NEW MODULAR PATH ────────────────────────────────────────────────
+    # If the user has no active legacy bundle AND no grandfathered tier,
+    # they are on the new model: ALEX is purely credit-based.
+    if tier_key == "free" and not grandfathered:
+        uses_credits = True
+        if chat_credits <= 0:
+            msg = (
+                '<div class="limit-card">'
+                '<div class="limit-kicker">ALEX Chat</div>'
+                '<div class="limit-title">Нужны кредиты ALEX</div>'
+                '<div class="limit-text">Кредиты тратятся за каждое сообщение и не сгорают. Купи пакет, чтобы продолжить общение.</div>'
+                '<button class="chip" onclick="openPremium()">Купить кредиты</button>'
+                '</div>'
+                if lang == "ru" else
+                '<div class="limit-card">'
+                '<div class="limit-kicker">ALEX Chat</div>'
+                '<div class="limit-title">ALEX credits required</div>'
+                '<div class="limit-text">Credits are spent per message and never expire. Top up to keep chatting.</div>'
+                '<button class="chip" onclick="openPremium()">Buy credits</button>'
+                '</div>'
+            )
+            return web.json_response({"reply": msg, "premium_required": True, "credits_required": True, "chat_credits": 0},
+                                     headers={"Access-Control-Allow-Origin":"*"})
+        # Credit-based users get access to the "basic" tier model pool
+        # (Haiku + Sonnet 4) — model cost is paid in credits, not gated.
+        tier_key = "basic"
     tier_cfg = TIER_ECONOMY[tier_key]
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in {*MODEL_ECONOMY.keys(), "auto"}:
@@ -507,7 +525,24 @@ async def handle_chat(request):
         except Exception:
             pass
 
-    return web.json_response({"reply": reply}, headers={"Access-Control-Allow-Origin": "*"})
+    # ── Credit deduction (new modular path only) ────────────────────────
+    # Grandfathered bundle holders keep using the legacy quota system and
+    # are NOT charged credits. New users pay per-message in credits priced
+    # by model (Haiku=1, Sonnet4=4, etc.) via credits_for_message().
+    new_balance = None
+    if uses_credits and uid:
+        try:
+            from database import credits_for_message, spend_credits, get_credits
+            cost = credits_for_message(model_key, voice=bool(body.get("voice")))
+            await spend_credits(uid, cost)
+            new_balance = await get_credits(uid)
+        except Exception as e:
+            logger.warning("credit deduction failed uid=%s: %s", uid, e)
+
+    resp = {"reply": reply}
+    if new_balance is not None:
+        resp["chat_credits"] = new_balance
+    return web.json_response(resp, headers={"Access-Control-Allow-Origin": "*"})
 
 # ── CHAT RESET ───────────────────────────────────────────────────────────────
 async def handle_chat_reset(request):
@@ -665,20 +700,99 @@ async def handle_health(request):
 
 # ── CHECK PREMIUM ─────────────────────────────────────────────────────────────
 async def handle_check_premium(request):
-    """Returns detailed premium status for a user."""
+    """Returns detailed premium status for a user — includes modular billing fields.
+
+    Response shape:
+      {
+        is_premium, tier, until, lifetime,       # legacy bundle (kept for back-compat)
+        platform_active, platform_until, platform_lifetime,
+        chat_credits,
+        grandfathered_tier,
+        access_kind                              # 'platform' | 'grandfathered' | 'none'
+      }
+    The WebApp picks the right paywall based on access_kind.
+    """
     try:
         uid = int(request.match_info["uid"])
     except Exception:
         return web.json_response({"error":"invalid uid"},status=400)
 
     try:
-        from database import get_premium_info
-        info = await get_premium_info(uid)
-        info["source"] = "database"
+        from database import get_premium_info, get_platform_info, get_credits, grandfather_legacy_tier
+        legacy = await get_premium_info(uid)
+        # Snapshot grandfathered tier the first time we see an active legacy
+        # bundle alongside empty grandfathered_tier — idempotent.
+        try:
+            await grandfather_legacy_tier(uid)
+        except Exception:
+            pass
+        platform = await get_platform_info(uid)
+        credits = await get_credits(uid)
+        gf = platform.get("grandfathered_tier","") or ""
+        if platform.get("active"):
+            kind = "platform"
+        elif gf:
+            kind = "grandfathered"
+        else:
+            kind = "none"
+        info = {
+            **legacy,
+            "platform_active": platform.get("active", False),
+            "platform_until": platform.get("until"),
+            "platform_lifetime": platform.get("lifetime", False),
+            "chat_credits": credits,
+            "grandfathered_tier": gf,
+            "access_kind": kind,
+            "source": "database",
+        }
         return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         return web.json_response({"is_premium":False,"tier":"","error":str(e)},
                                   headers={"Access-Control-Allow-Origin":"*"})
+
+# ── GRANT PLATFORM SUB (bot → server after payment) ───────────────────────────
+async def handle_grant_platform(request):
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0))
+        period = str(body.get("period","1m"))
+        secret = body.get("secret","")
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400)
+    if period not in {"1m","6m","lifetime"}:
+        return web.json_response({"error":"invalid period"},status=400)
+    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
+    if secret != BOT_SECRET:
+        return web.json_response({"error":"unauthorized"},status=403)
+    try:
+        from database import grant_platform
+        await grant_platform(uid, period)
+        return web.json_response({"ok":True,"uid":uid,"period":period},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
+# ── GRANT CREDITS (bot → server after credit pack purchase) ───────────────────
+async def handle_grant_credits(request):
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0))
+        credits = int(body.get("credits",0))
+        secret = body.get("secret","")
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400)
+    if credits <= 0 or credits > 100000:
+        return web.json_response({"error":"invalid credits"},status=400)
+    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
+    if secret != BOT_SECRET:
+        return web.json_response({"error":"unauthorized"},status=403)
+    try:
+        from database import add_credits
+        await add_credits(uid, credits)
+        return web.json_response({"ok":True,"uid":uid,"credits":credits},
+                                  headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── GRANT PREMIUM (called by bot after successful payment) ────────────────────
 async def handle_grant_premium(request):
@@ -869,6 +983,8 @@ def create_app():
     app.router.add_post("/api/audio_task",handle_audio_task)
     app.router.add_get("/api/premium/{uid}",handle_check_premium)
     app.router.add_post("/api/premium/grant",handle_grant_premium)
+    app.router.add_post("/api/platform/grant",handle_grant_platform)
+    app.router.add_post("/api/credits/grant",handle_grant_credits)
     app.router.add_post("/api/tts",handle_tts)
     app.router.add_post("/api/transcribe",handle_transcribe)
     app.router.add_post("/api/sync_stats",handle_sync_stats)

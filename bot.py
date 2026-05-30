@@ -146,6 +146,21 @@ FIRST_TIME_DISCOUNT = 0.10
 STRIPE_TOKEN = os.getenv("STRIPE_PROVIDER_TOKEN", "")
 MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 
+# ══ MODULAR BILLING (split: Platform sub + ALEX credits) ─────────────────────
+# Platform subscription unlocks course/exams/analytics/UI. Sold flat.
+# ALEX credits are a separate pre-paid pool spent per chat message.
+# Legacy PREMIUM_PLANS above stays alive for grandfathered renewals.
+PLATFORM_PLANS = {
+    "plat_1m":  {"stars": 400,  "period": "1m",       "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
+    "plat_6m":  {"stars": 1800, "period": "6m",       "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
+    "plat_life":{"stars": 6500, "period": "lifetime", "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
+}
+CREDIT_PACKS = {
+    "credits_100":  {"stars": 200,  "credits": 100,  "label_ru": "100 кредитов ALEX",    "label_en": "100 ALEX credits"},
+    "credits_500":  {"stars": 800,  "credits": 500,  "label_ru": "500 кредитов ALEX",    "label_en": "500 ALEX credits"},
+    "credits_2000": {"stars": 2500, "credits": 2000, "label_ru": "2 000 кредитов ALEX",  "label_en": "2 000 ALEX credits"},
+}
+
 def plan_stars_for_user(plan_id: str, uid: int, has_discount: bool = False) -> int:
     plan = PREMIUM_PLANS[plan_id]
     if plan_id == "basic" and is_test_payment_user(uid):
@@ -1878,6 +1893,64 @@ async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate"
         logger.error("direct premium grant failed uid=%s tier=%s months=%s error=%s", uid, tier, months, e)
         return False
 
+
+async def grant_platform_via_server(uid: int, period: str) -> bool:
+    """Grant Platform subscription via server API, fallback to direct DB write."""
+    try:
+        local_port = os.getenv("PORT", "8080")
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.post(
+                f"http://127.0.0.1:{local_port}/api/platform/grant",
+                json={"uid": uid, "period": period, "secret": BOT_SECRET}
+            )
+            if r.status_code == 200:
+                try:
+                    data = r.json()
+                except Exception:
+                    data = {}
+                if data.get("ok") is True:
+                    return True
+            logger.error("grant_platform_via_server failed uid=%s status=%s body=%s", uid, r.status_code, r.text[:500])
+    except Exception as e:
+        logger.error(f"grant_platform_via_server error: {e}")
+    try:
+        from database import grant_platform
+        await grant_platform(uid, period)
+        logger.info("platform granted directly uid=%s period=%s", uid, period)
+        return True
+    except Exception as e:
+        logger.error("direct platform grant failed uid=%s period=%s error=%s", uid, period, e)
+        return False
+
+
+async def grant_credits_via_server(uid: int, credits: int) -> bool:
+    """Top up ALEX credits via server API, fallback to direct DB write."""
+    try:
+        local_port = os.getenv("PORT", "8080")
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.post(
+                f"http://127.0.0.1:{local_port}/api/credits/grant",
+                json={"uid": uid, "credits": credits, "secret": BOT_SECRET}
+            )
+            if r.status_code == 200:
+                try:
+                    data = r.json()
+                except Exception:
+                    data = {}
+                if data.get("ok") is True:
+                    return True
+            logger.error("grant_credits_via_server failed uid=%s status=%s body=%s", uid, r.status_code, r.text[:500])
+    except Exception as e:
+        logger.error(f"grant_credits_via_server error: {e}")
+    try:
+        from database import add_credits
+        await add_credits(uid, credits)
+        logger.info("credits granted directly uid=%s credits=%s", uid, credits)
+        return True
+    except Exception as e:
+        logger.error("direct credits grant failed uid=%s credits=%s error=%s", uid, credits, e)
+        return False
+
 # ══ /premium COMMAND ══════════════════════════════════════════════════════════
 @dp.message(Command("premium"))
 async def cmd_premium(msg: Message):
@@ -2045,6 +2118,72 @@ async def cb_prem_buy(cb: CallbackQuery):
         err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
         await bot.send_message(uid, err)
 
+# ══ PLATFORM SUBSCRIPTION BUY (Stars) ════════════════════════════════════
+@dp.callback_query(F.data.startswith("plat_buy:"))
+async def cb_plat_buy(cb: CallbackQuery):
+    from aiogram.types import LabeledPrice
+    parts = cb.data.split(":")
+    plan_id = parts[1] if len(parts) > 1 else "plat_1m"
+    plan = PLATFORM_PLANS.get(plan_id)
+    if not plan:
+        await cb.answer("Invalid plan", show_alert=True)
+        return
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    label = plan["label_ru"] if ru else plan["label_en"]
+    stars = int(plan["stars"])
+    desc = ("Подписка PolyGlotty Platform — курс, экзамены, статистика. ALEX-чат покупается отдельно кредитами."
+            if ru else
+            "PolyGlotty Platform subscription — course, exams, analytics. ALEX chat is sold separately as credits.")
+    await cb.answer()
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title=f"PolyGlotty {label}",
+            description=desc,
+            payload=f"platform:{plan['period']}:{uid}",
+            currency="XTR",
+            prices=[LabeledPrice(label=label, amount=stars)],
+            protect_content=False,
+        )
+    except Exception as e:
+        logger.error(f"send_invoice platform error: {e}")
+        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+
+# ══ ALEX CREDITS BUY (Stars) ═════════════════════════════════════════════
+@dp.callback_query(F.data.startswith("credit_buy:"))
+async def cb_credit_buy(cb: CallbackQuery):
+    from aiogram.types import LabeledPrice
+    parts = cb.data.split(":")
+    pack_id = parts[1] if len(parts) > 1 else "credits_100"
+    pack = CREDIT_PACKS.get(pack_id)
+    if not pack:
+        await cb.answer("Invalid pack", show_alert=True)
+        return
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    label = pack["label_ru"] if ru else pack["label_en"]
+    stars = int(pack["stars"])
+    desc = ("Кредиты ALEX. Тратятся за каждое сообщение чату. Не сгорают."
+            if ru else
+            "ALEX credits. Spent per chat message. Never expire.")
+    await cb.answer()
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title=f"PolyGlotty {label}",
+            description=desc,
+            payload=f"credits:{pack['credits']}:{uid}",
+            currency="XTR",
+            prices=[LabeledPrice(label=label, amount=stars)],
+            protect_content=False,
+        )
+    except Exception as e:
+        logger.error(f"send_invoice credits error: {e}")
+        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+
 # ══ CARD PAYMENT MENU ════════════════════════════════════════════════════
 @dp.callback_query(F.data == "prem_card_menu")
 async def cb_card_menu(cb: CallbackQuery):
@@ -2067,6 +2206,70 @@ async def on_payment_success(msg: Message):
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
 
+    # ── New modular billing routes ────────────────────────────────────
+    # payload format:
+    #   premium:<plan_id>:<uid>      (legacy bundle, still allowed)
+    #   platform:<period>:<uid>      (1m / 6m / lifetime)
+    #   credits:<n>:<uid>            (ALEX credit pack)
+    head = payload.split(":", 1)[0] if payload else ""
+    if head == "platform":
+        try:
+            parts = payload.split(":")
+            period = parts[1] if len(parts) > 1 else "1m"
+            granted = await grant_platform_via_server(uid, period)
+            label = {"1m":"1 месяц" if ru else "1 month",
+                     "6m":"6 месяцев" if ru else "6 months",
+                     "lifetime":"навсегда" if ru else "lifetime"}.get(period, period)
+            if not granted:
+                await msg.answer(("Оплата прошла, но доступ не активировался. Напиши /paysupport." if ru
+                                  else "Payment succeeded but access did not activate. Use /paysupport."),
+                                 parse_mode="HTML")
+                return
+            text = (
+                f"🎉 <b>Оплата прошла!</b>\n\n"
+                f"📚 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n\n"
+                f"Курс, экзамены, расширенные карточки и аналитика — открыты.\n"
+                f"Чат ALEX покупается отдельно — кредиты в /premium."
+                if ru else
+                f"🎉 <b>Payment successful!</b>\n\n"
+                f"📚 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n\n"
+                f"Course, exams, expanded cards and analytics are unlocked.\n"
+                f"ALEX chat is sold separately as credits — see /premium."
+            )
+            await msg.answer(text, parse_mode="HTML")
+            logger.info("✅ Platform granted uid=%s period=%s", uid, period)
+        except Exception as e:
+            logger.error(f"platform payment handler error: {e}")
+            await msg.answer("✅ Платёж принят." if ru else "✅ Payment received.")
+        return
+
+    if head == "credits":
+        try:
+            parts = payload.split(":")
+            credits = int(parts[1]) if len(parts) > 1 else 0
+            granted = await grant_credits_via_server(uid, credits)
+            if not granted:
+                await msg.answer(("Оплата прошла, но кредиты не зачислились. Напиши /paysupport." if ru
+                                  else "Payment succeeded but credits were not added. Use /paysupport."),
+                                 parse_mode="HTML")
+                return
+            text = (
+                f"🎉 <b>Кредиты зачислены!</b>\n\n"
+                f"💬 +<b>{credits}</b> кредитов ALEX в твой пул.\n\n"
+                f"Кредиты тратятся за каждое сообщение и не сгорают."
+                if ru else
+                f"🎉 <b>Credits added!</b>\n\n"
+                f"💬 +<b>{credits}</b> ALEX credits in your pool.\n\n"
+                f"Credits are spent per message and never expire."
+            )
+            await msg.answer(text, parse_mode="HTML")
+            logger.info("✅ Credits granted uid=%s credits=%s", uid, credits)
+        except Exception as e:
+            logger.error(f"credits payment handler error: {e}")
+            await msg.answer("✅ Платёж принят." if ru else "✅ Payment received.")
+        return
+
+    # ── Legacy bundle path (premium:<plan_id>:<uid>) ──────────────────
     try:
         parts = payload.split(":")
         plan_id = parts[1] if len(parts) > 1 else "basic"

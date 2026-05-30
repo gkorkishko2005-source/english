@@ -93,6 +93,10 @@ CREATE TABLE IF NOT EXISTS users (
     is_premium      BOOLEAN DEFAULT FALSE,
     premium_until   TIMESTAMPTZ,
     premium_tier    TEXT DEFAULT '',
+    platform_until      TIMESTAMPTZ,
+    platform_lifetime   BOOLEAN DEFAULT FALSE,
+    chat_credits        INTEGER DEFAULT 0,
+    grandfathered_tier  TEXT DEFAULT '',
     ref_by          BIGINT,
     referrals       INTEGER DEFAULT 0,
     created_at      TIMESTAMPTZ DEFAULT NOW()
@@ -206,6 +210,8 @@ CREATE TABLE IF NOT EXISTS users (
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
     premium_until TEXT, premium_tier TEXT DEFAULT '',
+    platform_until TEXT, platform_lifetime INTEGER DEFAULT 0,
+    chat_credits INTEGER DEFAULT 0, grandfathered_tier TEXT DEFAULT '',
     ref_by INTEGER, referrals INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
@@ -273,6 +279,11 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN is_premium INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_until TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_tier TEXT DEFAULT ''",
+        # ── Modular billing (Platform sub + ALEX credits) ──────────────
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS platform_until TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN platform_until TEXT",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS platform_lifetime BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN platform_lifetime INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_credits INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN chat_credits INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS grandfathered_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN grandfathered_tier TEXT DEFAULT ''",
     ]
     for stmt in migrations:
         try:
@@ -465,6 +476,165 @@ async def check_premium(uid: int) -> bool:
         return until_dt > datetime.now(timezone.utc)
     except Exception:
         return False
+
+
+# ══════════════════════════════════════════════════════════════════
+#  MODULAR BILLING: Platform subscription + ALEX credits
+# ══════════════════════════════════════════════════════════════════
+#  We are splitting the legacy bundle (basic/pro/ultimate) into two
+#  independent products:
+#    1) "Platform" — flat subscription for course/exams/analytics/UI.
+#       Periods: 1m, 6m, lifetime. Stored in platform_until + platform_lifetime.
+#    2) "Chat credits" — prepaid pool spent per ALEX message, priced
+#       per model (Haiku=1, Sonnet4=4, Sonnet4.6=5, Opus=12, voice +3).
+#  Old Basic/Pro/Ultimate buyers are *grandfathered* into their bundle
+#  via grandfathered_tier (snapshotted the first time the legacy fields
+#  are seen alongside the new fields being empty).
+# ══════════════════════════════════════════════════════════════════
+
+PLATFORM_PERIOD_DAYS = {"1m": 30, "6m": 180}
+
+async def grant_platform(uid: int, period: str = "1m"):
+    """Grant Platform subscription. period ∈ {'1m','6m','lifetime'}.
+    Stacks on top of existing platform_until (extends from the latest).
+    'lifetime' sets platform_lifetime=TRUE permanently."""
+    from datetime import datetime, timedelta, timezone
+    await upsert_user(uid, "")
+    if period == "lifetime":
+        flag_val = True if USE_POSTGRES else 1
+        await db("UPDATE users SET platform_lifetime=? WHERE uid=?", flag_val, uid)
+        return
+    days = PLATFORM_PERIOD_DAYS.get(period, 30)
+    user = await get_user(uid) or {}
+    now = datetime.now(timezone.utc)
+    current_until = None
+    raw = user.get("platform_until")
+    if raw:
+        try:
+            current_until = raw if isinstance(raw, datetime) else datetime.fromisoformat(str(raw))
+            if current_until.tzinfo is None:
+                current_until = current_until.replace(tzinfo=timezone.utc)
+        except Exception as e:
+            logger.warning("platform_until parse failed uid=%s value=%r: %s", uid, raw, e)
+    base = current_until if (current_until and current_until > now) else now
+    until = base + timedelta(days=days)
+    until_value = until if USE_POSTGRES else until.isoformat()
+    await db("UPDATE users SET platform_until=? WHERE uid=?", until_value, uid)
+
+
+async def get_platform_info(uid: int) -> dict:
+    """Return {active, until, lifetime} for the Platform subscription.
+    Also surfaces grandfathered_tier for legacy bundle holders."""
+    from datetime import datetime, timezone
+    user = await get_user(uid)
+    if not user:
+        return {"active": False, "until": None, "lifetime": False, "grandfathered_tier": ""}
+    lifetime = bool(user.get("platform_lifetime"))
+    until_raw = user.get("platform_until")
+    until = None
+    active = lifetime
+    if until_raw:
+        try:
+            until = until_raw if isinstance(until_raw, datetime) else datetime.fromisoformat(str(until_raw))
+            if until.tzinfo is None:
+                until = until.replace(tzinfo=timezone.utc)
+            if until > datetime.now(timezone.utc):
+                active = True
+        except Exception as e:
+            logger.warning("platform_until parse failed uid=%s value=%r: %s", uid, until_raw, e)
+    return {
+        "active": active,
+        "until": until.isoformat() if until else None,
+        "lifetime": lifetime,
+        "grandfathered_tier": (user.get("grandfathered_tier") or "") or "",
+    }
+
+
+async def check_platform(uid: int) -> bool:
+    """True if Platform subscription is active (lifetime OR until > now).
+    Legacy bundle holders (grandfathered_tier set) ALSO pass — they paid
+    for the full bundle and must keep platform access."""
+    info = await get_platform_info(uid)
+    if info["active"]:
+        return True
+    if info.get("grandfathered_tier"):
+        return True
+    # Also recognise still-active legacy premium that has not yet been
+    # snapshotted into grandfathered_tier.
+    return await check_premium(uid)
+
+
+# ── ALEX credit pool ───────────────────────────────────────────────
+
+async def get_credits(uid: int) -> int:
+    user = await get_user(uid)
+    if not user:
+        return 0
+    return int(user.get("chat_credits") or 0)
+
+
+async def add_credits(uid: int, amount: int):
+    """Top up ALEX credit pool. Credits never expire."""
+    if amount <= 0:
+        return
+    await upsert_user(uid, "")
+    await db("UPDATE users SET chat_credits=COALESCE(chat_credits,0)+? WHERE uid=?", int(amount), uid)
+
+
+async def spend_credits(uid: int, amount: int) -> bool:
+    """Atomically subtract credits. Returns True on success, False if balance is too low.
+    Grandfathered bundle holders are exempt (still use the old quota system)."""
+    if amount <= 0:
+        return True
+    user = await get_user(uid) or {}
+    # Grandfathered users still ride the old quota system, not credits.
+    if (user.get("grandfathered_tier") or "") and not user.get("chat_credits"):
+        return True
+    have = int(user.get("chat_credits") or 0)
+    if have < amount:
+        return False
+    await db("UPDATE users SET chat_credits=chat_credits-? WHERE uid=? AND chat_credits>=?", amount, uid, amount)
+    return True
+
+
+# ── Grandfather snapshot ───────────────────────────────────────────
+
+async def grandfather_legacy_tier(uid: int) -> str:
+    """If the user has an active legacy premium_tier and no grandfathered_tier
+    is recorded yet, snapshot it. Idempotent. Returns the resulting
+    grandfathered_tier (may be '')."""
+    user = await get_user(uid)
+    if not user:
+        return ""
+    existing = (user.get("grandfathered_tier") or "")
+    if existing:
+        return existing
+    if not user.get("is_premium"):
+        return ""
+    tier = (user.get("premium_tier") or "")
+    if tier not in {"basic", "pro", "ultimate"}:
+        return ""
+    if not await check_premium(uid):
+        return ""
+    await db("UPDATE users SET grandfathered_tier=? WHERE uid=?", tier, uid)
+    return tier
+
+
+# ── Per-model credit cost (single source of truth) ─────────────────
+ALEX_CREDIT_COST = {
+    "haiku":   1,
+    "sonnet4": 4,
+    "sonnet":  5,
+    "opus41":  10,
+    "opus":    12,
+}
+VOICE_CREDIT_SURCHARGE = 3
+
+
+def credits_for_message(model: str, voice: bool = False) -> int:
+    base = ALEX_CREDIT_COST.get((model or "").lower(), 1)
+    return base + (VOICE_CREDIT_SURCHARGE if voice else 0)
+
 
 async def add_xp(uid: int, amount: int):
     await db("UPDATE users SET xp=xp+? WHERE uid=?", amount, uid)
