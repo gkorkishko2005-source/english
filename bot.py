@@ -828,6 +828,21 @@ async def cmd_start(message: Message):
             logger.error(f"cmd_premium from start error: {e}")
             await message.answer("⚠️ Error loading premium. Try /premium")
         return
+    # ── Direct invoice deep links (from WebApp paywall) ──────────────
+    if args in PLATFORM_PLANS:
+        user_lang = await get_lang(uid) or "ru"
+        ok = await _send_platform_invoice(uid, args, user_lang == "ru")
+        if not ok:
+            await message.answer("⚠️ Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
+                                  else "⚠️ Could not create invoice. Try /premium")
+        return
+    if args in CREDIT_PACKS:
+        user_lang = await get_lang(uid) or "ru"
+        ok = await _send_credits_invoice(uid, args, user_lang == "ru")
+        if not ok:
+            await message.answer("⚠️ Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
+                                  else "⚠️ Could not create invoice. Try /premium")
+        return
     ref_applied = False
     if args.startswith("ref_"):
         try:
@@ -1967,13 +1982,106 @@ async def cmd_premium(msg: Message):
 
     # Check if first-time buyer for discount
     is_first = True
+    grandfathered = ""
+    platform_info = {}
+    credits_balance = 0
     try:
-        from database import get_premium_info
+        from database import get_premium_info, grandfather_legacy_tier, get_platform_info, get_credits
         info = await get_premium_info(uid)
         if info.get("tier"):  # has or had premium before
             is_first = False
+        try:
+            grandfathered = await grandfather_legacy_tier(uid)
+        except Exception:
+            grandfathered = ""
+        platform_info = await get_platform_info(uid)
+        credits_balance = await get_credits(uid)
     except Exception:
         pass
+
+    # ── NEW MODULAR MENU (default for new users) ─────────────────────
+    # Grandfathered users still see the legacy bundle menu below to renew
+    # the exact plan they originally bought.
+    if not grandfathered:
+        plat_kb = [
+            [InlineKeyboardButton(
+                text=("Платформа · 1 мес — 400 ⭐" if ru else "Platform · 1 mo — 400 ⭐"),
+                callback_data="plat_buy:plat_1m"
+            )],
+            [InlineKeyboardButton(
+                text=("Платформа · 6 мес — 1800 ⭐ (-25%)" if ru else "Platform · 6 mo — 1800 ⭐ (-25%)"),
+                callback_data="plat_buy:plat_6m"
+            )],
+            [InlineKeyboardButton(
+                text=("Платформа · навсегда — 6500 ⭐" if ru else "Platform · lifetime — 6500 ⭐"),
+                callback_data="plat_buy:plat_life"
+            )],
+            [InlineKeyboardButton(
+                text=("💬 100 кредитов ALEX — 200 ⭐" if ru else "💬 100 ALEX credits — 200 ⭐"),
+                callback_data="credit_buy:credits_100"
+            )],
+            [InlineKeyboardButton(
+                text=("💬 500 кредитов ALEX — 800 ⭐ (-20%)" if ru else "💬 500 ALEX credits — 800 ⭐ (-20%)"),
+                callback_data="credit_buy:credits_500"
+            )],
+            [InlineKeyboardButton(
+                text=("💬 2 000 кредитов ALEX — 2500 ⭐ (-37%)" if ru else "💬 2 000 ALEX credits — 2500 ⭐ (-37%)"),
+                callback_data="credit_buy:credits_2000"
+            )],
+        ]
+        status_lines = []
+        if platform_info.get("active"):
+            if platform_info.get("lifetime"):
+                status_lines.append("📚 " + ("Платформа: навсегда" if ru else "Platform: lifetime"))
+            elif platform_info.get("until"):
+                from datetime import datetime
+                try:
+                    d = datetime.fromisoformat(platform_info["until"]).date().isoformat()
+                    status_lines.append("📚 " + (f"Платформа активна до {d}" if ru else f"Platform active until {d}"))
+                except Exception:
+                    status_lines.append("📚 " + ("Платформа активна" if ru else "Platform active"))
+        if credits_balance > 0:
+            status_lines.append("💬 " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
+                                          if ru else f"ALEX credits: {credits_balance:,}"))
+        status_block = ("\n\n" + "\n".join(status_lines)) if status_lines else ""
+
+        text = (
+            "<b>PolyGlotty — подписки</b>\n"
+            "━━━━━━━━━━━━━━━━━\n\n"
+            "<b>Платформа</b> — курс A0–C2, экзамены, статистика, безлимит карточек и продвинутые тренировки.\n"
+            "├ 1 месяц — 400 ⭐\n"
+            "├ 6 месяцев — 1 800 ⭐ (−25%)\n"
+            "└ Навсегда — 6 500 ⭐\n\n"
+            "<b>Кредиты ALEX</b> — отдельно от платформы, тратятся за каждое сообщение и <u>не сгорают</u>.\n"
+            "├ Haiku 4.5 = 1 кредит\n"
+            "├ Sonnet 4 = 4 кредита\n"
+            "├ Sonnet 4.6 = 5 кредитов\n"
+            "├ Opus 4.7 = 12 кредитов\n"
+            "└ Голос ALEX = +3 кредита к стоимости\n\n"
+            "Пакеты: <b>100</b> · <b>500</b> (−20%) · <b>2 000</b> (−37%).\n"
+            f"{status_block}\n\n"
+            "⭐ Оплата только Telegram Stars"
+        ) if ru else (
+            "<b>PolyGlotty — subscriptions</b>\n"
+            "━━━━━━━━━━━━━━━━━\n\n"
+            "<b>Platform</b> — A0–C2 course, exams, analytics, unlimited cards, advanced practice.\n"
+            "├ 1 month — 400 ⭐\n"
+            "├ 6 months — 1 800 ⭐ (−25%)\n"
+            "└ Lifetime — 6 500 ⭐\n\n"
+            "<b>ALEX credits</b> — separate from Platform, spent per message and <u>never expire</u>.\n"
+            "├ Haiku 4.5 = 1 credit\n"
+            "├ Sonnet 4 = 4 credits\n"
+            "├ Sonnet 4.6 = 5 credits\n"
+            "├ Opus 4.7 = 12 credits\n"
+            "└ Voice ALEX = +3 credits surcharge\n\n"
+            "Packs: <b>100</b> · <b>500</b> (−20%) · <b>2 000</b> (−37%).\n"
+            f"{status_block}\n\n"
+            "⭐ Telegram Stars only"
+        )
+        await msg.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=plat_kb))
+        return
+
+    # ── LEGACY BUNDLE MENU (grandfathered users only) ────────────────
 
     discount_text = ""
     if is_first:
@@ -2118,25 +2226,17 @@ async def cb_prem_buy(cb: CallbackQuery):
         err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
         await bot.send_message(uid, err)
 
-# ══ PLATFORM SUBSCRIPTION BUY (Stars) ════════════════════════════════════
-@dp.callback_query(F.data.startswith("plat_buy:"))
-async def cb_plat_buy(cb: CallbackQuery):
+# ── Invoice helpers (shared by callback + deep-link /start) ──────────────
+async def _send_platform_invoice(uid: int, plan_id: str, ru: bool) -> bool:
     from aiogram.types import LabeledPrice
-    parts = cb.data.split(":")
-    plan_id = parts[1] if len(parts) > 1 else "plat_1m"
     plan = PLATFORM_PLANS.get(plan_id)
     if not plan:
-        await cb.answer("Invalid plan", show_alert=True)
-        return
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
+        return False
     label = plan["label_ru"] if ru else plan["label_en"]
     stars = int(plan["stars"])
     desc = ("Подписка PolyGlotty Platform — курс, экзамены, статистика. ALEX-чат покупается отдельно кредитами."
             if ru else
             "PolyGlotty Platform subscription — course, exams, analytics. ALEX chat is sold separately as credits.")
-    await cb.answer()
     try:
         await bot.send_invoice(
             chat_id=uid,
@@ -2147,29 +2247,21 @@ async def cb_plat_buy(cb: CallbackQuery):
             prices=[LabeledPrice(label=label, amount=stars)],
             protect_content=False,
         )
+        return True
     except Exception as e:
         logger.error(f"send_invoice platform error: {e}")
-        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+        return False
 
-# ══ ALEX CREDITS BUY (Stars) ═════════════════════════════════════════════
-@dp.callback_query(F.data.startswith("credit_buy:"))
-async def cb_credit_buy(cb: CallbackQuery):
+async def _send_credits_invoice(uid: int, pack_id: str, ru: bool) -> bool:
     from aiogram.types import LabeledPrice
-    parts = cb.data.split(":")
-    pack_id = parts[1] if len(parts) > 1 else "credits_100"
     pack = CREDIT_PACKS.get(pack_id)
     if not pack:
-        await cb.answer("Invalid pack", show_alert=True)
-        return
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
+        return False
     label = pack["label_ru"] if ru else pack["label_en"]
     stars = int(pack["stars"])
     desc = ("Кредиты ALEX. Тратятся за каждое сообщение чату. Не сгорают."
             if ru else
             "ALEX credits. Spent per chat message. Never expire.")
-    await cb.answer()
     try:
         await bot.send_invoice(
             chat_id=uid,
@@ -2180,8 +2272,39 @@ async def cb_credit_buy(cb: CallbackQuery):
             prices=[LabeledPrice(label=label, amount=stars)],
             protect_content=False,
         )
+        return True
     except Exception as e:
         logger.error(f"send_invoice credits error: {e}")
+        return False
+
+# ══ PLATFORM SUBSCRIPTION BUY (Stars) ════════════════════════════════════
+@dp.callback_query(F.data.startswith("plat_buy:"))
+async def cb_plat_buy(cb: CallbackQuery):
+    parts = cb.data.split(":")
+    plan_id = parts[1] if len(parts) > 1 else "plat_1m"
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    if plan_id not in PLATFORM_PLANS:
+        await cb.answer("Invalid plan", show_alert=True); return
+    await cb.answer()
+    ok = await _send_platform_invoice(uid, plan_id, ru)
+    if not ok:
+        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+
+# ══ ALEX CREDITS BUY (Stars) ═════════════════════════════════════════════
+@dp.callback_query(F.data.startswith("credit_buy:"))
+async def cb_credit_buy(cb: CallbackQuery):
+    parts = cb.data.split(":")
+    pack_id = parts[1] if len(parts) > 1 else "credits_100"
+    uid = cb.from_user.id
+    user_lang = await get_lang(uid) or "ru"
+    ru = user_lang == "ru"
+    if pack_id not in CREDIT_PACKS:
+        await cb.answer("Invalid pack", show_alert=True); return
+    await cb.answer()
+    ok = await _send_credits_invoice(uid, pack_id, ru)
+    if not ok:
         await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
 
 # ══ CARD PAYMENT MENU ════════════════════════════════════════════════════

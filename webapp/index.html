@@ -1188,6 +1188,19 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-btn{margin:0 17px 10px;padding:15px;background:linear-gradient(135deg,#d4a843,#ffb830);border:none;border-radius:var(--r2);width:calc(100% - 34px);font-family:var(--f);font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:.18s;box-shadow:0 4px 18px rgba(212,168,67,.3)}
 .prem-btn:active{transform:scale(.97)}
 .prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
+/* ── Modular billing: Platform / Credits tabs ─────────────────────── */
+.prem-tabs{display:flex;gap:6px;padding:0 17px 10px}
+.prem-tab{flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--b1);background:var(--e2);color:var(--t2);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.18s}
+.prem-tab.on{background:rgba(var(--ar),.12);border-color:rgba(var(--ar),.35);color:var(--a)}
+.prem-tab:active{transform:scale(.97)}
+.prem-tab svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pp-perks{font-size:11.5px;color:var(--t2);line-height:1.55;margin:6px 0 0;padding-left:1px}
+.pp-perks div{display:flex;gap:6px;align-items:flex-start;padding:2px 0}
+.pp-perks div::before{content:'✓';color:var(--a);font-weight:900;flex-shrink:0;line-height:1.4}
+.pp-save{font-size:10px;font-weight:800;color:var(--a2);background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.28);padding:2px 7px;border-radius:100px;letter-spacing:.3px;margin-left:7px}
+.pp-rate{font-size:10.5px;color:var(--t3);margin-top:7px;font-weight:600}
+.credit-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.25);font-size:11px;font-weight:800;color:var(--a);letter-spacing:.2px;cursor:pointer}
+.credit-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 /* Premium plan cards */
 .prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
 .prem-plan{background:linear-gradient(135deg,var(--e2),rgba(var(--ar),.03));border:1px solid var(--b1);border-radius:16px;padding:14px 14px 12px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
@@ -1712,6 +1725,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   <div class="chdr">
     <div class="chtxt"><div class="chnm">ALEX</div></div>
     <div class="hbtns">
+      <button class="credit-chip" id="credit-chip" style="display:none" onclick="openPremium(null,'credits')" type="button" title="ALEX credits">
+        <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>
+        <span id="credit-chip-n">0</span>
+      </button>
       <button class="hbtn" onclick="openSpanel()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
       <button class="hbtn" onclick="confirmClear()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
     </div>
@@ -2171,24 +2188,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
       <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div>
     </div>
-    <div class="prem-plans" id="prem-plans">
-      <div class="prem-plan" onclick="selectPlan('basic')">
-        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Basic</span><span class="pp-price">650 ⭐<small>/мес</small></span></div>
-        <div class="pp-buffs" id="pp-basic-buffs"></div>
-        <div class="pp-year" id="pp-basic-year">6630 ⭐ / год <span>-15%</span></div>
-      </div>
-      <div class="prem-plan pp-pop" onclick="selectPlan('pro')">
-        <div class="pp-popular" id="pp-popular-lbl">Популярный</div>
-        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8L12 3z"/></svg>Pro</span><span class="pp-price">1600 ⭐<small>/мес</small></span></div>
-        <div class="pp-buffs" id="pp-pro-buffs"></div>
-        <div class="pp-year" id="pp-pro-year">16320 ⭐ / год <span>-15%</span></div>
-      </div>
-      <div class="prem-plan" onclick="selectPlan('ultimate')">
-        <div class="pp-hdr"><span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M4 7l4 4 4-7 4 7 4-4v11H4V7z"/><path d="M4 18h16"/></svg>Ultimate</span><span class="pp-price">4200 ⭐<small>/мес</small></span></div>
-        <div class="pp-buffs" id="pp-ult-buffs"></div>
-        <div class="pp-year" id="pp-ult-year">42840 ⭐ / год <span>-15%</span></div>
-      </div>
+    <!-- Modular billing: two products as tabs -->
+    <div class="prem-tabs" id="prem-tabs">
+      <button class="prem-tab on" data-tab="platform" type="button" onclick="switchPremTab('platform')"><span id="prem-tab-platform-lbl">Platform</span></button>
+      <button class="prem-tab" data-tab="credits" type="button" onclick="switchPremTab('credits')"><span id="prem-tab-credits-lbl">ALEX credits</span></button>
     </div>
+    <div class="prem-plans" id="prem-plans"></div>
     <div class="prem-proof" id="prem-proof"></div>
     <div class="prem-depth">
       <div class="prem-depth-title" id="prem-depth-title">Learning system</div>
@@ -2659,11 +2664,13 @@ function goTab(n,allowPractice){
   if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
   try{updateCourseTopBtn();}catch(e){}
 }
-function hasChatAccess(){return !!isPremium;}
+/* hasChatAccess() is redefined in the modular-billing helpers further down
+   — kept here as a placeholder for hoisting safety. */
 function showChatPaywall(){
   try{sfx.warn();}catch(e){}haptic('light');
-  openPremium({ru:'Для чата с ALEX нужна подписка',en:'ALEX chat requires a subscription',es:'El chat con ALEX requiere suscripción',pt:'O chat com ALEX exige assinatura'}[lang]||'ALEX chat requires a subscription');
-  toast({ru:'Нужна подписка',en:'Subscription required',es:'Suscripción requerida',pt:'Assinatura necessária'}[lang]||'Subscription required','🔒');
+  const msg=chatCredits>0?{ru:'Для чата с ALEX нужна подписка',en:'ALEX chat requires a subscription'}[lang]:{ru:'Нужны кредиты ALEX',en:'ALEX credits required',es:'Se necesitan créditos ALEX',pt:'Créditos ALEX necessários'}[lang]||'ALEX credits required';
+  openPremium(msg,'credits');
+  toast(msg,'💳');
 }
 /* Chat model picker — compact Claude choices gated per subscription.
    Server re-validates so a cheating client cannot bypass tier limits. */
@@ -3547,7 +3554,16 @@ async function doChat(text){
     if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
     const data=await r.json();
     addMsg('bot',data.reply||'...');
-    if(data.premium_required){try{sfx.warn();}catch(e){}openPremium();}
+    /* Server tells us the new balance after spending credits — sync UI. */
+    if(typeof data.chat_credits==='number'){
+      chatCredits=data.chat_credits;
+      try{updateCreditChip();}catch(_){}
+    }
+    if(data.premium_required){
+      try{sfx.warn();}catch(e){}
+      /* Show the right tab: credit-only failures default to credits. */
+      openPremium(null, data.credits_required?'credits':'platform');
+    }
     if(data.limit&&!isPremium){try{sfx.warn();}catch(e){}}
     resetChipCooldown();
     saveCurSes();
@@ -8672,6 +8688,35 @@ let isPremium = false;
 let premiumTier = '';
 let premiumUntil = null;
 let premiumLifetime = false;
+/* Modular billing state (mirrors /api/premium/{uid} response) */
+let platformActive = false;
+let platformUntil = null;
+let platformLifetime = false;
+let chatCredits = 0;
+let grandfatheredTier = '';
+let accessKind = 'none';   /* 'platform' | 'grandfathered' | 'none' */
+
+/* Tiny chip in the chat header that shows the credit balance. Hidden
+   for grandfathered bundle holders (they don't run on credits) and for
+   users on legacy active premium. */
+function updateCreditChip(){
+  const chip=document.getElementById('credit-chip');
+  if(!chip)return;
+  const visible = !grandfatheredTier && !(isPremium && premiumTier);
+  chip.style.display = visible ? 'inline-flex' : 'none';
+  const n=document.getElementById('credit-chip-n');
+  if(n) n.textContent = (chatCredits||0).toLocaleString(lang==='ru'?'ru-RU':'en-US');
+  /* Visual warning when balance hits zero. */
+  if(visible && chatCredits<=0){
+    chip.style.color='var(--w)';
+    chip.style.background='rgba(255,170,40,.10)';
+    chip.style.borderColor='rgba(255,170,40,.30)';
+  } else {
+    chip.style.color='';
+    chip.style.background='';
+    chip.style.borderColor='';
+  }
+}
 
 async function checkPremiumStatus(uid){
   if(!uid||!API)return;
@@ -8682,10 +8727,20 @@ async function checkPremiumStatus(uid){
       premiumTier=d.tier||'';
       premiumUntil=d.until||null;
       premiumLifetime=!!d.lifetime;
+      platformActive=!!d.platform_active;
+      platformUntil=d.platform_until||null;
+      platformLifetime=!!d.platform_lifetime;
+      chatCredits=typeof d.chat_credits==='number'?d.chat_credits:0;
+      grandfatheredTier=d.grandfathered_tier||'';
+      accessKind=d.access_kind||'none';
       setPremium(d.is_premium===true,d.source||'database');
+      try{updateCreditChip();}catch(_){}
     }
   }catch(e){
-    premiumTier='';premiumUntil=null;premiumLifetime=false;setPremium(false,'network_error');
+    premiumTier='';premiumUntil=null;premiumLifetime=false;
+    platformActive=false;platformUntil=null;platformLifetime=false;
+    chatCredits=0;grandfatheredTier='';accessKind='none';
+    setPremium(false,'network_error');
   }
 }
 
@@ -8718,8 +8773,43 @@ function setPremium(active, source){
 function tierLevel(tier){
   return ({free:0,basic:1,pro:2,ultimate:3}[(tier||'free').toLowerCase()]||0);
 }
+/* ── Modular billing helpers ──────────────────────────────────────
+   We sell three things now:
+     1. Platform subscription  → all content gates (course extras,
+        exams, analytics, expanded cards, roleplay, text check).
+     2. ALEX credits           → pay-per-message chat (no monthly limit).
+     3. Legacy bundle (Basic/Pro/Ultimate) → kept for grandfathered users.
+
+   hasPlatform()        — any active access path to content features.
+   hasChatAccess()      — can the user open the chat right now?
+   hasTier(minTier)     — back-compat: existing code calls hasTier('basic')
+                          for content gates and hasTier('pro') for the
+                          extra workflows. Platform users get the
+                          equivalent of Pro. Grandfathered users keep
+                          their original tier exactly.
+*/
+function hasPlatform(){
+  if(platformActive)return true;
+  if(grandfatheredTier)return true;
+  if(isPremium)return true;  /* legacy bundle still active but not yet grandfathered */
+  return false;
+}
+function hasChatAccess(){
+  if(grandfatheredTier)return true;
+  if(isPremium)return true;
+  return chatCredits>0;
+}
 function hasTier(minTier){
-  return isPremium&&tierLevel(premiumTier)>=tierLevel(minTier);
+  const need=tierLevel(minTier);
+  if(grandfatheredTier)return tierLevel(grandfatheredTier)>=need;
+  if(isPremium&&premiumTier)return tierLevel(premiumTier)>=need;
+  /* New Platform users get parity with the old Pro bundle for content
+     (everything except chat — chat is credits). Ultimate-only features
+     stay grandfather-only until we ship Voice/Writing as add-ons. */
+  if(platformActive){
+    return need<=tierLevel('pro');
+  }
+  return false;
 }
 function showTierPaywall(minTier, feature){
   const names={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
@@ -8825,130 +8915,184 @@ const PREMIUM_FEATURES=[
   {icon:'M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3',ru:{title:'Детальный разбор ошибок',sub:'Еженедельный отчёт и персональные упражнения'},en:{title:'Detailed Error Analysis',sub:'Weekly report + targeted exercises'}},
 ];
 
-function openPremium(highlightFeature){
+/* ══════════════════════════════════════════════════════════════════
+   PAYWALL (modular billing)
+   Two tabs: "Platform" (1m/6m/lifetime) + "ALEX credits" (100/500/2000).
+   Each plan card renders pricing in Telegram Stars and deep-links the
+   user back into the bot with ?start=<plan_id>, which triggers an
+   immediate Stars invoice.
+   ══════════════════════════════════════════════════════════════════ */
+
+const PLATFORM_PLAN_DEFS=[
+  {id:'plat_1m',  stars:400,  period:'1m',       monthly:400,  save:0},
+  {id:'plat_6m',  stars:1800, period:'6m',       monthly:300,  save:25},
+  {id:'plat_life',stars:6500, period:'lifetime', monthly:null, save:null},
+];
+const CREDIT_PACK_DEFS=[
+  {id:'credits_100',  stars:200,  credits:100,  perMsg:2.0},
+  {id:'credits_500',  stars:800,  credits:500,  perMsg:1.6, popular:true},
+  {id:'credits_2000', stars:2500, credits:2000, perMsg:1.25},
+];
+
+let _premTab='platform';
+
+function switchPremTab(tab){
+  _premTab=tab;
+  document.querySelectorAll('.prem-tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===tab));
+  renderPremPlans();
+}
+
+function _platCopy(){
+  return {
+    title:{ru:'Платформа PolyGlotty',en:'PolyGlotty Platform',es:'Plataforma PolyGlotty',de:'PolyGlotty Plattform',fr:'Plateforme PolyGlotty',pt:'Plataforma PolyGlotty',uk:'Платформа PolyGlotty',tr:'PolyGlotty Platformu',zh:'PolyGlotty 平台',ar:'منصة PolyGlotty'}[lang]||'PolyGlotty Platform',
+    sub:{ru:'Курс A0–C2, экзамены, статистика, расширенные карточки. Чат с ALEX продаётся отдельно — кредитами.',en:'A0–C2 course, exams, analytics, expanded cards. ALEX chat is sold separately as credits.'}[lang]||'A0–C2 course, exams, analytics, expanded cards. ALEX chat is sold separately as credits.',
+    perks:{
+      ru:['Безлимит карточек и интервальное повторение','Exam Hub: TOEFL, IELTS, CAE','Полная статистика и Score Ring','Roleplay, проверка текстов и истории','Темы оформления и расширенный курс'],
+      en:['Unlimited flashcards with spaced repetition','Exam Hub: TOEFL, IELTS, CAE','Full analytics and Score Ring','Roleplay, text check and stories','Themes and the expanded course']
+    }[lang]||['Unlimited flashcards','Exam Hub','Full analytics','Roleplay + text check','Themes']
+  };
+}
+function _credCopy(){
+  return {
+    title:{ru:'Кредиты ALEX',en:'ALEX credits',es:'Créditos ALEX',de:'ALEX-Guthaben',fr:'Crédits ALEX',pt:'Créditos ALEX',uk:'Кредити ALEX',tr:'ALEX kredileri',zh:'ALEX 信用',ar:'رصيد ALEX'}[lang]||'ALEX credits',
+    sub:{ru:'Тратятся за каждое сообщение. Не сгорают. Подходят для всех уровней и моделей.',en:'Spent per chat message. Never expire. Work with every model and level.'}[lang]||'Spent per chat message. Never expire.',
+    perks:{
+      ru:['Haiku — 1 кредит за сообщение','Sonnet 4 — 4 кредита','Sonnet 4.6 — 5 кредитов','Opus 4.7 — 12 кредитов','Голос ALEX — +3 кредита'],
+      en:['Haiku — 1 credit per message','Sonnet 4 — 4 credits','Sonnet 4.6 — 5 credits','Opus 4.7 — 12 credits','Voice ALEX — +3 credits']
+    }[lang]||['Haiku 1','Sonnet 4: 4','Sonnet 4.6: 5','Opus: 12','Voice +3']
+  };
+}
+
+function _platLabel(period){
+  const L={ru:{'1m':'1 месяц','6m':'6 месяцев','lifetime':'Навсегда ∞'},en:{'1m':'1 month','6m':'6 months','lifetime':'Lifetime ∞'}};
+  return (L[lang]||L.en)[period]||period;
+}
+function _starsFmt(n){return n.toLocaleString(lang==='ru'?'ru-RU':'en-US')+' ⭐';}
+
+function renderPremPlans(){
+  const host=document.getElementById('prem-plans');
+  if(!host)return;
+  if(_premTab==='platform'){
+    const owns=hasPlatform();
+    host.innerHTML = PLATFORM_PLAN_DEFS.map(p=>{
+      const dim = owns && p.period!=='lifetime' ? 'opacity:.45;pointer-events:none;' : '';
+      const monthly = p.monthly!=null ? `<div class="pp-rate">≈ ${_starsFmt(p.monthly)} ${lang==='ru'?'в месяц':'/ month'}</div>` : '';
+      const save = p.save ? `<span class="pp-save">−${p.save}%</span>` : '';
+      return `<div class="prem-plan" style="${dim}" onclick="selectPlan('${p.id}')">
+        <div class="pp-hdr">
+          <span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M3 12l3 3 7-7"/><path d="M14 11l4 4 3-3"/></svg>${_platLabel(p.period)}${save}</span>
+          <span class="pp-price">${_starsFmt(p.stars)}</span>
+        </div>
+        ${monthly}
+      </div>`;
+    }).join('');
+  } else {
+    host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
+      const popClass = p.popular ? ' pp-pop' : '';
+      const popLbl = p.popular ? `<div class="pp-popular">${{ru:'Популярный',en:'Popular'}[lang]||'Popular'}</div>` : '';
+      const credLbl = lang==='ru' ? `${p.credits.toLocaleString('ru-RU')} кредитов` : `${p.credits.toLocaleString('en-US')} credits`;
+      const rate = `≈ ${p.perMsg} ⭐ ${lang==='ru'?'за сообщение':'per message'}`;
+      return `<div class="prem-plan${popClass}" onclick="selectPlan('${p.id}')">
+        ${popLbl}
+        <div class="pp-hdr">
+          <span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>${credLbl}</span>
+          <span class="pp-price">${_starsFmt(p.stars)}</span>
+        </div>
+        <div class="pp-rate">${rate}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function openPremium(highlightFeature, initialTab){
   const title=document.getElementById('prem-title');
   const sub=document.getElementById('prem-sub');
   const free=document.getElementById('prem-free');
 
-  if(title)title.textContent='ALEX Subscriptions';
-  if(sub)sub.textContent=highlightFeature||({ru:'Учись бесплатно сколько хочешь. Подписка открывает AI-репетитора, голос, сценарии и быстрый разбор ошибок.',en:'Learn free as long as you want. A subscription unlocks the AI tutor, voice, roleplay and faster mistake review.',es:'Aprende gratis. La suscripción abre tutor AI, voz, roleplay y análisis.',pt:'Aprenda grátis. A assinatura libera tutor AI, voz, roleplay e análise.'}[lang]||'Subscription unlocks AI tutor.');
-  if(free)free.textContent={ru:'Продолжить бесплатно',en:'Continue free',es:'Continuar gratis',pt:'Continuar grátis'}[lang]||'Continue free';
-  const proof=document.getElementById('prem-proof');
-  if(proof)proof.innerHTML=lang==='ru'
-    ?'<b>Оплата только Telegram Stars.</b> Free остаётся полезным: курс, путь, карточки и тесты доступны без оплаты. Подписка нужна, когда хочется личного AI-разбора и больше практики каждый день.'
-    :'<b>Telegram Stars only.</b> Free remains useful: course, path, cards and tests work without payment. Subscribe when you want personal AI explanations and more daily practice.';
-  const pop=document.getElementById('pp-popular-lbl');
-  if(pop)pop.textContent={ru:'Популярный',en:'Popular',es:'Popular',pt:'Popular'}[lang]||'Popular';
-  const by=document.getElementById('pp-basic-year'),py=document.getElementById('pp-pro-year'),uy=document.getElementById('pp-ult-year');
-  if(by)by.innerHTML=lang==='ru'?'6630 ⭐ / год <span>-15%</span>':'6630 ⭐ / year <span>-15%</span>';
-  if(py)py.innerHTML=lang==='ru'?'16320 ⭐ / год <span>-15%</span>':'16320 ⭐ / year <span>-15%</span>';
-  if(uy)uy.innerHTML=lang==='ru'?'42840 ⭐ / год <span>-15%</span>':'42840 ⭐ / year <span>-15%</span>';
+  if(initialTab && (initialTab==='platform' || initialTab==='credits')) _premTab=initialTab;
+  /* If the user explicitly hit a chat paywall, default to credits tab. */
+  else if(highlightFeature && /alex|chat|кредит|credits|chat/i.test(String(highlightFeature))) _premTab='credits';
+
+  /* Sync tab UI + labels. */
+  const platLbl=document.getElementById('prem-tab-platform-lbl');
+  const credLbl=document.getElementById('prem-tab-credits-lbl');
+  if(platLbl)platLbl.textContent=_platCopy().title;
+  if(credLbl)credLbl.textContent=_credCopy().title;
+  document.querySelectorAll('.prem-tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===_premTab));
+
+  if(title)title.textContent=_premTab==='platform'?_platCopy().title:_credCopy().title;
+  if(sub)sub.textContent=highlightFeature||(_premTab==='platform'?_platCopy().sub:_credCopy().sub);
+  if(free)free.textContent={ru:'Закрыть',en:'Close',es:'Cerrar',de:'Schliessen',fr:'Fermer',pt:'Fechar',uk:'Закрити',tr:'Kapat',zh:'关闭',ar:'إغلاق'}[lang]||'Close';
+
+  /* Perks block reused as the "depth grid" — shows what the chosen
+     product unlocks so users understand the split. */
   const depthTitle=document.getElementById('prem-depth-title');
   const depthGrid=document.getElementById('prem-depth-grid');
-  if(depthTitle)depthTitle.textContent={ru:'Что усиливает обучение',en:'What gets upgraded',es:'Qué mejora',pt:'O que melhora'}[lang]||'What gets upgraded';
+  if(depthTitle)depthTitle.textContent=_premTab==='platform'
+    ? ({ru:'Что входит в Платформу',en:"What's in Platform"}[lang]||"What's in Platform")
+    : ({ru:'Тариф за сообщение',en:'Per-message rate'}[lang]||'Per-message rate');
   if(depthGrid){
-    const depth=lang==='ru'
-      ?[
-        ['M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z','AI-разбор','Пояснения ошибок, правил и примеров под тебя'],
-        ['M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2','Голос и аудио','Более приятная озвучка, shadowing и listening'],
-        ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2 M9 14l2 2 4-4','Экзамены','Переходные тесты, TOEFL и сертификаты'],
-        ['M3 12h18M12 3v18M5 5l14 14M19 5L5 19','Больше контента','Карточки, сценарии, тексты, истории и отчёты']
-      ]
-      :[
-        ['M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-4-3H8l-4 3z','AI breakdown','Personal explanations for mistakes, rules and examples'],
-        ['M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z M19 10v2a7 7 0 01-14 0v-2','Voice and audio','Smoother voices, shadowing and listening'],
-        ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2 M9 5a2 2 0 002 2h2a2 2 0 002-2 M9 14l2 2 4-4','Exams','Level-up tests, TOEFL and certificates'],
-        ['M3 12h18M12 3v18M5 5l14 14M19 5L5 19','More content','Cards, roleplays, text checks, stories and reports']
-      ];
-    depthGrid.innerHTML=depth.map(d=>`<div class="prem-depth-card"><div class="prem-depth-ico"><svg viewBox="0 0 24 24"><path d="${d[0]}"/></svg></div><div class="prem-depth-name">${d[1]}</div><div class="prem-depth-sub">${d[2]}</div></div>`).join('');
-  }
-  const ladder=document.getElementById('prem-ladder');
-  if(ladder){
-    const items=lang==='ru'
-      ?[
-        ['Free','Полный путь A0-C2 · 500 слов · 10 карточек / 5ч · drills · путь · тесты уровня'],
-        ['Basic','ALEX Chat · AI-подсказки · Sonnet 4 · 20 карточек / 5ч · голосовые ответы'],
-        ['Pro','Roleplay · проверка текста · 50 карточек / 4ч · отчёт ошибок · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 100 карточек / 4ч · длинная история · сертификаты']
-      ]
-      :[
-        ['Free','700 A0-C2 lessons · 500 words · 10 cards / 5h · drills · path · level tests'],
-        ['Basic','ALEX Chat · AI hints · Sonnet 4 · 20 cards / 5h · voice replies'],
-        ['Pro','Roleplay · text check · 50 cards / 4h · error report · Sonnet 4.6'],
-        ['Ultimate','TOEFL · Opus · 100 cards / 4h · long history · certificates']
-      ];
-    ladder.innerHTML=items.map(i=>`<div class="lad-card"><strong>${i[0]}</strong><span>${i[1]}</span></div>`).join('');
+    const perks = _premTab==='platform' ? _platCopy().perks : _credCopy().perks;
+    depthGrid.innerHTML=perks.map(p=>`<div class="prem-depth-card"><div class="prem-depth-name" style="margin-bottom:0">${safeHTML(p)}</div></div>`).join('');
   }
 
-  // Fill plan buffs
-  const basicB=document.getElementById('pp-basic-buffs');
-  const proB=document.getElementById('pp-pro-buffs');
-  const ultB=document.getElementById('pp-ult-buffs');
-  if(lang==='ru'){
-    if(basicB)basicB.innerHTML='<b>Старт с AI-репетитором</b><br>ALEX Chat открыт<br>45 quota points/день<br>Haiku 4.5 + Sonnet 4<br>20 карточек / 5 часов<br>Голосовые ответы + AI-подсказки<br>Полный разбор правил в курсе';
-    if(proB)proB.innerHTML='<b>Лучший баланс цены и силы</b><br>110 quota points/день<br>Sonnet 4/4.6<br>50 карточек / 4 часа<br>Roleplay + проверка текста<br>Отчёт ошибок и персональные drills<br>Больше сценариев и историй';
-    if(ultB)ultB.innerHTML='<b>Максимум для интенсивного режима</b><br>260 quota points/день<br>Opus 4.1/4.7<br>100 карточек / 4 часа<br>TOEFL + персональный план<br>Длинная история диалога<br>Сертификаты и максимум аудио';
-  } else {
-    if(basicB)basicB.innerHTML='<b>Start with an AI tutor</b><br>ALEX Chat unlocked<br>45 quota points/day<br>Haiku 4.5 + Sonnet 4<br>20 cards / 5 hours<br>Voice replies + AI hints<br>Full course rule breakdown';
-    if(proB)proB.innerHTML='<b>Best balance of price and power</b><br>110 quota points/day<br>Sonnet 4/4.6<br>50 cards / 4 hours<br>Roleplay + text check<br>Error report and personal drills<br>More scenarios and stories';
-    if(ultB)ultB.innerHTML='<b>Maximum for intensive learning</b><br>260 quota points/day<br>Opus 4.1/4.7<br>100 cards / 4 hours<br>TOEFL + personal plan<br>Long chat history<br>Certificates and max audio';
-  }
-
-  // Hide plans that are lower or equal to current tier
-  const tierOrder={basic:1,pro:2,ultimate:3};
-  const currentLevel=tierOrder[premiumTier]||0;
-  const plans=document.querySelectorAll('.prem-plan');
-  const tiers=['basic','pro','ultimate'];
-  plans.forEach((p,i)=>{
-    const planLevel=tierOrder[tiers[i]]||0;
-    if(isPremium&&planLevel<=currentLevel){
-      p.style.opacity='.35';p.style.pointerEvents='none';
-      // Add "current" label
-      if(planLevel===currentLevel&&!p.querySelector('.pp-current')){
-        const lbl=document.createElement('div');lbl.className='pp-current';
-        lbl.style.cssText='position:absolute;top:10px;left:14px;font-size:9px;font-weight:700;color:var(--a2);text-transform:uppercase;letter-spacing:.5px';
-        lbl.textContent={ru:'Текущий план',en:'Current plan',es:'Plan actual',de:'Aktueller Plan',fr:'Plan actuel',pt:'Plano atual',uk:'Поточний план',tr:'Mevcut plan',zh:'当前计划',ar:'الخطة الحالية'}[lang]||'Current';
-        p.appendChild(lbl);
-      }
-    } else {
-      p.style.opacity='1';p.style.pointerEvents='auto';
-      const cur=p.querySelector('.pp-current');if(cur)cur.remove();
+  /* Status banner (proof line). */
+  const proof=document.getElementById('prem-proof');
+  if(proof){
+    const lines=[];
+    if(platformActive){
+      const left = platformLifetime ? ({ru:'навсегда',en:'lifetime'}[lang]||'lifetime') : (platformUntil ? (lang==='ru'?`до ${new Date(platformUntil).toLocaleDateString('ru')}`:`until ${new Date(platformUntil).toLocaleDateString('en')}`) : '');
+      lines.push(`<b>${_platCopy().title}:</b> ${({ru:'активна',en:'active'}[lang]||'active')} · ${left}`);
+    } else if(grandfatheredTier){
+      lines.push(`<b>${grandfatheredTier.toUpperCase()}</b> — ${({ru:'старый план сохранён навсегда',en:'legacy plan kept forever'}[lang]||'legacy plan kept forever')}`);
     }
-  });
-
-  // If ultimate, hide free button and show "you have max"
-  if(isPremium&&premiumTier==='ultimate'){
-    if(sub)sub.textContent={ru:'У тебя максимальный план',en:'You have the highest plan',es:'Tienes el plan máximo',pt:'Você tem o plano máximo'}[lang]||'Max plan';
+    if(chatCredits>0){
+      lines.push(`💬 ${({ru:'Кредитов ALEX',en:'ALEX credits'}[lang]||'ALEX credits')}: <b>${chatCredits.toLocaleString(lang==='ru'?'ru-RU':'en-US')}</b>`);
+    } else if(!grandfatheredTier && !isPremium){
+      lines.push(({ru:'Чат ALEX покупается отдельно — кредитами.',en:'ALEX chat is sold separately as credits.'}[lang]||'ALEX chat sold separately as credits.'));
+    }
+    proof.innerHTML = lines.join(' · ') || (lang==='ru'?'<b>Оплата только Telegram Stars.</b>':'<b>Telegram Stars only.</b>');
   }
 
+  /* Ladder block is no longer relevant — empty it. */
+  const ladder=document.getElementById('prem-ladder');
+  if(ladder)ladder.innerHTML='';
+
+  renderPremPlans();
   openMod('premiumm');
 }
 
-function selectPlan(plan){
+function selectPlan(planId){
   haptic('medium');
   const botName=window.BOT_NAME||'PolyGlotty_bot';
-  if(tg?.openTelegramLink){
-    tg.openTelegramLink(`https://t.me/${botName}?start=premium`);
-  } else {
-    window.open(`https://t.me/${botName}?start=premium`);
-  }
+  /* Legacy bundle ids still work — point at /start=premium so the user
+     can renew via the old menu. New ids deep-link to a direct invoice. */
+  const startArg=(planId==='basic'||planId==='pro'||planId==='ultimate')?'premium':planId;
+  const url=`https://t.me/${botName}?start=${encodeURIComponent(startArg)}`;
+  if(tg?.openTelegramLink){tg.openTelegramLink(url);} else {window.open(url);}
   closeMod('premiumm');
-  toast({ru:'Открываю бот для оплаты...',en:'Opening bot for payment...',es:'Abriendo bot para pagar...',de:'Bot für Zahlung öffnen...',fr:'Ouverture du bot pour payer...',pt:'Abrindo bot para pagamento...',uk:'Відкриваю бот для оплати...',tr:'Ödeme botu açılıyor...',zh:'打开支付机器人...',ar:'جاري فتح بوت الدفع...'}[lang]||'Opening bot...','💎');
+  toast({ru:'Открываю Telegram для оплаты...',en:'Opening Telegram for payment...'}[lang]||'Opening Telegram for payment...','💳');
   let polls=0;
   const poll=setInterval(async()=>{
     polls++;
     if(polls>12){clearInterval(poll);return;}
     if(window._uid){
+      const before={p:platformActive,c:chatCredits,t:grandfatheredTier};
       await checkPremiumStatus(window._uid);
-      if(isPremium){
+      const changed = platformActive!==before.p || chatCredits!==before.c || grandfatheredTier!==before.t;
+      if(changed){
         clearInterval(poll);
-        toast({ru:'Premium активирован! 🎉',en:'Premium activated! 🎉',es:'¡Premium activado! 🎉',de:'Premium aktiviert! 🎉',fr:'Premium activé ! 🎉',pt:'Premium ativado! 🎉',uk:'Premium активовано! 🎉',tr:'Premium aktif! 🎉',zh:'Premium已激活！🎉',ar:'تم تفعيل Premium! 🎉'}[lang]||'Premium activated!','⭐');
+        if(platformActive&&!before.p){
+          toast({ru:'Платформа активирована! 🎉',en:'Platform activated! 🎉'}[lang]||'Platform activated! 🎉','⭐');
+        } else if(chatCredits>before.c){
+          toast(({ru:'+ кредиты ALEX 🎉',en:'+ ALEX credits 🎉'}[lang]||'+ ALEX credits 🎉'),'💬');
+        }
       }
     }
   },5000);
 }
 
-function activatePremium(){ selectPlan('pro'); }
+function activatePremium(){ selectPlan('plat_1m'); }
 
 /* ══ Update applyLang for new labels ══ */
 function updateNewLabels(){
