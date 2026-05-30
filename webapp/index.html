@@ -1545,6 +1545,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .ed-exp{font-size:11px;color:var(--t3);margin-top:2px}
 .ed-empty{text-align:center;padding:24px;color:var(--t3);font-size:13px}
 
+/* ══ CONTINUE LESSON CARD ══ */
+.continue-card{position:relative;display:flex;align-items:stretch;gap:12px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);padding:14px 14px 14px 18px;margin:14px 0 12px;cursor:pointer;overflow:hidden;transition:.18s}
+.continue-card:active{transform:scale(.985)}
+.cont-bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--a);border-radius:4px 0 0 4px}
+.cont-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cont-row{display:flex;align-items:center;gap:8px}
+.cont-label{font-size:10px;font-weight:700;color:var(--a);letter-spacing:1px;text-transform:uppercase}
+.cont-level{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.5px;background:var(--e2);border:1px solid var(--b1);padding:2px 6px;border-radius:6px}
+.cont-title{font-size:15px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cont-sub{font-size:12px;color:var(--t2);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.cont-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden}
+.cont-fill{height:100%;background:linear-gradient(90deg,var(--a),#00d4aa);border-radius:100px;transition:width .8s ease}
+.cont-arr{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:32px;color:var(--a)}
+.cont-arr svg{width:22px;height:22px}
+
 /* ══ WEEKLY CHALLENGE ══ */
 .challenge-card{background:linear-gradient(135deg,rgba(var(--ar),.1),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.2);border-radius:var(--r);padding:15px;margin-bottom:13px;cursor:pointer;transition:.18s}
 .challenge-card:active{transform:scale(.98)}
@@ -1629,6 +1644,22 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </svg>
     <span class="streak-chip-n" id="hstk">0</span>
     <span class="streak-chip-lbl" id="hstk-lbl">days</span>
+  </div>
+  <!-- Continue lesson CTA -->
+  <div class="continue-card" id="continue-card" style="display:none" onclick="continueLessonTap()">
+    <div class="cont-bar" id="cont-bar"></div>
+    <div class="cont-main">
+      <div class="cont-row">
+        <span class="cont-label" id="cont-label">Continue learning</span>
+        <span class="cont-level" id="cont-level"></span>
+      </div>
+      <div class="cont-title" id="cont-title">—</div>
+      <div class="cont-sub" id="cont-sub">—</div>
+      <div class="cont-progress"><div class="cont-fill" id="cont-fill" style="width:0%"></div></div>
+    </div>
+    <div class="cont-arr">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
   </div>
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
@@ -2799,10 +2830,77 @@ function renderHome(d){
   const stkLbl=document.getElementById('hstk-lbl');
   if(stkLbl)stkLbl.textContent={ru:s===1?'день':(s%10>=2&&s%10<=4&&!(s%100>=12&&s%100<=14))?'дня':'дней',en:s===1?'day':'days',es:s===1?'día':'días',de:s===1?'Tag':'Tage',fr:s===1?'jour':'jours',pt:s===1?'dia':'dias',uk:s===1?'день':(s%10>=2&&s%10<=4)?'дні':'днів',tr:'gün',zh:'天',ar:'يوم'}[lang]||'days';
   loadMissions();
+  try{renderContinueLesson();}catch(e){}
   try{renderChallenge();}catch(e){}
   try{renderIdiomOfDay();}catch(e){}
   try{renderLeaderboard(d.xp||0);}catch(e){}
   try{updateNewLabels();}catch(e){}
+}
+
+/* ══ CONTINUE LESSON CARD ══ */
+function _continueLessonCopy(){
+  return {
+    label:{ru:'Продолжить урок',en:'Continue lesson',es:'Continuar lección',de:'Lektion fortsetzen',fr:'Continuer la leçon',pt:'Continuar lição',uk:'Продовжити урок',tr:'Derse devam et',zh:'继续课程',ar:'تابع الدرس'}[lang]||'Continue lesson',
+    next:{ru:'Следующий урок',en:'Up next',es:'A continuación',de:'Als Nächstes',fr:'À suivre',pt:'A seguir',uk:'Далі',tr:'Sırada',zh:'接下来',ar:'التالي'}[lang]||'Up next',
+    allDone:{ru:'Все уроки пройдены — повтори карточки',en:'All lessons done — review your cards',es:'Lecciones completadas — repasa tarjetas',de:'Alles erledigt — Karten wiederholen',fr:'Tout terminé — révisez vos cartes',pt:'Tudo concluído — revise os cartões',uk:'Усі уроки пройдені — повтори картки',tr:'Hepsi tamam — kartları tekrarla',zh:'全部完成 — 复习卡片',ar:'انتهت الدروس — راجع البطاقات'}[lang]||'All lessons done — review your cards',
+    untilUnlock:{ru:'Откроется после соседних уроков',en:'Unlocks after nearby lessons',es:'Se desbloquea tras lecciones cercanas',pt:'Desbloqueia após lições próximas'}[lang]||'Unlocks after nearby lessons'
+  };
+}
+function renderContinueLesson(){
+  const card=document.getElementById('continue-card');
+  if(!card)return;
+  let id=null;
+  try{id=currentCourseLessonId();}catch(_){}
+  if(!id){
+    /* All caught up — show a soft "review your cards" CTA. */
+    const c=_continueLessonCopy();
+    card.style.display='flex';
+    card.dataset.action='cards';
+    const lvl=document.getElementById('cont-level');if(lvl)lvl.textContent='';
+    const lbl=document.getElementById('cont-label');if(lbl)lbl.textContent=c.label;
+    const tt=document.getElementById('cont-title');if(tt)tt.textContent=c.allDone;
+    const sb=document.getElementById('cont-sub');if(sb)sb.textContent='Flashcards';
+    const fl=document.getElementById('cont-fill');if(fl)fl.style.width='100%';
+    const bar=document.getElementById('cont-bar');if(bar)bar.style.background='var(--a)';
+    return;
+  }
+  const ls=(typeof GALAXY_COURSE!=='undefined')?GALAXY_COURSE.find(x=>x.id===id):null;
+  if(!ls){card.style.display='none';return;}
+  const c=_continueLessonCopy();
+  card.style.display='flex';
+  card.dataset.action='lesson';
+  card.dataset.lessonId=id;
+  const lvl=document.getElementById('cont-level');if(lvl)lvl.textContent=ls.level||'';
+  const lbl=document.getElementById('cont-label');if(lbl)lbl.textContent=c.label;
+  const ttl=ls.title&&(ls.title[lang]||ls.title.en||ls.title.ru)||id;
+  const sub=ls.sub&&(ls.sub[lang]||ls.sub.en||ls.sub.ru)||'';
+  const tt=document.getElementById('cont-title');if(tt)tt.textContent=ttl;
+  const sb=document.getElementById('cont-sub');if(sb)sb.textContent=sub;
+  /* Course completion % within the user's current level. */
+  let pct=0;
+  try{
+    const sorted=sortedGalaxyCourse().filter(x=>x.level===ls.level);
+    const done=LS.getJ('course_done')||{};
+    const completed=sorted.filter(x=>done[x.id]).length;
+    pct=sorted.length?Math.round(completed/sorted.length*100):0;
+  }catch(_){}
+  const fl=document.getElementById('cont-fill');if(fl)fl.style.width=Math.max(6,pct)+'%';
+  const bar=document.getElementById('cont-bar');if(bar)bar.style.background=ls.color||'var(--a)';
+}
+function continueLessonTap(){
+  const card=document.getElementById('continue-card');
+  if(!card)return;
+  try{sfx.tap();}catch(_){}
+  const action=card.dataset.action||'lesson';
+  if(action==='cards'){
+    try{goTab('learn');switchLearnTab('cards');initLearn();}catch(_){try{goTab('learn');}catch(_){}}
+    return;
+  }
+  const id=card.dataset.lessonId;
+  if(!id)return;
+  try{goTab('learn');}catch(_){}
+  try{switchLearnTab('course');}catch(_){}
+  setTimeout(()=>{try{openCourseLesson(id);}catch(_){}},120);
 }
 
 /* ══ RENDER PROGRESS ══ */
@@ -7254,9 +7352,11 @@ function maybeCompleteCourse(id){
   if(done[id]){renderCourseCompleteCard(id,true);return true;}
   done[id]=Date.now();
   LS.setJ('course_done',done);
+  _ccLessonId={t:0,id:null};
   addLocalXP(10);
   bumpStat('tests');
   try{trackM('lesson');}catch(e){}
+  try{renderContinueLesson();}catch(_){}
   renderCourseCompleteCard(id,false);
   toast('+10 XP · '+(lang==='ru'?'урок закрыт':'lesson complete'),'⭐');
   return true;
