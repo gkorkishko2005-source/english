@@ -1650,10 +1650,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .shdr .stit{font-size:22px;font-weight:800;letter-spacing:-.4px}
 
 /* ── Settings · quick toggles (Dark / Sound) ───────────────────── */
-.dl-toggle{background:transparent;border:1px solid var(--b1);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s}
+.set-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dl-toggle{background:transparent;border:1px solid var(--b1);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s;
+           display:flex;align-items:center;gap:10px;min-height:54px;min-width:0;cursor:pointer}
 .dl-toggle:active{background:var(--e2);transform:none}
-.dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1)}
-.dl-toggle-icon{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center}
+.dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1);flex:1;min-width:0;
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.dl-toggle-icon{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dl-toggle-icon svg{width:18px;height:18px}
 .dl-switch{flex-shrink:0}
 
@@ -2504,6 +2507,150 @@ const LANGS = {
     blsav:'Idioma bot: ',no_prof:'Não definida',no_rem:'Não definido',
     profinpp:'Ex.: desenvolvedor, gosto de games, preparo uma entrevista',intemt:'Adicionar interesses',intems:'Converse com o ALEX — ele lembrará',
   },
+  de:{greet:h=>h<12?'Guten Morgen,':h<18?'Guten Tag,':'Guten Abend,',
+    streak_t:'Tage in Folge',streak:'Streak',words:'Wörter',tests:'Tests',
+    missions:'Tagesziele · 2 für Streak',m1:'Sende 3 Nachrichten an ALEX',m2:'Wiederhole 5 Karten',m3:'Audio-Aufgabe lösen',m4:"Lerne 5 Wörter des Tages",
+    qs:'Schnellstart',gr:'Grammatik',grs:'Eine Regel lernen',fc:'Karten',fcs:'Wörter wiederholen',tfs:'Hörverstehen',sp:'Sprechen',sps:'Freies Gespräch',
+    dw:'Wörter des Tages',dwa:'+ Mehr',rev:'Wiederholungsliste',tap_flip:'Tippe zum Umdrehen',translation:'ÜBERSETZUNG',
+    again:'Nochmal',hard:'Schwer',good:'Gut',easy:'Leicht',
+    all_done:'Alles erledigt!',all_done_s:'Heute keine Karten.',lnw:'5 neue Wörter lernen',ffact:'Englisch-Fakt',
+    prog:'Fortschritt',progs:'Dein Lernweg',stats:'Statistik',sess:'Sitzungen',wl:'Gelernte Wörter',td:'Tests gemacht',ef:'Fehler',tw:'Diese Woche',notoefl:'Noch keine TOEFL-Sitzungen',
+    settings:'Einstellungen',uilang:'Oberflächensprache',botlang:'Antwortsprache',theme:'Design',persona:'ALEX-Persönlichkeit',
+    p1n:'Freundlich',p1s:'Warm & ermutigend',p2n:'Professor',p2s:'Formell & präzise',p3n:'Gamer',p3s:'Locker, Slang',p4n:'Brite',p4s:'Witzig & sarkastisch',
+    myprof:'Mein Profil',lvt:'Niveau',lvs:'Bitte ALEX, es zu ändern',proft:'Über dich',remt:'Erinnerung',ints:'Interessen',intedit:'Im Chat bearbeiten',
+    online:'Online',chats:'Chats',new_chat:'+ Neu',
+    save:'Speichern',cancel:'Abbrechen',disrem:'Deaktivieren',
+    cfmt:'Chat löschen?',cfms:'ALEX vergisst diesen Chat. Dein Fortschritt bleibt erhalten.',yescl:'Ja, löschen',
+    c_corr:'Korrigiere mein Englisch',c_gr:'Grammatikstunde',c_sp:'Lass uns sprechen',c_vc:'Vokabeltest',c_au:'Hören',c_id:'Idiome lehren',c_er:'Meine Fehler',
+    welcome:'Hallo! Ich bin ALEX, dein Englischtutor. 👋\n\nSchreibe auf Englisch — ich korrigiere Fehler.',
+    errconn:'Verbindungsfehler. Versuche es erneut.',clrd:'Chat gelöscht',allrev:'Alle Karten geschafft! 🎉',
+    spam:'🤔 Schreibe etwas auf Englisch — ich helfe!',
+    copied:'Kopiert ✓',copy:'Kopieren',audgen:'Audio-Aufgabe wird erstellt...',
+    notift:'Schreibe auf Englisch — ich korrigiere! 👋',notifcta:'Chat öffnen →',
+    nosessiont:'Neuer Chat',profpt:'Erzähle uns von dir',remsav:'Erinnerung: ',remoff:'Erinnerungen aus',psav:'Gespeichert',
+    blsav:'Bot-Sprache: ',no_prof:'Nicht gesetzt',no_rem:'Nicht gesetzt',
+    profinpp:'Z.B.: Entwickler, mag Games, Vorbereitung auf ein Vorstellungsgespräch',intemt:'Interessen hinzufügen',intems:'Chatte mit ALEX — er merkt es sich',
+  },
+  fr:{greet:h=>h<12?'Bonjour,':h<18?'Bon après-midi,':'Bonsoir,',
+    streak_t:'Jours d’affilée',streak:'Série',words:'Mots',tests:'Tests',
+    missions:'Missions du jour · 2 pour la série',m1:'Envoie 3 messages à ALEX',m2:'Révise 5 cartes',m3:'Tâche audio TOEFL',m4:'Apprends 5 mots du jour',
+    qs:'Démarrage rapide',gr:'Grammaire',grs:'Apprendre une règle',fc:'Cartes',fcs:'Réviser les mots',tfs:'Compréhension orale',sp:'Parler',sps:'Conversation libre',
+    dw:'Mots du jour',dwa:'+ Plus',rev:'File de révision',tap_flip:'Tape pour retourner',translation:'TRADUCTION',
+    again:'Encore',hard:'Difficile',good:'Bien',easy:'Facile',
+    all_done:'Tout est fait !',all_done_s:'Aucune carte pour aujourd’hui.',lnw:'Apprendre 5 nouveaux mots',ffact:'Anecdote anglaise',
+    prog:'Progression',progs:'Ton parcours',stats:'Statistiques',sess:'Sessions',wl:'Mots appris',td:'Tests faits',ef:'Erreurs',tw:'Cette semaine',notoefl:'Aucune session TOEFL pour l’instant',
+    settings:'Paramètres',uilang:'Langue de l’interface',botlang:'Langue des réponses',theme:'Thème',persona:'Personnalité d’ALEX',
+    p1n:'Amical',p1s:'Chaleureux & encourageant',p2n:'Professeur',p2s:'Formel & précis',p3n:'Gamer',p3s:'Décontracté, argot',p4n:'Britannique',p4s:'Plein d’esprit & sarcastique',
+    myprof:'Mon profil',lvt:'Niveau',lvs:'Demande à ALEX de le changer',proft:'À propos de toi',remt:'Rappel',ints:'Intérêts',intedit:'Modifier dans le chat',
+    online:'En ligne',chats:'Discussions',new_chat:'+ Nouveau',
+    save:'Enregistrer',cancel:'Annuler',disrem:'Désactiver',
+    cfmt:'Effacer la conversation ?',cfms:'ALEX oubliera ce chat. Ta progression est sauvegardée.',yescl:'Oui, effacer',
+    c_corr:'Corrige mon anglais',c_gr:'Leçon de grammaire',c_sp:'Parlons un peu',c_vc:'Test de vocabulaire',c_au:'Écoute',c_id:'Apprendre des idiomes',c_er:'Mes erreurs',
+    welcome:'Salut ! Je suis ALEX, ton tuteur d’anglais. 👋\n\nÉcris en anglais — je corrige.',
+    errconn:'Erreur de connexion. Réessaie.',clrd:'Chat effacé',allrev:'Toutes les cartes ! 🎉',
+    spam:'🤔 Écris quelque chose en anglais et je t’aide !',
+    copied:'Copié ✓',copy:'Copier',audgen:'Génération de la tâche audio...',
+    notift:'Écris en anglais — je corrige ! 👋',notifcta:'Ouvrir le chat →',
+    nosessiont:'Nouveau chat',profpt:'Parle-nous de toi',remsav:'Rappel : ',remoff:'Rappels désactivés',psav:'Enregistré',
+    blsav:'Langue du bot : ',no_prof:'Non défini',no_rem:'Non défini',
+    profinpp:'Ex. : développeur, fan de jeux, prépare un entretien en anglais',intemt:'Ajouter des intérêts',intems:'Parle à ALEX — il s’en souviendra',
+  },
+  uk:{greet:h=>h<12?'Доброго ранку,':h<18?'Доброго дня,':h<23?'Доброго вечора,':'Доброї ночі,',
+    streak_t:'Днів поспіль',streak:'Стрік',words:'Слова',tests:'Тести',
+    missions:'Завдання дня · 2 для стріку',m1:'Надішли 3 повідомлення ALEX',m2:'Повтори 5 карток',m3:'Аудіо-завдання TOEFL',m4:'Вивчи 5 слів дня',
+    qs:'Швидкий старт',gr:'Граматика',grs:'Вивчити правило',fc:'Картки',fcs:'Повторити слова',tfs:'Аудіювання',sp:'Розмова',sps:'Вільний діалог',
+    dw:'Слова дня',dwa:'+ Ще',rev:'Черга повторень',tap_flip:'Натисни, щоб перевернути',translation:'ПЕРЕКЛАД',
+    again:'Знову',hard:'Складно',good:'Добре',easy:'Легко',
+    all_done:'Усе повторено!',all_done_s:'Немає карток на сьогодні.',lnw:'Вивчити 5 нових слів',ffact:'Факт про англійську',
+    prog:'Прогрес',progs:'Твій шлях навчання',stats:'Статистика',sess:'Сесії',wl:'Вивчено слів',td:'Складено тестів',ef:'Помилок',tw:'Цього тижня',notoefl:'Сесій TOEFL поки немає',
+    settings:'Налаштування',uilang:'Мова інтерфейсу',botlang:'Мова відповідей бота',theme:'Тема',persona:'Особистість ALEX',
+    p1n:'Дружній',p1s:'Теплий і підтримуючий',p2n:'Професор',p2s:'Формальний і точний',p3n:'Геймер',p3s:'Розслаблений, сленг',p4n:'Британець',p4s:'Дотепний і саркастичний',
+    myprof:'Мій профіль',lvt:'Рівень',lvs:'Скажи ALEX, щоб змінити',proft:'Про себе',remt:'Нагадування',ints:'Інтереси',intedit:'Редагувати в чаті',
+    online:'Онлайн',chats:'Чати',new_chat:'+ Новий',
+    save:'Зберегти',cancel:'Скасувати',disrem:'Вимкнути',
+    cfmt:'Очистити діалог?',cfms:'ALEX забуде розмову. Прогрес збережеться.',yescl:'Так, очистити',
+    c_corr:'Перевір мою англійську',c_gr:'Урок граматики',c_sp:'Поговорімо',c_vc:'Тест зі словника',c_au:'Аудіювання',c_id:'Навчи ідіомам',c_er:'Мої помилки',
+    welcome:'Привіт! Я ALEX, твій репетитор англійської. 👋\n\nПиши англійською — виправлю помилки.',
+    errconn:'Помилка з’єднання. Спробуй ще раз.',clrd:'Діалог очищено',allrev:'Усі картки! 🎉',
+    spam:'🤔 Напиши щось англійською — я допоможу!',
+    copied:'Скопійовано ✓',copy:'Копіювати',audgen:'Генерую аудіо-завдання...',
+    notift:'Пиши англійською — виправлю! 👋',notifcta:'Відкрити чат →',
+    nosessiont:'Новий чат',profpt:'Розкажи про себе',remsav:'Нагадування: ',remoff:'Нагадування вимкнено',psav:'Збережено',
+    blsav:'Мова бота: ',no_prof:'Не задано',no_rem:'Не задано',
+    profinpp:'Напр.: розробник, люблю ігри, готуюсь до інтерв’ю англійською',intemt:'Додати інтереси',intems:'Спілкуйся з ALEX — він запам’ятає',
+  },
+  tr:{greet:h=>h<12?'Günaydın,':h<18?'İyi günler,':'İyi akşamlar,',
+    streak_t:'Üst üste gün',streak:'Seri',words:'Kelimeler',tests:'Testler',
+    missions:'Günlük görevler · seri için 2',m1:'ALEX’a 3 mesaj gönder',m2:'5 kart tekrar et',m3:'TOEFL dinleme görevi',m4:'Bugünün 5 kelimesini öğren',
+    qs:'Hızlı başlangıç',gr:'Gramer',grs:'Bir kural öğren',fc:'Kartlar',fcs:'Kelime tekrarı',tfs:'Dinleme alıştırması',sp:'Konuşma',sps:'Serbest sohbet',
+    dw:'Günün kelimeleri',dwa:'+ Daha fazla',rev:'Tekrar sırası',tap_flip:'Çevirmek için dokun',translation:'ÇEVİRİ',
+    again:'Tekrar',hard:'Zor',good:'İyi',easy:'Kolay',
+    all_done:'Hepsi tamam!',all_done_s:'Bugün için kart yok.',lnw:'5 yeni kelime öğren',ffact:'İngilizce ilginç bilgi',
+    prog:'İlerleme',progs:'Öğrenme yolun',stats:'İstatistikler',sess:'Oturumlar',wl:'Öğrenilen kelime',td:'Tamamlanan test',ef:'Hata',tw:'Bu hafta',notoefl:'Henüz TOEFL oturumu yok',
+    settings:'Ayarlar',uilang:'Arayüz dili',botlang:'Bot yanıt dili',theme:'Tema',persona:'ALEX kişiliği',
+    p1n:'Dostça',p1s:'Sıcak ve cesaretlendirici',p2n:'Profesör',p2s:'Resmi ve net',p3n:'Gamer',p3s:'Rahat, argo',p4n:'İngiliz',p4s:'Esprili ve sivri dilli',
+    myprof:'Profilim',lvt:'Seviye',lvs:'Değiştirmek için ALEX’a söyle',proft:'Hakkında',remt:'Hatırlatma',ints:'İlgi alanları',intedit:'Sohbette düzenle',
+    online:'Çevrimiçi',chats:'Sohbetler',new_chat:'+ Yeni',
+    save:'Kaydet',cancel:'İptal',disrem:'Kapat',
+    cfmt:'Sohbeti temizle?',cfms:'ALEX bu sohbeti unutur. İlerlemen güvende.',yescl:'Evet, temizle',
+    c_corr:'İngilizcemi düzelt',c_gr:'Gramer dersi',c_sp:'Hadi konuşalım',c_vc:'Kelime testi',c_au:'Dinleme',c_id:'Deyim öğret',c_er:'Hatalarım',
+    welcome:'Merhaba! Ben ALEX, İngilizce öğretmenin. 👋\n\nİngilizce yaz — hataları düzeltirim.',
+    errconn:'Bağlantı hatası. Tekrar dene.',clrd:'Sohbet temizlendi',allrev:'Tüm kartlar bitti! 🎉',
+    spam:'🤔 İngilizce bir şey yaz — yardım ederim!',
+    copied:'Kopyalandı ✓',copy:'Kopyala',audgen:'Ses görevi oluşturuluyor...',
+    notift:'İngilizce yaz — düzeltirim! 👋',notifcta:'Sohbeti aç →',
+    nosessiont:'Yeni sohbet',profpt:'Kendinden bahset',remsav:'Hatırlatma: ',remoff:'Hatırlatmalar kapalı',psav:'Kaydedildi',
+    blsav:'Bot dili: ',no_prof:'Ayarlı değil',no_rem:'Ayarlı değil',
+    profinpp:'Ör.: yazılımcı, oyun severim, İngilizce mülakata hazırlanıyorum',intemt:'İlgi alanı ekle',intems:'ALEX ile konuş — hatırlar',
+  },
+  zh:{greet:h=>h<12?'早上好,':h<18?'下午好,':'晚上好,',
+    streak_t:'连续天数',streak:'连胜',words:'单词',tests:'测验',
+    missions:'每日任务 · 2 个保持连胜',m1:'向 ALEX 发送 3 条消息',m2:'复习 5 张卡片',m3:'TOEFL 听力任务',m4:'学习今天的 5 个词',
+    qs:'快速开始',gr:'语法',grs:'学习规则',fc:'卡片',fcs:'复习单词',tfs:'听力练习',sp:'口语',sps:'自由对话',
+    dw:'每日单词',dwa:'+ 更多',rev:'复习队列',tap_flip:'点击翻转',translation:'翻译',
+    again:'再来',hard:'困难',good:'好',easy:'简单',
+    all_done:'全部完成！',all_done_s:'今天没有卡片。',lnw:'学习 5 个新词',ffact:'英语小知识',
+    prog:'进度',progs:'你的学习之路',stats:'统计',sess:'会话',wl:'已学单词',td:'已完成测验',ef:'错误',tw:'本周',notoefl:'暂无 TOEFL 会话',
+    settings:'设置',uilang:'界面语言',botlang:'机器人语言',theme:'主题',persona:'ALEX 个性',
+    p1n:'友好',p1s:'温暖鼓励',p2n:'教授',p2s:'正式严谨',p3n:'游戏玩家',p3s:'放松、俚语',p4n:'英国人',p4s:'机智讽刺',
+    myprof:'我的资料',lvt:'等级',lvs:'告诉 ALEX 修改',proft:'关于你',remt:'提醒',ints:'兴趣',intedit:'在聊天中编辑',
+    online:'在线',chats:'聊天',new_chat:'+ 新建',
+    save:'保存',cancel:'取消',disrem:'关闭',
+    cfmt:'清空对话？',cfms:'ALEX 会忘记这次对话。进度仍然保留。',yescl:'确认清空',
+    c_corr:'纠正我的英语',c_gr:'语法课',c_sp:'我们聊聊',c_vc:'词汇测试',c_au:'听力',c_id:'教我习语',c_er:'我的错误',
+    welcome:'你好！我是 ALEX，你的英语老师。👋\n\n请用英文写——我会纠正错误。',
+    errconn:'连接错误，请重试。',clrd:'对话已清空',allrev:'所有卡片完成！🎉',
+    spam:'🤔 用英文写一些内容，我会帮你！',
+    copied:'已复制 ✓',copy:'复制',audgen:'正在生成音频任务...',
+    notift:'用英文写——我来纠正！👋',notifcta:'打开聊天 →',
+    nosessiont:'新对话',profpt:'介绍一下自己',remsav:'提醒：',remoff:'提醒已关闭',psav:'已保存',
+    blsav:'机器人语言：',no_prof:'未设置',no_rem:'未设置',
+    profinpp:'例如：开发者，喜欢游戏，准备英语面试',intemt:'添加兴趣',intems:'与 ALEX 聊天——他会记住',
+  },
+  ar:{greet:h=>h<12?'صباح الخير,':h<18?'مساء الخير,':'مساء الخير,',
+    streak_t:'أيام متتالية',streak:'سلسلة',words:'كلمات',tests:'اختبارات',
+    missions:'مهام اليوم · 2 للسلسلة',m1:'أرسل 3 رسائل إلى ALEX',m2:'راجع 5 بطاقات',m3:'مهمة استماع TOEFL',m4:'تعلم 5 كلمات اليوم',
+    qs:'بداية سريعة',gr:'قواعد',grs:'تعلم قاعدة',fc:'بطاقات',fcs:'مراجعة الكلمات',tfs:'تدريب على الاستماع',sp:'محادثة',sps:'حوار حر',
+    dw:'كلمات اليوم',dwa:'+ المزيد',rev:'قائمة المراجعة',tap_flip:'انقر للقلب',translation:'الترجمة',
+    again:'مرة أخرى',hard:'صعب',good:'جيد',easy:'سهل',
+    all_done:'تم كل شيء!',all_done_s:'لا توجد بطاقات اليوم.',lnw:'تعلم 5 كلمات جديدة',ffact:'معلومة عن الإنجليزية',
+    prog:'التقدم',progs:'رحلتك التعليمية',stats:'إحصائيات',sess:'الجلسات',wl:'الكلمات المتعلمة',td:'اختبارات تمت',ef:'أخطاء',tw:'هذا الأسبوع',notoefl:'لا توجد جلسات TOEFL بعد',
+    settings:'الإعدادات',uilang:'لغة الواجهة',botlang:'لغة ردود البوت',theme:'المظهر',persona:'شخصية ALEX',
+    p1n:'ودود',p1s:'دافئ ومشجع',p2n:'أستاذ',p2s:'رسمي ودقيق',p3n:'لاعب',p3s:'هادئ، عامية',p4n:'بريطاني',p4s:'ذكي وساخر',
+    myprof:'ملفي',lvt:'المستوى',lvs:'اطلب من ALEX التغيير',proft:'عنك',remt:'تذكير',ints:'اهتمامات',intedit:'حرر في الدردشة',
+    online:'متصل',chats:'محادثات',new_chat:'+ جديد',
+    save:'حفظ',cancel:'إلغاء',disrem:'تعطيل',
+    cfmt:'مسح المحادثة؟',cfms:'سينسى ALEX هذه المحادثة. تقدمك محفوظ.',yescl:'نعم، امسح',
+    c_corr:'صحح إنجليزيتي',c_gr:'درس قواعد',c_sp:'لنتحدث',c_vc:'اختبار مفردات',c_au:'الاستماع',c_id:'علمني التعابير',c_er:'أخطائي',
+    welcome:'مرحبا! أنا ALEX، معلمك للإنجليزية. 👋\n\nاكتب بالإنجليزية — سأصحح الأخطاء.',
+    errconn:'خطأ في الاتصال. حاول مرة أخرى.',clrd:'تم مسح المحادثة',allrev:'كل البطاقات تمت! 🎉',
+    spam:'🤔 اكتب شيئا بالإنجليزية وسأساعدك!',
+    copied:'تم النسخ ✓',copy:'نسخ',audgen:'جاري إنشاء المهمة الصوتية...',
+    notift:'اكتب بالإنجليزية — سأصحح! 👋',notifcta:'افتح المحادثة →',
+    nosessiont:'محادثة جديدة',profpt:'أخبرنا عنك',remsav:'تذكير: ',remoff:'التذكيرات متوقفة',psav:'تم الحفظ',
+    blsav:'لغة البوت: ',no_prof:'غير محدد',no_rem:'غير محدد',
+    profinpp:'مثلا: مطور، أحب الألعاب، أستعد لمقابلة بالإنجليزية',intemt:'إضافة اهتمامات',intems:'تحدث مع ALEX — سيتذكر',
+  },
 };
 
 /* ══ CORE SETUP ══ */
@@ -2519,7 +2666,9 @@ const LS = {
   setJ: (k,v)=>{ LS.set(k,JSON.stringify(v)) },
 };
 
-const SUPPORTED_LANGS = ['ru','en','es','pt'];
+/* Full set of UI / bot languages. Every code here needs a matching
+   entry in LANGS below; anything missing falls back to LANGS.en. */
+const SUPPORTED_LANGS = ['ru','en','es','pt','de','fr','uk','tr','zh','ar'];
 function _normLang(v){return SUPPORTED_LANGS.includes(v)?v:'en';}
 let lang    = _normLang(LS.get('app_lang')   || 'ru');
 let botLang = _normLang(LS.get('bot_lang')   || 'ru');
@@ -2528,6 +2677,11 @@ let L = LANGS[lang] || LANGS.en;
 /* ══ APPLY LANGUAGE ══ */
 function applyLang(){
   L = LANGS[lang] || LANGS.en;
+  /* Arabic is the only right-to-left UI language we ship; flip the
+     <html dir> so Telegram WebView mirrors paddings, scrollbars and
+     bidi-correct text layout. */
+  try{document.documentElement.setAttribute('dir', lang==='ar' ? 'rtl' : 'ltr');
+       document.documentElement.setAttribute('lang', lang||'en');}catch(_){}
   // Nav
   document.getElementById('nb1').textContent = {ru:'Главная',en:'Home',es:'Inicio',de:'Start',fr:'Accueil',pt:'Início',uk:'Головна',tr:'Ana Sayfa',zh:'首页',ar:'الرئيسية'}[lang]||'Home';
   document.getElementById('nb2').textContent = {ru:'Чат',en:'Chat',es:'Chat',de:'Chat',fr:'Chat',pt:'Chat',uk:'Чат',tr:'Sohbet',zh:'聊天',ar:'محادثة'}[lang]||'Chat';
@@ -2589,6 +2743,14 @@ function applyLang(){
   document.getElementById('rem-sav').textContent=L.save;document.getElementById('rem-dis').textContent=L.disrem;document.getElementById('rem-can').textContent=L.cancel;
   document.getElementById('cfmt').textContent=L.cfmt;document.getElementById('cfms').textContent=L.cfms;
   document.getElementById('cfmd').textContent=L.yescl;document.getElementById('cfmc').textContent=L.cancel;
+  // Sound toggle label (was hard-coded "Sound")
+  var sfxT=document.getElementById('sfx-text');
+  if(sfxT)sfxT.textContent={ru:'Звук',en:'Sound',es:'Sonido',de:'Ton',fr:'Son',pt:'Som',uk:'Звук',tr:'Ses',zh:'声音',ar:'صوت'}[lang]||'Sound';
+  // Refresh theme toggle label (lazy-applied)
+  try{const m=LS.get('dark_mode')||'dark';const t=document.getElementById('dl-text');
+       if(t)t.textContent=m==='light'
+         ?({ru:'Светлая',en:'Light',es:'Clara',de:'Hell',fr:'Clair',pt:'Clara',uk:'Світла',tr:'Açık',zh:'浅色',ar:'فاتح'}[lang]||'Light')
+         :({ru:'Тёмная',en:'Dark',es:'Oscura',de:'Dunkel',fr:'Sombre',pt:'Escura',uk:'Темна',tr:'Koyu',zh:'深色',ar:'داكن'}[lang]||'Dark');}catch(_){}
   // Notif
   document.getElementById('ntxt').textContent=L.notift;document.getElementById('ncta').textContent=L.notifcta;
   // Update lang picker buttons
@@ -2605,12 +2767,24 @@ const UI_LANGS=[
   {code:'en',name:'English'},
   {code:'es',name:'Español'},
   {code:'pt',name:'Português'},
+  {code:'de',name:'Deutsch'},
+  {code:'fr',name:'Français'},
+  {code:'uk',name:'Українська'},
+  {code:'tr',name:'Türkçe'},
+  {code:'zh',name:'中文'},
+  {code:'ar',name:'العربية'},
 ];
 const BOT_LANGS=[
   {code:'ru',name:'Русский'},
   {code:'en',name:'English'},
   {code:'es',name:'Español'},
   {code:'pt',name:'Português'},
+  {code:'de',name:'Deutsch'},
+  {code:'fr',name:'Français'},
+  {code:'uk',name:'Українська'},
+  {code:'tr',name:'Türkçe'},
+  {code:'zh',name:'中文'},
+  {code:'ar',name:'العربية'},
 ];
 
 function updateLangPickerBtns(){
@@ -10856,9 +11030,11 @@ function applyDarkLight(mode){
   const text=document.getElementById('dl-text');
   const sw=document.getElementById('dl-switch');
   if(icon)icon.classList.toggle('light',mode==='light');
+  /* Single-word labels keep the toggle on one line so Dark and Sound
+     cards stay the same height regardless of localisation. */
   if(text)text.textContent=mode==='light'
-    ?({ru:'Светлый режим',en:'Light mode',es:'Modo claro',de:'Heller Modus',fr:'Mode clair',pt:'Modo claro',uk:'Світлий режим',tr:'Açık mod',zh:'浅色模式',ar:'الوضع الفاتح'}[lang]||'Light mode')
-    :({ru:'Тёмный режим',en:'Dark mode',es:'Modo oscuro',de:'Dunkler Modus',fr:'Mode sombre',pt:'Modo escuro',uk:'Темний режим',tr:'Koyu mod',zh:'深色模式',ar:'الوضع الداكن'}[lang]||'Dark mode');
+    ?({ru:'Светлая',en:'Light',es:'Clara',de:'Hell',fr:'Clair',pt:'Clara',uk:'Світла',tr:'Açık',zh:'浅色',ar:'فاتح'}[lang]||'Light')
+    :({ru:'Тёмная',en:'Dark',es:'Oscura',de:'Dunkel',fr:'Sombre',pt:'Escura',uk:'Темна',tr:'Koyu',zh:'深色',ar:'داكن'}[lang]||'Dark');
   if(sw)sw.classList.toggle('on',mode==='light');
 }
 
