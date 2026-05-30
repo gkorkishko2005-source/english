@@ -151,14 +151,14 @@ MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 # ALEX credits are a separate pre-paid pool spent per chat message.
 # Legacy PREMIUM_PLANS above stays alive for grandfathered renewals.
 PLATFORM_PLANS = {
-    "plat_1m":  {"stars": 400,  "period": "1m",       "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
-    "plat_6m":  {"stars": 1800, "period": "6m",       "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
-    "plat_life":{"stars": 6500, "period": "lifetime", "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
+    "plat_1m":  {"stars": 299,  "period": "1m",       "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
+    "plat_6m":  {"stars": 1290, "period": "6m",       "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
+    "plat_life":{"stars": 4990, "period": "lifetime", "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
 }
 CREDIT_PACKS = {
-    "credits_100":  {"stars": 200,  "credits": 100,  "label_ru": "100 кредитов ALEX",    "label_en": "100 ALEX credits"},
-    "credits_500":  {"stars": 800,  "credits": 500,  "label_ru": "500 кредитов ALEX",    "label_en": "500 ALEX credits"},
-    "credits_2000": {"stars": 2500, "credits": 2000, "label_ru": "2 000 кредитов ALEX",  "label_en": "2 000 ALEX credits"},
+    "credits_100":  {"stars": 149,  "credits": 100,  "label_ru": "100 кредитов ALEX",    "label_en": "100 ALEX credits"},
+    "credits_500":  {"stars": 599,  "credits": 500,  "label_ru": "500 кредитов ALEX",    "label_en": "500 ALEX credits"},
+    "credits_2000": {"stars": 1990, "credits": 2000, "label_ru": "2 000 кредитов ALEX",  "label_en": "2 000 ALEX credits"},
 }
 
 def plan_stars_for_user(plan_id: str, uid: int, has_discount: bool = False) -> int:
@@ -2005,27 +2005,27 @@ async def cmd_premium(msg: Message):
     if not grandfathered:
         plat_kb = [
             [InlineKeyboardButton(
-                text=("Платформа · 1 мес — 400 ⭐" if ru else "Platform · 1 mo — 400 ⭐"),
+                text=("Платформа · 1 мес — 299 ⭐" if ru else "Platform · 1 mo — 299 ⭐"),
                 callback_data="plat_buy:plat_1m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · 6 мес — 1800 ⭐ (-25%)" if ru else "Platform · 6 mo — 1800 ⭐ (-25%)"),
+                text=("Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "Platform · 6 mo — 1 290 ⭐ (−28%)"),
                 callback_data="plat_buy:plat_6m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · навсегда — 6500 ⭐" if ru else "Platform · lifetime — 6500 ⭐"),
+                text=("Платформа · навсегда — 4 990 ⭐" if ru else "Platform · lifetime — 4 990 ⭐"),
                 callback_data="plat_buy:plat_life"
             )],
             [InlineKeyboardButton(
-                text=("💬 100 кредитов ALEX — 200 ⭐" if ru else "💬 100 ALEX credits — 200 ⭐"),
+                text=("💬 100 кредитов ALEX — 149 ⭐" if ru else "💬 100 ALEX credits — 149 ⭐"),
                 callback_data="credit_buy:credits_100"
             )],
             [InlineKeyboardButton(
-                text=("💬 500 кредитов ALEX — 800 ⭐ (-20%)" if ru else "💬 500 ALEX credits — 800 ⭐ (-20%)"),
+                text=("💬 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "💬 500 ALEX credits — 599 ⭐ (−20%)"),
                 callback_data="credit_buy:credits_500"
             )],
             [InlineKeyboardButton(
-                text=("💬 2 000 кредитов ALEX — 2500 ⭐ (-37%)" if ru else "💬 2 000 ALEX credits — 2500 ⭐ (-37%)"),
+                text=("💬 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "💬 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
                 callback_data="credit_buy:credits_2000"
             )],
         ]
@@ -2046,37 +2046,23 @@ async def cmd_premium(msg: Message):
         status_block = ("\n\n" + "\n".join(status_lines)) if status_lines else ""
 
         text = (
-            "<b>PolyGlotty — подписки</b>\n"
-            "━━━━━━━━━━━━━━━━━\n\n"
-            "<b>Платформа</b> — курс A0–C2, экзамены, статистика, безлимит карточек и продвинутые тренировки.\n"
-            "├ 1 месяц — 400 ⭐\n"
-            "├ 6 месяцев — 1 800 ⭐ (−25%)\n"
-            "└ Навсегда — 6 500 ⭐\n\n"
-            "<b>Кредиты ALEX</b> — отдельно от платформы, тратятся за каждое сообщение и <u>не сгорают</u>.\n"
-            "├ Haiku 4.5 = 1 кредит\n"
-            "├ Sonnet 4 = 4 кредита\n"
-            "├ Sonnet 4.6 = 5 кредитов\n"
-            "├ Opus 4.7 = 12 кредитов\n"
-            "└ Голос ALEX = +3 кредита к стоимости\n\n"
-            "Пакеты: <b>100</b> · <b>500</b> (−20%) · <b>2 000</b> (−37%).\n"
+            "<b>PolyGlotty</b>\n\n"
+            "<b>Платформа</b> · курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста.\n"
+            "299 ⭐ / мес · 1 290 ⭐ / 6 мес · 4 990 ⭐ навсегда\n\n"
+            "<b>Кредиты ALEX</b> · отдельно от платформы. Тратятся за каждое сообщение, не сгорают.\n"
+            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus: 12 · Voice +3\n"
+            "Пакеты: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
-            "⭐ Оплата только Telegram Stars"
+            "<i>Оплата Telegram Stars</i>"
         ) if ru else (
-            "<b>PolyGlotty — subscriptions</b>\n"
-            "━━━━━━━━━━━━━━━━━\n\n"
-            "<b>Platform</b> — A0–C2 course, exams, analytics, unlimited cards, advanced practice.\n"
-            "├ 1 month — 400 ⭐\n"
-            "├ 6 months — 1 800 ⭐ (−25%)\n"
-            "└ Lifetime — 6 500 ⭐\n\n"
-            "<b>ALEX credits</b> — separate from Platform, spent per message and <u>never expire</u>.\n"
-            "├ Haiku 4.5 = 1 credit\n"
-            "├ Sonnet 4 = 4 credits\n"
-            "├ Sonnet 4.6 = 5 credits\n"
-            "├ Opus 4.7 = 12 credits\n"
-            "└ Voice ALEX = +3 credits surcharge\n\n"
-            "Packs: <b>100</b> · <b>500</b> (−20%) · <b>2 000</b> (−37%).\n"
+            "<b>PolyGlotty</b>\n\n"
+            "<b>Platform</b> · A0–C2 course, exams, analytics, unlimited cards, roleplay and text check.\n"
+            "299 ⭐ / mo · 1 290 ⭐ / 6 mo · 4 990 ⭐ lifetime\n\n"
+            "<b>ALEX credits</b> · separate from Platform. Spent per message, never expire.\n"
+            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus: 12 · Voice +3\n"
+            "Packs: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
-            "⭐ Telegram Stars only"
+            "<i>Telegram Stars only</i>"
         )
         await msg.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=plat_kb))
         return

@@ -1188,50 +1188,46 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-btn{margin:0 17px 10px;padding:15px;background:linear-gradient(135deg,#d4a843,#ffb830);border:none;border-radius:var(--r2);width:calc(100% - 34px);font-family:var(--f);font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:.18s;box-shadow:0 4px 18px rgba(212,168,67,.3)}
 .prem-btn:active{transform:scale(.97)}
 .prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
-/* ── Modular billing: Platform / Credits tabs ─────────────────────── */
-.prem-tabs{display:flex;gap:6px;padding:0 17px 10px}
-.prem-tab{flex:1;padding:9px 10px;border-radius:10px;border:1px solid var(--b1);background:var(--e2);color:var(--t2);font-size:12.5px;font-weight:700;cursor:pointer;font-family:var(--f);transition:.18s}
-.prem-tab.on{background:rgba(var(--ar),.12);border-color:rgba(var(--ar),.35);color:var(--a)}
-.prem-tab:active{transform:scale(.97)}
-.prem-tab svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pp-perks{font-size:11.5px;color:var(--t2);line-height:1.55;margin:6px 0 0;padding-left:1px}
-.pp-perks div{display:flex;gap:6px;align-items:flex-start;padding:2px 0}
-.pp-perks div::before{content:'✓';color:var(--a);font-weight:900;flex-shrink:0;line-height:1.4}
-.pp-save{font-size:10px;font-weight:800;color:var(--a2);background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.28);padding:2px 7px;border-radius:100px;letter-spacing:.3px;margin-left:7px}
-.pp-rate{font-size:10.5px;color:var(--t3);margin-top:7px;font-weight:600}
+/* ══════════════════════════════════════════════════════════════════
+   PAYWALL (minimal modular billing)
+   Two products, three plans each, dense info, one accent colour.
+   No gradients, no radial halos, no shadows — just typography + lines.
+   ══════════════════════════════════════════════════════════════════ */
+.prem-hero{padding:18px 18px 12px;text-align:left}
+.prem-tabs{display:flex;gap:0;padding:0 18px 14px;border-bottom:1px solid var(--b1);margin-bottom:14px}
+.prem-tab{flex:1;padding:10px 0;border:0;background:transparent;color:var(--t3);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
+.prem-tab.on{color:var(--t1);border-bottom-color:var(--a)}
+.prem-tab:active{opacity:.6}
 .credit-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.25);font-size:11px;font-weight:800;color:var(--a);letter-spacing:.2px;cursor:pointer}
 .credit-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-/* Premium plan cards */
-.prem-plans{display:flex;flex-direction:column;gap:10px;padding:0 17px 12px}
-.prem-plan{background:linear-gradient(135deg,var(--e2),rgba(var(--ar),.03));border:1px solid var(--b1);border-radius:16px;padding:14px 14px 12px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
-.prem-plan::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--a),var(--a2));opacity:.75}
-.prem-plan::after{content:'';position:absolute;right:-42px;top:-48px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.14),transparent 68%);opacity:.65;pointer-events:none}
-.prem-plan:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.35)}
-.prem-plan:active{transform:scale(.97)}
-.prem-plan.pp-pop{border-color:rgba(0,212,170,.36);background:linear-gradient(135deg,rgba(var(--ar),.11),rgba(0,212,170,.07));box-shadow:0 12px 30px rgba(79,138,255,.10)}
-.pp-popular{position:absolute;top:10px;right:12px;font-size:9px;font-weight:800;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.2);padding:2px 8px;border-radius:100px;letter-spacing:.35px}
-.pp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.pp-badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:900;color:var(--t1);padding:5px 9px;border-radius:10px;background:var(--e3);border:1px solid var(--b1)}
-.pp-badge svg{width:15px;height:15px;stroke:var(--a);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.pp-price{font-size:16px;font-weight:800;color:var(--t1)}
-.pp-price small{font-size:11px;font-weight:500;color:var(--t2)}
-.pp-buffs{font-size:12px;color:var(--t2);line-height:1.62;padding-left:1px;position:relative;z-index:1}
-.pp-buffs b{color:var(--t1);font-weight:900}
-.pp-year{margin-top:9px;padding:8px 10px;border-radius:9px;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.14);font-size:11px;font-weight:700;color:var(--a);display:flex;align-items:center;justify-content:space-between}
-.prem-proof{margin:0 17px 12px;padding:11px 12px;border-radius:13px;background:rgba(0,212,170,.065);border:1px solid rgba(0,212,170,.16);font-size:11px;line-height:1.45;color:var(--t2)}
-.prem-proof b{color:var(--a2)}
-.prem-depth{padding:0 17px 12px}
-.prem-depth-title{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:2px 0 8px}
-.prem-depth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.prem-depth-card{background:var(--e1);border:1px solid var(--b1);border-radius:10px;padding:10px;min-height:72px}
-.prem-depth-ico{width:25px;height:25px;border-radius:8px;background:rgba(var(--ar),.11);display:flex;align-items:center;justify-content:center;margin-bottom:7px}
-.prem-depth-ico svg{width:15px;height:15px;stroke:var(--a);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.prem-depth-name{font-size:12px;font-weight:800;color:var(--t1);margin-bottom:3px}
-.prem-depth-sub{font-size:10.5px;line-height:1.35;color:var(--t2)}
-.prem-ladder{padding:0 17px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lad-card{background:rgba(var(--ar),.055);border:1px solid var(--b1);border-radius:10px;padding:10px}
-.lad-card strong{display:block;font-size:12px;margin-bottom:5px;color:var(--t1)}
-.lad-card span{display:block;font-size:10.5px;line-height:1.45;color:var(--t2)}
+/* Plan list — flat rows, no gradients */
+.prem-plans{display:flex;flex-direction:column;gap:0;padding:0 18px 8px}
+.prem-plan{position:relative;background:transparent;border:0;border-top:1px solid var(--b1);border-radius:0;padding:14px 0;cursor:pointer;transition:background .15s}
+.prem-plan:first-child{border-top:0}
+.prem-plan:active{background:var(--e2)}
+.prem-plan.pp-pop{}
+.pp-popular{position:absolute;top:14px;right:0;font-size:10px;font-weight:700;color:var(--a);letter-spacing:.4px;text-transform:uppercase}
+.pp-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.pp-name{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.1px}
+.pp-name small{font-weight:500;color:var(--t3);font-size:12px;margin-left:6px}
+.pp-price{font-size:16px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pp-meta{font-size:11.5px;color:var(--t3);margin-top:5px;line-height:1.4;font-variant-numeric:tabular-nums}
+.pp-meta b{color:var(--a);font-weight:700}
+.pp-save{font-size:10.5px;font-weight:700;color:var(--a);margin-left:6px;letter-spacing:.2px}
+/* Comparison + summary blocks */
+.prem-proof{margin:8px 18px 0;padding:10px 12px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);font-size:11.5px;line-height:1.5;color:var(--t2)}
+.prem-proof b{color:var(--t1);font-weight:700}
+.prem-info{padding:16px 18px 4px}
+.prem-info-section{margin-bottom:14px}
+.prem-info-section:last-child{margin-bottom:6px}
+.prem-info-h{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:8px}
+.prem-info-list{font-size:12.5px;color:var(--t2);line-height:1.55}
+.prem-info-list .row{display:flex;gap:10px;padding:5px 0;border-bottom:1px dashed var(--b1)}
+.prem-info-list .row:last-child{border-bottom:0}
+.prem-info-list .row span:first-child{flex:1;color:var(--t1);font-weight:500}
+.prem-info-list .row span:last-child{color:var(--t2);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.prem-info-foot{font-size:11px;color:var(--t3);line-height:1.5;margin-top:8px}
+.prem-info-foot b{color:var(--t2);font-weight:600}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -2195,12 +2191,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="prem-plans" id="prem-plans"></div>
     <div class="prem-proof" id="prem-proof"></div>
-    <div class="prem-depth">
-      <div class="prem-depth-title" id="prem-depth-title">Learning system</div>
-      <div class="prem-depth-grid" id="prem-depth-grid"></div>
-    </div>
-    <div class="prem-ladder" id="prem-ladder"></div>
-    <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Continue free</div>
+    <div class="prem-info" id="prem-info"></div>
+    <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Close</div>
   </div>
 </div>
 
@@ -8924,14 +8916,14 @@ const PREMIUM_FEATURES=[
    ══════════════════════════════════════════════════════════════════ */
 
 const PLATFORM_PLAN_DEFS=[
-  {id:'plat_1m',  stars:400,  period:'1m',       monthly:400,  save:0},
-  {id:'plat_6m',  stars:1800, period:'6m',       monthly:300,  save:25},
-  {id:'plat_life',stars:6500, period:'lifetime', monthly:null, save:null},
+  {id:'plat_1m',  stars:299,  period:'1m',       monthly:299, save:0},
+  {id:'plat_6m',  stars:1290, period:'6m',       monthly:215, save:28, popular:true},
+  {id:'plat_life',stars:4990, period:'lifetime', monthly:null,save:null},
 ];
 const CREDIT_PACK_DEFS=[
-  {id:'credits_100',  stars:200,  credits:100,  perMsg:2.0},
-  {id:'credits_500',  stars:800,  credits:500,  perMsg:1.6, popular:true},
-  {id:'credits_2000', stars:2500, credits:2000, perMsg:1.25},
+  {id:'credits_100',  stars:149,  credits:100,  perMsg:1.49},
+  {id:'credits_500',  stars:599,  credits:500,  perMsg:1.20, popular:true},
+  {id:'credits_2000', stars:1990, credits:2000, perMsg:1.00},
 ];
 
 let _premTab='platform';
@@ -8944,61 +8936,107 @@ function switchPremTab(tab){
 
 function _platCopy(){
   return {
-    title:{ru:'Платформа PolyGlotty',en:'PolyGlotty Platform',es:'Plataforma PolyGlotty',de:'PolyGlotty Plattform',fr:'Plateforme PolyGlotty',pt:'Plataforma PolyGlotty',uk:'Платформа PolyGlotty',tr:'PolyGlotty Platformu',zh:'PolyGlotty 平台',ar:'منصة PolyGlotty'}[lang]||'PolyGlotty Platform',
-    sub:{ru:'Курс A0–C2, экзамены, статистика, расширенные карточки. Чат с ALEX продаётся отдельно — кредитами.',en:'A0–C2 course, exams, analytics, expanded cards. ALEX chat is sold separately as credits.'}[lang]||'A0–C2 course, exams, analytics, expanded cards. ALEX chat is sold separately as credits.',
-    perks:{
-      ru:['Безлимит карточек и интервальное повторение','Exam Hub: TOEFL, IELTS, CAE','Полная статистика и Score Ring','Roleplay, проверка текстов и истории','Темы оформления и расширенный курс'],
-      en:['Unlimited flashcards with spaced repetition','Exam Hub: TOEFL, IELTS, CAE','Full analytics and Score Ring','Roleplay, text check and stories','Themes and the expanded course']
-    }[lang]||['Unlimited flashcards','Exam Hub','Full analytics','Roleplay + text check','Themes']
+    title:{ru:'Платформа',en:'Platform',es:'Plataforma',de:'Plattform',fr:'Plateforme',pt:'Plataforma',uk:'Платформа',tr:'Platform',zh:'平台',ar:'المنصة'}[lang]||'Platform',
+    sub:{ru:'Весь контент. Чат ALEX покупается отдельно — кредитами.',en:'All content. ALEX chat is sold separately as credits.'}[lang]||'All content. ALEX chat sold separately.',
+    /* "What\'s included" table — feature → value pairs */
+    rows:{
+      ru:[
+        ['Курс A0–C2', '65 уроков'],
+        ['Exam Hub', 'TOEFL · IELTS · CAE'],
+        ['Карточки SM-2', 'без лимита'],
+        ['Roleplay и проверка текста', 'включено'],
+        ['Аналитика и Score Ring', 'включено'],
+        ['Темы и расширенный курс', 'включено'],
+      ],
+      en:[
+        ['A0–C2 course', '65 lessons'],
+        ['Exam Hub', 'TOEFL · IELTS · CAE'],
+        ['SM-2 flashcards', 'unlimited'],
+        ['Roleplay and text check', 'included'],
+        ['Analytics and Score Ring', 'included'],
+        ['Themes and expanded course', 'included'],
+      ]
+    }[lang]||[],
+    foot:{ru:'ALEX-чат покупается <b>отдельно</b> кредитами — выбери вкладку справа.', en:'ALEX chat is sold <b>separately</b> as credits — pick the right-hand tab.'}[lang]||'ALEX chat sold separately.'
   };
 }
 function _credCopy(){
   return {
     title:{ru:'Кредиты ALEX',en:'ALEX credits',es:'Créditos ALEX',de:'ALEX-Guthaben',fr:'Crédits ALEX',pt:'Créditos ALEX',uk:'Кредити ALEX',tr:'ALEX kredileri',zh:'ALEX 信用',ar:'رصيد ALEX'}[lang]||'ALEX credits',
-    sub:{ru:'Тратятся за каждое сообщение. Не сгорают. Подходят для всех уровней и моделей.',en:'Spent per chat message. Never expire. Work with every model and level.'}[lang]||'Spent per chat message. Never expire.',
-    perks:{
-      ru:['Haiku — 1 кредит за сообщение','Sonnet 4 — 4 кредита','Sonnet 4.6 — 5 кредитов','Opus 4.7 — 12 кредитов','Голос ALEX — +3 кредита'],
-      en:['Haiku — 1 credit per message','Sonnet 4 — 4 credits','Sonnet 4.6 — 5 credits','Opus 4.7 — 12 credits','Voice ALEX — +3 credits']
-    }[lang]||['Haiku 1','Sonnet 4: 4','Sonnet 4.6: 5','Opus: 12','Voice +3']
+    sub:{ru:'Тратятся за каждое сообщение. Не сгорают.',en:'Spent per chat message. Never expire.'}[lang]||'Spent per chat message. Never expire.',
+    rows:{
+      ru:[
+        ['Haiku 4.5 — быстрый','1 кр / сообщение'],
+        ['Sonnet 4 — умный','4 кр'],
+        ['Sonnet 4.6 — точный','5 кр'],
+        ['Opus 4.7 — максимум','12 кр'],
+        ['Голос ALEX','+3 кр'],
+      ],
+      en:[
+        ['Haiku 4.5 — fast','1 cr / message'],
+        ['Sonnet 4 — smart','4 cr'],
+        ['Sonnet 4.6 — precise','5 cr'],
+        ['Opus 4.7 — max','12 cr'],
+        ['Voice ALEX','+3 cr'],
+      ]
+    }[lang]||[],
+    foot:{ru:'Кредиты не сгорают. Работают с Platform или без неё.', en:'Credits never expire. Work with or without Platform.'}[lang]||'Credits never expire.'
   };
 }
 
 function _platLabel(period){
-  const L={ru:{'1m':'1 месяц','6m':'6 месяцев','lifetime':'Навсегда ∞'},en:{'1m':'1 month','6m':'6 months','lifetime':'Lifetime ∞'}};
+  const L={ru:{'1m':'1 месяц','6m':'6 месяцев','lifetime':'Навсегда'},en:{'1m':'1 month','6m':'6 months','lifetime':'Lifetime'}};
   return (L[lang]||L.en)[period]||period;
 }
 function _starsFmt(n){return n.toLocaleString(lang==='ru'?'ru-RU':'en-US')+' ⭐';}
 
+/* Estimated US-dollar value of a Stars price.
+   1 ⭐ ≈ $0.0145 (Telegram Stars retail). Rounded to 0.01. */
+function _usdFromStars(stars){return (stars*0.0145).toFixed(stars>=500?0:1);}
+
 function renderPremPlans(){
   const host=document.getElementById('prem-plans');
   if(!host)return;
+  const popLbl={ru:'ВЫГОДНО',en:'BEST VALUE',es:'MEJOR',pt:'MELHOR'}[lang]||'BEST VALUE';
   if(_premTab==='platform'){
     const owns=hasPlatform();
     host.innerHTML = PLATFORM_PLAN_DEFS.map(p=>{
-      const dim = owns && p.period!=='lifetime' ? 'opacity:.45;pointer-events:none;' : '';
-      const monthly = p.monthly!=null ? `<div class="pp-rate">≈ ${_starsFmt(p.monthly)} ${lang==='ru'?'в месяц':'/ month'}</div>` : '';
+      const dim = owns && p.period!=='lifetime' ? 'style="opacity:.45;pointer-events:none"' : '';
+      const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const save = p.save ? `<span class="pp-save">−${p.save}%</span>` : '';
-      return `<div class="prem-plan" style="${dim}" onclick="selectPlan('${p.id}')">
-        <div class="pp-hdr">
-          <span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M3 12l3 3 7-7"/><path d="M14 11l4 4 3-3"/></svg>${_platLabel(p.period)}${save}</span>
+      const monthly = p.monthly!=null
+        ? `${_starsFmt(p.monthly)} ${lang==='ru'?'/ мес':'/ mo'}`
+        : (lang==='ru'?'один раз':'one-time');
+      const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
+      return `<div class="prem-plan" ${dim} onclick="selectPlan('${p.id}')">
+        ${popMark}
+        <div class="pp-row">
+          <span class="pp-name">${_platLabel(p.period)}${save}</span>
           <span class="pp-price">${_starsFmt(p.stars)}</span>
         </div>
-        ${monthly}
+        <div class="pp-meta"><b>${monthly}</b>${usd}</div>
       </div>`;
     }).join('');
   } else {
     host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
-      const popClass = p.popular ? ' pp-pop' : '';
-      const popLbl = p.popular ? `<div class="pp-popular">${{ru:'Популярный',en:'Popular'}[lang]||'Popular'}</div>` : '';
+      const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const credLbl = lang==='ru' ? `${p.credits.toLocaleString('ru-RU')} кредитов` : `${p.credits.toLocaleString('en-US')} credits`;
-      const rate = `≈ ${p.perMsg} ⭐ ${lang==='ru'?'за сообщение':'per message'}`;
-      return `<div class="prem-plan${popClass}" onclick="selectPlan('${p.id}')">
-        ${popLbl}
-        <div class="pp-hdr">
-          <span class="pp-badge"><svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>${credLbl}</span>
+      /* Rough Haiku-equivalence to anchor mental price: 1 cr / msg. */
+      const msgsHaiku = p.credits;
+      const msgsSonnet = Math.floor(p.credits/4);
+      const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
+      const rate = `<b>${p.perMsg.toFixed(2)} ⭐ ${lang==='ru'?'/ сообщение':'/ message'}</b>${usd}`;
+      const detail = lang==='ru'
+        ? `${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`
+        : `${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`;
+      return `<div class="prem-plan" onclick="selectPlan('${p.id}')">
+        ${popMark}
+        <div class="pp-row">
+          <span class="pp-name">${credLbl}</span>
           <span class="pp-price">${_starsFmt(p.stars)}</span>
         </div>
-        <div class="pp-rate">${rate}</div>
+        <div class="pp-meta">${rate}</div>
+        <div class="pp-meta" style="color:var(--t3)">${detail}</div>
       </div>`;
     }).join('');
   }
@@ -9024,39 +9062,48 @@ function openPremium(highlightFeature, initialTab){
   if(sub)sub.textContent=highlightFeature||(_premTab==='platform'?_platCopy().sub:_credCopy().sub);
   if(free)free.textContent={ru:'Закрыть',en:'Close',es:'Cerrar',de:'Schliessen',fr:'Fermer',pt:'Fechar',uk:'Закрити',tr:'Kapat',zh:'关闭',ar:'إغلاق'}[lang]||'Close';
 
-  /* Perks block reused as the "depth grid" — shows what the chosen
-     product unlocks so users understand the split. */
-  const depthTitle=document.getElementById('prem-depth-title');
-  const depthGrid=document.getElementById('prem-depth-grid');
-  if(depthTitle)depthTitle.textContent=_premTab==='platform'
-    ? ({ru:'Что входит в Платформу',en:"What's in Platform"}[lang]||"What's in Platform")
-    : ({ru:'Тариф за сообщение',en:'Per-message rate'}[lang]||'Per-message rate');
-  if(depthGrid){
-    const perks = _premTab==='platform' ? _platCopy().perks : _credCopy().perks;
-    depthGrid.innerHTML=perks.map(p=>`<div class="prem-depth-card"><div class="prem-depth-name" style="margin-bottom:0">${safeHTML(p)}</div></div>`).join('');
-  }
-
-  /* Status banner (proof line). */
+  /* Status banner (proof line) — first thing the user sees under tabs. */
   const proof=document.getElementById('prem-proof');
   if(proof){
     const lines=[];
     if(platformActive){
-      const left = platformLifetime ? ({ru:'навсегда',en:'lifetime'}[lang]||'lifetime') : (platformUntil ? (lang==='ru'?`до ${new Date(platformUntil).toLocaleDateString('ru')}`:`until ${new Date(platformUntil).toLocaleDateString('en')}`) : '');
-      lines.push(`<b>${_platCopy().title}:</b> ${({ru:'активна',en:'active'}[lang]||'active')} · ${left}`);
+      const left = platformLifetime
+        ? ({ru:'навсегда',en:'lifetime'}[lang]||'lifetime')
+        : (platformUntil ? (lang==='ru'?`до ${new Date(platformUntil).toLocaleDateString('ru')}`:`until ${new Date(platformUntil).toLocaleDateString('en')}`) : '');
+      lines.push(`<b>${_platCopy().title}</b> · ${({ru:'активна',en:'active'}[lang]||'active')} · ${left}`);
     } else if(grandfatheredTier){
-      lines.push(`<b>${grandfatheredTier.toUpperCase()}</b> — ${({ru:'старый план сохранён навсегда',en:'legacy plan kept forever'}[lang]||'legacy plan kept forever')}`);
+      lines.push(`<b>${grandfatheredTier.toUpperCase()}</b> · ${({ru:'старый план сохранён',en:'legacy plan kept'}[lang]||'legacy plan kept')}`);
     }
     if(chatCredits>0){
-      lines.push(`💬 ${({ru:'Кредитов ALEX',en:'ALEX credits'}[lang]||'ALEX credits')}: <b>${chatCredits.toLocaleString(lang==='ru'?'ru-RU':'en-US')}</b>`);
-    } else if(!grandfatheredTier && !isPremium){
-      lines.push(({ru:'Чат ALEX покупается отдельно — кредитами.',en:'ALEX chat is sold separately as credits.'}[lang]||'ALEX chat sold separately as credits.'));
+      lines.push(`<b>${chatCredits.toLocaleString(lang==='ru'?'ru-RU':'en-US')}</b> ${({ru:'кредитов ALEX',en:'ALEX credits'}[lang]||'ALEX credits')}`);
     }
-    proof.innerHTML = lines.join(' · ') || (lang==='ru'?'<b>Оплата только Telegram Stars.</b>':'<b>Telegram Stars only.</b>');
+    proof.style.display = lines.length ? 'block' : 'none';
+    proof.innerHTML = lines.join(' · ');
   }
 
-  /* Ladder block is no longer relevant — empty it. */
-  const ladder=document.getElementById('prem-ladder');
-  if(ladder)ladder.innerHTML='';
+  /* Compact info table — what you get + per-message economics. */
+  const infoHost=document.getElementById('prem-info');
+  if(infoHost){
+    const copy = _premTab==='platform' ? _platCopy() : _credCopy();
+    const hLabel = _premTab==='platform'
+      ? ({ru:'Что входит',en:"What's included"}[lang]||"What's included")
+      : ({ru:'Сколько стоит сообщение',en:'Per-message price'}[lang]||'Per-message price');
+    const rowsHTML = copy.rows.map(r=>`<div class="row"><span>${safeHTML(r[0])}</span><span>${safeHTML(r[1])}</span></div>`).join('');
+    const econLabel={ru:'Экономика',en:'Economics'}[lang]||'Economics';
+    /* Tiny footer explaining the split + Stars-to-dollar reality. */
+    const splitFoot = _premTab==='platform'
+      ? `${copy.foot}<br>${({ru:'Lifetime окупает себя примерно за 17 месяцев подписки.',en:'Lifetime pays off after about 17 months of monthly billing.'}[lang]||'')}`
+      : `${copy.foot}<br>${({ru:'Курс цены примерный: 1 ⭐ ≈ $0.0145.',en:'Approximate USD value: 1 ⭐ ≈ $0.0145.'}[lang]||'')}`;
+    infoHost.innerHTML = `
+      <div class="prem-info-section">
+        <div class="prem-info-h">${hLabel}</div>
+        <div class="prem-info-list">${rowsHTML}</div>
+      </div>
+      <div class="prem-info-section">
+        <div class="prem-info-h">${econLabel}</div>
+        <div class="prem-info-foot">${splitFoot}</div>
+      </div>`;
+  }
 
   renderPremPlans();
   openMod('premiumm');
