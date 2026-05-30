@@ -1268,6 +1268,37 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .place-cta{margin:6px 22px 4px;width:calc(100% - 44px);padding:13px;border-radius:12px;border:0;background:var(--a);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--f);letter-spacing:.1px}
 .place-cta:active{opacity:.85}
 .place-cta[disabled]{opacity:.4;pointer-events:none}
+
+/* ── Writing Studio ─────────────────────────────────────────────── */
+.wr-modes{display:flex;gap:6px;padding:0 22px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.wr-modes::-webkit-scrollbar{display:none}
+.wr-mode{flex:0 0 auto;padding:7px 12px;border-radius:100px;border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--f)}
+.wr-mode.on{background:rgba(var(--ar),.12);border-color:rgba(var(--ar),.4);color:var(--a)}
+.wr-prompt{margin:0 22px 10px;padding:10px 12px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);font-size:12.5px;line-height:1.5;color:var(--t2);min-height:0}
+.wr-prompt b{color:var(--t1)}
+.wr-inp-wrap{padding:0 22px 8px}
+.wr-inp{width:100%;min-height:200px;resize:vertical;border:1px solid var(--b1);border-radius:12px;padding:12px 14px;background:var(--e2);color:var(--t1);font-size:14px;line-height:1.55;font-family:var(--f);transition:border-color .15s}
+.wr-inp:focus{outline:none;border-color:rgba(var(--ar),.45)}
+.wr-meter{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);font-weight:700;padding:6px 2px 12px;font-variant-numeric:tabular-nums}
+.wr-meter span{letter-spacing:.3px}
+.wr-result{padding:8px 22px 18px}
+.wr-overall{display:flex;align-items:baseline;gap:10px;padding:14px 0 10px;border-bottom:1px solid var(--b1);margin-bottom:12px}
+.wr-overall-band{font-size:34px;font-weight:900;color:var(--a);letter-spacing:-1px;line-height:1}
+.wr-overall-max{font-size:14px;color:var(--t3);font-weight:600}
+.wr-overall-l{flex:1;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;font-weight:700;text-align:right}
+.wr-bars{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.wr-bar{display:flex;flex-direction:column;gap:4px}
+.wr-bar-head{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--t2)}
+.wr-bar-head b{color:var(--t1);font-weight:700}
+.wr-bar-track{height:5px;background:var(--e3);border-radius:100px;overflow:hidden}
+.wr-bar-fill{height:100%;background:linear-gradient(90deg,var(--a),#00d4aa);border-radius:100px;transition:width .8s ease}
+.wr-section{margin-top:12px}
+.wr-section h4{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin:0 0 6px}
+.wr-section p{margin:0;font-size:13px;line-height:1.55;color:var(--t2)}
+.wr-section ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:var(--t2)}
+.wr-section ul li{margin-bottom:3px}
+.wr-section ul li::marker{color:var(--a)}
+.wr-corrected{margin-top:8px;padding:10px 12px;border:1px dashed var(--b1);border-radius:10px;font-size:12.5px;line-height:1.55;color:var(--t2);background:var(--e2)}
 .prem-lock-row{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:var(--r2);cursor:pointer;margin-top:8px;transition:.15s}
 .prem-lock-row svg{width:14px;height:14px;stroke:#d4a843;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .prem-lock-txt{font-size:12px;font-weight:600;color:#d4a843}
@@ -1756,15 +1787,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
    thumb's translate look mis-aligned; reset to the natural size. */
 .set-grid-2 .dl-switch{transform:none;margin-left:auto}
 
-/* ── Toggle icons — stop the 180° rotation that made them "jump" ── */
+/* ── Toggle icons — center perfectly + stop the 180° rotation ──── */
 /* The legacy `.dl-toggle-icon.light/.muted{transform:rotate(±180deg)}`
    rules rotated the entire 30×30 chip, which in a flex row reads as
-   the icon visibly jumping up or down. Hold the chip steady and let
-   the inner SVGs do the state animation via opacity only. */
+   the icon visibly jumping. Hold the chip steady, kill drop-shadows,
+   and let the inner SVGs cross-fade through opacity only. */
 .dl-toggle-icon,
 .dl-toggle-icon.light,
-.dl-toggle-icon.muted{transform:none!important;transition:background .15s,border-color .15s}
-.theme-orb svg,.sound-orb svg{filter:none;transition:opacity .2s ease}
+.dl-toggle-icon.muted{transform:none!important;transition:background .15s,border-color .15s;
+  padding:0!important;line-height:0;overflow:hidden}
+/* Lock the orb to a square sized for the 30×30 chip and let flex
+   centre it pixel-perfect. */
+.dl-toggle-icon .theme-orb,
+.dl-toggle-icon .sound-orb{width:18px!important;height:18px!important;display:block;position:relative;flex-shrink:0;margin:0;padding:0;line-height:0}
+.theme-orb svg,.sound-orb svg{position:absolute!important;top:0!important;left:0!important;width:18px!important;height:18px!important;filter:none!important;transition:opacity .2s ease;display:block}
 .theme-orb .moon,.theme-orb .sun,
 .sound-orb .sound-on,.sound-orb .sound-off{transform:none!important}
 .theme-orb .moon{opacity:1}
@@ -1878,9 +1914,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2.2 2.2 4.3-4.4"/></svg></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
     </div>
-    <div class="qb" onclick="openDrillPicker()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 2.5h5"/><path d="M19.5 6l1.4-1.4"/></svg></div>
-      <div class="qbt" id="qb5t">Drill</div><div class="qbs" id="qb5s">Grammar quiz</div>
+    <div class="qb" onclick="openWritingStudio()">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M9 13l2 2 4-4"/><path d="M9 17h6"/></svg></div>
+      <div class="qbt" id="qb5t">Writing</div><div class="qbs" id="qb5s">TOEFL · IELTS rubric</div>
     </div>
     <div class="qb" onclick="openPathPicker()">
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 5h11l-2.3 3.2L17 11.5H6"/><circle cx="6" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg></div>
@@ -2103,10 +2139,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <button class="tool-card cert" onclick="generateCertificate()" type="button">
       <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3"/><path d="M8 9h8M8 13h5"/><path d="M15 16l1.2 1.2L19 14.5"/></svg></div>
       <div class="tool-title" id="cert-lbl">Certificate</div><div class="tool-sub" id="cert-sub">Achievement card</div>
-    </button>
-    <button class="tool-card gift" onclick="openGiftSub()" type="button">
-      <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8v12M4 12h16"/><path d="M12 8s-1.4-4-4-4c-1.4 0-2.2 1.1-1.6 2.2C7 7.4 9.3 8 12 8Zm0 0s1.4-4 4-4c1.4 0 2.2 1.1 1.6 2.2C17 7.4 14.7 8 12 8Z"/></svg></div>
-      <div class="tool-title" id="gift-lbl">Gift Premium</div><div class="tool-sub" id="gift-sub">Invite link</div>
     </button>
     <button class="tool-card terms" onclick="openTermsRules()" type="button">
       <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 012 2v16l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
@@ -2390,6 +2422,26 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <button class="place-cta" id="place-cta" onclick="acceptPlacementResult()">Start my course</button>
       <button class="place-skip" onclick="finishPlacement(true)" style="margin-top:6px">Choose a different level</button>
     </div>
+  </div>
+</div>
+
+<!-- WRITING STUDIO MODAL -->
+<div class="mov" id="writingm" style="display:none" onclick="closeMod('writingm')">
+  <div class="msh place-msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="place-hero">
+      <div class="place-kicker" id="wr-kicker">Writing Studio</div>
+      <div class="place-h" id="wr-h">Get a TOEFL / IELTS band</div>
+      <div class="place-sub" id="wr-sub">Write your essay — ALEX grades it with the official rubric.</div>
+    </div>
+    <div class="wr-modes" id="wr-modes"></div>
+    <div class="wr-prompt" id="wr-prompt"></div>
+    <div class="wr-inp-wrap">
+      <textarea class="wr-inp" id="wr-inp" rows="9" placeholder=""></textarea>
+      <div class="wr-meter"><span id="wr-count">0</span><span id="wr-target"></span></div>
+    </div>
+    <button class="place-cta" id="wr-btn" onclick="submitWritingEssay()">Grade my essay</button>
+    <button class="place-skip" onclick="closeMod('writingm')" id="wr-cancel">Close</button>
+    <div class="wr-result" id="wr-result" style="display:none"></div>
   </div>
 </div>
 
@@ -2777,6 +2829,30 @@ function applyLang(){
   // Sound toggle label (was hard-coded "Sound")
   var sfxT=document.getElementById('sfx-text');
   if(sfxT)sfxT.textContent={ru:'Звук',en:'Sound',es:'Sonido',de:'Ton',fr:'Son',pt:'Som',uk:'Звук',tr:'Ses',zh:'声音',ar:'صوت'}[lang]||'Sound';
+  /* Settings · Tools section labels — moved out of drawProgress() so
+     they get localised even for users who never visit the Progress
+     screen. Includes the section toggle, four tool titles, four
+     subtitles and the certificate's translated copy. */
+  try{
+    var ttl=document.getElementById('tools-toggle-lbl');
+    if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
+    var sl=document.getElementById('share-lbl');
+    if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
+    var elx=document.getElementById('export-lbl');
+    if(elx)elx.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
+    var cl=document.getElementById('cert-lbl');
+    if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
+    var tml=document.getElementById('terms-lbl');
+    if(tml)tml.textContent={ru:'Условия и правила',en:'Terms & Rules',es:'Términos y reglas',de:'Bedingungen & Regeln',fr:'Conditions et règles',pt:'Termos e regras',uk:'Умови та правила',tr:'Şartlar ve kurallar',zh:'条款与规则',ar:'الشروط والقواعد'}[lang]||'Terms & Rules';
+    var ss=document.getElementById('share-sub');
+    if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',de:'Telegram-Beitrag',fr:'Post Telegram',pt:'Post para Telegram',uk:'Пост для Telegram',tr:'Telegram gönderisi',zh:'Telegram 帖子',ar:'منشور تيليجرام'}[lang]||'Telegram post';
+    var esb=document.getElementById('export-sub');
+    if(esb)esb.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',de:'Kopieren oder herunterladen',fr:'Copier ou télécharger',pt:'Copiar ou baixar',uk:'Скопіювати або завантажити',tr:'Kopyala veya indir',zh:'复制或下载',ar:'انسخ أو نزّل'}[lang]||'Copy or download';
+    var cs=document.getElementById('cert-sub');
+    if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',de:'Erfolgskarte',fr:'Carte de réussite',pt:'Cartão de conquista',uk:'Картка досягнення',tr:'Başarı kartı',zh:'成就卡片',ar:'بطاقة الإنجاز'}[lang]||'Achievement card';
+    var tsb=document.getElementById('terms-sub');
+    if(tsb)tsb.textContent={ru:'Политика сервиса',en:'Service policy',es:'Política del servicio',de:'Servicebedingungen',fr:'Politique de service',pt:'Política do serviço',uk:'Політика сервісу',tr:'Hizmet politikası',zh:'服务政策',ar:'سياسة الخدمة'}[lang]||'Service policy';
+  }catch(_){}
   // Refresh theme toggle label (lazy-applied)
   try{const m=LS.get('dark_mode')||'dark';const t=document.getElementById('dl-text');
        if(t)t.textContent=m==='light'
@@ -3348,14 +3424,12 @@ function drawProgress(){
     var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
     var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
     var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
-    var gl=document.getElementById('gift-lbl');if(gl)gl.textContent={ru:'Подарить Premium',en:'Gift Premium',es:'Regalar Premium',de:'Premium verschenken',fr:'Offrir Premium',pt:'Dar Premium',uk:'Подарувати Premium',tr:'Premium hediye et',zh:'赠送Premium',ar:'إهداء Premium'}[lang]||'Gift Premium';
-    var termsLbl=document.getElementById('terms-lbl');if(termsLbl)termsLbl.textContent='Terms & Rules';
+    var termsLbl=document.getElementById('terms-lbl');if(termsLbl)termsLbl.textContent={ru:'Условия и правила',en:'Terms & Rules',es:'Términos y reglas',de:'Bedingungen & Regeln',fr:'Conditions et règles',pt:'Termos e regras',uk:'Умови та правила',tr:'Şartlar ve kurallar',zh:'条款与规则',ar:'الشروط والقواعد'}[lang]||'Terms & Rules';
     var ttl=document.getElementById('tools-toggle-lbl');if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
-    var ss=document.getElementById('share-sub');if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',pt:'Post para Telegram'}[lang]||'Telegram post';
-    var es=document.getElementById('export-sub');if(es)es.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',pt:'Copiar ou baixar'}[lang]||'Copy or download';
-    var cs=document.getElementById('cert-sub');if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',pt:'Cartão de conquista'}[lang]||'Achievement card';
-    var gs=document.getElementById('gift-sub');if(gs)gs.textContent={ru:'Ссылка-приглашение',en:'Invite link',es:'Enlace de invitación',pt:'Link de convite'}[lang]||'Invite link';
-    var ts=document.getElementById('terms-sub');if(ts)ts.textContent='Service policy';
+    var ss=document.getElementById('share-sub');if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',de:'Telegram-Beitrag',fr:'Post Telegram',pt:'Post para Telegram',uk:'Пост для Telegram',tr:'Telegram gönderisi',zh:'Telegram 帖子',ar:'منشور تيليجرام'}[lang]||'Telegram post';
+    var es=document.getElementById('export-sub');if(es)es.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',de:'Kopieren oder herunterladen',fr:'Copier ou télécharger',pt:'Copiar ou baixar',uk:'Скопіювати або завантажити',tr:'Kopyala veya indir',zh:'复制或下载',ar:'انسخ أو نزّل'}[lang]||'Copy or download';
+    var cs=document.getElementById('cert-sub');if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',de:'Erfolgskarte',fr:'Carte de réussite',pt:'Cartão de conquista',uk:'Картка досягнення',tr:'Başarı kartı',zh:'成就卡片',ar:'بطاقة الإنجاز'}[lang]||'Achievement card';
+    var ts=document.getElementById('terms-sub');if(ts)ts.textContent={ru:'Политика сервиса',en:'Service policy',es:'Política del servicio',de:'Servicebedingungen',fr:'Politique de service',pt:'Política do serviço',uk:'Політика сервісу',tr:'Hizmet politikası',zh:'服务政策',ar:'سياسة الخدمة'}[lang]||'Service policy';
   }catch(e){}
 
   // Achievements
@@ -9781,6 +9855,203 @@ function finishPlacement(skip){
   _placeState=null;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   WRITING STUDIO
+   User picks a writing task (TOEFL Independent / IELTS Task 2 / Free),
+   writes their essay in a single textarea, taps Grade. We send the
+   essay to /api/chat with a strict JSON-only system prompt; ALEX
+   plays the role of a TOEFL/IELTS examiner and returns a band score
+   per criterion plus actionable feedback. Credits are deducted by
+   /api/chat as for any other chat message.
+   ══════════════════════════════════════════════════════════════════ */
+const WRITING_MODES = [
+  {id:'toefl',  scale:30, target:300, range:'300+',
+    name:{ru:'TOEFL Independent',en:'TOEFL Independent'},
+    brief:{ru:'Эссе-аргументация на свободную тему. 300+ слов, 30 минут.',en:'Argumentative essay on a free topic. 300+ words, 30 minutes.'}},
+  {id:'ielts',  scale:9,  target:250, range:'250+',
+    name:{ru:'IELTS Task 2',en:'IELTS Task 2'},
+    brief:{ru:'Мнение или обсуждение. 250+ слов, 40 минут.',en:'Opinion or discussion essay. 250+ words, 40 minutes.'}},
+  {id:'free',   scale:9,  target:150, range:'any',
+    name:{ru:'Свободная практика',en:'Free practice'},
+    brief:{ru:'Любой текст — email, описание, рассуждение. Балл по IELTS-шкале.',en:'Any text — email, description, argument. Graded on the IELTS 0-9 scale.'}},
+];
+let _writingMode = 'toefl';
+
+function _writingCopy(){
+  return {
+    kicker:{ru:'Writing Studio',en:'Writing Studio'}[lang]||'Writing Studio',
+    h:{ru:'Получи балл TOEFL / IELTS',en:'Get a TOEFL / IELTS band',es:'Obtén tu nota TOEFL / IELTS',pt:'Obtenha sua nota TOEFL / IELTS',de:'TOEFL- / IELTS-Wertung erhalten',fr:'Obtiens ta note TOEFL / IELTS',uk:'Отримай бал TOEFL / IELTS',tr:'TOEFL / IELTS puanın',zh:'获取你的 TOEFL / IELTS 分数',ar:'احصل على درجة TOEFL / IELTS'}[lang]||'Get a TOEFL / IELTS band',
+    sub:{ru:'Напиши эссе — ALEX оценит по официальной шкале и даст рекомендации.',en:'Write your essay — ALEX grades it against the official rubric and gives feedback.',es:'Escribe tu ensayo — ALEX lo evalúa con la rúbrica oficial.',pt:'Escreva o seu ensaio — ALEX avalia com a rubrica oficial.',de:'Schreibe dein Essay — ALEX bewertet nach offizieller Rubrik.',fr:'Écris ton essai — ALEX évalue avec la grille officielle.',uk:'Напиши есе — ALEX оцінить за офіційною шкалою.',tr:'Yazını yaz — ALEX resmi rubriğe göre puanlar.',zh:'写下你的文章——ALEX 用官方评分标准评分。',ar:'اكتب مقالك — يقيّمه ALEX وفقًا للمعايير الرسمية.'}[lang]||'Write your essay — ALEX grades it.',
+    cta:{ru:'Оценить эссе',en:'Grade my essay',es:'Evaluar mi ensayo',pt:'Avaliar meu ensaio',de:'Essay bewerten',fr:'Évaluer mon essai',uk:'Оцінити есе',tr:'Yazımı puanla',zh:'评分我的作文',ar:'قيّم مقالي'}[lang]||'Grade my essay',
+    cancel:{ru:'Закрыть',en:'Close'}[lang]||'Close',
+    words:{ru:'слов',en:'words',es:'palabras',pt:'palavras',de:'Wörter',fr:'mots',uk:'слів',tr:'kelime',zh:'词',ar:'كلمة'}[lang]||'words',
+    target:{ru:'цель',en:'target',es:'meta',pt:'meta',de:'Ziel',fr:'cible',uk:'ціль',tr:'hedef',zh:'目标',ar:'الهدف'}[lang]||'target',
+    placeholder:{ru:'Напиши эссе здесь...',en:'Write your essay here...',es:'Escribe tu ensayo aquí...',pt:'Escreva seu ensaio aqui...',de:'Schreibe dein Essay hier...',fr:'Écris ton essai ici...',uk:'Напиши есе тут...',tr:'Yazını buraya yaz...',zh:'在此处写作文...',ar:'اكتب مقالك هنا...'}[lang]||'Write your essay here...',
+    grading:{ru:'ALEX проверяет твоё эссе...',en:'ALEX is grading your essay...',es:'ALEX está evaluando...',pt:'ALEX está avaliando...',de:'ALEX bewertet...',fr:'ALEX évalue...',uk:'ALEX перевіряє...',tr:'ALEX puanlıyor...',zh:'ALEX 正在评分...',ar:'ALEX يقيّم...'}[lang]||'ALEX is grading...',
+    err:{ru:'Не удалось получить оценку. Попробуй ещё раз.',en:"Couldn't grade. Try again.",es:'No se pudo evaluar.',pt:'Não foi possível avaliar.',de:'Bewertung fehlgeschlagen.',fr:'Évaluation impossible.',uk:'Не вдалося оцінити.',tr:'Puanlama başarısız.',zh:'评分失败',ar:'تعذر التقييم.'}[lang]||"Couldn't grade.",
+    short:{ru:'Напиши хотя бы 50 слов.',en:'Write at least 50 words.',es:'Escribe al menos 50 palabras.',pt:'Escreva pelo menos 50 palavras.',de:'Schreibe mindestens 50 Wörter.',fr:'Écris au moins 50 mots.',uk:'Напиши щонайменше 50 слів.',tr:'En az 50 kelime yaz.',zh:'至少写 50 个词。',ar:'اكتب 50 كلمة على الأقل.'}[lang]||'Write at least 50 words.',
+    strengths:{ru:'Сильные стороны',en:'Strengths',es:'Fortalezas',pt:'Pontos fortes',de:'Stärken',fr:'Forces',uk:'Сильні сторони',tr:'Güçlü yönler',zh:'优点',ar:'نقاط القوة'}[lang]||'Strengths',
+    improvements:{ru:'Что улучшить',en:'What to improve',es:'Qué mejorar',pt:'O que melhorar',de:'Verbesserungen',fr:'À améliorer',uk:'Що покращити',tr:'İyileştirilecekler',zh:'需要改进',ar:'مجالات التحسين'}[lang]||'What to improve',
+    corrected:{ru:'Исправленный фрагмент',en:'Corrected excerpt',es:'Extracto corregido',pt:'Trecho corrigido',de:'Korrigierter Auszug',fr:'Extrait corrigé',uk:'Виправлений фрагмент',tr:'Düzeltilmiş alıntı',zh:'修改后的段落',ar:'مقطع مصحح'}[lang]||'Corrected excerpt',
+    rubric:{
+      task:{ru:'Соответствие заданию',en:'Task response',es:'Cumplimiento',pt:'Resposta à tarefa',de:'Aufgabenbezug',fr:'Réponse à la tâche',uk:'Відповідність завданню',tr:'Görev yanıtı',zh:'内容',ar:'تنفيذ المهمة'}[lang]||'Task response',
+      coherence:{ru:'Связность',en:'Coherence',es:'Coherencia',pt:'Coerência',de:'Kohärenz',fr:'Cohérence',uk:'Зв’язність',tr:'Tutarlılık',zh:'连贯性',ar:'الترابط'}[lang]||'Coherence',
+      lexical:{ru:'Лексика',en:'Lexical resource',es:'Léxico',pt:'Léxico',de:'Wortschatz',fr:'Lexique',uk:'Лексика',tr:'Kelime hazinesi',zh:'词汇',ar:'المفردات'}[lang]||'Lexical resource',
+      grammar:{ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'}[lang]||'Grammar',
+    }
+  };
+}
+
+function openWritingStudio(){
+  /* Writing Studio is gated as a Pro-tier feature (or any Platform
+     subscription, which gets parity). Free users see the paywall on
+     the Credits tab — Writing also costs Sonnet-4 messages. */
+  if(!hasTier('pro')){
+    showTierPaywall('pro',{ru:'Writing Studio',en:'Writing Studio'}[lang]||'Writing Studio');
+    return;
+  }
+  if(!hasChatAccess()){
+    showChatPaywall();
+    return;
+  }
+  const c=_writingCopy();
+  const set=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  set('wr-kicker',c.kicker);
+  set('wr-h',c.h);
+  set('wr-sub',c.sub);
+  set('wr-btn',c.cta);
+  set('wr-cancel',c.cancel);
+  const inp=document.getElementById('wr-inp');
+  if(inp){
+    inp.placeholder=c.placeholder;
+    inp.value='';
+    inp.oninput=()=>{
+      const words=(inp.value.trim().match(/\b\w+\b/g)||[]).length;
+      const wc=document.getElementById('wr-count');
+      if(wc)wc.textContent=words+' '+c.words;
+    };
+  }
+  /* Mode chips */
+  const modes=document.getElementById('wr-modes');
+  if(modes){
+    modes.innerHTML='';
+    WRITING_MODES.forEach(m=>{
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='wr-mode'+(m.id===_writingMode?' on':'');
+      btn.textContent=m.name[lang]||m.name.en;
+      btn.onclick=()=>{
+        _writingMode=m.id;
+        modes.querySelectorAll('.wr-mode').forEach(b=>b.classList.remove('on'));
+        btn.classList.add('on');
+        _writingUpdateMode();
+      };
+      modes.appendChild(btn);
+    });
+  }
+  _writingUpdateMode();
+  document.getElementById('wr-result').style.display='none';
+  document.querySelectorAll('#writingm .wr-inp-wrap,#writingm .place-cta,#writingm .wr-prompt,#writingm .wr-modes,#writingm .place-hero').forEach(el=>{el.style.display=''});
+  document.getElementById('wr-cancel').style.display='';
+  openMod('writingm');
+  try{sfx.tap();}catch(_){}
+}
+
+function _writingUpdateMode(){
+  const c=_writingCopy();
+  const mode=WRITING_MODES.find(m=>m.id===_writingMode)||WRITING_MODES[0];
+  const promptEl=document.getElementById('wr-prompt');
+  if(promptEl)promptEl.innerHTML=`<b>${safeHTML(mode.name[lang]||mode.name.en)}.</b> ${safeHTML(mode.brief[lang]||mode.brief.en)}`;
+  const target=document.getElementById('wr-target');
+  if(target)target.textContent=`${c.target}: ${mode.range} ${c.words}`;
+}
+
+async function submitWritingEssay(){
+  if(!hasChatAccess()){showChatPaywall();return;}
+  const inp=document.getElementById('wr-inp');
+  const text=(inp?.value||'').trim();
+  const words=(text.match(/\b\w+\b/g)||[]).length;
+  const c=_writingCopy();
+  if(words<50){toast(c.short,'⚠️');return;}
+  const mode=WRITING_MODES.find(m=>m.id===_writingMode)||WRITING_MODES[0];
+  const btn=document.getElementById('wr-btn');
+  if(btn){btn.disabled=true;btn.textContent=c.grading;}
+  const scaleLabel=mode.scale===30?'TOEFL Independent (0-30 overall)':'IELTS Task 2 (band 0-9)';
+  const systemHint = `You are a senior ${mode.scale===30?'TOEFL':'IELTS'} writing examiner. Grade the following essay using the official rubric. Be honest and specific. Return ONLY valid JSON, no markdown, no commentary, in this exact shape:
+{
+ "scores": {
+   "task":        <0-${mode.scale}>,
+   "coherence":   <0-${mode.scale}>,
+   "lexical":     <0-${mode.scale}>,
+   "grammar":     <0-${mode.scale}>,
+   "overall":     <0-${mode.scale}>
+ },
+ "feedback":     "<2 sentences, honest>",
+ "strengths":    ["<short>","<short>"],
+ "improvements": ["<short>","<short>","<short>"],
+ "corrected":    "<rewrite the first 2-3 sentences of the student's essay with corrections>"
+}
+For ${scaleLabel}. Use half-point granularity for IELTS (5.0, 5.5, 6.0…). Student essay below.`;
+  const payload = `${systemHint}\n\nSTUDENT ESSAY:\n"""${text}"""`;
+  try{
+    const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.'}[botLang]||'Respond in English.';
+    const r=await fetch(`${API}/api/chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({uid:window._uid||0,message:payload,bot_lang:bl,chosen_model:'sonnet4',init_data:tg?.initData||''}),
+      signal:AbortSignal.timeout(60000)
+    });
+    const d=await r.json();
+    if(typeof d.chat_credits==='number'){chatCredits=d.chat_credits;try{updateCreditChip();}catch(_){}}
+    if(d.premium_required){closeMod('writingm');openPremium(null,'credits');return;}
+    if(!d.reply){throw new Error('empty reply');}
+    /* Tolerant JSON extraction — strip code fences, then find the
+       first {...} block in the reply text. */
+    let raw=String(d.reply).replace(/```json|```/g,'').trim();
+    const m=raw.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('no JSON');
+    const parsed=JSON.parse(m[0]);
+    _renderWritingResult(parsed,mode);
+  }catch(e){
+    console.warn('writing studio',e);
+    toast(c.err,'⚠️');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=c.cta;}
+  }
+}
+
+function _renderWritingResult(p,mode){
+  const c=_writingCopy();
+  const host=document.getElementById('wr-result');
+  if(!host)return;
+  document.querySelectorAll('#writingm .wr-inp-wrap,#writingm .place-cta,#writingm .wr-prompt,#writingm .wr-modes').forEach(el=>{el.style.display='none'});
+  const s=p.scores||{};
+  const max=mode.scale;
+  const pct=(v)=>Math.max(0,Math.min(100,Math.round((Number(v)||0)/max*100)));
+  const fmt=(v)=>{const n=Number(v)||0;return max===9?n.toFixed(1):Math.round(n);};
+  host.style.display='block';
+  host.innerHTML = `
+    <div class="wr-overall">
+      <span class="wr-overall-band">${fmt(s.overall)}</span><span class="wr-overall-max">/ ${max}</span>
+      <span class="wr-overall-l">${mode.scale===30?'TOEFL':'IELTS'}</span>
+    </div>
+    <div class="wr-bars">
+      ${[['task',s.task],['coherence',s.coherence],['lexical',s.lexical],['grammar',s.grammar]].map(([k,v])=>`
+        <div class="wr-bar">
+          <div class="wr-bar-head"><b>${safeHTML(c.rubric[k])}</b><span>${fmt(v)} / ${max}</span></div>
+          <div class="wr-bar-track"><div class="wr-bar-fill" style="width:${pct(v)}%"></div></div>
+        </div>`).join('')}
+    </div>
+    ${p.feedback?`<div class="wr-section"><p>${safeHTML(p.feedback)}</p></div>`:''}
+    ${Array.isArray(p.strengths)&&p.strengths.length?`<div class="wr-section"><h4>${c.strengths}</h4><ul>${p.strengths.map(x=>`<li>${safeHTML(x)}</li>`).join('')}</ul></div>`:''}
+    ${Array.isArray(p.improvements)&&p.improvements.length?`<div class="wr-section"><h4>${c.improvements}</h4><ul>${p.improvements.map(x=>`<li>${safeHTML(x)}</li>`).join('')}</ul></div>`:''}
+    ${p.corrected?`<div class="wr-section"><h4>${c.corrected}</h4><div class="wr-corrected">${safeHTML(p.corrected)}</div></div>`:''}
+    <button class="place-cta" style="margin-top:14px" onclick="openWritingStudio()">${({ru:'Написать ещё',en:'Write another'}[lang]||'Write another')}</button>
+    <button class="place-skip" onclick="closeMod('writingm')">${c.cancel}</button>`;
+  try{sfx.win();}catch(_){}
+  try{haptic('medium');}catch(_){}
+}
+
 /* ══ Update applyLang for new labels ══ */
 function updateNewLabels(){
   // Learn tabs
@@ -11015,17 +11286,8 @@ function loadAdminStats(){
 }
 
 /* ══ GIFT SUBSCRIPTION ══ */
-function openGiftSub(){
-  var botName=window.BOT_NAME||'PolyGlotty_bot';
-  var link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
-  var text=lang==='ru'
-    ? 'Учи английский с AI-репетитором в Telegram. Попробуй PolyGlotty:'
-    : 'Learn English with an AI tutor in Telegram. Try PolyGlotty:';
-  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));}
-  else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
-  else{try{navigator.clipboard.writeText(link);}catch(e){}}
-  toast(lang==='ru'?'Ссылка готова':'Link ready','✅');
-}
+/* openGiftSub was removed — gifting Premium is implemented natively
+   by Telegram Stars; users can simply transfer Stars to each other. */
 
 function openTermsRules(){
   haptic('light');
