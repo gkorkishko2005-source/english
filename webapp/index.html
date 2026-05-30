@@ -8916,9 +8916,9 @@ const PREMIUM_FEATURES=[
    ══════════════════════════════════════════════════════════════════ */
 
 const PLATFORM_PLAN_DEFS=[
-  {id:'plat_1m',  stars:299,  period:'1m',       monthly:299, save:0},
-  {id:'plat_6m',  stars:1290, period:'6m',       monthly:215, save:28, popular:true},
-  {id:'plat_life',stars:4990, period:'lifetime', monthly:null,save:null},
+  {id:'plat_1m',  stars:299,  period:'1m',       monthly:299, save:0,  starterCredits:30},
+  {id:'plat_6m',  stars:1290, period:'6m',       monthly:215, save:28, starterCredits:150, popular:true},
+  {id:'plat_life',stars:4990, period:'lifetime', monthly:null,save:null, starterCredits:500},
 ];
 const CREDIT_PACK_DEFS=[
   {id:'credits_100',  stars:149,  credits:100,  perMsg:1.49},
@@ -8957,7 +8957,7 @@ function _platCopy(){
         ['Themes and expanded course', 'included'],
       ]
     }[lang]||[],
-    foot:{ru:'ALEX-чат покупается <b>отдельно</b> кредитами — выбери вкладку справа.', en:'ALEX chat is sold <b>separately</b> as credits — pick the right-hand tab.'}[lang]||'ALEX chat sold separately.'
+    foot:{ru:'Каждый план уже включает стартовые кредиты ALEX, чтобы можно было пользоваться чатом сразу. Дополнительные кредиты докупаются на вкладке справа.', en:'Every plan ships with starter ALEX credits so you can use the chat right away. Top up extra credits on the tab to the right.'}[lang]||'Each plan includes starter ALEX credits.'
   };
 }
 function _credCopy(){
@@ -8967,17 +8967,17 @@ function _credCopy(){
     rows:{
       ru:[
         ['Haiku 4.5 — быстрый','1 кр / сообщение'],
-        ['Sonnet 4 — умный','4 кр'],
-        ['Sonnet 4.6 — точный','5 кр'],
-        ['Opus 4.7 — максимум','12 кр'],
-        ['Голос ALEX','+3 кр'],
+        ['Sonnet 4 — умный','5 кр'],
+        ['Sonnet 4.6 — точный','6 кр'],
+        ['Opus 4.7 — максимум','18 кр'],
+        ['Голос ALEX (TTS+STT)','+5 кр'],
       ],
       en:[
         ['Haiku 4.5 — fast','1 cr / message'],
-        ['Sonnet 4 — smart','4 cr'],
-        ['Sonnet 4.6 — precise','5 cr'],
-        ['Opus 4.7 — max','12 cr'],
-        ['Voice ALEX','+3 cr'],
+        ['Sonnet 4 — smart','5 cr'],
+        ['Sonnet 4.6 — precise','6 cr'],
+        ['Opus 4.7 — max','18 cr'],
+        ['Voice ALEX (TTS+STT)','+5 cr'],
       ]
     }[lang]||[],
     foot:{ru:'Кредиты не сгорают. Работают с Platform или без неё.', en:'Credits never expire. Work with or without Platform.'}[lang]||'Credits never expire.'
@@ -9000,6 +9000,7 @@ function renderPremPlans(){
   const popLbl={ru:'ВЫГОДНО',en:'BEST VALUE',es:'MEJOR',pt:'MELHOR'}[lang]||'BEST VALUE';
   if(_premTab==='platform'){
     const owns=hasPlatform();
+    const crLbl=lang==='ru'?'стартовых кредитов ALEX':'starter ALEX credits';
     host.innerHTML = PLATFORM_PLAN_DEFS.map(p=>{
       const dim = owns && p.period!=='lifetime' ? 'style="opacity:.45;pointer-events:none"' : '';
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
@@ -9008,6 +9009,7 @@ function renderPremPlans(){
         ? `${_starsFmt(p.monthly)} ${lang==='ru'?'/ мес':'/ mo'}`
         : (lang==='ru'?'один раз':'one-time');
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
+      const starter = p.starterCredits ? `<div class="pp-meta" style="color:var(--a)">+ ${p.starterCredits} ${crLbl}</div>` : '';
       return `<div class="prem-plan" ${dim} onclick="selectPlan('${p.id}')">
         ${popMark}
         <div class="pp-row">
@@ -9015,20 +9017,21 @@ function renderPremPlans(){
           <span class="pp-price">${_starsFmt(p.stars)}</span>
         </div>
         <div class="pp-meta"><b>${monthly}</b>${usd}</div>
+        ${starter}
       </div>`;
     }).join('');
   } else {
     host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const credLbl = lang==='ru' ? `${p.credits.toLocaleString('ru-RU')} кредитов` : `${p.credits.toLocaleString('en-US')} credits`;
-      /* Rough Haiku-equivalence to anchor mental price: 1 cr / msg. */
+      /* Mental anchor: Haiku 1 cr/msg, Sonnet 4 = 5 cr/msg (current pricing). */
       const msgsHaiku = p.credits;
-      const msgsSonnet = Math.floor(p.credits/4);
+      const msgsSonnet = Math.floor(p.credits/5);
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
       const rate = `<b>${p.perMsg.toFixed(2)} ⭐ ${lang==='ru'?'/ сообщение':'/ message'}</b>${usd}`;
       const detail = lang==='ru'
-        ? `${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`
-        : `${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`;
+        ? `≈ ${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`
+        : `≈ ${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`;
       return `<div class="prem-plan" onclick="selectPlan('${p.id}')">
         ${popMark}
         <div class="pp-row">

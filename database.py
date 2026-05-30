@@ -621,14 +621,23 @@ async def grandfather_legacy_tier(uid: int) -> str:
 
 
 # ── Per-model credit cost (single source of truth) ─────────────────
+#  Calibrated to keep ≥ 2× margin on the cheapest credit pack
+#  (bulk = 2000 credits @ 1.0 ⭐/cr ≈ $0.0088 net after 30 % Telegram
+#  commission) against measured Anthropic costs without prompt caching:
+#     Haiku 4.5  ≈ $0.004 / message
+#     Sonnet 4   ≈ $0.012
+#     Sonnet 4.6 ≈ $0.012
+#     Opus 4.1   ≈ $0.040
+#     Opus 4.7   ≈ $0.061
+#     Voice (TTS+STT) ≈ $0.021 surcharge
 ALEX_CREDIT_COST = {
     "haiku":   1,
-    "sonnet4": 4,
-    "sonnet":  5,
-    "opus41":  10,
-    "opus":    12,
+    "sonnet4": 5,
+    "sonnet":  6,
+    "opus41":  14,
+    "opus":    18,
 }
-VOICE_CREDIT_SURCHARGE = 3
+VOICE_CREDIT_SURCHARGE = 5
 
 
 def credits_for_message(model: str, voice: bool = False) -> int:

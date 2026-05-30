@@ -151,9 +151,9 @@ MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 # ALEX credits are a separate pre-paid pool spent per chat message.
 # Legacy PREMIUM_PLANS above stays alive for grandfathered renewals.
 PLATFORM_PLANS = {
-    "plat_1m":  {"stars": 299,  "period": "1m",       "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
-    "plat_6m":  {"stars": 1290, "period": "6m",       "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
-    "plat_life":{"stars": 4990, "period": "lifetime", "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
+    "plat_1m":  {"stars": 299,  "period": "1m",       "starter_credits": 30,  "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
+    "plat_6m":  {"stars": 1290, "period": "6m",       "starter_credits": 150, "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
+    "plat_life":{"stars": 4990, "period": "lifetime", "starter_credits": 500, "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
 }
 CREDIT_PACKS = {
     "credits_100":  {"stars": 149,  "credits": 100,  "label_ru": "100 кредитов ALEX",    "label_en": "100 ALEX credits"},
@@ -2005,15 +2005,15 @@ async def cmd_premium(msg: Message):
     if not grandfathered:
         plat_kb = [
             [InlineKeyboardButton(
-                text=("Платформа · 1 мес — 299 ⭐" if ru else "Platform · 1 mo — 299 ⭐"),
+                text=("Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "Platform · 1 mo — 299 ⭐ + 30 cr"),
                 callback_data="plat_buy:plat_1m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "Platform · 6 mo — 1 290 ⭐ (−28%)"),
+                text=("Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
                 callback_data="plat_buy:plat_6m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · навсегда — 4 990 ⭐" if ru else "Platform · lifetime — 4 990 ⭐"),
+                text=("Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "Platform · lifetime — 4 990 ⭐ + 500 cr"),
                 callback_data="plat_buy:plat_life"
             )],
             [InlineKeyboardButton(
@@ -2047,19 +2047,19 @@ async def cmd_premium(msg: Message):
 
         text = (
             "<b>PolyGlotty</b>\n\n"
-            "<b>Платформа</b> · курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста.\n"
-            "299 ⭐ / мес · 1 290 ⭐ / 6 мес · 4 990 ⭐ навсегда\n\n"
-            "<b>Кредиты ALEX</b> · отдельно от платформы. Тратятся за каждое сообщение, не сгорают.\n"
-            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus: 12 · Voice +3\n"
+            "<b>Платформа</b> · курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
+            "299 ⭐ / мес (+30 кр) · 1 290 ⭐ / 6 мес (+150 кр) · 4 990 ⭐ навсегда (+500 кр)\n\n"
+            "<b>Кредиты ALEX</b> · отдельно. Тратятся за каждое сообщение, не сгорают.\n"
+            "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Voice +5\n"
             "Пакеты: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
             "<i>Оплата Telegram Stars</i>"
         ) if ru else (
             "<b>PolyGlotty</b>\n\n"
-            "<b>Platform</b> · A0–C2 course, exams, analytics, unlimited cards, roleplay and text check.\n"
-            "299 ⭐ / mo · 1 290 ⭐ / 6 mo · 4 990 ⭐ lifetime\n\n"
-            "<b>ALEX credits</b> · separate from Platform. Spent per message, never expire.\n"
-            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus: 12 · Voice +3\n"
+            "<b>Platform</b> · A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
+            "299 ⭐ / mo (+30 cr) · 1 290 ⭐ / 6 mo (+150 cr) · 4 990 ⭐ lifetime (+500 cr)\n\n"
+            "<b>ALEX credits</b> · separate. Spent per message, never expire.\n"
+            "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Voice +5\n"
             "Packs: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
             "<i>Telegram Stars only</i>"
@@ -2334,19 +2334,32 @@ async def on_payment_success(msg: Message):
                                   else "Payment succeeded but access did not activate. Use /paysupport."),
                                  parse_mode="HTML")
                 return
+            # ── Self-contained value: each Platform purchase ships with
+            #    starter ALEX credits so the user can use the chat right
+            #    away without a second purchase.
+            starter_credits = 0
+            plan_id = next((pid for pid, p in PLATFORM_PLANS.items() if p["period"] == period), None)
+            if plan_id and PLATFORM_PLANS[plan_id].get("starter_credits"):
+                starter_credits = int(PLATFORM_PLANS[plan_id]["starter_credits"])
+                try:
+                    await grant_credits_via_server(uid, starter_credits)
+                except Exception as e:
+                    logger.warning("starter credit grant failed uid=%s credits=%s: %s", uid, starter_credits, e)
+            starter_line_ru = f"\n💬 +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
+            starter_line_en = f"\n💬 +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
             text = (
                 f"🎉 <b>Оплата прошла!</b>\n\n"
-                f"📚 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n\n"
-                f"Курс, экзамены, расширенные карточки и аналитика — открыты.\n"
-                f"Чат ALEX покупается отдельно — кредиты в /premium."
+                f"📚 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
+                f"Курс, экзамены, расширенные карточки и аналитика — открыты.{starter_line_ru}\n\n"
+                f"Кредиты ALEX докупаются отдельно в /premium, когда захочешь больше чата."
                 if ru else
                 f"🎉 <b>Payment successful!</b>\n\n"
-                f"📚 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n\n"
-                f"Course, exams, expanded cards and analytics are unlocked.\n"
-                f"ALEX chat is sold separately as credits — see /premium."
+                f"📚 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
+                f"Course, exams, expanded cards and analytics are unlocked.{starter_line_en}\n\n"
+                f"Top up ALEX credits in /premium when you want more chat."
             )
             await msg.answer(text, parse_mode="HTML")
-            logger.info("✅ Platform granted uid=%s period=%s", uid, period)
+            logger.info("✅ Platform granted uid=%s period=%s starter_credits=%s", uid, period, starter_credits)
         except Exception as e:
             logger.error(f"platform payment handler error: {e}")
             await msg.answer("✅ Платёж принят." if ru else "✅ Payment received.")
