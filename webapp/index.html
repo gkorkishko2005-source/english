@@ -1911,19 +1911,43 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 #s-progress .premium-mask{color:var(--t3)!important;font-size:11px!important;font-weight:600;
   text-transform:none;letter-spacing:0}
 
-/* Weekly chart card — flat */
+/* Weekly chart card — flat, bars share one baseline */
+/* The previous design tilted the whole chart with rotateX(5deg) +
+   perspective so bars at the edges appeared to sit at different
+   heights. We kill the 3D entirely so every bar grows straight up
+   from a single shared baseline. */
 #s-progress .chart-wrap{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;perspective:none!important;padding:14px 12px;border-radius:12px}
-#s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:90px}
-#s-progress .bc{flex:1;display:flex;align-items:flex-end;justify-content:center;height:100%}
-#s-progress .bb{width:100%;max-width:18px;background:var(--a);border-radius:4px 4px 0 0;
-  transition:height .8s ease;opacity:.85}
-#s-progress .bb.td{background:var(--a);opacity:1}
-#s-progress .bb.zero{background:var(--b1);opacity:.5;height:3px!important}
-#s-progress .chartdays{display:flex;gap:6px;margin-top:6px}
-#s-progress .bd{flex:1;text-align:center;font-size:10.5px;color:var(--t3);font-weight:600;
-  letter-spacing:.3px}
+  box-shadow:none!important;perspective:none!important;padding:14px 14px 12px;border-radius:12px}
+#s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:112px;margin:0;
+  transform:none!important;transform-origin:50% 100%;overflow:visible;
+  border-bottom:1px solid var(--b1);padding-bottom:0}
+/* Each column is a flex-column: value label on top, bar at the bottom.
+   align-items:stretch + justify-content:flex-end ensures the bar
+   always hugs the baseline of the chart row. */
+#s-progress .bc{flex:1;display:flex;flex-direction:column;align-items:stretch;
+  justify-content:flex-end;height:100%;padding:0;cursor:pointer;position:relative;
+  transform:none!important;transform-style:flat;min-width:0}
+#s-progress .bc::after,
+#s-progress .bc::before{display:none!important}
+/* The XP value label sits above the bar without affecting its baseline. */
+#s-progress .bbv{font-size:10px;color:var(--t3);font-weight:700;text-align:center;
+  margin-bottom:4px;font-variant-numeric:tabular-nums;line-height:1;min-height:11px}
+#s-progress .bb{width:auto;max-width:22px;margin:0 auto;border-radius:4px 4px 0 0;
+  background:var(--a)!important;opacity:.9;min-height:3px;
+  transition:height .7s cubic-bezier(.22,1,.36,1);box-shadow:none!important;
+  transform:none!important;position:relative}
+#s-progress .bb::before,
+#s-progress .bb::after{display:none!important}
+#s-progress .bb:hover{opacity:1;transform:none!important}
+#s-progress .bb.td{background:var(--a)!important;opacity:1}
+#s-progress .bb.zero{background:var(--b1)!important;opacity:.45;min-height:3px;height:3px!important}
+#s-progress .chartdays{display:flex;gap:6px;margin-top:8px;padding:0}
+#s-progress .bd{flex:1;text-align:center;font-size:10.5px;color:var(--t3);font-weight:700;
+  letter-spacing:.3px;text-transform:uppercase}
 #s-progress .bd.td{color:var(--a)}
+/* The chart-empty hint that shows when the user has no XP this week.   */
+#s-progress .chart-empty{text-align:center;font-size:11.5px;color:var(--t3);padding:6px 0 2px;
+  font-weight:500}
 
 /* TOEFL card — flat */
 #s-progress .toefl-card{background:transparent!important;border:1px solid var(--b1)!important;
