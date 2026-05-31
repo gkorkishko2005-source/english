@@ -1922,20 +1922,23 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   transform:none!important;transform-origin:50% 100%;overflow:visible;
   border-bottom:1px solid var(--b1);padding-bottom:0}
 /* Each column is a flex-column: value label on top, bar at the bottom.
-   align-items:stretch + justify-content:flex-end ensures the bar
-   always hugs the baseline of the chart row. */
-#s-progress .bc{flex:1;display:flex;flex-direction:column;align-items:stretch;
+   `align-items:center` + an explicit bar width is the layout the
+   original chart used successfully — flex `width:auto + max-width`
+   broke rendering in the Telegram WebView, leaving bars with zero
+   visible width. */
+#s-progress .bc{flex:1;display:flex;flex-direction:column;align-items:center;
   justify-content:flex-end;height:100%;padding:0;cursor:pointer;position:relative;
-  transform:none!important;transform-style:flat;min-width:0}
+  transform:none!important;transform-style:flat;min-width:0;gap:4px}
 #s-progress .bc::after,
 #s-progress .bc::before{display:none!important}
 /* The XP value label sits above the bar without affecting its baseline. */
 #s-progress .bbv{font-size:10px;color:var(--t3);font-weight:700;text-align:center;
-  margin-bottom:4px;font-variant-numeric:tabular-nums;line-height:1;min-height:11px}
-#s-progress .bb{width:auto;max-width:22px;margin:0 auto;border-radius:4px 4px 0 0;
+  font-variant-numeric:tabular-nums;line-height:1;min-height:11px;width:100%}
+/* Explicit percentage width matches the original chart pattern. */
+#s-progress .bb{width:62%;max-width:24px;border-radius:4px 4px 0 0;
   background:var(--a)!important;opacity:.9;min-height:3px;
   transition:height .7s cubic-bezier(.22,1,.36,1);box-shadow:none!important;
-  transform:none!important;position:relative}
+  transform:none!important;position:relative;align-self:center}
 #s-progress .bb::before,
 #s-progress .bb::after{display:none!important}
 #s-progress .bb:hover{opacity:1;transform:none!important}
