@@ -1952,6 +1952,38 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 #s-progress .chart-empty{text-align:center;font-size:11.5px;color:var(--t3);padding:6px 0 2px;
   font-weight:500}
 
+/* ── Rank card · streak-freeze perks ──────────────────────────────
+   Same minimal grammar as the rest of the Progress tab: transparent
+   background, hairline border, the accent colour only on the
+   progress bar and on the freeze chip.                              */
+.rank-card{background:transparent;border:1px solid var(--b1);border-radius:12px;padding:14px;
+  margin-bottom:6px;display:flex;flex-direction:column;gap:10px}
+.rank-row{display:flex;align-items:center;gap:12px}
+.rank-emoji{font-size:24px;line-height:1;flex-shrink:0;width:38px;height:38px;
+  border-radius:10px;background:var(--e2);border:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:center}
+.rank-main{flex:1;min-width:0}
+.rank-title{font-size:14px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-sub{font-size:11.5px;color:var(--t3);margin-top:2px;line-height:1.4;font-weight:500}
+.rank-freeze{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:100px;
+  background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.25);color:var(--a);
+  font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
+.rank-freeze svg{width:13px;height:13px}
+.rank-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden}
+.rank-fill{height:100%;background:var(--a);border-radius:100px;
+  transition:width .8s cubic-bezier(.22,1,.36,1)}
+.rank-meta{font-size:11px;color:var(--t3);font-weight:600;font-variant-numeric:tabular-nums;
+  letter-spacing:.2px}
+.rank-use-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:11px;border-radius:10px;border:1px solid rgba(var(--ar),.30);
+  background:rgba(var(--ar),.06);color:var(--a);font-size:12.5px;font-weight:700;
+  cursor:pointer;font-family:var(--f);transition:background .15s,border-color .15s}
+.rank-use-btn:active{background:rgba(var(--ar),.14)}
+.rank-use-btn svg{width:14px;height:14px}
+.rank-use-btn.disabled{background:var(--e2);border-color:var(--b1);color:var(--t3);
+  cursor:default;pointer-events:none}
+
 /* TOEFL card — flat */
 #s-progress .toefl-card{background:transparent!important;border:1px solid var(--b1)!important;
   box-shadow:none!important;padding:14px 16px;border-radius:12px}
@@ -2222,6 +2254,27 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
         <div class="pbw"><div class="pbl"><span id="pbc">0 XP</span><span id="pbm">—</span></div><div class="pbtr"><div class="pbfi" id="pbfi" style="width:0"></div></div></div>
       </div>
     </div>
+  </div>
+  <!-- Rank card · streak-freeze perks tied to the rank ladder -->
+  <div class="sec"><span id="rank-sec-lbl">Rank</span></div>
+  <div class="rank-card" id="rank-card">
+    <div class="rank-row">
+      <div class="rank-emoji" id="rank-emoji">🌱</div>
+      <div class="rank-main">
+        <div class="rank-title" id="rank-title">—</div>
+        <div class="rank-sub" id="rank-sub">—</div>
+      </div>
+      <div class="rank-freeze" id="rank-freeze">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10"/></svg>
+        <span id="rank-freeze-n">0</span>
+      </div>
+    </div>
+    <div class="rank-progress"><div class="rank-fill" id="rank-fill" style="width:0%"></div></div>
+    <div class="rank-meta"><span id="rank-next">—</span></div>
+    <button class="rank-use-btn" id="rank-use-btn" onclick="useStreakFreezeForToday()" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10"/></svg>
+      <span id="rank-use-btn-lbl">Use a streak freeze</span>
+    </button>
   </div>
   <div class="sec"><span id="stat-lbl"></span></div>
   <div class="s4">
@@ -3254,9 +3307,96 @@ function getTreeSvg(xp){
 }
 
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
-const RANKS=[{r:'Seedling',min:0,max:100},{r:'Beginner',min:100,max:300},{r:'Elementary',min:300,max:600},{r:'Pre-Inter.',min:600,max:1000},{r:'Intermediate',min:1000,max:1500},{r:'Upper-Inter.',min:1500,max:2500},{r:'Advanced',min:2500,max:4000},{r:'Master',min:4000,max:9999}];
+/* Eight ranks. Each tier grants a concrete monthly Streak Freeze
+   budget — small enough not to make missing days routine, large
+   enough to make ranking up feel earned. The Master tier carries
+   the highest practical refill (10) — effectively limit-removed for
+   anyone actually engaged daily. `freezes_pm` = freezes per month. */
+const RANKS=[
+  {r:'Seedling',     min:0,    max:100,  emoji:'🌱', freezes_pm:0},
+  {r:'Beginner',     min:100,  max:300,  emoji:'🌿', freezes_pm:1},
+  {r:'Elementary',   min:300,  max:600,  emoji:'🌳', freezes_pm:2},
+  {r:'Pre-Inter.',   min:600,  max:1000, emoji:'🌲', freezes_pm:3},
+  {r:'Intermediate', min:1000, max:1500, emoji:'🍀', freezes_pm:4},
+  {r:'Upper-Inter.', min:1500, max:2500, emoji:'🌟', freezes_pm:5},
+  {r:'Advanced',     min:2500, max:4000, emoji:'💫', freezes_pm:6},
+  {r:'Master',       min:4000, max:9999, emoji:'🏆', freezes_pm:10},
+];
 function treeOf(xp){return[...TREES].reverse().find(t=>xp>=t.min)||TREES[0];}
 function rankOf(xp){return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[RANKS.length-1];}
+function rankIndex(xp){
+  /* Returns the 0-based tier index — used for milestone celebrations
+     so we know which tier was just crossed. */
+  const r=rankOf(xp);return RANKS.findIndex(x=>x.r===r.r);
+}
+
+/* ══ STREAK FREEZE ECONOMY ════════════════════════════════════════
+   A user gets a monthly budget of freeze tokens determined by their
+   rank. Tokens are stored in localStorage (and synced to the server
+   alongside other XP/streak state). Refill is lazy: every time we
+   read the count we check whether the calendar month has changed and
+   top up to the current rank's `freezes_pm` if so. This guarantees
+   that the perk is delivered without requiring a daily background
+   job, while also preventing players from hoarding tokens across
+   months (the refill is a SET, not an ADD).
+*/
+function _currentMonthKey(){
+  const d=new Date();return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+}
+function getStreakFreezes(){
+  /* Lazily refill at the start of each month based on current rank. */
+  const stored=LS.get('sfreeze_month');
+  const cur=_currentMonthKey();
+  const xp=(window._d&&window._d.xp)||loadXP()||0;
+  const cap=rankOf(xp).freezes_pm;
+  if(stored!==cur){
+    LS.set('sfreeze_month',cur);
+    LS.set('sfreeze_count',String(cap));
+    return cap;
+  }
+  /* Honour a rank-up mid-month — the count can only ever increase via
+     this path, never decrease. */
+  const have=parseInt(LS.get('sfreeze_count')||'0',10)||0;
+  if(have<cap){LS.set('sfreeze_count',String(cap));return cap;}
+  return have;
+}
+function consumeStreakFreeze(){
+  /* Spend one token. Returns true on success, false if pool empty.
+     Caller is responsible for actually preserving the streak (we
+     just decrement and log). */
+  const have=getStreakFreezes();
+  if(have<=0)return false;
+  LS.set('sfreeze_count',String(have-1));
+  return true;
+}
+function useStreakFreezeForToday(){
+  /* User-facing: tap "use a freeze" to mark today as a streak day
+     without having completed any missions. Safe-by-design: it just
+     fast-forwards the streak_done_date marker the same way completing
+     two missions would. */
+  const today=localDayKey();
+  if(LS.get('streak_done_date')===today){
+    toast({ru:'Сегодня уже учтено',en:'Today is already counted',es:'Hoy ya cuenta',pt:'Hoje já conta'}[lang]||'Today is already counted','🔥');
+    return false;
+  }
+  if(!consumeStreakFreeze()){
+    toast({ru:'Заморозки закончились',en:'No freezes left',es:'Sin congelaciones',pt:'Sem congelamentos'}[lang]||'No freezes left','❄️');
+    return false;
+  }
+  /* Apply the same forward-step that completeDailyStreak() does. */
+  const prev=LS.get('streak_done_date');
+  if(!window._d)window._d={streak:0,xp:0};
+  const base=Number(window._d.streak||0);
+  window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
+  LS.set('streak_done_date',today);
+  LS.set('local_streak',String(window._d.streak));
+  try{renderHome(window._d);}catch(_){}
+  try{renderRankCard(window._d);}catch(_){}
+  try{syncToServer();}catch(_){}
+  toast({ru:'Стрик спасён! ❄️',en:'Streak saved! ❄️',es:'¡Racha salvada!',pt:'Sequência salva!'}[lang]||'Streak saved! ❄️','❄️');
+  try{sfx.win();}catch(_){}
+  return true;
+}
 
 /* ══ NAV ══ */
 let tab='home';
@@ -3523,6 +3663,68 @@ function continueLessonTap(){
   setTimeout(()=>{try{openCourseLesson(id);}catch(_){}},120);
 }
 
+/* ══ RENDER RANK CARD ═════════════════════════════════════════════
+   Builds the per-tier card on the Progress screen. Shows the current
+   rank, the next milestone (XP delta + perk it unlocks) and the
+   available streak-freeze pool with a single-tap CTA to spend one
+   when the user is about to miss a streak day. */
+function renderRankCard(d){
+  const card=document.getElementById('rank-card');
+  if(!card)return;
+  const xp=(d&&d.xp)||0;
+  const cur=rankOf(xp);
+  const idx=rankIndex(xp);
+  const next=RANKS[idx+1]||null;
+  const pct=Math.max(0,Math.min(100,Math.round(((xp-cur.min)/(cur.max-cur.min))*100)));
+  const freezes=getStreakFreezes();
+  /* Section header copy */
+  const sec=document.getElementById('rank-sec-lbl');
+  if(sec)sec.textContent={ru:'Ранг',en:'Rank',es:'Rango',de:'Rang',fr:'Rang',pt:'Posto',uk:'Ранг',tr:'Rütbe',zh:'等级',ar:'الرتبة'}[lang]||'Rank';
+  /* Visible state */
+  const em=document.getElementById('rank-emoji');if(em)em.textContent=cur.emoji||'🌱';
+  const t=document.getElementById('rank-title');if(t)t.textContent=cur.r;
+  const sub=document.getElementById('rank-sub');
+  if(sub){
+    const perkLine = cur.freezes_pm>0
+      ? ({ru:`${cur.freezes_pm} заморозок стрика в месяц`,en:`${cur.freezes_pm} streak freezes / month`,es:`${cur.freezes_pm} congelaciones/mes`,de:`${cur.freezes_pm} Streak-Stops / Monat`,fr:`${cur.freezes_pm} gels / mois`,pt:`${cur.freezes_pm} congelamentos / mês`,uk:`${cur.freezes_pm} заморозок / міс`,tr:`${cur.freezes_pm} dondurma / ay`,zh:`${cur.freezes_pm} 次连胜冻结 / 月`,ar:`${cur.freezes_pm} تجميد / الشهر`}[lang]||`${cur.freezes_pm} streak freezes / month`)
+      : ({ru:'Базовый ранг — перки откроются дальше',en:'Base rank — perks unlock from the next tier'}[lang]||'Base rank — perks unlock from the next tier');
+    sub.textContent=perkLine;
+  }
+  const fn=document.getElementById('rank-freeze-n');if(fn)fn.textContent=String(freezes);
+  const fl=document.getElementById('rank-fill');if(fl)fl.style.width=Math.max(3,pct)+'%';
+  /* Next-tier copy */
+  const nx=document.getElementById('rank-next');
+  if(nx){
+    if(next){
+      const remaining=Math.max(0,next.min-xp);
+      const nextPerk = next.freezes_pm>cur.freezes_pm
+        ? ({ru:`${next.freezes_pm} заморозок/мес`,en:`${next.freezes_pm} freezes/mo`,es:`${next.freezes_pm} congel./mes`,pt:`${next.freezes_pm} congel./mês`}[lang]||`${next.freezes_pm} freezes/mo`)
+        : '';
+      nx.textContent=({ru:`До ${next.r}: ${remaining} XP`,en:`Next: ${next.r} in ${remaining} XP`,es:`Próx.: ${next.r} en ${remaining} XP`,pt:`Próx.: ${next.r} em ${remaining} XP`}[lang]||`Next: ${next.r} in ${remaining} XP`) + (nextPerk?' · '+nextPerk:'');
+    } else {
+      nx.textContent={ru:'Максимальный ранг достигнут',en:'Maximum rank reached',es:'Rango máximo alcanzado',pt:'Rango máximo'}[lang]||'Maximum rank reached';
+    }
+  }
+  /* Freeze-use button: disabled when pool is empty or today is already
+     counted as a streak day. */
+  const btn=document.getElementById('rank-use-btn');
+  const lbl=document.getElementById('rank-use-btn-lbl');
+  const today=localDayKey();
+  const alreadyCounted=LS.get('streak_done_date')===today;
+  const disabled=freezes<=0||alreadyCounted;
+  if(btn){
+    btn.disabled=!!disabled;
+    btn.classList.toggle('disabled',!!disabled);
+  }
+  if(lbl){
+    lbl.textContent = alreadyCounted
+      ? ({ru:'Сегодня уже учтено',en:'Today already counts',es:'Hoy ya cuenta',pt:'Hoje já conta'}[lang]||'Today already counts')
+      : (freezes>0
+          ? ({ru:`Использовать заморозку (${freezes})`,en:`Use streak freeze (${freezes})`,es:`Usar congelación (${freezes})`,pt:`Usar congelamento (${freezes})`}[lang]||`Use streak freeze (${freezes})`)
+          : ({ru:'Заморозок нет · повысь ранг',en:'No freezes · rank up to earn',es:'Sin congelaciones · sube rango',pt:'Sem congelamentos · suba de posto'}[lang]||'No freezes · rank up to earn'));
+  }
+}
+
 /* ══ RENDER PROGRESS ══ */
 function renderProgress(d){
   const inf=rankOf(d.xp||0),tr=treeOf(d.xp||0);
@@ -3540,6 +3742,7 @@ function renderProgress(d){
   else{const e=document.getElementById('perrs');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
   document.getElementById('pbm').textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
   setTimeout(()=>document.getElementById('pbfi').style.width=pct+'%',350);
+  try{renderRankCard(d);}catch(_){}
   renderInterests(d.interests||[]);
   updateProfileUI(d);
 }
@@ -10952,10 +11155,23 @@ function addLocalXP(amount){
     const xpBar=document.querySelector('.xpf');
     const rank=rankOf(d.xp);
     if(xpBar)animateXPBar(xpBar,Math.min(100,((d.xp-rank.min)/(rank.max-rank.min))*100));
-    // Check for rank up → confetti
+    // Check for rank up → confetti + replenish streak freezes
     const oldRank=rankOf(oldXP);
     const newRank=rankOf(d.xp);
-    if(newRank.r!==oldRank.r){fireConfetti();toast(`Level up: ${newRank.r}!`,'🎉');try{sfx.level();}catch(e){}}
+    if(newRank.r!==oldRank.r){
+      fireConfetti();
+      try{sfx.level();}catch(e){}
+      /* Force the freeze pool to reflect the new tier's monthly cap.
+         The next read of getStreakFreezes() will pick it up. */
+      const cap=newRank.freezes_pm;
+      const have=parseInt(LS.get('sfreeze_count')||'0',10)||0;
+      if(cap>have)LS.set('sfreeze_count',String(cap));
+      const perkLine = cap>0
+        ? ({ru:`Перк: ${cap} заморозок стрика в месяц`,en:`Perk: ${cap} streak freezes / month`,es:`Beneficio: ${cap} congelaciones/mes`,pt:`Vantagem: ${cap} congelamentos/mês`}[lang]||`Perk: ${cap} streak freezes / month`)
+        : '';
+      toast(`${newRank.emoji} ${newRank.r}${perkLine?' · '+perkLine:''}`,'🎉');
+      try{renderRankCard(d);}catch(_){}
+    }
     else{try{sfx.xp();}catch(e){}}
   }catch(e){console.warn('addLocalXP',e);}
 }
