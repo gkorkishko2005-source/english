@@ -11965,5 +11965,17 @@ async function init(){
 }
 init();
 </script>
+<!-- Codex-illustrated growth tree art + weather overlays.
+     Loaded after the main bundle: the script registers
+     window.GROWTH_STAGES / window.WEATHER_OVERLAYS, and the next
+     call to renderGrowth() picks them up. ?v=mtime is added on the
+     fly in case Telegram WebView caches the asset bundle. -->
+<script src="data/growth_assets.js"></script>
+<script>
+/* Force a re-render of the Progress hero so the new SVG art shows
+   immediately on first paint instead of waiting for the next XP
+   change. */
+try{if(window._d&&typeof renderGrowth==='function')renderGrowth(window._d);}catch(_){}
+</script>
 </body>
 </html>
