@@ -898,33 +898,63 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .embtns{display:flex;flex-direction:column;gap:8px;max-width:230px;margin:0 auto}
 
 /* ══ PROGRESS ══ */
-.phdr{padding-top:3px;margin-bottom:16px}
-.ptit{font-size:21px;font-weight:800;margin-bottom:2px}
-.psub{color:var(--t2);font-size:13px}
-.rrow2{display:flex;align-items:center;gap:16px}
-.rsvg{width:80px;height:80px;flex-shrink:0}
-.rtrk{fill:none;stroke:var(--e3);stroke-width:8}
-.rfil{fill:none;stroke:url(#rg);stroke-width:8;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .2s}
-.rlbl{font-size:14px;font-weight:800;fill:var(--t1)}
-.lvnm{font-size:22px;font-weight:800;margin-bottom:2px}
-.lvrk{font-size:13px;color:var(--a);font-weight:600;margin-bottom:4px}
-.lvxp{font-size:12px;color:var(--t2)}
-.pbw{margin-top:10px}
-.pbl{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:4px}
-.pbtr{background:rgba(0,0,0,.3);border-radius:100px;height:5px;overflow:hidden}
-.pbfi{height:100%;border-radius:100px;background:var(--gb);box-shadow:0 0 10px rgba(var(--ar),.4);transition:width 1.3s cubic-bezier(.4,0,.2,1) .3s;position:relative;overflow:hidden}
-.pbfi::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);animation:xpshim 2.4s ease-in-out infinite;animation-delay:1.6s}
+.phdr{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:2px;margin-bottom:12px}
+.ptit{font-size:20px;font-weight:850;margin-bottom:2px;color:var(--t1)}
+.psub{color:var(--t2);font-size:12.5px;line-height:1.35}
+.progress-hero{padding:15px;margin-bottom:13px;border-color:rgba(var(--ar),.16);background:linear-gradient(145deg,rgba(var(--ar),.10),rgba(0,212,170,.055) 52%,var(--e1));box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 14px 30px rgba(0,0,0,.14)}
+.rrow2{display:flex;align-items:center;gap:14px}
+.rsvg{width:76px;height:76px;flex-shrink:0;filter:drop-shadow(0 10px 18px rgba(var(--ar),.14))}
+.rtrk{fill:none;stroke:var(--e3);stroke-width:7}
+.rfil{fill:none;stroke:url(#rg);stroke-width:7;stroke-linecap:round;stroke-dasharray:220;stroke-dashoffset:220;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1) .2s}
+.rlbl{font-size:13px;font-weight:850;fill:var(--t1)}
+.lvnm{font-size:19px;font-weight:850;margin-bottom:2px;color:var(--t1);line-height:1.15}
+.lvrk{display:inline-flex;align-items:center;max-width:100%;font-size:11.5px;color:var(--a);font-weight:750;margin-bottom:7px;padding:3px 8px;border-radius:100px;background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.14)}
+.lvxp{font-size:11.5px;color:var(--t2)}
+.pbw{margin-top:9px}
+.pbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--t2);margin-bottom:5px;font-weight:700}
+.pbtr{background:var(--e3);border-radius:100px;height:7px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.16)}
+.pbfi{height:100%;border-radius:100px;background:var(--gb);box-shadow:0 0 12px rgba(var(--ar),.24);transition:width 1.3s cubic-bezier(.4,0,.2,1) .3s;position:relative;overflow:hidden}
+.pbfi::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);transform:translateX(-100%);animation:xpshim 2.4s ease-in-out infinite;animation-delay:1.6s}
 @keyframes xpshim{0%{transform:translateX(-100%)}55%,100%{transform:translateX(220%)}}
 
-.s4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
-.s4c{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:15px;cursor:pointer;transition:.22s;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.s4c:active{transform:scale(.95);box-shadow:0 0 0 rgba(0,0,0,0)}
+.s4{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.s4c{--stat:var(--a);display:grid;grid-template-columns:38px 1fr;align-items:center;column-gap:10px;min-height:72px;background:var(--e1);border:1px solid var(--b1);border-radius:15px;padding:12px;cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.s4c:nth-child(1){--stat:var(--a)}.s4c:nth-child(2){--stat:var(--a2)}.s4c:nth-child(3){--stat:var(--gd)}.s4c:nth-child(4){--stat:var(--rd)}
+.s4c:active{transform:scale(.97);box-shadow:0 0 0 rgba(0,0,0,0)}
+.s4c:hover{border-color:rgba(var(--ar),.18);background:linear-gradient(145deg,rgba(var(--ar),.045),var(--e1))}
 .s4ca{display:none}
-.s4c::before{content:'';position:absolute;top:0;left:16px;right:16px;height:2px;border-radius:0 0 2px 2px;background:var(--gb);opacity:.3;transition:.2s}
-.s4c:active::before{opacity:.7}
-.s4ci{font-size:19px;margin-bottom:8px}
-.s4cv{font-size:25px;font-weight:800;line-height:1;margin-bottom:3px}
-.s4cl{font-size:11px;color:var(--t2)}
+.s4ci-svg{width:38px;height:38px;margin:0;border-radius:12px;background:rgba(var(--ar),.11);display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--ar),.18)}
+.s4c:nth-child(2) .s4ci-svg{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.18)}
+.s4c:nth-child(3) .s4ci-svg{background:rgba(255,184,48,.10);border-color:rgba(255,184,48,.18)}
+.s4c:nth-child(4) .s4ci-svg{background:rgba(255,107,107,.10);border-color:rgba(255,107,107,.18)}
+.s4ci-svg svg{width:22px;height:22px;stroke:var(--stat)!important}
+.s4cv{font-size:21px;font-weight:850;line-height:1.05;margin-bottom:3px;color:var(--t1)!important}
+.s4cl{font-size:10.5px;color:var(--t2);line-height:1.25}
+.premium-mask{font-size:11px!important;color:var(--a)!important}
+
+.chart-wrap{padding:14px 12px 12px;overflow:visible!important;background:var(--e1);box-shadow:0 2px 10px rgba(0,0,0,.07);perspective:520px;border-color:var(--b1)}
+.chart{display:flex;align-items:flex-end;gap:7px;height:110px;margin:1px 0 9px;overflow:visible;transform:rotateX(5deg);transform-origin:50% 100%}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;cursor:pointer;position:relative;transform-style:preserve-3d;padding-top:20px}
+.bc::after{content:'';width:78%;height:8px;border-radius:50%;background:rgba(0,0,0,.22);filter:blur(5px);transform:translateY(5px);opacity:.30}
+.bb{width:74%;border-radius:8px 8px 5px 5px;min-height:5px;background:linear-gradient(180deg,#79aaff 0%,var(--a) 58%,#2d67cf 100%);transition:height .85s cubic-bezier(.22,1,.36,1),opacity .2s,transform .2s;box-shadow:inset -5px 0 8px rgba(0,0,0,.14),inset 5px 0 8px rgba(255,255,255,.13),0 8px 18px rgba(var(--ar),.16);position:relative;transform:translateZ(8px)}
+.bb::before{content:'';position:absolute;left:9%;right:9%;top:0;height:7px;border-radius:50%;background:rgba(255,255,255,.34)}
+.bb:hover{opacity:.94;transform:translateZ(14px) translateY(-2px)}
+.bb.td{background:linear-gradient(180deg,#66f0cf 0%,var(--a2) 58%,#079b86 100%);box-shadow:inset -5px 0 8px rgba(0,0,0,.14),inset 5px 0 8px rgba(255,255,255,.14),0 9px 19px rgba(0,212,170,.19)}
+.bb.zero{background:linear-gradient(180deg,var(--e3),rgba(255,255,255,.035));min-height:5px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 10px rgba(0,0,0,.10)}
+.bbv{position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:800;color:var(--t2);white-space:nowrap;opacity:.86;pointer-events:none}
+.bd{flex:1;text-align:center;font-size:10px;color:var(--t3);font-weight:700}.bd.td{color:var(--a2);font-weight:850}
+.chartdays{display:flex;gap:5px}
+.chart-tooltip{position:absolute;background:var(--e2);border:1px solid var(--b2);border-radius:9px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--t1);pointer-events:none;transform:translate(-50%,-2px);white-space:nowrap;z-index:40;opacity:0;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.chart-tooltip.show{opacity:1;transform:translate(-50%,-8px)}
+.chart-empty{position:absolute;left:14px;right:14px;top:38px;text-align:center;color:var(--t3);font-size:12px;font-weight:700;pointer-events:none}
+.toefl-card{padding:12px 14px}
+.toefl-empty{text-align:center;color:var(--t2);font-size:12.5px;padding:8px 0;line-height:1.4}
+.toefl-row{display:grid;grid-template-columns:minmax(70px,1fr) 1.6fr 38px;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--b1);animation:pg .3s ease both}
+.toefl-row:last-child{border-bottom:0}
+.toefl-name{font-size:12.5px;color:var(--t1);font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toefl-track{background:var(--e3);border-radius:100px;height:5px;overflow:hidden}
+.toefl-fill{height:100%;background:var(--gb);border-radius:100px;transition:width 1.2s ease}
+.toefl-score{font-size:10.5px;color:var(--t2);text-align:right;font-weight:800}
 
 
 /* ══ SETTINGS ══ */
@@ -2051,7 +2081,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- PROGRESS -->
 <div class="screen" id="s-progress">
   <div class="phdr"><div class="ptit" id="p-tit"></div><div class="psub" id="p-sub"></div></div>
-  <div class="card">
+  <div class="card progress-hero">
     <div class="rrow2">
       <svg class="rsvg" viewBox="0 0 80 80">
         <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--a)"/><stop offset="100%" stop-color="var(--a2)"/></linearGradient></defs>
@@ -2089,13 +2119,13 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
   </div>
   <div class="sec"><span id="tw-lbl"></span></div>
-  <div class="card chart-wrap" style="position:relative">
+  <div class="card chart-wrap">
     <div class="chart" id="chart"></div>
-    <div style="display:flex;gap:5px" id="chartdays"></div>
+    <div class="chartdays" id="chartdays"></div>
     <div class="chart-tooltip" id="chart-tooltip"></div>
   </div>
   <div class="sec"><span>TOEFL</span></div>
-  <div class="card"><div id="toefll" style="text-align:center;color:var(--t2);font-size:13px;padding:8px 0"></div></div>
+  <div class="card toefl-card"><div id="toefll" class="toefl-empty"></div></div>
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
@@ -3448,9 +3478,21 @@ function drawProgress(){
   const tip=document.getElementById('chart-tooltip');
   if(!cEl||!dEl)return;
   cEl.innerHTML='';dEl.innerHTML='';
+  const chartCard=cEl.parentElement;
+  chartCard?.querySelector('.chart-empty')?.remove();
+  if(w.reduce((a,b)=>a+b,0)===0&&chartCard){
+    const empty=document.createElement('div');
+    empty.className='chart-empty';
+    empty.textContent=lang==='ru'?'Первые XP этой недели появятся здесь':'This week’s first XP will appear here';
+    chartCard.appendChild(empty);
+  }
   w.forEach((v,i)=>{
     const bc=document.createElement('div');bc.className='bc';
     const isToday=i===today;
+    const bv=document.createElement('div');
+    bv.className='bbv';
+    bv.textContent=v>0?`${v} XP`:'';
+    bc.appendChild(bv);
     const bb=document.createElement('div');
     bb.className='bb'+(isToday?' td':'')+(v===0?' zero':'');
     bb.style.height='0';
@@ -3470,13 +3512,13 @@ function drawProgress(){
       };
     }
     setTimeout(()=>bb.style.height=(v/mx*86)+'px',70+i*45);
-    const dl=document.createElement('div');dl.style.cssText='flex:1;text-align:center';
+    const dl=document.createElement('div');
     dl.className='bd'+(isToday?' td':'');dl.textContent=days[i];dEl.appendChild(dl);
   });
   // TOEFL
   const sc=d.toefl_scores||[],tl=document.getElementById('toefll');
-  if(tl){if(sc.length)tl.innerHTML=sc.map((s,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--b1);animation:pg .3s ease ${i*.07}s both"><span style="flex:1;font-size:13px">${s.section}</span><div style="flex:2;background:var(--e3);border-radius:100px;height:4px;overflow:hidden"><div style="height:100%;background:var(--a);width:${s.score/s.max*100}%;border-radius:100px;transition:width 1.2s ease"></div></div><span style="font-size:11px;color:var(--t2);width:28px;text-align:right">${s.score}/${s.max}</span></div>`).join('');
-  else tl.textContent=L.notoefl;}
+  if(tl){if(sc.length){tl.className='';tl.innerHTML=sc.map((s,i)=>`<div class="toefl-row" style="animation-delay:${i*.07}s"><span class="toefl-name">${safeHTML(s.section)}</span><div class="toefl-track"><div class="toefl-fill" style="width:${Math.max(0,Math.min(100,s.score/s.max*100))}%"></div></div><span class="toefl-score">${s.score}/${s.max}</span></div>`).join('');}
+  else{tl.className='toefl-empty';tl.textContent=L.notoefl;}}
 }
 
 function alexLockedCard(title,sub,feature){
