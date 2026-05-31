@@ -1863,24 +1863,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 #s-progress .ptit{font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--t1);margin-bottom:2px}
 #s-progress .psub{font-size:12px;color:var(--t3);line-height:1.4;font-weight:500}
 
-/* Hero card with the XP ring — strip gradients and animation */
-#s-progress .progress-hero{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;padding:16px;border-radius:14px;margin-bottom:14px}
-#s-progress .progress-hero::before,
-#s-progress .progress-hero::after{display:none!important}
-#s-progress .rrow2{gap:16px}
-#s-progress .rsvg{width:72px;height:72px;filter:none!important;animation:none!important}
-#s-progress .rtrk{stroke:var(--b1);stroke-width:5;fill:none}
-#s-progress .rfil{stroke:var(--a);stroke-width:5;fill:none}
-#s-progress .rlbl{fill:var(--t1);font-size:18px;font-weight:800}
-#s-progress .lvnm{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.2px}
-#s-progress .lvrk{font-size:12px;color:var(--t3);font-weight:600;margin-top:2px}
-#s-progress .lvxp{font-size:11px;color:var(--t3);margin-top:1px;font-variant-numeric:tabular-nums}
-#s-progress .pbw{margin-top:10px}
-#s-progress .pbl{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);
-  font-weight:700;margin-bottom:4px;font-variant-numeric:tabular-nums}
-#s-progress .pbtr{height:3px;background:var(--e3);border-radius:100px;overflow:hidden}
-#s-progress .pbfi{height:100%;background:var(--a);border-radius:100px;transition:width .8s ease}
+/* The XP ring hero was replaced by the growth-hero card (see below). */
 
 /* Section headers — same uppercase tracker letter as Settings */
 #s-progress .sec{font-size:10.5px!important;font-weight:700!important;text-transform:uppercase;
@@ -1952,37 +1935,31 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 #s-progress .chart-empty{text-align:center;font-size:11.5px;color:var(--t3);padding:6px 0 2px;
   font-weight:500}
 
-/* ── Rank card · streak-freeze perks ──────────────────────────────
-   Same minimal grammar as the rest of the Progress tab: transparent
-   background, hairline border, the accent colour only on the
-   progress bar and on the freeze chip.                              */
-.rank-card{background:transparent;border:1px solid var(--b1);border-radius:12px;padding:14px;
-  margin-bottom:6px;display:flex;flex-direction:column;gap:10px}
-.rank-row{display:flex;align-items:center;gap:12px}
-.rank-emoji{font-size:24px;line-height:1;flex-shrink:0;width:38px;height:38px;
-  border-radius:10px;background:var(--e2);border:1px solid var(--b1);
-  display:flex;align-items:center;justify-content:center}
-.rank-main{flex:1;min-width:0}
-.rank-title{font-size:14px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-sub{font-size:11.5px;color:var(--t3);margin-top:2px;line-height:1.4;font-weight:500}
-.rank-freeze{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:100px;
-  background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.25);color:var(--a);
-  font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums;flex-shrink:0}
-.rank-freeze svg{width:13px;height:13px}
-.rank-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden}
-.rank-fill{height:100%;background:var(--a);border-radius:100px;
-  transition:width .8s cubic-bezier(.22,1,.36,1)}
-.rank-meta{font-size:11px;color:var(--t3);font-weight:600;font-variant-numeric:tabular-nums;
-  letter-spacing:.2px}
-.rank-use-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
-  padding:11px;border-radius:10px;border:1px solid rgba(var(--ar),.30);
-  background:rgba(var(--ar),.06);color:var(--a);font-size:12.5px;font-weight:700;
-  cursor:pointer;font-family:var(--f);transition:background .15s,border-color .15s}
-.rank-use-btn:active{background:rgba(var(--ar),.14)}
-.rank-use-btn svg{width:14px;height:14px}
-.rank-use-btn.disabled{background:var(--e2);border-color:var(--b1);color:var(--t3);
-  cursor:default;pointer-events:none}
+/* ── Growth hero — the learner's tree ─────────────────────────────
+   The visual centre of the Progress screen. We give the SVG real
+   room to breathe (the whole point is that the learner can see
+   the tree growing), but everything else around it stays
+   restrained — small type, a single hairline divider, the accent
+   colour reserved for the progress bar and the SVG's blossoms. */
+.growth-hero{background:transparent;border:1px solid var(--b1);border-radius:14px;
+  padding:18px 16px 14px;margin-bottom:14px;display:flex;flex-direction:column;
+  align-items:stretch;gap:12px}
+.growth-svg{display:flex;align-items:flex-end;justify-content:center;
+  width:100%;height:200px;color:var(--t1)}
+.growth-svg svg{width:auto;height:100%;max-width:80%}
+.growth-meta{text-align:center;margin-top:-4px}
+.growth-title{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
+  margin-bottom:2px}
+.growth-sub{font-size:11.5px;color:var(--t3);font-weight:600;letter-spacing:.3px;
+  text-transform:uppercase}
+.growth-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden;
+  margin:0 4px}
+.growth-fill{height:100%;background:var(--a);border-radius:100px;
+  transition:width .9s cubic-bezier(.22,1,.36,1)}
+.growth-foot{display:flex;justify-content:space-between;align-items:baseline;
+  font-size:11px;color:var(--t3);font-weight:600;padding:0 4px;
+  font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.growth-foot span:first-child{color:var(--t1);font-weight:700;font-size:12px}
 
 /* TOEFL card — flat */
 #s-progress .toefl-card{background:transparent!important;border:1px solid var(--b1)!important;
@@ -2241,40 +2218,21 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- PROGRESS -->
 <div class="screen" id="s-progress">
   <div class="phdr"><div class="ptit" id="p-tit"></div><div class="psub" id="p-sub"></div></div>
-  <div class="card progress-hero">
-    <div class="rrow2">
-      <svg class="rsvg" viewBox="0 0 80 80">
-        <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--a)"/><stop offset="100%" stop-color="var(--a2)"/></linearGradient></defs>
-        <circle class="rtrk" cx="40" cy="40" r="33"/>
-        <circle class="rfil" id="rfil" cx="40" cy="40" r="33"/>
-        <text class="rlbl" x="40" y="45" text-anchor="middle" id="rlvtxt">B1</text>
-      </svg>
-      <div style="flex:1">
-        <div class="lvnm" id="plv">—</div><div class="lvrk" id="prk">—</div><div class="lvxp" id="pxp">—</div>
-        <div class="pbw"><div class="pbl"><span id="pbc">0 XP</span><span id="pbm">—</span></div><div class="pbtr"><div class="pbfi" id="pbfi" style="width:0"></div></div></div>
-      </div>
+  <!-- Growth hero: the learner's tree at the current stage.
+       The SVG itself is rendered by renderGrowth(d) — 8 botanical
+       stages from sprout to grand tree. Level chip + CEFR + XP
+       progress sit below as quiet metadata. -->
+  <div class="growth-hero" id="growth-hero">
+    <div class="growth-svg" id="growth-svg"></div>
+    <div class="growth-meta">
+      <div class="growth-title" id="growth-title">—</div>
+      <div class="growth-sub" id="growth-sub">—</div>
     </div>
-  </div>
-  <!-- Rank card · streak-freeze perks tied to the rank ladder -->
-  <div class="sec"><span id="rank-sec-lbl">Rank</span></div>
-  <div class="rank-card" id="rank-card">
-    <div class="rank-row">
-      <div class="rank-emoji" id="rank-emoji">🌱</div>
-      <div class="rank-main">
-        <div class="rank-title" id="rank-title">—</div>
-        <div class="rank-sub" id="rank-sub">—</div>
-      </div>
-      <div class="rank-freeze" id="rank-freeze">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10"/></svg>
-        <span id="rank-freeze-n">0</span>
-      </div>
+    <div class="growth-progress"><div class="growth-fill" id="growth-fill" style="width:0%"></div></div>
+    <div class="growth-foot">
+      <span id="growth-xp">0 XP</span>
+      <span id="growth-next">—</span>
     </div>
-    <div class="rank-progress"><div class="rank-fill" id="rank-fill" style="width:0%"></div></div>
-    <div class="rank-meta"><span id="rank-next">—</span></div>
-    <button class="rank-use-btn" id="rank-use-btn" onclick="useStreakFreezeForToday()" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10"/></svg>
-      <span id="rank-use-btn-lbl">Use a streak freeze</span>
-    </button>
   </div>
   <div class="sec"><span id="stat-lbl"></span></div>
   <div class="s4">
@@ -3307,95 +3265,24 @@ function getTreeSvg(xp){
 }
 
 const TREES=[{min:0,t:'🌱'},{min:100,t:'🌿'},{min:300,t:'🌳'},{min:600,t:'🌲'},{min:1000,t:'🍀'},{min:1500,t:'🌟'},{min:2500,t:'💫'},{min:4000,t:'🏆'}];
-/* Eight ranks. Each tier grants a concrete monthly Streak Freeze
-   budget — small enough not to make missing days routine, large
-   enough to make ranking up feel earned. The Master tier carries
-   the highest practical refill (10) — effectively limit-removed for
-   anyone actually engaged daily. `freezes_pm` = freezes per month. */
+/* Eight growth stages. Each is a quiet, considered transformation
+   of the learner's tree — sprout → young plant → bud → bloom →
+   bush → sapling → tree → grand tree. The XP thresholds match the
+   old rank ladder so existing progress carries over unchanged. */
 const RANKS=[
-  {r:'Seedling',     min:0,    max:100,  emoji:'🌱', freezes_pm:0},
-  {r:'Beginner',     min:100,  max:300,  emoji:'🌿', freezes_pm:1},
-  {r:'Elementary',   min:300,  max:600,  emoji:'🌳', freezes_pm:2},
-  {r:'Pre-Inter.',   min:600,  max:1000, emoji:'🌲', freezes_pm:3},
-  {r:'Intermediate', min:1000, max:1500, emoji:'🍀', freezes_pm:4},
-  {r:'Upper-Inter.', min:1500, max:2500, emoji:'🌟', freezes_pm:5},
-  {r:'Advanced',     min:2500, max:4000, emoji:'💫', freezes_pm:6},
-  {r:'Master',       min:4000, max:9999, emoji:'🏆', freezes_pm:10},
+  {r:'Seedling',     min:0,    max:100,  emoji:'🌱', stage:1},
+  {r:'Sprout',       min:100,  max:300,  emoji:'🌿', stage:2},
+  {r:'Bud',          min:300,  max:600,  emoji:'🌱', stage:3},
+  {r:'Bloom',        min:600,  max:1000, emoji:'🌸', stage:4},
+  {r:'Bush',         min:1000, max:1500, emoji:'🍃', stage:5},
+  {r:'Sapling',      min:1500, max:2500, emoji:'🌳', stage:6},
+  {r:'Tree',         min:2500, max:4000, emoji:'🌲', stage:7},
+  {r:'Grand Tree',   min:4000, max:9999, emoji:'🌳', stage:8},
 ];
 function treeOf(xp){return[...TREES].reverse().find(t=>xp>=t.min)||TREES[0];}
 function rankOf(xp){return RANKS.find((_,i)=>xp<(RANKS[i+1]?.min??9999))||RANKS[RANKS.length-1];}
 function rankIndex(xp){
-  /* Returns the 0-based tier index — used for milestone celebrations
-     so we know which tier was just crossed. */
   const r=rankOf(xp);return RANKS.findIndex(x=>x.r===r.r);
-}
-
-/* ══ STREAK FREEZE ECONOMY ════════════════════════════════════════
-   A user gets a monthly budget of freeze tokens determined by their
-   rank. Tokens are stored in localStorage (and synced to the server
-   alongside other XP/streak state). Refill is lazy: every time we
-   read the count we check whether the calendar month has changed and
-   top up to the current rank's `freezes_pm` if so. This guarantees
-   that the perk is delivered without requiring a daily background
-   job, while also preventing players from hoarding tokens across
-   months (the refill is a SET, not an ADD).
-*/
-function _currentMonthKey(){
-  const d=new Date();return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
-}
-function getStreakFreezes(){
-  /* Lazily refill at the start of each month based on current rank. */
-  const stored=LS.get('sfreeze_month');
-  const cur=_currentMonthKey();
-  const xp=(window._d&&window._d.xp)||loadXP()||0;
-  const cap=rankOf(xp).freezes_pm;
-  if(stored!==cur){
-    LS.set('sfreeze_month',cur);
-    LS.set('sfreeze_count',String(cap));
-    return cap;
-  }
-  /* Honour a rank-up mid-month — the count can only ever increase via
-     this path, never decrease. */
-  const have=parseInt(LS.get('sfreeze_count')||'0',10)||0;
-  if(have<cap){LS.set('sfreeze_count',String(cap));return cap;}
-  return have;
-}
-function consumeStreakFreeze(){
-  /* Spend one token. Returns true on success, false if pool empty.
-     Caller is responsible for actually preserving the streak (we
-     just decrement and log). */
-  const have=getStreakFreezes();
-  if(have<=0)return false;
-  LS.set('sfreeze_count',String(have-1));
-  return true;
-}
-function useStreakFreezeForToday(){
-  /* User-facing: tap "use a freeze" to mark today as a streak day
-     without having completed any missions. Safe-by-design: it just
-     fast-forwards the streak_done_date marker the same way completing
-     two missions would. */
-  const today=localDayKey();
-  if(LS.get('streak_done_date')===today){
-    toast({ru:'Сегодня уже учтено',en:'Today is already counted',es:'Hoy ya cuenta',pt:'Hoje já conta'}[lang]||'Today is already counted','🔥');
-    return false;
-  }
-  if(!consumeStreakFreeze()){
-    toast({ru:'Заморозки закончились',en:'No freezes left',es:'Sin congelaciones',pt:'Sem congelamentos'}[lang]||'No freezes left','❄️');
-    return false;
-  }
-  /* Apply the same forward-step that completeDailyStreak() does. */
-  const prev=LS.get('streak_done_date');
-  if(!window._d)window._d={streak:0,xp:0};
-  const base=Number(window._d.streak||0);
-  window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
-  LS.set('streak_done_date',today);
-  LS.set('local_streak',String(window._d.streak));
-  try{renderHome(window._d);}catch(_){}
-  try{renderRankCard(window._d);}catch(_){}
-  try{syncToServer();}catch(_){}
-  toast({ru:'Стрик спасён! ❄️',en:'Streak saved! ❄️',es:'¡Racha salvada!',pt:'Sequência salva!'}[lang]||'Streak saved! ❄️','❄️');
-  try{sfx.win();}catch(_){}
-  return true;
 }
 
 /* ══ NAV ══ */
@@ -3663,65 +3550,213 @@ function continueLessonTap(){
   setTimeout(()=>{try{openCourseLesson(id);}catch(_){}},120);
 }
 
-/* ══ RENDER RANK CARD ═════════════════════════════════════════════
-   Builds the per-tier card on the Progress screen. Shows the current
-   rank, the next milestone (XP delta + perk it unlocks) and the
-   available streak-freeze pool with a single-tap CTA to spend one
-   when the user is about to miss a streak day. */
-function renderRankCard(d){
-  const card=document.getElementById('rank-card');
-  if(!card)return;
+/* ══ GROWTH VISUALISATION ═════════════════════════════════════════
+   The learner's progress is a tree that grows through eight quiet
+   botanical stages, from sprout to grand tree. The SVGs below share
+   a common visual grammar: viewBox 0 0 200 220, soil baseline at
+   y=200, monochrome 1.6-px strokes on var(--t1), accent (var(--a))
+   reserved for blossoms and fruit. They are intentionally restrained
+   — the point is that the visual rewards genuine progress, not that
+   it pretends to. */
+const GROWTH_STAGES = [
+  /* 1 · Seedling — a single curl through fresh soil. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <circle cx="78" cy="206" r="1.2" fill="currentColor" stroke="none" opacity=".4"/>
+     <circle cx="118" cy="207" r="1.2" fill="currentColor" stroke="none" opacity=".4"/>
+     <path d="M100 200 Q100 192 100 184"/>
+     <path d="M100 186 Q92 184 88 188"/>
+     <path d="M100 186 Q108 184 112 188"/>
+   </svg>`,
+
+  /* 2 · Sprout — taller stem, two pairs of small leaves. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <circle cx="74" cy="206" r="1.2" fill="currentColor" stroke="none" opacity=".4"/>
+     <circle cx="122" cy="207" r="1.2" fill="currentColor" stroke="none" opacity=".4"/>
+     <path d="M100 200 Q100 178 100 156"/>
+     <path d="M100 184 Q88 178 80 184"/>
+     <path d="M100 184 Q112 178 120 184"/>
+     <path d="M100 164 Q90 158 84 166"/>
+     <path d="M100 164 Q110 158 116 166"/>
+   </svg>`,
+
+  /* 3 · Bud — slim trunk with a closed bud at the top. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <path d="M100 200 Q100 175 100 140"/>
+     <path d="M100 180 Q86 172 78 180"/>
+     <path d="M100 180 Q114 172 122 180"/>
+     <path d="M100 160 Q86 152 80 162"/>
+     <path d="M100 160 Q114 152 120 162"/>
+     <path d="M93 140 Q100 128 107 140 Q100 144 93 140 Z"/>
+     <path d="M93 140 Q100 132 107 140"/>
+   </svg>`,
+
+  /* 4 · Bloom — opens into a flower in the accent colour. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <path d="M100 200 Q100 175 100 138"/>
+     <path d="M100 180 Q84 172 76 182"/>
+     <path d="M100 180 Q116 172 124 182"/>
+     <path d="M100 160 Q86 152 80 162"/>
+     <path d="M100 160 Q114 152 120 162"/>
+     <g stroke="var(--a)" stroke-width="1.6">
+       <ellipse cx="100" cy="120" rx="6" ry="9"/>
+       <ellipse cx="100" cy="120" rx="6" ry="9" transform="rotate(72 100 120)"/>
+       <ellipse cx="100" cy="120" rx="6" ry="9" transform="rotate(144 100 120)"/>
+       <ellipse cx="100" cy="120" rx="6" ry="9" transform="rotate(216 100 120)"/>
+       <ellipse cx="100" cy="120" rx="6" ry="9" transform="rotate(288 100 120)"/>
+       <circle cx="100" cy="120" r="2.4" fill="var(--a)" stroke="none"/>
+     </g>
+   </svg>`,
+
+  /* 5 · Bush — multiple branching stems with a soft canopy outline. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <path d="M100 200 Q98 175 96 150"/>
+     <path d="M100 200 Q102 175 104 150"/>
+     <path d="M100 200 Q92 178 84 162"/>
+     <path d="M100 200 Q108 178 116 162"/>
+     <path d="M100 200 Q86 170 70 150"/>
+     <path d="M100 200 Q114 170 130 150"/>
+     <path d="M60 142 Q70 110 100 102 Q130 110 140 142" stroke-opacity=".85"/>
+     <path d="M75 138 Q90 122 100 118"/>
+     <path d="M125 138 Q110 122 100 118"/>
+     <circle cx="92" cy="118" r="2" fill="var(--a)" stroke="none" opacity=".7"/>
+     <circle cx="108" cy="120" r="2" fill="var(--a)" stroke="none" opacity=".7"/>
+   </svg>`,
+
+  /* 6 · Sapling — clear trunk with a rounded canopy. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <path d="M82 200 Q90 192 92 180"/>
+     <path d="M118 200 Q110 192 108 180"/>
+     <path d="M95 200 L95 130"/>
+     <path d="M105 200 L105 130"/>
+     <path d="M100 150 L78 134"/>
+     <path d="M100 145 L122 130"/>
+     <path d="M55 110 Q60 78 100 70 Q140 78 145 110 Q140 132 100 138 Q60 132 55 110 Z" stroke-opacity=".85"/>
+     <path d="M76 102 Q86 88 100 86"/>
+     <path d="M124 102 Q114 88 100 86"/>
+     <circle cx="88" cy="92" r="2" fill="var(--a)" stroke="none" opacity=".7"/>
+     <circle cx="112" cy="96" r="2" fill="var(--a)" stroke="none" opacity=".7"/>
+     <circle cx="100" cy="84" r="2" fill="var(--a)" stroke="none" opacity=".7"/>
+   </svg>`,
+
+  /* 7 · Tree — fuller canopy, visible roots, first fruit. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M30 200 Q100 196 170 200" stroke-opacity=".55"/>
+     <path d="M65 204 Q80 196 90 188" stroke-opacity=".55"/>
+     <path d="M135 204 Q120 196 110 188" stroke-opacity=".55"/>
+     <path d="M88 200 L88 120"/>
+     <path d="M112 200 L112 120"/>
+     <path d="M100 158 L72 138"/>
+     <path d="M100 152 L130 130"/>
+     <path d="M100 138 L82 118"/>
+     <path d="M100 132 L120 110"/>
+     <path d="M42 96 Q48 56 100 46 Q152 56 158 96 Q152 128 100 134 Q48 128 42 96 Z" stroke-opacity=".85"/>
+     <path d="M68 84 Q80 70 100 66"/>
+     <path d="M132 84 Q120 70 100 66"/>
+     <path d="M64 102 Q80 116 100 116"/>
+     <path d="M136 102 Q120 116 100 116"/>
+     <circle cx="84" cy="72" r="2.4" fill="var(--a)" stroke="none"/>
+     <circle cx="116" cy="78" r="2.4" fill="var(--a)" stroke="none"/>
+     <circle cx="100" cy="58" r="2.4" fill="var(--a)" stroke="none"/>
+     <circle cx="74" cy="108" r="2.4" fill="var(--a)" stroke="none"/>
+     <circle cx="126" cy="108" r="2.4" fill="var(--a)" stroke="none"/>
+   </svg>`,
+
+  /* 8 · Grand Tree — a wide canopy, prominent roots, a constellation
+       of small stars above. The final form. */
+  `<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+     <path d="M16 200 Q100 195 184 200" stroke-opacity=".55"/>
+     <path d="M55 204 Q72 198 84 188" stroke-opacity=".55"/>
+     <path d="M145 204 Q128 198 116 188" stroke-opacity=".55"/>
+     <path d="M70 208 Q78 202 86 198" stroke-opacity=".4"/>
+     <path d="M130 208 Q122 202 114 198" stroke-opacity=".4"/>
+     <path d="M84 200 L84 110"/>
+     <path d="M116 200 L116 110"/>
+     <path d="M100 160 Q88 168 84 180" stroke-opacity=".5"/>
+     <path d="M100 160 Q112 168 116 180" stroke-opacity=".5"/>
+     <path d="M100 148 L66 124"/>
+     <path d="M100 142 L136 116"/>
+     <path d="M100 124 L78 104"/>
+     <path d="M100 118 L122 96"/>
+     <path d="M30 80 Q38 38 100 26 Q162 38 170 80 Q172 118 100 124 Q28 118 30 80 Z" stroke-opacity=".9"/>
+     <path d="M58 64 Q76 48 100 44"/>
+     <path d="M142 64 Q124 48 100 44"/>
+     <path d="M54 92 Q76 106 100 108"/>
+     <path d="M146 92 Q124 106 100 108"/>
+     <circle cx="80" cy="56" r="2.6" fill="var(--a)" stroke="none"/>
+     <circle cx="120" cy="60" r="2.6" fill="var(--a)" stroke="none"/>
+     <circle cx="100" cy="40" r="2.6" fill="var(--a)" stroke="none"/>
+     <circle cx="68" cy="98" r="2.6" fill="var(--a)" stroke="none"/>
+     <circle cx="132" cy="98" r="2.6" fill="var(--a)" stroke="none"/>
+     <circle cx="96" cy="98" r="2.6" fill="var(--a)" stroke="none"/>
+     <g stroke="var(--a)" stroke-width="1.4" opacity=".9">
+       <path d="M44 22 L44 30 M40 26 L48 26"/>
+       <path d="M158 26 L158 32 M155 29 L161 29"/>
+       <path d="M100 12 L100 18 M97 15 L103 15"/>
+     </g>
+   </svg>`,
+];
+
+function _growthCopy(){
+  return {
+    /* Translated stage names. Keys mirror the RANKS list. */
+    Seedling:    {ru:'Семечко',en:'Seedling',es:'Semilla',de:'Samen',fr:'Graine',pt:'Semente',uk:'Насінина',tr:'Tohum',zh:'幼苗',ar:'بذرة'},
+    Sprout:      {ru:'Росток',en:'Sprout',es:'Brote',de:'Spross',fr:'Pousse',pt:'Broto',uk:'Паросток',tr:'Filiz',zh:'萌芽',ar:'برعم'},
+    Bud:         {ru:'Бутон',en:'Bud',es:'Capullo',de:'Knospe',fr:'Bouton',pt:'Botão',uk:'Бутон',tr:'Tomurcuk',zh:'花蕾',ar:'برعم زهري'},
+    Bloom:       {ru:'Цветок',en:'Bloom',es:'Flor',de:'Blüte',fr:'Fleur',pt:'Flor',uk:'Квітка',tr:'Çiçek',zh:'花',ar:'زهرة'},
+    Bush:        {ru:'Куст',en:'Bush',es:'Arbusto',de:'Strauch',fr:'Buisson',pt:'Arbusto',uk:'Кущ',tr:'Çalı',zh:'灌木',ar:'شجيرة'},
+    Sapling:     {ru:'Деревце',en:'Sapling',es:'Árbol joven',de:'Setzling',fr:'Jeune arbre',pt:'Árvore jovem',uk:'Деревце',tr:'Fidan',zh:'小树',ar:'شتلة'},
+    Tree:        {ru:'Дерево',en:'Tree',es:'Árbol',de:'Baum',fr:'Arbre',pt:'Árvore',uk:'Дерево',tr:'Ağaç',zh:'树',ar:'شجرة'},
+    'Grand Tree':{ru:'Великое дерево',en:'Grand Tree',es:'Gran árbol',de:'Mächtiger Baum',fr:'Grand arbre',pt:'Árvore majestosa',uk:'Велике дерево',tr:'Görkemli ağaç',zh:'参天大树',ar:'الشجرة العظيمة'},
+    next:{ru:'До следующей стадии',en:'To next stage',es:'A la próxima etapa',de:'Bis zur nächsten Stufe',fr:'Vers la prochaine étape',pt:'Até a próxima fase',uk:'До наступної стадії',tr:'Sonraki aşamaya',zh:'到下一阶段',ar:'إلى المرحلة التالية'}[lang]||'To next stage',
+    max:{ru:'Дерево полностью выросло',en:'The tree is fully grown',es:'El árbol está completamente crecido',pt:'A árvore cresceu por completo'}[lang]||'The tree is fully grown'
+  };
+}
+
+function renderGrowth(d){
+  const host=document.getElementById('growth-hero');
+  if(!host)return;
   const xp=(d&&d.xp)||0;
   const cur=rankOf(xp);
   const idx=rankIndex(xp);
   const next=RANKS[idx+1]||null;
-  const pct=Math.max(0,Math.min(100,Math.round(((xp-cur.min)/(cur.max-cur.min))*100)));
-  const freezes=getStreakFreezes();
-  /* Section header copy */
-  const sec=document.getElementById('rank-sec-lbl');
-  if(sec)sec.textContent={ru:'Ранг',en:'Rank',es:'Rango',de:'Rang',fr:'Rang',pt:'Posto',uk:'Ранг',tr:'Rütbe',zh:'等级',ar:'الرتبة'}[lang]||'Rank';
-  /* Visible state */
-  const em=document.getElementById('rank-emoji');if(em)em.textContent=cur.emoji||'🌱';
-  const t=document.getElementById('rank-title');if(t)t.textContent=cur.r;
-  const sub=document.getElementById('rank-sub');
+  const stage=Math.max(1,Math.min(8,cur.stage||1));
+  /* The SVG slot. */
+  const svgHost=document.getElementById('growth-svg');
+  if(svgHost) svgHost.innerHTML = GROWTH_STAGES[stage-1] || GROWTH_STAGES[0];
+  const c=_growthCopy();
+  const localName = (c[cur.r] && (c[cur.r][lang] || c[cur.r].en)) || cur.r;
+  const title=document.getElementById('growth-title');
+  if(title)title.textContent=`${cur.emoji} ${localName}`;
+  /* Subtitle: CEFR level + stage index. */
+  const sub=document.getElementById('growth-sub');
   if(sub){
-    const perkLine = cur.freezes_pm>0
-      ? ({ru:`${cur.freezes_pm} заморозок стрика в месяц`,en:`${cur.freezes_pm} streak freezes / month`,es:`${cur.freezes_pm} congelaciones/mes`,de:`${cur.freezes_pm} Streak-Stops / Monat`,fr:`${cur.freezes_pm} gels / mois`,pt:`${cur.freezes_pm} congelamentos / mês`,uk:`${cur.freezes_pm} заморозок / міс`,tr:`${cur.freezes_pm} dondurma / ay`,zh:`${cur.freezes_pm} 次连胜冻结 / 月`,ar:`${cur.freezes_pm} تجميد / الشهر`}[lang]||`${cur.freezes_pm} streak freezes / month`)
-      : ({ru:'Базовый ранг — перки откроются дальше',en:'Base rank — perks unlock from the next tier'}[lang]||'Base rank — perks unlock from the next tier');
-    sub.textContent=perkLine;
+    const cefr=(d&&d.level)||LS.get('ob_level')||'';
+    sub.textContent = cefr
+      ? `${cefr} · ${({ru:'стадия',en:'stage',es:'etapa',de:'Stufe',fr:'étape',pt:'etapa',uk:'стадія',tr:'aşama',zh:'阶段',ar:'مرحلة'}[lang]||'stage')} ${stage}/8`
+      : `${({ru:'Стадия',en:'Stage'}[lang]||'Stage')} ${stage}/8`;
   }
-  const fn=document.getElementById('rank-freeze-n');if(fn)fn.textContent=String(freezes);
-  const fl=document.getElementById('rank-fill');if(fl)fl.style.width=Math.max(3,pct)+'%';
-  /* Next-tier copy */
-  const nx=document.getElementById('rank-next');
-  if(nx){
+  /* Progress fill within current stage. */
+  const pct=Math.max(0,Math.min(100,Math.round(((xp-cur.min)/(cur.max-cur.min))*100)));
+  const fill=document.getElementById('growth-fill');
+  if(fill)fill.style.width=Math.max(3,pct)+'%';
+  /* Footer line — current XP + to-next. */
+  const xpEl=document.getElementById('growth-xp');
+  if(xpEl)xpEl.textContent=`${xp.toLocaleString(lang==='ru'?'ru-RU':'en-US')} XP`;
+  const nxEl=document.getElementById('growth-next');
+  if(nxEl){
     if(next){
       const remaining=Math.max(0,next.min-xp);
-      const nextPerk = next.freezes_pm>cur.freezes_pm
-        ? ({ru:`${next.freezes_pm} заморозок/мес`,en:`${next.freezes_pm} freezes/mo`,es:`${next.freezes_pm} congel./mes`,pt:`${next.freezes_pm} congel./mês`}[lang]||`${next.freezes_pm} freezes/mo`)
-        : '';
-      nx.textContent=({ru:`До ${next.r}: ${remaining} XP`,en:`Next: ${next.r} in ${remaining} XP`,es:`Próx.: ${next.r} en ${remaining} XP`,pt:`Próx.: ${next.r} em ${remaining} XP`}[lang]||`Next: ${next.r} in ${remaining} XP`) + (nextPerk?' · '+nextPerk:'');
+      const nextName=(c[next.r] && (c[next.r][lang]||c[next.r].en)) || next.r;
+      nxEl.textContent=`${c.next}: ${nextName} · ${remaining.toLocaleString(lang==='ru'?'ru-RU':'en-US')} XP`;
     } else {
-      nx.textContent={ru:'Максимальный ранг достигнут',en:'Maximum rank reached',es:'Rango máximo alcanzado',pt:'Rango máximo'}[lang]||'Maximum rank reached';
+      nxEl.textContent=c.max;
     }
-  }
-  /* Freeze-use button: disabled when pool is empty or today is already
-     counted as a streak day. */
-  const btn=document.getElementById('rank-use-btn');
-  const lbl=document.getElementById('rank-use-btn-lbl');
-  const today=localDayKey();
-  const alreadyCounted=LS.get('streak_done_date')===today;
-  const disabled=freezes<=0||alreadyCounted;
-  if(btn){
-    btn.disabled=!!disabled;
-    btn.classList.toggle('disabled',!!disabled);
-  }
-  if(lbl){
-    lbl.textContent = alreadyCounted
-      ? ({ru:'Сегодня уже учтено',en:'Today already counts',es:'Hoy ya cuenta',pt:'Hoje já conta'}[lang]||'Today already counts')
-      : (freezes>0
-          ? ({ru:`Использовать заморозку (${freezes})`,en:`Use streak freeze (${freezes})`,es:`Usar congelación (${freezes})`,pt:`Usar congelamento (${freezes})`}[lang]||`Use streak freeze (${freezes})`)
-          : ({ru:'Заморозок нет · повысь ранг',en:'No freezes · rank up to earn',es:'Sin congelaciones · sube rango',pt:'Sem congelamentos · suba de posto'}[lang]||'No freezes · rank up to earn'));
   }
 }
 
@@ -3729,20 +3764,23 @@ function renderRankCard(d){
 function renderProgress(d){
   const inf=rankOf(d.xp||0),tr=treeOf(d.xp||0);
   const pct=Math.max(0,Math.round((d.xp-inf.min)/(inf.max-inf.min)*100));
-  document.getElementById('plv').textContent=d.level||'B1';
-  document.getElementById('prk').textContent=inf.r+' '+tr.t;
-  document.getElementById('rlvtxt').textContent=d.level||'B1';
-  animateCount(document.getElementById('pxp'),d.xp||0,900,' XP total');
-  animateCount(document.getElementById('pbc'),d.xp||0,900,' XP');
+  /* The old XP-ring hero (plv / prk / rlvtxt / pxp / pbc) has been
+     replaced by the growth-hero. Guard each lookup so a stale call
+     site doesn't throw if the element was already removed. */
+  const _set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  _set('plv',d.level||'B1');
+  _set('prk',inf.r+' '+tr.t);
+  _set('rlvtxt',d.level||'B1');
+  const pxp=document.getElementById('pxp');if(pxp)animateCount(pxp,d.xp||0,900,' XP total');
+  const pbc=document.getElementById('pbc');if(pbc)animateCount(pbc,d.xp||0,900,' XP');
   if(hasTier('basic')){const e=document.getElementById('psess');if(e)e.classList.remove('premium-mask');animateCount(e,d.sessions||0,700);}
   else{const e=document.getElementById('psess');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
   animateCount(document.getElementById('pwrds'),d.words||0,700);
   animateCount(document.getElementById('ptsts'),d.tests||0,700);
   if(hasTier('basic')){const e=document.getElementById('perrs');if(e)e.classList.remove('premium-mask');animateCount(e,d.errors||0,700);}
   else{const e=document.getElementById('perrs');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
-  document.getElementById('pbm').textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
-  setTimeout(()=>document.getElementById('pbfi').style.width=pct+'%',350);
-  try{renderRankCard(d);}catch(_){}
+  const pbm=document.getElementById('pbm');if(pbm)pbm.textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
+  try{renderGrowth(d);}catch(_){}
   renderInterests(d.interests||[]);
   updateProfileUI(d);
 }
@@ -11155,22 +11193,14 @@ function addLocalXP(amount){
     const xpBar=document.querySelector('.xpf');
     const rank=rankOf(d.xp);
     if(xpBar)animateXPBar(xpBar,Math.min(100,((d.xp-rank.min)/(rank.max-rank.min))*100));
-    // Check for rank up → confetti + replenish streak freezes
+    // Check for stage transition → quiet celebration
     const oldRank=rankOf(oldXP);
     const newRank=rankOf(d.xp);
     if(newRank.r!==oldRank.r){
-      fireConfetti();
       try{sfx.level();}catch(e){}
-      /* Force the freeze pool to reflect the new tier's monthly cap.
-         The next read of getStreakFreezes() will pick it up. */
-      const cap=newRank.freezes_pm;
-      const have=parseInt(LS.get('sfreeze_count')||'0',10)||0;
-      if(cap>have)LS.set('sfreeze_count',String(cap));
-      const perkLine = cap>0
-        ? ({ru:`Перк: ${cap} заморозок стрика в месяц`,en:`Perk: ${cap} streak freezes / month`,es:`Beneficio: ${cap} congelaciones/mes`,pt:`Vantagem: ${cap} congelamentos/mês`}[lang]||`Perk: ${cap} streak freezes / month`)
-        : '';
-      toast(`${newRank.emoji} ${newRank.r}${perkLine?' · '+perkLine:''}`,'🎉');
-      try{renderRankCard(d);}catch(_){}
+      const grewLine={ru:'Твоё дерево выросло',en:'Your tree has grown',es:'Tu árbol creció',de:'Dein Baum ist gewachsen',fr:'Ton arbre a grandi',pt:'Sua árvore cresceu',uk:'Твоє дерево виросло',tr:'Ağacın büyüdü',zh:'你的树长大了',ar:'نمت شجرتك'}[lang]||'Your tree has grown';
+      toast(`${newRank.emoji} ${grewLine} · ${newRank.r}`,'🌱');
+      try{renderGrowth(d);}catch(_){}
     }
     else{try{sfx.xp();}catch(e){}}
   }catch(e){console.warn('addLocalXP',e);}
