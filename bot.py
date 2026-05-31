@@ -58,6 +58,7 @@ ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
+OFFICIAL_CHANNEL_URL = os.getenv("OFFICIAL_CHANNEL_URL", "https://t.me/PolyGlottyDailyEnglish").strip()
 
 # Cache-bust the WebApp URL by appending the index.html mtime as ?v=.
 # Telegram caches WebView contents per URL, and "no-cache" headers alone
@@ -82,6 +83,21 @@ SUPPORT_USERNAME = (os.getenv("SUPPORT_USERNAME", "") or "").lstrip("@")
 
 def support_contact_url() -> str:
     return f"https://t.me/{SUPPORT_USERNAME}" if SUPPORT_USERNAME else f"tg://user?id={SUPPORT_USER_ID}"
+
+def public_bot_url() -> str:
+    return f"https://t.me/{BOT_USERNAME}"
+
+def referral_url(uid: int) -> str:
+    return f"{public_bot_url()}?start=ref_{uid}"
+
+def channel_url() -> str:
+    return OFFICIAL_CHANNEL_URL or public_bot_url()
+
+def html_link(url: str, text: str, bold: bool = False) -> str:
+    label = html.escape(text, quote=False)
+    href = html.escape(url, quote=True)
+    link = f'<a href="{href}">{label}</a>'
+    return f"<b>{link}</b>" if bold else link
 
 # ══ ADMIN WHITELIST (admin tools only) ═══════════════════════════════════════
 # Добавь сюда Telegram UID админов. Premium больше не выдаётся автоматически.
@@ -224,7 +240,25 @@ def set_ctx(uid, **kw): session_ctx.setdefault(uid, {}).update(kw)
 def get_ctx(uid) -> dict: return session_ctx.get(uid, {})
 def clear_ctx(uid): session_ctx.pop(uid, None)
 
-FOOTER = "\n\n<i>──────────────────────────────────</i>\n<i>/lesson · /vocab · /test · /toefl · /roleplay · /story · /help</i>"
+FOOTER = "\n\n<i>────────────────</i>\n<i>/lesson · /vocab · /test · /toefl · /roleplay · /story · /help</i>"
+
+ICON = {
+    "app": "▣",
+    "premium": "◇",
+    "lesson": "▤",
+    "vocab": "◌",
+    "test": "✓",
+    "menu": "☰",
+    "support": "?",
+    "share": "↗",
+    "channel": "◎",
+    "platform": "▣",
+    "credits": "◦",
+    "audio": "◍",
+    "progress": "▥",
+    "success": "✓",
+    "warn": "!",
+}
 
 # ══════════════════════════════════════════════════════════════════
 #  ANTHROPIC API
@@ -268,7 +302,7 @@ async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str =
     try:
         reply = await _call_anthropic(system, get_history(uid))
     except Exception as e:
-        return f"⚠️ Error. Try again.\n<i>{str(e)[:80]}</i>"
+        return f"{ICON['warn']} Error. Try again.\n<i>{str(e)[:80]}</i>"
 
     # Smart Interest Detection
     for interest in INTEREST_TAG.findall(reply):
@@ -292,9 +326,9 @@ async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str =
 
     if level_change:
         direction, new_level = level_change.split(":")
-        emoji = "🎉" if direction == "up" else "💡"
-        msg = (f"\n\n{emoji} <b>Уровень изменён на {new_level}!</b>" if lang=="ru"
-               else f"\n\n{emoji} <b>Level adjusted to {new_level}!</b>")
+        mark = "▥" if direction == "up" else "◦"
+        msg = (f"\n\n{mark} <b>Уровень изменён на {new_level}</b>" if lang=="ru"
+               else f"\n\n{mark} <b>Level adjusted to {new_level}</b>")
         result += msg
 
     return result
@@ -330,7 +364,7 @@ async def analyze_photo_vision(uid: int, photo_bytes: bytes) -> str:
         ]}])
         return reply + FOOTER
     except Exception as e:
-        return f"⚠️ <i>{str(e)[:100]}</i>"
+        return f"{ICON['warn']} <i>{str(e)[:100]}</i>"
 
 # ══════════════════════════════════════════════════════════════════
 #  TOEFL LISTENING — лекции И диалоги
@@ -351,7 +385,7 @@ async def run_toefl_listening(uid: int, message: Message):
     )
 
     status_msg = await message.answer(
-        f"🎧 <b>Генерирую {type_label}...</b>" if lang=="ru" else f"🎧 <b>Generating {type_label}...</b>"
+        f"{ICON['audio']} <b>Генерирую {type_label}...</b>" if lang=="ru" else f"{ICON['audio']} <b>Generating {type_label}...</b>"
     )
 
     toefl_system = build_system(level, lang, mode="toefl_json")
@@ -368,14 +402,14 @@ async def run_toefl_listening(uid: int, message: Message):
         setting    = data.get("setting", "")
     except Exception as e:
         logger.error(f"TOEFL parse error: {e}\nRaw: {raw[:300]}")
-        await status_msg.edit_text("⚠️ Ошибка. Попробуй ещё раз." if lang=="ru" else "⚠️ Error. Try again.")
+        await status_msg.edit_text(f"{ICON['warn']} Ошибка. Попробуй ещё раз." if lang=="ru" else f"{ICON['warn']} Error. Try again.")
         return
 
-    await status_msg.edit_text("🔊 <b>Синтезирую аудио...</b>" if lang=="ru" else "🔊 <b>Generating audio...</b>")
+    await status_msg.edit_text(f"{ICON['audio']} <b>Синтезирую аудио...</b>" if lang=="ru" else f"{ICON['audio']} <b>Generating audio...</b>")
 
     audio_bytes = await text_to_speech(transcript)
 
-    type_icon = "💬" if content_type == "dialogue" else "🎓"
+    type_icon = "◦" if content_type == "dialogue" else "▤"
     caption_detail = f"<i>{setting}</i>\n" if setting else ""
 
     if audio_bytes:
@@ -389,7 +423,7 @@ async def run_toefl_listening(uid: int, message: Message):
             ),
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(
-                    text="✅ Готов отвечать" if lang=="ru" else "✅ Ready for questions",
+                    text="✓ Готов отвечать" if lang=="ru" else "✓ Ready for questions",
                     callback_data="toefl_q_start"
                 )
             ]])
@@ -406,7 +440,7 @@ async def run_toefl_listening(uid: int, message: Message):
             f"{'Нажми когда запомнишь:' if lang=='ru' else 'Press when ready:'}",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(
-                    text="✅ Готов" if lang=="ru" else "✅ Ready",
+                    text="✓ Готов" if lang=="ru" else "✓ Ready",
                     callback_data="toefl_q_start"
                 )
             ]])
@@ -452,8 +486,8 @@ async def finish_toefl_listening(uid: int, message: Message):
     analysis = await ask_alex_raw(check_prompt, toefl_system)
 
     await message.answer(
-        f"🎧 <b>{'Результат' if lang=='ru' else 'Result'}</b>\n\n"
-        f"✅ {'Правильно' if lang=='ru' else 'Correct'}: <b>{correct}/{len(questions)}</b>\n\n"
+        f"{ICON['audio']} <b>{'Результат' if lang=='ru' else 'Result'}</b>\n\n"
+        f"✓ {'Правильно' if lang=='ru' else 'Correct'}: <b>{correct}/{len(questions)}</b>\n\n"
         f"{analysis[:3000]}"
     )
     log_toefl(uid, "listening", correct, len(questions))
@@ -465,12 +499,12 @@ async def finish_toefl_listening(uid: int, message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
-    ru = [["📚 Урок грамматики","📝 Словарь"],["🎭 Ролевой диалог","🎮 Story Quest"],
-          ["✅ Тест","🎓 TOEFL"],["✍️ Проверить текст","🎨 Тон фразы"],
-          ["💬 Разговор","⚔️ Дебаты"],["🗣 Идиомы","❌ Мои ошибки"],["📊 Прогресс",""]]
-    en = [["📚 Grammar Lesson","📝 Vocabulary"],["🎭 Roleplay","🎮 Story Quest"],
-          ["✅ Test","🎓 TOEFL"],["✍️ Check Writing","🎨 Tone Editor"],
-          ["💬 Speaking","⚔️ Debate"],["🗣 Idioms","❌ My Mistakes"],["📊 Progress",""]]
+    ru = [["▤ Урок грамматики","◌ Словарь"],["◇ Ролевой диалог","▧ Story Quest"],
+          ["✓ Тест","◍ TOEFL"],["✎ Проверить текст","⌁ Тон фразы"],
+          ["◦ Разговор","△ Дебаты"],["◆ Идиомы","! Мои ошибки"],["▥ Прогресс",""]]
+    en = [["▤ Grammar Lesson","◌ Vocabulary"],["◇ Roleplay","▧ Story Quest"],
+          ["✓ Test","◍ TOEFL"],["✎ Check Writing","⌁ Tone Editor"],
+          ["◦ Speaking","△ Debate"],["◆ Idioms","! My Mistakes"],["▥ Progress",""]]
     rows_data = ru if lang=="ru" else en
     rows = []
     for row in rows_data:
@@ -483,13 +517,13 @@ def main_kb(lang: str) -> ReplyKeyboardMarkup:
 
 def lang_kb():
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🇷🇺 Русский", callback_data="lang_ru"),
-        InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"),
+        InlineKeyboardButton(text="RU · Русский", callback_data="lang_ru"),
+        InlineKeyboardButton(text="EN · English", callback_data="lang_en"),
     ]])
 
 def level_kb():
     rows = [[InlineKeyboardButton(text=lv, callback_data=f"setlevel_{lv}")] for lv in LEVEL_ORDER]
-    rows.append([InlineKeyboardButton(text="🔍 Placement test", callback_data="test_placement")])
+    rows.append([InlineKeyboardButton(text="Placement test", callback_data="test_placement")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 def _simple_kb(items: dict, lang: str, back: bool = True) -> InlineKeyboardMarkup:
@@ -511,94 +545,94 @@ def story_kb(lang):
 
 def lesson_kb(lang):
     items = {
-        "lesson_tenses":       ("⏰ Времена глагола","⏰ Verb Tenses"),
-        "lesson_conditionals": ("🔀 Условные","🔀 Conditionals"),
-        "lesson_modal":        ("💭 Модальные глаголы","💭 Modal Verbs"),
-        "lesson_passive":      ("🔄 Пассивный залог","🔄 Passive Voice"),
-        "lesson_articles":     ("📌 Артикли","📌 Articles"),
-        "lesson_prepositions": ("📍 Предлоги","📍 Prepositions"),
-        "lesson_phrasal":      ("🔗 Фразовые глаголы","🔗 Phrasal Verbs"),
-        "lesson_reported":     ("💬 Косвенная речь","💬 Reported Speech"),
-        "lesson_subjunctive":  ("🌙 Сослагательное","🌙 Subjunctive"),
-        "lesson_inversion":    ("🔁 Инверсия C1-C2","🔁 Inversion C1-C2"),
+        "lesson_tenses":       ("▤ Времена глагола","▤ Verb Tenses"),
+        "lesson_conditionals": ("◇ Условные","◇ Conditionals"),
+        "lesson_modal":        ("◦ Модальные глаголы","◦ Modal Verbs"),
+        "lesson_passive":      ("↔ Пассивный залог","↔ Passive Voice"),
+        "lesson_articles":     ("• Артикли","• Articles"),
+        "lesson_prepositions": ("⌖ Предлоги","⌖ Prepositions"),
+        "lesson_phrasal":      ("∞ Фразовые глаголы","∞ Phrasal Verbs"),
+        "lesson_reported":     ("◌ Косвенная речь","◌ Reported Speech"),
+        "lesson_subjunctive":  ("△ Сослагательное","△ Subjunctive"),
+        "lesson_inversion":    ("⇄ Инверсия C1-C2","⇄ Inversion C1-C2"),
     }
     return _simple_kb(items, lang)
 
 def vocab_kb(lang):
     items = {
-        "vocab_new":         ("🆕 Новые слова","🆕 New Words"),
-        "vocab_review":      ("🔄 Повторение SM-2","🔄 SM-2 Review"),
-        "vocab_flashcards":  ("🃏 Флэш-карточки","🃏 Flashcards"),
-        "vocab_collocations":("🤝 Коллокации","🤝 Collocations"),
-        "vocab_idioms_adv":  ("🗣 Продвинутые идиомы","🗣 Advanced Idioms"),
-        "vocab_topic":       ("📂 По теме","📂 By Topic"),
-        "daily_quiz":        ("📅 Ежедневный квиз","📅 Daily Quiz"),
-        "idioms_cultural":   ("🎭 Культурные идиомы","🎭 Cultural Idioms"),
+        "vocab_new":         ("＋ Новые слова","＋ New Words"),
+        "vocab_review":      ("↻ Повторение SM-2","↻ SM-2 Review"),
+        "vocab_flashcards":  ("▧ Флэш-карточки","▧ Flashcards"),
+        "vocab_collocations":("∞ Коллокации","∞ Collocations"),
+        "vocab_idioms_adv":  ("◆ Продвинутые идиомы","◆ Advanced Idioms"),
+        "vocab_topic":       ("▣ По теме","▣ By Topic"),
+        "daily_quiz":        ("◌ Ежедневный квиз","◌ Daily Quiz"),
+        "idioms_cultural":   ("◇ Культурные идиомы","◇ Cultural Idioms"),
     }
     return _simple_kb(items, lang)
 
 def test_kb(lang):
     items = {
-        "test_grammar":   ("📐 Грамматика","📐 Grammar"),
-        "test_vocab":     ("📝 Лексика","📝 Vocabulary"),
-        "test_reading":   ("📖 Чтение","📖 Reading"),
-        "test_writing":   ("✍️ Письмо","✍️ Writing"),
-        "test_mixed":     ("🎲 Смешанный","🎲 Mixed"),
-        "test_placement": ("🔍 Определить уровень","🔍 Placement Test"),
+        "test_grammar":   ("▤ Грамматика","▤ Grammar"),
+        "test_vocab":     ("◌ Лексика","◌ Vocabulary"),
+        "test_reading":   ("▥ Чтение","▥ Reading"),
+        "test_writing":   ("✎ Письмо","✎ Writing"),
+        "test_mixed":     ("◇ Смешанный","◇ Mixed"),
+        "test_placement": ("⌖ Определить уровень","⌖ Placement Test"),
     }
     return _simple_kb(items, lang)
 
 def toefl_kb(lang):
     items = {
-        "toefl_reading":   ("📖 Reading","📖 Reading"),
-        "toefl_listening": ("🎧 Listening + Audio","🎧 Listening + Audio"),
-        "toefl_speaking1": ("🗣 Speaking Independent","🗣 Speaking Independent"),
-        "toefl_speaking2": ("🗣 Speaking Integrated","🗣 Speaking Integrated"),
-        "toefl_writing1":  ("✍️ Writing Independent","✍️ Writing Independent"),
-        "toefl_writing2":  ("✍️ Writing Integrated","✍️ Writing Integrated"),
-        "toefl_full":      ("🏆 Полный мини-тест","🏆 Full Mini-Test"),
-        "toefl_strategy":  ("💡 Стратегии","💡 Strategies"),
-        "toefl_score":     ("📊 Мои баллы","📊 My Scores"),
+        "toefl_reading":   ("▥ Reading","▥ Reading"),
+        "toefl_listening": ("◍ Listening + Audio","◍ Listening + Audio"),
+        "toefl_speaking1": ("◦ Speaking Independent","◦ Speaking Independent"),
+        "toefl_speaking2": ("◇ Speaking Integrated","◇ Speaking Integrated"),
+        "toefl_writing1":  ("✎ Writing Independent","✎ Writing Independent"),
+        "toefl_writing2":  ("✎ Writing Integrated","✎ Writing Integrated"),
+        "toefl_full":      ("▣ Полный мини-тест","▣ Full Mini-Test"),
+        "toefl_strategy":  ("⌁ Стратегии","⌁ Strategies"),
+        "toefl_score":     ("▥ Мои баллы","▥ My Scores"),
     }
     return _simple_kb(items, lang)
 
 def talk_kb(lang):
     items = {
-        "talk_daily":     ("☀️ Повседневная жизнь","☀️ Daily Life"),
-        "talk_travel":    ("✈️ Путешествия","✈️ Travel"),
-        "talk_work":      ("💼 Работа","💼 Work"),
-        "talk_debate":    ("⚔️ Дебаты","⚔️ Debate"),
-        "talk_business":  ("🤝 Бизнес English","🤝 Business English"),
-        "talk_free":      ("💭 Свободная беседа","💭 Free Chat"),
-        "talk_interview": ("👔 Mock Interview","👔 Mock Interview"),
+        "talk_daily":     ("◌ Повседневная жизнь","◌ Daily Life"),
+        "talk_travel":    ("↗ Путешествия","↗ Travel"),
+        "talk_work":      ("▣ Работа","▣ Work"),
+        "talk_debate":    ("△ Дебаты","△ Debate"),
+        "talk_business":  ("◇ Бизнес English","◇ Business English"),
+        "talk_free":      ("◦ Свободная беседа","◦ Free Chat"),
+        "talk_interview": ("▤ Mock Interview","▤ Mock Interview"),
     }
     return _simple_kb(items, lang)
 
 def remind_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌅 08:00",callback_data="remind_08:00"),
-         InlineKeyboardButton(text="☀️ 10:00",callback_data="remind_10:00")],
-        [InlineKeyboardButton(text="🌞 12:00",callback_data="remind_12:00"),
-         InlineKeyboardButton(text="🌇 18:00",callback_data="remind_18:00")],
-        [InlineKeyboardButton(text="🌆 19:00",callback_data="remind_19:00"),
-         InlineKeyboardButton(text="🌙 21:00",callback_data="remind_21:00")],
-        [InlineKeyboardButton(text="❌ Disable",callback_data="remind_off")],
+        [InlineKeyboardButton(text="08:00",callback_data="remind_08:00"),
+         InlineKeyboardButton(text="10:00",callback_data="remind_10:00")],
+        [InlineKeyboardButton(text="12:00",callback_data="remind_12:00"),
+         InlineKeyboardButton(text="18:00",callback_data="remind_18:00")],
+        [InlineKeyboardButton(text="19:00",callback_data="remind_19:00"),
+         InlineKeyboardButton(text="21:00",callback_data="remind_21:00")],
+        [InlineKeyboardButton(text="Disable",callback_data="remind_off")],
     ])
 
 def flashcard_kb(word_id: int, lang: str):
-    opts = [("😕 Не знал",1),("🤔 Почти",2),("😊 Помнил",4),("✅ Легко",5)] if lang=="ru" else [("😕 Forgot",1),("🤔 Hard",2),("😊 Good",4),("✅ Easy",5)]
+    opts = [("! Не знал",1),("◦ Почти",2),("◇ Помнил",4),("✓ Легко",5)] if lang=="ru" else [("! Forgot",1),("◦ Hard",2),("◇ Good",4),("✓ Easy",5)]
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=l,callback_data=f"fc_{word_id}_{q}") for l,q in opts]])
 
 def shadowing_kb(lang: str):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🔊 Ещё раз" if lang=="ru" else "🔊 Hear again", callback_data="shadow_repeat"),
-        InlineKeyboardButton(text="✍️ Написать" if lang=="ru" else "✍️ Write it", callback_data="shadow_write"),
+        InlineKeyboardButton(text="◍ Ещё раз" if lang=="ru" else "◍ Hear again", callback_data="shadow_repeat"),
+        InlineKeyboardButton(text="✎ Написать" if lang=="ru" else "✎ Write it", callback_data="shadow_write"),
     ]])
 
 def pronunciation_kb(lang: str):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="🎤 Записать голосовое" if lang=="ru" else "🎤 Record voice", callback_data="pronounce_record"),
-        InlineKeyboardButton(text="✍️ Написать" if lang=="ru" else "✍️ Type instead", callback_data="shadow_write"),
+        InlineKeyboardButton(text="◍ Записать голосовое" if lang=="ru" else "◍ Record voice", callback_data="pronounce_record"),
+        InlineKeyboardButton(text="✎ Написать" if lang=="ru" else "✎ Type instead", callback_data="shadow_write"),
     ]])
 
 # ══════════════════════════════════════════════════════════════════
@@ -623,14 +657,14 @@ async def send_reminder(uid: int):
     interest_hint = ""
     if interests:
         first = interests.split(",")[0].strip()
-        interest_hint = f"\n💡 {'Сегодня разберём тему' if lang=='ru' else 'Today: topic'}: <b>{first}</b>"
+        interest_hint = f"\n⌁ {'Сегодня разберём тему' if lang=='ru' else 'Today: topic'}: <b>{html.escape(first, quote=False)}</b>"
 
     header_ru = "<b>Практика английского.</b>"
     header_en = "<b>English practice.</b>"
     text = (header_ru if lang=="ru" else header_en) + interest_hint
-    if streak > 2: text += f"\n\n🔥 Streak: <b>{streak}</b>"
-    if due_cnt:    text += f"\n📅 <b>{due_cnt}</b> {'слов на повторение' if lang=='ru' else 'words due'} → /vocab"
-    if due_idioms: text += f"\n🗣 <b>{due_idioms}</b> {'идиом на повторение' if lang=='ru' else 'idioms due'} → /vocab"
+    if streak > 2: text += f"\n\n▥ Streak: <b>{streak}</b>"
+    if due_cnt:    text += f"\n◌ <b>{due_cnt}</b> {'слов на повторение' if lang=='ru' else 'words due'} → /vocab"
+    if due_idioms: text += f"\n◆ <b>{due_idioms}</b> {'идиом на повторение' if lang=='ru' else 'idioms due'} → /vocab"
     app_url = webapp_url()
     kb = None
     if app_url:
@@ -646,10 +680,10 @@ async def send_weekly_report(uid: int):
     lang  = await get_lang(uid)
     try:
         await bot.send_message(uid,
-            f"📊 <b>{'Еженедельный отчёт' if lang=='ru' else 'Weekly Report'}</b>\n\n"
-            f"🎯 {stats['level']} · {stats['rank']} · ⭐ {stats['xp']} XP\n"
-            f"🔥 Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-            f"📝 Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>"
+            f"▥ <b>{'Еженедельный отчёт' if lang=='ru' else 'Weekly Report'}</b>\n\n"
+            f"⌖ {stats['level']} · {stats['rank']} · {stats['xp']} XP\n"
+            f"▥ Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
+            f"◌ Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>"
         )
     except Exception: pass
 
@@ -700,15 +734,17 @@ async def send_daily_word(uid: int):
         kb = None
         if app_url:
             kb = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="📱 Учить в приложении" if ru else "📱 Learn in app",
-                                      web_app=WebAppInfo(url=app_url))]
+                [InlineKeyboardButton(text=f"{ICON['app']} Учить в приложении" if ru else f"{ICON['app']} Learn in app",
+                                      web_app=WebAppInfo(url=app_url))],
+                [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
+                                      url=channel_url())],
             ])
         await bot.send_message(uid,
-            f"📚 <b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
-            f"🔤 <b>{w['word']}</b>\n"
-            f"🔊 {w['ph']}\n"
-            f"🇷🇺 {w['tr']}\n\n"
-            f"📝 <i>{w['ex']}</i>\n\n"
+            f"◌ <b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
+            f"<b>{w['word']}</b>\n"
+            f"<code>{w['ph']}</code>\n"
+            f"{w['tr']}\n\n"
+            f"<i>{w['ex']}</i>\n\n"
             f"<b>{'Как использовать:' if ru else 'How to use it:'}</b> "
             f"{'напиши своё предложение с этим словом. В Basic ALEX исправит его в чате.' if ru else 'write your own sentence with this word. With Basic, ALEX will correct it in chat.'}\n\n"
             f"<i>{motivation_line(lang)}</i>",
@@ -752,10 +788,10 @@ async def handle_inline(query: InlineQuery):
         data = {"translation": raw[:100], "explanation": "", "example": ""}
     results = [
         InlineQueryResultArticle(
-            id="1", title=f"🔤 {data.get('translation','')}",
+            id="1", title=f"{ICON['vocab']} {data.get('translation','')}",
             description=data.get("explanation","")[:100],
             input_message_content=InputTextMessageContent(
-                message_text=f"<b>{text}</b> → {data.get('translation','')}\n<i>{data.get('explanation','')}</i>\n📝 {data.get('example','')}",
+                message_text=f"<b>{text}</b> → {data.get('translation','')}\n<i>{data.get('explanation','')}</i>\n{ICON['lesson']} {data.get('example','')}",
                 parse_mode="HTML"
             ),
         )
@@ -780,6 +816,7 @@ async def setup_bot_profile():
         BotCommand(command="menu", description="Button menu / Меню кнопок"),
         BotCommand(command="premium", description="Plans and limits / Подписки"),
         BotCommand(command="share", description="Invite friends / Пригласить друзей"),
+        BotCommand(command="channel", description="Official channel / Канал"),
         BotCommand(command="lesson", description="Grammar lesson / Урок грамматики"),
         BotCommand(command="vocab", description="Vocabulary practice / Слова"),
         BotCommand(command="test", description="English test / Тест"),
@@ -826,22 +863,22 @@ async def cmd_start(message: Message):
             await cmd_premium(message)
         except Exception as e:
             logger.error(f"cmd_premium from start error: {e}")
-            await message.answer("⚠️ Error loading premium. Try /premium")
+            await message.answer(f"{ICON['warn']} Error loading premium. Try /premium")
         return
     # ── Direct invoice deep links (from WebApp paywall) ──────────────
     if args in PLATFORM_PLANS:
         user_lang = await get_lang(uid) or "ru"
         ok = await _send_platform_invoice(uid, args, user_lang == "ru")
         if not ok:
-            await message.answer("⚠️ Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
-                                  else "⚠️ Could not create invoice. Try /premium")
+            await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
+                                  else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
     if args in CREDIT_PACKS:
         user_lang = await get_lang(uid) or "ru"
         ok = await _send_credits_invoice(uid, args, user_lang == "ru")
         if not ok:
-            await message.answer("⚠️ Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
-                                  else "⚠️ Could not create invoice. Try /premium")
+            await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
+                                  else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
     ref_applied = False
     if args.startswith("ref_"):
@@ -864,31 +901,35 @@ async def cmd_start(message: Message):
     kb_buttons = []
     if app_url:
         kb_buttons.append([InlineKeyboardButton(
-            text="📱 Открыть приложение" if ru else "📱 Open App",
+            text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
             web_app=WebAppInfo(url=app_url)
         )])
     kb_buttons.append([InlineKeyboardButton(
-        text="💎 Premium",
+        text=f"{ICON['premium']} Подписки" if ru else f"{ICON['premium']} Plans",
         callback_data="open_premium"
     )])
     kb_buttons.append([
-        InlineKeyboardButton(text="📚 Урок" if ru else "📚 Lesson", callback_data="quick_lesson"),
-        InlineKeyboardButton(text="📝 Слова" if ru else "📝 Vocab", callback_data="quick_vocab"),
-        InlineKeyboardButton(text="✅ Тест" if ru else "✅ Test", callback_data="quick_test"),
+        InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
+        InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab"),
+        InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
     ])
     kb_buttons.append([
-        InlineKeyboardButton(text="🧭 Меню" if ru else "🧭 Menu", callback_data="quick_menu"),
-        InlineKeyboardButton(text="Поддержка" if ru else "Support", callback_data="quick_support"),
+        InlineKeyboardButton(text=f"{ICON['menu']} Меню" if ru else f"{ICON['menu']} Menu", callback_data="quick_menu"),
+        InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
     ])
-    ref_link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
+    ref_link = referral_url(uid)
     share_text = (
         "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty"
         if ru else
         "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty"
     )
     kb_buttons.append([InlineKeyboardButton(
-        text="Пригласить друга" if ru else "Invite a friend",
+        text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
         url=f"https://t.me/share/url?url={quote(ref_link, safe='')}&text={quote(share_text, safe='')}"
+    )])
+    kb_buttons.append([InlineKeyboardButton(
+        text=f"{ICON['channel']} Канал PolyGlotty" if ru else f"{ICON['channel']} PolyGlotty Channel",
+        url=channel_url()
     )])
 
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
@@ -898,35 +939,40 @@ async def cmd_start(message: Message):
         is_prem = await check_premium(uid)
     except Exception:
         pass
-    badge = " · 👑 Premium" if is_prem else ""
+    badge = " · Premium" if is_prem else ""
 
     ref_line = "\n\nБонус за приглашение начислен: +50 XP тебе, +150 XP другу." if (ru and ref_applied) else (
         "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
     )
+    name_html = html.escape(name, quote=False)
+    cta_link = html_link(ref_link, "если хочешь начать учить английский — жми сюда", bold=True) if ru else html_link(ref_link, "tap here to start learning English", bold=True)
+    channel_link = html_link(channel_url(), "канал с ежедневными словами", bold=True) if ru else html_link(channel_url(), "daily English channel", bold=True)
     text = (
-        f"<b>Привет, {name}!</b>{badge}\n\n"
+        f"<b>Привет, {name_html}!</b>{badge}\n\n"
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
         f"Тренируй английский каждый день без отдельного приложения.\n\n"
-        f"<b>Что умеет бот:</b>\n"
+        f"<b>Внутри:</b>\n"
         f"• даёт бесплатный курс A0-C2, карточки, drills, аудирование и путь\n"
         f"• открывает живой чат с ALEX по любой подписке\n"
         f"• исправляет ошибки и объясняет грамматику\n"
         f"• открывает roleplay и проверку текста на Pro\n"
         f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
-        f"<b>Старт:</b> открой приложение ниже. Бесплатно можно проходить курс и копить прогресс, чат с ALEX — по подписке."
+        f"{cta_link}\n"
+        f"Больше короткой практики: {channel_link}."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
     ) if ru else (
-        f"<b>Hey, {name}!</b>{badge}\n\n"
+        f"<b>Hey, {name_html}!</b>{badge}\n\n"
         f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
         f"Practice English every day without installing another app.\n\n"
-        f"<b>What it does:</b>\n"
+        f"<b>Inside:</b>\n"
         f"• gives a free A0-C2 course, flashcards, drills, listening and paths\n"
         f"• unlocks live ALEX chat with any subscription\n"
         f"• corrects mistakes and explains grammar\n"
         f"• unlocks roleplay and text check on Pro\n"
         f"• helps with TOEFL on Ultimate and tracks progress\n\n"
-        f"<b>Start:</b> open the app below. The free course is available, ALEX Chat starts with a subscription."
+        f"{cta_link}\n"
+        f"More short practice: {channel_link}."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
     )
@@ -949,11 +995,11 @@ async def cb_quick_menu(cb: CallbackQuery):
     action = cb.data.replace("quick_", "")
     await cb.answer()
     if action == "lesson":
-        await cb.message.answer("📚 <b>Grammar Lessons:</b>", reply_markup=lesson_kb(lang))
+        await cb.message.answer(f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
     elif action == "vocab":
-        await cb.message.answer("📝 <b>Vocabulary:</b>", reply_markup=vocab_kb(lang))
+        await cb.message.answer(f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
     elif action == "test":
-        await cb.message.answer("✅ <b>Tests:</b>", reply_markup=test_kb(lang))
+        await cb.message.answer(f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
         await send_support_prompt(cb.message, uid)
     else:
@@ -973,27 +1019,57 @@ async def cmd_share(message: Message):
         ref_count = await get_referral_count(uid)
     except Exception as e:
         logger.warning(f"share stats failed uid={uid}: {e}")
-    link = f"https://t.me/{BOT_USERNAME}?start=ref_{uid}"
+    link = referral_url(uid)
+    cta = html_link(link, "если хочешь начать учить английский — жми сюда", bold=True) if ru else html_link(link, "tap here to start learning English", bold=True)
+    channel = html_link(channel_url(), "канал PolyGlotty", bold=True) if ru else html_link(channel_url(), "PolyGlotty channel", bold=True)
     text = (
         "<b>Пригласи друга в PolyGlotty</b>\n\n"
-        "Алгоритм простой: полезный бот + личная рекомендация = лучший рост.\n\n"
-        f"Твоя ссылка:\n<code>{link}</code>\n\n"
+        "Отправь другу одну фразу вместо длинной ссылки:\n"
+        f"{cta}\n\n"
+        f"Канал для ежедневной практики: {channel}\n\n"
         "Бонус: друг получает +50 XP, ты получаешь +150 XP за нового пользователя.\n"
         f"Приглашено: <b>{ref_count}</b>"
     ) if ru else (
         "<b>Invite a friend to PolyGlotty</b>\n\n"
-        "Simple growth loop: useful bot + personal recommendation.\n\n"
-        f"Your link:\n<code>{link}</code>\n\n"
+        "Send one clean phrase instead of a raw link:\n"
+        f"{cta}\n\n"
+        f"Daily practice channel: {channel}\n\n"
         "Bonus: your friend gets +50 XP, you get +150 XP for a new user.\n"
         f"Invited: <b>{ref_count}</b>"
     )
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="Поделиться" if ru else "Share",
+            text=f"{ICON['share']} Поделиться" if ru else f"{ICON['share']} Share",
             url=f"https://t.me/share/url?url={quote(link, safe='')}&text={quote('AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty', safe='')}"
-        )]
+        )],
+        [InlineKeyboardButton(
+            text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
+            url=channel_url()
+        )],
     ])
     await message.answer(text, parse_mode="HTML", reply_markup=kb)
+
+@dp.message(Command("channel"))
+async def cmd_channel(message: Message):
+    lang = await get_lang(message.from_user.id) or "ru"
+    ru = lang == "ru"
+    link = html_link(channel_url(), "открыть канал PolyGlotty", bold=True) if ru else html_link(channel_url(), "open the PolyGlotty channel", bold=True)
+    text = (
+        f"{ICON['channel']} <b>Канал PolyGlotty</b>\n\n"
+        "Там будут короткие посты: слово дня, пример, перевод и ссылка на практику.\n\n"
+        f"{link}"
+    ) if ru else (
+        f"{ICON['channel']} <b>PolyGlotty Channel</b>\n\n"
+        "Short posts: word of the day, example, translation and a link to practice.\n\n"
+        f"{link}"
+    )
+    await message.answer(
+        text,
+        parse_mode="HTML",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel", url=channel_url())
+        ]])
+    )
 
 @dp.callback_query(F.data == "open_premium")
 async def cb_open_premium(cb: CallbackQuery):
@@ -1002,21 +1078,21 @@ async def cb_open_premium(cb: CallbackQuery):
 
 @dp.message(Command("lang"))
 async def cmd_lang(m: Message):
-    await m.answer("🌍 Choose / Выбери:", reply_markup=lang_kb())
+    await m.answer("Language / Язык", reply_markup=lang_kb())
 
 @dp.message(Command("level"))
 async def cmd_level(m: Message):
-    await m.answer("🎯 Choose your level:", reply_markup=level_kb())
+    await m.answer("Choose your level / Выбери уровень", reply_markup=level_kb())
 
 @dp.message(Command("lesson"))
 async def cmd_lesson(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer("📚 <b>Grammar Lessons:</b>", reply_markup=lesson_kb(lang))
+    await m.answer(f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
 
 @dp.message(Command("vocab"))
 async def cmd_vocab(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer("📝 <b>Vocabulary:</b>", reply_markup=vocab_kb(lang))
+    await m.answer(f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
 
 @dp.message(Command("roleplay"))
 async def cmd_roleplay(m: Message):
@@ -1024,7 +1100,7 @@ async def cmd_roleplay(m: Message):
     if not await has_access(m.from_user.id, "pro"):
         await send_upgrade_hint(m, "pro", lang, "Roleplay")
         return
-    await m.answer("🎭 <b>Roleplay:</b>", reply_markup=roleplay_kb(lang))
+    await m.answer("◇ <b>Roleplay</b>", reply_markup=roleplay_kb(lang))
 
 @dp.message(Command("story"))
 async def cmd_story(m: Message):
@@ -1032,7 +1108,7 @@ async def cmd_story(m: Message):
     if not await has_access(m.from_user.id, "basic"):
         await send_upgrade_hint(m, "basic", lang, "Story Quest")
         return
-    await m.answer("🎮 <b>Story Quest:</b>", reply_markup=story_kb(lang))
+    await m.answer("▧ <b>Story Quest</b>", reply_markup=story_kb(lang))
 
 @dp.message(Command("debate"))
 async def cmd_debate(m: Message):
@@ -1055,7 +1131,7 @@ async def cmd_debate(m: Message):
 @dp.message(Command("test"))
 async def cmd_test(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer("✅ <b>Tests:</b>", reply_markup=test_kb(lang))
+    await m.answer(f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
 
 @dp.message(Command("toefl"))
 async def cmd_toefl(m: Message):
@@ -1063,21 +1139,25 @@ async def cmd_toefl(m: Message):
     if not await has_access(m.from_user.id, "ultimate"):
         await send_upgrade_hint(m, "ultimate", lang, "TOEFL")
         return
-    await m.answer("🎓 <b>TOEFL iBT:</b>", reply_markup=toefl_kb(lang))
+    await m.answer("◍ <b>TOEFL iBT</b>", reply_markup=toefl_kb(lang))
 
 @dp.message(Command("talk"))
 async def cmd_talk(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer("💬 <b>Speaking:</b>", reply_markup=talk_kb(lang))
+    await m.answer("◦ <b>Speaking</b>", reply_markup=talk_kb(lang))
 
 @dp.message(Command("tone"))
 async def cmd_tone(m: Message):
     uid  = m.from_user.id
     lang = await get_lang(uid)
     await m.answer(
-        "🎨 <b>{'Редактор тона фразы' if lang=='ru' else 'Tone Editor'}</b>\n\n"
-        "{'Отправь любую фразу на английском — ALEX покажет 5 вариантов с разным стилем:' if lang=='ru' else 'Send any English phrase — ALEX will show 5 versions with different tones:'}\n"
-        "👔 Professional · 🤝 Polite · 😤 Assertive · 😏 Passive-aggressive · 😎 Casual"
+        (f"{ICON['lesson']} <b>Редактор тона фразы</b>\n\n"
+         "Отправь любую фразу на английском. ALEX покажет 5 вариантов с разным стилем:\n"
+         "<code>Professional</code> · <code>Polite</code> · <code>Assertive</code> · <code>Soft</code> · <code>Casual</code>")
+        if lang=="ru" else
+        (f"{ICON['lesson']} <b>Tone Editor</b>\n\n"
+         "Send any English phrase. ALEX will show 5 versions with different tones:\n"
+         "<code>Professional</code> · <code>Polite</code> · <code>Assertive</code> · <code>Soft</code> · <code>Casual</code>")
     )
     waiting[uid] = "tone_editor"
 
@@ -1097,11 +1177,11 @@ async def cmd_shadow(m: Message):
     if audio:
         await m.answer_voice(
             BufferedInputFile(audio,"phrase.mp3"),
-            caption=f"🎙 <b>Shadowing</b>\n\n<i>{phrase}</i>\n\n{'Запиши голосовое или напиши:' if lang=='ru' else 'Record a voice message or type:'}",
+            caption=f"{ICON['audio']} <b>Shadowing</b>\n\n<i>{phrase}</i>\n\n{'Запиши голосовое или напиши:' if lang=='ru' else 'Record a voice message or type:'}",
             reply_markup=pronunciation_kb(lang)
         )
     else:
-        await m.answer(f"🎙 <b>Shadowing</b>\n\n<i>{phrase}</i>", reply_markup=shadowing_kb(lang))
+        await m.answer(f"{ICON['audio']} <b>Shadowing</b>\n\n<i>{phrase}</i>", reply_markup=shadowing_kb(lang))
     waiting[uid] = "shadowing"
     log_session(uid, "shadowing")
 
@@ -1110,9 +1190,13 @@ async def cmd_writing(m: Message):
     uid  = m.from_user.id
     lang = await get_lang(uid)
     await m.answer(
-        "✍️ <b>{'Проверка текста' if lang=='ru' else 'Writing Check'}</b>\n\n"
-        "{'Отправь текст → получишь:' if lang=='ru' else 'Send text → get:'}\n"
-        "✅ Corrected · 🌟 Native-like · 📚 Error breakdown"
+        (f"{ICON['lesson']} <b>Проверка текста</b>\n\n"
+         "Отправь текст. ALEX вернёт:\n"
+         "<code>Corrected</code> · <code>Native-like</code> · <code>Error breakdown</code>")
+        if lang=="ru" else
+        (f"{ICON['lesson']} <b>Writing Check</b>\n\n"
+         "Send a text. ALEX will return:\n"
+         "<code>Corrected</code> · <code>Native-like</code> · <code>Error breakdown</code>")
     )
     waiting[uid] = "writing"
 
@@ -1140,9 +1224,15 @@ async def cmd_profession(m: Message):
     uid  = m.from_user.id
     lang = await get_lang(uid)
     await m.answer(
-        "💼 <b>{'Укажи свою профессию или сферу' if lang=='ru' else 'Enter your profession or field'}</b>\n\n"
-        "{'Например:' if lang=='ru' else 'Example:'} <code>Java Developer</code>, <code>Digital Marketing</code>, <code>Teacher</code>\n\n"
-        "{'ALEX будет создавать ролевые диалоги и примеры именно для твоей области.' if lang=='ru' else 'ALEX will create roleplays and examples specific to your field.'}"
+        (f"{ICON['lesson']} <b>О себе</b>\n\n"
+         "Напиши профессию, интересы или цель обучения.\n"
+         "Например: <code>Java Developer, хочу говорить на митингах</code>\n\n"
+         "ALEX будет подбирать примеры ближе к твоему контексту.")
+        if lang=="ru" else
+        (f"{ICON['lesson']} <b>About You</b>\n\n"
+         "Write your field, interests, or learning goal.\n"
+         "Example: <code>Java Developer, I want to speak in meetings</code>\n\n"
+         "ALEX will make examples closer to your context.")
     )
     waiting[uid] = "set_profession"
 
@@ -1161,14 +1251,14 @@ async def cmd_stats(m: Message):
     nxt = nxt_xp.get(stats["rank"],9999)
     bar = "█"*min(10,int(xp/nxt*10))+"░"*max(0,10-int(xp/nxt*10))
     await m.answer(
-        f"📊 <b>{'Прогресс' if lang=='ru' else 'Progress'}</b>\n\n"
-        f"🎯 {stats['level']} · {stats['rank']}\n"
-        f"⭐ XP: <b>{xp}</b> [{bar}]\n\n"
-        f"🔥 Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-        f"📝 Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>\n"
-        f"❌ Errors: <b>{stats['errors']}</b> · TOEFL: <b>{stats['toefl']}</b>\n\n"
-        + (f"💼 <i>{profession}</i>\n" if profession else "")
-        + f"🎮 <i>{interest_line}</i>"
+        f"{ICON['progress']} <b>{'Прогресс' if lang=='ru' else 'Progress'}</b>\n\n"
+        f"{stats['level']} · {stats['rank']}\n"
+        f"XP: <b>{xp}</b> [{bar}]\n\n"
+        f"Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
+        f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>\n"
+        f"Errors: <b>{stats['errors']}</b> · TOEFL: <b>{stats['toefl']}</b>\n\n"
+        + (f"{ICON['lesson']} <i>{profession}</i>\n" if profession else "")
+        + f"{ICON['vocab']} <i>{interest_line}</i>"
     )
 
 @dp.message(Command("mistakes"))
@@ -1177,11 +1267,11 @@ async def cmd_mistakes(m: Message):
     lang = await get_lang(uid)
     rows = await get_mistakes(uid, limit=10)
     if not rows:
-        await m.answer("✅ No mistakes yet!" if lang=="en" else "✅ Ошибок пока нет!")
+        await m.answer("✓ No mistakes yet." if lang=="en" else "✓ Ошибок пока нет.")
         return
-    text = "❌ <b>Recent mistakes:</b>\n\n"
+    text = f"{ICON['warn']} <b>{'Recent mistakes' if lang=='en' else 'Последние ошибки'}</b>\n\n"
     for i, r in enumerate(rows, 1):
-        text += f"{i}. ❌ <code>{r['original'][:50]}</code>\n   ✅ <i>{r['corrected'][:50]}</i>\n   💡 {r['explanation'][:80]}\n\n"
+        text += f"{i}. <code>{r['original'][:50]}</code>\n   → <i>{r['corrected'][:50]}</i>\n   {r['explanation'][:80]}\n\n"
     await m.answer(text)
 
 @dp.message(Command("interests"))
@@ -1218,13 +1308,14 @@ async def cmd_help(m: Message):
     kb = None
     if app_url:
         kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📱 Открыть приложение" if lang=="ru" else "📱 Open App",
+            [InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
                                   web_app=WebAppInfo(url=app_url))],
-            [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
+            [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
+            [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url())],
         ])
     await m.answer(
-        ("<b>ALEX — AI-репетитор английского</b>\n\n"
-         "📱 Всё обучение в приложении:\n"
+        ("<b>PolyGlotty · AI-репетитор английского</b>\n\n"
+         "<b>Что доступно в приложении:</b>\n"
          "• Бесплатный курс A0-C2\n"
          "• Карточки и повторение\n"
          "• Grammar games\n"
@@ -1236,12 +1327,13 @@ async def cmd_help(m: Message):
          "/premium — подписка\n"
          "/share — пригласить друга и получить XP\n"
          "/support — поддержка\n"
+         "/channel — канал с ежедневной практикой\n"
          "/terms — условия и границы ответственности\n"
          "/rules — правила сервиса\n"
          "/start — главное меню\n\n"
-         "👇 Открой приложение") if lang=="ru" else
-        ("<b>ALEX — AI English Tutor</b>\n\n"
-         "📱 All learning happens in the app:\n"
+         f"{html_link(public_bot_url(), 'открыть бота', bold=True)}") if lang=="ru" else
+        ("<b>PolyGlotty · AI English Tutor</b>\n\n"
+         "<b>Inside the app:</b>\n"
          "• Free A0-C2 course\n"
          "• Flashcards & review\n"
          "• Grammar games\n"
@@ -1253,10 +1345,11 @@ async def cmd_help(m: Message):
          "/premium — subscription\n"
          "/share — invite a friend and earn XP\n"
          "/support — support\n"
+         "/channel — daily practice channel\n"
          "/terms — terms and responsibility limits\n"
          "/rules — service rules\n"
          "/start — main menu\n\n"
-         "👇 Open the app"),
+         f"{html_link(public_bot_url(), 'open the bot', bold=True)}"),
         reply_markup=kb
     )
 
@@ -1268,9 +1361,9 @@ async def send_support_prompt(target, uid: int):
     lang = await get_lang(uid) or "ru"
     ru = lang == "ru"
     waiting[uid] = "support_message"
-    kb_rows = [[InlineKeyboardButton(text="Написать в поддержку" if ru else "Message support", url=support_contact_url())]]
+    kb_rows = [[InlineKeyboardButton(text=f"{ICON['support']} Написать в поддержку" if ru else f"{ICON['support']} Message support", url=support_contact_url())]]
     if RAILWAY_URL and "localhost" not in RAILWAY_URL:
-        kb_rows.append([InlineKeyboardButton(text="Открыть приложение" if ru else "Open App",
+        kb_rows.append([InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
                                              web_app=WebAppInfo(url=webapp_url()))])
     kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
     await target.answer(
@@ -1355,7 +1448,7 @@ async def cmd_reset(m: Message):
     uid = m.from_user.id
     lang = await get_lang(uid)
     clear_history(uid); waiting.pop(uid,None); clear_ctx(uid)
-    await m.answer("🔄 Reset." if lang=="en" else "🔄 Сброшен.")
+    await m.answer("↻ Reset." if lang=="en" else "↻ Сброшен.")
 
 # ══════════════════════════════════════════════════════════════════
 #  CALLBACK
@@ -1367,17 +1460,17 @@ async def cb_lang(cb: CallbackQuery):
     lang = cb.data.replace("lang_","")
     await update_user(uid, lang=lang)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer("✅")
-    name = user_display_name(cb.from_user)
-    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b> 👋\n\nALEX. 🎯", reply_markup=main_kb(lang))
-    await cb.message.answer("🎯 <b>Level:</b>", reply_markup=level_kb())
+    await cb.answer("✓")
+    name = html.escape(user_display_name(cb.from_user), quote=False)
+    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\nPolyGlotty готов к практике.", reply_markup=main_kb(lang))
+    await cb.message.answer("⌖ <b>Level</b>", reply_markup=level_kb())
 
 @dp.callback_query(F.data == "back_main")
 async def cb_back(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = await get_lang(uid)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.message.answer("Menu 👇", reply_markup=main_kb(lang))
+    await cb.message.answer(f"{ICON['menu']} Menu", reply_markup=main_kb(lang))
     await cb.answer()
 
 @dp.callback_query(F.data.startswith("setlevel_"))
@@ -1387,7 +1480,7 @@ async def cb_setlevel(cb: CallbackQuery):
     level = cb.data.replace("setlevel_","")
     await update_user(uid, level=level)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(f"✅ {level}")
+    await cb.answer(f"✓ {level}")
     await bot.send_chat_action(cb.message.chat.id, "typing")
     reply = await ask_alex(uid, f"My English level is {level}. Give a brief encouraging welcome, what to focus on, and suggest what to start with today.", mode="general")
     await cb.message.answer(reply)
@@ -1404,7 +1497,7 @@ async def cb_roleplay(cb: CallbackQuery):
     if not scenario: await cb.answer(); return
     if cb.data == "rp_custom":
         await cb.answer()
-        await cb.message.answer("🎭 Опиши ситуацию:" if lang=="ru" else "🎭 Describe the scenario:")
+        await cb.message.answer(f"{ICON['lesson']} Опиши ситуацию:" if lang=="ru" else f"{ICON['lesson']} Describe the scenario:")
         waiting[uid] = "rp_custom"
         return
     if cb.data == "rp_smart":
@@ -1412,7 +1505,7 @@ async def cb_roleplay(cb: CallbackQuery):
         await cb.answer()
         profession = await get_profession(uid)
         if not profession:
-            await cb.message.answer("💼 " + ("Сначала укажи профессию: /profession" if lang=="ru" else "First set your profession: /profession"))
+            await cb.message.answer(f"{ICON['lesson']} " + ("Сначала заполни /profession" if lang=="ru" else "First fill in /profession"))
             return
         level = await get_level(uid)
         clear_history(uid)
@@ -1490,14 +1583,14 @@ async def cb_vocab(cb: CallbackQuery):
         due = await get_due_words(uid, limit=5)
         if not due:
             await cb.answer()
-            await cb.message.answer("✅ No words due today!" if lang=="en" else "✅ Нет слов для повторения!")
+            await cb.message.answer("✓ No words due today." if lang=="en" else "✓ Нет слов для повторения.")
             return
         await cb.message.edit_reply_markup(reply_markup=None)
         await cb.answer()
         word = due[0]
         set_ctx(uid, review_queue=due, review_idx=0)
         await cb.message.answer(
-            f"🃏 <b>Card 1/{len(due)}</b>\n\n📖 <b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\n"
+            f"▧ <b>Card 1/{len(due)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\n"
             f"{'Помнишь перевод?' if lang=='ru' else 'Remember the translation?'}",
             reply_markup=flashcard_kb(word["id"], lang)
         )
@@ -1528,15 +1621,15 @@ async def cb_flashcard(cb: CallbackQuery):
     await cb.message.edit_reply_markup(reply_markup=None)
     word_row = await db("SELECT * FROM vocabulary WHERE id=?", word_id, fetch="one")
     if word_row:
-        await cb.message.answer(f"✅ <b>{word_row['word']}</b> = {word_row['translation']}\n<i>{word_row['example']}</i>")
+        await cb.message.answer(f"✓ <b>{word_row['word']}</b> = {word_row['translation']}\n<i>{word_row['example']}</i>")
     if idx < len(queue):
         word = queue[idx]
         await cb.message.answer(
-            f"🃏 <b>Card {idx+1}/{len(queue)}</b>\n\n📖 <b>{word['word']}</b>\n\n<i>{word['example']}</i>",
+            f"▧ <b>Card {idx+1}/{len(queue)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>",
             reply_markup=flashcard_kb(word["id"], lang)
         )
     else:
-        await cb.message.answer(f"✅ Done! +{len(queue)*3} XP 🎉")
+        await cb.message.answer(f"✓ Done. +{len(queue)*3} XP")
         log_session(uid, "vocab_review")
         clear_ctx(uid)
     await cb.answer()
@@ -1546,7 +1639,7 @@ async def cb_flashcard(cb: CallbackQuery):
 async def cb_toefl_q_start(cb: CallbackQuery):
     uid  = cb.from_user.id
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer("✅")
+    await cb.answer("✓")
     await bot.send_chat_action(cb.message.chat.id, "typing")
     await asyncio.sleep(0.3)
     await send_toefl_question(uid, cb.message, 0)
@@ -1562,7 +1655,7 @@ async def cb_toefl_answer(cb: CallbackQuery):
     answers = ctx.get("toefl_answers",{}); answers[str(q_idx)] = answer
     set_ctx(uid, toefl_answers=answers)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer(f"✅ {answer}")
+    await cb.answer(f"✓ {answer}")
     next_idx = q_idx + 1
     questions = ctx.get("toefl_questions",[])
     if next_idx < len(questions):
@@ -1580,9 +1673,9 @@ async def cb_toefl(cb: CallbackQuery):
     if cb.data == "toefl_score":
         await cb.answer()
         rows = await get_toefl_scores(uid)
-        if not rows: await cb.message.answer("🎓 No scores yet!"); return
-        text = "🎓 <b>TOEFL Scores:</b>\n\n"
-        for r in rows: text += f"📌 <b>{r['section']}</b>: best {r['best']}, avg {r['avg_s']:.0f} ({r['cnt']} sessions)\n"
+        if not rows: await cb.message.answer("No scores yet."); return
+        text = f"{ICON['test']} <b>TOEFL Scores</b>\n\n"
+        for r in rows: text += f"• <b>{r['section']}</b>: best {r['best']}, avg {r['avg_s']:.0f} ({r['cnt']} sessions)\n"
         await cb.message.answer(text); return
     if not await has_access(uid, "ultimate"):
         await cb.answer("Нужен Ultimate" if lang == "ru" else "Ultimate required", show_alert=True)
@@ -1626,10 +1719,10 @@ async def cb_shadow(cb: CallbackQuery):
         phrase = get_ctx(uid).get("shadow_phrase","")
         if phrase:
             audio = await text_to_speech(phrase)
-            if audio: await cb.message.answer_voice(BufferedInputFile(audio,"phrase.mp3"), caption=f"🔊 <i>{phrase}</i>")
-            else: await cb.message.answer(f"🔊 <i>{phrase}</i>")
+            if audio: await cb.message.answer_voice(BufferedInputFile(audio,"phrase.mp3"), caption=f"{ICON['audio']} <i>{phrase}</i>")
+            else: await cb.message.answer(f"{ICON['audio']} <i>{phrase}</i>")
     elif cb.data in ("shadow_write","pronounce_record"):
-        await cb.message.answer("✍️ Write the phrase:" if lang=="en" else "✍️ Напиши или запиши голосовое:")
+        await cb.message.answer(f"{ICON['lesson']} Write the phrase:" if lang=="en" else f"{ICON['lesson']} Напиши или запиши голосовое:")
         waiting[uid] = "shadowing"
     await cb.answer()
 
@@ -1649,7 +1742,7 @@ async def cb_remind(cb: CallbackQuery):
             h, m = map(int, data.split(":"))
             scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[uid],id=f"remind_{uid}",replace_existing=True)
         except Exception as e: logger.warning(e)
-        await cb.answer(f"✅ {data}")
+        await cb.answer(f"✓ {data}")
         await cb.message.edit_text(
             (f"<b>Reminder set: {data}</b>\n\n<i>{motivation_line('en')}</i>" if lang=="en"
              else f"<b>Напоминание: {data}</b>\n\n<i>{motivation_line('ru')}</i>")
@@ -1663,16 +1756,16 @@ async def cb_remind(cb: CallbackQuery):
 async def handle_photo(message: Message):
     lang = await get_lang(message.from_user.id) or "ru"
     await message.answer(
-        "📸 Фото-анализ доступен в приложении! Нажми 📱 App внизу." if lang=="ru"
-        else "📸 Photo analysis is available in the app! Tap 📱 App below."
+        f"{ICON['app']} Фото-анализ доступен в приложении. Нажми App внизу." if lang=="ru"
+        else f"{ICON['app']} Photo analysis is available in the app. Tap App below."
     )
 
 @dp.message(F.voice)
 async def handle_voice(message: Message):
     lang = await get_lang(message.from_user.id) or "ru"
     await message.answer(
-        "🎤 Голосовые сообщения обрабатываются в приложении! Нажми 📱 App внизу." if lang=="ru"
-        else "🎤 Voice messages are processed in the app! Tap 📱 App below."
+        f"{ICON['audio']} Голосовые сообщения обрабатываются в приложении. Нажми App внизу." if lang=="ru"
+        else f"{ICON['audio']} Voice messages are processed in the app. Tap App below."
     )
 
 # ══════════════════════════════════════════════════════════════════
@@ -1680,16 +1773,25 @@ async def handle_voice(message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 MENU_RU = {
+    "▤ Урок грамматики":"lesson","◌ Словарь":"vocab","◇ Ролевой диалог":"roleplay",
+    "▧ Story Quest":"story","✓ Тест":"test","◍ TOEFL":"toefl",
+    "✎ Проверить текст":"writing","⌁ Тон фразы":"tone",
+    "◦ Разговор":"talk","△ Дебаты":"debate","◆ Идиомы":"idioms","! Мои ошибки":"mistakes","▥ Прогресс":"stats",
+    # Legacy labels kept so older Telegram keyboards still route correctly.
     "📚 Урок грамматики":"lesson","📝 Словарь":"vocab","🎭 Ролевой диалог":"roleplay",
     "🎮 Story Quest":"story","✅ Тест":"test","🎓 TOEFL":"toefl",
-    "✍️ Проверить текст":"writing","🎨 Тон фразы":"tone",
-    "💬 Разговор":"talk","⚔️ Дебаты":"debate","🗣 Идиомы":"idioms","❌ Мои ошибки":"mistakes","📊 Прогресс":"stats",
+    "✍️ Проверить текст":"writing","🎨 Тон фразы":"tone","💬 Разговор":"talk",
+    "⚔️ Дебаты":"debate","🗣 Идиомы":"idioms","❌ Мои ошибки":"mistakes","📊 Прогресс":"stats",
 }
 MENU_EN = {
+    "▤ Grammar Lesson":"lesson","◌ Vocabulary":"vocab","◇ Roleplay":"roleplay",
+    "▧ Story Quest":"story","✓ Test":"test","◍ TOEFL":"toefl",
+    "✎ Check Writing":"writing","⌁ Tone Editor":"tone",
+    "◦ Speaking":"talk","△ Debate":"debate","◆ Idioms":"idioms","! My Mistakes":"mistakes","▥ Progress":"stats",
     "📚 Grammar Lesson":"lesson","📝 Vocabulary":"vocab","🎭 Roleplay":"roleplay",
     "🎮 Story Quest":"story","✅ Test":"test","🎓 TOEFL":"toefl",
-    "✍️ Check Writing":"writing","🎨 Tone Editor":"tone",
-    "💬 Speaking":"talk","⚔️ Debate":"debate","🗣 Idioms":"idioms","❌ My Mistakes":"mistakes","📊 Progress":"stats",
+    "✍️ Check Writing":"writing","🎨 Tone Editor":"tone","💬 Speaking":"talk",
+    "⚔️ Debate":"debate","🗣 Idioms":"idioms","❌ My Mistakes":"mistakes","📊 Progress":"stats",
 }
 
 @dp.message(F.text & ~F.text.startswith("/"))
@@ -1736,14 +1838,14 @@ async def handle_text(message: Message):
         for interest in [i.strip() for i in text.split(",") if i.strip()]:
             await save_interest(uid, interest, source="manual")
         await update_user(uid, interests=text[:200])
-        await message.answer(f"✅ {'Сохранено!' if lang=='ru' else 'Saved!'} <i>{text}</i>")
+        await message.answer(f"✓ {'Сохранено' if lang=='ru' else 'Saved'}\n<i>{html.escape(text[:200])}</i>")
         return
 
     if state == "set_profession":
         waiting.pop(uid, None)
         await update_user(uid, profession=text[:100])
         await save_interest(uid, text[:50], source="profession")
-        await message.answer(f"💼 {'Профессия сохранена:' if lang=='ru' else 'Profession saved:'} <b>{text}</b>")
+        await message.answer(f"{ICON['lesson']} {'Сохранено:' if lang=='ru' else 'Saved:'} <b>{html.escape(text[:100])}</b>")
         return
 
     # Menu buttons → redirect to app
@@ -1761,15 +1863,16 @@ async def handle_text(message: Message):
     kb = None
     if app_url:
         kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📱 Открыть приложение" if lang=="ru" else "📱 Open App",
+            [InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
                                   web_app=WebAppInfo(url=app_url))],
-            [InlineKeyboardButton(text="💎 Premium", callback_data="open_premium")],
+            [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
+            [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url())],
         ])
     await message.answer(
-        ("📱 Учись в приложении — Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается по подписке.\n\n"
-         "👇 Нажми кнопку ниже") if lang=="ru" else
-        ("📱 Learn in the app — Free includes flashcards, drills, games and progress. ALEX Chat starts with a subscription.\n\n"
-         "👇 Tap the button below"),
+        ("<b>Продолжи в приложении</b>\n\n"
+         "Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается по подписке.") if lang=="ru" else
+        ("<b>Continue in the app</b>\n\n"
+         "Free includes flashcards, drills, games and progress. ALEX Chat starts with a subscription."),
         reply_markup=kb
     )
 
@@ -1780,16 +1883,16 @@ async def cmd_app(m: Message):
     lang = await get_lang(uid)
     domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
     if not domain:
-        await m.answer("⚠️ WebApp URL not configured." if lang=="en" else "⚠️ WebApp ещё не настроен.")
+        await m.answer("! WebApp URL not configured." if lang=="en" else "! WebApp ещё не настроен.")
         return
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
     await m.answer(
-        "📱 <b>LinguaMax App</b>\n\n"
+        f"{ICON['app']} <b>PolyGlotty App</b>\n\n"
         + ("Открывай приложение — там твой прогресс, флэш-карточки и статистика!" if lang=="ru"
            else "Open the app — your progress, flashcards and stats!"),
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
             InlineKeyboardButton(
-                text="🚀 Открыть приложение" if lang=="ru" else "🚀 Open App",
+                text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
                 web_app=WebAppInfo(url=webapp_url() or f"https://{domain}")
             )
         ]])
@@ -1822,7 +1925,7 @@ async def handle_webapp_data(message: Message):
     if action == "set_lang":
         new_lang = data.get("lang", "ru")
         await update_user(uid, lang=new_lang)
-        await message.answer("✅ Language updated!" if new_lang=="en" else "✅ Язык обновлён!")
+        await message.answer("✓ Language updated." if new_lang=="en" else "✓ Язык обновлён.")
         return
 
     if action == "rate_card":
@@ -1836,8 +1939,8 @@ async def handle_webapp_data(message: Message):
 
     if action == "add_word":
         await message.answer(
-            "📝 Напиши слово которое хочешь добавить:" if lang=="ru"
-            else "📝 Write the word you want to add:"
+            f"{ICON['vocab']} Напиши слово, которое хочешь добавить:" if lang=="ru"
+            else f"{ICON['vocab']} Write the word you want to add:"
         )
         waiting[uid] = "vocab_active"
         return
@@ -1977,8 +2080,8 @@ async def cmd_premium(msg: Message):
     is_prem = await check_premium(uid)
     prem_badge = ""
     if is_prem:
-        prem_badge = ("\n\n✅ <i>У тебя уже есть Premium. Можешь продлить!</i>" if ru
-                      else "\n\n✅ <i>You already have Premium. You can extend!</i>")
+        prem_badge = ("\n\n✓ <i>Premium активен. Его можно продлить заранее.</i>" if ru
+                      else "\n\n✓ <i>Premium is active. You can extend it early.</i>")
 
     # Check if first-time buyer for discount
     is_first = True
@@ -2005,60 +2108,64 @@ async def cmd_premium(msg: Message):
     if not grandfathered:
         plat_kb = [
             [InlineKeyboardButton(
-                text=("Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "Platform · 1 mo — 299 ⭐ + 30 cr"),
+                text=("▣ Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "▣ Platform · 1 mo — 299 ⭐ + 30 cr"),
                 callback_data="plat_buy:plat_1m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
+                text=("▣ Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "▣ Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
                 callback_data="plat_buy:plat_6m"
             )],
             [InlineKeyboardButton(
-                text=("Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "Platform · lifetime — 4 990 ⭐ + 500 cr"),
+                text=("▣ Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "▣ Platform · lifetime — 4 990 ⭐ + 500 cr"),
                 callback_data="plat_buy:plat_life"
             )],
             [InlineKeyboardButton(
-                text=("💬 100 кредитов ALEX — 149 ⭐" if ru else "💬 100 ALEX credits — 149 ⭐"),
+                text=("◦ 100 кредитов ALEX — 149 ⭐" if ru else "◦ 100 ALEX credits — 149 ⭐"),
                 callback_data="credit_buy:credits_100"
             )],
             [InlineKeyboardButton(
-                text=("💬 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "💬 500 ALEX credits — 599 ⭐ (−20%)"),
+                text=("◦ 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "◦ 500 ALEX credits — 599 ⭐ (−20%)"),
                 callback_data="credit_buy:credits_500"
             )],
             [InlineKeyboardButton(
-                text=("💬 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "💬 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
+                text=("◦ 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "◦ 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
                 callback_data="credit_buy:credits_2000"
             )],
         ]
         status_lines = []
         if platform_info.get("active"):
             if platform_info.get("lifetime"):
-                status_lines.append("📚 " + ("Платформа: навсегда" if ru else "Platform: lifetime"))
+                status_lines.append("▣ " + ("Платформа: навсегда" if ru else "Platform: lifetime"))
             elif platform_info.get("until"):
                 from datetime import datetime
                 try:
                     d = datetime.fromisoformat(platform_info["until"]).date().isoformat()
-                    status_lines.append("📚 " + (f"Платформа активна до {d}" if ru else f"Platform active until {d}"))
+                    status_lines.append("▣ " + (f"Платформа активна до {d}" if ru else f"Platform active until {d}"))
                 except Exception:
-                    status_lines.append("📚 " + ("Платформа активна" if ru else "Platform active"))
+                    status_lines.append("▣ " + ("Платформа активна" if ru else "Platform active"))
         if credits_balance > 0:
-            status_lines.append("💬 " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
+            status_lines.append("◦ " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
                                           if ru else f"ALEX credits: {credits_balance:,}"))
         status_block = ("\n\n" + "\n".join(status_lines)) if status_lines else ""
 
         text = (
-            "<b>PolyGlotty</b>\n\n"
-            "<b>Платформа</b> · курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
+            "<b>PolyGlotty Plans</b>\n\n"
+            "<b>Платформа</b>\n"
+            "Курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
             "299 ⭐ / мес (+30 кр) · 1 290 ⭐ / 6 мес (+150 кр) · 4 990 ⭐ навсегда (+500 кр)\n\n"
-            "<b>Кредиты ALEX</b> · отдельно. Тратятся за каждое сообщение, не сгорают.\n"
+            "<b>Кредиты ALEX</b>\n"
+            "Отдельный баланс для чата. Тратятся за каждое сообщение и не сгорают.\n"
             "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Opus 4.8: 22 · Voice +5\n"
             "Пакеты: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
             "<i>Оплата Telegram Stars</i>"
         ) if ru else (
-            "<b>PolyGlotty</b>\n\n"
-            "<b>Platform</b> · A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
+            "<b>PolyGlotty Plans</b>\n\n"
+            "<b>Platform</b>\n"
+            "A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
             "299 ⭐ / mo (+30 cr) · 1 290 ⭐ / 6 mo (+150 cr) · 4 990 ⭐ lifetime (+500 cr)\n\n"
-            "<b>ALEX credits</b> · separate. Spent per message, never expire.\n"
+            "<b>ALEX credits</b>\n"
+            "Separate chat balance. Spent per message and never expire.\n"
             "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Opus 4.8: 22 · Voice +5\n"
             "Packs: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
@@ -2071,8 +2178,8 @@ async def cmd_premium(msg: Message):
 
     discount_text = ""
     if is_first:
-        discount_text = "\n\n🎁 <b>-10% на первую покупку!</b>" if ru else "\n\n🎁 <b>10% off your first purchase!</b>"
-    year_text = "\n📅 <b>Годовой план: -15%</b>" if ru else "\n📅 <b>Annual plan: 15% off</b>"
+        discount_text = "\n\n◇ <b>-10% на первую покупку</b>" if ru else "\n\n◇ <b>10% off your first purchase</b>"
+    year_text = "\n▣ <b>Годовой план: -15%</b>" if ru else "\n▣ <b>Annual plan: 15% off</b>"
 
     # Prices with discount. Basic can be 1 Star only for configured test users.
     is_test_payment = is_test_payment_user(uid)
@@ -2140,7 +2247,7 @@ async def cmd_premium(msg: Message):
         "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Оплата только Telegram Stars"
+        "Оплата только Telegram Stars"
     ) if ru else (
         "<b>ALEX Subscriptions</b>\n"
         "━━━━━━━━━━━━━━━━━\n\n"
@@ -2170,7 +2277,7 @@ async def cmd_premium(msg: Message):
         "<i>Quota points keep premium limits fair and sustainable.</i>"
         f"{discount_text}{year_text}\n"
         f"{prem_badge}\n\n"
-        "⭐ Telegram Stars only"
+        "Telegram Stars only"
     )
     await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
 
@@ -2345,24 +2452,24 @@ async def on_payment_success(msg: Message):
                     await grant_credits_via_server(uid, starter_credits)
                 except Exception as e:
                     logger.warning("starter credit grant failed uid=%s credits=%s: %s", uid, starter_credits, e)
-            starter_line_ru = f"\n💬 +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
-            starter_line_en = f"\n💬 +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
+            starter_line_ru = f"\n◦ +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
+            starter_line_en = f"\n◦ +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
             text = (
-                f"🎉 <b>Оплата прошла!</b>\n\n"
-                f"📚 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
+                f"✓ <b>Оплата прошла</b>\n\n"
+                f"▣ <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
                 f"Курс, экзамены, расширенные карточки и аналитика — открыты.{starter_line_ru}\n\n"
                 f"Кредиты ALEX докупаются отдельно в /premium, когда захочешь больше чата."
                 if ru else
-                f"🎉 <b>Payment successful!</b>\n\n"
-                f"📚 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
+                f"✓ <b>Payment successful</b>\n\n"
+                f"▣ <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
                 f"Course, exams, expanded cards and analytics are unlocked.{starter_line_en}\n\n"
                 f"Top up ALEX credits in /premium when you want more chat."
             )
             await msg.answer(text, parse_mode="HTML")
-            logger.info("✅ Platform granted uid=%s period=%s starter_credits=%s", uid, period, starter_credits)
+            logger.info("Platform granted uid=%s period=%s starter_credits=%s", uid, period, starter_credits)
         except Exception as e:
             logger.error(f"platform payment handler error: {e}")
-            await msg.answer("✅ Платёж принят." if ru else "✅ Payment received.")
+            await msg.answer("✓ Платёж принят." if ru else "✓ Payment received.")
         return
 
     if head == "credits":
@@ -2376,19 +2483,19 @@ async def on_payment_success(msg: Message):
                                  parse_mode="HTML")
                 return
             text = (
-                f"🎉 <b>Кредиты зачислены!</b>\n\n"
-                f"💬 +<b>{credits}</b> кредитов ALEX в твой пул.\n\n"
+                f"✓ <b>Кредиты зачислены</b>\n\n"
+                f"◦ +<b>{credits}</b> кредитов ALEX в твой пул.\n\n"
                 f"Кредиты тратятся за каждое сообщение и не сгорают."
                 if ru else
-                f"🎉 <b>Credits added!</b>\n\n"
-                f"💬 +<b>{credits}</b> ALEX credits in your pool.\n\n"
+                f"✓ <b>Credits added</b>\n\n"
+                f"◦ +<b>{credits}</b> ALEX credits in your pool.\n\n"
                 f"Credits are spent per message and never expire."
             )
             await msg.answer(text, parse_mode="HTML")
-            logger.info("✅ Credits granted uid=%s credits=%s", uid, credits)
+            logger.info("Credits granted uid=%s credits=%s", uid, credits)
         except Exception as e:
             logger.error(f"credits payment handler error: {e}")
-            await msg.answer("✅ Платёж принят." if ru else "✅ Payment received.")
+            await msg.answer("✓ Платёж принят." if ru else "✓ Payment received.")
         return
 
     # ── Legacy bundle path (premium:<plan_id>:<uid>) ──────────────────
@@ -2399,7 +2506,7 @@ async def on_payment_success(msg: Message):
         months = plan["months"]
         label = plan["label_ru"] if ru else plan["label_en"]
         tier = plan.get("tier", "basic")
-        tier_emoji = {"basic":"🟢","pro":"🔵","ultimate":"💎"}.get(tier,"🟢")
+        tier_icon = {"basic":"◇","pro":"◆","ultimate":"▣"}.get(tier,"◇")
         tier_scope_ru = {
             "basic": "ALEX Chat, Sonnet 4, голосовые ответы и AI-подсказки активны.",
             "pro": "Pro-функции, Sonnet 4.6, roleplay, проверка текста и отчёты активны.",
@@ -2424,24 +2531,24 @@ async def on_payment_success(msg: Message):
 
         # Confirm to user
         text = (
-            f"🎉 <b>Оплата прошла!</b>\n\n"
-            f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
+            f"✓ <b>Оплата прошла</b>\n\n"
+            f"{tier_icon} ALEX Subscriptions <b>{tier.upper()}</b> активирован на <b>{label}</b>\n\n"
             f"{tier_scope_ru}\n\n"
             f"Открой приложение — подписка уже синхронизирована.\n\n"
-            f"Спасибо за поддержку! 🙏"
+            f"Спасибо за поддержку."
         ) if ru else (
-            f"🎉 <b>Payment successful!</b>\n\n"
-            f"{tier_emoji} ALEX Subscriptions <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
+            f"✓ <b>Payment successful</b>\n\n"
+            f"{tier_icon} ALEX Subscriptions <b>{tier.upper()}</b> activated for <b>{label}</b>\n\n"
             f"{tier_scope_en}\n\n"
             f"Open the app — your subscription is already synced.\n\n"
-            f"Thank you for your support! 🙏"
+            f"Thank you for your support."
         )
         await msg.answer(text, parse_mode="HTML")
-        logger.info(f"✅ Premium granted: uid={uid} plan={plan_id} months={months}")
+        logger.info(f"Premium granted: uid={uid} plan={plan_id} months={months}")
 
     except Exception as e:
         logger.error(f"Payment success handler error: {e}")
-        await msg.answer("✅ Payment received! Premium activated." if not ru else "✅ Оплата получена! Premium активирован.")
+        await msg.answer("✓ Payment received. Premium activated." if not ru else "✓ Оплата получена. Premium активирован.")
 
 # ══ /admin COMMAND (grant free premium to anyone) ═════════════════════════
 @dp.message(Command("admin_grant"))
@@ -2459,15 +2566,15 @@ async def cmd_admin_grant(msg: Message):
         target_uid = int(parts[1])
         months = int(parts[2]) if len(parts) > 2 else 1
         await grant_premium_via_server(target_uid, months)
-        await msg.answer(f"✅ Granted {months} months of Premium to uid {target_uid}")
+        await msg.answer(f"✓ Granted {months} months of Premium to uid {target_uid}")
     except Exception as e:
-        await msg.answer(f"❌ Error: {e}")
+        await msg.answer(f"{ICON['warn']} Error: {e}")
 
 async def main():
     await db_init()
     await schedule_all()
     scheduler.start()
-    logger.info("🎓 LinguaMax ALEX v4 Ultimate — запущен!")
+    logger.info("PolyGlotty bot started")
 
     # Запускаем веб-сервер (для WebApp)
     from server import start_server
