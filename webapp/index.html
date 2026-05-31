@@ -1944,9 +1944,34 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .growth-hero{background:transparent;border:1px solid var(--b1);border-radius:14px;
   padding:18px 16px 14px;margin-bottom:14px;display:flex;flex-direction:column;
   align-items:stretch;gap:12px}
+.growth-stage{position:relative;width:100%;height:200px;display:flex;
+  align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px}
 .growth-svg{display:flex;align-items:flex-end;justify-content:center;
-  width:100%;height:200px;color:var(--t1)}
+  width:100%;height:100%;color:var(--t1);transform-origin:50% 100%;
+  transition:transform .4s ease,filter .4s ease,opacity .4s ease}
 .growth-svg svg{width:auto;height:100%;max-width:80%}
+/* The weather overlay sits above the tree and below any future
+   foreground elements. Codex's WEATHER_OVERLAYS map will supply
+   SVG art (sun rays, drifting leaves, rain lines); the placeholder
+   CSS below already gives each mood a distinct feeling so the
+   feature works the moment it ships. */
+.growth-weather{position:absolute;inset:0;pointer-events:none;
+  display:flex;align-items:flex-start;justify-content:center}
+/* Mood placeholders — quiet CSS-only animations until Codex art is in. */
+@keyframes growBreeze{0%,100%{transform:translateX(0) rotate(0)}50%{transform:translateX(1px) rotate(.6deg)}}
+@keyframes growWind  {0%,100%{transform:translateX(-2px) rotate(-1.2deg)}50%{transform:translateX(2px) rotate(1.2deg)}}
+@keyframes growSag   {0%,100%{transform:translateY(0)}50%{transform:translateY(1.5px)}}
+@keyframes growSunPulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(var(--ar),0)}50%{box-shadow:inset 0 -30px 60px -30px rgba(var(--ar),.12)}}
+.growth-hero[data-mood="fresh"] .growth-stage{animation:growSunPulse 8s ease-in-out infinite}
+.growth-hero[data-mood="fresh"] .growth-svg{animation:growBreeze 7s ease-in-out infinite}
+.growth-hero[data-mood="breezy"] .growth-svg{animation:growBreeze 4.5s ease-in-out infinite}
+.growth-hero[data-mood="windy"] .growth-svg{animation:growWind 3s ease-in-out infinite;filter:saturate(.85)}
+.growth-hero[data-mood="rainy"] .growth-svg{animation:growSag 4s ease-in-out infinite;filter:saturate(.7) brightness(.92);opacity:.92}
+.growth-hero[data-mood="rainy"] .growth-stage{background:linear-gradient(180deg,rgba(120,140,170,.06),transparent 70%)}
+@media(prefers-reduced-motion:reduce){
+  .growth-hero[data-mood] .growth-svg,
+  .growth-hero[data-mood] .growth-stage{animation:none!important;transition:none}
+}
 .growth-meta{text-align:center;margin-top:-4px}
 .growth-title{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
   margin-bottom:2px}
@@ -2021,25 +2046,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="profile-badges" id="profile-badges"></div>
   </div>
   <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="openPathPicker()"></div>
-  <div class="streak-chip" id="streak-chip" onclick="goTab('progress')">
-    <svg class="streak-chip-fire" viewBox="0 0 48 48" aria-hidden="true">
-      <defs>
-        <linearGradient id="fg-main" x1="12" y1="6" x2="34" y2="42" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#ffcf5c"/><stop offset=".48" stop-color="#ff9500"/><stop offset="1" stop-color="#ff5f57"/>
-        </linearGradient>
-        <linearGradient id="fg-inner" x1="19" y1="18" x2="29" y2="39" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#fff4b8"/><stop offset="1" stop-color="#ffd166"/>
-        </linearGradient>
-      </defs>
-      <circle class="flame-spark s1" cx="35" cy="13" r="2" fill="#ffb830"/>
-      <circle class="flame-spark s2" cx="14" cy="18" r="1.7" fill="#ff7a59"/>
-      <circle class="flame-spark s3" cx="30" cy="8" r="1.3" fill="#ffe08a"/>
-      <path class="flame-main" d="M24 43c9.2 0 15.2-6.1 15.2-14.2 0-6.6-3.6-10.8-7.8-14.8-2.4-2.3-4.5-5-4.7-8.7-5.8 3.9-7.4 8.4-6.9 13.2-2.7-1.4-4.3-3.8-4.8-6.4-4 4.1-6.2 8.9-6.2 14.1C8.8 36.2 15 43 24 43Z" fill="url(#fg-main)"/>
-      <path class="flame-inner" d="M24.3 39c4.7 0 7.9-3.2 7.9-7.7 0-3.7-2.2-6-4.5-8.5-1.3-1.4-2.3-3-2.4-5.2-3.4 2.4-4.2 5.2-3.8 8.2-1.7-.8-2.8-2.1-3.3-3.7-2.1 2.4-3.2 5-3.2 8.1C15 35.5 18.8 39 24.3 39Z" fill="url(#fg-inner)"/>
-    </svg>
-    <span class="streak-chip-n" id="hstk">0</span>
-    <span class="streak-chip-lbl" id="hstk-lbl">days</span>
-  </div>
+  <!-- The streak chip used to live here. It has been replaced by the
+       growth tree on the Progress tab, which carries the same idea
+       — recurrence — without the cookie-cutter day-counter UI. -->
   <!-- Continue lesson CTA -->
   <div class="continue-card" id="continue-card" style="display:none" onclick="continueLessonTap()">
     <div class="cont-bar" id="cont-bar"></div>
@@ -2222,8 +2231,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
        The SVG itself is rendered by renderGrowth(d) — 8 botanical
        stages from sprout to grand tree. Level chip + CEFR + XP
        progress sit below as quiet metadata. -->
-  <div class="growth-hero" id="growth-hero">
-    <div class="growth-svg" id="growth-svg"></div>
+  <div class="growth-hero" id="growth-hero" data-mood="fresh">
+    <div class="growth-stage">
+      <div class="growth-weather" id="growth-weather" aria-hidden="true"></div>
+      <div class="growth-svg" id="growth-svg"></div>
+    </div>
     <div class="growth-meta">
       <div class="growth-title" id="growth-title">—</div>
       <div class="growth-sub" id="growth-sub">—</div>
@@ -3471,11 +3483,10 @@ function refreshSub(){
 function renderHome(d){
   refreshSub();
   document.getElementById('hname').textContent=displayName(d);
-  document.getElementById('hsub').textContent=d.streak>1?`${d.streak} ${lang==='ru'?'дней подряд 🔥':'days in a row! 🔥'}`:{ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
-  const s=d.streak||0;
-  const stkEl=document.getElementById('hstk');if(stkEl)stkEl.textContent=s;
-  const stkLbl=document.getElementById('hstk-lbl');
-  if(stkLbl)stkLbl.textContent={ru:s===1?'день':(s%10>=2&&s%10<=4&&!(s%100>=12&&s%100<=14))?'дня':'дней',en:s===1?'day':'days',es:s===1?'día':'días',de:s===1?'Tag':'Tage',fr:s===1?'jour':'jours',pt:s===1?'dia':'dias',uk:s===1?'день':(s%10>=2&&s%10<=4)?'дні':'днів',tr:'gün',zh:'天',ar:'يوم'}[lang]||'days';
+  document.getElementById('hsub').textContent={ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
+  /* Record today as a visit so the growth tree's mood detection
+     knows the user opened the app today. */
+  try{LS.set('growth_last_visit',localDayKey());}catch(_){}
   loadMissions();
   try{renderContinueLesson();}catch(e){}
   try{renderChallenge();}catch(e){}
@@ -3718,6 +3729,29 @@ function _growthCopy(){
   };
 }
 
+/* The growth tree carries a mood derived from how recently the user
+   has visited. The four states map cleanly to weather metaphors:
+     fresh  — visited today or yesterday → sunlight, gentle pulse
+     breezy — 2-3 days idle              → light wind in the leaves
+     windy  — 4-7 days idle              → stronger sway, slight droop
+     rainy  — 8+ days idle               → rain falling, leaves down
+   We expose the state as a data-mood attribute on .growth-hero so the
+   CSS layer (and the Codex-illustrated SVG overlays) can react. */
+function _getGrowthMood(){
+  const today=localDayKey();
+  const last=LS.get('growth_last_visit')||LS.get('streak_done_date');
+  if(!last)return 'fresh';
+  try{
+    const a=new Date(today+'T00:00:00');
+    const b=new Date(last +'T00:00:00');
+    const days=Math.max(0,Math.round((a-b)/86400000));
+    if(days<=1)return 'fresh';
+    if(days<=3)return 'breezy';
+    if(days<=7)return 'windy';
+    return 'rainy';
+  }catch(_){return 'fresh';}
+}
+
 function renderGrowth(d){
   const host=document.getElementById('growth-hero');
   if(!host)return;
@@ -3726,9 +3760,15 @@ function renderGrowth(d){
   const idx=rankIndex(xp);
   const next=RANKS[idx+1]||null;
   const stage=Math.max(1,Math.min(8,cur.stage||1));
+  /* The mood drives the weather overlay + plant animation class. */
+  const mood=_getGrowthMood();
+  host.setAttribute('data-mood',mood);
   /* The SVG slot. */
   const svgHost=document.getElementById('growth-svg');
   if(svgHost) svgHost.innerHTML = GROWTH_STAGES[stage-1] || GROWTH_STAGES[0];
+  /* The weather overlay slot (filled by Codex's WEATHER_OVERLAYS). */
+  const wxHost=document.getElementById('growth-weather');
+  if(wxHost) wxHost.innerHTML = (window.WEATHER_OVERLAYS&&window.WEATHER_OVERLAYS[mood])||'';
   const c=_growthCopy();
   const localName = (c[cur.r] && (c[cur.r][lang] || c[cur.r].en)) || cur.r;
   const title=document.getElementById('growth-title');
