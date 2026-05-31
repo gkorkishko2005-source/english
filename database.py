@@ -122,6 +122,11 @@ CREATE TABLE IF NOT EXISTS vocabulary (
     next_review DATE,
     interval    INTEGER DEFAULT 1,
     ease        FLOAT DEFAULT 2.5,
+    stability   REAL DEFAULT 0,
+    difficulty  REAL DEFAULT 0,
+    state       TEXT DEFAULT 'new',
+    lapses      INTEGER DEFAULT 0,
+    last_review_dt TIMESTAMPTZ,
     reviews     INTEGER DEFAULT 0,
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
@@ -197,9 +202,23 @@ CREATE TABLE IF NOT EXISTS quota_usage (
     PRIMARY KEY (uid, day)
 );
 
+CREATE TABLE IF NOT EXISTS fsrs_review_log (
+    id           SERIAL PRIMARY KEY,
+    uid          BIGINT,
+    word_id      BIGINT,
+    rating       SMALLINT,                -- 1=Again 2=Hard 3=Good 4=Easy
+    review_dt    TIMESTAMPTZ DEFAULT NOW(),
+    elapsed_days REAL,
+    scheduled_days REAL,
+    state_before TEXT,
+    duration_ms  INTEGER
+);
+
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
+CREATE INDEX IF NOT EXISTS idx_vocab_uid_state  ON vocabulary(uid, state);
 CREATE INDEX IF NOT EXISTS idx_sessions_uid ON sessions(uid);
 CREATE INDEX IF NOT EXISTS idx_mistakes_uid ON mistakes(uid);
+CREATE INDEX IF NOT EXISTS idx_frl_uid_time ON fsrs_review_log(uid, review_dt DESC);
 """
 
 SCHEMA_SQLITE = """
@@ -224,7 +243,10 @@ CREATE TABLE IF NOT EXISTS vocabulary (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, word TEXT,
     translation TEXT, example TEXT, topic TEXT DEFAULT 'general',
     next_review TEXT, interval INTEGER DEFAULT 1, ease REAL DEFAULT 2.5,
-    reviews INTEGER DEFAULT 0, created_at TEXT DEFAULT (datetime('now'))
+    reviews INTEGER DEFAULT 0,
+    stability REAL DEFAULT 0, difficulty REAL DEFAULT 0,
+    state TEXT DEFAULT 'new', lapses INTEGER DEFAULT 0,
+    last_review_dt TEXT, created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS mistakes (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, original TEXT,
@@ -262,6 +284,13 @@ CREATE TABLE IF NOT EXISTS quota_usage (
     updated_at TEXT DEFAULT (datetime('now')),
     PRIMARY KEY (uid, day)
 );
+CREATE TABLE IF NOT EXISTS fsrs_review_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid INTEGER, word_id INTEGER,
+    rating INTEGER, review_dt TEXT DEFAULT (datetime('now')),
+    elapsed_days REAL, scheduled_days REAL,
+    state_before TEXT, duration_ms INTEGER
+);
 """
 
 
@@ -284,6 +313,14 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS platform_lifetime BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN platform_lifetime INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_credits INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN chat_credits INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS grandfathered_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN grandfathered_tier TEXT DEFAULT ''",
+        # ── FSRS spaced-repetition fields (extends existing SM-2 vocab) ──
+        # We keep the legacy `interval / ease / reviews` columns intact so
+        # nothing breaks during the rollout; FSRS reads its own columns.
+        "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS stability REAL DEFAULT 0"  if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN stability REAL DEFAULT 0",
+        "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS difficulty REAL DEFAULT 0" if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN difficulty REAL DEFAULT 0",
+        "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS state TEXT DEFAULT 'new'"  if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN state TEXT DEFAULT 'new'",
+        "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS lapses INTEGER DEFAULT 0"  if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN lapses INTEGER DEFAULT 0",
+        "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS last_review_dt TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN last_review_dt TEXT",
     ]
     for stmt in migrations:
         try:
@@ -763,6 +800,52 @@ async def update_word_review(word_id: int, quality: int):
 async def get_word_count(uid: int) -> int:
     row = await db("SELECT COUNT(*) as c FROM vocabulary WHERE uid=?", uid, fetch="one")
     return row["c"] if row else 0
+
+
+# ── FSRS audit & state writeback ───────────────────────────────────
+# FSRS scheduling itself lives client-side for now (the WebApp already
+# runs an SM-2 loop and we don't want to block reviews on a server hop);
+# the server's job is to (a) accept the new card state from the client
+# and (b) keep an audit log that the FSRS Optimizer can later replay.
+async def fsrs_save_state(
+    word_id: int,
+    *,
+    stability: float,
+    difficulty: float,
+    state: str,
+    lapses: int,
+    next_review_dt: str | None,
+):
+    """Persist the FSRS Card state computed by the client."""
+    await db(
+        "UPDATE vocabulary SET stability=?, difficulty=?, state=?, lapses=?, "
+        "next_review=?, last_review_dt=? WHERE id=?",
+        float(stability), float(difficulty), str(state)[:16], int(lapses),
+        next_review_dt, _today(), word_id,
+    )
+
+
+async def fsrs_log_review(
+    uid: int,
+    word_id: int,
+    rating: int,
+    *,
+    elapsed_days: float | None = None,
+    scheduled_days: float | None = None,
+    state_before: str | None = None,
+    duration_ms: int | None = None,
+):
+    """Append a row to the FSRS review log. Cheap insert, never blocks."""
+    try:
+        await db(
+            "INSERT INTO fsrs_review_log "
+            "(uid, word_id, rating, elapsed_days, scheduled_days, state_before, duration_ms) "
+            "VALUES (?,?,?,?,?,?,?)",
+            uid, word_id, int(rating),
+            elapsed_days, scheduled_days, state_before, duration_ms,
+        )
+    except Exception as e:
+        logger.warning("fsrs_log_review failed uid=%s word_id=%s: %s", uid, word_id, e)
 
 
 # ── Идиомы SM-2 ───────────────────────────────────────────────────

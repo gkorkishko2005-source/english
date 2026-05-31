@@ -1845,6 +1845,103 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .sound-orb .sound-off{opacity:0}
 .dl-toggle-icon.muted .sound-on{opacity:0}
 .dl-toggle-icon.muted .sound-off{opacity:1}
+
+/* ── Progress tab · minimal refresh ───────────────────────────────
+   Brings the Progress screen in line with the same visual grammar
+   used in Settings, Home, the paywall and the placement test:
+     · transparent backgrounds with 1px hairline borders;
+     · one accent colour (var(--a)) — for the XP ring and chart fill
+       only, never for stat values or icon halos;
+     · monochrome stat-card icons (var(--t2) stroke), so the eye is
+       drawn to the number, not to the chrome around it;
+     · no gradients, no glow animations, no drop-shadow halos.
+   The override layer is appended after the original Progress CSS so
+   it wins on cascade without rewriting the markup. */
+
+/* Screen header tightening */
+#s-progress .phdr{margin-bottom:14px;align-items:flex-start;gap:8px}
+#s-progress .ptit{font-size:22px;font-weight:800;letter-spacing:-.4px;color:var(--t1);margin-bottom:2px}
+#s-progress .psub{font-size:12px;color:var(--t3);line-height:1.4;font-weight:500}
+
+/* Hero card with the XP ring — strip gradients and animation */
+#s-progress .progress-hero{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;padding:16px;border-radius:14px;margin-bottom:14px}
+#s-progress .progress-hero::before,
+#s-progress .progress-hero::after{display:none!important}
+#s-progress .rrow2{gap:16px}
+#s-progress .rsvg{width:72px;height:72px;filter:none!important;animation:none!important}
+#s-progress .rtrk{stroke:var(--b1);stroke-width:5;fill:none}
+#s-progress .rfil{stroke:var(--a);stroke-width:5;fill:none}
+#s-progress .rlbl{fill:var(--t1);font-size:18px;font-weight:800}
+#s-progress .lvnm{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.2px}
+#s-progress .lvrk{font-size:12px;color:var(--t3);font-weight:600;margin-top:2px}
+#s-progress .lvxp{font-size:11px;color:var(--t3);margin-top:1px;font-variant-numeric:tabular-nums}
+#s-progress .pbw{margin-top:10px}
+#s-progress .pbl{display:flex;justify-content:space-between;font-size:11px;color:var(--t3);
+  font-weight:700;margin-bottom:4px;font-variant-numeric:tabular-nums}
+#s-progress .pbtr{height:3px;background:var(--e3);border-radius:100px;overflow:hidden}
+#s-progress .pbfi{height:100%;background:var(--a);border-radius:100px;transition:width .8s ease}
+
+/* Section headers — same uppercase tracker letter as Settings */
+#s-progress .sec{font-size:10.5px!important;font-weight:700!important;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--t3);margin:18px 2px 8px}
+#s-progress .sec .seca{font-size:10.5px;color:var(--a);font-weight:700;letter-spacing:.5px;
+  text-transform:none;cursor:pointer}
+
+/* Quad stat cards — flat, mono icons, one number colour */
+#s-progress .s4{gap:8px;margin-bottom:4px}
+#s-progress .s4c{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;border-radius:12px;padding:14px 12px;position:relative;overflow:hidden}
+#s-progress .s4c::before{display:none!important}
+#s-progress .s4c:active{background:var(--e2);transform:scale(.985)}
+#s-progress .s4ca{font-size:14px;color:var(--t3);position:absolute;top:10px;right:12px}
+#s-progress .s4ci-svg{width:30px!important;height:30px!important;background:var(--e2)!important;
+  border:1px solid var(--b1)!important;border-radius:9px;margin-bottom:10px}
+#s-progress .s4ci-svg svg{width:16px!important;height:16px!important;stroke:var(--t2)!important}
+#s-progress .s4c .s4ci-svg svg [fill]:not([fill="none"]){fill:transparent!important}
+/* Override the rainbow per-card accent for stat values */
+#s-progress .s4c .s4cv,
+#s-progress .s4c:nth-child(1) .s4cv,
+#s-progress .s4c:nth-child(2) .s4cv,
+#s-progress .s4c:nth-child(3) .s4cv,
+#s-progress .s4c:nth-child(4) .s4cv{color:var(--t1)!important;font-size:20px;font-weight:800;
+  letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+#s-progress .s4cl{font-size:11px;color:var(--t3);font-weight:600;line-height:1.3;
+  text-transform:uppercase;letter-spacing:.4px}
+#s-progress .premium-mask{color:var(--t3)!important;font-size:11px!important;font-weight:600;
+  text-transform:none;letter-spacing:0}
+
+/* Weekly chart card — flat */
+#s-progress .chart-wrap{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;perspective:none!important;padding:14px 12px;border-radius:12px}
+#s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:90px}
+#s-progress .bc{flex:1;display:flex;align-items:flex-end;justify-content:center;height:100%}
+#s-progress .bb{width:100%;max-width:18px;background:var(--a);border-radius:4px 4px 0 0;
+  transition:height .8s ease;opacity:.85}
+#s-progress .bb.td{background:var(--a);opacity:1}
+#s-progress .bb.zero{background:var(--b1);opacity:.5;height:3px!important}
+#s-progress .chartdays{display:flex;gap:6px;margin-top:6px}
+#s-progress .bd{flex:1;text-align:center;font-size:10.5px;color:var(--t3);font-weight:600;
+  letter-spacing:.3px}
+#s-progress .bd.td{color:var(--a)}
+
+/* TOEFL card — flat */
+#s-progress .toefl-card{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;padding:14px 16px;border-radius:12px}
+#s-progress .toefl-empty{font-size:12px;color:var(--t3);text-align:center;padding:4px 0}
+
+/* Achievements button — flat with hairline border */
+#s-progress .ach-home-btn{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;padding:13px 14px;border-radius:12px;font-size:13px;font-weight:600}
+#s-progress .ach-home-btn svg{stroke:var(--t2)!important;fill:none!important}
+#s-progress .ach-home-btn:active{background:var(--e2)}
+#s-progress .ach-home-cnt{margin-left:auto;font-size:11px;color:var(--t3);font-weight:700;
+  font-variant-numeric:tabular-nums;background:var(--e2);border:1px solid var(--b1);
+  padding:2px 8px;border-radius:100px}
+
+/* Error diary cards — match flat hairline aesthetic */
+#s-progress #errdiary-wrap > *{background:transparent!important;border:1px solid var(--b1)!important;
+  box-shadow:none!important;border-radius:12px}
 </style>
 </head>
 <body>
