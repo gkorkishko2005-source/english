@@ -374,6 +374,37 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Quick grid */
 .qg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+/* Single-tile mode — used when Quick start collapses to one ALEX
+   Chat tile. The grid keeps its layout system but spans full width. */
+.qg-single{grid-template-columns:1fr}
+.qg-single .qb{padding:18px 16px}
+
+/* Today rows — make the merged daily-goal rows feel tappable. */
+.today-row{cursor:pointer;transition:background .15s}
+.today-row:active{background:rgba(var(--ar),.04)}
+
+/* Exam Hub CTA — secondary primary action under Continue lesson.
+   Mirrors the minimal design language: hairline border, single
+   accent, no gradients. */
+.exam-cta{display:flex;align-items:center;gap:12px;
+  background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:14px 14px;margin-bottom:13px;cursor:pointer;transition:.18s}
+.exam-cta:active{transform:scale(.98);border-color:rgba(var(--ar),.25)}
+.exam-cta-ic{flex:0 0 38px;width:38px;height:38px;border-radius:50%;
+  background:rgba(var(--ar),.08);color:var(--a);
+  display:flex;align-items:center;justify-content:center}
+.exam-cta-ic svg{width:20px;height:20px}
+.exam-cta-text{flex:1;min-width:0}
+.exam-cta-title{font-size:14px;font-weight:700;color:var(--t1);line-height:1.2}
+.exam-cta-sub{font-size:12px;color:var(--t2);margin-top:2px;letter-spacing:.2px}
+.exam-cta-arr{color:var(--a);font-size:18px;font-weight:600;line-height:1;padding-right:2px}
+
+/* Idiom-of-the-day message bubble (delivered inside chat). */
+.idiom-msg{padding:2px 0}
+.idiom-msg-lbl{font-size:10.5px;font-weight:700;color:var(--a);letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px}
+.idiom-msg-phrase{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.idiom-msg-meaning{font-size:13px;color:var(--t2);line-height:1.4;margin-bottom:5px}
+.idiom-msg-example{font-size:12.5px;color:var(--t3);font-style:italic;line-height:1.45}
 .qb{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:15px 13px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s;animation:qb-in .4s ease-out backwards}
 .qb:nth-child(1){animation-delay:.05s}
 .qb:nth-child(2){animation-delay:.1s}
@@ -2062,11 +2093,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
-  <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="openPathPicker()"></div>
-  <!-- The streak chip used to live here. It has been replaced by the
-       growth tree on the Progress tab, which carries the same idea
-       — recurrence — without the cookie-cutter day-counter UI. -->
-  <!-- Continue lesson CTA -->
+  <!-- Path banner removed: the active Learning Path is already
+       visible inside the Course tab; a duplicate banner here only
+       competed with the Continue-lesson CTA below. -->
+  <!-- Continue lesson CTA — the primary action. Always at the top. -->
   <div class="continue-card" id="continue-card" style="display:none" onclick="continueLessonTap()">
     <div class="cont-bar" id="cont-bar"></div>
     <div class="cont-main">
@@ -2082,45 +2112,41 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
   </div>
+  <!-- TODAY: three goals aligned with the platform's purpose —
+       course progress, long-term memory (cards), exam readiness.
+       Replaces the old 4-row random Missions section, which mixed
+       chat-pings and mini-games that duplicated other tabs. -->
   <div class="sec"><span id="msec-lbl"></span></div>
   <div class="card" id="mcard">
-    <div class="mrow"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp" id="mxp1">+5 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc2"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt2"></div><div class="mxp" id="mxp2">+7 XP</div></div>
-    <div class="mrow"><div class="mchk" id="mc3"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt3"></div><div class="mxp" id="mxp3">+8 XP</div></div>
-    <div class="mrow" style="border-bottom:none"><div class="mchk" id="mc4"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt4"></div><div class="mxp" id="mxp4">+10 XP</div></div>
+    <div class="mrow today-row" onclick="continueLessonTap()"><div class="mchk" id="mc1"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt1"></div><div class="mxp" id="mxp1">+10 XP</div></div>
+    <div class="mrow today-row" onclick="goCardsTab()"><div class="mchk" id="mc2"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt2"></div><div class="mxp" id="mxp2">+9 XP</div></div>
+    <div class="mrow today-row" style="border-bottom:none" onclick="goExamsTab()"><div class="mchk" id="mc3"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div><div class="mtxt" id="mt3"></div><div class="mxp" id="mxp3">+8 XP</div></div>
   </div>
+  <!-- Exam Hub CTA — the second primary goal. Replaces Weekly
+       Challenge, which was an abstract metaphor competing with the
+       Today goals and the growth tree. -->
+  <div class="exam-cta" id="exam-cta" onclick="openExamPrep()">
+    <div class="exam-cta-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M22 7l-6 4v6l6-4V7z"/><path d="M16 5l6 2"/><path d="M6 11h6M6 15h4"/></svg></div>
+    <div class="exam-cta-text">
+      <div class="exam-cta-title" id="exam-cta-title">Exam preparation</div>
+      <div class="exam-cta-sub" id="exam-cta-sub">TOEFL · IELTS · CAE</div>
+    </div>
+    <div class="exam-cta-arr">›</div>
+  </div>
+  <!-- Quick start — a single tile leading into ALEX Chat, where
+       grammar, roleplay and text-check are already available as
+       chips. Four separate tiles for those modes only duplicated
+       what the chat already offers. -->
   <div class="sec"><span id="qs-lbl"></span></div>
-  <div class="qg">
-    <div class="qb qa"  onclick="openDrillPicker()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5v14"/><path d="M3 5.2c0-.55.45-1 1-1h4.5a3 3 0 013 3v13a2.5 2.5 0 00-2.5-2.5H4a1 1 0 01-1-1V5.2z"/><path d="M21 5.2c0-.55-.45-1-1-1h-4.5a3 3 0 00-3 3v13a2.5 2.5 0 012.5-2.5H20a1 1 0 001-1V5.2z"/></svg></div>
-      <div class="qbt" id="qb1t"></div><div class="qbs" id="qb1s"></div>
+  <div class="qg qg-single">
+    <div class="qb qa" onclick="goTab('chat')">
+      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg></div>
+      <div class="qbt" id="qb1t">ALEX Chat</div><div class="qbs" id="qb1s">Grammar · Roleplay · Text check</div>
     </div>
-    <div class="qb qb2" onclick="openRoleplay()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8l-4 3v-3H5a2 2 0 01-2-2V6z"/><path d="M16.5 10H19a2 2 0 012 2v4a2 2 0 01-2 2h-1v3l-3.5-3H13"/></svg></div>
-      <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
-    </div>
-    <div class="qb qd"  onclick="openTextChecker()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2.2 2.2 4.3-4.4"/></svg></div>
-      <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
-    </div>
-    <div class="qb" onclick="openWritingStudio()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M9 13l2 2 4-4"/><path d="M9 17h6"/></svg></div>
-      <div class="qbt" id="qb5t">Writing</div><div class="qbs" id="qb5s">TOEFL · IELTS rubric</div>
-    </div>
-    <!-- TOEFL tile removed: lives in the Exams sub-tab inside Learn.
-         Path tile removed: the active path is already shown in the
-         banner above when set. -->
   </div>
-  <!-- Weekly Challenge -->
-  <div class="challenge-card" id="challenge-card" onclick="joinChallenge()">
-    <div class="ch-label"><div class="ch-dot"></div><span id="ch-label-txt">Weekly Challenge</span></div>
-    <div class="ch-title" id="ch-title">—</div>
-    <div class="ch-sub" id="ch-sub">—</div>
-    <div class="ch-progress"><div class="ch-fill" id="ch-fill" style="width:20%"></div></div>
-    <div class="ch-footer"><span class="ch-days" id="ch-days">—</span><span class="ch-reward" id="ch-reward">—</span></div>
-  </div>
-  <!-- Idiom of the Day -->
-  <div class="idiom-card" id="idiom-card"></div>
+  <!-- Idiom-of-the-day card removed from Home: the idiom is now
+       posted as a bot message in chat on the first open of the day,
+       which is where you actually use it. -->
 </div>
 
 <!-- CHAT -->
@@ -2965,19 +2991,20 @@ function applyLang(){
   document.getElementById('nb5').textContent = {ru:'Настройки',en:'Settings',es:'Ajustes',de:'Einstellungen',fr:'Paramètres',pt:'Config.',uk:'Налаштування',tr:'Ayarlar',zh:'设置',ar:'إعدادات'}[lang]||'Settings';
   // Home
   refreshSub();
-  document.getElementById('msec-lbl').textContent = L.missions;
+  /* "Today" instead of "Daily missions · 2 for streak" — the section
+     now shows three fixed goals, not a random pool. */
+  document.getElementById('msec-lbl').textContent = ({ru:'Сегодня',en:'Today',es:'Hoy',de:'Heute',fr:'Aujourd’hui',pt:'Hoje',uk:'Сьогодні',tr:'Bugün',zh:'今天',ar:'اليوم'}[lang]||'Today');
   try{loadMissions();}catch(e){}
   document.getElementById('qs-lbl').textContent=L.qs;
-  /* Quick start grid (4 tiles). TOEFL and Path tiles were removed —
-     TOEFL lives in the Exams sub-tab, the active Path shows as a
-     banner above. The id="qb1..qb5" naming is preserved so any older
-     code paths that still reference them stay null-safe. */
+  /* Quick start collapsed to a single ALEX Chat tile — Grammar,
+     Roleplay and Text-check live as chips inside the chat already.
+     Helper stays null-safe for any older code paths. */
   var _t=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
-  _t('qb1t',L.gr);_t('qb1s',L.grs);
-  _t('qb2t',L.fc);_t('qb2s',L.fcs);
-  _t('qb4t',L.sp);_t('qb4s',L.sps);
-  _t('qb5t',{ru:'Текст',en:'Writing',es:'Escritura',de:'Schreiben',fr:'Écriture',pt:'Escrita',uk:'Текст',tr:'Yazma',zh:'写作',ar:'كتابة'}[lang]||'Writing');
-  _t('qb5s',{ru:'TOEFL · IELTS оценка',en:'TOEFL · IELTS rubric',es:'TOEFL · IELTS rúbrica',de:'TOEFL · IELTS-Bewertung',fr:'TOEFL · IELTS critères',pt:'TOEFL · IELTS rubrica',uk:'TOEFL · IELTS оцінка',tr:'TOEFL · IELTS rubrik',zh:'TOEFL · IELTS 评分',ar:'TOEFL · IELTS تقييم'}[lang]||'TOEFL · IELTS rubric');
+  _t('qb1t',{ru:'Чат с ALEX',en:'ALEX Chat',es:'Chat con ALEX',de:'ALEX Chat',fr:'Chat ALEX',pt:'Chat com ALEX',uk:'Чат з ALEX',tr:'ALEX Sohbet',zh:'与 ALEX 聊天',ar:'محادثة ALEX'}[lang]||'ALEX Chat');
+  _t('qb1s',{ru:'Грамматика · Сценки · Проверка текста',en:'Grammar · Roleplay · Text check',es:'Gramática · Roleplay · Revisión',de:'Grammatik · Rollenspiel · Textprüfung',fr:'Grammaire · Roleplay · Vérification',pt:'Gramática · Roleplay · Revisão',uk:'Граматика · Сценки · Перевірка',tr:'Dilbilgisi · Roleplay · Metin kontrolü',zh:'语法 · 角色扮演 · 文本检查',ar:'قواعد · أدوار · فحص النص'}[lang]||'Grammar · Roleplay · Text check');
+  /* Exam Hub CTA copy. */
+  _t('exam-cta-title',{ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de examen',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',pt:'Preparação de exame',uk:'Підготовка до іспитів',tr:'Sınav hazırlığı',zh:'考试准备',ar:'التحضير للامتحان'}[lang]||'Exam preparation');
+  _t('exam-cta-sub','TOEFL · IELTS · CAE');
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'Выбери путь обучения',en:'Choose Learning Path',es:'Elige tu camino',pt:'Escolher caminho'}[lang]||'Choose Learning Path';
   var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
@@ -4057,9 +4084,15 @@ function updateXPBar(xp){
   const rfil=document.getElementById('rfil');  if(rfil)rfil.style.strokeDashoffset=220-(pct/100)*220;
 }
 
-/* ══ MISSIONS ══ */
-const MK=['1','2','3','4'];
-/* Mission pool — 4 of these are picked daily (deterministic by date). */
+/* ══ MISSIONS (a.k.a. TODAY) ══
+   The Home now shows three fixed daily goals aligned with the
+   platform's purpose: course progress, long-term memory (cards),
+   exam readiness. The legacy random mission pool is kept below for
+   any leftover callers (trackM still routes by key), but
+   todayMissions() always returns the same three rows so the daily
+   habit is unambiguous. */
+const MK=['1','2','3'];
+/* Mission pool — used by trackM keys; not surfaced on Home anymore. */
 const MISSION_POOL=[
   {id:'chat3', key:'chat',  target:3, xp:6,  diff:'easy',   label:{ru:'Отправь 3 сообщения ALEX',en:'Send 3 messages to ALEX',es:'Envía 3 mensajes a ALEX',pt:'Envie 3 mensagens ao ALEX'}},
   {id:'chat5', key:'chat',  target:5, xp:8,  diff:'medium', label:{ru:'Отправь 5 сообщений ALEX',en:'Send 5 messages to ALEX',es:'Envía 5 mensajes a ALEX',pt:'Envie 5 mensagens ao ALEX'}},
@@ -4091,16 +4124,30 @@ function prevDayKey(){
   const d=new Date();d.setDate(d.getDate()-1);return localDayKey(d);
 }
 function todayMissions(){
-  const seed=_todaySeed();
-  const disallowed = hasTier('ultimate') ? [] : hasTier('pro') ? ['listen'] : hasTier('basic') ? ['check','roleplay','story','listen'] : ['chat','check','roleplay','story','listen'];
-  const pool=MISSION_POOL.filter(m=>!disallowed.includes(m.key));
-  const idx=pool.map((_,i)=>i);
-  // Deterministic shuffle using seed.
-  for(let i=idx.length-1;i>0;i--){
-    const j=Math.abs((seed*9301+i*49297)%233280)%(i+1);
-    const t=idx[i];idx[i]=idx[j];idx[j]=t;
-  }
-  return idx.slice(0,4).map(i=>pool[i]);
+  /* Three fixed goals every day: course lesson, flashcards,
+     exam-style listening task. The random pool was dropped because
+     the chat/roleplay/mini-game variants only duplicated other
+     tabs and diluted the message of "what should I do today". */
+  return [
+    {id:'today_lesson', key:'lesson', target:1,  xp:10, label:{
+      ru:'Пройди 1 урок курса',  en:'Complete 1 course lesson',
+      es:'Completa 1 lección',   pt:'Conclua 1 lição',
+      de:'1 Kurslektion absolvieren', fr:'Termine 1 leçon du cours',
+      uk:'Пройди 1 урок курсу',  tr:'1 ders bitir',
+      zh:'完成 1 节课程',         ar:'أكمل درسًا واحدًا من الدورة'}},
+    {id:'today_cards',  key:'words',  target:10, xp:9, label:{
+      ru:'Повтори 10 карточек',  en:'Review 10 flashcards',
+      es:'Repasa 10 tarjetas',   pt:'Revise 10 cartões',
+      de:'10 Karten wiederholen', fr:'Révise 10 cartes',
+      uk:'Повтори 10 карток',    tr:'10 kartı tekrar et',
+      zh:'复习 10 张卡片',        ar:'راجع 10 بطاقات'}},
+    {id:'today_exam',   key:'listen', target:1,  xp:8, label:{
+      ru:'1 экзамен. задание (TOEFL/IELTS)', en:'1 exam task (TOEFL/IELTS)',
+      es:'1 tarea de examen',    pt:'1 tarefa de exame',
+      de:'1 Prüfungsaufgabe',    fr:'1 tâche d’examen',
+      uk:'1 екзаменаційне завдання', tr:'1 sınav görevi',
+      zh:'1 个考试任务',          ar:'مهمة امتحان واحدة'}}
+  ];
 }
 function dailyMissionDoneCount(sv){
   const done=(sv&&sv.done)||{};
@@ -4531,6 +4578,33 @@ function clearSilent(){
   document.getElementById('cmsgs').innerHTML='';
   if(API&&window._uid)fetch(`${API}/api/chat/${window._uid}`,{method:'DELETE'}).catch(()=>{});
   const s=getSes(curSid);if(s){s.msgs=[];saveSessions();}
+}
+
+/* Navigation helpers used by the Today rows on Home. */
+function goCardsTab(){try{goTab('learn');switchLearnTab('cards');initLearn();}catch(_){try{goTab('learn');}catch(_){}}}
+function goExamsTab(){try{goTab('learn');switchLearnTab('road');}catch(_){try{goTab('learn');}catch(_){}}}
+
+/* ══ IDIOM-IN-CHAT DELIVERY ══
+   The Idiom-of-the-Day used to be a card on Home. It now arrives as
+   an ALEX message inside chat on the first daily open — that's where
+   you'd actually try it. Posted at most once per local day. */
+function _formatIdiomMessage(idiom){
+  var lbl={ru:'💡 Идиома дня',en:'💡 Idiom of the day',es:'💡 Modismo del día',de:'💡 Redewendung des Tages',fr:'💡 Expression du jour',pt:'💡 Expressão do dia',uk:'💡 Ідіома дня',tr:'💡 Günün deyimi',zh:'💡 今日习语',ar:'💡 تعبير اليوم'}[lang]||'💡 Idiom of the day';
+  var meanLbl={ru:'Значение',en:'Meaning',es:'Significado',de:'Bedeutung',fr:'Sens',pt:'Significado',uk:'Значення',tr:'Anlam',zh:'意思',ar:'المعنى'}[lang]||'Meaning';
+  return '<div class="idiom-msg"><div class="idiom-msg-lbl">'+lbl+'</div><div class="idiom-msg-phrase">'+safeHTML(idiom.phrase)+'</div><div class="idiom-msg-meaning"><b>'+meanLbl+':</b> '+safeHTML(idiom.meaning[lang]||idiom.meaning.en)+'</div><div class="idiom-msg-example">"'+safeHTML(idiom.example)+'"</div></div>';
+}
+function maybePostIdiom(){
+  try{
+    if(typeof IDIOMS==='undefined'||!IDIOMS.length)return;
+    var key='idiom_pushed_'+localDayKey();
+    if(LS.get(key))return;
+    var dayOfYear=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/86400000);
+    var idiom=IDIOMS[dayOfYear%IDIOMS.length];
+    if(!idiom)return;
+    setTimeout(function(){
+      try{addMsg('bot',_formatIdiomMessage(idiom));LS.set(key,'1');}catch(_){}
+    },650);
+  }catch(_){}
 }
 
 function openChat(topic){
@@ -11962,6 +12036,10 @@ async function init(){
           addMsg('bot',quickHintChips());
         },400);
       }
+      /* First open of the day: deliver the day's idiom as a message,
+         not a card on Home. Runs whether the session was restored or
+         freshly created. */
+      try{maybePostIdiom();}catch(_){}
     }catch(e){
       try{addMsg('bot',L?.welcome||'Привет! Я ALEX 👋');}catch{}
     }
