@@ -93,6 +93,16 @@ def referral_url(uid: int) -> str:
 def channel_url() -> str:
     return OFFICIAL_CHANNEL_URL or public_bot_url()
 
+def channel_handle() -> str:
+    """Returns "@PolyGlottyDailyEnglish" extracted from OFFICIAL_CHANNEL_URL.
+    Used inside plain-text share copy where a t.me/... URL would
+    collide with the preview Telegram renders for the ref link."""
+    try:
+        path = (OFFICIAL_CHANNEL_URL or "").rstrip("/").split("/")[-1]
+        return f"@{path}" if path else ""
+    except Exception:
+        return ""
+
 def html_link(url: str, text: str, bold: bool = False) -> str:
     label = html.escape(text, quote=False)
     href = html.escape(url, quote=True)
@@ -665,25 +675,42 @@ async def send_reminder(uid: int):
     if streak > 2: text += f"\n\n▥ Streak: <b>{streak}</b>"
     if due_cnt:    text += f"\n◌ <b>{due_cnt}</b> {'слов на повторение' if lang=='ru' else 'words due'} → /vocab"
     if due_idioms: text += f"\n◆ <b>{due_idioms}</b> {'идиом на повторение' if lang=='ru' else 'idioms due'} → /vocab"
+    # Bot-side messages always carry a Channel button so the reader has
+    # somewhere to go when they're not ready to open the app.
     app_url = webapp_url()
-    kb = None
+    rows = []
     if app_url:
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="Открыть практику" if lang=="ru" else "Open practice",
-                                  web_app=WebAppInfo(url=app_url))]
-        ])
+        rows.append([InlineKeyboardButton(
+            text="Открыть практику" if lang=="ru" else "Open practice",
+            web_app=WebAppInfo(url=app_url))])
+    rows.append([InlineKeyboardButton(
+        text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel",
+        url=channel_url())])
+    kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
     try: await bot.send_message(uid, text, reply_markup=kb)
     except Exception as e: logger.warning(f"Reminder failed {uid}: {e}")
 
 async def send_weekly_report(uid: int):
     stats = await get_full_stats(uid)
     lang  = await get_lang(uid)
+    ru = lang == "ru"
     try:
+        app_url = webapp_url()
+        rows = []
+        if app_url:
+            rows.append([InlineKeyboardButton(
+                text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open app",
+                web_app=WebAppInfo(url=app_url))])
+        rows.append([InlineKeyboardButton(
+            text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
+            url=channel_url())])
+        kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
         await bot.send_message(uid,
-            f"▥ <b>{'Еженедельный отчёт' if lang=='ru' else 'Weekly Report'}</b>\n\n"
+            f"▥ <b>{'Еженедельный отчёт' if ru else 'Weekly Report'}</b>\n\n"
             f"⌖ {stats['level']} · {stats['rank']} · {stats['xp']} XP\n"
             f"▥ Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-            f"◌ Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>"
+            f"◌ Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>",
+            reply_markup=kb
         )
     except Exception: pass
 
@@ -739,6 +766,20 @@ async def send_daily_word(uid: int):
                 [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
                                       url=channel_url())],
             ])
+        # Tier-agnostic "how to use" line. The previous wording assumed
+        # the reader had a Basic subscription ("В Basic ALEX исправит…")
+        # which was wrong for free-tier readers — and this message goes
+        # to every user, regardless of tier.
+        how_to_ru = (
+            "прочитай пример вслух, придумай своё предложение с этим словом "
+            "и попробуй использовать его сегодня в сообщении или разговоре. "
+            "Открой приложение, чтобы закрепить слово в карточках."
+        )
+        how_to_en = (
+            "read the example aloud, write your own sentence with this word, "
+            "and try to use it in a message or conversation today. Open the "
+            "app to lock it in with flashcards."
+        )
         await bot.send_message(uid,
             f"◌ <b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
             f"<b>{w['word']}</b>\n"
@@ -746,7 +787,7 @@ async def send_daily_word(uid: int):
             f"{w['tr']}\n\n"
             f"<i>{w['ex']}</i>\n\n"
             f"<b>{'Как использовать:' if ru else 'How to use it:'}</b> "
-            f"{'напиши своё предложение с этим словом. В Basic ALEX исправит его в чате.' if ru else 'write your own sentence with this word. With Basic, ALEX will correct it in chat.'}\n\n"
+            f"{how_to_ru if ru else how_to_en}\n\n"
             f"<i>{motivation_line(lang)}</i>",
             parse_mode="HTML", reply_markup=kb
         )
@@ -918,10 +959,16 @@ async def cmd_start(message: Message):
         InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
     ])
     ref_link = referral_url(uid)
+    # Share-text includes the channel handle so an invited friend
+    # picks up both the bot (via the ref link Telegram appends) and
+    # the channel for daily practice.
+    ch = channel_handle()
+    ch_tail_ru = f" · Канал: {ch}" if ch else ""
+    ch_tail_en = f" · Channel: {ch}" if ch else ""
     share_text = (
-        "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty"
+        "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty" + ch_tail_ru
         if ru else
-        "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty"
+        "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty" + ch_tail_en
     )
     kb_buttons.append([InlineKeyboardButton(
         text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
@@ -1040,7 +1087,7 @@ async def cmd_share(message: Message):
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=f"{ICON['share']} Поделиться" if ru else f"{ICON['share']} Share",
-            url=f"https://t.me/share/url?url={quote(link, safe='')}&text={quote('AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty', safe='')}"
+            url=f"https://t.me/share/url?url={quote(link, safe='')}&text={quote('AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty' + (f' · Channel: {channel_handle()}' if channel_handle() else ''), safe='')}"
         )],
         [InlineKeyboardButton(
             text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
