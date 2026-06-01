@@ -45,13 +45,17 @@
     this.xp=opt.xp||0;this.maxXp=opt.maxXp||100;this.mood=opt.mood||'fresh';this.prevMood=this.mood;
     this.moodBlend=1;this.onTap=opt.onTap;this.rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.a=css(container,'--a','#4f8aff');this.t=css(container,'--t1','#eef2ff');
-    this.cv=document.createElement('canvas');this.cv.setAttribute('role','img');this.cv.style.cssText='width:100%;height:100%;display:block;touch-action:none';
+    this.cv=document.createElement('canvas');this.cv.setAttribute('role','img');this.cv.style.cssText='width:100%;height:100%;display:block;pointer-events:none';
     this.ctx=this.cv.getContext('2d');container.innerHTML='';container.appendChild(this.cv);
     this.w=this.h=1;this.base=1;this.br=[];this.leaves=[];this.fruit=[];this.fallen=[];this.puffs=[];this.parts=[];
-    this.tapWaves=[];this.drag=null;this.hidden=false;this.inView=true;this.slow=0;this.cap=1;this.last=performance.now();
-    this.resize=this.resize.bind(this);this.loop=this.loop.bind(this);this.handlePointer=this.handlePointer.bind(this);
-    this.movePointer=this.movePointer.bind(this);this.cv.addEventListener('pointerdown',this.handlePointer,{passive:true});
-    this.cv.addEventListener('pointermove',this.movePointer,{passive:true});
+    /* User interaction has been removed: no tap waves, no drag wind,
+       no fruit drop on touch. The tree's job is to look beautiful
+       and quietly mark progress, not to be a toy. */
+    this.hidden=false;this.inView=true;this.slow=0;this.cap=1;this.last=performance.now();
+    /* Progress shimmer: each setXp() with a higher value spawns a
+       gentle light streak that travels up the trunk. */
+    this.shimmers=[];this.lastXpSeen=opt.xp||0;
+    this.resize=this.resize.bind(this);this.loop=this.loop.bind(this);
     this.ro=new ResizeObserver(this.resize);this.ro.observe(container);
     var self=this;this.vis=function(){self.hidden=document.hidden};document.addEventListener('visibilitychange',this.vis);
     this.io=new IntersectionObserver(function(e){self.inView=!!(e[0]&&e[0].isIntersecting)},{threshold:.05});this.io.observe(container);
@@ -66,11 +70,18 @@
   Engine.prototype.setStage=function(n){n=clamp(n||1,1,8);if(n===this.targetStage)return;if(this.rm){this.stage=this.targetStage=n;this.build();return}
     this.fromStage=this.stage;this.targetStage=n;this.trans=0;this.transDur=2200+Math.random()*700;};
   Engine.prototype.setMood=function(m){if(!MOOD[m])m='fresh';if(m===this.mood)return;this.prevMood=this.mood;this.mood=m;this.moodBlend=0};
-  Engine.prototype.setXp=function(x,max){this.xp=x||0;this.maxXp=max||this.maxXp||100;this.build()};
+  Engine.prototype.setXp=function(x,max){
+    var prev=this.lastXpSeen, next=x||0;
+    this.xp=next;this.maxXp=max||this.maxXp||100;
+    if(next>prev+0.0001){
+      var jump=Math.min(1,(next-prev)/Math.max(1,this.maxXp*.25));
+      this.shimmers.push({t:0,dur:1.6+jump*1.1,strength:.55+jump*.45});
+    }
+    this.lastXpSeen=next;this.build();
+  };
   Engine.prototype.destroy=function(){
     cancelAnimationFrame(this.raf);this.ro&&this.ro.disconnect();this.io&&this.io.disconnect();
-    document.removeEventListener('visibilitychange',this.vis);this.cv.removeEventListener('pointerdown',this.handlePointer);
-    this.cv.removeEventListener('pointermove',this.movePointer);this.cv.remove();
+    document.removeEventListener('visibilitychange',this.vis);this.cv.remove();
   };
 
   Engine.prototype.progress=function(){return clamp(this.xp/Math.max(1,this.maxXp),0,1)}
@@ -138,14 +149,12 @@
     if(this.trans!==undefined){this.trans+=dt*1000;if(this.trans>=this.transDur){this.stage=this.targetStage;this.trans=undefined}this.build()}
     this.moodBlend=Math.min(1,this.moodBlend+dt/1.5);
     var frame=dt*1000;if(frame>18)this.slow++;else this.slow=Math.max(0,this.slow-2);if(this.slow>30){this.cap=.65;this.slow=0}
-    if(this.drag){this.drag.t-=dt;if(this.drag.t<=0)this.drag=null}
-    for(var i=this.tapWaves.length-1;i>=0;i--){this.tapWaves[i].age+=dt;if(this.tapWaves[i].age>.8)this.tapWaves.splice(i,1)}
     var m=MOOD[this.mood]||MOOD.fresh, amp=m[0], sp=m[1];if(this.mood==='windy')amp*=1+.5*Math.sin(t*.3);
-    for(i=0;i<this.leaves.length;i++){var L=this.leaves[i], n=noise(L.x*.015,L.y*.015,t*sp);L.wind=n*amp;
+    for(var i=0;i<this.leaves.length;i++){var L=this.leaves[i], n=noise(L.x*.015,L.y*.015,t*sp);L.wind=n*amp;
       L.shake*=Math.pow(.08,dt);
-      if(this.drag){var ddx=L.x-this.drag.x,ddy=L.y-this.drag.y,dd=Math.sqrt(ddx*ddx+ddy*ddy),rr=this.h*.28;if(dd<rr)L.shake+=(1-dd/rr)*this.drag.t*.45}
-      for(var j=0;j<this.tapWaves.length;j++){var w=this.tapWaves[j],dx=L.x-w.x,dy=L.y-w.y,d=Math.sqrt(dx*dx+dy*dy);if(d<w.r)L.shake+=(1-d/w.r)*(1-w.age/.8)*.9}}
-    for(i=this.fruit.length-1;i>=0;i--){var F=this.fruit[i];if(F.fall){F.vy+=420*dt;F.x+=F.vx*dt;F.y+=F.vy*dt;if(F.y>this.base){this.puff(F.x,this.base,this.a);F.fall=false;F.hide=30;F.y=this.base}}else if(F.hide>0){F.hide-=dt;if(F.hide<=0){F.hide=0;F.grow=0}}else if(F.grow<1)F.grow=Math.min(1,F.grow+dt*.35)}
+    }
+    for(i=this.fruit.length-1;i>=0;i--){var F=this.fruit[i];if(F.grow<1)F.grow=Math.min(1,F.grow+dt*.35)}
+    for(i=this.shimmers.length-1;i>=0;i--){this.shimmers[i].t+=dt;if(this.shimmers[i].t>=this.shimmers[i].dur)this.shimmers.splice(i,1)}
     this.updateParticles(dt,t);
   };
 
@@ -163,18 +172,60 @@
     else{p.type='leaf';p.x=-20-r()*W*.2;p.y=H*(.12+r()*.42);p.vx=(m==='windy'?180:70)+r()*80;p.vy=(m==='windy'?36:22)+r()*42;p.life=(m==='windy'?2.6:5)+r()*2;p.rot=r()*TWO}
   };
 
-  Engine.prototype.handlePointer=function(e){
-    var r=this.cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;this.onTap&&this.onTap(e);
-    try{window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback&&Telegram.WebApp.HapticFeedback.impactOccurred('light')}catch(_){}
-    this.tapWaves.push({x:x,y:y,r:this.h*.32,age:0});this.drag={x:x,y:y,t:.5};
-    for(var i=0;i<this.fruit.length;i++){var f=this.fruit[i],dx=f.x-x,dy=f.y-y;if(!f.fall&&!f.hide&&dx*dx+dy*dy<(f.r+18)*(f.r+18)){f.fall=true;f.vx=(dx>0?1:-1)*(60+Math.random()*45);f.vy=-80;break}}
-  };
-  Engine.prototype.movePointer=function(e){if(!this.drag||e.buttons===0)return;var r=this.cv.getBoundingClientRect();this.drag={x:e.clientX-r.left,y:e.clientY-r.top,t:.5}};
-
   Engine.prototype.draw=function(t){
     var c=this.ctx,W=this.w,H=this.h,b=this.base,sf=this.stageFloat();c.clearRect(0,0,W,H);c.lineCap='round';c.lineJoin='round';
+    this.drawAtmosphere(c,t);
     c.strokeStyle=this.t;c.fillStyle=this.t;c.globalAlpha=.32;c.beginPath();c.moveTo(W*.16,b);c.quadraticCurveTo(W*.5,b-5,W*.84,b);c.stroke();c.globalAlpha=1;
-    this.drawWeatherBack(c,t);this.drawRoots(c);this.drawBranches(c,t);this.drawYoungExtras(c,sf,t);this.drawLeaves(c,t);this.drawFruit(c,t);this.drawParticles(c,t);this.drawDirt(c);
+    this.drawWeatherBack(c,t);
+    /* Subtle breathing sway — the whole tree drifts within a hair
+       of a degree, like it's quietly inhaling. Anchored at the soil
+       so the roots stay put. */
+    var sway=Math.sin(t*.42)*0.006+Math.sin(t*.17)*0.004;
+    c.save();c.translate(W*.5,b);c.rotate(sway);c.translate(-W*.5,-b);
+    this.drawRoots(c);
+    if(sf>=5)this.drawCanopyGlow(c,sf,t);
+    this.drawBranches(c,t);this.drawShimmers(c,t);this.drawYoungExtras(c,sf,t);this.drawLeaves(c,t);this.drawFruit(c,t);
+    c.restore();
+    this.drawParticles(c,t);this.drawDirt(c);
+  };
+  Engine.prototype.drawAtmosphere=function(c,t){
+    var W=this.w,H=this.h,m=this.mood,a=this.a;
+    /* Warm low-sat wash for fresh, cool slate for rainy, neutral
+       for the middle moods. Painted as a single soft radial so it
+       reads as "light in the room" rather than a sticker. */
+    var cx,cy,r1,r2,stop;
+    if(m==='fresh'){cx=W*.78;cy=H*.18;r2=Math.max(W,H)*.95;stop='rgba(255,214,158,0.18)'}
+    else if(m==='rainy'){cx=W*.4;cy=H*.12;r2=Math.max(W,H)*1.05;stop='rgba(120,140,170,0.16)'}
+    else if(m==='windy'){cx=W*.2;cy=H*.22;r2=Math.max(W,H);stop='rgba(180,195,220,0.13)'}
+    else {cx=W*.7;cy=H*.22;r2=Math.max(W,H);stop='rgba(210,200,240,0.13)'}
+    var g=c.createRadialGradient(cx,cy,8,cx,cy,r2);g.addColorStop(0,stop);g.addColorStop(1,'rgba(0,0,0,0)');
+    c.fillStyle=g;c.fillRect(0,0,W,H);
+  };
+  Engine.prototype.drawCanopyGlow=function(c,sf,t){
+    /* Soft accent halo behind the canopy so a mature tree feels
+       lit-from-within. Stronger as the stage grows. */
+    var W=this.w,H=this.h,b=this.base,trunk=lerp(H*.16,H*.32,(clamp(sf,5,8)-5)/3);
+    var cx=W*.5,cy=b-trunk-H*.06,r=H*.34+(sf-5)*H*.04;
+    var g=c.createRadialGradient(cx,cy,4,cx,cy,r);
+    var alpha=.10+.05*(sf-5)+.02*Math.sin(t*.6);
+    g.addColorStop(0,'rgba(255,255,255,'+alpha.toFixed(3)+')');
+    g.addColorStop(.55,'rgba(255,255,255,'+(alpha*.4).toFixed(3)+')');
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=g;c.beginPath();c.arc(cx,cy,r,0,TWO);c.fill();
+  };
+  Engine.prototype.drawShimmers=function(c,t){
+    /* Progress shimmer: ascending sparks along the trunk after XP gain. */
+    if(!this.shimmers.length)return;
+    var W=this.w,H=this.h,b=this.base,sf=this.stageFloat(),trunk=sf<4.7?H*.42:lerp(H*.16,H*.32,(clamp(sf,5,8)-5)/3);
+    var tipY=b-trunk,x=W*.5;
+    for(var i=0;i<this.shimmers.length;i++){
+      var s=this.shimmers[i],p=clamp(s.t/s.dur,0,1),fade=Math.sin(p*Math.PI),y=lerp(b-4,tipY-6,p),wob=Math.sin(p*8+i)*2;
+      c.fillStyle=this.a;c.globalAlpha=.55*fade*s.strength;
+      c.beginPath();c.arc(x+wob,y,2.2,0,TWO);c.fill();
+      c.globalAlpha=.22*fade*s.strength;
+      c.beginPath();c.arc(x+wob,y,5,0,TWO);c.fill();
+    }
+    c.globalAlpha=1;
   };
   Engine.prototype.drawDirt=function(c){if(!this.dirt)return;c.fillStyle=this.t;c.globalAlpha=.34;for(var i=0;i<this.dirt.length;i++){var d=this.dirt[i];c.beginPath();c.arc(d.x,d.y,d.r,0,TWO);c.fill()}c.globalAlpha=1};
   Engine.prototype.drawRoots=function(c){if(!this.roots)return;c.strokeStyle=this.t;c.globalAlpha=.55;for(var i=0;i<this.roots.length;i++){var r=this.roots[i];this.taper(c,r[0],r[1],r[2],r[3],3,1.2)}c.globalAlpha=1};
@@ -184,8 +235,16 @@
       this.taper(c,b.x1,b.y1,b.x2+dx,b.y2,b.w,b.w*.35);if(this.stageFloat()>=7&&b.w>4){c.globalAlpha=.26;c.lineWidth=1;c.beginPath();c.moveTo(lerp(b.x1,b.x2,.45)+2,b.y1+(b.y2-b.y1)*.45);c.lineTo(lerp(b.x1,b.x2,.45)-3,b.y1+(b.y2-b.y1)*.45+5);c.stroke();c.globalAlpha=1}}
   };
   Engine.prototype.drawLeaf=function(c,L,t){
-    var a=L.a+(L.wind||0)+(L.shake||0),len=L.len,w=L.w,x=L.x,y=L.y,cp=Math.cos(a),sp=Math.sin(a);
-    c.save();c.translate(x,y);c.rotate(a);c.strokeStyle=this.t;c.globalAlpha=.78;c.lineWidth=1.15;c.beginPath();c.moveTo(0,0);c.bezierCurveTo(len*.35,-w,len*.72,-w,len,0);c.bezierCurveTo(len*.72,w,len*.35,w,0,0);c.stroke();c.globalAlpha=.36;c.beginPath();c.moveTo(0,0);c.lineTo(len*.86,0);c.stroke();c.restore();
+    var a=L.a+(L.wind||0)+(L.shake||0),len=L.len,w=L.w,x=L.x,y=L.y;
+    c.save();c.translate(x,y);c.rotate(a);
+    /* Soft filled body for a sense of volume, then a hairline outline,
+       then a single vein. Keeps the minimal grammar but stops the
+       leaves from looking like wireframes. */
+    c.beginPath();c.moveTo(0,0);c.bezierCurveTo(len*.35,-w,len*.72,-w,len,0);c.bezierCurveTo(len*.72,w,len*.35,w,0,0);
+    c.fillStyle=this.t;c.globalAlpha=.16;c.fill();
+    c.strokeStyle=this.t;c.globalAlpha=.82;c.lineWidth=1.1;c.stroke();
+    c.globalAlpha=.34;c.lineWidth=.9;c.beginPath();c.moveTo(0,0);c.lineTo(len*.86,0);c.stroke();
+    c.restore();c.globalAlpha=1;
   };
   Engine.prototype.drawLeaves=function(c,t){for(var i=0;i<this.leaves.length;i++)this.drawLeaf(c,this.leaves[i],t)};
   Engine.prototype.drawFruit=function(c,t){c.fillStyle=this.a;for(var i=0;i<this.fruit.length;i++){var f=this.fruit[i];if(f.hide>0)continue;c.globalAlpha=.86*f.grow;c.beginPath();c.arc(f.x,f.y,f.r*f.grow,0,TWO);c.fill()}c.globalAlpha=1};
@@ -222,7 +281,7 @@
     function sync(d){
       d=d||window._d||{};var xp=d.xp||0,info=stageInfo(xp),max=info.max-info.min,stage=info.stage,mood=moodFromLegacy(),localXp=xp-info.min;
       if(window.RANKS){try{var r=window.RANKS.find(function(a,i){return xp<((window.RANKS[i+1]||{}).min||9999)});if(r){stage=r.stage||stage;max=(r.max||xp+100)-(r.min||0);localXp=xp-(r.min||0)}}catch(_){}}
-      if(!handle)handle=mount(stageEl,{stage:stage,mood:mood,xp:localXp,maxXp:max,onTap:function(){try{window.SFX&&window.SFX.tap&&window.SFX.tap()}catch(_){}}});
+      if(!handle)handle=mount(stageEl,{stage:stage,mood:mood,xp:localXp,maxXp:max});
       else{handle.setStage(stage);handle.setMood(mood);handle.setXp(localXp,max)}
     }
     ['growth-svg','growth-weather'].forEach(function(id){var e=document.getElementById(id);if(e)e.remove()});
