@@ -816,7 +816,54 @@ async def schedule_all():
 @dp.inline_query()
 async def handle_inline(query: InlineQuery):
     text = query.query.strip()
-    if not text or len(text) < 2:
+    qlow = text.lower()
+
+    # "invite" branch — used by the Share buttons in /start and /share.
+    # We can't put HTML inline links inside t.me/share/url?text=… (that
+    # mechanism only carries plain text and a URL preview). Going through
+    # inline mode is the only way to deliver a forwarded message where
+    # the call-to-action sits *inside* the text as clickable links.
+    if qlow == "" or qlow.startswith("invite") or qlow.startswith("пригласи") or qlow.startswith("share"):
+        uid = query.from_user.id
+        try:
+            lang = await get_lang(uid) or "ru"
+        except Exception:
+            lang = "ru"
+        ru = lang == "ru"
+        ref_link = referral_url(uid)
+        ch_url = channel_url()
+        # Two short bold links, one per line — mirrors the screenshot
+        # style ("🎧 Нажми, чтобы найти песню" / "⭐ Telegram звёзды
+        # берут здесь"). The whole label is the hyperlink, no raw URL
+        # in the text.
+        msg = (
+            f'🎓 <a href="{html.escape(ref_link, quote=True)}"><b>'
+            f'{"Нажми сюда, чтобы открыть PolyGlotty" if ru else "Tap here to open PolyGlotty"}'
+            f'</b></a>\n'
+            f'📡 <a href="{html.escape(ch_url, quote=True)}"><b>'
+            f'{"Канал с ежедневной практикой" if ru else "Channel with daily practice"}'
+            f'</b></a>\n\n'
+            f'<i>'
+            f'{"AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL." if ru else "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL."}'
+            f'</i>'
+        )
+        results = [InlineQueryResultArticle(
+            id="invite",
+            title="Пригласить друга в PolyGlotty" if ru else "Invite a friend to PolyGlotty",
+            description=(
+                "AI-репетитор английского · бот + канал" if ru
+                else "AI English tutor · bot + channel"
+            ),
+            input_message_content=InputTextMessageContent(
+                message_text=msg,
+                parse_mode="HTML",
+                disable_web_page_preview=False,
+            ),
+        )]
+        await query.answer(results, cache_time=5, is_personal=True)
+        return
+
+    if len(text) < 2:
         await query.answer([], cache_time=1)
         return
     system = ('You are a compact translation assistant. Return ONLY valid JSON: '
@@ -959,20 +1006,13 @@ async def cmd_start(message: Message):
         InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
     ])
     ref_link = referral_url(uid)
-    # Share-text includes the channel handle so an invited friend
-    # picks up both the bot (via the ref link Telegram appends) and
-    # the channel for daily practice.
-    ch = channel_handle()
-    ch_tail_ru = f" · Канал: {ch}" if ch else ""
-    ch_tail_en = f" · Channel: {ch}" if ch else ""
-    share_text = (
-        "AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL. Попробуй PolyGlotty" + ch_tail_ru
-        if ru else
-        "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty" + ch_tail_en
-    )
+    # The Share button uses switch_inline_query so the user picks any
+    # chat and the bot answers inline with a rich message containing
+    # clickable HTML links inside the text (see handle_inline, "invite"
+    # branch). t.me/share/url cannot carry inline HTML links.
     kb_buttons.append([InlineKeyboardButton(
         text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
-        url=f"https://t.me/share/url?url={quote(ref_link, safe='')}&text={quote(share_text, safe='')}"
+        switch_inline_query="invite"
     )])
     kb_buttons.append([InlineKeyboardButton(
         text=f"{ICON['channel']} Канал PolyGlotty" if ru else f"{ICON['channel']} PolyGlotty Channel",
@@ -1084,10 +1124,13 @@ async def cmd_share(message: Message):
         "Bonus: your friend gets +50 XP, you get +150 XP for a new user.\n"
         f"Invited: <b>{ref_count}</b>"
     )
+    # The Share button hands off to the inline "invite" flow so that
+    # the sent message contains HTML-linked call-to-action labels
+    # (PolyGlotty + Channel), not a raw URL preview.
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text=f"{ICON['share']} Поделиться" if ru else f"{ICON['share']} Share",
-            url=f"https://t.me/share/url?url={quote(link, safe='')}&text={quote('AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL. Try PolyGlotty' + (f' · Channel: {channel_handle()}' if channel_handle() else ''), safe='')}"
+            switch_inline_query="invite"
         )],
         [InlineKeyboardButton(
             text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
