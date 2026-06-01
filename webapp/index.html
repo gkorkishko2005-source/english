@@ -396,6 +396,42 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .idiom-msg-phrase{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:4px}
 .idiom-msg-meaning{font-size:13px;color:var(--t2);line-height:1.4;margin-bottom:5px}
 .idiom-msg-example{font-size:12.5px;color:var(--t3);font-style:italic;line-height:1.45}
+
+/* ══ HOME QUICK CARD ══
+   Redesigned single-card review surface for the Home screen.
+   Visually distinct from the Learn→Flashcards full view: smaller,
+   typographic, no flip-animation (the front and back simply swap).
+   Uses the same SM-2 store, so a tap here counts toward the daily
+   "Сегодня · 10 карточек" goal and shows up in Progress stats. */
+.qcard{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:18px 16px 14px;margin-bottom:14px;position:relative;overflow:hidden}
+.qcard-meta{display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.4px;
+  text-transform:uppercase;margin-bottom:14px;min-height:14px}
+.qcard-count{color:var(--t3)}
+.qcard-level{color:var(--a);background:rgba(var(--ar),.08);padding:2px 7px;border-radius:8px}
+.qcard-body{min-height:96px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;cursor:pointer;
+  padding:6px 4px 14px;user-select:none;-webkit-tap-highlight-color:transparent}
+.qcard-word{font-size:clamp(22px,6.4vw,28px);font-weight:800;color:var(--t1);
+  line-height:1.15;letter-spacing:-.3px;margin-bottom:4px;word-break:break-word}
+.qcard-ph{font-size:13px;color:var(--t2);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.3px}
+.qcard-hint{font-size:11px;color:var(--t3);margin-top:10px;letter-spacing:.3px;opacity:.85}
+.qcard-tr{font-size:clamp(20px,5.8vw,25px);font-weight:700;color:var(--t1);
+  line-height:1.2;margin-bottom:6px;word-break:break-word}
+.qcard-ex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.4;padding:0 8px}
+.qcard-actions{display:flex;gap:10px;margin-top:6px}
+.qcard-btn{flex:1;padding:11px 12px;border-radius:11px;
+  font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--b1);
+  background:var(--e2);color:var(--t1);transition:.15s;letter-spacing:.2px}
+.qcard-btn:active{transform:scale(.97)}
+.qcard-no{color:var(--t2)}
+.qcard-no:active{border-color:rgba(220,90,90,.35);background:rgba(220,90,90,.05)}
+.qcard-yes{background:var(--a);color:#fff;border-color:transparent}
+.qcard-yes:active{filter:brightness(.92)}
+.qcard-empty{display:flex;align-items:center;gap:10px;padding:14px 4px 4px;color:var(--t2);font-size:13px;justify-content:center}
+.qce-ico{width:24px;height:24px;border-radius:50%;background:rgba(var(--ar),.12);
+  color:var(--a);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px}
 .qb{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);padding:15px 13px;cursor:pointer;transition:transform .2s,border-color .2s,background .2s;animation:qb-in .4s ease-out backwards}
 .qb:nth-child(1){animation-delay:.05s}
 .qb:nth-child(2){animation-delay:.1s}
@@ -2121,20 +2157,37 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     </div>
     <div class="exam-cta-arr">›</div>
   </div>
-  <!-- Quick start — a single tile leading into ALEX Chat, where
-       grammar, roleplay and text-check are already available as
-       chips. Four separate tiles for those modes only duplicated
-       what the chat already offers. -->
-  <div class="sec"><span id="qs-lbl"></span></div>
-  <div class="qg qg-single">
-    <div class="qb qa" onclick="goTab('chat')">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/></svg></div>
-      <div class="qbt" id="qb1t">ALEX Chat</div><div class="qbs" id="qb1s">Grammar · Roleplay · Text check</div>
+  <!-- Quick start was dropped (Chat is one tap away on the bottom nav).
+       In its place: a redesigned inline flashcard for fast practice —
+       one tap to flip, two buttons to mark, and the full deck remains
+       a tap away via "Open all". Uses the same SM-2 store as the
+       Learn → Flashcards tab so progress is shared, not duplicated. -->
+  <div class="sec"><span id="qcard-lbl">Карточки</span><span class="seca" id="qcard-cta" onclick="goCardsTab()">Открыть все →</span></div>
+  <div class="qcard" id="qcard" style="display:none">
+    <div class="qcard-meta">
+      <span class="qcard-count" id="qcard-count"></span>
+      <span class="qcard-level" id="qcard-level"></span>
+    </div>
+    <div class="qcard-body" id="qcard-body" onclick="homeCardFlip()">
+      <div class="qcard-front" id="qcard-front">
+        <div class="qcard-word" id="qcard-word">—</div>
+        <div class="qcard-ph" id="qcard-ph"></div>
+        <div class="qcard-hint" id="qcard-hint">Нажми чтобы перевернуть</div>
+      </div>
+      <div class="qcard-back" id="qcard-back" style="display:none">
+        <div class="qcard-tr" id="qcard-tr">—</div>
+        <div class="qcard-ex" id="qcard-ex"></div>
+      </div>
+    </div>
+    <div class="qcard-actions" id="qcard-actions" style="display:none">
+      <button class="qcard-btn qcard-no" onclick="homeCardRate(1)" type="button"><span id="qcard-no-lbl">Не знал</span></button>
+      <button class="qcard-btn qcard-yes" onclick="homeCardRate(4)" type="button"><span id="qcard-yes-lbl">Знал</span></button>
+    </div>
+    <div class="qcard-empty" id="qcard-empty" style="display:none">
+      <div class="qce-ico">✓</div>
+      <div class="qce-text" id="qcard-empty-lbl">Все карточки на сегодня пройдены</div>
     </div>
   </div>
-  <!-- Idiom-of-the-day card removed from Home: the idiom is now
-       posted as a bot message in chat on the first open of the day,
-       which is where you actually use it. -->
 </div>
 
 <!-- CHAT -->
@@ -2983,13 +3036,10 @@ function applyLang(){
      now shows three fixed goals, not a random pool. */
   document.getElementById('msec-lbl').textContent = ({ru:'Сегодня',en:'Today',es:'Hoy',de:'Heute',fr:'Aujourd’hui',pt:'Hoje',uk:'Сьогодні',tr:'Bugün',zh:'今天',ar:'اليوم'}[lang]||'Today');
   try{loadMissions();}catch(e){}
-  document.getElementById('qs-lbl').textContent=L.qs;
-  /* Quick start collapsed to a single ALEX Chat tile — Grammar,
-     Roleplay and Text-check live as chips inside the chat already.
-     Helper stays null-safe for any older code paths. */
+  /* Quick start was removed: chat is one tap away on the bottom nav,
+     and Home now uses the freed space for the redesigned Quick Cards
+     surface (renderHomeCard handles its own labels). */
   var _t=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
-  _t('qb1t',{ru:'Чат с ALEX',en:'ALEX Chat',es:'Chat con ALEX',de:'ALEX Chat',fr:'Chat ALEX',pt:'Chat com ALEX',uk:'Чат з ALEX',tr:'ALEX Sohbet',zh:'与 ALEX 聊天',ar:'محادثة ALEX'}[lang]||'ALEX Chat');
-  _t('qb1s',{ru:'Грамматика · Сценки · Проверка текста',en:'Grammar · Roleplay · Text check',es:'Gramática · Roleplay · Revisión',de:'Grammatik · Rollenspiel · Textprüfung',fr:'Grammaire · Roleplay · Vérification',pt:'Gramática · Roleplay · Revisão',uk:'Граматика · Сценки · Перевірка',tr:'Dilbilgisi · Roleplay · Metin kontrolü',zh:'语法 · 角色扮演 · 文本检查',ar:'قواعد · أدوار · فحص النص'}[lang]||'Grammar · Roleplay · Text check');
   /* Exam Hub CTA copy. */
   _t('exam-cta-title',{ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de examen',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',pt:'Preparação de exame',uk:'Підготовка до іспитів',tr:'Sınav hazırlığı',zh:'考试准备',ar:'التحضير للامتحان'}[lang]||'Exam preparation');
   _t('exam-cta-sub','TOEFL · IELTS · CAE');
@@ -3518,10 +3568,93 @@ function renderHome(d){
   try{LS.set('growth_last_visit',localDayKey());}catch(_){}
   loadMissions();
   try{renderContinueLesson();}catch(e){}
+  try{renderHomeCard();}catch(e){}
   try{renderChallenge();}catch(e){}
   try{renderIdiomOfDay();}catch(e){}
   try{renderLeaderboard(d.xp||0);}catch(e){}
   try{updateNewLabels();}catch(e){}
+}
+
+/* ══ HOME QUICK CARD ══
+   A compact flashcard surface on Home. Reuses buildDeckCards(),
+   sm2Review() and rate_card sync from the full Learn → Flashcards
+   experience, but renders into its own DOM (qcard-*) with a simpler
+   two-button UI ("Не знал" / "Знал"). */
+var homeCards=[], homeCardIdx=0, homeCardFlipped=false;
+function _qcardCopy(){
+  return {
+    flip: ({ru:'Нажми чтобы перевернуть',en:'Tap to flip',es:'Toca para girar',pt:'Toque para girar',de:'Tippen zum Umdrehen',fr:'Touche pour retourner',uk:'Натисни, щоб перевернути',tr:'Çevirmek için dokun',zh:'点击翻转',ar:'انقر للقلب'}[lang]||'Tap to flip'),
+    no:  ({ru:'Не знал',en:"Didn't know",es:'No sabía',pt:'Não sabia',de:'Wusste nicht',fr:'Pas su',uk:'Не знав',tr:'Bilmiyordum',zh:'不会',ar:'لم أعرف'}[lang]||"Didn't know"),
+    yes: ({ru:'Знал',en:'Knew it',es:'Sabía',pt:'Sabia',de:'Wusste',fr:'Su',uk:'Знав',tr:'Biliyordum',zh:'会',ar:'عرفت'}[lang]||'Knew it'),
+    empty: ({ru:'Все карточки на сегодня пройдены',en:'All cards done for today',es:'Todas las tarjetas de hoy',pt:'Todos os cartões de hoje',de:'Alle Karten für heute erledigt',fr:'Toutes les cartes du jour faites',uk:'Усі картки на сьогодні пройдено',tr:'Bugünün kartları tamam',zh:'今天的卡片已完成',ar:'انتهت بطاقات اليوم'}[lang]||'All cards done for today'),
+    sec: ({ru:'Карточки',en:'Flashcards',es:'Tarjetas',pt:'Cartões',de:'Karten',fr:'Cartes',uk:'Картки',tr:'Kartlar',zh:'卡片',ar:'بطاقات'}[lang]||'Flashcards'),
+    cta: ({ru:'Открыть все →',en:'Open all →',es:'Ver todas →',pt:'Ver todos →',de:'Alle öffnen →',fr:'Tout ouvrir →',uk:'Відкрити всі →',tr:'Tümünü aç →',zh:'打开全部 →',ar:'افتح الكل ←'}[lang]||'Open all →')
+  };
+}
+function renderHomeCard(){
+  var wrap=document.getElementById('qcard');if(!wrap)return;
+  var copy=_qcardCopy();
+  var lbl=document.getElementById('qcard-lbl');if(lbl)lbl.textContent=copy.sec;
+  var cta=document.getElementById('qcard-cta');if(cta)cta.textContent=copy.cta;
+  var noLbl=document.getElementById('qcard-no-lbl');if(noLbl)noLbl.textContent=copy.no;
+  var yesLbl=document.getElementById('qcard-yes-lbl');if(yesLbl)yesLbl.textContent=copy.yes;
+  var emptyLbl=document.getElementById('qcard-empty-lbl');if(emptyLbl)emptyLbl.textContent=copy.empty;
+  var hint=document.getElementById('qcard-hint');if(hint)hint.textContent=copy.flip;
+  try{homeCards=(typeof buildDeckCards==='function')?buildDeckCards():[];}catch(_){homeCards=[];}
+  homeCardIdx=0;homeCardFlipped=false;
+  wrap.style.display='block';
+  if(!homeCards.length){_qcardShowEmpty();return;}
+  document.getElementById('qcard-empty').style.display='none';
+  _qcardShowCurrent();
+}
+function _qcardShowEmpty(){
+  document.getElementById('qcard-front').style.display='none';
+  document.getElementById('qcard-back').style.display='none';
+  document.getElementById('qcard-actions').style.display='none';
+  document.getElementById('qcard-empty').style.display='flex';
+  document.getElementById('qcard-count').textContent='';
+  document.getElementById('qcard-level').textContent='';
+}
+function _qcardShowCurrent(){
+  if(homeCardIdx>=homeCards.length){_qcardShowEmpty();return;}
+  var c=homeCards[homeCardIdx];
+  homeCardFlipped=false;
+  document.getElementById('qcard-front').style.display='block';
+  document.getElementById('qcard-back').style.display='none';
+  document.getElementById('qcard-actions').style.display='none';
+  document.getElementById('qcard-empty').style.display='none';
+  document.getElementById('qcard-word').textContent=c.word||'';
+  document.getElementById('qcard-ph').textContent=c.phonetic||'';
+  document.getElementById('qcard-tr').textContent=c.translation||'';
+  document.getElementById('qcard-ex').textContent=c.example||'';
+  document.getElementById('qcard-level').textContent=c.level||'';
+  document.getElementById('qcard-count').textContent=(homeCardIdx+1)+' / '+homeCards.length;
+}
+function homeCardFlip(){
+  if(homeCardFlipped||homeCardIdx>=homeCards.length||!homeCards.length)return;
+  homeCardFlipped=true;
+  document.getElementById('qcard-front').style.display='none';
+  document.getElementById('qcard-back').style.display='block';
+  document.getElementById('qcard-actions').style.display='flex';
+  try{sfx.flip();}catch(_){}
+}
+async function homeCardRate(q){
+  if(!homeCardFlipped||homeCardIdx>=homeCards.length||!homeCards.length)return;
+  try{if(typeof cardDailyRemaining==='function'&&cardDailyRemaining()<=0){
+    toast(lang==='ru'?'Лимит карточек':'Card limit reached','🔒');return;
+  }}catch(_){}
+  var c=homeCards[homeCardIdx];
+  try{haptic(q>=3?'success':'light');}catch(_){}
+  try{q>=3?sfx.correct():sfx.wrong();}catch(_){}
+  try{trackM('words');trackM('dwords');}catch(_){}
+  try{bumpStat('words');}catch(_){}
+  try{if(typeof recordCardDaily==='function')recordCardDaily();}catch(_){}
+  try{if(typeof sm2Review==='function')sm2Review(c.id,Math.max(0,q-1));}catch(_){}
+  if(typeof API!=='undefined'&&API&&window._uid){
+    try{await fetch(API+'/api/rate_card',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch(_){}
+  }
+  homeCardIdx++;
+  _qcardShowCurrent();
 }
 
 /* ══ CONTINUE LESSON CARD ══ */

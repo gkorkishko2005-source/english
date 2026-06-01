@@ -58,7 +58,7 @@ ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
 BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
-OFFICIAL_CHANNEL_URL = os.getenv("OFFICIAL_CHANNEL_URL", "https://t.me/PolyGlottyDailyEnglish").strip()
+OFFICIAL_CHANNEL_URL = os.getenv("OFFICIAL_CHANNEL_URL", "https://t.me/polyglotty_daily").strip()
 
 # Cache-bust the WebApp URL by appending the index.html mtime as ?v=.
 # Telegram caches WebView contents per URL, and "no-cache" headers alone
@@ -1032,7 +1032,9 @@ async def cmd_start(message: Message):
         "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
     )
     name_html = html.escape(name, quote=False)
-    cta_link = html_link(ref_link, "если хочешь начать учить английский — жми сюда", bold=True) if ru else html_link(ref_link, "tap here to start learning English", bold=True)
+    # The previous welcome text had a "tap here to start learning"
+    # link that pointed back to the bot the user was already in —
+    # pointless. The Open-App button below already takes them in.
     channel_link = html_link(channel_url(), "канал с ежедневными словами", bold=True) if ru else html_link(channel_url(), "daily English channel", bold=True)
     text = (
         f"<b>Привет, {name_html}!</b>{badge}\n\n"
@@ -1044,7 +1046,6 @@ async def cmd_start(message: Message):
         f"• исправляет ошибки и объясняет грамматику\n"
         f"• открывает roleplay и проверку текста на Pro\n"
         f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
-        f"{cta_link}\n"
         f"Больше короткой практики: {channel_link}."
         f"\n\n<i>{motivation_line('ru')}</i>"
         f"{ref_line}"
@@ -1058,7 +1059,6 @@ async def cmd_start(message: Message):
         f"• corrects mistakes and explains grammar\n"
         f"• unlocks roleplay and text check on Pro\n"
         f"• helps with TOEFL on Ultimate and tracks progress\n\n"
-        f"{cta_link}\n"
         f"More short practice: {channel_link}."
         f"\n\n<i>{motivation_line('en')}</i>"
         f"{ref_line}"
