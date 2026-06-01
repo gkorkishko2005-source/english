@@ -295,20 +295,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(var(--ar),.22)}50%{box-shadow:0 0 20px rgba(var(--ar),.55),0 0 40px rgba(var(--ar),.12)}}
 
 /* ══ HOME ══
-   Header is a single row: avatar (Telegram photo or initials)
-   + greeting line ("Доброе утро,") + name on its own line.
-   The old subtitle and the orbital blob were removed — both were
-   decoration without purpose. */
+   Greeting line ("Доброе утро,") + name. The avatar, orbital blob
+   and nav-style subtitle were all removed — pure typography, no
+   decoration. */
 .hero{padding:8px 0 16px;position:relative}
-.hero-row{display:flex;align-items:center;gap:12px;min-width:0}
-.hero-av{flex:0 0 44px;width:44px;height:44px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(var(--ar),.85),rgba(var(--ar),.55));
-  color:#fff;font-weight:700;font-size:16px;letter-spacing:.4px;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;border:1px solid var(--b1);
-  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 8px rgba(0,0,0,.08)}
-.hero-av img{width:100%;height:100%;object-fit:cover;display:block}
-.hero-text{min-width:0;flex:1}
+.hero-text{min-width:0}
 .htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.55px;margin-bottom:2px;line-height:1.2}
 .hnm{font-size:clamp(19px,5.2vw,25px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word;letter-spacing:-.2px}
 .hsb{display:none}
@@ -2083,13 +2074,10 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- HOME -->
 <div class="screen active" id="s-home">
   <div class="hero">
-    <div class="hero-row">
-      <div class="hero-av" id="hero-av" aria-hidden="true">U</div>
-      <div class="hero-text">
-        <div class="htm" id="greet"></div>
-        <div class="hnm" id="hname">—</div>
-        <div class="hsb" id="hsub"></div>
-      </div>
+    <div class="hero-text">
+      <div class="htm" id="greet"></div>
+      <div class="hnm" id="hname">—</div>
+      <div class="hsb" id="hsub"></div>
     </div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
@@ -3517,29 +3505,6 @@ function heroGreeting(){
   const h=new Date().getHours();
   return (L.greet?L.greet(h):'Hello,');
 }
-function _initialsFromName(name){
-  var s=String(name||'').trim().replace(/^@/,'');
-  if(!s)return 'U';
-  var parts=s.split(/[\s_.\-]+/).filter(Boolean);
-  if(parts.length>=2)return (parts[0][0]+parts[1][0]).toUpperCase();
-  return s.slice(0,2).toUpperCase();
-}
-function renderHeroAvatar(d){
-  var av=document.getElementById('hero-av');if(!av)return;
-  var u=(window.tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
-  var photo=u.photo_url||'';
-  var name=displayName(d);
-  if(photo){
-    /* Telegram Bot API 8.0+ exposes a user photo. Fall through to
-       initials if the image errors (private accounts, network). */
-    av.innerHTML='';
-    var img=new Image();img.alt='';img.referrerPolicy='no-referrer';
-    img.onerror=function(){av.textContent=_initialsFromName(name)};
-    img.src=photo;av.appendChild(img);
-  }else{
-    av.textContent=_initialsFromName(name);
-  }
-}
 function refreshSub(){
   const el=document.getElementById('greet');if(el)el.textContent=heroGreeting();
 }
@@ -3548,7 +3513,6 @@ function refreshSub(){
 function renderHome(d){
   refreshSub();
   document.getElementById('hname').textContent=displayName(d);
-  try{renderHeroAvatar(d);}catch(_){}
   /* Record today as a visit so the growth tree's mood detection
      knows the user opened the app today. */
   try{LS.set('growth_last_visit',localDayKey());}catch(_){}
