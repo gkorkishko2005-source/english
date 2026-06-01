@@ -294,12 +294,24 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(var(--ar),.22)}50%{box-shadow:0 0 20px rgba(var(--ar),.55),0 0 40px rgba(var(--ar),.12)}}
 
-/* ══ HOME ══ */
-.hero{padding:4px 0 18px;position:relative;overflow:hidden}
-.hbg{position:absolute;right:-12px;top:-8px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.1),transparent 70%);pointer-events:none;animation:float 5s ease-in-out infinite}
-.htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.45px;margin-bottom:4px;line-height:1.35;max-width:92%}
-.hnm{font-size:clamp(18px,5vw,26px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word}
-.hsb{font-size:13px;color:var(--t2);margin-top:4px}
+/* ══ HOME ══
+   Header is a single row: avatar (Telegram photo or initials)
+   + greeting line ("Доброе утро,") + name on its own line.
+   The old subtitle and the orbital blob were removed — both were
+   decoration without purpose. */
+.hero{padding:8px 0 16px;position:relative}
+.hero-row{display:flex;align-items:center;gap:12px;min-width:0}
+.hero-av{flex:0 0 44px;width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(var(--ar),.85),rgba(var(--ar),.55));
+  color:#fff;font-weight:700;font-size:16px;letter-spacing:.4px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border:1px solid var(--b1);
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 2px 8px rgba(0,0,0,.08)}
+.hero-av img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-text{min-width:0;flex:1}
+.htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.55px;margin-bottom:2px;line-height:1.2}
+.hnm{font-size:clamp(19px,5.2vw,25px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word;letter-spacing:-.2px}
+.hsb{display:none}
 
 /* XP */
 .xpc{background:var(--g);border-color:rgba(var(--ar),.2);margin-bottom:13px;animation:glow 3s ease-in-out infinite}
@@ -2039,10 +2051,15 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 <!-- HOME -->
 <div class="screen active" id="s-home">
-  <div class="hero"><div class="hbg"></div>
-    <div class="htm" id="greet"></div>
-    <div class="hnm" id="hname">—</div>
-    <div class="hsb" id="hsub"></div>
+  <div class="hero">
+    <div class="hero-row">
+      <div class="hero-av" id="hero-av" aria-hidden="true">U</div>
+      <div class="hero-text">
+        <div class="htm" id="greet"></div>
+        <div class="hnm" id="hname">—</div>
+        <div class="hsb" id="hsub"></div>
+      </div>
+    </div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
   <div id="path-banner" class="lp-banner" style="display:none;margin-top:12px" onclick="openPathPicker()"></div>
@@ -2082,10 +2099,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8l-4 3v-3H5a2 2 0 01-2-2V6z"/><path d="M16.5 10H19a2 2 0 012 2v4a2 2 0 01-2 2h-1v3l-3.5-3H13"/></svg></div>
       <div class="qbt" id="qb2t"></div><div class="qbs" id="qb2s"></div>
     </div>
-    <div class="qb qc"  onclick="startAudio()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0116 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.6"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.6"/></svg></div>
-      <div class="qbt">TOEFL</div><div class="qbs" id="qb3s"></div>
-    </div>
     <div class="qb qd"  onclick="openTextChecker()">
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2.2 2.2 4.3-4.4"/></svg></div>
       <div class="qbt" id="qb4t"></div><div class="qbs" id="qb4s"></div>
@@ -2094,10 +2107,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
       <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5"/><path d="M9 13l2 2 4-4"/><path d="M9 17h6"/></svg></div>
       <div class="qbt" id="qb5t">Writing</div><div class="qbs" id="qb5s">TOEFL · IELTS rubric</div>
     </div>
-    <div class="qb" onclick="openPathPicker()">
-      <div class="qbi"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 5h11l-2.3 3.2L17 11.5H6"/><circle cx="6" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg></div>
-      <div class="qbt" id="qb6t">Path</div><div class="qbs" id="qb6s">Learning path</div>
-    </div>
+    <!-- TOEFL tile removed: lives in the Exams sub-tab inside Learn.
+         Path tile removed: the active path is already shown in the
+         banner above when set. -->
   </div>
   <!-- Weekly Challenge -->
   <div class="challenge-card" id="challenge-card" onclick="joinChallenge()">
@@ -2956,15 +2968,16 @@ function applyLang(){
   document.getElementById('msec-lbl').textContent = L.missions;
   try{loadMissions();}catch(e){}
   document.getElementById('qs-lbl').textContent=L.qs;
-  document.getElementById('qb1t').textContent=L.gr;document.getElementById('qb1s').textContent=L.grs;
-  document.getElementById('qb2t').textContent=L.fc;document.getElementById('qb2s').textContent=L.fcs;
-  document.getElementById('qb3s').textContent=L.tfs;
-  document.getElementById('qb4t').textContent=L.sp;document.getElementById('qb4s').textContent=L.sps;
-  // Drill & Path buttons
-  var qb5t=document.getElementById('qb5t');if(qb5t)qb5t.textContent={ru:'Drill',en:'Drill',es:'Drill',de:'Drill',fr:'Drill',pt:'Drill',uk:'Drill',tr:'Drill',zh:'训练',ar:'تمرين'}[lang]||'Drill';
-  var qb5s=document.getElementById('qb5s');if(qb5s)qb5s.textContent={ru:'Тест на время',en:'Timed quiz',es:'Quiz cronometrado',de:'Zeitquiz',fr:'Quiz minuté',pt:'Quiz cronometrado',uk:'Тест на час',tr:'Zamanlı test',zh:'限时测试',ar:'اختبار موقت'}[lang]||'Timed quiz';
-  var qb6t=document.getElementById('qb6t');if(qb6t)qb6t.textContent={ru:'Путь',en:'Path',es:'Ruta',de:'Pfad',fr:'Parcours',pt:'Caminho',uk:'Шлях',tr:'Yol',zh:'路径',ar:'مسار'}[lang]||'Path';
-  var qb6s=document.getElementById('qb6s');if(qb6s)qb6s.textContent={ru:'Выбрать цель',en:'Choose goal',es:'Elegir meta',de:'Ziel wählen',fr:'Choisir objectif',pt:'Escolher meta',uk:'Обрати ціль',tr:'Hedef seç',zh:'选择目标',ar:'اختر الهدف'}[lang]||'Choose goal';
+  /* Quick start grid (4 tiles). TOEFL and Path tiles were removed —
+     TOEFL lives in the Exams sub-tab, the active Path shows as a
+     banner above. The id="qb1..qb5" naming is preserved so any older
+     code paths that still reference them stay null-safe. */
+  var _t=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v};
+  _t('qb1t',L.gr);_t('qb1s',L.grs);
+  _t('qb2t',L.fc);_t('qb2s',L.fcs);
+  _t('qb4t',L.sp);_t('qb4s',L.sps);
+  _t('qb5t',{ru:'Текст',en:'Writing',es:'Escritura',de:'Schreiben',fr:'Écriture',pt:'Escrita',uk:'Текст',tr:'Yazma',zh:'写作',ar:'كتابة'}[lang]||'Writing');
+  _t('qb5s',{ru:'TOEFL · IELTS оценка',en:'TOEFL · IELTS rubric',es:'TOEFL · IELTS rúbrica',de:'TOEFL · IELTS-Bewertung',fr:'TOEFL · IELTS critères',pt:'TOEFL · IELTS rubrica',uk:'TOEFL · IELTS оцінка',tr:'TOEFL · IELTS rubrik',zh:'TOEFL · IELTS 评分',ar:'TOEFL · IELTS تقييم'}[lang]||'TOEFL · IELTS rubric');
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'Выбери путь обучения',en:'Choose Learning Path',es:'Elige tu camino',pt:'Escolher caminho'}[lang]||'Choose Learning Path';
   var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
   // Chat
@@ -3471,9 +3484,34 @@ const HERO_SUBTITLES={
   ar:'دورة A0–C2 · مركز الاختبارات · محادثة ALEX'
 };
 function heroGreeting(){
+  /* Just "Good morning," — the name lives on the line below and the
+     avatar to the left. The old subtitle (course/exam/chat nav) was
+     redundant with the bottom tab bar, so it's gone. */
   const h=new Date().getHours();
-  const base=(L.greet?L.greet(h):'Hello,').replace(/[,،]\s*$/,'');
-  return base+' · '+(HERO_SUBTITLES[lang]||HERO_SUBTITLES.en);
+  return (L.greet?L.greet(h):'Hello,');
+}
+function _initialsFromName(name){
+  var s=String(name||'').trim().replace(/^@/,'');
+  if(!s)return 'U';
+  var parts=s.split(/[\s_.\-]+/).filter(Boolean);
+  if(parts.length>=2)return (parts[0][0]+parts[1][0]).toUpperCase();
+  return s.slice(0,2).toUpperCase();
+}
+function renderHeroAvatar(d){
+  var av=document.getElementById('hero-av');if(!av)return;
+  var u=(window.tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+  var photo=u.photo_url||'';
+  var name=displayName(d);
+  if(photo){
+    /* Telegram Bot API 8.0+ exposes a user photo. Fall through to
+       initials if the image errors (private accounts, network). */
+    av.innerHTML='';
+    var img=new Image();img.alt='';img.referrerPolicy='no-referrer';
+    img.onerror=function(){av.textContent=_initialsFromName(name)};
+    img.src=photo;av.appendChild(img);
+  }else{
+    av.textContent=_initialsFromName(name);
+  }
 }
 function refreshSub(){
   const el=document.getElementById('greet');if(el)el.textContent=heroGreeting();
@@ -3483,7 +3521,7 @@ function refreshSub(){
 function renderHome(d){
   refreshSub();
   document.getElementById('hname').textContent=displayName(d);
-  document.getElementById('hsub').textContent={ru:'Продолжай учиться 🎯',en:'Keep learning 🎯',es:'¡Sigue aprendiendo! 🎯',de:'Weiterlernen 🎯',fr:'Continuez à apprendre 🎯',pt:'Continue aprendendo 🎯',uk:'Продовжуй вчитись 🎯',tr:'Öğrenmeye devam et 🎯',zh:'继续学习 🎯',ar:'استمر في التعلم 🎯'}[lang]||'Keep learning 🎯';
+  try{renderHeroAvatar(d);}catch(_){}
   /* Record today as a visit so the growth tree's mood detection
      knows the user opened the app today. */
   try{LS.set('growth_last_visit',localDayKey());}catch(_){}
@@ -3544,6 +3582,9 @@ function renderContinueLesson(){
   }catch(_){}
   const fl=document.getElementById('cont-fill');if(fl)fl.style.width=Math.max(6,pct)+'%';
   const bar=document.getElementById('cont-bar');if(bar)bar.style.background=ls.color||'var(--a)';
+  /* Refresh path banner: if Continue is now visible, the banner will
+     hide itself; otherwise it appears per its own rules. */
+  try{renderPathBanner();}catch(_){}
 }
 function continueLessonTap(){
   const card=document.getElementById('continue-card');
@@ -11657,6 +11698,10 @@ function renderPathSelector(){
 }
 function renderPathBanner(){
   var el=document.getElementById('path-banner');if(!el)return;
+  /* Hide the path banner when the Continue-lesson CTA is showing —
+     one primary action at the top instead of two. */
+  var cont=document.getElementById('continue-card');
+  if(cont&&cont.style.display&&cont.style.display!=='none'){el.style.display='none';return;}
   var pid=getActivePath();if(!pid){el.style.display='none';return;}
   var path=LEARNING_PATHS.find(function(p){return p.id===pid;});if(!path){el.style.display='none';return;}
   el.style.display='flex';
