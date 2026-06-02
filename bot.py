@@ -210,25 +210,15 @@ BOT_PROFILE = {
     "short_ru": "Репетитор английского в Telegram: бесплатный курс A0-C2, чат ALEX по подписке, грамматика, TOEFL и стрик.",
     "description_default": (
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
-        "Practice English every day:\n"
-        "• Free A0-C2 course, flashcards, paths, drills and listening\n"
-        "• ALEX Chat with corrections with any subscription\n"
-        "• Grammar games and spaced repetition\n"
-        "• Pro roleplay: interview, travel, cafe, business\n"
-        "• Ultimate TOEFL practice, progress and streaks\n\n"
-        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules.\n\n"
-        "Open the app: the free course is available right away, ALEX Chat starts with a subscription."
+        "Free: A0-C2 course, flashcards, drills, listening, growth tree.\n"
+        "Subscription: live ALEX chat, roleplay, text check, TOEFL · IELTS · CAE prep. Top up with ALEX credits.\n\n"
+        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules."
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
-        "Практикуй английский каждый день:\n"
-        "• бесплатный курс A0-C2, карточки, путь, drills и аудирование\n"
-        "• чат ALEX с исправлением ошибок по любой подписке\n"
-        "• grammar games и интервальное повторение\n"
-        "• Pro-сценки: интервью, путешествия, кафе, бизнес\n"
-        "• Ultimate TOEFL, прогресс и стрик\n\n"
-        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules.\n\n"
-        "Открой приложение: бесплатный курс доступен сразу, чат ALEX начинается с подписки."
+        "Бесплатно: курс A0-C2, карточки, drills, аудирование, дерево роста.\n"
+        "По подписке: живой чат ALEX, roleplay, проверка текста, подготовка к TOEFL · IELTS · CAE. Кредиты ALEX можно докупать отдельно.\n\n"
+        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules."
     ),
 }
 
@@ -1045,22 +1035,26 @@ async def cmd_start(message: Message):
         f"<b>Привет, {name_html}!</b>{badge}\n\n"
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
         f"Курсы, карточки, экзамены и живой чат с ALEX — без отдельного приложения.\n\n"
-        f"<b>Внутри</b>\n"
-        f"• Бесплатный курс A0–C2 · карточки · аудирование\n"
-        f"• Чат с ALEX по любой подписке\n"
-        f"• Roleplay и проверка текста — Pro\n"
-        f"• TOEFL · IELTS · CAE — Ultimate\n\n"
+        f"<b>Бесплатно</b>\n"
+        f"• Курс A0–C2, карточки, аудирование, drills\n"
+        f"• Прогресс, дерево роста, ежедневные цели\n\n"
+        f"<b>По подписке</b>\n"
+        f"• Живой чат с ALEX, roleplay, проверка текста\n"
+        f"• Подготовка к TOEFL · IELTS · CAE\n"
+        f"• Кредиты ALEX докупаются отдельно\n\n"
         f"Короткая ежедневная практика: {channel_link}."
         f"{ref_line}"
     ) if ru else (
         f"<b>Hey, {name_html}!</b>{badge}\n\n"
         f"<b>PolyGlotty</b> is an AI English tutor inside Telegram.\n"
         f"Course, flashcards, exam prep and live ALEX chat — no extra app to install.\n\n"
-        f"<b>Inside</b>\n"
-        f"• Free A0–C2 course · flashcards · listening\n"
-        f"• ALEX chat on any subscription\n"
-        f"• Roleplay and text check — Pro\n"
-        f"• TOEFL · IELTS · CAE — Ultimate\n\n"
+        f"<b>Free</b>\n"
+        f"• A0–C2 course, flashcards, listening, drills\n"
+        f"• Progress, growth tree, daily goals\n\n"
+        f"<b>With subscription</b>\n"
+        f"• Live ALEX chat, roleplay, text check\n"
+        f"• TOEFL · IELTS · CAE preparation\n"
+        f"• ALEX credits available as top-ups\n\n"
         f"Short daily practice: {channel_link}."
         f"{ref_line}"
     )
@@ -1461,7 +1455,7 @@ async def send_support_prompt(target, uid: int):
         ("<b>Поддержка PolyGlotty</b>\n\n"
          "Опиши проблему одним сообщением, и мы передадим её в поддержку:\n"
          "• что произошло;\n"
-         "• твой тариф;\n"
+         "• есть ли у тебя подписка / кредиты;\n"
          "• примерное время ошибки;\n"
          "• что ты нажимал перед ошибкой.\n\n"
          "Можно также написать напрямую по кнопке ниже.")
@@ -1469,7 +1463,7 @@ async def send_support_prompt(target, uid: int):
         ("<b>PolyGlotty Support</b>\n\n"
          "Describe the issue in one message and we will send it to support:\n"
          "• what happened;\n"
-         "• your plan;\n"
+         "• whether you have a subscription / credits;\n"
          "• approximate error time;\n"
          "• what you tapped before the issue.\n\n"
          "You can also message directly using the button below."),
@@ -1483,19 +1477,19 @@ async def cmd_paysupport(m: Message):
     waiting[m.from_user.id] = "support_message"
     await m.answer(
         ("<b>Поддержка оплаты</b>\n\n"
-         "Подписки оплачиваются через Telegram Stars. После успешной оплаты доступ обычно появляется сразу.\n\n"
+         "Подписка и кредиты ALEX оплачиваются через Telegram Stars. После успешной оплаты доступ обычно появляется сразу.\n\n"
          "Если доступ не появился:\n"
          "1. Перезапусти мини-приложение.\n"
          "2. Нажми /premium и проверь статус.\n"
-         "3. Напиши сюда: тариф, время оплаты и скрин платежа.\n\n"
+         "3. Напиши сюда: что покупал, время оплаты и скрин платежа.\n\n"
          "Возвраты и спорные платежи обрабатываются по правилам Telegram Stars.")
         if ru else
         ("<b>Payment Support</b>\n\n"
-         "Subscriptions are paid through Telegram Stars. After a successful payment, access normally appears immediately.\n\n"
+         "The subscription and ALEX credits are paid through Telegram Stars. After a successful payment, access normally appears immediately.\n\n"
          "If access did not appear:\n"
          "1. Restart the mini app.\n"
          "2. Tap /premium and check your status.\n"
-         "3. Send the plan, payment time and payment screenshot here.\n\n"
+         "3. Send what you bought, payment time and payment screenshot here.\n\n"
          "Refunds and disputed payments follow Telegram Stars rules.")
     )
 
@@ -1581,7 +1575,7 @@ async def cb_roleplay(cb: CallbackQuery):
     uid      = cb.from_user.id
     lang     = await get_lang(uid)
     if not await has_access(uid, "pro"):
-        await cb.answer("Нужен Pro" if lang == "ru" else "Pro required", show_alert=True)
+        await cb.answer("Нужна подписка" if lang == "ru" else "Subscription required", show_alert=True)
         await send_upgrade_hint(cb.message, "pro", lang, "Roleplay")
         return
     scenario = ROLEPLAY_SCENARIOS.get(cb.data)
@@ -1769,7 +1763,7 @@ async def cb_toefl(cb: CallbackQuery):
         for r in rows: text += f"• <b>{r['section']}</b>: best {r['best']}, avg {r['avg_s']:.0f} ({r['cnt']} sessions)\n"
         await cb.message.answer(text); return
     if not await has_access(uid, "ultimate"):
-        await cb.answer("Нужен Ultimate" if lang == "ru" else "Ultimate required", show_alert=True)
+        await cb.answer("Нужна подписка" if lang == "ru" else "Subscription required", show_alert=True)
         await send_upgrade_hint(cb.message, "ultimate", lang, "TOEFL")
         return
     if cb.data == "toefl_listening":
@@ -2064,14 +2058,22 @@ async def has_access(uid: int, tier: str) -> bool:
     return tier_level(await get_access_tier(uid)) >= tier_level(tier)
 
 async def send_upgrade_hint(message: Message, tier: str, lang: str, feature: str):
+    # One subscription model now: no tier-specific copy. Free covers
+    # the course + cards + drills; the subscription unlocks chat and
+    # advanced features. ALEX credits are a separate top-up.
     text = (
-        f"<b>{feature}</b> доступно с тарифа <b>{tier.title()}</b>.\n\n"
-        "В Free остаются карточки, drills, задания дня и прогресс. Подписка открывает живой ALEX Chat и продвинутые тренировки."
+        f"<b>{feature}</b> — по подписке.\n\n"
+        "В бесплатной версии остаются курс, карточки, drills и прогресс. "
+        "Подписка открывает живой чат с ALEX, roleplay, проверку текста и подготовку к экзаменам."
         if lang == "ru" else
-        f"<b>{feature}</b> starts with <b>{tier.title()}</b>.\n\n"
-        "Free still includes flashcards, drills, daily tasks and progress. Subscription unlocks live ALEX Chat and advanced practice."
+        f"<b>{feature}</b> requires a subscription.\n\n"
+        "Free still includes the course, flashcards, drills and progress. "
+        "The subscription unlocks live ALEX chat, roleplay, text check and exam prep."
     )
-    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="ALEX Subscriptions", callback_data="open_premium")]])
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
+        text=("Подписка и кредиты" if lang == "ru" else "Subscription and credits"),
+        callback_data="open_premium"
+    )]])
     await message.answer(text, parse_mode="HTML", reply_markup=kb)
 
 async def grant_premium_via_server(uid: int, months: int, tier: str = "ultimate") -> bool:
