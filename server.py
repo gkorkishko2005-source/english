@@ -72,6 +72,10 @@ TIER_ECONOMY = {
     "basic":    {"quota": 45,  "models": ("haiku", "sonnet4"),                                         "daily_budget": 0.12,  "history": 35, "burst_gap": 2.0},
     "pro":      {"quota": 110, "models": ("haiku", "sonnet4", "sonnet"),                               "daily_budget": 0.35,  "history": 55, "burst_gap": 1.5},
     "ultimate": {"quota": 260, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus", "opus48"),    "daily_budget": 0.95,  "history": 90, "burst_gap": 1.2},
+    # Single modular subscription: chat is paid per-message in ALEX credits,
+    # so every model is unlocked. Credits are the real gate (checked + spent
+    # below), hence quota / daily_budget are effectively uncapped here.
+    "platform": {"quota": 10**9, "models": ("haiku", "sonnet4", "sonnet", "opus41", "opus", "opus48"),  "daily_budget": 10**9, "history": 90, "burst_gap": 1.2},
 }
 
 # ══ ADMIN WHITELIST ══════════════════════════════════════════════════════════
@@ -399,9 +403,9 @@ async def handle_chat(request):
             )
             return web.json_response({"reply": msg, "premium_required": True, "credits_required": True, "chat_credits": 0},
                                      headers={"Access-Control-Allow-Origin":"*"})
-        # Credit-based users get access to the "basic" tier model pool
-        # (Haiku + Sonnet 4) — model cost is paid in credits, not gated.
-        tier_key = "basic"
+        # Credit-based users get the full model pool — every model is paid
+        # for in credits (priced per model), so nothing is tier-gated.
+        tier_key = "platform"
     tier_cfg = TIER_ECONOMY[tier_key]
     chosen = str(body.get("chosen_model", "haiku")).lower()
     if chosen not in {*MODEL_ECONOMY.keys(), "auto"}:
@@ -415,7 +419,7 @@ async def handle_chat(request):
     if chosen == "auto":
         if tier_key == "basic" and is_complex:
             model_key = "sonnet4"
-        elif tier_key in ("pro", "ultimate") and is_complex:
+        elif tier_key in ("pro", "ultimate", "platform") and is_complex:
             model_key = "sonnet"
         else:
             model_key = "haiku"
@@ -430,8 +434,10 @@ async def handle_chat(request):
             model_key = "haiku" if "haiku" in tier_cfg["models"] else tier_cfg["models"][0]
 
     model_cfg = MODEL_ECONOMY[model_key]
+    # "platform" reuses the "ultimate" token budgets (full model pool parity).
+    mt_tier = "ultimate" if tier_key == "platform" else tier_key
     chat_model = model_cfg.get("model_by_tier", {}).get(tier_key, model_cfg["model"])
-    max_tokens = model_cfg["max_tokens"].get(tier_key, 500)
+    max_tokens = model_cfg["max_tokens"].get(mt_tier, 500)
     weight = int(model_cfg["weight"])
     msg_limit = int(tier_cfg["quota"])
 

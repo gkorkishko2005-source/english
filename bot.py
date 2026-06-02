@@ -2184,23 +2184,11 @@ async def cmd_premium(msg: Message):
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
 
-    # Check if already premium
-    is_prem = await check_premium(uid)
-    prem_badge = ""
-    if is_prem:
-        prem_badge = ("\n\n✓ <i>Premium активен. Его можно продлить заранее.</i>" if ru
-                      else "\n\n✓ <i>Premium is active. You can extend it early.</i>")
-
-    # Check if first-time buyer for discount
-    is_first = True
     grandfathered = ""
     platform_info = {}
     credits_balance = 0
     try:
         from database import get_premium_info, grandfather_legacy_tier, get_platform_info, get_credits
-        info = await get_premium_info(uid)
-        if info.get("tier"):  # has or had premium before
-            is_first = False
         try:
             grandfathered = await grandfather_legacy_tier(uid)
         except Exception:
@@ -2210,10 +2198,12 @@ async def cmd_premium(msg: Message):
     except Exception:
         pass
 
-    # ── NEW MODULAR MENU (default for new users) ─────────────────────
-    # Grandfathered users still see the legacy bundle menu below to renew
-    # the exact plan they originally bought.
-    if not grandfathered:
+    # ── SINGLE MODULAR MENU (everyone) ───────────────────────────────
+    # There is only one subscription now: Platform + ALEX credits.
+    # The legacy Basic/Pro/Ultimate bundle is no longer sold to anyone —
+    # grandfathered users keep their remaining access but renew via the
+    # Platform plan like everybody else.
+    if True:
         plat_kb = [
             [InlineKeyboardButton(
                 text=("▣ Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "▣ Platform · 1 mo — 299 ⭐ + 30 cr"),
@@ -2282,150 +2272,17 @@ async def cmd_premium(msg: Message):
         await msg.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=plat_kb))
         return
 
-    # ── LEGACY BUNDLE MENU (grandfathered users only) ────────────────
-
-    discount_text = ""
-    if is_first:
-        discount_text = "\n\n◇ <b>-10% на первую покупку</b>" if ru else "\n\n◇ <b>10% off your first purchase</b>"
-    year_text = "\n▣ <b>Годовой план: -15%</b>" if ru else "\n▣ <b>Annual plan: 15% off</b>"
-
-    # Prices with discount. Basic can be 1 Star only for configured test users.
-    is_test_payment = is_test_payment_user(uid)
-    b_stars = plan_stars_for_user("basic", uid, is_first)
-    p_stars = plan_stars_for_user("pro", uid, is_first)
-    u_stars = plan_stars_for_user("ultimate", uid, is_first)
-    by_stars = plan_stars_for_user("basic_year", uid, False)
-    py_stars = plan_stars_for_user("pro_year", uid, False)
-    uy_stars = plan_stars_for_user("ultimate_year", uid, False)
-
-    kb_rows = [
-        [InlineKeyboardButton(
-            text=(f"Basic TEST — {b_stars} ⭐" if ru else f"Basic TEST — {b_stars} ⭐") if is_test_payment else (f"Basic — {b_stars} ⭐/мес (~$9)" if ru else f"Basic — {b_stars} ⭐/mo (~$9)"),
-            callback_data=f"prem_buy:basic:{'d' if is_first else 'n'}"
-        )],
-        [InlineKeyboardButton(
-            text=f"Pro — {p_stars} ⭐/мес (~$20)" if ru else f"Pro — {p_stars} ⭐/mo (~$20)",
-            callback_data=f"prem_buy:pro:{'d' if is_first else 'n'}"
-        )],
-        [InlineKeyboardButton(
-            text=f"Ultimate — {u_stars} ⭐/мес (~$50)" if ru else f"Ultimate — {u_stars} ⭐/mo (~$50)",
-            callback_data=f"prem_buy:ultimate:{'d' if is_first else 'n'}"
-        )],
-        [InlineKeyboardButton(
-            text=f"Basic год — {by_stars} ⭐ (-15%)" if ru else f"Basic yearly — {by_stars} ⭐ (-15%)",
-            callback_data="prem_buy:basic_year:n"
-        )],
-        [InlineKeyboardButton(
-            text=f"Pro год — {py_stars} ⭐ (-15%)" if ru else f"Pro yearly — {py_stars} ⭐ (-15%)",
-            callback_data="prem_buy:pro_year:n"
-        )],
-        [InlineKeyboardButton(
-            text=f"Ultimate год — {uy_stars} ⭐ (-15%)" if ru else f"Ultimate yearly — {uy_stars} ⭐ (-15%)",
-            callback_data="prem_buy:ultimate_year:n"
-        )],
-    ]
-    plans_kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
-
-    text = (
-        "<b>ALEX Subscriptions</b>\n"
-        "━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>Basic</b> — {b_stars} ⭐/мес\n"
-        "├ 45 quota points/день\n"
-        "├ Живой чат с ALEX\n"
-        "├ Модели: Haiku 4.5 или Sonnet 4\n"
-        "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
-        "├ Голосовые ответы + AI-подсказки\n"
-        "├ 20 карточек / 5 часов и полный разбор правил\n"
-        "└ Комфортный режим без пустого ожидания\n\n"
-        f"<b>Pro</b> — {p_stars} ⭐/мес\n"
-        "├ 110 quota points/день\n"
-        "├ Модели: Haiku 4.5, Sonnet 4 или Sonnet 4.6\n"
-        "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
-        "├ Roleplay, проверка текста, анализ ошибок\n"
-        "├ 50 карточек / 4 часа и персональные drills\n"
-        "└ Расширенные истории, сценарии и отчёты\n\n"
-        f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
-        "├ 260 quota points/день\n"
-        "├ Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7/4.8\n"
-        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-18 points\n"
-        "├ TOEFL, персональный план и сертификаты\n"
-        "├ 100 карточек / 4 часа и максимум аудио\n"
-        "└ Длинная история диалога\n\n"
-        f"<b>Год:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
-        "<i>Quota points защищают тарифы от перерасхода и держат подписки честными.</i>"
-        f"{discount_text}{year_text}\n"
-        f"{prem_badge}\n\n"
-        "Оплата только Telegram Stars"
-    ) if ru else (
-        "<b>ALEX Subscriptions</b>\n"
-        "━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>Basic</b> — {b_stars} ⭐/mo\n"
-        "├ 45 quota points/day\n"
-        "├ Live ALEX chat\n"
-        "├ Models: Haiku 4.5 or Sonnet 4\n"
-        "├ Haiku = 1 point, Sonnet 4 = 4 points\n"
-        "├ Voice replies + AI hints\n"
-        "├ 20 cards / 5 hours and full rule breakdowns\n"
-        "└ Comfortable learning without empty waiting\n\n"
-        f"<b>Pro</b> — {p_stars} ⭐/mo\n"
-        "├ 110 quota points/day\n"
-        "├ Models: Haiku 4.5, Sonnet 4 or Sonnet 4.6\n"
-        "├ Haiku = 1, Sonnet 4 = 4, Sonnet 4.6 = 5 points\n"
-        "├ Roleplay, text check and error analysis\n"
-        "├ 50 cards / 4 hours and personal drills\n"
-        "└ More stories, scenarios and reports\n\n"
-        f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
-        "├ 260 quota points/day\n"
-        "├ Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7/4.8\n"
-        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-18 points\n"
-        "├ TOEFL, personal plan and certificates\n"
-        "├ 100 cards / 4 hours and max audio practice\n"
-        "└ Long chat history\n\n"
-        f"<b>Yearly:</b> Basic {by_stars} ⭐ · Pro {py_stars} ⭐ · Ultimate {uy_stars} ⭐\n"
-        "<i>Quota points keep premium limits fair and sustainable.</i>"
-        f"{discount_text}{year_text}\n"
-        f"{prem_badge}\n\n"
-        "Telegram Stars only"
-    )
-    await msg.answer(text, parse_mode="HTML", reply_markup=plans_kb)
-
-# ══ PREMIUM BUY CALLBACK (Stars) ══════════════════════════════════════════
+# ══ LEGACY PREMIUM BUY CALLBACK (retired) ═════════════════════════════════
+# The old Basic/Pro/Ultimate bundle is no longer sold. If a user taps an
+# old inline button that still lingers in their chat history, send them to
+# the current single subscription menu instead of an obsolete invoice.
 @dp.callback_query(F.data.startswith("prem_buy:"))
 async def cb_prem_buy(cb: CallbackQuery):
-    from aiogram.types import LabeledPrice
-    parts = cb.data.split(":")
-    plan_id = parts[1] if len(parts) > 1 else "basic"
-    has_discount = (parts[2] == "d") if len(parts) > 2 else False
-    plan = PREMIUM_PLANS.get(plan_id)
-    if not plan:
-        await cb.answer("Invalid plan", show_alert=True)
-        return
-
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
-    label = plan["label_ru"] if ru else plan["label_en"]
-
-    stars = plan_stars_for_user(plan_id, uid, has_discount)
-
-    period = "1 год" if (ru and plan["months"] == 12) else "1 year" if plan["months"] == 12 else "1 месяц" if ru else "1 month"
-    desc = f"ALEX Subscriptions {plan['tier'].upper()} — {period}"
-
-    await cb.answer()
     try:
-        await bot.send_invoice(
-            chat_id=uid,
-            title=f"ALEX Subscriptions {label}",
-            description=desc,
-            payload=f"premium:{plan_id}:{uid}",
-            currency="XTR",
-            prices=[LabeledPrice(label=f"Premium {label}", amount=stars)],
-            protect_content=False,
-        )
-    except Exception as e:
-        logger.error(f"send_invoice error: {e}")
-        err = "Ошибка при создании платежа. Попробуй позже." if ru else "Payment error. Try again later."
-        await bot.send_message(uid, err)
+        await cb.answer()
+    except Exception:
+        pass
+    await cmd_premium(cb.message)
 
 # ── Invoice helpers (shared by callback + deep-link /start) ──────────────
 async def _send_platform_invoice(uid: int, plan_id: str, ru: bool) -> bool:

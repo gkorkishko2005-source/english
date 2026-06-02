@@ -2660,9 +2660,15 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
           </svg>
         </div>
         <div class="rem-timebox">
-          <input type="time" id="rem-time" value="08:00" class="rem-input">
+          <div class="rem-input" id="rem-time-disp">08:00</div>
           <div class="rem-sub" id="rem-sub-lbl">Daily reminder</div>
         </div>
+      </div>
+      <div class="time-drum-wrap" id="rem-drum">
+        <div class="time-drum-sel"></div>
+        <div class="time-drum-col" id="drum-h"><div class="time-drum-inner" id="drum-h-inner"></div></div>
+        <div class="time-drum-sep">:</div>
+        <div class="time-drum-col" id="drum-m"><div class="time-drum-inner" id="drum-m-inner"></div></div>
       </div>
       <div class="rem-presets">
         <button class="rem-preset" data-t="08:00" onclick="remPreset('08:00')"><div class="rpe"><svg viewBox="0 0 32 32"><path d="M5 24h22"></path><path d="M10 24a6 6 0 0 1 12 0"></path><path d="M16 8v4M8 14l3 3M24 14l-3 3"></path></svg></div><div class="rptext"><div class="rpt">08:00</div><div class="rpl" id="rp1">Morning</div></div></button>
@@ -3594,6 +3600,9 @@ function showChatPaywall(){
 /* Chat model picker — compact Claude choices gated per subscription.
    Server re-validates so a cheating client cannot bypass tier limits. */
 function modelChoicesForTier(){
+  /* Single subscription (Platform) or any active chat access unlocks every
+     model — cost is paid per answer in quota points, not gated by a tier. */
+  if(platformActive||chatCredits>0)return ['haiku','sonnet4','sonnet','opus41','opus','opus48'];
   const tier=(premiumTier||'').toLowerCase();
   if(tier==='ultimate')return ['haiku','sonnet4','sonnet','opus41','opus','opus48'];
   if(tier==='pro')return ['haiku','sonnet4','sonnet'];
@@ -3604,13 +3613,13 @@ function modelAllowedForTier(m){
   return modelChoicesForTier().includes(m);
 }
 function getChosenModel(){
-  if(!isPremium)return 'auto';
+  if(!isPremium&&!platformActive&&!(chatCredits>0))return 'auto';
   const v=LS.get('app_model_choice')||'haiku';
   // sanitize against the user's actual tier
   return modelAllowedForTier(v)?v:'haiku';
 }
 function pickModel(m){
-  if(!isPremium){openPremium();return;}
+  if(!isPremium&&!platformActive&&!(chatCredits>0)){openPremium();return;}
   if(!modelAllowedForTier(m)){openPremium();return;}
   if(!['haiku','sonnet4','sonnet','opus41','opus','opus48'].includes(m))return;
   LS.set('app_model_choice',m);
@@ -3624,7 +3633,7 @@ function selectModel(m){
   if(modelAllowedForTier(m))document.getElementById('modelm')?.classList.remove('open');
 }
 function openModelPicker(){
-  if(!isPremium){openPremium();return;}
+  if(!isPremium&&!platformActive&&!(chatCredits>0)){openPremium();return;}
   updateModelOptions();
   document.getElementById('modelm')?.classList.toggle('open');
 }
@@ -3658,7 +3667,10 @@ function updateModelOptions(){
     opus:{name:'Opus 4.7',tag:t.deep,sub:cost(14,t.high),pts:'14'},
     opus48:{name:'Opus 4.8',tag:t.max,sub:cost(18,t.high),pts:'18'}
   };
-  const req={sonnet4:'Basic+',sonnet:'Pro+',opus41:'Ultimate',opus:'Ultimate',opus48:'Ultimate'};
+  /* No tier names — a single subscription (or credits) unlocks every model;
+     a locked row only ever means "no chat access yet". */
+  const lockLbl={ru:'Подписка',en:'Subscribe',es:'Suscríbete',pt:'Assine',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscribe';
+  const req={haiku:'',sonnet4:lockLbl,sonnet:lockLbl,opus41:lockLbl,opus:lockLbl,opus48:lockLbl};
   document.querySelectorAll('#modelm .mopt').forEach(row=>{
     const m=row.dataset.m,ok=modelAllowedForTier(m),meta=data[m]||data.haiku;
     row.classList.toggle('on',ok&&m===cur);
@@ -3673,8 +3685,9 @@ function updateModelOptions(){
 function updateChatModelStrip(){
   const bar=document.getElementById('mbar');
   if(!bar)return;
-  bar.style.display=isPremium?'flex':'none';
-  if(!isPremium)return;
+  const canPick=isPremium||platformActive||chatCredits>0;
+  bar.style.display=canPick?'flex':'none';
+  if(!canPick)return;
   const cur=getChosenModel();
   const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
   const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
@@ -6593,37 +6606,148 @@ async function saveProf(){
 /* ══ iOS DRUM PICKER LOGIC ══ */
 let selTime='';
 
+/* iOS-alarm-style scrolling wheel picker. Two columns (HH 00-23, MM 00-59)
+   with drag + momentum + wheel, per-number haptic tick, and a fixed
+   selection band. Built once, then reset to the saved time on each open. */
+const DRUM_ITEM_H=40, DRUM_CENTER=80; // .time-drum-item height; (200-40)/2
+let remH=8, remM=0;
+const _drum={h:null,m:null};
+let _drumsBuilt=false;
+
+function _drumItemsHTML(max){
+  let s='';
+  for(let i=0;i<max;i++)s+='<div class="time-drum-item" data-v="'+i+'">'+String(i).padStart(2,'0')+'</div>';
+  return s;
+}
+
+function _initDrum(unit,inner,col){
+  const max=unit==='h'?24:60;
+  inner.innerHTML=_drumItemsHTML(max);
+  const items=Array.prototype.slice.call(inner.children);
+  const offsetFor=idx=>DRUM_CENTER-idx*DRUM_ITEM_H;
+  const minY=offsetFor(max-1), maxY=offsetFor(0);
+  const state={y:offsetFor(0),index:0,dragging:false,startY:0,startOffset:0,vel:0,lastY:0,lastT:0,raf:0,lastSel:-1};
+  function render(y){
+    state.y=y;
+    inner.style.transform='translateY('+y+'px)';
+    let sel=Math.round((DRUM_CENTER-y)/DRUM_ITEM_H);
+    sel=Math.max(0,Math.min(max-1,sel));
+    for(let i=0;i<items.length;i++){
+      const d=Math.abs(i-sel);
+      items[i].className='time-drum-item'+(d===0?' selected':d===1?' near1':d===2?' near2':'');
+    }
+    if(sel!==state.lastSel){
+      state.lastSel=sel;
+      if(unit==='h')remH=sel; else remM=sel;
+      _remUpdateDisplay();
+      try{haptic('light');}catch(_){}
+    }
+  }
+  function snap(){
+    cancelAnimationFrame(state.raf);
+    let idx=Math.round((DRUM_CENTER-state.y)/DRUM_ITEM_H);
+    idx=Math.max(0,Math.min(max-1,idx));
+    state.index=idx;
+    const start=state.y, target=offsetFor(idx), dist=target-start, t0=performance.now();
+    (function step(t){
+      const p=Math.min(1,(t-t0)/170), e=1-Math.pow(1-p,3);
+      render(start+dist*e);
+      if(p<1)state.raf=requestAnimationFrame(step);
+    })(t0);
+  }
+  function momentum(){
+    cancelAnimationFrame(state.raf);
+    (function step(){
+      if(Math.abs(state.vel)<0.6){snap();return;}
+      let ny=state.y+state.vel;
+      if(ny>maxY){ny=maxY;state.vel=0;} else if(ny<minY){ny=minY;state.vel=0;}
+      render(ny);
+      state.vel*=0.92;
+      state.raf=requestAnimationFrame(step);
+    })();
+  }
+  function clientY(e){return e.touches?e.touches[0].clientY:e.clientY;}
+  function down(e){
+    state.dragging=true;cancelAnimationFrame(state.raf);
+    state.startY=clientY(e);state.startOffset=state.y;
+    state.lastY=state.startY;state.lastT=performance.now();state.vel=0;
+    e.preventDefault();
+  }
+  function move(e){
+    if(!state.dragging)return;
+    const cy=clientY(e), now=performance.now(), dt=now-state.lastT;
+    if(dt>0)state.vel=(cy-state.lastY)/dt*16;
+    state.lastY=cy;state.lastT=now;
+    let ny=state.startOffset+(cy-state.startY);
+    if(ny>maxY+DRUM_ITEM_H)ny=maxY+DRUM_ITEM_H; if(ny<minY-DRUM_ITEM_H)ny=minY-DRUM_ITEM_H;
+    render(ny);
+    e.preventDefault();
+  }
+  function up(){
+    if(!state.dragging)return;
+    state.dragging=false;
+    if(Math.abs(state.vel)>2)momentum(); else snap();
+  }
+  col.addEventListener('touchstart',down,{passive:false});
+  col.addEventListener('touchmove',move,{passive:false});
+  col.addEventListener('touchend',up);
+  col.addEventListener('touchcancel',up);
+  col.addEventListener('mousedown',down);
+  window.addEventListener('mousemove',move);
+  window.addEventListener('mouseup',up);
+  col.addEventListener('wheel',function(e){
+    e.preventDefault();
+    let idx=Math.max(0,Math.min(max-1,state.index+(e.deltaY>0?1:-1)));
+    state.index=idx;render(offsetFor(idx));
+  },{passive:false});
+  return {
+    setIndex:function(idx){idx=Math.max(0,Math.min(max-1,idx|0));state.index=idx;state.lastSel=-1;render(offsetFor(idx));}
+  };
+}
+
+function _buildDrums(){
+  if(_drumsBuilt)return;
+  const hi=document.getElementById('drum-h-inner'), mi=document.getElementById('drum-m-inner');
+  const hc=document.getElementById('drum-h'), mc=document.getElementById('drum-m');
+  if(!hi||!mi||!hc||!mc)return;
+  _drum.h=_initDrum('h',hi,hc);
+  _drum.m=_initDrum('m',mi,mc);
+  _drumsBuilt=true;
+}
+
+function _remUpdateDisplay(){
+  const v=String(remH).padStart(2,'0')+':'+String(remM).padStart(2,'0');
+  const disp=document.getElementById('rem-time-disp');if(disp)disp.textContent=v;
+  const phase=remH<6?'night':remH<12?'morning':remH<17?'day':remH<21?'evening':'night';
+  const hero=document.getElementById('rem-hero');if(hero)hero.dataset.phase=phase;
+  document.querySelectorAll('.rem-preset').forEach(function(b){b.classList.toggle('on',b.dataset.t===v);});
+}
+
 function openRemModal(){
   openMod('remm');
   let cur=(LS.get('app_remind')||window._d?.remind_time||'08:00').replace('off','08:00');
   if(!/^\d{1,2}:\d{2}$/.test(cur))cur='08:00';
-  const inp=document.getElementById('rem-time');
-  if(inp){const p=cur.split(':');inp.value=p[0].padStart(2,'0')+':'+p[1].padStart(2,'0');inp.oninput=remReflect;inp.onchange=remReflect;}
-  remReflect();
+  const p=cur.split(':');
+  remH=Math.max(0,Math.min(23,parseInt(p[0],10)||8));
+  remM=Math.max(0,Math.min(59,parseInt(p[1],10)||0));
+  _buildDrums();
+  if(_drum.h)_drum.h.setIndex(remH);
+  if(_drum.m)_drum.m.setIndex(remM);
+  _remUpdateDisplay();
 }
-function remReflect(){
-  var inp=document.getElementById('rem-time');if(!inp)return;
-  var v=inp.value||'08:00',h=parseInt(v.split(':')[0]||'8',10);
-  var phase=h<6?'night':h<12?'morning':h<17?'day':h<21?'evening':'night';
-  var hero=document.getElementById('rem-hero');
-  if(hero){
-    hero.dataset.phase=phase;
-    hero.classList.remove('tick');
-    void hero.offsetWidth;
-    hero.classList.add('tick');
-    setTimeout(function(){hero.classList.remove('tick');},220);
-  }
-  document.querySelectorAll('.rem-preset').forEach(function(b){b.classList.toggle('on',b.dataset.t===v);});
-}
+function remReflect(){_remUpdateDisplay();}
 function remPreset(t){
-  var inp=document.getElementById('rem-time');if(inp)inp.value=t;
-  remReflect();try{sfx.tap();}catch(e){}haptic('light');
+  const p=t.split(':');
+  remH=parseInt(p[0],10)||0;remM=parseInt(p[1],10)||0;
+  if(_drum.h)_drum.h.setIndex(remH);
+  if(_drum.m)_drum.m.setIndex(remM);
+  _remUpdateDisplay();
+  try{sfx.tap();}catch(e){}haptic('light');
 }
 function closeRemModal(){closeMod('remm');}
 
 async function saveRem(){
-  const inp=document.getElementById('rem-time');
-  const v=(inp&&inp.value)||'';
+  const v=String(remH).padStart(2,'0')+':'+String(remM).padStart(2,'0');
   if(!/^\d{2}:\d{2}$/.test(v)){toast('⏰ 08:00','⚠️');return;}
   selTime=v;
   LS.set('app_remind',selTime);LS.set('remind_time_str',selTime);
@@ -6641,7 +6765,7 @@ async function disableRem(){
   closeRemModal();toast(L.remoff||'Reminders disabled','🔕');
 }
 
-// legacy stubs
+// legacy stubs (kept for any old callers)
 function buildDrum(){}function buildDrumH(){}function buildDrumM(){}
 function attachDrumGestures(){}function highlightDrum(){}function applyHighlight2(){}
 
@@ -9423,13 +9547,13 @@ function renderRoadmap(){
   const done=LS.getJ('course_done')||{};
   const headSub=examUnlocked
     ?({ru:'Полные уроки в формате реального экзамена: задания, словарь, стратегия.',en:'Full lessons in real-exam format: tasks, vocabulary, strategy.',es:'Lecciones completas en formato de examen real: tareas, vocabulario, estrategia.',pt:'Aulas completas no formato de exame real: tarefas, vocabulário, estratégia.',de:'Vollständige Lektionen im echten Prüfungsformat: Aufgaben, Wortschatz, Strategie.',fr:'Leçons complètes au format d’examen réel : tâches, vocabulaire, stratégie.',uk:'Повні уроки у форматі справжнього іспиту: завдання, словник, стратегія.',tr:'Gerçek sınav formatında tam dersler: görevler, kelime, strateji.',zh:'真实考试形式的完整课程：题目、词汇、策略。',ar:'دروس كاملة بصيغة الامتحان الحقيقي: مهام ومفردات واستراتيجية.'}[lang]||'Full lessons in real-exam format: tasks, vocabulary, strategy.')
-    :({ru:'Доступно с подпиской Basic. Стратегия, словарь и задания в формате реального экзамена.',en:'Available with the Basic subscription. Strategy, vocabulary and tasks in real-exam format.',es:'Disponible con la suscripción Basic. Estrategia, vocabulario y tareas en formato de examen real.',pt:'Disponível com a assinatura Basic. Estratégia, vocabulário e tarefas no formato de exame real.',de:'Verfügbar mit dem Basic-Abo. Strategie, Wortschatz und Aufgaben im echten Prüfungsformat.',fr:'Disponible avec l’abonnement Basic. Stratégie, vocabulaire et tâches au format d’examen réel.',uk:'Доступно з підпискою Basic. Стратегія, словник і завдання у форматі справжнього іспиту.',tr:'Basic aboneliğiyle kullanılabilir. Gerçek sınav formatında strateji, kelime ve görevler.',zh:'需 Basic 订阅。真实考试形式的策略、词汇与题目。',ar:'متاح مع اشتراك Basic. استراتيجية ومفردات ومهام بصيغة الامتحان الحقيقي.'}[lang]||'Available with the Basic subscription. Strategy, vocabulary and tasks in real-exam format.');
+    :({ru:'Доступно с подпиской. Стратегия, словарь и задания в формате реального экзамена.',en:'Available with a subscription. Strategy, vocabulary and tasks in real-exam format.',es:'Disponible con la suscripción. Estrategia, vocabulario y tareas en formato de examen real.',pt:'Disponível com a assinatura. Estratégia, vocabulário e tarefas no formato de exame real.',de:'Mit Abo verfügbar. Strategie, Wortschatz und Aufgaben im echten Prüfungsformat.',fr:'Disponible avec l’abonnement. Stratégie, vocabulaire et tâches au format d’examen réel.',uk:'Доступно з підпискою. Стратегія, словник і завдання у форматі справжнього іспиту.',tr:'Abonelikle kullanılabilir. Gerçek sınav formatında strateji, kelime ve görevler.',zh:'需订阅。真实考试形式的策略、词汇与题目。',ar:'متاح مع الاشتراك. استراتيجية ومفردات ومهام بصيغة الامتحان الحقيقي.'}[lang]||'Available with a subscription. Strategy, vocabulary and tasks in real-exam format.');
   const head=`<div class="course-system">
     <div class="course-system-top">
-      <div><div class="course-system-title">${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')} ${examUnlocked?'':'<span class="course-system-pill" style="background:rgba(255,165,0,.16);color:#ffa500;border-color:rgba(255,165,0,.32)">'+(lang==='ru'?'Basic+':'Basic+')+'</span>'}</div>
+      <div><div class="course-system-title">${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')} ${examUnlocked?'':'<span class="course-system-pill" style="background:rgba(255,165,0,.16);color:#ffa500;border-color:rgba(255,165,0,.32)">★</span>'}</div>
       <div class="course-system-sub">${headSub}</div></div>
     </div>
-    ${examUnlocked?'':`<button class="course-exam-btn" onclick="showTierPaywall('basic','${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')}')">${({ru:'Открыть подписку Basic',en:'Unlock with Basic',es:'Desbloquear con Basic',pt:'Desbloquear com Basic',de:'Mit Basic freischalten',fr:'Débloquer avec Basic',uk:'Відкрити з підпискою Basic',tr:'Basic ile aç',zh:'用 Basic 解锁',ar:'افتحه مع Basic'}[lang]||'Unlock with Basic')}</button>`}
+    ${examUnlocked?'':`<button class="course-exam-btn" onclick="showTierPaywall('basic','${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')}')">${({ru:'Открыть с подпиской',en:'Unlock with subscription',es:'Desbloquear con suscripción',pt:'Desbloquear com assinatura',de:'Mit Abo freischalten',fr:'Débloquer avec l’abonnement',uk:'Відкрити з підпискою',tr:'Abonelikle aç',zh:'用订阅解锁',ar:'افتحه مع الاشتراك'}[lang]||'Unlock with subscription')}</button>`}
   </div>`;
   const groups=exams.map(ex=>{
     const items=sorted.filter(l=>l.level===ex.level);
@@ -10149,7 +10273,7 @@ function setPremium(active, source){
       const old=shdr.querySelector('.premium-badge');if(old)old.remove();
       const badge=document.createElement('span');
       badge.className='premium-badge';
-      badge.textContent=premiumTier?premiumTier.toUpperCase():'PRO';
+      badge.textContent='★';
       badge.style.marginLeft='8px';
       shdr.appendChild(badge);
     }
@@ -10187,29 +10311,28 @@ function hasChatAccess(){
 }
 function hasTier(minTier){
   const need=tierLevel(minTier);
+  /* Single subscription: an active Platform plan unlocks every feature
+     (Writing Studio, voice ALEX, advanced models, Exam Hub — everything).
+     Chat itself still runs on ALEX credits. */
+  if(platformActive)return true;
   if(grandfatheredTier)return tierLevel(grandfatheredTier)>=need;
   if(isPremium&&premiumTier)return tierLevel(premiumTier)>=need;
-  /* New Platform users get parity with the old Pro bundle for content
-     (everything except chat — chat is credits). Ultimate-only features
-     stay grandfather-only until we ship Voice/Writing as add-ons. */
-  if(platformActive){
-    return need<=tierLevel('pro');
-  }
   return false;
 }
 function showTierPaywall(minTier, feature){
-  const names={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
-  const title=minTier==='basic'?({
-    ru:`${feature||'Функция'}: нужна подписка`,
-    en:`${feature||'Feature'}: subscription required`,
-    es:`${feature||'Función'}: suscripción requerida`,
-    pt:`${feature||'Recurso'}: assinatura necessária`
-  }[lang]||`${feature||'Feature'}: subscription required`):({
-    ru:`${feature||'Функция'} доступно с ${names[minTier]||minTier}`,
-    en:`${feature||'Feature'} starts with ${names[minTier]||minTier}`,
-    es:`Disponible desde ${names[minTier]||minTier}`,
-    pt:`Disponível a partir do ${names[minTier]||minTier}`
-  }[lang]||`${feature||'Feature'} starts with ${names[minTier]||minTier}`);
+  /* One subscription unlocks everything — never name legacy tiers. */
+  const title={
+    ru:`${feature||'Эта функция'} — нужна подписка`,
+    en:`${feature||'This feature'} needs a subscription`,
+    es:`${feature||'Esta función'} requiere suscripción`,
+    pt:`${feature||'Este recurso'} requer assinatura`,
+    de:`${feature||'Diese Funktion'} erfordert ein Abo`,
+    fr:`${feature||'Cette fonction'} nécessite un abonnement`,
+    uk:`${feature||'Ця функція'} — потрібна підписка`,
+    tr:`${feature||'Bu özellik'} abonelik gerektirir`,
+    zh:`${feature||'此功能'}需要订阅`,
+    ar:`${feature||'هذه الميزة'} تتطلب اشتراكًا`
+  }[lang]||`${feature||'This feature'} needs a subscription`;
   try{sfx.warn();}catch(e){}haptic('light');
   openPremium(title);
   toast(title,'🔒');
@@ -10218,52 +10341,36 @@ function showTierPaywall(minTier, feature){
 function updatePremiumUI(){
   const banner=document.getElementById('premium-settings-banner');
   if(!banner)return;
-  const tierNames={basic:'Basic',pro:'Pro',ultimate:'Ultimate'};
-  const tierName=tierNames[premiumTier]||premiumTier||'Premium';
-  const activePlanLine={
-    basic:{
-      ru:'ALEX Chat · Sonnet 4 · 45 quota points/день',
-      en:'ALEX Chat · Sonnet 4 · 45 quota points/day',
-      es:'ALEX Chat · Sonnet 4 · 45 puntos/día',
-      pt:'ALEX Chat · Sonnet 4 · 45 pontos/dia'
-    },
-    pro:{
-      ru:'Sonnet 4/4.6 · 110 quota points/день · отчёты',
-      en:'Sonnet 4/4.6 · 110 quota points/day · reports',
-      es:'Sonnet 4/4.6 · 110 puntos/día · informes',
-      pt:'Sonnet 4/4.6 · 110 pontos/dia · relatórios'
-    },
-    ultimate:{
-      ru:'Haiku, Sonnet, Opus · 260 quota points/день · максимум',
-      en:'Haiku, Sonnet, Opus · 260 quota points/day · maximum',
-      es:'Haiku, Sonnet, Opus · 260 puntos/día · máximo',
-      pt:'Haiku, Sonnet, Opus · 260 pontos/dia · máximo'
-    }
-  };
+  /* One generic subscription — no Basic/Pro/Ultimate naming anywhere. */
+  const subActive=platformActive||isPremium||!!grandfatheredTier;
+  const isLifetime=platformLifetime||premiumLifetime;
+  const subUntil=platformUntil||premiumUntil;
+  const subTitle={ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'الاشتراك'}[lang]||'Subscription';
+  const detailActive={ru:'Все функции открыты · ALEX, модели и AI-разборы',en:'All features unlocked · ALEX, models and AI reviews',es:'Todo desbloqueado · ALEX, modelos y análisis AI',pt:'Tudo liberado · ALEX, modelos e análises AI',de:'Alles freigeschaltet · ALEX, Modelle und KI-Analysen',fr:'Tout débloqué · ALEX, modèles et analyses IA',uk:'Усі функції відкриті · ALEX, моделі та AI-розбори',tr:'Tüm özellikler açık · ALEX, modeller ve AI analizleri',zh:'已解锁全部功能 · ALEX、模型与 AI 解析',ar:'كل الميزات مفتوحة · ALEX والنماذج وتحليلات الذكاء الاصطناعي'}[lang]||'All features unlocked';
 
-  if(isPremium){
+  if(subActive){
     let untilText='';
-    if(premiumLifetime){
+    if(isLifetime){
       untilText={ru:'Навсегда ∞',en:'Lifetime ∞',es:'Para siempre ∞',de:'Für immer ∞',fr:'À vie ∞',pt:'Para sempre ∞',uk:'Назавжди ∞',tr:'Ömür boyu ∞',zh:'永久 ∞',ar:'مدى الحياة ∞'}[lang]||'Lifetime ∞';
-    } else if(premiumUntil){
+    } else if(subUntil){
       try{
-        const d=new Date(premiumUntil);
+        const d=new Date(subUntil);
         const days=Math.max(0,Math.ceil((d-Date.now())/(1000*60*60*24)));
-        untilText={ru:`Осталось ${days} дн · до ${d.toLocaleDateString('ru')}`,en:`${days} days left · until ${d.toLocaleDateString('en')}`}[lang]||`${days} days left`;
+        const loc=({ru:'ru',uk:'uk',es:'es',pt:'pt',de:'de',fr:'fr',tr:'tr',zh:'zh',ar:'ar'}[lang]||'en');
+        untilText={ru:`Осталось ${days} дн · до ${d.toLocaleDateString(loc)}`,en:`${days} days left · until ${d.toLocaleDateString(loc)}`,es:`Quedan ${days} días · hasta ${d.toLocaleDateString(loc)}`,pt:`Restam ${days} dias · até ${d.toLocaleDateString(loc)}`,de:`Noch ${days} Tage · bis ${d.toLocaleDateString(loc)}`,fr:`${days} jours restants · jusqu'au ${d.toLocaleDateString(loc)}`,uk:`Залишилось ${days} дн · до ${d.toLocaleDateString(loc)}`,tr:`${days} gün kaldı · ${d.toLocaleDateString(loc)} tarihine kadar`,zh:`剩余 ${days} 天 · 至 ${d.toLocaleDateString(loc)}`,ar:`متبقٍ ${days} يومًا · حتى ${d.toLocaleDateString(loc)}`}[lang]||`${days} days left`;
       }catch(e){untilText='';}
     }
-    const planLine=(activePlanLine[(premiumTier||'basic').toLowerCase()]||activePlanLine.basic)[lang]||(activePlanLine[(premiumTier||'basic').toLowerCase()]||activePlanLine.basic).en;
-    const detailLine=[planLine,untilText].filter(Boolean).join(' · ');
+    const detailLine=[detailActive,untilText].filter(Boolean).join(' · ');
+    const badgeLbl={ru:'АКТИВНА',en:'ACTIVE',es:'ACTIVA',pt:'ATIVA',de:'AKTIV',fr:'ACTIF',uk:'АКТИВНА',tr:'AKTİF',zh:'已激活',ar:'مُفعّل'}[lang]||'ACTIVE';
     banner.innerHTML=`
       <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
-        <div style="display:flex;align-items:center;gap:13px;margin-bottom:${!premiumLifetime&&premiumTier!=='ultimate'?'10':'0'}px">
+        <div style="display:flex;align-items:center;gap:13px">
           <div style="flex:1">
-            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${tierName}</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:2px">${subTitle}</div>
             <div style="font-size:12px;color:var(--t2);line-height:1.35">${detailLine}</div>
           </div>
-          <span class="premium-badge">${(premiumTier||'pro').toUpperCase()}</span>
+          <span class="premium-badge">${badgeLbl}</span>
         </div>
-        ${!premiumLifetime&&premiumTier!=='ultimate'?`<button onclick="openPremium()" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--b1);background:var(--e1);color:var(--a);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--f)">${{ru:'Улучшить план',en:'Upgrade plan',es:'Mejorar plan',pt:'Melhorar plano'}[lang]||'Upgrade'}</button>`:''}
       </div>`;
   } else {
     banner.innerHTML=`
