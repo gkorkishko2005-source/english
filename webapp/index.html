@@ -3968,9 +3968,9 @@ function renderInterests(ints){
   if(!hasTier('basic')){
     if(edit)edit.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');
     w.innerHTML=alexLockedCard(
-      lang==='ru'?'Персональные интересы ALEX':'ALEX personal context',
-      lang==='ru'?'Расскажи о себе один раз, и ALEX будет подбирать примеры, задания и объяснения под тебя. Доступно с любой подпиской.':'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Available with any subscription.',
-      lang==='ru'?'персональный контекст ALEX':'ALEX personal context'
+      ({ru:'Персональные интересы ALEX',en:'ALEX personal context',es:'Contexto personal de ALEX',pt:'Contexto pessoal do ALEX',de:'Persönlicher ALEX-Kontext',fr:'Contexte personnel d’ALEX',uk:'Персональний контекст ALEX',tr:'ALEX kişisel bağlam',zh:'ALEX 个人背景',ar:'سياق ALEX الشخصي'}[lang]||'ALEX personal context'),
+      ({ru:'Расскажи о себе один раз, и ALEX будет подбирать примеры, задания и объяснения под тебя. Доступно с любой подпиской.',en:'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Available with any subscription.',es:'Cuéntale a ALEX sobre ti una vez y adaptará ejemplos, tareas y explicaciones a tu medida. Disponible con cualquier suscripción.',pt:'Conte ao ALEX sobre você uma vez e ele adaptará exemplos, tarefas e explicações a você. Disponível com qualquer assinatura.',de:'Erzähl ALEX einmal von dir, und er passt Beispiele, Aufgaben und Erklärungen an dich an. Mit jedem Abo verfügbar.',fr:'Parle de toi à ALEX une fois et il adaptera exemples, exercices et explications. Disponible avec tout abonnement.',uk:'Розкажи про себе один раз, і ALEX добиратиме приклади, завдання та пояснення під тебе. Доступно з будь-якою підпискою.',tr:'Kendini bir kez anlat, ALEX örnekleri, görevleri ve açıklamaları sana göre uyarlasın. Her abonelikte mevcut.',zh:'只需介绍一次自己，ALEX 就会为你定制示例、练习和讲解。任意订阅均可使用。',ar:'أخبر ALEX عن نفسك مرة واحدة، وسيكيّف الأمثلة والمهام والشروحات لك. متاح مع أي اشتراك.'}[lang]||'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Available with any subscription.'),
+      ({ru:'персональный контекст ALEX',en:'ALEX personal context',es:'contexto personal de ALEX',pt:'contexto pessoal do ALEX',de:'persönlicher ALEX-Kontext',fr:'contexte personnel d’ALEX',uk:'персональний контекст ALEX',tr:'ALEX kişisel bağlam',zh:'ALEX 个人背景',ar:'سياق ALEX الشخصي'}[lang]||'ALEX personal context')
     );
     return;
   }
@@ -3988,13 +3988,13 @@ function updateProfileUI(d){
   const sl=document.getElementById('silv');if(sl)sl.textContent=d.level||'—';
   const sr=document.getElementById('sirem');if(sr)sr.textContent=er;
   const mt=document.getElementById('prof-mtit');
-  if(mt)mt.textContent=(L.proft||'About you')+(hasTier('basic')?'':(lang==='ru'?' · подписка':' · subscription'));
+  if(mt)mt.textContent=(L.proft||'About you')+(hasTier('basic')?'':(' · '+({ru:'подписка',en:'subscription',es:'suscripción',pt:'assinatura',de:'Abo',fr:'abonnement',uk:'підписка',tr:'abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'subscription')));
   const box=document.getElementById('about-access');
   if(box&&!hasTier('basic')){
     box.innerHTML=alexLockedCard(
-      lang==='ru'?'“О себе” работает с ALEX':'“About you” works with ALEX',
-      lang==='ru'?'Free оставляет курс, карточки и прогресс. Любая подписка добавляет память о твоих целях, стиле и интересах для персональных ответов.':'Free keeps course, cards and progress. Any subscription adds memory for your goals, style and interests so ALEX can answer personally.',
-      lang==='ru'?'память ALEX':'ALEX memory'
+      ({ru:'“О себе” работает с ALEX',en:'“About you” works with ALEX',es:'“Sobre ti” funciona con ALEX',pt:'“Sobre você” funciona com o ALEX',de:'„Über dich“ arbeitet mit ALEX',fr:'« À propos de toi » fonctionne avec ALEX',uk:'«Про себе» працює з ALEX',tr:'“Hakkında” ALEX ile çalışır',zh:'“关于你”与 ALEX 协作',ar:'«نبذة عنك» تعمل مع ALEX'}[lang]||'“About you” works with ALEX'),
+      ({ru:'Free оставляет курс, карточки и прогресс. Любая подписка добавляет память о твоих целях, стиле и интересах для персональных ответов.',en:'Free keeps course, cards and progress. Any subscription adds memory for your goals, style and interests so ALEX can answer personally.',es:'Free mantiene el curso, las tarjetas y el progreso. Cualquier suscripción añade memoria de tus metas, estilo e intereses para respuestas personales.',pt:'O Free mantém curso, cartões e progresso. Qualquer assinatura adiciona memória das suas metas, estilo e interesses para respostas pessoais.',de:'Free behält Kurs, Karten und Fortschritt. Jedes Abo ergänzt das Gedächtnis für deine Ziele, deinen Stil und deine Interessen für persönliche Antworten.',fr:'Free conserve cours, cartes et progression. Tout abonnement ajoute la mémoire de tes objectifs, ton style et tes centres d’intérêt pour des réponses personnalisées.',uk:'Free зберігає курс, картки та прогрес. Будь-яка підписка додає пам’ять про твої цілі, стиль та інтереси для персональних відповідей.',tr:'Free; kursu, kartları ve ilerlemeyi tutar. Her abonelik hedeflerin, tarzın ve ilgi alanların için hafıza ekleyerek kişisel yanıtlar sağlar.',zh:'免费版保留课程、卡片和进度。任意订阅都会记住你的目标、风格和兴趣，让回答更贴合你。',ar:'تحافظ النسخة المجانية على الدورة والبطاقات والتقدّم. أي اشتراك يضيف ذاكرة لأهدافك وأسلوبك واهتماماتك لإجابات شخصية.'}[lang]||'Free keeps course, cards and progress. Any subscription adds memory for your goals, style and interests so ALEX can answer personally.'),
+      ({ru:'память ALEX',en:'ALEX memory',es:'memoria de ALEX',pt:'memória do ALEX',de:'ALEX-Gedächtnis',fr:'mémoire d’ALEX',uk:'пам’ять ALEX',tr:'ALEX hafızası',zh:'ALEX 记忆',ar:'ذاكرة ALEX'}[lang]||'ALEX memory')
     );
     return;
   }else if(box&&hasTier('basic')&&!document.getElementById('profinp')){
@@ -4269,7 +4269,7 @@ function openSCtx(id,e){
   const menu=document.getElementById('sctx');
   const ov=document.getElementById('sctx-overlay');
   const isStarred=s.starred;
-  const starLabel=lang==='ru'?(isStarred?'Убрать из избранного':'В избранное'):(isStarred?'Unstar':'Star');
+  const starLabel=isStarred?({ru:'Убрать из избранного',en:'Unstar',es:'Quitar de favoritos',pt:'Remover dos favoritos',de:'Favorit entfernen',fr:'Retirer des favoris',uk:'Прибрати з обраного',tr:'Favorilerden çıkar',zh:'取消收藏',ar:'إزالة من المفضّلة'}[lang]||'Unstar'):({ru:'В избранное',en:'Star',es:'Añadir a favoritos',pt:'Adicionar aos favoritos',de:'Zu Favoriten',fr:'Ajouter aux favoris',uk:'До обраного',tr:'Favorilere ekle',zh:'收藏',ar:'إضافة إلى المفضّلة'}[lang]||'Star');
   const renameLabel=({ru:'Переименовать',en:'Rename',es:'Renombrar',pt:'Renomear',de:'Umbenennen',fr:'Renommer',uk:'Перейменувати',tr:'Yeniden adlandır',zh:'重命名',ar:'إعادة تسمية'}[lang]||'Rename');
   const deleteLabel=({ru:'Удалить',en:'Delete',es:'Eliminar',pt:'Excluir',de:'Löschen',fr:'Supprimer',uk:'Видалити',tr:'Sil',zh:'删除',ar:'حذف'}[lang]||'Delete');
   menu.innerHTML=`
@@ -5457,9 +5457,11 @@ function cardResetText(){
   const totalMin=Math.max(1,Math.ceil(ms/60000));
   const h=Math.floor(totalMin/60);
   const m=totalMin%60;
-  if(h>0&&m>0)return lang==='ru'?`${h}ч ${m}м`:`${h}h ${m}m`;
-  if(h>0)return lang==='ru'?`${h}ч`:`${h}h`;
-  return lang==='ru'?`${totalMin}м`:`${totalMin}m`;
+  const hu=({ru:'ч',en:'h',es:'h',pt:'h',de:'Std',fr:'h',uk:'год',tr:'sa',zh:'时',ar:'س'}[lang]||'h');
+  const mu=({ru:'м',en:'m',es:'min',pt:'min',de:'Min',fr:'min',uk:'хв',tr:'dk',zh:'分',ar:'د'}[lang]||'m');
+  if(h>0&&m>0)return `${h}${hu} ${m}${mu}`;
+  if(h>0)return `${h}${hu}`;
+  return `${totalMin}${mu}`;
 }
 function recordCardDaily(){
   const info=cardWindowInfo();
@@ -5494,7 +5496,7 @@ function initLearn(){
   document.getElementById('rrow').classList.add('hid');
   const cl=document.getElementById('fc-cnt-lbl');
   const info=cardWindowInfo(),used=info.used,limit=info.limit,left=info.remaining;
-  if(cl)cl.textContent=left>0?`${left} / ${limit} · ${lang==='ru'?'сброс':'reset'} ${cardResetText()}`:`${used} / ${limit}`;
+  if(cl)cl.textContent=left>0?`${left} / ${limit} · ${({ru:'сброс',en:'reset',es:'reinicio',pt:'reinício',de:'Reset',fr:'réinit.',uk:'скидання',tr:'sıfırlama',zh:'重置',ar:'إعادة'}[lang]||'reset')} ${cardResetText()}`:`${used} / ${limit}`;
   // Fix: hide counter dash when no cards
   const fctr=document.getElementById('fctr');
   if(fctr)fctr.textContent=cards.length?`0 / ${cards.length}`:'';
@@ -5502,11 +5504,11 @@ function initLearn(){
     document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';
     const et=document.getElementById('em-t'),es=document.getElementById('em-s'),b1=document.getElementById('em-b1'),b2=document.getElementById('em-b2');
     if(left<=0){
-      if(et)et.textContent=lang==='ru'?'Лимит карточек':'Card limit reached';
-      if(es)es.textContent=lang==='ru'?`Ты закрыл норму. Сброс через ${cardResetText()}. Подписка даст больше карточек и более частые сбросы.`:`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`;
-      if(b1)b1.textContent=lang==='ru'?'Выбрать подписку':'Choose plan';
+      if(et)et.textContent=({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached');
+      if(es)es.textContent=({ru:`Ты закрыл норму. Сброс через ${cardResetText()}. Подписка даст больше карточек и более частые сбросы.`,en:`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`,es:`Has completado esta tanda. Se reinicia en ${cardResetText()}. Una suscripción da más tarjetas y reinicios más rápidos.`,pt:`Você concluiu esta leva. Reinicia em ${cardResetText()}. Uma assinatura dá mais cartões e reinícios mais rápidos.`,de:`Du hast diese Runde geschafft. Reset in ${cardResetText()}. Ein Abo bietet mehr Karten und schnellere Resets.`,fr:`Tu as terminé cette série. Réinitialisation dans ${cardResetText()}. Un abonnement offre plus de cartes et des réinitialisations plus rapides.`,uk:`Ти закрив цю порцію. Скидання через ${cardResetText()}. Підписка дає більше карток і частіші скидання.`,tr:`Bu turu bitirdin. ${cardResetText()} sonra sıfırlanır. Abonelik daha çok kart ve daha sık sıfırlama verir.`,zh:`你已完成本轮卡片。${cardResetText()} 后重置。订阅可获得更多卡片和更频繁的重置。`,ar:`أنهيت هذه الدفعة. تُعاد التهيئة خلال ${cardResetText()}. الاشتراك يمنح بطاقات أكثر وإعادة تهيئة أسرع.`}[lang]||`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`);
+      if(b1)b1.textContent=({ru:'Выбрать подписку',en:'Choose plan',es:'Elegir suscripción',pt:'Escolher assinatura',de:'Abo wählen',fr:'Choisir un abonnement',uk:'Обрати підписку',tr:'Abonelik seç',zh:'选择订阅',ar:'اختر الاشتراك'}[lang]||'Choose plan');
       if(b2)b2.textContent=L.ffact||'English fun fact';
-      if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(lang==='ru'?'Подписка даст больше карточек в день':'A subscription gives more cards per day');
+      if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(({ru:'Подписка даст больше карточек в день',en:'A subscription gives more cards per day',es:'Una suscripción da más tarjetas al día',pt:'Uma assinatura dá mais cartões por dia',de:'Ein Abo gibt mehr Karten pro Tag',fr:'Un abonnement offre plus de cartes par jour',uk:'Підписка дає більше карток на день',tr:'Abonelik günde daha çok kart verir',zh:'订阅可获得每天更多卡片',ar:'الاشتراك يمنح بطاقات أكثر يوميًا'}[lang]||'A subscription gives more cards per day'));
       if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
     }else{
       if(et)et.textContent=L.all_done;
@@ -5532,7 +5534,7 @@ function showCard(i){
   document.getElementById('fcex').textContent=c.example||'';
   const lvl=document.getElementById('fclevel');if(lvl)lvl.textContent=c.level||'B1';
   const topic=document.getElementById('fctopic');if(topic)topic.textContent=c.topic||'Core';
-  const use=document.getElementById('fcuse');if(use)use.textContent=(lang==='ru'?'Используй в контексте: ':'Use in context: ')+(c.word||'');
+  const use=document.getElementById('fcuse');if(use)use.textContent=(({ru:'Используй в контексте: ',en:'Use in context: ',es:'Úsalo en contexto: ',pt:'Use no contexto: ',de:'Im Kontext verwenden: ',fr:'Utilise en contexte : ',uk:'Вживай у контексті: ',tr:'Bağlamda kullan: ',zh:'在语境中使用：',ar:'استخدمها في سياق: '}[lang]||'Use in context: '))+(c.word||'');
   document.getElementById('fctr').textContent=`${i+1} / ${cards.length}`;
   document.getElementById('pfill').style.width=(i/cards.length*100)+'%';
   document.getElementById('rrow').classList.add('hid');
@@ -5570,12 +5572,12 @@ function showCardHelp(c,q){
   const examples=cardHelpExamples(c);
   const box=document.createElement('div');
   box.className='fc-help';box.id='fc-help-box';
-  box.innerHTML=`<div class="fc-help-top"><div><div class="fc-help-word">${safeHTML(c.word||'')}</div><div class="fc-help-meaning">${safeHTML(t.meaning)}</div></div><div class="fc-help-tag">${q<=1?(lang==='ru'?'ещё раз':'again'):(lang==='ru'?'сложно':'hard')}</div></div>
+  box.innerHTML=`<div class="fc-help-top"><div><div class="fc-help-word">${safeHTML(c.word||'')}</div><div class="fc-help-meaning">${safeHTML(t.meaning)}</div></div><div class="fc-help-tag">${q<=1?({ru:'ещё раз',en:'again',es:'otra vez',pt:'de novo',de:'nochmal',fr:'encore',uk:'ще раз',tr:'tekrar',zh:'再来',ar:'مرة أخرى'}[lang]||'again'):({ru:'сложно',en:'hard',es:'difícil',pt:'difícil',de:'schwer',fr:'difficile',uk:'складно',tr:'zor',zh:'较难',ar:'صعب'}[lang]||'hard')}</div></div>
     <ul class="fc-help-list">${examples.map(ex=>`<li>${safeHTML(ex)}</li>`).join('')}</ul>
     <div class="fc-help-tip">${safeHTML(t.tip)}</div>
     <div class="fc-help-actions">
-      ${hasChatAccess()?`<button class="fc-help-btn" onclick="askAlexCardHelp()">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>`:`<button class="fc-help-btn" onclick="showTierPaywall('basic','${lang==='ru'?'объяснение ALEX':'ALEX explanation'}')">${lang==='ru'?'Объяснение ALEX по подписке':'ALEX explanation with subscription'}</button>`}
-      <button class="fc-help-btn secondary" onclick="continueAfterCardHelp()">${lang==='ru'?'Продолжить':'Continue'}</button>
+      ${hasChatAccess()?`<button class="fc-help-btn" onclick="askAlexCardHelp()">${({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX')}</button>`:`<button class="fc-help-btn" onclick="showTierPaywall('basic','${({ru:'объяснение ALEX',en:'ALEX explanation',es:'explicación de ALEX',pt:'explicação do ALEX',de:'ALEX-Erklärung',fr:'explication d’ALEX',uk:'пояснення ALEX',tr:'ALEX açıklaması',zh:'ALEX 讲解',ar:'شرح ALEX'}[lang]||'ALEX explanation')}')">${({ru:'Объяснение ALEX по подписке',en:'ALEX explanation with subscription',es:'Explicación de ALEX con suscripción',pt:'Explicação do ALEX com assinatura',de:'ALEX-Erklärung mit Abo',fr:'Explication d’ALEX avec abonnement',uk:'Пояснення ALEX із підпискою',tr:'Abonelikle ALEX açıklaması',zh:'订阅后获得 ALEX 讲解',ar:'شرح ALEX مع الاشتراك'}[lang]||'ALEX explanation with subscription')}</button>`}
+      <button class="fc-help-btn secondary" onclick="continueAfterCardHelp()">${({ru:'Продолжить',en:'Continue',es:'Continuar',pt:'Continuar',de:'Weiter',fr:'Continuer',uk:'Продовжити',tr:'Devam',zh:'继续',ar:'متابعة'}[lang]||'Continue')}</button>
     </div>`;
   main.insertBefore(box,main.firstChild);
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -5584,15 +5586,13 @@ function continueAfterCardHelp(){document.getElementById('fc-help-box')?.remove(
 function askAlexCardHelp(){
   const c=lastHelpCard;if(!c)return;
   const w=c.word||'';
-  const req=lang==='ru'
-    ?`Объясни простыми словами английское слово «${w}»: значение, когда использовать, 3 разных примера, частые ошибки и короткое упражнение.`
-    :`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`;
+  const req=({ru:`Объясни простыми словами английское слово «${w}»: значение, когда использовать, 3 разных примера, частые ошибки и короткое упражнение.`,en:`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`,es:`Explica de forma sencilla la palabra inglesa "${w}": significado, cuándo usarla, 3 ejemplos variados, errores frecuentes y un ejercicio corto.`,pt:`Explique de forma simples a palavra inglesa "${w}": significado, quando usar, 3 exemplos variados, erros comuns e um exercício curto.`,de:`Erkläre das englische Wort „${w}“ einfach: Bedeutung, Verwendung, 3 verschiedene Beispiele, häufige Fehler und eine kurze Übung.`,fr:`Explique simplement le mot anglais « ${w} » : sens, quand l’utiliser, 3 exemples variés, erreurs fréquentes et un court exercice.`,uk:`Поясни простими словами англійське слово «${w}»: значення, коли вживати, 3 різні приклади, типові помилки й коротку вправу.`,tr:`"${w}" İngilizce kelimesini sade biçimde açıkla: anlamı, ne zaman kullanılır, 3 farklı örnek, sık yapılan hatalar ve kısa bir alıştırma.`,zh:`用简单的话解释英文单词 "${w}"：含义、使用场景、3 个不同例句、常见错误以及一个简短练习。`,ar:`اشرح الكلمة الإنجليزية "${w}" ببساطة: المعنى، ومتى تُستخدم، و3 أمثلة متنوعة، والأخطاء الشائعة، وتمرين قصير.`}[lang]||`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`);
   sendChip(req);
 }
 async function rate(q){
   if(cardRateBusy)return;
   cardRateBusy=true;
-  if(cardDailyRemaining()<=0){toast(lang==='ru'?'Лимит карточек':'Card limit reached','🔒');initLearn();return;}
+  if(cardDailyRemaining()<=0){toast(({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached'),'🔒');initLearn();return;}
   haptic(q>=3?'success':'light');
   try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
   const c=cards[cIdx];
@@ -5606,8 +5606,8 @@ async function rate(q){
     /* Show the SRS interval so the user sees the algorithm working. */
     const days=Math.max(1,Math.round(nextInfo.interval));
     const txt=days===1
-      ?(lang==='ru'?'Следующий показ — завтра.':'Next review tomorrow.')
-      :(lang==='ru'?`Следующий показ через ${days} дн.`:`Next review in ${days} days.`);
+      ?({ru:'Следующий показ — завтра.',en:'Next review tomorrow.',es:'Próximo repaso mañana.',pt:'Próxima revisão amanhã.',de:'Nächste Wiederholung morgen.',fr:'Prochaine révision demain.',uk:'Наступний показ завтра.',tr:'Sonraki tekrar yarın.',zh:'下次复习在明天。',ar:'المراجعة التالية غدًا.'}[lang]||'Next review tomorrow.')
+      :({ru:`Следующий показ через ${days} дн.`,en:`Next review in ${days} days.`,es:`Próximo repaso en ${days} días.`,pt:`Próxima revisão em ${days} dias.`,de:`Nächste Wiederholung in ${days} Tagen.`,fr:`Prochaine révision dans ${days} jours.`,uk:`Наступний показ через ${days} дн.`,tr:`Sonraki tekrar ${days} gün sonra.`,zh:`下次复习在 ${days} 天后。`,ar:`المراجعة التالية بعد ${days} أيام.`}[lang]||`Next review in ${days} days.`);
     setTimeout(()=>{try{toast(txt,'📅');}catch(_){}},900);
   }
   if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
@@ -6200,8 +6200,8 @@ function startAudio(){openExamPrep();}
 function openExamPrep(){
   goTab('chat',true);
   addMsg('bot',`<div class="exam-hub">
-    <div><div class="exam-title">${lang==='ru'?'TOEFL / IELTS тренажёр':'TOEFL / IELTS trainer'}</div>
-    <div class="exam-sub">${lang==='ru'?'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Подписка добавляет разбор ответа и подсказки ALEX.':'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.'}</div></div>
+    <div><div class="exam-title">${({ru:'TOEFL / IELTS тренажёр',en:'TOEFL / IELTS trainer',es:'Entrenador TOEFL / IELTS',pt:'Treino TOEFL / IELTS',de:'TOEFL / IELTS Trainer',fr:'Entraîneur TOEFL / IELTS',uk:'Тренажер TOEFL / IELTS',tr:'TOEFL / IELTS antrenörü',zh:'TOEFL / IELTS 训练器',ar:'مدرّب TOEFL / IELTS'}[lang]||'TOEFL / IELTS trainer')}</div>
+    <div class="exam-sub">${({ru:'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Подписка добавляет разбор ответа и подсказки ALEX.',en:'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.',es:'Gratis: tareas de Reading, Listening, Writing y Speaking sin IA. Una suscripción añade análisis y consejos de ALEX.',pt:'Grátis: tarefas de Reading, Listening, Writing e Speaking sem IA. Uma assinatura adiciona análise e dicas do ALEX.',de:'Kostenlos: Reading-, Listening-, Writing- und Speaking-Aufgaben ohne KI. Ein Abo ergänzt ALEX-Feedback und Tipps.',fr:'Gratuit : tâches Reading, Listening, Writing et Speaking sans IA. Un abonnement ajoute l’analyse et les conseils d’ALEX.',uk:'Безкоштовно: завдання Reading, Listening, Writing і Speaking без AI. Підписка додає розбір і поради ALEX.',tr:'Ücretsiz: yapay zekâsız Reading, Listening, Writing ve Speaking görevleri. Abonelik ALEX geri bildirimi ve ipuçları ekler.',zh:'免费：无 AI 的 Reading、Listening、Writing 和 Speaking 题目。订阅可获得 ALEX 的点评和提示。',ar:'مجانًا: مهام Reading وListening وWriting وSpeaking بدون ذكاء اصطناعي. الاشتراك يضيف تحليل ALEX ونصائحه.'}[lang]||'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.')}</div></div>
     <div class="exam-grid">
       <button class="exam-card" onclick="runExamTask('toefl','reading')"><strong>TOEFL Reading</strong><span>academic passages</span></button>
       <button class="exam-card" onclick="runExamTask('toefl','listening')"><strong>TOEFL Listening</strong><span>campus / lecture</span></button>
@@ -6220,11 +6220,11 @@ function runExamTask(exam,section){
   let body='';
   if(section==='reading'||section==='listening'){
     body+=`<div class="exam-passage">${safeHTML(section==='listening'?task.transcript:task.passage)}</div>`;
-    if(section==='listening')body+=`<div class="exam-actions"><button class="exam-btn" onclick="speakExamTask('${id}')">${lang==='ru'?'Слушать':'Listen'}</button></div>`;
+    if(section==='listening')body+=`<div class="exam-actions"><button class="exam-btn" onclick="speakExamTask('${id}')">${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button></div>`;
     body+=`<div class="exam-prompt">${safeHTML(task.q)}</div><div class="lt-opts">${task.o.map((o,i)=>`<div class="lt-opt" onclick="answerExamTask('${id}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('')}</div>`;
   }else{
-    body+=`<div class="exam-prompt">${safeHTML(task.prompt)}</div><textarea class="exam-area" id="${id}-txt" placeholder="${section==='writing'?(lang==='ru'?'Напиши ответ или план':'Write your response or plan'):(lang==='ru'?'Запиши краткий план ответа':'Write a short answer plan')}"></textarea>`;
-    body+=`<div class="exam-actions"><button class="exam-btn" onclick="localExamChecklist('${id}')">${lang==='ru'?'Чек-лист':'Checklist'}</button><button class="exam-btn" onclick="askExamAI('${id}')">${lang==='ru'?'Разбор с ALEX':'ALEX feedback'}</button></div><div class="course-result" id="${id}-res"></div>`;
+    body+=`<div class="exam-prompt">${safeHTML(task.prompt)}</div><textarea class="exam-area" id="${id}-txt" placeholder="${section==='writing'?({ru:'Напиши ответ или план',en:'Write your response or plan',es:'Escribe tu respuesta o plan',pt:'Escreva sua resposta ou plano',de:'Schreibe deine Antwort oder einen Plan',fr:'Rédige ta réponse ou ton plan',uk:'Напиши відповідь або план',tr:'Yanıtını veya planını yaz',zh:'写下你的回答或提纲',ar:'اكتب إجابتك أو خطتك'}[lang]||'Write your response or plan'):({ru:'Запиши краткий план ответа',en:'Write a short answer plan',es:'Escribe un plan breve de respuesta',pt:'Escreva um plano breve de resposta',de:'Schreibe einen kurzen Antwortplan',fr:'Note un bref plan de réponse',uk:'Запиши короткий план відповіді',tr:'Kısa bir yanıt planı yaz',zh:'写一个简短的答题提纲',ar:'اكتب خطة إجابة موجزة'}[lang]||'Write a short answer plan')}"></textarea>`;
+    body+=`<div class="exam-actions"><button class="exam-btn" onclick="localExamChecklist('${id}')">${({ru:'Чек-лист',en:'Checklist',es:'Lista',pt:'Checklist',de:'Checkliste',fr:'Checklist',uk:'Чек-лист',tr:'Kontrol listesi',zh:'清单',ar:'قائمة تحقّق'}[lang]||'Checklist')}</button><button class="exam-btn" onclick="askExamAI('${id}')">${({ru:'Разбор с ALEX',en:'ALEX feedback',es:'Análisis con ALEX',pt:'Análise com ALEX',de:'ALEX-Feedback',fr:'Analyse avec ALEX',uk:'Розбір з ALEX',tr:'ALEX geri bildirimi',zh:'ALEX 点评',ar:'تحليل مع ALEX'}[lang]||'ALEX feedback')}</button></div><div class="course-result" id="${id}-res"></div>`;
   }
   addMsg('bot',`<div class="exam-task" id="${id}"><div class="exam-kicker">${safeHTML(kicker)}</div>${body}</div>`);
   try{trackM(section==='listening'?'listen':'drill');}catch(e){}
@@ -6235,7 +6235,7 @@ function answerExamTask(id,picked){
   const box=document.getElementById(id);if(!box)return;
   box.querySelectorAll('.lt-opt').forEach((o,i)=>{o.style.pointerEvents='none';if(i===correct)o.classList.add('lt-correct');if(i===picked&&picked!==correct)o.classList.add('lt-wrong');});
   if(picked===correct){addLocalXP(10);bumpStat('tests');toast('+10 XP','✅');}
-  else toast(lang==='ru'?'Посмотри правильный ответ':'Check the correct answer','⚠️');
+  else toast(({ru:'Посмотри правильный ответ',en:'Check the correct answer',es:'Mira la respuesta correcta',pt:'Veja a resposta correta',de:'Sieh dir die richtige Antwort an',fr:'Regarde la bonne réponse',uk:'Поглянь на правильну відповідь',tr:'Doğru cevaba bak',zh:'看看正确答案',ar:'انظر إلى الإجابة الصحيحة'}[lang]||'Check the correct answer'),'⚠️');
 }
 function speakExamTask(id){
   const st=examState[id];if(!st||!('speechSynthesis' in window))return;
@@ -6246,12 +6246,12 @@ function localExamChecklist(id){
   const st=examState[id];const res=document.getElementById(id+'-res');if(!st||!res)return;
   res.className='course-result ok';
   res.textContent=st.section==='writing'
-    ?(lang==='ru'?'Проверь: тезис, 2 аргумента, пример, вывод, связки however/therefore.':'Check: thesis, two reasons, example, conclusion, linkers such as however/therefore.')
-    :(lang==='ru'?'Ответь 45-60 секунд: позиция, причина, пример, короткий вывод.':'Answer for 45-60 seconds: position, reason, example, short conclusion.');
+    ?({ru:'Проверь: тезис, 2 аргумента, пример, вывод, связки however/therefore.',en:'Check: thesis, two reasons, example, conclusion, linkers such as however/therefore.',es:'Revisa: tesis, 2 razones, ejemplo, conclusión, conectores como however/therefore.',pt:'Verifique: tese, 2 razões, exemplo, conclusão, conectivos como however/therefore.',de:'Prüfe: These, 2 Gründe, Beispiel, Schluss, Konnektoren wie however/therefore.',fr:'Vérifie : thèse, 2 raisons, exemple, conclusion, connecteurs comme however/therefore.',uk:'Перевір: теза, 2 аргументи, приклад, висновок, зв’язки however/therefore.',tr:'Kontrol et: tez, 2 neden, örnek, sonuç, however/therefore gibi bağlaçlar.',zh:'检查：论点、两个理由、例子、结论，以及 however/therefore 等连接词。',ar:'تحقّق: الأطروحة، سببان، مثال، خاتمة، وروابط مثل however/therefore.'}[lang]||'Check: thesis, two reasons, example, conclusion, linkers such as however/therefore.')
+    :({ru:'Ответь 45-60 секунд: позиция, причина, пример, короткий вывод.',en:'Answer for 45-60 seconds: position, reason, example, short conclusion.',es:'Responde 45-60 segundos: postura, razón, ejemplo, conclusión breve.',pt:'Responda por 45-60 segundos: posição, razão, exemplo, conclusão breve.',de:'Antworte 45-60 Sekunden: Position, Grund, Beispiel, kurzer Schluss.',fr:'Réponds 45-60 secondes : position, raison, exemple, courte conclusion.',uk:'Відповідай 45-60 секунд: позиція, причина, приклад, короткий висновок.',tr:'45-60 saniye yanıtla: görüş, neden, örnek, kısa sonuç.',zh:'回答 45-60 秒：立场、理由、例子、简短结论。',ar:'أجب لمدة 45-60 ثانية: الموقف، السبب، المثال، خاتمة قصيرة.'}[lang]||'Answer for 45-60 seconds: position, reason, example, short conclusion.');
 }
 function askExamAI(id){
   const st=examState[id];if(!st)return;
-  if(!hasTier('basic')){showTierPaywall('basic',lang==='ru'?'AI-разбор экзамена':'AI exam feedback');return;}
+  if(!hasTier('basic')){showTierPaywall('basic',({ru:'AI-разбор экзамена',en:'AI exam feedback',es:'Análisis de examen con IA',pt:'Análise de exame com IA',de:'KI-Prüfungsanalyse',fr:'Analyse d’examen par IA',uk:'AI-розбір екзамену',tr:'Yapay zekâ sınav analizi',zh:'AI 考试点评',ar:'تحليل الامتحان بالذكاء الاصطناعي'}[lang]||'AI exam feedback'));return;}
   const txt=(document.getElementById(id+'-txt')?.value||'').trim();
   const prompt=`${examTitle(st.exam)} ${st.section} feedback. Task: ${st.task.prompt||st.task.q}. My answer: ${txt||'(I need guidance before answering)'}. Give a score-style review, corrections and a better sample answer.`;
   sendChip(prompt);
@@ -6318,7 +6318,7 @@ async function saveProfSilent(){
 }
 // Явное сохранение по кнопке: toast + chip ALEX'у
 async function saveProf(){
-  if(!hasTier('basic')){showTierPaywall('basic',lang==='ru'?'память ALEX':'ALEX memory');return;}
+  if(!hasTier('basic')){showTierPaywall('basic',({ru:'память ALEX',en:'ALEX memory',es:'memoria de ALEX',pt:'memória do ALEX',de:'ALEX-Gedächtnis',fr:'mémoire d’ALEX',uk:'пам’ять ALEX',tr:'ALEX hafızası',zh:'ALEX 记忆',ar:'ذاكرة ALEX'}[lang]||'ALEX memory'));return;}
   const val=(document.getElementById('profinp')?.value||'').trim().slice(0,500);
   if(!val){toast(L.profpt,'⚠️');return;}
   profDraft(val);
@@ -6328,7 +6328,7 @@ async function saveProf(){
   }catch{}
   toast(L.psav,'✅');
   if(hasChatAccess()){
-    setTimeout(()=>sendChip(lang==='ru'?`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`:`About me: ${val}. Remember this and adapt your teaching to it.`),300);
+    setTimeout(()=>sendChip(({ru:`Обо мне: ${val}. Запомни это и учитывай в общении со мной.`,en:`About me: ${val}. Remember this and adapt your teaching to it.`,es:`Sobre mí: ${val}. Recuérdalo y adapta tu enseñanza a mí.`,pt:`Sobre mim: ${val}. Lembre-se disso e adapte seu ensino a mim.`,de:`Über mich: ${val}. Merk dir das und passe deinen Unterricht an mich an.`,fr:`À propos de moi : ${val}. Retiens-le et adapte ton enseignement.`,uk:`Про мене: ${val}. Запам’ятай це й враховуй у спілкуванні зі мною.`,tr:`Hakkımda: ${val}. Bunu hatırla ve öğretimini bana göre uyarla.`,zh:`关于我：${val}。记住这一点，并据此调整你的教学。`,ar:`عنّي: ${val}. تذكّر هذا وكيّف أسلوب تعليمك معي.`}[lang]||`About me: ${val}. Remember this and adapt your teaching to it.`)),300);
   }
 }
 
@@ -7468,7 +7468,7 @@ function tapSkipLevelTest(target,evt){
   addCourseSkippedLevel(target);
   _provenMemo.t=0; _ccLessonId.t=0;
   try{haptic('medium');}catch(_){}
-  try{toast(lang==='ru'?`Уровень ${target} открыт без теста.`:`Level ${target} opened without the test.`,'⚠️');}catch(_){}
+  try{toast(({ru:`Уровень ${target} открыт без теста.`,en:`Level ${target} opened without the test.`,es:`Nivel ${target} abierto sin examen.`,pt:`Nível ${target} aberto sem teste.`,de:`Level ${target} ohne Test freigeschaltet.`,fr:`Niveau ${target} ouvert sans test.`,uk:`Рівень ${target} відкрито без тесту.`,tr:`${target} seviyesi testsiz açıldı.`,zh:`${target} 级别已无需测试解锁。`,ar:`تم فتح المستوى ${target} بدون اختبار.`}[lang]||`Level ${target} opened without the test.`),'⚠️');}catch(_){}
   /* Re-render the list so newly-unlocked lessons appear. */
   requestAnimationFrame(()=>{try{renderCourse();}catch(_){}});
   return false;
@@ -7489,19 +7489,19 @@ function renderCourse(){
   const levelPick=levels.map(l=>`<button class="level-pick-btn" type="button" onclick="startLevelTest('${l}')">${l}</button>`).join('');
   const system=`<div class="course-system">
     <div class="course-system-top">
-      <div><div class="course-system-title">${lang==='ru'?'Системный курс A0-C2':'System course A0-C2'}</div>
-      <div class="course-system-sub">${lang==='ru'?'Полный путь A0-C2: правило, словарь, синонимы, пазл, диктовка и грамматическая практика на каждом уроке.':'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.'}</div></div>
+      <div><div class="course-system-title">${({ru:'Системный курс A0-C2',en:'System course A0-C2',es:'Curso completo A0-C2',pt:'Curso completo A0-C2',de:'Systemkurs A0-C2',fr:'Cours complet A0-C2',uk:'Системний курс A0-C2',tr:'Sistematik kurs A0-C2',zh:'A0-C2 系统课程',ar:'دورة منهجية A0-C2'}[lang]||'System course A0-C2')}</div>
+      <div class="course-system-sub">${({ru:'Полный путь A0-C2: правило, словарь, синонимы, пазл, диктовка и грамматическая практика на каждом уроке.',en:'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.',es:'Ruta completa A0-C2: regla, vocabulario, sinónimos, puzzle, dictado y práctica de gramática en cada lección.',pt:'Trajeto completo A0-C2: regra, vocabulário, sinônimos, puzzle, ditado e prática de gramática em cada lição.',de:'Kompletter Weg A0-C2: Regel, Wortschatz, Synonyme, Satzpuzzle, Diktat und Grammatikübung in jeder Lektion.',fr:'Parcours complet A0-C2 : règle, vocabulaire, synonymes, puzzle, dictée et grammaire à chaque leçon.',uk:'Повний шлях A0-C2: правило, словник, синоніми, пазл, диктант і граматична практика в кожному уроці.',tr:'Tam yol A0-C2: her derste kural, kelime, eş anlamlılar, cümle yapbozu, dikte ve dilbilgisi pratiği.',zh:'完整 A0-C2 路径：每节课包含规则、词汇、近义词、拼句、听写和语法练习。',ar:'مسار كامل A0-C2: قاعدة ومفردات ومرادفات ولغز جمل وإملاء وتمرين قواعد في كل درس.'}[lang]||'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.')}</div></div>
       <div class="course-system-pill">${doneCount}/${GALAXY_COURSE.length}</div>
     </div>
     <div class="course-system-grid">
-      <div class="course-step"><strong>${lang==='ru'?'Теория':'Theory'}</strong><span>${lang==='ru'?'коротко':'short'}</span></div>
-      <div class="course-step"><strong>${lang==='ru'?'Практика':'Practice'}</strong><span>${lang==='ru'?'точность':'accuracy'}</span></div>
-      <div class="course-step"><strong>${lang==='ru'?'Слух':'Listen'}</strong><span>${lang==='ru'?'фразы':'phrases'}</span></div>
-      <div class="course-step"><strong>${lang==='ru'?'Экзамен':'Exam'}</strong><span>80%</span></div>
+      <div class="course-step"><strong>${({ru:'Теория',en:'Theory',es:'Teoría',pt:'Teoria',de:'Theorie',fr:'Théorie',uk:'Теорія',tr:'Teori',zh:'理论',ar:'النظرية'}[lang]||'Theory')}</strong><span>${({ru:'коротко',en:'short',es:'breve',pt:'breve',de:'kurz',fr:'bref',uk:'коротко',tr:'kısa',zh:'简短',ar:'مختصر'}[lang]||'short')}</span></div>
+      <div class="course-step"><strong>${({ru:'Практика',en:'Practice',es:'Práctica',pt:'Prática',de:'Übung',fr:'Pratique',uk:'Практика',tr:'Pratik',zh:'练习',ar:'تطبيق'}[lang]||'Practice')}</strong><span>${({ru:'точность',en:'accuracy',es:'precisión',pt:'precisão',de:'Genauigkeit',fr:'précision',uk:'точність',tr:'doğruluk',zh:'准确度',ar:'دقّة'}[lang]||'accuracy')}</span></div>
+      <div class="course-step"><strong>${({ru:'Слух',en:'Listen',es:'Escucha',pt:'Escuta',de:'Hören',fr:'Écoute',uk:'Слух',tr:'Dinleme',zh:'听力',ar:'استماع'}[lang]||'Listen')}</strong><span>${({ru:'фразы',en:'phrases',es:'frases',pt:'frases',de:'Phrasen',fr:'phrases',uk:'фрази',tr:'kalıplar',zh:'短语',ar:'عبارات'}[lang]||'phrases')}</span></div>
+      <div class="course-step"><strong>${({ru:'Экзамен',en:'Exam',es:'Examen',pt:'Exame',de:'Prüfung',fr:'Examen',uk:'Екзамен',tr:'Sınav',zh:'考试',ar:'امتحان'}[lang]||'Exam')}</strong><span>80%</span></div>
     </div>
-    <div class="course-system-sub" style="margin-top:10px">${lang==='ru'?'Выбери уровень. Он подтвердится только после теста.':'Choose your level. It is confirmed only after a test.'}</div>
+    <div class="course-system-sub" style="margin-top:10px">${({ru:'Выбери уровень. Он подтвердится только после теста.',en:'Choose your level. It is confirmed only after a test.',es:'Elige tu nivel. Se confirma solo tras un examen.',pt:'Escolha seu nível. Ele é confirmado só após um teste.',de:'Wähle dein Level. Es wird erst nach einem Test bestätigt.',fr:'Choisis ton niveau. Il n’est confirmé qu’après un test.',uk:'Обери свій рівень. Він підтверджується лише після тесту.',tr:'Seviyeni seç. Yalnızca testten sonra onaylanır.',zh:'选择你的级别。仅在通过测试后确认。',ar:'اختر مستواك. يُؤكَّد فقط بعد اختبار.'}[lang]||'Choose your level. It is confirmed only after a test.')}</div>
     <div class="level-pick-row">${levelPick}</div>
-    <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${lang==='ru'?'Сдать тест перехода на':'Take level-up test for'} ${nextExam}</button>
+    <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${({ru:'Сдать тест перехода на',en:'Take level-up test for',es:'Hacer examen de paso a',pt:'Fazer teste de avanço para',de:'Aufstiegstest für',fr:'Passer le test de passage vers',uk:'Скласти тест переходу на',tr:'Şu seviyeye geçiş testi:',zh:'参加升级到',ar:'اجتياز اختبار الانتقال إلى'}[lang]||'Take level-up test for')} ${nextExam}</button>
   </div>`;
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
@@ -7522,15 +7522,15 @@ function renderCourse(){
         :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>');
     const onClick=unlocked?`openCourseLesson('${ls.id}')`:`handleLockedCourseTap('${ls.id}')`;
     const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${
-      reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${lang==='ru'?'Сдать тест':'Take the test'} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${lang==='ru'?'Открыть без теста':'Skip the test'}</button></div>`:
-      reason&&reason.kind==='prev'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="event.stopPropagation();openCourseLesson('${reason.prevId}')">${lang==='ru'?'Открыть нужный урок':'Open the required lesson'}</button></div>`:''
+      reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${({ru:'Сдать тест',en:'Take the test',es:'Hacer el examen',pt:'Fazer o teste',de:'Test machen',fr:'Passer le test',uk:'Скласти тест',tr:'Testi yap',zh:'参加测试',ar:'اجتياز الاختبار'}[lang]||'Take the test')} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${({ru:'Открыть без теста',en:'Skip the test',es:'Abrir sin examen',pt:'Abrir sem teste',de:'Ohne Test öffnen',fr:'Ouvrir sans test',uk:'Відкрити без тесту',tr:'Testsiz aç',zh:'跳过测试',ar:'الفتح بدون اختبار'}[lang]||'Skip the test')}</button></div>`:
+      reason&&reason.kind==='prev'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="event.stopPropagation();openCourseLesson('${reason.prevId}')">${({ru:'Открыть нужный урок',en:'Open the required lesson',es:'Abrir la lección necesaria',pt:'Abrir a lição necessária',de:'Erforderliche Lektion öffnen',fr:'Ouvrir la leçon requise',uk:'Відкрити потрібний урок',tr:'Gerekli dersi aç',zh:'打开所需课程',ar:'افتح الدرس المطلوب'}[lang]||'Open the required lesson')}</button></div>`:''
     }`:'';
     return `${header}<div class="course-card ${isDone?'done':''} ${unlocked?'':'locked'}" style="--lesson-color:${ls.color}" onclick="${onClick}">
       <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${lessonThemeIcon(ls)}</div>
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
         <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
-        <div class="course-meta">${unlocked?`<span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span><span class="course-pill">${lang==='ru'?'Аудирование':'Listening'}</span>${isDone?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:''}`:lockedMeta}</div>
+        <div class="course-meta">${unlocked?`<span class="course-pill">${({ru:'Теория',en:'Theory',es:'Teoría',pt:'Teoria',de:'Theorie',fr:'Théorie',uk:'Теорія',tr:'Teori',zh:'理论',ar:'النظرية'}[lang]||'Theory')}</span><span class="course-pill">${({ru:'Практика',en:'Practice',es:'Práctica',pt:'Prática',de:'Übung',fr:'Pratique',uk:'Практика',tr:'Pratik',zh:'练习',ar:'تطبيق'}[lang]||'Practice')}</span><span class="course-pill">${({ru:'Аудирование',en:'Listening',es:'Comprensión auditiva',pt:'Compreensão oral',de:'Hörverstehen',fr:'Compréhension orale',uk:'Аудіювання',tr:'Dinleme',zh:'听力',ar:'استماع'}[lang]||'Listening')}</span>${isDone?`<span class="course-done-pill">${({ru:'Пройдено',en:'Done',es:'Hecho',pt:'Concluído',de:'Erledigt',fr:'Terminé',uk:'Пройдено',tr:'Tamamlandı',zh:'已完成',ar:'تم'}[lang]||'Done')}</span>`:''}`:lockedMeta}</div>
       </div>
       <div class="course-status">${statusIcon}</div>
     </div>`;
@@ -7667,21 +7667,21 @@ const COURSE_SYNONYMS={
 function courseSynonymKeys(){return Object.keys(COURSE_SYNONYMS);}
 function courseT(key){
   const m={
-    vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras'},
-    vocabSub:{ru:'Выберите перевод слова.',en:'Select the correct translation.',es:'Selecciona la traducción.',pt:'Selecione a tradução.'},
-    reverse:{ru:'Обратный перевод',en:'Reverse translation',es:'Traducción inversa',pt:'Tradução inversa'},
-    reverseSub:{ru:'С родного языка в английский.',en:'From your interface language into English.',es:'De tu idioma al inglés.',pt:'Do seu idioma para inglês.'},
-    grammar:{ru:'Грамматика и выбор',en:'Grammar choice',es:'Gramática',pt:'Gramática'},
-    puzzle:{ru:'Пазл на английском',en:'English puzzle',es:'Puzzle en inglés',pt:'Puzzle em inglês'},
-    nativePuzzle:{ru:'Пазл с перевода',en:'Translation puzzle',es:'Puzzle de traducción',pt:'Puzzle de tradução'},
-    errors:{ru:'Найди ошибку',en:'Find the mistake',es:'Encuentra el error',pt:'Encontre o erro'},
-    listen:{ru:'Слух и чтение',en:'Listening and reading',es:'Escucha y lectura',pt:'Escuta e leitura'},
-    done:{ru:'готово',en:'done',es:'listo',pt:'feito'},
-    choose:{ru:'Выбери перевод:',en:'Choose the translation:',es:'Elige la traducción:',pt:'Escolha a tradução:'},
-    chooseWord:{ru:'Выбери английское слово:',en:'Choose the English word:',es:'Elige la palabra en inglés:',pt:'Escolha a palavra em inglês:'},
-    correct:{ru:'Верно.',en:'Correct.',es:'Correcto.',pt:'Correto.'},
-    miss:{ru:'Неверно.',en:'Incorrect.',es:'Incorrecto.',pt:'Incorreto.'},
-    allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.'},
+    vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras',de:'Lektionswörter',fr:'Mots de la leçon',uk:'Слова уроку',tr:'Ders kelimeleri',zh:'课程单词',ar:'كلمات الدرس'},
+    vocabSub:{ru:'Выберите перевод слова.',en:'Select the correct translation.',es:'Selecciona la traducción.',pt:'Selecione a tradução.',de:'Wähle die richtige Übersetzung.',fr:'Choisis la bonne traduction.',uk:'Обери правильний переклад.',tr:'Doğru çeviriyi seç.',zh:'选择正确的翻译。',ar:'اختر الترجمة الصحيحة.'},
+    reverse:{ru:'Обратный перевод',en:'Reverse translation',es:'Traducción inversa',pt:'Tradução inversa',de:'Rückübersetzung',fr:'Traduction inverse',uk:'Зворотний переклад',tr:'Ters çeviri',zh:'反向翻译',ar:'الترجمة العكسية'},
+    reverseSub:{ru:'С родного языка в английский.',en:'From your interface language into English.',es:'De tu idioma al inglés.',pt:'Do seu idioma para inglês.',de:'Von deiner Sprache ins Englische.',fr:'De ta langue vers l’anglais.',uk:'З твоєї мови англійською.',tr:'Kendi dilinden İngilizceye.',zh:'从你的语言翻译成英语。',ar:'من لغتك إلى الإنجليزية.'},
+    grammar:{ru:'Грамматика и выбор',en:'Grammar choice',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法选择',ar:'القواعد'},
+    puzzle:{ru:'Пазл на английском',en:'English puzzle',es:'Puzzle en inglés',pt:'Puzzle em inglês',de:'Englisch-Puzzle',fr:'Puzzle en anglais',uk:'Пазл англійською',tr:'İngilizce yapboz',zh:'英语拼句',ar:'لغز إنجليزي'},
+    nativePuzzle:{ru:'Пазл с перевода',en:'Translation puzzle',es:'Puzzle de traducción',pt:'Puzzle de tradução',de:'Übersetzungs-Puzzle',fr:'Puzzle de traduction',uk:'Пазл із перекладу',tr:'Çeviri yapbozu',zh:'翻译拼句',ar:'لغز الترجمة'},
+    errors:{ru:'Найди ошибку',en:'Find the mistake',es:'Encuentra el error',pt:'Encontre o erro',de:'Finde den Fehler',fr:'Trouve l’erreur',uk:'Знайди помилку',tr:'Hatayı bul',zh:'找出错误',ar:'اعثر على الخطأ'},
+    listen:{ru:'Слух и чтение',en:'Listening and reading',es:'Escucha y lectura',pt:'Escuta e leitura',de:'Hören und Lesen',fr:'Écoute et lecture',uk:'Слухання й читання',tr:'Dinleme ve okuma',zh:'听力与阅读',ar:'استماع وقراءة'},
+    done:{ru:'готово',en:'done',es:'listo',pt:'feito',de:'fertig',fr:'fait',uk:'готово',tr:'tamam',zh:'完成',ar:'تم'},
+    choose:{ru:'Выбери перевод:',en:'Choose the translation:',es:'Elige la traducción:',pt:'Escolha a tradução:',de:'Wähle die Übersetzung:',fr:'Choisis la traduction :',uk:'Обери переклад:',tr:'Çeviriyi seç:',zh:'选择翻译：',ar:'اختر الترجمة:'},
+    chooseWord:{ru:'Выбери английское слово:',en:'Choose the English word:',es:'Elige la palabra en inglés:',pt:'Escolha a palavra em inglês:',de:'Wähle das englische Wort:',fr:'Choisis le mot anglais :',uk:'Обери англійське слово:',tr:'İngilizce kelimeyi seç:',zh:'选择英文单词：',ar:'اختر الكلمة الإنجليزية:'},
+    correct:{ru:'Верно.',en:'Correct.',es:'Correcto.',pt:'Correto.',de:'Richtig.',fr:'Correct.',uk:'Правильно.',tr:'Doğru.',zh:'正确。',ar:'صحيح.'},
+    miss:{ru:'Неверно.',en:'Incorrect.',es:'Incorrecto.',pt:'Incorreto.',de:'Falsch.',fr:'Incorrect.',uk:'Неправильно.',tr:'Yanlış.',zh:'错误。',ar:'غير صحيح.'},
+    allAttempted:{ru:'Часть сохранена. Ошибки пойдут в повторение.',en:'Part saved. Misses go to review.',es:'Parte guardada. Errores para repaso.',pt:'Parte salva. Erros irão para revisão.',de:'Teil gespeichert. Fehler kommen in die Wiederholung.',fr:'Partie enregistrée. Les erreurs iront en révision.',uk:'Частину збережено. Помилки підуть на повторення.',tr:'Bölüm kaydedildi. Hatalar tekrara gidecek.',zh:'已保存部分进度，错误将进入复习。',ar:'تم حفظ الجزء. الأخطاء ستذهب للمراجعة.'},
     synonym:{ru:'Близкие по смыслу',en:'Close in meaning',es:'Cercanos en significado',de:'Bedeutungsnah',fr:'Sens proche',pt:'Próximos em significado',uk:'Близькі за змістом',tr:'Anlamca yakın',zh:'近义词',ar:'قريبة في المعنى'},
     synonymSub:{ru:'Выбери английское слово ближе всего по смыслу.',en:'Pick the English word closest in meaning.',es:'Elige la palabra inglesa más cercana en significado.',de:'Wähle das englische Wort mit der nächsten Bedeutung.',fr:'Choisis le mot anglais le plus proche par le sens.',pt:'Escolha a palavra inglesa mais próxima em significado.',uk:'Обери англійське слово, найближче за змістом.',tr:'Anlamı en yakın İngilizce kelimeyi seç.',zh:'选择含义最接近的英文单词。',ar:'اختر الكلمة الإنجليزية الأقرب في المعنى.'},
     synonymHead:{ru:'Какое слово ближе по смыслу к',en:'Which word is closest in meaning to',es:'¿Cuál es más cercana a',de:'Welches Wort ist am nächsten zu',fr:'Quel mot est le plus proche de',pt:'Qual é mais próximo de',uk:'Яке слово ближче за змістом до',tr:'Hangi kelime şuna en yakın:',zh:'哪个词最接近',ar:'أي كلمة أقرب إلى'}
@@ -7744,11 +7744,11 @@ function courseStageMeta(id,ls,practice,parts){
   ];
   if(hasSynonym)stages.push({key:'synonym',title:courseT('synonym'),sub:courseT('synonymSub'),pct:done('synonym')?100:0});
   stages.push(
-    {key:'grammar',title:courseT('grammar'),sub:lang==='ru'?'5 заданий на правило и естественную фразу':'5 tasks for rule and natural phrasing',pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
-    {key:'builder',title:courseT('puzzle'),sub:lang==='ru'?'Собери фразу из английских слов':'Build the phrase from English tiles',pct:done('builder')?100:0},
-    {key:'builder_native',title:courseT('nativePuzzle'),sub:lang==='ru'?'Собери английский по переводу':'Build English from translation',pct:done('builder_native')?100:0},
-    {key:'errors',title:courseT('errors'),sub:lang==='ru'?'Найди тип ошибки в предложении':'Find the mistake type in a sentence',pct:done('errors')?100:0},
-    {key:'listen',title:courseT('listen'),sub:lang==='ru'?'Диктант и понимание текста':'Dictation and reading check',pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
+    {key:'grammar',title:courseT('grammar'),sub:({ru:'5 заданий на правило и естественную фразу',en:'5 tasks for rule and natural phrasing',es:'5 tareas de regla y frase natural',pt:'5 tarefas de regra e frase natural',de:'5 Aufgaben zu Regel und natürlicher Formulierung',fr:'5 tâches sur la règle et la formulation naturelle',uk:'5 завдань на правило та природну фразу',tr:'Kural ve doğal ifade için 5 görev',zh:'5 个关于规则和自然表达的任务',ar:'5 مهام للقاعدة والصياغة الطبيعية'}[lang]||'5 tasks for rule and natural phrasing'),pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
+    {key:'builder',title:courseT('puzzle'),sub:({ru:'Собери фразу из английских слов',en:'Build the phrase from English tiles',es:'Forma la frase con fichas en inglés',pt:'Monte a frase com peças em inglês',de:'Bilde den Satz aus englischen Bausteinen',fr:'Compose la phrase avec des tuiles anglaises',uk:'Склади фразу з англійських слів',tr:'İngilizce parçalardan cümleyi kur',zh:'用英文词块拼出句子',ar:'كوّن الجملة من قطع إنجليزية'}[lang]||'Build the phrase from English tiles'),pct:done('builder')?100:0},
+    {key:'builder_native',title:courseT('nativePuzzle'),sub:({ru:'Собери английский по переводу',en:'Build English from translation',es:'Forma el inglés a partir de la traducción',pt:'Monte o inglês a partir da tradução',de:'Bilde Englisch aus der Übersetzung',fr:'Compose l’anglais à partir de la traduction',uk:'Склади англійську з перекладу',tr:'Çeviriden İngilizceyi kur',zh:'根据翻译拼出英语',ar:'كوّن الإنجليزية من الترجمة'}[lang]||'Build English from translation'),pct:done('builder_native')?100:0},
+    {key:'errors',title:courseT('errors'),sub:({ru:'Найди тип ошибки в предложении',en:'Find the mistake type in a sentence',es:'Encuentra el tipo de error en la frase',pt:'Encontre o tipo de erro na frase',de:'Finde die Fehlerart im Satz',fr:'Trouve le type d’erreur dans la phrase',uk:'Знайди тип помилки в реченні',tr:'Cümledeki hata türünü bul',zh:'找出句中的错误类型',ar:'اعثر على نوع الخطأ في الجملة'}[lang]||'Find the mistake type in a sentence'),pct:done('errors')?100:0},
+    {key:'listen',title:courseT('listen'),sub:({ru:'Диктант и понимание текста',en:'Dictation and reading check',es:'Dictado y comprensión lectora',pt:'Ditado e compreensão de leitura',de:'Diktat und Lesekontrolle',fr:'Dictée et compréhension écrite',uk:'Диктант і розуміння тексту',tr:'Dikte ve okuma kontrolü',zh:'听写与阅读理解',ar:'إملاء وفحص القراءة'}[lang]||'Dictation and reading check'),pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
   );
   return stages.map((s,i)=>Object.assign({n:i+1},s));
 }
@@ -7829,11 +7829,11 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
       if(hardMode){
         return `<div class="course-vocab-card active hard-mode" data-card-idx="${i}" id="course-choice-${part}-${i}">
           <div class="course-vocab-word">${safeHTML(prompt)}</div>
-          <div class="course-vocab-sub">${lang==='ru'?'Сложный режим — впишите ответ.':'Hard mode — type the answer.'}</div>
-          <input type="text" class="course-input-hard" id="course-input-${part}-${i}" placeholder="${lang==='ru'?'твой ответ':'your answer'}" autocomplete="off" autocapitalize="off" />
+          <div class="course-vocab-sub">${({ru:'Сложный режим — впишите ответ.',en:'Hard mode — type the answer.',es:'Modo difícil: escribe la respuesta.',pt:'Modo difícil — digite a resposta.',de:'Schwerer Modus — Antwort eintippen.',fr:'Mode difficile — saisis la réponse.',uk:'Складний режим — впиши відповідь.',tr:'Zor mod — cevabı yaz.',zh:'困难模式——请输入答案。',ar:'الوضع الصعب — اكتب الإجابة.'}[lang]||'Hard mode — type the answer.')}</div>
+          <input type="text" class="course-input-hard" id="course-input-${part}-${i}" placeholder="${({ru:'твой ответ',en:'your answer',es:'tu respuesta',pt:'sua resposta',de:'deine Antwort',fr:'ta réponse',uk:'твоя відповідь',tr:'cevabın',zh:'你的答案',ar:'إجابتك'}[lang]||'your answer')}" autocomplete="off" autocapitalize="off" />
           <div class="course-mini-actions">
-            <button class="course-mini-btn" onclick="answerCourseWordInput('${id}','${part}',${i},${data.answer},'${safeHTML(w)}','${safeHTML(correctText).replace(/'/g,'&#39;')}')">${lang==='ru'?'Проверить':'Check'}</button>
-            <button class="course-hint-btn" onclick="answerCourseWordSkipHard('${id}','${part}')">${lang==='ru'?'Слишком сложно':'Too hard'}</button>
+            <button class="course-mini-btn" onclick="answerCourseWordInput('${id}','${part}',${i},${data.answer},'${safeHTML(w)}','${safeHTML(correctText).replace(/'/g,'&#39;')}')">${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button>
+            <button class="course-hint-btn" onclick="answerCourseWordSkipHard('${id}','${part}')">${({ru:'Слишком сложно',en:'Too hard',es:'Demasiado difícil',pt:'Difícil demais',de:'Zu schwer',fr:'Trop difficile',uk:'Надто складно',tr:'Çok zor',zh:'太难了',ar:'صعب جدًا'}[lang]||'Too hard')}</button>
           </div>
         </div>`;
       }
@@ -7845,10 +7845,10 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
           const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==data.answer&&isAns?'ok-reveal':'');
           return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseWord('${id}','${part}',${i},${oi},${data.answer},'${safeHTML(w)}')">${safeHTML(o)}</button>`;
         }).join('')}</div>
-        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${data.answer})">${lang==='ru'?'Подсказка':'Hint'}</button>`:''}
+        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${data.answer})">${({ru:'Подсказка',en:'Hint',es:'Pista',pt:'Dica',de:'Tipp',fr:'Indice',uk:'Підказка',tr:'İpucu',zh:'提示',ar:'تلميح'}[lang]||'Hint')}</button>`:''}
       </div>`;
     }).join('')}</div>
-    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${({ru:'Перепройти этап',en:'Retry stage',es:'Repetir etapa',pt:'Refazer etapa',de:'Etappe wiederholen',fr:'Refaire l’étape',uk:'Пройти етап знову',tr:'Aşamayı tekrarla',zh:'重做此阶段',ar:'إعادة المرحلة'}[lang]||'Retry stage')}</button>`:''}
   </div>`;
 }
 function courseSentenceTranslation(sentence){
@@ -7896,14 +7896,14 @@ function renderBuilderMulti(id,targets,mode){
       ?`<div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>`
       :'';
     const label=mode==='native'
-      ?(lang==='ru'?`Перевод #${i+1}`:`Translation #${i+1}`)
-      :(lang==='ru'?`Предложение #${i+1}`:`Sentence #${i+1}`);
+      ?({ru:`Перевод #${i+1}`,en:`Translation #${i+1}`,es:`Traducción n.º ${i+1}`,pt:`Tradução nº ${i+1}`,de:`Übersetzung #${i+1}`,fr:`Traduction n° ${i+1}`,uk:`Переклад #${i+1}`,tr:`Çeviri #${i+1}`,zh:`翻译 #${i+1}`,ar:`الترجمة #${i+1}`}[lang]||`Translation #${i+1}`)
+      :({ru:`Предложение #${i+1}`,en:`Sentence #${i+1}`,es:`Frase n.º ${i+1}`,pt:`Frase nº ${i+1}`,de:`Satz #${i+1}`,fr:`Phrase n° ${i+1}`,uk:`Речення #${i+1}`,tr:`Cümle #${i+1}`,zh:`句子 #${i+1}`,ar:`الجملة #${i+1}`}[lang]||`Sentence #${i+1}`);
     return `<div class="course-build">
       <div class="course-lab">${label}</div>
       ${promptHtml}
       <div class="course-slots" id="cb-slots-${id}-${suffix}"></div>
       <div class="course-pool" id="cb-pool-${id}-${suffix}">${shuffled.map(w=>`<button class="course-word" data-word="${safeHTML(w)}" onclick="coursePickWord('${id}','${suffix}',this)">${safeHTML(w)}</button>`).join('')}</div>
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','${suffix}')">${lang==='ru'?'Проверить':'Check'}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','${suffix}')">${lang==='ru'?'Сброс':'Reset'}</button></div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="checkCourseBuilder('${id}','${suffix}')">${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button><button class="course-mini-btn" onclick="resetCourseBuilder('${id}','${suffix}')">${({ru:'Сброс',en:'Reset',es:'Reiniciar',pt:'Redefinir',de:'Zurücksetzen',fr:'Réinitialiser',uk:'Скинути',tr:'Sıfırla',zh:'重置',ar:'إعادة'}[lang]||'Reset')}</button></div>
       <div class="course-result" id="cb-res-${id}-${suffix}"></div>
     </div>`;
   }).join('');
@@ -7970,17 +7970,17 @@ function renderCourseErrorSection(ls,id,index){
   const opts=['verb','prep','order'];
   const activeIdx=_firstUnansweredIdx(state,items.length);
   return `<div class="course-section ${done?'done':''}" data-course-stage="errors" id="course-section-errors">
-    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${lang==='ru'?'Выбери тип ошибки. Правильный ответ подсветится после нажатия.':'Choose the mistake type. The correct answer is revealed after you tap.'}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+    <div class="course-section-head"><div class="course-section-index">${index}</div><div><div class="course-section-title">${courseT('errors')}</div><div class="course-section-sub">${({ru:'Выбери тип ошибки. Правильный ответ подсветится после нажатия.',en:'Choose the mistake type. The correct answer is revealed after you tap.',es:'Elige el tipo de error. La respuesta correcta se muestra al pulsar.',pt:'Escolha o tipo de erro. A resposta correta aparece após tocar.',de:'Wähle die Fehlerart. Die richtige Antwort erscheint nach dem Tippen.',fr:'Choisis le type d’erreur. La bonne réponse apparaît après le clic.',uk:'Обери тип помилки. Правильна відповідь з’явиться після натискання.',tr:'Hata türünü seç. Doğru cevap dokununca görünür.',zh:'选择错误类型。点击后会显示正确答案。',ar:'اختر نوع الخطأ. تظهر الإجابة الصحيحة بعد الضغط.'}[lang]||'Choose the mistake type. The correct answer is revealed after you tap.')}</div></div>${done?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
     <div class="course-card-progress">${items.map((_,i)=>`<div class="course-card-dot ${state[i]!==undefined?'done':''} ${i===activeIdx&&state[i]===undefined?'active':''}"></div>`).join('')}<span class="course-card-counter">${Math.min(activeIdx+1,items.length)} / ${items.length}</span></div>
     <div class="course-card-flow">${items.map((q,i)=>{
       const picked=state[i];const isActive=i===activeIdx;
       return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-errors-${i}">
         <div class="course-vocab-word">${safeHTML(q.bad)}</div>
-        <div class="course-vocab-sub">${lang==='ru'?'Какая ошибка?':'What kind of mistake?'}</div>
+        <div class="course-vocab-sub">${({ru:'Какая ошибка?',en:'What kind of mistake?',es:'¿Qué tipo de error?',pt:'Que tipo de erro?',de:'Welche Art von Fehler?',fr:'Quel type d’erreur ?',uk:'Який це тип помилки?',tr:'Hangi tür hata?',zh:'是哪种错误？',ar:'ما نوع الخطأ؟'}[lang]||'What kind of mistake?')}</div>
         <div class="course-choice-grid">${opts.map((o,oi)=>`<button class="course-choice ${picked===oi?(o===q.type?'ok':'bad'):(picked!==undefined&&o===q.type?'ok-reveal':'')}" data-type="${o}" ${picked!==undefined?'disabled':''} onclick="answerCourseError('${id}',${i},'${q.type}',${oi},'${o}')">${safeHTML(labels[o][lang]||labels[o].en)}</button>`).join('')}</div>
       </div>`;
     }).join('')}</div>
-    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${({ru:'Перепройти этап',en:'Retry stage',es:'Repetir etapa',pt:'Refazer etapa',de:'Etappe wiederholen',fr:'Refaire l’étape',uk:'Пройти етап знову',tr:'Aşamayı tekrarla',zh:'重做此阶段',ar:'إعادة المرحلة'}[lang]||'Retry stage')}</button>`:''}
   </div>`;
 }
 /* Pick up to 4 synonym tasks for a lesson. Prefer the lesson's own words,
@@ -8034,10 +8034,10 @@ function renderCourseSynonymSection(ls,id,index){
           const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==it.answer&&isAns?'ok-reveal':'');
           return `<button class="course-choice ${cls}" ${picked!==undefined?'disabled':''} onclick="answerCourseSynonym('${id}',${i},${oi},${it.answer},'${safeHTML(it.word)}')">${safeHTML(o)}</button>`;
         }).join('')}</div>
-        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${it.answer})">${lang==='ru'?'Подсказка':'Hint'}</button>`:''}
+        ${picked===undefined?`<button class="course-hint-btn" type="button" onclick="useCourseHint('${id}','${part}',${i},${it.answer})">${({ru:'Подсказка',en:'Hint',es:'Pista',pt:'Dica',de:'Tipp',fr:'Indice',uk:'Підказка',tr:'İpucu',zh:'提示',ar:'تلميح'}[lang]||'Hint')}</button>`:''}
       </div>`;
     }).join('')}</div>
-    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${lang==='ru'?'Перепройти этап':'Retry stage'}</button>`:''}
+    ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${({ru:'Перепройти этап',en:'Retry stage',es:'Repetir etapa',pt:'Refazer etapa',de:'Etappe wiederholen',fr:'Refaire l’étape',uk:'Пройти етап знову',tr:'Aşamayı tekrarla',zh:'重做此阶段',ar:'إعادة المرحلة'}[lang]||'Retry stage')}</button>`:''}
   </div>`;
 }
 function coursePracticeSet(ls){
@@ -8081,8 +8081,8 @@ function openCourseLesson(id){
     const wrap=document.getElementById('course-wrap');
     if(wrap){
       wrap.innerHTML=`<div class="course-lesson">
-        <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
-        <div class="course-rule-compact"><span>${lang==='ru'?'Не удалось загрузить урок. Нажми «Назад» и выбери другой.':'Could not load lesson. Tap Back and pick another.'}</span></div>
+        <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:12px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${({ru:'Назад к курсу',en:'Back to course',es:'Volver al curso',pt:'Voltar ao curso',de:'Zurück zum Kurs',fr:'Retour au cours',uk:'Назад до курсу',tr:'Kursa dön',zh:'返回课程',ar:'العودة إلى الدورة'}[lang]||'Back to course')}</button>
+        <div class="course-rule-compact"><span>${({ru:'Не удалось загрузить урок. Нажми «Назад» и выбери другой.',en:'Could not load lesson. Tap Back and pick another.',es:'No se pudo cargar la lección. Pulsa Atrás y elige otra.',pt:'Não foi possível carregar a lição. Toque em Voltar e escolha outra.',de:'Lektion konnte nicht geladen werden. Tippe auf Zurück und wähle eine andere.',fr:'Impossible de charger la leçon. Appuie sur Retour et choisis-en une autre.',uk:'Не вдалося завантажити урок. Натисни «Назад» і обери інший.',tr:'Ders yüklenemedi. Geri’ye dokun ve başka birini seç.',zh:'无法加载课程。点击返回并选择其他课程。',ar:'تعذّر تحميل الدرس. اضغط رجوع واختر درسًا آخر.'}[lang]||'Could not load lesson. Tap Back and pick another.')}</span></div>
       </div>`;
     }
   }
@@ -8104,7 +8104,7 @@ let _examLessonReturn=false;
 function openExamLessonFromHub(id){
   /* Gate behind Basic+ — Exam Hub is a major reason users upgrade. */
   if(!hasTier('basic')){
-    showTierPaywall('basic',lang==='ru'?'Подготовка к экзаменам':'Exam preparation');
+    showTierPaywall('basic',({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation'));
     return;
   }
   /* The Exam Hub lives in #roadmap-wrap, but openCourseLesson renders into
@@ -8136,9 +8136,9 @@ function _openCourseLessonInner(id){
   window['course_targets_'+courseKey(id)]=coursePuzzleTargets(ls);
   window['course_dictation_'+courseKey(id)]=dictation;
   const focus=(ls.focus&&ls.focus.length)?ls.focus:[
-    lang==='ru'?'Прочитай правило и найди эту же структуру в примерах.':'Read the rule and find the same structure in the examples.',
-    lang==='ru'?'Скажи один пример вслух, затем переходи к практике.':'Say one example aloud, then move to practice.',
-    lang==='ru'?'Не ищи готовый ответ: проверь форму глагола и порядок слов.':'Do not hunt for a ready answer: check the verb form and word order.'
+    ({ru:'Прочитай правило и найди эту же структуру в примерах.',en:'Read the rule and find the same structure in the examples.',es:'Lee la regla y encuentra la misma estructura en los ejemplos.',pt:'Leia a regra e encontre a mesma estrutura nos exemplos.',de:'Lies die Regel und finde dieselbe Struktur in den Beispielen.',fr:'Lis la règle et retrouve la même structure dans les exemples.',uk:'Прочитай правило й знайди ту саму структуру в прикладах.',tr:'Kuralı oku ve aynı yapıyı örneklerde bul.',zh:'阅读规则，并在例句中找出相同的结构。',ar:'اقرأ القاعدة وابحث عن البنية نفسها في الأمثلة.'}[lang]||'Read the rule and find the same structure in the examples.'),
+    ({ru:'Скажи один пример вслух, затем переходи к практике.',en:'Say one example aloud, then move to practice.',es:'Di un ejemplo en voz alta y luego pasa a la práctica.',pt:'Diga um exemplo em voz alta e depois vá para a prática.',de:'Sprich ein Beispiel laut aus, dann geh zur Übung über.',fr:'Dis un exemple à voix haute, puis passe à la pratique.',uk:'Скажи один приклад уголос, а потім переходь до практики.',tr:'Bir örneği sesli söyle, sonra pratiğe geç.',zh:'大声说出一个例句，然后进入练习。',ar:'انطق مثالًا بصوت عالٍ، ثم انتقل إلى التطبيق.'}[lang]||'Say one example aloud, then move to practice.'),
+    ({ru:'Не ищи готовый ответ: проверь форму глагола и порядок слов.',en:'Do not hunt for a ready answer: check the verb form and word order.',es:'No busques una respuesta hecha: revisa la forma del verbo y el orden de las palabras.',pt:'Não procure uma resposta pronta: verifique a forma do verbo e a ordem das palavras.',de:'Such nicht nach einer fertigen Antwort: prüfe Verbform und Wortstellung.',fr:'Ne cherche pas une réponse toute faite : vérifie la forme du verbe et l’ordre des mots.',uk:'Не шукай готову відповідь: перевір форму дієслова й порядок слів.',tr:'Hazır cevap arama: fiil biçimini ve sözcük sırasını kontrol et.',zh:'不要去找现成答案：检查动词形式和语序。',ar:'لا تبحث عن إجابة جاهزة: تحقّق من صيغة الفعل وترتيب الكلمات.'}[lang]||'Do not hunt for a ready answer: check the verb form and word order.')
   ];
   const grammarLabel=(ls.grammar&&(ls.grammar[lang]||ls.grammar.en))||(ls.sub&&((ls.sub[lang]||ls.sub.en)))||'Rule';
   const ruleText=courseShortRule(ls);
@@ -8169,35 +8169,35 @@ function _openCourseLessonInner(id){
   const errorsIdx=nativeBuilderIdx+1;
   const listenIdx=errorsIdx+1;
   const html=`<div class="course-lesson" style="--lesson-color:${ls.color}">
-    <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${lang==='ru'?'Назад к курсу':'Back to course'}</button>
+    <button class="rm-action" type="button" onclick="leaveCourseLesson()" style="margin-bottom:10px"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>${({ru:'Назад к курсу',en:'Back to course',es:'Volver al curso',pt:'Voltar ao curso',de:'Zurück zum Kurs',fr:'Retour au cours',uk:'Назад до курсу',tr:'Kursa dön',zh:'返回课程',ar:'العودة إلى الدورة'}[lang]||'Back to course')}</button>
     <div class="course-hero">
       <div class="course-hero-top">
         <div class="course-hero-ico">${lessonThemeIcon(ls)}</div>
         <div style="min-width:0;flex:1">
           <div class="course-hero-title">${safeHTML(ls.level)} · ${safeHTML(ls.title[lang]||ls.title.en)}</div>
-          <div class="course-hero-sub">${safeHTML(grammarLabel)} · ${lang==='ru'?'около 5 минут':'about 5 minutes'}</div>
+          <div class="course-hero-sub">${safeHTML(grammarLabel)} · ${({ru:'около 5 минут',en:'about 5 minutes',es:'unos 5 minutos',pt:'cerca de 5 minutos',de:'etwa 5 Minuten',fr:'environ 5 minutes',uk:'близько 5 хвилин',tr:'yaklaşık 5 dakika',zh:'约 5 分钟',ar:'حوالي 5 دقائق'}[lang]||'about 5 minutes')}</div>
         </div>
       </div>
       <div class="course-track" id="course-track-${id}">${trackHtml}</div>
     </div>
-    <div class="course-rule-compact"><b>${lang==='ru'?'Правило':'Rule'}</b><span>${safeHTML(ruleText)}</span></div>
+    <div class="course-rule-compact"><b>${({ru:'Правило',en:'Rule',es:'Regla',pt:'Regra',de:'Regel',fr:'Règle',uk:'Правило',tr:'Kural',zh:'规则',ar:'القاعدة'}[lang]||'Rule')}</b><span>${safeHTML(ruleText)}</span></div>
     <div class="course-insight">
-      <div class="course-insight-card"><div class="course-insight-label">${lang==='ru'?'Паттерн':'Pattern'}</div><div class="course-insight-text">${safeHTML(insight.pattern[lang]||insight.pattern.en)}</div></div>
-      <div class="course-insight-card"><div class="course-insight-label">${lang==='ru'?'Не попадайся':'Watch out'}</div><div class="course-insight-text">${safeHTML(insight.mistake[lang]||insight.mistake.en)}</div></div>
+      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${safeHTML(insight.pattern[lang]||insight.pattern.en)}</div></div>
+      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Не попадайся',en:'Watch out',es:'Cuidado',pt:'Atenção',de:'Achtung',fr:'Attention',uk:'Не попадайся',tr:'Dikkat',zh:'注意',ar:'انتبه'}[lang]||'Watch out')}</div><div class="course-insight-text">${safeHTML(insight.mistake[lang]||insight.mistake.en)}</div></div>
     </div>
     <div class="course-focus-row">
       ${(lang==='ru'&&Array.isArray(ls.focus_ru)?ls.focus_ru:focus).slice(0,2).map((x,i)=>`<div class="course-focus-chip">${i+1}. ${safeHTML(x)}</div>`).join('')}
     </div>
-    <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${lang==='ru'?'Слушать':'Listen'}</button></div>`).join('')}</div>
+    <div class="course-ex">${ls.examples.map((ex,i)=>`<div class="course-line"><span>${safeHTML(ex)}</span><button onclick="speakCourseLine('${id}',${i})">${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button></div>`).join('')}</div>
     <div class="course-meta">${ls.words.map(w=>`<span class="course-pill">${safeHTML(w)}</span>`).join('')}</div>
     ${renderCourseStageList(id,ls,practice,partState)}
     ${renderCourseVocabSection(ls,id,'vocab_native',1,false)}
     ${renderCourseVocabSection(ls,id,'vocab_reverse',2,true)}
     ${synonymHtml}
     <div class="course-section ${grammarDone?'done':''}" data-course-stage="grammar" id="course-section-grammar">
-      <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${lang==='ru'?'5 коротких заданий: форма, слово, естественная фраза.':'5 short tasks: form, word, natural sentence.'}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${({ru:'5 коротких заданий: форма, слово, естественная фраза.',en:'5 short tasks: form, word, natural sentence.',es:'5 tareas breves: forma, palabra, frase natural.',pt:'5 tarefas breves: forma, palavra, frase natural.',de:'5 kurze Aufgaben: Form, Wort, natürlicher Satz.',fr:'5 tâches courtes : forme, mot, phrase naturelle.',uk:'5 коротких завдань: форма, слово, природне речення.',tr:'5 kısa görev: biçim, kelime, doğal cümle.',zh:'5 个简短任务：形式、词语、自然句子。',ar:'5 مهام قصيرة: الصيغة، الكلمة، الجملة الطبيعية.'}[lang]||'5 short tasks: form, word, natural sentence.')}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
-        <div class="course-practice-head"><div class="course-practice-title">${lang==='ru'?'Практика урока':'Lesson practice'}</div><div class="course-practice-sub">5 tasks</div></div>
+        <div class="course-practice-head"><div class="course-practice-title">${({ru:'Практика урока',en:'Lesson practice',es:'Práctica de la lección',pt:'Prática da lição',de:'Lektionsübung',fr:'Pratique de la leçon',uk:'Практика уроку',tr:'Ders pratiği',zh:'课程练习',ar:'تمرين الدرس'}[lang]||'Lesson practice')}</div><div class="course-practice-sub">5 tasks</div></div>
         ${(function(){
           const pState=LS.getJ('course_practice_state_'+id)||{};
           return practice.map((q,qi)=>{
@@ -8214,36 +8214,36 @@ function _openCourseLessonInner(id){
                 const lock=st?'style="pointer-events:none"':'';
                 return `<div class="course-opt ${cls}" ${lock} onclick="answerCoursePractice('${id}',${qi},${i})">${String.fromCharCode(65+i)}. ${safeHTML(o)}</div>`;
               }).join('')}
-              ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryPracticeQuestion('${id}',${qi})">${lang==='ru'?'Перепройти':'Retry'}</button>`:''}
+              ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryPracticeQuestion('${id}',${qi})">${({ru:'Перепройти',en:'Retry',es:'Reintentar',pt:'Repetir',de:'Wiederholen',fr:'Réessayer',uk:'Ще раз',tr:'Tekrar dene',zh:'重试',ar:'إعادة المحاولة'}[lang]||'Retry')}</button>`:''}
             </div>`;
           }).join('');
         })()}
       </div>
     </div>
     <div class="course-section ${builderDone?'done':''}" data-course-stage="builder" id="course-section-builder">
-      <div class="course-section-head"><div class="course-section-index">${builderIdx}</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${lang==='ru'?'Собери английские предложения из слов.':'Build the English sentences from word tiles.'}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${builderIdx}</div><div><div class="course-section-title">${courseT('puzzle')}</div><div class="course-section-sub">${({ru:'Собери английские предложения из слов.',en:'Build the English sentences from word tiles.',es:'Forma las frases en inglés con las fichas de palabras.',pt:'Monte as frases em inglês com as peças de palavras.',de:'Bilde die englischen Sätze aus den Wortbausteinen.',fr:'Compose les phrases anglaises avec les tuiles de mots.',uk:'Склади англійські речення зі слів.',tr:'İngilizce cümleleri kelime parçalarından kur.',zh:'用词块拼出英语句子。',ar:'كوّن الجمل الإنجليزية من قطع الكلمات.'}[lang]||'Build the English sentences from word tiles.')}</div></div>${builderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       ${renderBuilderMulti(id,coursePuzzleTargets(ls),'')}
     </div>
     <div class="course-section ${nativeBuilderDone?'done':''}" data-course-stage="builder_native" id="course-section-builder-native">
-      <div class="course-section-head"><div class="course-section-index">${nativeBuilderIdx}</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${lang==='ru'?'Сначала смысл на твоём языке, потом английская фраза.':'Start from meaning, then build the English phrase.'}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${nativeBuilderIdx}</div><div><div class="course-section-title">${courseT('nativePuzzle')}</div><div class="course-section-sub">${({ru:'Сначала смысл на твоём языке, потом английская фраза.',en:'Start from meaning, then build the English phrase.',es:'Primero el sentido en tu idioma, luego la frase en inglés.',pt:'Primeiro o sentido na sua língua, depois a frase em inglês.',de:'Erst die Bedeutung in deiner Sprache, dann der englische Satz.',fr:'D’abord le sens dans ta langue, puis la phrase anglaise.',uk:'Спершу зміст твоєю мовою, потім англійська фраза.',tr:'Önce kendi dilinde anlam, sonra İngilizce cümle.',zh:'先用你的语言理解含义，再拼出英语句子。',ar:'أولًا المعنى بلغتك، ثم الجملة الإنجليزية.'}[lang]||'Start from meaning, then build the English phrase.')}</div></div>${nativeBuilderDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       ${renderBuilderMulti(id,coursePuzzleTargets(ls),'native')}
     </div>
     ${renderCourseErrorSection(ls,id,errorsIdx)}
     <div class="course-section ${listenDone?'done':''}" data-course-stage="listen" id="course-section-listen">
-      <div class="course-section-head"><div class="course-section-index">${listenIdx}</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${lang==='ru'?'Диктант и короткая проверка понимания.':'Dictation and a short comprehension check.'}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${listenIdx}</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${({ru:'Диктант и короткая проверка понимания.',en:'Dictation and a short comprehension check.',es:'Dictado y una breve comprobación de comprensión.',pt:'Ditado e uma breve verificação de compreensão.',de:'Diktat und eine kurze Verständniskontrolle.',fr:'Dictée et une courte vérification de compréhension.',uk:'Диктант і коротка перевірка розуміння.',tr:'Dikte ve kısa bir anlama kontrolü.',zh:'听写以及一次简短的理解检查。',ar:'إملاء وفحص قصير للفهم.'}[lang]||'Dictation and a short comprehension check.')}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
-      <div class="course-lab">${lang==='ru'?'Слуховой диктант':'Listening dictation'}</div>
-      <div class="course-note">${lang==='ru'?'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.':'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.'}</div>
-      <input class="course-inp" id="cd-inp-${id}" placeholder="${lang==='ru'?'Напиши услышанную фразу':'Type what you heard'}">
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">${lang==='ru'?'Слушать':'Listen'}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${lang==='ru'?'Проверить':'Check'}</button></div>
+      <div class="course-lab">${({ru:'Слуховой диктант',en:'Listening dictation',es:'Dictado auditivo',pt:'Ditado auditivo',de:'Hördiktat',fr:'Dictée à l’écoute',uk:'Слуховий диктант',tr:'Dinleme diktesi',zh:'听力听写',ar:'إملاء سمعي'}[lang]||'Listening dictation')}</div>
+      <div class="course-note">${({ru:'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.',en:'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.',es:'Pulsa “Escuchar” y escribe la frase de memoria. El texto no se muestra de antemano.',pt:'Toque em “Ouvir” e digite a frase de memória. O texto não é mostrado antes.',de:'Tippe auf „Anhören“ und schreibe den Satz aus dem Gedächtnis. Der Text wird vorher nicht angezeigt.',fr:'Appuie sur « Écouter » et écris la phrase de mémoire. Le texte n’est pas affiché à l’avance.',uk:'Натисни «Слухати» і запиши фразу з пам’яті. Текст не показується заздалегідь.',tr:'“Dinle”ye dokun ve cümleyi hafızandan yaz. Metin önceden gösterilmez.',zh:'点击“收听”并凭记忆写出句子。句子不会提前显示。',ar:'اضغط «استمع» واكتب الجملة من الذاكرة. لا يظهر النص مسبقًا.'}[lang]||'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.')}</div>
+      <input class="course-inp" id="cd-inp-${id}" placeholder="${({ru:'Напиши услышанную фразу',en:'Type what you heard',es:'Escribe lo que escuchaste',pt:'Digite o que você ouviu',de:'Tippe, was du gehört hast',fr:'Écris ce que tu as entendu',uk:'Напиши почуту фразу',tr:'Duyduğunu yaz',zh:'写出你听到的内容',ar:'اكتب ما سمعته'}[lang]||'Type what you heard')}">
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button></div>
       <div class="course-result" id="cd-res-${id}"></div>
       </div>
       <div class="course-build">
-      <div class="course-lab">${lang==='ru'?'Чтение и понимание':'Reading check'}</div>
+      <div class="course-lab">${({ru:'Чтение и понимание',en:'Reading check',es:'Comprensión lectora',pt:'Compreensão de leitura',de:'Lesekontrolle',fr:'Compréhension écrite',uk:'Читання й розуміння',tr:'Okuma kontrolü',zh:'阅读理解',ar:'فحص القراءة'}[lang]||'Reading check')}</div>
       <div class="course-rule">${safeHTML(courseReadingText(ls))}</div>
-      <div class="course-opt" onclick="checkCourseReading('${id}',true)">${lang==='ru'?'Нужно заметить правило и контекст примеров':'Notice the rule and the context of the examples'}</div>
-      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Нужно выбрать только самое длинное слово':'Choose only the longest word'}</div>
-      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${lang==='ru'?'Можно игнорировать форму глагола':'Ignore the verb form'}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',true)">${({ru:'Нужно заметить правило и контекст примеров',en:'Notice the rule and the context of the examples',es:'Hay que notar la regla y el contexto de los ejemplos',pt:'É preciso notar a regra e o contexto dos exemplos',de:'Man muss die Regel und den Kontext der Beispiele beachten',fr:'Il faut remarquer la règle et le contexte des exemples',uk:'Потрібно помітити правило й контекст прикладів',tr:'Kuralı ve örneklerin bağlamını fark etmek gerekir',zh:'要注意规则和例句的语境',ar:'يجب ملاحظة القاعدة وسياق الأمثلة'}[lang]||'Notice the rule and the context of the examples')}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${({ru:'Нужно выбрать только самое длинное слово',en:'Choose only the longest word',es:'Solo hay que elegir la palabra más larga',pt:'Basta escolher a palavra mais longa',de:'Nur das längste Wort wählen',fr:'Il suffit de choisir le mot le plus long',uk:'Потрібно обрати лише найдовше слово',tr:'Sadece en uzun kelimeyi seçmek gerekir',zh:'只需选择最长的单词',ar:'يكفي اختيار أطول كلمة'}[lang]||'Choose only the longest word')}</div>
+      <div class="course-opt" onclick="checkCourseReading('${id}',false)">${({ru:'Можно игнорировать форму глагола',en:'Ignore the verb form',es:'Se puede ignorar la forma del verbo',pt:'Pode ignorar a forma do verbo',de:'Die Verbform kann ignoriert werden',fr:'On peut ignorer la forme du verbe',uk:'Можна ігнорувати форму дієслова',tr:'Fiil biçimi göz ardı edilebilir',zh:'可以忽略动词形式',ar:'يمكن تجاهل صيغة الفعل'}[lang]||'Ignore the verb form')}</div>
       <div class="course-result" id="cr-res-${id}"></div>
       </div>
     </div>
@@ -8382,8 +8382,8 @@ function renderCourseCompleteCard(id,already){
     scoreBlock=`<div class="course-complete-score" style="--pct:${score.pct}%;--ring:${ringColor}">
       <div class="course-complete-ring"><div class="course-complete-ring-in">${score.pct}%</div></div>
       <div class="course-complete-score-meta">
-        <div class="course-complete-score-label">${lang==='ru'?'Средний балл':'Average score'} · ${safeHTML(tierLabel)}</div>
-        <div class="course-complete-score-sub">${score.correct} / ${score.total} ${lang==='ru'?'верно':'correct'}</div>
+        <div class="course-complete-score-label">${({ru:'Средний балл',en:'Average score',es:'Puntuación media',pt:'Pontuação média',de:'Durchschnittsnote',fr:'Score moyen',uk:'Середній бал',tr:'Ortalama puan',zh:'平均分',ar:'المعدّل'}[lang]||'Average score')} · ${safeHTML(tierLabel)}</div>
+        <div class="course-complete-score-sub">${score.correct} / ${score.total} ${({ru:'верно',en:'correct',es:'correctas',pt:'corretas',de:'richtig',fr:'correctes',uk:'правильно',tr:'doğru',zh:'正确',ar:'صحيحة'}[lang]||'correct')}</div>
       </div>
     </div>`;
   } else {
@@ -8391,13 +8391,13 @@ function renderCourseCompleteCard(id,already){
     scoreBlock=`<div class="course-complete-score" style="--pct:0%;--ring:#7a869a;opacity:.85">
       <div class="course-complete-ring"><div class="course-complete-ring-in" style="font-size:18px">🔒</div></div>
       <div class="course-complete-score-meta">
-        <div class="course-complete-score-label">${lang==='ru'?'Детальный балл — Pro':'Detailed score · Pro'}</div>
-        <div class="course-complete-score-sub" style="cursor:pointer" onclick="showTierPaywall('pro','${lang==='ru'?'Детальный балл':'Detailed score'}')">${lang==='ru'?'Открыть статистику по уроку':'Unlock per-lesson analytics'}</div>
+        <div class="course-complete-score-label">${({ru:'Детальный балл — Pro',en:'Detailed score · Pro',es:'Puntuación detallada · Pro',pt:'Pontuação detalhada · Pro',de:'Detailnote · Pro',fr:'Score détaillé · Pro',uk:'Детальний бал — Pro',tr:'Ayrıntılı puan · Pro',zh:'详细评分 · Pro',ar:'درجة مفصّلة · Pro'}[lang]||'Detailed score · Pro')}</div>
+        <div class="course-complete-score-sub" style="cursor:pointer" onclick="showTierPaywall('pro','${({ru:'Детальный балл',en:'Detailed score',es:'Puntuación detallada',pt:'Pontuação detalhada',de:'Detailnote',fr:'Score détaillé',uk:'Детальний бал',tr:'Ayrıntılı puan',zh:'详细评分',ar:'درجة مفصّلة'}[lang]||'Detailed score')}')">${({ru:'Открыть статистику по уроку',en:'Unlock per-lesson analytics',es:'Desbloquea analíticas por lección',pt:'Desbloqueie análises por lição',de:'Statistik je Lektion freischalten',fr:'Débloque les statistiques par leçon',uk:'Відкрий аналітику по уроку',tr:'Ders bazında analizleri aç',zh:'解锁每课数据分析',ar:'افتح تحليلات كل درس'}[lang]||'Unlock per-lesson analytics')}</div>
       </div>
     </div>`;
   }
   box.innerHTML=`<div class="course-complete-card">
-    <div class="course-complete-title">${already?(lang==='ru'?'Урок уже закрыт':'Lesson already complete'):(lang==='ru'?'Урок закрыт · +10 XP':'Lesson complete · +10 XP')}</div>
+    <div class="course-complete-title">${already?({ru:'Урок уже закрыт',en:'Lesson already complete',es:'Lección ya completada',pt:'Lição já concluída',de:'Lektion bereits abgeschlossen',fr:'Leçon déjà terminée',uk:'Урок уже завершено',tr:'Ders zaten tamamlandı',zh:'课程已完成',ar:'الدرس مكتمل بالفعل'}[lang]||'Lesson already complete'):({ru:'Урок закрыт · +10 XP',en:'Lesson complete · +10 XP',es:'Lección completada · +10 XP',pt:'Lição concluída · +10 XP',de:'Lektion abgeschlossen · +10 XP',fr:'Leçon terminée · +10 XP',uk:'Урок завершено · +10 XP',tr:'Ders tamamlandı · +10 XP',zh:'课程完成 · +10 XP',ar:'اكتمل الدرس · +10 XP'}[lang]||'Lesson complete · +10 XP')}</div>
     ${scoreBlock}
     <div class="course-complete-sub">${safeHTML(courseWarmLine())}</div>
   </div>`;
@@ -8416,7 +8416,7 @@ function maybeCompleteCourse(id){
   try{trackM('lesson');}catch(e){}
   try{renderContinueLesson();}catch(_){}
   renderCourseCompleteCard(id,false);
-  toast('+10 XP · '+(lang==='ru'?'урок закрыт':'lesson complete'),'⭐');
+  toast('+10 XP · '+({ru:'урок закрыт',en:'lesson complete',es:'lección completada',pt:'lição concluída',de:'Lektion abgeschlossen',fr:'leçon terminée',uk:'урок завершено',tr:'ders tamamlandı',zh:'课程完成',ar:'اكتمل الدرس'}[lang]||'lesson complete'),'⭐');
   return true;
 }
 function courseStageFromPart(part){
@@ -8494,7 +8494,7 @@ function answerCourseWord(id,part,idx,picked,answer,word){
     /* Adaptive: bump streak; when it crosses 3 the next card flips to hard mode. */
     const newStreak=getAdaptiveStreak(id,part)+1;
     setAdaptiveStreak(id,part,newStreak);
-    if(newStreak===3){try{toast(lang==='ru'?'Включён сложный режим.':'Hard mode unlocked.','💪');}catch(_){}}
+    if(newStreak===3){try{toast(({ru:'Включён сложный режим.',en:'Hard mode unlocked.',es:'Modo difícil activado.',pt:'Modo difícil ativado.',de:'Schwerer Modus aktiviert.',fr:'Mode difficile activé.',uk:'Складний режим увімкнено.',tr:'Zor mod açıldı.',zh:'已开启困难模式。',ar:'تم تفعيل الوضع الصعب.'}[lang]||'Hard mode unlocked.'),'💪');}catch(_){}}
   }else{
     setAdaptiveStreak(id,part,0);
     courseMarkStageFailed(id,part,true);
@@ -8526,7 +8526,7 @@ function answerCourseWordInput(id,part,idx,answerIdx,word,correctText){
   }else{
     setAdaptiveStreak(id,part,0);
     courseMarkStageFailed(id,part,true);
-    card.innerHTML+=`<div class="course-hint" style="color:var(--rd)">${lang==='ru'?'Не совсем. Правильно:':'Not quite. The answer:'} <b style="color:var(--a2)">${safeHTML(correctText)}</b></div>`;
+    card.innerHTML+=`<div class="course-hint" style="color:var(--rd)">${({ru:'Не совсем. Правильно:',en:'Not quite. The answer:',es:'No del todo. La respuesta:',pt:'Não exatamente. A resposta:',de:'Nicht ganz. Die Antwort:',fr:'Pas tout à fait. La réponse :',uk:'Не зовсім. Правильно:',tr:'Tam değil. Doğrusu:',zh:'不太对。答案：',ar:'ليس تمامًا. الإجابة:'}[lang]||'Not quite. The answer:')} <b style="color:var(--a2)">${safeHTML(correctText)}</b></div>`;
     try{sfx.warn();}catch(_){}
   }
   const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
@@ -8636,8 +8636,8 @@ function checkCourseBuilder(id,suffix){
   const res=document.getElementById('cb-res-'+id+sfx);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
   res.textContent=ok
-    ?(lang==='ru'?'Верно.':'Correct.')
-    :(lang==='ru'?'Не так — проверь порядок слов.':'Not yet — check word order.');
+    ?(({ru:'Верно.',en:'Correct.',es:'Correcto.',pt:'Correto.',de:'Richtig.',fr:'Correct.',uk:'Правильно.',tr:'Doğru.',zh:'正确。',ar:'صحيح.'}[lang]||'Correct.'))
+    :({ru:'Не так — проверь порядок слов.',en:'Not yet — check word order.',es:'Todavía no: revisa el orden de las palabras.',pt:'Ainda não — verifique a ordem das palavras.',de:'Noch nicht — prüfe die Wortstellung.',fr:'Pas encore — vérifie l’ordre des mots.',uk:'Ще ні — перевір порядок слів.',tr:'Henüz değil — sözcük sırasını kontrol et.',zh:'还不对——检查一下语序。',ar:'ليس بعد — تحقّق من ترتيب الكلمات.'}[lang]||'Not yet — check word order.');
   if(ok){
     /* Mark this specific sentence as done. The stage closes once every
        sentence in the builder is correctly assembled. */
@@ -8663,17 +8663,17 @@ function checkCourseDictation(id){
   const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
   if(!ok)LS.set(attemptsKey,String(attempts));
   res.textContent=ok
-    ?(lang==='ru'?'Слух отлично сработал. Идём дальше.':'Good listening. Keep going.')
+    ?({ru:'Слух отлично сработал. Идём дальше.',en:'Good listening. Keep going.',es:'Buena escucha. Sigue así.',pt:'Boa escuta. Continue.',de:'Gut gehört. Weiter so.',fr:'Bonne écoute. Continue.',uk:'Чудовий слух. Рухаймося далі.',tr:'İyi dinledin. Devam et.',zh:'听得不错，继续。',ar:'استماع جيّد. واصِل.'}[lang]||'Good listening. Keep going.')
     :(attempts<2
-      ?(lang==='ru'?'Не совсем. Послушай ещё раз и проверь артикли/окончания.':'Not quite. Listen again and check articles/endings.')
-      :(lang==='ru'?'Подсказка: фраза начинается с “':'Hint: the phrase starts with “')+target.split(' ').slice(0,3).join(' ')+'...”');
+      ?({ru:'Не совсем. Послушай ещё раз и проверь артикли/окончания.',en:'Not quite. Listen again and check articles/endings.',es:'No del todo. Escucha otra vez y revisa artículos/terminaciones.',pt:'Não exatamente. Ouça de novo e verifique artigos/terminações.',de:'Nicht ganz. Hör nochmal und prüfe Artikel/Endungen.',fr:'Pas tout à fait. Réécoute et vérifie articles/terminaisons.',uk:'Не зовсім. Послухай ще раз і перевір артиклі/закінчення.',tr:'Tam değil. Tekrar dinle ve artikelleri/ekleri kontrol et.',zh:'不太对。再听一遍，检查冠词和词尾。',ar:'ليس تمامًا. استمع مجددًا وتحقّق من الأدوات/النهايات.'}[lang]||'Not quite. Listen again and check articles/endings.')
+      :({ru:'Подсказка: фраза начинается с “',en:'Hint: the phrase starts with “',es:'Pista: la frase empieza por “',pt:'Dica: a frase começa com “',de:'Tipp: Der Satz beginnt mit „',fr:'Indice : la phrase commence par « ',uk:'Підказка: фраза починається з “',tr:'İpucu: cümle şununla başlar: “',zh:'提示：句子以“',ar:'تلميح: تبدأ الجملة بـ "'}[lang]||'Hint: the phrase starts with “')+target.split(' ').slice(0,3).join(' ')+'...”');
   if(ok){courseMarkPart(id,'dictation',true);try{trackM('listen');}catch(e){}}
 }
 function checkCourseReading(id,picked){
   const ok=!!picked;
   const res=document.getElementById('cr-res-'+id);if(!res)return;
   res.className='course-result '+(ok?'ok':'bad');
-  res.textContent=ok?(lang==='ru'?'Верно. Сначала смотри на правило, потом на смысл темы.':'Correct. First notice the rule, then the topic meaning.'):(lang==='ru'?'Не совсем. В таких заданиях важны правило, контекст и форма слова.':'Not quite. These tasks depend on the rule, context and word form.');
+  res.textContent=ok?({ru:'Верно. Сначала смотри на правило, потом на смысл темы.',en:'Correct. First notice the rule, then the topic meaning.',es:'Correcto. Primero la regla, luego el sentido del tema.',pt:'Correto. Primeiro a regra, depois o sentido do tema.',de:'Richtig. Erst die Regel, dann die Bedeutung des Themas.',fr:'Correct. D’abord la règle, puis le sens du sujet.',uk:'Правильно. Спершу правило, потім зміст теми.',tr:'Doğru. Önce kural, sonra konunun anlamı.',zh:'正确。先看规则，再看主题含义。',ar:'صحيح. أولًا القاعدة، ثم معنى الموضوع.'}[lang]||'Correct. First notice the rule, then the topic meaning.'):({ru:'Не совсем. В таких заданиях важны правило, контекст и форма слова.',en:'Not quite. These tasks depend on the rule, context and word form.',es:'No del todo. Estas tareas dependen de la regla, el contexto y la forma de la palabra.',pt:'Não exatamente. Estas tarefas dependem da regra, do contexto e da forma da palavra.',de:'Nicht ganz. Diese Aufgaben hängen von Regel, Kontext und Wortform ab.',fr:'Pas tout à fait. Ces tâches dépendent de la règle, du contexte et de la forme du mot.',uk:'Не зовсім. У таких завданнях важливі правило, контекст і форма слова.',tr:'Tam değil. Bu görevler kurala, bağlama ve sözcük biçimine bağlıdır.',zh:'不太对。这类题目取决于规则、语境和词形。',ar:'ليس تمامًا. تعتمد هذه المهام على القاعدة والسياق وصيغة الكلمة.'}[lang]||'Not quite. These tasks depend on the rule, context and word form.');
   if(ok){courseMarkPart(id,'reading',true);}
 }
 function courseUtterance(text){
@@ -8719,14 +8719,14 @@ function answerCoursePractice(id,qi,picked){
     const completed=courseMarkPart(id,'practice_'+qi,true);
     if(!completed)maybeAutoOpenNextAfterPractice(id);
     try{trackM('drill');}catch(e){}
-    toast(lang==='ru'?'Верно.':'Correct.','✅');
+    toast(({ru:'Верно.',en:'Correct.',es:'Correcto.',pt:'Correto.',de:'Richtig.',fr:'Correct.',uk:'Правильно.',tr:'Doğru.',zh:'正确。',ar:'صحيح.'}[lang]||'Correct.'),'✅');
   }else{
     courseMarkStageFailed(id,'practice_'+qi,true);
     if(!box.querySelector('.course-retry-btn')){
       const btn=document.createElement('button');
       btn.className='course-retry-btn';
       btn.type='button';
-      btn.textContent=lang==='ru'?'Перепройти':'Retry';
+      btn.textContent=({ru:'Перепройти',en:'Retry',es:'Reintentar',pt:'Repetir',de:'Wiederholen',fr:'Réessayer',uk:'Ще раз',tr:'Tekrar dene',zh:'重试',ar:'إعادة المحاولة'}[lang]||'Retry');
       btn.onclick=function(ev){ev.stopPropagation();courseRetryPracticeQuestion(id,qi);};
       box.appendChild(btn);
     }
@@ -8752,20 +8752,18 @@ function answerCourse(id,picked){
   });
   if(picked===ls.a){
     courseMarkPart(id,'practice_0',true);
-    toast(lang==='ru'?'Верно. Продолжай урок до конца.':'Correct. Finish the full lesson.','✅');
-    box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Верно. Повтори примеры вслух: так правило быстрее становится автоматическим.':'Correct. Repeat the examples aloud: this helps the rule become automatic.')+'</div>');
+    toast(({ru:'Верно. Продолжай урок до конца.',en:'Correct. Finish the full lesson.',es:'Correcto. Termina toda la lección.',pt:'Correto. Conclua a lição inteira.',de:'Richtig. Schließe die ganze Lektion ab.',fr:'Correct. Termine toute la leçon.',uk:'Правильно. Доведи урок до кінця.',tr:'Doğru. Dersi sonuna kadar bitir.',zh:'正确。继续完成整节课。',ar:'صحيح. أكمل الدرس بالكامل.'}[lang]||'Correct. Finish the full lesson.'),'✅');
+    box.insertAdjacentHTML('beforeend','<div class="course-note">'+({ru:'Верно. Повтори примеры вслух: так правило быстрее становится автоматическим.',en:'Correct. Repeat the examples aloud: this helps the rule become automatic.',es:'Correcto. Repite los ejemplos en voz alta: así la regla se automatiza más rápido.',pt:'Correto. Repita os exemplos em voz alta: assim a regra se automatiza mais rápido.',de:'Richtig. Sprich die Beispiele laut nach: So wird die Regel schneller automatisch.',fr:'Correct. Répète les exemples à voix haute : la règle devient automatique plus vite.',uk:'Правильно. Повтори приклади вголос: так правило швидше стає автоматичним.',tr:'Doğru. Örnekleri sesli tekrarla: kural böyle daha hızlı otomatikleşir.',zh:'正确。大声重复例句：这样规则会更快变得自然。',ar:'صحيح. كرّر الأمثلة بصوت عالٍ: هكذا تصبح القاعدة تلقائية أسرع.'}[lang]||'Correct. Repeat the examples aloud: this helps the rule become automatic.')+'</div>');
   }else{
-    toast(lang==='ru'?'Посмотри правильный вариант':'Check the correct answer','');
-    box.insertAdjacentHTML('beforeend','<div class="course-note">'+(lang==='ru'?'Быстрая подсказка: верный вариант подсвечен зелёным. Перечитай правило выше и попробуй построить свой пример.':'Quick hint: the correct answer is highlighted in green. Reread the rule above and try making your own example.')+'</div>');
+    toast(({ru:'Посмотри правильный вариант',en:'Check the correct answer',es:'Mira la respuesta correcta',pt:'Veja a resposta correta',de:'Sieh dir die richtige Antwort an',fr:'Regarde la bonne réponse',uk:'Поглянь на правильну відповідь',tr:'Doğru cevaba bak',zh:'看看正确答案',ar:'انظر إلى الإجابة الصحيحة'}[lang]||'Check the correct answer'),'');
+    box.insertAdjacentHTML('beforeend','<div class="course-note">'+({ru:'Быстрая подсказка: верный вариант подсвечен зелёным. Перечитай правило выше и попробуй построить свой пример.',en:'Quick hint: the correct answer is highlighted in green. Reread the rule above and try making your own example.',es:'Pista rápida: la respuesta correcta está en verde. Relee la regla de arriba e intenta tu propio ejemplo.',pt:'Dica rápida: a resposta correta está em verde. Releia a regra acima e tente seu próprio exemplo.',de:'Kurzer Tipp: Die richtige Antwort ist grün markiert. Lies die Regel oben erneut und bilde ein eigenes Beispiel.',fr:'Astuce : la bonne réponse est en vert. Relis la règle ci-dessus et essaie ton propre exemple.',uk:'Швидка підказка: правильний варіант підсвічено зеленим. Перечитай правило вище й спробуй свій приклад.',tr:'Hızlı ipucu: doğru cevap yeşil. Yukarıdaki kuralı tekrar oku ve kendi örneğini dene.',zh:'小提示：正确答案以绿色标出。重读上面的规则，试着造个你自己的例句。',ar:'تلميح سريع: الإجابة الصحيحة مظللة بالأخضر. أعد قراءة القاعدة أعلاه وجرّب مثالك الخاص.'}[lang]||'Quick hint: the correct answer is highlighted in green. Reread the rule above and try making your own example.')+'</div>');
   }
 }
 function courseAIBreakdown(id){
   const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
-  if(!hasTier('basic')){showTierPaywall('basic',lang==='ru'?'Полный AI-разбор':'Full AI breakdown');return;}
+  if(!hasTier('basic')){showTierPaywall('basic',({ru:'Полный AI-разбор',en:'Full AI breakdown',es:'Análisis completo con IA',pt:'Análise completa com IA',de:'Vollständige KI-Analyse',fr:'Analyse complète par IA',uk:'Повний AI-розбір',tr:'Tam yapay zekâ analizi',zh:'完整 AI 解析',ar:'تحليل كامل بالذكاء الاصطناعي'}[lang]||'Full AI breakdown'));return;}
   goTab('chat',true);
-  const prompt=lang==='ru'
-    ?`Разбери правило "${ls.title.ru}" простыми словами. Дай 5 примеров, 3 типичные ошибки, мини-тренировку и проверь мой ответ.`
-    :`Explain "${ls.title.en}" in simple words. Give 5 examples, 3 common mistakes, a mini practice task and check my answer.`;
+  const prompt=({ru:`Разбери правило "${ls.title.ru}" простыми словами. Дай 5 примеров, 3 типичные ошибки, мини-тренировку и проверь мой ответ.`,en:`Explain "${ls.title.en}" in simple words. Give 5 examples, 3 common mistakes, a mini practice task and check my answer.`,es:`Explica "${ls.title.en}" con palabras sencillas. Da 5 ejemplos, 3 errores frecuentes, un mini ejercicio y revisa mi respuesta.`,pt:`Explique "${ls.title.en}" com palavras simples. Dê 5 exemplos, 3 erros comuns, um mini exercício e verifique minha resposta.`,de:`Erkläre „${ls.title.en}“ in einfachen Worten. Gib 5 Beispiele, 3 häufige Fehler, eine Mini-Übung und prüfe meine Antwort.`,fr:`Explique « ${ls.title.en} » simplement. Donne 5 exemples, 3 erreurs fréquentes, un mini exercice et vérifie ma réponse.`,uk:`Поясни правило "${ls.title.en}" простими словами. Дай 5 прикладів, 3 типові помилки, міні-вправу та перевір мою відповідь.`,tr:`"${ls.title.en}" konusunu sade biçimde açıkla. 5 örnek, 3 sık hata, kısa bir alıştırma ver ve cevabımı kontrol et.`,zh:`用简单的话解释 "${ls.title.en}"。给出 5 个例句、3 个常见错误、一个小练习，并检查我的回答。`,ar:`اشرح "${ls.title.en}" بكلمات بسيطة. أعطِ 5 أمثلة و3 أخطاء شائعة وتمرينًا صغيرًا وتحقّق من إجابتي.`}[lang]||`Explain "${ls.title.en}" in simple words. Give 5 examples, 3 common mistakes, a mini practice task and check my answer.`);
   setTimeout(()=>sendChip(prompt),150);
 }
 
@@ -8775,7 +8773,7 @@ function startLevelTest(targetLevel){
   const locked=levelTestLockLeft(targetLevel);
   if(locked>0){
     const mins=Math.ceil(locked/60000);
-    toast((lang==='ru'?'Повтор через ':'Try again in ')+mins+(lang==='ru'?' мин':' min'),'⚠️');
+    toast(({ru:'Повтор через ',en:'Try again in ',es:'Reintenta en ',pt:'Tente de novo em ',de:'Erneut versuchen in ',fr:'Réessaie dans ',uk:'Повтор через ',tr:'Tekrar dene: ',zh:'请在 ',ar:'حاول مجددًا خلال '}[lang]||'Try again in ')+mins+({ru:' мин',en:' min',es:' min',pt:' min',de:' Min',fr:' min',uk:' хв',tr:' dk',zh:' 分钟后',ar:' دقيقة'}[lang]||' min'),'⚠️');
     return;
   }
   const cfg=levelTestCfg(targetLevel);
@@ -8802,7 +8800,7 @@ function startLevelTest(targetLevel){
   };
   goTab('chat',true);
   const title=test.title[lang]||test.title.en;
-  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${lang==='ru'?'вопросов':'questions'} · ${lang==='ru'?'5 минут':'5 minutes'} · ${lang==='ru'?'проходной балл':'passing score'} ${cfg.pass}%</span></div>`);
+  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'питань',tr:'soru',zh:'道题',ar:'سؤالًا'}[lang]||'questions')} · ${({ru:'5 минут',en:'5 minutes',es:'5 minutos',pt:'5 minutos',de:'5 Minuten',fr:'5 minutes',uk:'5 хвилин',tr:'5 dakika',zh:'5 分钟',ar:'5 دقائق'}[lang]||'5 minutes')} · ${({ru:'проходной балл',en:'passing score',es:'puntuación mínima',pt:'nota de corte',de:'Mindestpunktzahl',fr:'score de réussite',uk:'прохідний бал',tr:'geçme puanı',zh:'及格分',ar:'درجة النجاح'}[lang]||'passing score')} ${cfg.pass}%</span></div>`);
   setTimeout(showLevelQuestion,500);
 }
 
@@ -8868,9 +8866,9 @@ function finishLevelTest(timedOut=false){
     // Sync to server
     if(API&&window._uid)fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,message:`/setlevel ${target}`})}).catch(()=>{});
     addMsg('bot',`<div class="lt-result lt-pass">
-      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Тест пройден!':'Test passed!'}</div>
-      <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${lang==='ru'?'нужно':'required'} ${pass}%</div>
-      <div style="font-size:14px">${lang==='ru'?`Твой новый уровень: <b>${target}</b>. Спокойно, база становится крепче.`:`Your new level: <b>${target}</b>. Steady work, stronger base.`}</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${({ru:'Тест пройден!',en:'Test passed!',es:'¡Examen aprobado!',pt:'Teste aprovado!',de:'Test bestanden!',fr:'Test réussi !',uk:'Тест складено!',tr:'Test geçildi!',zh:'测试通过！',ar:'تم اجتياز الاختبار!'}[lang]||'Test passed!')}</div>
+      <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${({ru:'нужно',en:'required',es:'requerido',pt:'exigido',de:'erforderlich',fr:'requis',uk:'потрібно',tr:'gerekli',zh:'需要',ar:'المطلوب'}[lang]||'required')} ${pass}%</div>
+      <div style="font-size:14px">${({ru:`Твой новый уровень: <b>${target}</b>. Спокойно, база становится крепче.`,en:`Your new level: <b>${target}</b>. Steady work, stronger base.`,es:`Tu nuevo nivel: <b>${target}</b>. Con calma, tu base se fortalece.`,pt:`Seu novo nível: <b>${target}</b>. Com calma, sua base fica mais forte.`,de:`Dein neues Level: <b>${target}</b>. Ruhig weiter, die Basis wird stärker.`,fr:`Ton nouveau niveau : <b>${target}</b>. Tranquillement, ta base se renforce.`,uk:`Твій новий рівень: <b>${target}</b>. Спокійно, база міцнішає.`,tr:`Yeni seviyen: <b>${target}</b>. Sakin ol, temelin güçleniyor.`,zh:`你的新级别：<b>${target}</b>。稳步前进，基础更牢固。`,ar:`مستواك الجديد: <b>${target}</b>. بهدوء، أساسك يزداد قوة.`}[lang]||`Your new level: <b>${target}</b>. Steady work, stronger base.`)}</div>
     </div>`);
     if(!alreadyPassed){addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'⭐');}
     else toast(`Level ${target}`,'✅');
@@ -8878,9 +8876,9 @@ function finishLevelTest(timedOut=false){
     haptic('error');
     setLevelTestCooldown(target,false);
     addMsg('bot',`<div class="lt-result lt-fail">
-      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${lang==='ru'?'Пока не прошёл':'Not yet'}</div>
-      <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${lang==='ru'?'нужно':'need'} ${pass}%</div>
-      <div style="font-size:13px;color:var(--t2)">${overTime?(lang==='ru'?'Время вышло: тест рассчитан на 5 минут.':'Time is up: the test is designed for 5 minutes.'):tooFast?(lang==='ru'?`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`:`Attempt too fast to validate: minimum ${minSeconds} sec.`):(lang==='ru'?'Это не провал. Повтори слабые темы и зайди ещё раз спокойно.':'This is not a failure. Review weak topics and try again calmly.')}</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px">${({ru:'Пока не прошёл',en:'Not yet',es:'Aún no',pt:'Ainda não',de:'Noch nicht',fr:'Pas encore',uk:'Поки що ні',tr:'Henüz değil',zh:'还没通过',ar:'ليس بعد'}[lang]||'Not yet')}</div>
+      <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${({ru:'нужно',en:'need',es:'necesitas',pt:'precisa',de:'nötig',fr:'requis',uk:'потрібно',tr:'gerekli',zh:'需要',ar:'تحتاج'}[lang]||'need')} ${pass}%</div>
+      <div style="font-size:13px;color:var(--t2)">${overTime?({ru:'Время вышло: тест рассчитан на 5 минут.',en:'Time is up: the test is designed for 5 minutes.',es:'Se acabó el tiempo: el examen es de 5 minutos.',pt:'Tempo esgotado: o teste é de 5 minutos.',de:'Zeit abgelaufen: der Test dauert 5 Minuten.',fr:'Temps écoulé : le test dure 5 minutes.',uk:'Час вийшов: тест розрахований на 5 хвилин.',tr:'Süre doldu: test 5 dakika içindir.',zh:'时间到：测试限时 5 分钟。',ar:'انتهى الوقت: الاختبار مدته 5 دقائق.'}[lang]||'Time is up: the test is designed for 5 minutes.'):tooFast?({ru:`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`,en:`Attempt too fast to validate: minimum ${minSeconds} sec.`,es:`Intento demasiado rápido para validar: mínimo ${minSeconds} s.`,pt:`Tentativa rápida demais para validar: mínimo ${minSeconds} s.`,de:`Versuch zu schnell zum Werten: mindestens ${minSeconds} Sek.`,fr:`Tentative trop rapide pour être validée : minimum ${minSeconds} s.`,uk:`Спроба надто швидка для заліку: мінімум ${minSeconds} с.`,tr:`Doğrulamak için çok hızlı: en az ${minSeconds} sn.`,zh:`作答太快，无法计分：至少需 ${minSeconds} 秒。`,ar:`المحاولة سريعة جدًا للاحتساب: ${minSeconds} ثانية على الأقل.`}[lang]||`Attempt too fast to validate: minimum ${minSeconds} sec.`):({ru:'Это не провал. Повтори слабые темы и зайди ещё раз спокойно.',en:'This is not a failure. Review weak topics and try again calmly.',es:'Esto no es un fracaso. Repasa los temas flojos y vuelve a intentarlo con calma.',pt:'Isto não é uma falha. Revise os temas fracos e tente de novo com calma.',de:'Das ist kein Misserfolg. Wiederhole schwache Themen und versuch es in Ruhe erneut.',fr:'Ce n’est pas un échec. Revois les points faibles et réessaie tranquillement.',uk:'Це не провал. Повтори слабкі теми й спробуй ще раз спокійно.',tr:'Bu bir başarısızlık değil. Zayıf konuları tekrar et ve sakince yeniden dene.',zh:'这不是失败。复习薄弱的主题，然后从容再试一次。',ar:'هذا ليس فشلًا. راجِع المواضيع الضعيفة وحاول مجددًا بهدوء.'}[lang]||'This is not a failure. Review weak topics and try again calmly.')}</div>
     </div>`);
   }
   levelTestState=null;
@@ -9078,7 +9076,7 @@ function openRoadmapOfflineLesson(found){
     </div>
     <div class="rm-mission-actions">
       <button class="rm-mission-complete" onclick="completeRoadmapMission('${safeHTML(found.lesson.id)}')">${lang==='ru'?'Завершить миссию':'Complete mission'}</button>
-      <button class="rm-mission-ghost" onclick="courseAIBreakdown('${rmLinkedCourseId(found.lesson.id,found.lesson)||'a1-routine'}')">${lang==='ru'?'Спросить ALEX':'Ask ALEX'}</button>
+      <button class="rm-mission-ghost" onclick="courseAIBreakdown('${rmLinkedCourseId(found.lesson.id,found.lesson)||'a1-routine'}')">${({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX')}</button>
     </div>
     <div class="course-note">${lang==='ru'?'Курс даёт тему и правило. Путь превращает эту тему в практику под твою цель.':'Course gives the topic and rule. Path turns the topic into practice for your goal.'}</div>
   </div>`;
@@ -9235,10 +9233,10 @@ function renderRoadmap(){
     :(lang==='ru'?'Доступно с подпиской Basic. Стратегия, словарь и задания в формате реального экзамена.':'Available with the Basic subscription. Strategy, vocabulary and tasks in real-exam format.');
   const head=`<div class="course-system">
     <div class="course-system-top">
-      <div><div class="course-system-title">${lang==='ru'?'Подготовка к экзаменам':'Exam preparation'} ${examUnlocked?'':'<span class="course-system-pill" style="background:rgba(255,165,0,.16);color:#ffa500;border-color:rgba(255,165,0,.32)">'+(lang==='ru'?'Basic+':'Basic+')+'</span>'}</div>
+      <div><div class="course-system-title">${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')} ${examUnlocked?'':'<span class="course-system-pill" style="background:rgba(255,165,0,.16);color:#ffa500;border-color:rgba(255,165,0,.32)">'+(lang==='ru'?'Basic+':'Basic+')+'</span>'}</div>
       <div class="course-system-sub">${headSub}</div></div>
     </div>
-    ${examUnlocked?'':`<button class="course-exam-btn" onclick="showTierPaywall('basic','${lang==='ru'?'Подготовка к экзаменам':'Exam preparation'}')">${lang==='ru'?'Открыть подписку Basic':'Unlock with Basic'}</button>`}
+    ${examUnlocked?'':`<button class="course-exam-btn" onclick="showTierPaywall('basic','${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')}')">${lang==='ru'?'Открыть подписку Basic':'Unlock with Basic'}</button>`}
   </div>`;
   const groups=exams.map(ex=>{
     const items=sorted.filter(l=>l.level===ex.level);
@@ -9249,7 +9247,7 @@ function renderRoadmap(){
       <div class="course-info">
         <div class="course-title">${safeHTML(ls.title[lang]||ls.title.en)}</div>
         <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
-        <div class="course-meta">${done[ls.id]?`<span class="course-done-pill">${lang==='ru'?'Пройдено':'Done'}</span>`:`<span class="course-pill">${lang==='ru'?'Теория':'Theory'}</span><span class="course-pill">${lang==='ru'?'Практика':'Practice'}</span>`}</div>
+        <div class="course-meta">${done[ls.id]?`<span class="course-done-pill">${({ru:'Пройдено',en:'Done',es:'Hecho',pt:'Concluído',de:'Erledigt',fr:'Terminé',uk:'Пройдено',tr:'Tamamlandı',zh:'已完成',ar:'تم'}[lang]||'Done')}</span>`:`<span class="course-pill">${({ru:'Теория',en:'Theory',es:'Teoría',pt:'Teoria',de:'Theorie',fr:'Théorie',uk:'Теорія',tr:'Teori',zh:'理论',ar:'النظرية'}[lang]||'Theory')}</span><span class="course-pill">${({ru:'Практика',en:'Practice',es:'Práctica',pt:'Prática',de:'Übung',fr:'Pratique',uk:'Практика',tr:'Pratik',zh:'练习',ar:'تطبيق'}[lang]||'Practice')}</span>`}</div>
       </div>
       <div class="course-status"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>`).join('');
@@ -9440,7 +9438,7 @@ const SCENARIOS=[
 
 let activeRoleplay=null;
 function openRoleplay(){
-  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Сценки':'Roleplay');return;}
+  if(!hasTier('pro')){showTierPaywall('pro',({ru:'Сценки',en:'Roleplay',es:'Juegos de rol',pt:'Encenações',de:'Rollenspiele',fr:'Jeux de rôle',uk:'Сценки',tr:'Rol yapma',zh:'角色扮演',ar:'تمثيل الأدوار'}[lang]||'Roleplay'));return;}
   const grid=document.getElementById('scenario-grid');
   const title=document.getElementById('rp-modal-title');
   if(title)title.textContent={ru:'Выбери сценарий',en:'Choose a scenario',es:'Elige un escenario',de:'Szenario wählen',fr:'Choisir un scénario',pt:'Escolher cenário',uk:'Обери сценарій',tr:'Senaryo seç',zh:'选择场景',ar:'اختر سيناريو'}[lang]||'Choose a scenario';
@@ -9460,7 +9458,7 @@ function openRoleplay(){
 }
 
 function startRoleplay(sc){
-  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Сценки':'Roleplay');return;}
+  if(!hasTier('pro')){showTierPaywall('pro',({ru:'Сценки',en:'Roleplay',es:'Juegos de rol',pt:'Encenações',de:'Rollenspiele',fr:'Jeux de rôle',uk:'Сценки',tr:'Rol yapma',zh:'角色扮演',ar:'تمثيل الأدوار'}[lang]||'Roleplay'));return;}
   activeRoleplay=sc;
   try{trackM('roleplay');}catch(e){}
   // Show roleplay banner in chat
@@ -9499,7 +9497,7 @@ const TC_MODES=[
 let tcMode='grammar';
 
 function openTextChecker(){
-  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Проверка текста':'Text Check');return;}
+  if(!hasTier('pro')){showTierPaywall('pro',({ru:'Проверка текста',en:'Text Check',es:'Revisión de texto',pt:'Revisão de texto',de:'Textprüfung',fr:'Vérification de texte',uk:'Перевірка тексту',tr:'Metin kontrolü',zh:'文本检查',ar:'فحص النص'}[lang]||'Text Check'));return;}
   try{trackM('check');}catch(e){}
   const title=document.getElementById('tc-modal-title');
   const btn=document.getElementById('tc-btn');
@@ -9536,7 +9534,7 @@ function openTextChecker(){
 }
 
 async function submitTextCheck(){
-  if(!hasTier('pro')){showTierPaywall('pro',lang==='ru'?'Проверка текста':'Text Check');return;}
+  if(!hasTier('pro')){showTierPaywall('pro',({ru:'Проверка текста',en:'Text Check',es:'Revisión de texto',pt:'Revisão de texto',de:'Textprüfung',fr:'Vérification de texte',uk:'Перевірка тексту',tr:'Metin kontrolü',zh:'文本检查',ar:'فحص النص'}[lang]||'Text Check'));return;}
   const inp=document.getElementById('tc-inp');
   const text=inp?.value?.trim();
   if(!text||text.length<10){toast(lang==='ru'?'Введи текст':'Enter some text','⚠️');return;}
@@ -10732,7 +10730,7 @@ function openGrammarGame(){
     <div class="gg-pool" id="${gid}-pool">${shuffled.map((w,i)=>`<span class="gg-word" data-w="${w}" data-i="${i}" onclick="ggPick(this,'${gid}')">${w}</span>`).join('')}</div>
     <div class="gg-actions">
       <button class="btn bg" onclick="ggReset('${gid}')">↺ ${lang==='ru'?'Заново':'Reset'}</button>
-      <button class="btn bp" onclick="ggCheck('${gid}')">✓ ${lang==='ru'?'Проверить':'Check'}</button>
+      <button class="btn bp" onclick="ggCheck('${gid}')">✓ ${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button>
     </div>
     <div class="gg-result" id="${gid}-res"></div>
   </div>`;
