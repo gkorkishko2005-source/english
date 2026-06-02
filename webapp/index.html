@@ -2072,6 +2072,154 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* Error diary cards — match flat hairline aesthetic */
 #s-progress #errdiary-wrap > *{background:transparent!important;border:1px solid var(--b1)!important;
   box-shadow:none!important;border-radius:12px}
+
+/* ── Learn / Path · premium dark minimalism ──────────────────────
+   Claude-like calm + English Galaxy structure: keep cards, but let
+   them breathe. This layer is dark-theme scoped only; the light theme
+   remains exactly as-is. */
+html:not([data-mode=light]) #s-learn{
+  background:
+    radial-gradient(circle at 50% -18%,rgba(var(--ar),.085),transparent 34%),
+    linear-gradient(180deg,rgba(255,255,255,.012),transparent 150px);
+}
+html:not([data-mode=light]) #s-learn .lhdr{margin-bottom:16px;padding-top:2px}
+html:not([data-mode=light]) #s-learn .ltit{font-size:22px;font-weight:850;letter-spacing:-.35px}
+html:not([data-mode=light]) #s-learn .lctr{font-size:11px;color:var(--t3);font-weight:750;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.045);border-radius:999px;padding:4px 8px}
+html:not([data-mode=light]) #learn-sub{margin:-8px 1px 14px!important;color:rgba(148,163,184,.78)!important;line-height:1.45}
+
+html:not([data-mode=light]) #s-learn .learn-tabs{
+  gap:6px;padding:3px;margin:0 0 14px;border:1px solid rgba(255,255,255,.045);
+  border-radius:14px;background:rgba(255,255,255,.025);
+}
+html:not([data-mode=light]) #s-learn .learn-tab{
+  padding:9px 8px;border:0;background:transparent;color:rgba(148,163,184,.66);
+  border-radius:11px;font-size:12px;font-weight:760;letter-spacing:.05px;
+}
+html:not([data-mode=light]) #s-learn .learn-tab.on{
+  background:rgba(var(--ar),.12);color:var(--t1);box-shadow:inset 0 0 0 1px rgba(var(--ar),.13);
+}
+
+html:not([data-mode=light]) #s-learn .practice-dock{gap:9px;margin:0 0 14px}
+html:not([data-mode=light]) #s-learn .practice-card{
+  min-height:58px;padding:12px;border-color:rgba(255,255,255,.045);
+  border-radius:15px;background:rgba(255,255,255,.024);box-shadow:none;
+}
+html:not([data-mode=light]) #s-learn .practice-card:hover{background:rgba(255,255,255,.04);border-color:rgba(var(--ar),.16);transform:translateY(-1px)}
+html:not([data-mode=light]) #s-learn .practice-ico{width:32px;height:32px;border-radius:10px;background:rgba(var(--ar),.075);box-shadow:inset 0 0 0 1px rgba(var(--ar),.08)}
+html:not([data-mode=light]) #s-learn .practice-title{font-size:12px;font-weight:850}
+html:not([data-mode=light]) #s-learn .practice-sub{font-size:10.5px;color:rgba(148,163,184,.62)}
+
+html:not([data-mode=light]) #s-learn .course-grid,
+html:not([data-mode=light]) #s-learn .roadmap-wrap{gap:10px}
+html:not([data-mode=light]) #s-learn .course-level-head{
+  margin:19px 2px 8px;padding-top:2px;border-top:1px solid rgba(255,255,255,.035);
+}
+html:not([data-mode=light]) #s-learn .course-level-head:first-child{border-top:0;margin-top:8px}
+html:not([data-mode=light]) #s-learn .course-level-name{font-size:11px;font-weight:900;letter-spacing:.55px;text-transform:uppercase}
+html:not([data-mode=light]) #s-learn .course-level-desc{font-size:10.5px;color:rgba(148,163,184,.55)}
+
+html:not([data-mode=light]) #s-learn .course-card,
+html:not([data-mode=light]) #s-learn .rm-lesson{
+  gap:13px;padding:14px 14px;border-radius:16px;border-color:rgba(255,255,255,.045);
+  background:rgba(255,255,255,.026);box-shadow:none;
+}
+html:not([data-mode=light]) #s-learn .course-card::after,
+html:not([data-mode=light]) #s-learn .rm-lesson::after{display:none}
+html:not([data-mode=light]) #s-learn .course-card::before,
+html:not([data-mode=light]) #s-learn .rm-lesson::before{top:14px;bottom:14px;width:2px;opacity:.44}
+html:not([data-mode=light]) #s-learn .course-card:hover,
+html:not([data-mode=light]) #s-learn .rm-lesson:hover{
+  border-color:rgba(var(--ar),.15);background:rgba(255,255,255,.04);
+  box-shadow:0 10px 24px rgba(0,0,0,.10);transform:translateY(-1px);
+}
+html:not([data-mode=light]) #s-learn .course-card.done,
+html:not([data-mode=light]) #s-learn .rm-lesson.done{
+  border-color:rgba(0,212,170,.16);background:rgba(0,212,170,.035);box-shadow:none;
+}
+html:not([data-mode=light]) #s-learn .course-card.locked,
+html:not([data-mode=light]) #s-learn .rm-lesson.locked{opacity:.56;background:rgba(255,255,255,.018)}
+html:not([data-mode=light]) #s-learn .course-ico,
+html:not([data-mode=light]) #s-learn .rm-lesson-ico{
+  width:38px;height:38px;border-radius:13px;background:rgba(var(--ar),.075);
+  box-shadow:inset 0 0 0 1px rgba(var(--ar),.09);
+}
+html:not([data-mode=light]) #s-learn .course-ico svg,
+html:not([data-mode=light]) #s-learn .rm-lesson-ico svg{width:20px;height:20px}
+html:not([data-mode=light]) #s-learn .course-title,
+html:not([data-mode=light]) #s-learn .rm-title{font-size:13.5px;font-weight:850;letter-spacing:-.1px}
+html:not([data-mode=light]) #s-learn .course-sub,
+html:not([data-mode=light]) #s-learn .rm-prog{font-size:11px;color:rgba(148,163,184,.68);line-height:1.42}
+html:not([data-mode=light]) #s-learn .course-meta{margin-top:7px}
+html:not([data-mode=light]) #s-learn .course-pill,
+html:not([data-mode=light]) #s-learn .course-done-pill,
+html:not([data-mode=light]) #s-learn .rm-tag{
+  border-color:rgba(255,255,255,.045);background:rgba(255,255,255,.028);
+  color:rgba(148,163,184,.70);font-weight:750;
+}
+html:not([data-mode=light]) #s-learn .course-status,
+html:not([data-mode=light]) #s-learn .rm-status{
+  background:transparent;border-color:rgba(255,255,255,.045);color:rgba(148,163,184,.68);
+}
+
+html:not([data-mode=light]) #s-learn .course-system,
+html:not([data-mode=light]) #s-learn .rm-overview,
+html:not([data-mode=light]) #s-learn .rm-mission-head{
+  border-color:rgba(var(--ar),.13);border-radius:18px;
+  background:linear-gradient(145deg,rgba(var(--ar),.08),rgba(255,255,255,.026));
+  box-shadow:none;
+}
+html:not([data-mode=light]) #s-learn .rm-overview::after,
+html:not([data-mode=light]) #s-learn .rm-mission-head::after{opacity:.5}
+html:not([data-mode=light]) #s-learn .course-system-title,
+html:not([data-mode=light]) #s-learn .rm-over-title,
+html:not([data-mode=light]) #s-learn .rm-mission-title{letter-spacing:-.2px}
+html:not([data-mode=light]) #s-learn .course-system-sub,
+html:not([data-mode=light]) #s-learn .rm-over-sub,
+html:not([data-mode=light]) #s-learn .rm-mission-sub{color:rgba(148,163,184,.72)}
+html:not([data-mode=light]) #s-learn .rm-action,
+html:not([data-mode=light]) #s-learn .rm-mission-card,
+html:not([data-mode=light]) #s-learn .course-stage-card,
+html:not([data-mode=light]) #s-learn .course-section,
+html:not([data-mode=light]) #s-learn .course-practice,
+html:not([data-mode=light]) #s-learn .course-practice-card,
+html:not([data-mode=light]) #s-learn .course-vocab-card,
+html:not([data-mode=light]) #s-learn .course-build,
+html:not([data-mode=light]) #s-learn .course-error-card,
+html:not([data-mode=light]) #s-learn .rp-passage,
+html:not([data-mode=light]) #s-learn .rp-q{
+  border-color:rgba(255,255,255,.045);background:rgba(255,255,255,.026);
+  box-shadow:none;border-radius:15px;
+}
+html:not([data-mode=light]) #s-learn .course-lesson{
+  border-color:rgba(var(--ar),.10);border-radius:18px;
+  background:linear-gradient(180deg,rgba(var(--ar),.045),transparent 220px),rgba(255,255,255,.018);
+}
+html:not([data-mode=light]) #s-learn .course-hero{
+  border-color:rgba(var(--ar),.12);background:linear-gradient(145deg,rgba(var(--ar),.08),rgba(255,255,255,.025));
+  border-radius:20px;margin-bottom:12px;
+}
+html:not([data-mode=light]) #s-learn .course-track-rail,
+html:not([data-mode=light]) #s-learn .rm-over-bar,
+html:not([data-mode=light]) #s-learn .rm-bar,
+html:not([data-mode=light]) #s-learn .cont-progress{background:rgba(255,255,255,.055)}
+html:not([data-mode=light]) #s-learn .course-choice,
+html:not([data-mode=light]) #s-learn .course-opt,
+html:not([data-mode=light]) #s-learn .course-word,
+html:not([data-mode=light]) #s-learn .rm-mission-task,
+html:not([data-mode=light]) #s-learn .course-inp,
+html:not([data-mode=light]) #s-learn .rm-mission-input{
+  border-color:rgba(255,255,255,.05);background:rgba(255,255,255,.03);
+}
+html:not([data-mode=light]) #s-learn .course-choice:hover,
+html:not([data-mode=light]) #s-learn .course-opt:hover{border-color:rgba(var(--ar),.16);background:rgba(var(--ar),.055)}
+
+html:not([data-mode=light]) .lp-card{
+  border-color:rgba(255,255,255,.045);background:rgba(255,255,255,.026);
+  border-radius:15px;padding:13px 14px;
+}
+html:not([data-mode=light]) .lp-card:hover{border-color:rgba(var(--ar),.16);background:rgba(255,255,255,.04)}
+html:not([data-mode=light]) .lp-card.active-path{border-color:rgba(var(--ar),.22);background:rgba(var(--ar),.07)}
+html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
 </style>
 </head>
 <body>
