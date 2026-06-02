@@ -441,16 +441,16 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
    tail (one rounded corner cut to 4px) but lose the heavy accent
    fill on user messages — a subtle tint reads as "yours" without
    shouting. */
-.chdr{padding:14px 16px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chdr{padding:11px 14px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .chtxt{display:flex;align-items:center;gap:7px;min-height:28px}
-.chnm{font-size:16px;font-weight:800;letter-spacing:.1px}
+.chnm{font-size:14.5px;font-weight:850;letter-spacing:.1px}
 .odot{width:6px;height:6px;border-radius:50%;background:var(--a2);opacity:.85}
 .hbtns{margin-left:auto;display:flex;align-items:center;gap:4px}
 .hbtn{background:none;border:none;cursor:pointer;color:var(--t3);padding:6px;border-radius:8px;transition:.15s;display:flex;align-items:center;justify-content:center}
 .hbtn:hover{color:var(--t2);background:var(--e2)}
 .hbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-.cmsgs{flex:1;overflow-y:auto;padding:13px 15px 8px;display:flex;flex-direction:column;gap:9px}
+.cmsgs{flex:1;overflow-y:auto;padding:12px 14px 8px;display:flex;flex-direction:column;gap:7px}
 .cmsgs::-webkit-scrollbar{width:0}
 
 .msg{display:flex;gap:8px;animation:msgin .2s ease}
@@ -465,12 +465,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 .mwrap{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:80%}
 .msg.user .mwrap{align-items:flex-end}
-.mbub{padding:11px 13px;font-size:14px;line-height:1.55;border-radius:14px}
+.mbub{padding:10px 12px;font-size:13.5px;line-height:1.52;border-radius:13px}
 /* User bubble: subtle accent tint instead of a heavy filled block.
    Distinct from bot via right-alignment + corner-tail; no need to
    shout in colour. */
-.msg.user .mbub{background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.18);color:var(--t1);border-radius:14px 14px 4px 14px}
-.msg.bot  .mbub{background:var(--e1);border:1px solid var(--b1);border-radius:14px 14px 14px 4px;color:var(--t1)}
+.msg.user .mbub{background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);color:var(--t1);border-radius:13px 13px 4px 13px}
+.msg.bot  .mbub{background:var(--e1);border:1px solid var(--b1);border-radius:13px 13px 13px 4px;color:var(--t1)}
 .mbub b{font-weight:700}
 .mbub i{font-style:italic;color:var(--t2)}
 .mbub code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--e2);border:1px solid var(--b1);padding:1px 6px;border-radius:5px;color:var(--t1)}
@@ -826,9 +826,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* Chips: hairline outline, transparent background, no gradient.
    Matches Home grammar — accent shows up only when the chip is
    actively pressed. */
-.chips{display:flex;gap:7px;overflow-x:auto;padding:8px 15px 6px;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px 5px;background:var(--bg);border-top:1px solid rgba(255,255,255,.02);flex-shrink:0;-webkit-overflow-scrolling:touch}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:100px;border:1px solid var(--b1);background:transparent;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;transition:.16s;white-space:nowrap}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:100px;border:1px solid var(--b1);background:transparent;font-size:12px;font-weight:650;color:var(--t2);cursor:pointer;transition:.16s;white-space:nowrap}
 .chip:hover{border-color:rgba(var(--ar),.35);color:var(--a)}
 .chip:active{border-color:var(--a);color:var(--a);transform:scale(.96);background:rgba(var(--ar),.06)}
 .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
@@ -836,6 +836,19 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .chip-smart svg{width:15px;height:15px;stroke-width:2.2}
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
+
+/* Learn practice dock: local, no-credit exercises moved out of chat. */
+.practice-dock{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.practice-card{position:relative;display:flex;align-items:center;gap:10px;min-height:62px;padding:11px 12px;border:1px solid var(--b1);border-radius:14px;background:linear-gradient(135deg,var(--e1),rgba(var(--ar),.025));cursor:pointer;overflow:hidden;transition:transform .16s,border-color .18s,background .18s;font-family:var(--f);text-align:left}
+.practice-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.28);background:linear-gradient(135deg,var(--e1),rgba(var(--ar),.06))}
+.practice-card:active{transform:scale(.98)}
+.practice-ico{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.09);color:var(--a)}
+.practice-ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.practice-title{font-size:12.5px;font-weight:850;color:var(--t1);line-height:1.15}
+.practice-sub{font-size:10.5px;color:var(--t3);line-height:1.25;margin-top:3px}
+.practice-body{padding:8px 16px 18px;max-height:70vh;overflow-y:auto}
+.practice-body .gg-wrap,.practice-body .story-grid-wrap,.practice-body .story-scene,.practice-body .drill-result{background:transparent;border:0;padding:0}
+.practice-body .gg-title{font-size:15px;margin-bottom:8px}
 
 /* Model bar — flat, no blur. Same surface as page background. */
 .mbar{display:flex;justify-content:flex-start;padding:6px 12px 0;background:var(--bg);border-top:1px solid transparent;flex-shrink:0;position:relative;z-index:80}
@@ -2221,6 +2234,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
     <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
     <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Exams</span></div>
   </div>
+  <div class="practice-dock" id="practice-dock"></div>
   <!-- COURSE panel -->
   <div id="learn-course-panel">
     <div class="course-grid" id="course-wrap"></div>
@@ -2556,8 +2570,17 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 <!-- DRILL TOPIC PICKER MODAL -->
 <div class="mov" id="drillm" style="display:none" onclick="closeMod('drillm')">
   <div class="msh" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto"><div class="mhnd"></div>
-    <div class="mtit" id="drill-mtit">🧠 Grammar Drill</div>
+    <div class="mtit" id="drill-mtit">Grammar Drill</div>
     <div style="padding:8px 16px 16px" id="drill-selector"></div>
+  </div>
+</div>
+
+<!-- LOCAL PRACTICE MODAL -->
+<div class="mov" id="practicem" style="display:none" onclick="closeMod('practicem')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:86vh;overflow:hidden"><div class="mhnd"></div>
+    <div class="mtit" id="practice-title">Practice</div>
+    <div class="course-lesson-sub" id="practice-sub" style="padding:0 16px 4px"></div>
+    <div class="practice-body" id="practice-body"></div>
   </div>
 </div>
 
@@ -3003,12 +3026,13 @@ function applyLang(){
   _t('exam-cta-title',{ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de examen',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',pt:'Preparação de exame',uk:'Підготовка до іспитів',tr:'Sınav hazırlığı',zh:'考试准备',ar:'التحضير للامتحان'}[lang]||'Exam preparation');
   _t('exam-cta-sub','TOEFL · IELTS · CAE');
   var pmt=document.getElementById('path-mtit');if(pmt)pmt.textContent={ru:'Выбери путь обучения',en:'Choose Learning Path',es:'Elige tu camino',pt:'Escolher caminho'}[lang]||'Choose Learning Path';
-  var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'🧠 Выбери тему',en:'🧠 Choose Topic',es:'🧠 Elige tema',de:'🧠 Thema wählen',fr:'🧠 Choisir un sujet',pt:'🧠 Escolher tema',uk:'🧠 Обери тему',tr:'🧠 Konu seç',zh:'🧠 选择主题',ar:'🧠 اختر الموضوع'}[lang]||'🧠 Grammar Drill';
+  var dmt=document.getElementById('drill-mtit');if(dmt)dmt.textContent={ru:'Выбери тему',en:'Choose Topic',es:'Elige tema',de:'Thema wählen',fr:'Choisir un sujet',pt:'Escolher tema',uk:'Обери тему',tr:'Konu seç',zh:'选择主题',ar:'اختر الموضوع'}[lang]||'Grammar Drill';
   // Chat
   var ol=document.getElementById('online-lbl');if(ol)ol.textContent=L.online;
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
   // Build chips
   buildChips();
+  renderPracticeDock();
   // Session panel
   document.getElementById('sp-title').textContent=L.chats;
   document.getElementById('sp-new').textContent=L.new_chat;
@@ -3241,36 +3265,59 @@ function buildChips(){
   const el = document.getElementById('chips');
   if(!el) return;
   el.innerHTML = '';
-  const texts=[L.c_corr,L.c_gr,L.c_sp,L.c_vc,L.c_au,L.c_id,L.c_er,
-    {ru:'Объясни проще',en:'Explain simply',es:'Explica simple',de:'Einfach erklären',fr:'Explique simplement',pt:'Explique simples',uk:'Поясни простіше',tr:'Basitçe açıkla',zh:'简单解释',ar:'اشرح ببساطة'}[lang]||'Explain simply',
-    {ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes',pt:'Cenários',uk:'Сценки',tr:'Rol yapma',zh:'角色扮演',ar:'تمثيل أدوار'}[lang]||'Roleplay',
-    {ru:'🧩 Собери фразу',en:'🧩 Build phrase',es:'🧩 Arma frase',de:'🧩 Satz bauen',fr:'🧩 Construis phrase',pt:'🧩 Monte frase',uk:'🧩 Склади фразу',tr:'🧩 Cümle kur',zh:'🧩 组句',ar:'🧩 كوّن جملة'}[lang]||'🧩 Build phrase',
-    {ru:'📖 Истории',en:'📖 Stories',es:'📖 Historias',de:'📖 Geschichten',fr:'📖 Histoires',pt:'📖 Histórias',uk:'📖 Історії',tr:'📖 Hikayeler',zh:'📖 故事',ar:'📖 قصص'}[lang]||'📖 Stories',
-    {ru:'🎮 Виселица',en:'🎮 Hangman',es:'🎮 Ahorcado',de:'🎮 Galgenmännchen',fr:'🎮 Le pendu',pt:'🎮 Forca',uk:'🎮 Шибениця',tr:'🎮 Adam Asmaca',zh:'🎮 猜词游戏',ar:'🎮 المشنقة'}[lang]||'🎮 Hangman',
+  const items=[
+    {text:L.c_corr,icon:0,fn:()=>chipAction(()=>sendChip(L.c_corr))},
+    {text:L.c_gr,icon:1,fn:()=>chipAction(()=>sendChip(L.c_gr))},
+    {text:L.c_sp,icon:2,fn:()=>chipAction(()=>sendChip(L.c_sp))},
+    {text:L.c_vc,icon:3,fn:()=>chipAction(()=>sendChip(L.c_vc))},
+    {text:L.c_id,icon:5,fn:()=>chipAction(()=>sendChip(L.c_id))},
+    {text:L.c_er,icon:6,fn:()=>chipAction(()=>sendChip(L.c_er))},
+    {text:{ru:'Объясни проще',en:'Explain simply',es:'Explica simple',de:'Einfach erklären',fr:'Explique simplement',pt:'Explique simples',uk:'Поясни простіше',tr:'Basitçe açıkla',zh:'简单解释',ar:'اشرح ببساطة'}[lang]||'Explain simply',icon:7,fn:()=>chipAction(()=>openChat('explain_simple'))},
   ];
-  const fns=[
-    ()=>chipAction(()=>sendChip(L.c_corr)),
-    ()=>chipAction(()=>sendChip(L.c_gr)),
-    ()=>chipAction(()=>sendChip(L.c_sp)),
-    ()=>chipAction(()=>sendChip(L.c_vc)),
-    ()=>chipAction(startAudio),
-    ()=>chipAction(()=>sendChip(L.c_id)),
-    ()=>chipAction(()=>sendChip(L.c_er)),
-    ()=>chipAction(()=>openChat('explain_simple')),
-    ()=>openRoleplay(),
-    ()=>openGrammarGame(),
-    ()=>openStoryMode(),
-    ()=>chipAction(openHangman),
-  ];
-  texts.forEach((text,i)=>{
+  items.forEach(item=>{
     const div=document.createElement('div');
     div.className='chip';
-    div.innerHTML=CHIP_SVGS[i]+text;
-    div.addEventListener('click',fns[i]);
+    div.innerHTML=CHIP_SVGS[item.icon]+safeHTML(item.text);
+    div.addEventListener('click',item.fn);
     el.appendChild(div);
   });
   // Wheel scroll
   el.onwheel=e=>{e.preventDefault();el.scrollLeft+=e.deltaY+e.deltaX;};
+}
+
+function renderPracticeDock(){
+  const el=document.getElementById('practice-dock');if(!el)return;
+  const copy={
+    drill:{
+      t:{ru:'Тренажёр',en:'Drills',es:'Ejercicios',de:'Übungen',fr:'Exercices',pt:'Treinos',uk:'Тренажер',tr:'Alıştırmalar',zh:'练习',ar:'تدريبات'},
+      s:{ru:'темы и быстрые тесты',en:'topics and quick tests',es:'temas y tests rápidos',de:'Themen und kurze Tests',fr:'thèmes et tests rapides',pt:'tópicos e testes rápidos',uk:'теми й швидкі тести',tr:'konular ve hızlı testler',zh:'主题和快速测验',ar:'مواضيع واختبارات سريعة'}
+    },
+    build:{
+      t:{ru:'Собери фразу',en:'Build phrase',es:'Arma frase',de:'Satz bauen',fr:'Construire une phrase',pt:'Monte frase',uk:'Склади фразу',tr:'Cümle kur',zh:'组句',ar:'كوّن جملة'},
+      s:{ru:'порядок слов без AI',en:'word order without AI',es:'orden de palabras sin IA',de:'Wortstellung ohne KI',fr:'ordre des mots sans IA',pt:'ordem sem IA',uk:'порядок слів без AI',tr:'AI olmadan kelime sırası',zh:'无需 AI 的词序练习',ar:'ترتيب الكلمات بدون ذكاء اصطناعي'}
+    },
+    story:{
+      t:{ru:'Истории',en:'Stories',es:'Historias',de:'Geschichten',fr:'Histoires',pt:'Histórias',uk:'Історії',tr:'Hikayeler',zh:'故事',ar:'قصص'},
+      s:{ru:'выбор ответа в сценах',en:'choice-based scenes',es:'escenas con elección',de:'Szenen mit Auswahl',fr:'scènes à choix',pt:'cenas com escolha',uk:'сцени з вибором',tr:'seçimli sahneler',zh:'选择式场景',ar:'مشاهد باختيارات'}
+    },
+    hang:{
+      t:{ru:'Виселица',en:'Hangman',es:'Ahorcado',de:'Galgenmännchen',fr:'Le pendu',pt:'Forca',uk:'Шибениця',tr:'Adam asmaca',zh:'猜词游戏',ar:'لعبة المشنقة'},
+      s:{ru:'слова и подсказки',en:'words and hints',es:'palabras y pistas',de:'Wörter und Hinweise',fr:'mots et indices',pt:'palavras e dicas',uk:'слова й підказки',tr:'kelimeler ve ipuçları',zh:'单词和提示',ar:'كلمات وتلميحات'}
+    },
+  };
+  const items=[
+    {k:'drill',icon:1,fn:'openDrillPicker()'},
+    {k:'build',icon:9,fn:'openGrammarGame()'},
+    {k:'story',icon:10,fn:'openStoryMode()'},
+    {k:'hang',icon:11,fn:'openHangman()'},
+  ];
+  el.innerHTML=items.map(function(it){
+    const c=copy[it.k],t=(c.t[lang]||c.t.en),s=(c.s[lang]||c.s.en);
+    return `<button class="practice-card" type="button" onclick="${it.fn}">
+      <div class="practice-ico">${CHIP_SVGS[it.icon]}</div>
+      <div><div class="practice-title">${safeHTML(t)}</div><div class="practice-sub">${safeHTML(s)}</div></div>
+    </button>`;
+  }).join('');
 }
 
 /* ══ CHIP COOLDOWN ══ */
@@ -4460,6 +4507,28 @@ function renderMsg(role,text,save=true,time=null){
 }
 
 function addMsg(role,text){renderMsg(role,text,true);}
+
+function openPracticeShell(title,sub){
+  const t=document.getElementById('practice-title');
+  const s=document.getElementById('practice-sub');
+  const b=document.getElementById('practice-body');
+  if(t)t.textContent=title||'Practice';
+  if(s)s.textContent=sub||'';
+  if(b)b.innerHTML='';
+  openMod('practicem');
+}
+function addPractice(html){
+  const b=document.getElementById('practice-body');
+  if(!b){addMsg('bot',html);return;}
+  b.insertAdjacentHTML('beforeend',html);
+  setTimeout(()=>{try{b.scrollTo({top:b.scrollHeight,behavior:'smooth'});}catch(_){}},30);
+}
+function setPractice(html){
+  const b=document.getElementById('practice-body');
+  if(!b){addMsg('bot',html);return;}
+  b.innerHTML=html;
+  setTimeout(()=>{try{b.scrollTo({top:0,behavior:'smooth'});}catch(_){}},30);
+}
 
 function addTyping(){
   const w=document.getElementById('cmsgs');
@@ -10654,24 +10723,26 @@ const GRAMMAR_GAMES=[
   {s:['Were','I','rich','I','would','help','everyone','I','know'],hint:'Subjunctive inversion (formal if)'},
 ];
 function openGrammarGame(){
-  haptic('light');goTab('chat');
+  haptic('light');
   const game=GRAMMAR_GAMES[Math.floor(Math.random()*GRAMMAR_GAMES.length)];
   const shuffled=[...game.s].sort(()=>Math.random()-.5);
   const gid='gg-'+Date.now();
+  const title=({ru:'Собери фразу',en:'Build the sentence',es:'Arma la oración',pt:'Monte a frase',de:'Bilde den Satz',fr:'Construis la phrase',uk:'Склади речення',tr:'Cümleyi kur',zh:'组句',ar:'كوّن الجملة'}[lang]||'Build the sentence');
+  openPracticeShell(title,game.hint);
   const html=`<div class="gg-wrap" id="${gid}">
-    <div class="gg-title">🧩 ${({ru:'Собери предложение',en:'Build the sentence',es:'Arma la oración',pt:'Monte a frase',de:'Bilde den Satz',fr:'Construis la phrase',uk:'Склади речення',tr:'Cümleyi kur',zh:'组句',ar:'كوّن الجملة'}[lang]||'Build the sentence')}</div>
+    <div class="gg-title">${title}</div>
     <div class="gg-hint">${game.hint}</div>
     <div class="gg-slots" id="${gid}-slots"></div>
     <div class="gg-pool" id="${gid}-pool">${shuffled.map((w,i)=>`<span class="gg-word" data-w="${w}" data-i="${i}" onclick="ggPick(this,'${gid}')">${w}</span>`).join('')}</div>
     <div class="gg-actions">
-      <button class="btn bg" onclick="ggReset('${gid}')">↺ ${({ru:'Заново',en:'Reset',es:'Reiniciar',pt:'Reiniciar',de:'Zurücksetzen',fr:'Recommencer',uk:'Спочатку',tr:'Sıfırla',zh:'重来',ar:'إعادة'}[lang]||'Reset')}</button>
-      <button class="btn bp" onclick="ggCheck('${gid}')">✓ ${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button>
+      <button class="btn bg" onclick="ggReset('${gid}')">${({ru:'Заново',en:'Reset',es:'Reiniciar',pt:'Reiniciar',de:'Zurücksetzen',fr:'Recommencer',uk:'Спочатку',tr:'Sıfırla',zh:'重来',ar:'إعادة'}[lang]||'Reset')}</button>
+      <button class="btn bp" onclick="ggCheck('${gid}')">${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button>
     </div>
     <div class="gg-result" id="${gid}-res"></div>
   </div>`;
   // Store correct answer
   window['_gg_'+gid]=game.s.join(' ');
-  addMsg('bot',html);
+  addPractice(html);
 }
 function ggPick(el,gid){
   haptic('light');
@@ -10699,11 +10770,11 @@ function ggCheck(gid){
   const res=document.getElementById(gid+'-res');
   if(answer===correct){
     haptic('success');
-    res.innerHTML=`<span class="gg-ok">✅ ${({ru:'Правильно!',en:'Correct!',es:'¡Correcto!',pt:'Correto!',de:'Richtig!',fr:'Correct !',uk:'Правильно!',tr:'Doğru!',zh:'正确！',ar:'صحيح!'}[lang]||'Correct!')} +8 XP</span>`;
-    addLocalXP(8);trackM('tests');trackM('game');bumpStat('tests');toast('+8 XP','✅');
+    res.innerHTML=`<span class="gg-ok">${({ru:'Правильно',en:'Correct',es:'Correcto',pt:'Correto',de:'Richtig',fr:'Correct',uk:'Правильно',tr:'Doğru',zh:'正确',ar:'صحيح'}[lang]||'Correct')} +8 XP</span>`;
+    addLocalXP(8);trackM('tests');trackM('game');bumpStat('tests');toast('+8 XP','✓');
   }else{
     haptic('error');
-    res.innerHTML=`<span class="gg-fail">❌ ${({ru:'Правильный ответ',en:'Correct answer',es:'Respuesta correcta',pt:'Resposta correta',de:'Richtige Antwort',fr:'Bonne réponse',uk:'Правильна відповідь',tr:'Doğru cevap',zh:'正确答案',ar:'الإجابة الصحيحة'}[lang]||'Correct answer')}:<br><b>${correct}</b></span>`;
+    res.innerHTML=`<span class="gg-fail">${({ru:'Правильный ответ',en:'Correct answer',es:'Respuesta correcta',pt:'Resposta correta',de:'Richtige Antwort',fr:'Bonne réponse',uk:'Правильна відповідь',tr:'Doğru cevap',zh:'正确答案',ar:'الإجابة الصحيحة'}[lang]||'Correct answer')}:<br><b>${correct}</b></span>`;
   }
 }
 
@@ -10771,27 +10842,27 @@ const HANGMAN_WORDS=[
   {w:'WEEKEND',h:{ru:'Выходные',en:'Saturday and Sunday',es:'Sábado y domingo',pt:'Sábado e domingo',de:'Samstag und Sonntag',fr:'Samedi et dimanche',uk:'Субота й неділя',tr:'Cumartesi ve pazar',zh:'周六和周日',ar:'السبت والأحد'}},
 ];
 const HM_T={
-  title:{ru:'🎮 Виселица',en:'🎮 Hangman',es:'🎮 El ahorcado',de:'🎮 Galgenmännchen',fr:'🎮 Le pendu',pt:'🎮 Forca',uk:'🎮 Шибениця',tr:'🎮 Adam Asmaca',zh:'🎮 猜词游戏',ar:'🎮 لعبة المشنقة'},
+  title:{ru:'Виселица',en:'Hangman',es:'El ahorcado',de:'Galgenmännchen',fr:'Le pendu',pt:'Forca',uk:'Шибениця',tr:'Adam Asmaca',zh:'猜词游戏',ar:'لعبة المشنقة'},
   hint:{ru:'Подсказка',en:'Hint',es:'Pista',de:'Tipp',fr:'Indice',pt:'Dica',uk:'Підказка',tr:'İpucu',zh:'提示',ar:'تلميح'},
   win:{ru:'Победа!',en:'You won!',es:'¡Ganaste!',de:'Gewonnen!',fr:'Gagné !',pt:'Você venceu!',uk:'Перемога!',tr:'Kazandın!',zh:'你赢了！',ar:'لقد فزت!'},
   lose:{ru:'Проигрыш. Слово',en:'Game over. The word was',es:'Fin. La palabra era',de:'Verloren. Das Wort war',fr:'Perdu. Le mot était',pt:'Fim. A palavra era',uk:'Програш. Слово',tr:'Bitti. Kelime',zh:'游戏结束。单词是',ar:'انتهت اللعبة. الكلمة هي'},
-  again:{ru:'🔄 Ещё слово',en:'🔄 New word',es:'🔄 Nueva palabra',de:'🔄 Neues Wort',fr:'🔄 Nouveau mot',pt:'🔄 Nova palavra',uk:'🔄 Інше слово',tr:'🔄 Yeni kelime',zh:'🔄 新单词',ar:'🔄 كلمة جديدة'},
+  again:{ru:'Ещё слово',en:'New word',es:'Nueva palabra',de:'Neues Wort',fr:'Nouveau mot',pt:'Nova palavra',uk:'Інше слово',tr:'Yeni kelime',zh:'新单词',ar:'كلمة جديدة'},
 };
 function _hmL(o){return o[lang]||o.en;}
 let hmState=null;
 function openHangman(){
   try{haptic('light');}catch(e){}
-  goTab('chat');
   const pick=HANGMAN_WORDS[Math.floor(Math.random()*HANGMAN_WORDS.length)];
   hmState={id:'hm'+Date.now(),word:pick.w,hint:pick.h,guessed:[],wrong:[],done:false};
-  addMsg('bot','<div class="gg-wrap" id="'+hmState.id+'"></div>');
+  openPracticeShell(_hmL(HM_T.title),_hmL(pick.h));
+  addPractice('<div class="gg-wrap" id="'+hmState.id+'"></div>');
   hmRender();
 }
 function hmRender(){
   if(!hmState)return;
   var box=document.getElementById(hmState.id);if(!box)return;
   var s=hmState;
-  var hearts='';for(var i=0;i<6;i++)hearts+=(i<6-s.wrong.length?'❤️':'🤍');
+  var hearts='';for(var i=0;i<6;i++)hearts+=(i<6-s.wrong.length?'●':'○');
   var slots='';for(var j=0;j<s.word.length;j++){
     var ch=s.word[j],hit=s.guessed.indexOf(ch)>=0;
     slots+='<div class="hm-slot'+(hit?' on':'')+'">'+(hit||s.done?ch:'&nbsp;')+'</div>';
@@ -10807,13 +10878,13 @@ function hmRender(){
   if(s.done){
     var won=s.word.split('').every(function(c){return s.guessed.indexOf(c)>=0;});
     res=won
-      ?'<div class="hm-res"><span class="hm-ok">🏆 '+_hmL(HM_T.win)+' +8 XP</span></div>'
-      :'<div class="hm-res"><span class="hm-bad">💀 '+_hmL(HM_T.lose)+': <b>'+s.word+'</b></span></div>';
+      ?'<div class="hm-res"><span class="hm-ok">'+_hmL(HM_T.win)+' +8 XP</span></div>'
+      :'<div class="hm-res"><span class="hm-bad">'+_hmL(HM_T.lose)+': <b>'+s.word+'</b></span></div>';
     res+='<button class="btn bp hm-again" onclick="openHangman()">'+_hmL(HM_T.again)+'</button>';
   }
   box.innerHTML='<div class="gg-title">'+_hmL(HM_T.title)+'</div>'
     +'<div class="hm-lives">'+hearts+'</div>'
-    +'<div class="hm-hint">💡 '+_hmL(HM_T.hint)+': '+_hmL(s.hint)+'</div>'
+    +'<div class="hm-hint">'+_hmL(HM_T.hint)+': '+_hmL(s.hint)+'</div>'
     +'<div class="hm-word">'+slots+'</div>'
     +'<div class="hm-keys">'+keys+'</div>'+res;
 }
@@ -11135,12 +11206,14 @@ function openStoryMode(){
       <div class="story-scenes">${s.scenes.length} ${({ru:'сцен',en:'scenes',es:'escenas',pt:'cenas',de:'Szenen',fr:'scènes',uk:'сцен',tr:'sahne',zh:'个场景',ar:'مشاهد'}[lang]||'scenes')}</div>
     </div>`;
   }).join('');
-  const title=({ru:'📖 Выбери историю',en:'📖 Choose a story',es:'📖 Elige una historia',pt:'📖 Escolha uma história',de:'📖 Wähle eine Geschichte',fr:'📖 Choisis une histoire',uk:'📖 Обери історію',tr:'📖 Bir hikâye seç',zh:'📖 选择一个故事',ar:'📖 اختر قصة'}[lang]||'📖 Choose a story');
-  addMsg('bot',`<div class="story-grid-wrap"><div class="gg-title">${title}</div><div class="story-grid">${grid}</div></div>`);
+  const title=({ru:'Выбери историю',en:'Choose a story',es:'Elige una historia',pt:'Escolha uma história',de:'Wähle eine Geschichte',fr:'Choisis une histoire',uk:'Обери історію',tr:'Bir hikâye seç',zh:'选择一个故事',ar:'اختر قصة'}[lang]||'Choose a story');
+  openPracticeShell(title,({ru:'Короткие сцены без AI-кредитов',en:'Short scenes without AI credits',es:'Escenas cortas sin créditos IA',pt:'Cenas curtas sem créditos de IA'}[lang]||'Short scenes without AI credits'));
+  addPractice(`<div class="story-grid-wrap"><div class="story-grid">${grid}</div></div>`);
 }
 function startStory(id){
   const story=STORIES.find(s=>s.id===id);
   if(!story)return;
+  const body=document.getElementById('practice-body');if(body)body.innerHTML='';
   storyState={story,scene:0,score:0};
   showScene();
 }
@@ -11152,9 +11225,8 @@ function showScene(){
     const pct=Math.round(storyState.score/total*100);
     const xp=storyState.score*5;
     addLocalXP(xp);bumpStat('tests');try{trackM('story');}catch(e){}
-    addMsg('bot',`<div class="story-end">
-      <div class="gg-title">${({ru:'📖 История завершена!',en:'📖 Story complete!',es:'📖 ¡Historia completada!',pt:'📖 História concluída!',de:'📖 Geschichte abgeschlossen!',fr:'📖 Histoire terminée !',uk:'📖 Історію завершено!',tr:'📖 Hikâye tamamlandı!',zh:'📖 故事完成！',ar:'📖 اكتملت القصة!'}[lang]||'📖 Story complete!')}</div>
-      <div style="font-size:32px;margin:12px 0">${pct>=80?'🏆':pct>=50?'👍':'💪'}</div>
+    addPractice(`<div class="story-end">
+      <div class="gg-title">${({ru:'История завершена',en:'Story complete',es:'Historia completada',pt:'História concluída',de:'Geschichte abgeschlossen',fr:'Histoire terminée',uk:'Історію завершено',tr:'Hikâye tamamlandı',zh:'故事完成',ar:'اكتملت القصة'}[lang]||'Story complete')}</div>
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${storyState.score}/${total} ${({ru:'лучших ответов',en:'best answers',es:'mejores respuestas',pt:'melhores respostas',de:'beste Antworten',fr:'meilleures réponses',uk:'найкращих відповідей',tr:'en iyi cevap',zh:'个最佳答案',ar:'أفضل الإجابات'}[lang]||'best answers')}</div>
       <div style="font-size:13px;color:var(--a)">+${xp} XP</div>
     </div>`);
@@ -11166,7 +11238,7 @@ function showScene(){
   const sid='ss-'+Date.now();
   const optHtml=sc.options.map((o,i)=>`<div class="story-opt" onclick="pickStoryOption('${sid}',${i})">${o}</div>`).join('');
   const desc=sc.text[lang]||sc.text.en;
-  addMsg('bot',`<div class="story-scene" id="${sid}">
+  addPractice(`<div class="story-scene" id="${sid}">
     <div style="font-size:13px;color:var(--t2);margin-bottom:8px">${desc}</div>
     <div style="font-size:14px;font-weight:600;margin-bottom:12px;line-height:1.5">${sc.prompt}</div>
     <div class="story-opts" id="${sid}-opts">${optHtml}</div>
@@ -11647,9 +11719,10 @@ function startDrill(topic){
   const bank=DRILL_BANKS[topic]||DRILL_BANKS.tenses;
   const questions=pickDrillQuestions(topic,bank,10);
   drillState={questions:questions,current:0,correct:0,total:questions.length,startTime:Date.now(),timeLimit:120,topic:topic};
-  goTab('chat',true);
   const meta=DRILL_TOPICS.find(t=>t.id===topic)||DRILL_TOPICS[0];
-  addMsg('bot','<div style="text-align:center;padding:8px 0"><div class="mini-type">'+(meta.name[lang]||meta.name.en)+'</div><div style="font-size:16px;font-weight:800">'+({ru:'Тренажёр',en:'Practice Drill',es:'Ejercicio rápido',pt:'Treino rápido',de:'Übungsdrill',fr:'Exercice rapide',uk:'Тренажер',tr:'Pratik turu',zh:'快速练习',ar:'تدريب سريع'}[lang]||'Practice Drill')+'</div><div style="font-size:12px;color:var(--t2)">'+drillState.total+' '+({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'запитань',tr:'soru',zh:'题',ar:'أسئلة'}[lang]||'questions')+' - 2 min</div></div>');
+  const title=meta.name[lang]||meta.name.en;
+  const sub=drillState.total+' '+({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'запитань',tr:'soru',zh:'题',ar:'أسئلة'}[lang]||'questions')+' - 2 min';
+  openPracticeShell(title,sub);
   setTimeout(showDrillQ,600);
 }
 function showDrillQ(){
@@ -11659,7 +11732,7 @@ function showDrillQ(){
   var q=s.questions[s.current],did='dq'+Date.now(),pct=Math.round(remaining/s.timeLimit*100);
   var opts='';for(var i=0;i<q.o.length;i++)opts+='<div class="drill-opt" data-i="'+i+'" data-a="'+q.a+'" data-did="'+did+'">'+q.o[i]+'</div>';
   const typeLabel={time:{ru:'Который час?',en:'What time is it?',es:'¿Qué hora es?',pt:'Que horas são?',de:'Wie spät ist es?',fr:'Quelle heure est-il ?',uk:'Котра година?',tr:'Saat kaç?',zh:'几点了？',ar:'كم الساعة؟'},order:{ru:'Порядок слов',en:'Word order',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung',fr:'Ordre des mots',uk:'Порядок слів',tr:'Kelime sırası',zh:'词序',ar:'ترتيب الكلمات'},gap:{ru:'Вставь слово',en:'Fill the gap',es:'Completa el hueco',pt:'Preencha a lacuna',de:'Lücke füllen',fr:'Complète le trou',uk:'Встав слово',tr:'Boşluğu doldur',zh:'填空',ar:'املأ الفراغ'},translate:{ru:'Выбери естественный перевод',en:'Choose the natural translation',es:'Elige la traducción natural',pt:'Escolha a tradução natural',de:'Wähle die natürliche Übersetzung',fr:'Choisis la traduction naturelle',uk:'Обери природний переклад',tr:'Doğal çeviriyi seç',zh:'选择自然的翻译',ar:'اختر الترجمة الطبيعية'}}[q.type]||{ru:'Выбери ответ',en:'Choose the answer',es:'Elige la respuesta',pt:'Escolha a resposta',de:'Wähle die Antwort',fr:'Choisis la réponse',uk:'Обери відповідь',tr:'Cevabı seç',zh:'选择答案',ar:'اختر الإجابة'};
-  addMsg('bot','<div id="'+did+'"><div class="drill-timer"><div class="drill-timer-bar"><div class="drill-timer-fill" style="width:'+pct+'%"></div></div><div class="drill-timer-text">'+remaining+'s</div><div class="drill-score">'+s.correct+'/'+s.current+'</div></div><div class="drill-num">'+(s.current+1)+'/'+s.total+'</div><div class="mini-type">'+(typeLabel[lang]||typeLabel.en)+'</div><div class="drill-q">'+q.q+'</div><div class="drill-opts">'+opts+'</div></div>');
+  setPractice('<div id="'+did+'"><div class="drill-timer"><div class="drill-timer-bar"><div class="drill-timer-fill" style="width:'+pct+'%"></div></div><div class="drill-timer-text">'+remaining+'s</div><div class="drill-score">'+s.correct+'/'+s.current+'</div></div><div class="drill-num">'+(s.current+1)+'/'+s.total+'</div><div class="mini-type">'+(typeLabel[lang]||typeLabel.en)+'</div><div class="drill-q">'+q.q+'</div><div class="drill-opts">'+opts+'</div></div>');
   document.querySelectorAll('#'+did+' .drill-opt').forEach(function(el){el.onclick=function(){drillAnswer(did,parseInt(el.dataset.i),parseInt(el.dataset.a));};});
 }
 function drillAnswer(did,picked,correct){
@@ -11682,7 +11755,7 @@ function finishDrill(){
   const upgrade=!hasTier('basic')
     ? `<button class="course-ai" onclick="showTierPaywall('basic','${({ru:'AI-разбор ошибок',en:'AI mistake review',es:'Análisis de errores con IA',pt:'Análise de erros com IA',de:'KI-Fehleranalyse',fr:'Analyse des erreurs par IA',uk:'AI-розбір помилок',tr:'AI hata analizi',zh:'AI 错误分析',ar:'تحليل الأخطاء بالذكاء الاصطناعي'}[lang]||'AI mistake review')}')">${({ru:'Разобрать ошибки с AI',en:'Review mistakes with AI',es:'Analizar errores con IA',pt:'Revisar erros com IA',de:'Fehler mit KI durchgehen',fr:'Revoir les erreurs avec l’IA',uk:'Розібрати помилки з AI',tr:'Hataları AI ile incele',zh:'用 AI 复盘错误',ar:'راجع الأخطاء بالذكاء الاصطناعي'}[lang]||'Review mistakes with AI')}</button>`
     : '';
-  addMsg('bot','<div class="drill-result"><div class="drill-result-score">'+(pct>=90?'🏆':pct>=70?'🎯':pct>=50?'💪':'📚')+' '+c+'/'+t+'</div><div class="drill-result-label">'+pct+'% - +'+xp+' XP</div>'+upgrade+'</div>');
+  setPractice('<div class="drill-result"><div class="drill-result-score">'+c+'/'+t+'</div><div class="drill-result-label">'+pct+'% - +'+xp+' XP</div>'+upgrade+'</div>');
   try{addLocalXP(xp);bumpStat('tests');trackPerformance(drillState.topic||'tenses',c,t);trackM('drill');}catch(e){}
   drillState=null;
 }
