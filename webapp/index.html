@@ -3386,7 +3386,7 @@ function pickModel(m){
   try{sfx.tap();}catch(e){}haptic('light');
   updateChatModelStrip();
   const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
-  toast((lang==='ru'?'Модель: ':'Model: ')+names[m],'⚙️');
+  toast(({ru:'Модель: ',en:'Model: ',es:'Modelo: ',pt:'Modelo: ',de:'Modell: ',fr:'Modèle : ',uk:'Модель: ',tr:'Model: ',zh:'模型：',ar:'النموذج: '}[lang]||'Model: ')+names[m],'⚙️');
 }
 function selectModel(m){
   pickModel(m);
@@ -3855,11 +3855,11 @@ function renderProgress(d){
   const pxp=document.getElementById('pxp');if(pxp)animateCount(pxp,d.xp||0,900,' XP total');
   const pbc=document.getElementById('pbc');if(pbc)animateCount(pbc,d.xp||0,900,' XP');
   if(hasTier('basic')){const e=document.getElementById('psess');if(e)e.classList.remove('premium-mask');animateCount(e,d.sessions||0,700);}
-  else{const e=document.getElementById('psess');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
+  else{const e=document.getElementById('psess');if(e){e.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');e.classList.add('premium-mask');}}
   animateCount(document.getElementById('pwrds'),d.words||0,700);
   animateCount(document.getElementById('ptsts'),d.tests||0,700);
   if(hasTier('basic')){const e=document.getElementById('perrs');if(e)e.classList.remove('premium-mask');animateCount(e,d.errors||0,700);}
-  else{const e=document.getElementById('perrs');if(e){e.textContent=lang==='ru'?'Подписка':'Subscription';e.classList.add('premium-mask');}}
+  else{const e=document.getElementById('perrs');if(e){e.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');e.classList.add('premium-mask');}}
   const pbm=document.getElementById('pbm');if(pbm)pbm.textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
   try{renderGrowth(d);}catch(_){}
   renderInterests(d.interests||[]);
@@ -3882,8 +3882,8 @@ function drawProgress(){
     ['psess','perrs'].forEach(id=>document.getElementById(id)?.classList.remove('premium-mask'));
     safe('psess',sess); safe('perrs',errors);
   }else{
-    const se=document.getElementById('psess');if(se){se.textContent=lang==='ru'?'Подписка':'Subscription';se.classList.add('premium-mask');}
-    const er=document.getElementById('perrs');if(er){er.textContent=lang==='ru'?'Подписка':'Subscription';er.classList.add('premium-mask');}
+    const se=document.getElementById('psess');if(se){se.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');se.classList.add('premium-mask');}
+    const er=document.getElementById('perrs');if(er){er.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');er.classList.add('premium-mask');}
   }
   safe('pwrds',words); safe('ptsts',tests);
 
@@ -3931,7 +3931,7 @@ function drawProgress(){
   if(w.reduce((a,b)=>a+b,0)===0&&chartCard){
     const empty=document.createElement('div');
     empty.className='chart-empty';
-    empty.textContent=lang==='ru'?'Первые XP этой недели появятся здесь':'This week’s first XP will appear here';
+    empty.textContent=({ru:'Первые XP этой недели появятся здесь',en:'This week’s first XP will appear here',es:'Tus primeros XP de esta semana aparecerán aquí',pt:'Os primeiros XP da semana aparecerão aqui',de:'Die ersten XP dieser Woche erscheinen hier',fr:'Tes premiers XP de la semaine apparaîtront ici',uk:'Перші XP цього тижня з’являться тут',tr:'Bu haftanın ilk XP’si burada görünecek',zh:'本周首批 XP 会出现在这里',ar:'ستظهر أول نقاط XP لهذا الأسبوع هنا'}[lang]||'This week’s first XP will appear here');
     chartCard.appendChild(empty);
   }
   w.forEach((v,i)=>{
@@ -3959,14 +3959,14 @@ function alexLockedCard(title,sub,feature){
   return `<div class="alex-locked">
     <div class="alex-lock-ico"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 00-5 5v3H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V8a5 5 0 00-5-5Z"/><path d="M9 11V8a3 3 0 016 0v3"/><path d="M12 15v2"/></svg></div>
     <div class="alex-lock-main"><div class="alex-lock-title">${safeHTML(title)}</div><div class="alex-lock-sub">${safeHTML(sub)}</div>
-    <button class="alex-lock-btn" onclick="showTierPaywall('basic','${feature||'ALEX'}')">${lang==='ru'?'Выбрать подписку':'Choose plan'}</button></div>
+    <button class="alex-lock-btn" onclick="showTierPaywall('basic','${feature||'ALEX'}')">${({ru:'Выбрать подписку',en:'Choose plan',es:'Elegir plan',pt:'Escolher plano',de:'Plan wählen',fr:'Choisir un plan',uk:'Обрати підписку',tr:'Plan seç',zh:'选择订阅',ar:'اختر اشتراكًا'}[lang]||'Choose plan')}</button></div>
   </div>`;
 }
 function renderInterests(ints){
   const w=document.getElementById('intwrap');if(!w)return;
   const edit=document.getElementById('int-edit-lbl');
   if(!hasTier('basic')){
-    if(edit)edit.textContent=lang==='ru'?'Подписка':'Subscription';
+    if(edit)edit.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');
     w.innerHTML=alexLockedCard(
       lang==='ru'?'Персональные интересы ALEX':'ALEX personal context',
       lang==='ru'?'Расскажи о себе один раз, и ALEX будет подбирать примеры, задания и объяснения под тебя. Доступно с любой подпиской.':'Tell ALEX about yourself once, and it will adapt examples, tasks and explanations to you. Available with any subscription.',
@@ -4033,7 +4033,7 @@ function bumpStat(key,delta=1){
   const idMap={sessions:'psess',words:'pwrds',tests:'ptsts',errors:'perrs'};
   const el=document.getElementById(idMap[key]);
   if(el){
-    if((key==='sessions'||key==='errors')&&!hasTier('basic')){el.textContent=lang==='ru'?'Подписка':'Subscription';el.classList.add('premium-mask');}
+    if((key==='sessions'||key==='errors')&&!hasTier('basic')){el.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');el.classList.add('premium-mask');}
     else{el.textContent=s[key];el.classList.remove('premium-mask');}
   }
   // Also update home stats
@@ -4159,7 +4159,7 @@ function animateStreakComplete(streak){
   const old=document.querySelector('.streak-toast');if(old)old.remove();
   const t=document.createElement('div');
   t.className='streak-toast';
-  t.innerHTML=(lang==='ru'?'Стрик продлён':'Streak extended')+'<small>'+streak+' '+({ru:'дней подряд',en:'days in a row',es:'días seguidos',pt:'dias seguidos'}[lang]||'days in a row')+'</small>';
+  t.innerHTML=({ru:'Стрик продлён',en:'Streak extended',es:'Racha ampliada',pt:'Sequência mantida',de:'Streak verlängert',fr:'Streak prolongé',uk:'Стрік продовжено',tr:'Seri uzatıldı',zh:'连胜延续',ar:'تم تمديد السلسلة'}[lang]||'Streak extended')+'<small>'+streak+' '+({ru:'дней подряд',en:'days in a row',es:'días seguidos',pt:'dias seguidos',de:'Tage in Folge',fr:'jours d’affilée',uk:'днів поспіль',tr:'gün üst üste',zh:'天连续',ar:'يوم متتالي'}[lang]||'days in a row')+'</small>';
   document.body.appendChild(t);
   setTimeout(()=>t.remove(),1900);
   try{sfx.level();}catch(e){}
@@ -4244,19 +4244,19 @@ function renderSList(){
   if(starred.length){
     const h=document.createElement('div');h.className='s-section-header';
     const starSvg=`<svg viewBox="0 0 14 14" fill="rgba(255,184,48,.4)" stroke="#ffb830" stroke-width="1.2" stroke-linecap="round" style="width:12px;height:12px;vertical-align:middle;margin-right:5px"><polygon points="7 1 8.9 5.5 13.5 5.5 9.8 8.5 11.1 13 7 10.2 2.9 13 4.2 8.5 0.5 5.5 5.1 5.5"/></svg>`;
-    h.innerHTML=starSvg+(lang==='ru'?'Избранные':'Starred');
+    h.innerHTML=starSvg+({ru:'Избранные',en:'Starred',es:'Destacados',pt:'Favoritos',de:'Favoriten',fr:'Favoris',uk:'Обрані',tr:'Favoriler',zh:'收藏',ar:'المفضلة'}[lang]||'Starred');
     ul.appendChild(h);
     starred.forEach(s=>ul.appendChild(makeItem(s)));
   }
   if(recents.length){
     const h=document.createElement('div');h.className='s-section-header';
-    h.textContent=lang==='ru'?'Недавние':'Recents';
+    h.textContent=({ru:'Недавние',en:'Recents',es:'Recientes',pt:'Recentes',de:'Zuletzt',fr:'Récents',uk:'Нещодавні',tr:'Son',zh:'最近',ar:'الأخيرة'}[lang]||'Recents');
     ul.appendChild(h);
     recents.forEach(s=>ul.appendChild(makeItem(s)));
   }
   if(!sessions.length){
     const e=document.createElement('div');e.className='s-section-empty';
-    e.textContent=lang==='ru'?'Нет бесед. Нажми + чтобы начать.':'No chats yet. Tap + to start.';
+    e.textContent=({ru:'Нет бесед. Нажми + чтобы начать.',en:'No chats yet. Tap + to start.',es:'Sin chats aún. Toca + para empezar.',pt:'Ainda sem conversas. Toque em + para começar.',de:'Noch keine Chats. Tippe + zum Starten.',fr:'Aucune conversation. Touche + pour commencer.',uk:'Поки немає бесід. Натисни +, щоб почати.',tr:'Henüz sohbet yok. Başlamak için + tuşuna dokun.',zh:'还没有对话。点击 + 开始。',ar:'لا توجد محادثات بعد. اضغط + للبدء.'}[lang]||'No chats yet. Tap + to start.');
     ul.appendChild(e);
   }
 }
@@ -4270,8 +4270,8 @@ function openSCtx(id,e){
   const ov=document.getElementById('sctx-overlay');
   const isStarred=s.starred;
   const starLabel=lang==='ru'?(isStarred?'Убрать из избранного':'В избранное'):(isStarred?'Unstar':'Star');
-  const renameLabel=lang==='ru'?'Переименовать':'Rename';
-  const deleteLabel=lang==='ru'?'Удалить':'Delete';
+  const renameLabel=({ru:'Переименовать',en:'Rename',es:'Renombrar',pt:'Renomear',de:'Umbenennen',fr:'Renommer',uk:'Перейменувати',tr:'Yeniden adlandır',zh:'重命名',ar:'إعادة تسمية'}[lang]||'Rename');
+  const deleteLabel=({ru:'Удалить',en:'Delete',es:'Eliminar',pt:'Excluir',de:'Löschen',fr:'Supprimer',uk:'Видалити',tr:'Sil',zh:'删除',ar:'حذف'}[lang]||'Delete');
   menu.innerHTML=`
     <div class="sctx-item" onclick="starSes(${id})">
       <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -4307,9 +4307,9 @@ function openRenameModal(id){
   closeSCtx();ctxSid=id;
   const s=getSes(id);if(!s)return;
   const inp=document.getElementById('rename-inp');if(inp)inp.value=s.title;
-  const t=document.getElementById('rename-mtit');if(t)t.textContent=lang==='ru'?'Переименовать':'Rename';
-  const sv=document.getElementById('rename-sav');if(sv)sv.textContent=lang==='ru'?'Сохранить':'Save';
-  const cn=document.getElementById('rename-can');if(cn)cn.textContent=lang==='ru'?'Отмена':'Cancel';
+  const t=document.getElementById('rename-mtit');if(t)t.textContent=({ru:'Переименовать',en:'Rename',es:'Renombrar',pt:'Renomear',de:'Umbenennen',fr:'Renommer',uk:'Перейменувати',tr:'Yeniden adlandır',zh:'重命名',ar:'إعادة تسمية'}[lang]||'Rename');
+  const sv=document.getElementById('rename-sav');if(sv)sv.textContent=({ru:'Сохранить',en:'Save',es:'Guardar',pt:'Salvar',de:'Speichern',fr:'Enregistrer',uk:'Зберегти',tr:'Kaydet',zh:'保存',ar:'حفظ'}[lang]||'Save');
+  const cn=document.getElementById('rename-can');if(cn)cn.textContent=({ru:'Отмена',en:'Cancel',es:'Cancelar',pt:'Cancelar',de:'Abbrechen',fr:'Annuler',uk:'Скасувати',tr:'İptal',zh:'取消',ar:'إلغاء'}[lang]||'Cancel');
   openMod('renamem');
   setTimeout(()=>document.getElementById('rename-inp')?.focus(),300);
 }
@@ -4595,30 +4595,36 @@ function openChat(topic){
     return;
   }
   if(!hasChatAccess()){showChatPaywall();return;}
+  /* Chip-driven prompts to ALEX — localised in interface language so
+     the user sees their own bubble in their native tongue. ALEX has
+     its own reply-language setting independent of this. */
+  const _p=function(map){return map[lang]||map.en;};
   const P={
-    lesson:    lang==='ru'?'Дай урок грамматики.':'Teach me a grammar lesson.',
-    toefl:     lang==='ru'?'Дай упражнение TOEFL.':'Give me a TOEFL exercise.',
-    speaking:  lang==='ru'?'Давай практиковать разговор.':"Let's practice speaking English.",
-    words_new: lang==='ru'?'Научи меня 5 новым словам.':'Teach me 5 new useful words.',
-    fun_fact:  lang==='ru'?'Интересный факт об английском.':'Tell me an interesting English fact.',
-    mistakes:  lang==='ru'?'Разбери мои типичные ошибки и дай упражнение для исправления.':'Analyze my common mistakes and give me a targeted exercise to fix them.',
-    interests_add: lang==='ru'?'Хочу рассказать о своих интересах.':'I want to tell you about my interests.',
-    explain_simple: lang==='ru'?'Объясни мне как ребёнку последнее правило грамматики. Используй простые примеры.':'Explain the last grammar topic to me like I\'m 5 years old. Use very simple examples.',
+    lesson:    _p({ru:'Дай урок грамматики.',en:'Teach me a grammar lesson.',es:'Dame una lección de gramática.',pt:'Me dê uma lição de gramática.',de:'Gib mir eine Grammatikstunde.',fr:'Donne-moi un cours de grammaire.',uk:'Дай урок граматики.',tr:'Bana dilbilgisi dersi ver.',zh:'给我一节语法课。',ar:'أعطني درس قواعد.'}),
+    toefl:     _p({ru:'Дай упражнение TOEFL.',en:'Give me a TOEFL exercise.',es:'Dame un ejercicio de TOEFL.',pt:'Me dê um exercício de TOEFL.',de:'Gib mir eine TOEFL-Übung.',fr:'Donne-moi un exercice TOEFL.',uk:'Дай вправу TOEFL.',tr:'Bana TOEFL alıştırması ver.',zh:'给我一道 TOEFL 题。',ar:'أعطني تمرين TOEFL.'}),
+    speaking:  _p({ru:'Давай практиковать разговор.',en:"Let's practice speaking English.",es:'Practiquemos conversación.',pt:'Vamos praticar conversação.',de:'Lass uns Sprechen üben.',fr:'Pratiquons la conversation.',uk:'Давай попрактикуємо розмову.',tr:'Konuşma pratiği yapalım.',zh:'我们来练习口语吧。',ar:'لنتدرب على المحادثة.'}),
+    words_new: _p({ru:'Научи меня 5 новым словам.',en:'Teach me 5 new useful words.',es:'Enséñame 5 palabras nuevas útiles.',pt:'Me ensine 5 palavras novas úteis.',de:'Bring mir 5 neue nützliche Wörter bei.',fr:'Apprends-moi 5 nouveaux mots utiles.',uk:'Навчи мене 5 нових корисних слів.',tr:'Bana 5 yeni faydalı kelime öğret.',zh:'教我 5 个实用新词。',ar:'علّمني 5 كلمات جديدة مفيدة.'}),
+    fun_fact:  _p({ru:'Интересный факт об английском.',en:'Tell me an interesting English fact.',es:'Cuéntame un dato curioso del inglés.',pt:'Me conte um fato curioso do inglês.',de:'Erzähl mir einen interessanten Fakt über Englisch.',fr:'Raconte-moi un fait intéressant sur l’anglais.',uk:'Розкажи цікавий факт про англійську.',tr:'İngilizce hakkında ilginç bir bilgi ver.',zh:'告诉我一个英语小知识。',ar:'أخبرني بمعلومة طريفة عن الإنجليزية.'}),
+    mistakes:  _p({ru:'Разбери мои типичные ошибки и дай упражнение.',en:'Analyze my common mistakes and give me a targeted exercise.',es:'Analiza mis errores frecuentes y dame un ejercicio.',pt:'Analise meus erros comuns e me dê um exercício.',de:'Analysiere meine typischen Fehler und gib mir eine gezielte Übung.',fr:'Analyse mes erreurs fréquentes et donne-moi un exercice ciblé.',uk:'Розбери мої типові помилки і дай вправу.',tr:'Sık yaptığım hataları analiz et ve bana özel bir alıştırma ver.',zh:'分析我的常见错误并给我针对性练习。',ar:'حلّل أخطائي الشائعة وأعطني تمرينًا مركّزًا.'}),
+    interests_add: _p({ru:'Хочу рассказать о своих интересах.',en:'I want to tell you about my interests.',es:'Quiero contarte sobre mis intereses.',pt:'Quero falar sobre meus interesses.',de:'Ich möchte dir von meinen Interessen erzählen.',fr:'Je veux te parler de mes centres d’intérêt.',uk:'Хочу розповісти про свої інтереси.',tr:'İlgi alanlarımı anlatmak istiyorum.',zh:'我想说说我的兴趣爱好。',ar:'أريد أن أخبرك عن اهتماماتي.'}),
+    explain_simple: _p({ru:'Объясни последнее правило грамматики максимально просто, с простыми примерами.',en:"Explain the last grammar topic as simply as possible, with very simple examples.",es:'Explica el último tema de gramática lo más simple posible, con ejemplos sencillos.',pt:'Explique o último tópico de gramática o mais simples possível, com exemplos fáceis.',de:'Erkläre das letzte Grammatikthema so einfach wie möglich, mit ganz einfachen Beispielen.',fr:'Explique la dernière règle de grammaire le plus simplement possible, avec des exemples très simples.',uk:'Поясни останнє правило граматики максимально просто, із простими прикладами.',tr:'Son dilbilgisi konusunu mümkün olduğunca basit, çok basit örneklerle açıkla.',zh:'用最简单的方式解释上一个语法点，配简单的例子。',ar:'اشرح آخر قاعدة قواعدية بأبسط شكل ممكن وبأمثلة بسيطة جدًا.'}),
   };
   goTab('chat');if(P[topic]&&!busy)setTimeout(()=>sendChip(P[topic]),150);
 }
 function quickHintChips(){
-  const labels=lang==='ru'
-    ?[
-      ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0','О ALEX'],
-      ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16','Грамматика'],
-      ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z','Проверка']
-    ]
-    :[
-      ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0','About ALEX'],
-      ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16','Grammar'],
-      ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z','Text check']
-    ];
+  /* Welcome quick-action chips. The prompt sent to ALEX stays in
+     English (English is what users are practising); the chip label
+     is localised across all 10 interface languages. */
+  const lbl={
+    about:({ru:'О ALEX',en:'About ALEX',es:'Sobre ALEX',pt:'Sobre o ALEX',de:'Über ALEX',fr:'À propos d’ALEX',uk:'Про ALEX',tr:'ALEX hakkında',zh:'关于 ALEX',ar:'عن ALEX'}[lang]||'About ALEX'),
+    grammar:({ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'}[lang]||'Grammar'),
+    check:({ru:'Проверка',en:'Text check',es:'Revisar texto',pt:'Revisar texto',de:'Textprüfung',fr:'Vérification',uk:'Перевірка',tr:'Metin kontrolü',zh:'文本检查',ar:'فحص النص'}[lang]||'Text check')
+  };
+  const labels=[
+    ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0',lbl.about],
+    ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16',lbl.grammar],
+    ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z',lbl.check]
+  ];
   return `<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:5px">${labels.map(x=>`<button class="chip chip-smart" onclick="sendChip('${safeHTML(x[0])}')"><svg viewBox="0 0 24 24"><path d="${x[1]}"/></svg>${safeHTML(x[2])}</button>`).join('')}</div>`;
 }
 
@@ -9559,7 +9565,7 @@ function renderErrorDiary(){
   const lbl=document.getElementById('errdiary-lbl');
   const cta=document.getElementById('errdiary-cta');
   if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary',es:'Diario de errores',de:'Fehlertagebuch',fr:'Journal des erreurs',pt:'Diário de erros',uk:'Щоденник помилок',tr:'Hata günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Error Diary';
-  if(cta)cta.textContent=hasTier('basic')?({ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →'):(lang==='ru'?'Подписка':'Subscription');
+  if(cta)cta.textContent=hasTier('basic')?({ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →'):(({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription'));
   if(!wrap)return;
   if(!hasTier('basic')){
     wrap.innerHTML=alexLockedCard(
@@ -11566,17 +11572,49 @@ function pickDrillQuestions(topic,bank,count){
 }
 
 // Drill topic metadata for picker
+/* Drill topics — 10 languages each. Descriptions use natural phrasing
+   per language (no literal word-for-word transfers). New topics added:
+   conditionals, irregular verbs, modals. */
 const DRILL_TOPICS=[
-  {id:'tenses',icon:'⏰',color:'#4f8aff',name:{ru:'Времена',en:'Tenses'},desc:{ru:'Present, Past, Future',en:'Present, Past, Future'}},
-  {id:'articles',icon:'📰',color:'#2ecc71',name:{ru:'Артикли',en:'Articles'},desc:{ru:'a, an, the',en:'a, an, the'}},
-  {id:'prepositions',icon:'📍',color:'#e74c3c',name:{ru:'Предлоги',en:'Prepositions'},desc:{ru:'at, in, on, to',en:'at, in, on, to'}},
-  {id:'phrasal_verbs',icon:'🔗',color:'#ffb830',name:{ru:'Фразовые глаголы',en:'Phrasal Verbs'},desc:{ru:'take off, give up...',en:'take off, give up...'}},
-  {id:'collocations',icon:'🤝',color:'#a78bfa',name:{ru:'Словосочетания',en:'Collocations'},desc:{ru:'make/do/take',en:'make/do/take'}},
-  {id:'word_formation',icon:'🔤',color:'#f472b6',name:{ru:'Словообразование',en:'Word Formation'},desc:{ru:'decide → decision',en:'decide → decision'}},
-  {id:'time_practice',icon:'🕒',color:'#00d4aa',name:{ru:'Время',en:'Time'},desc:{ru:'8:15, quarter past...',en:'8:15, quarter past...'}},
-  {id:'sentence_order',icon:'↔️',color:'#4f8aff',name:{ru:'Порядок слов',en:'Word Order'},desc:{ru:'собери предложение',en:'build the sentence'}},
-  {id:'gap_fill',icon:'▣',color:'#ff6b6b',name:{ru:'Пропуски',en:'Gap Fill'},desc:{ru:'вставь нужное слово',en:'insert the right word'}},
-  {id:'translation_chunks',icon:'⇄',color:'#9b59b6',name:{ru:'Перевод фраз',en:'Phrase Translation'},desc:{ru:'без дословности',en:'natural chunks'}},
+  {id:'tenses',icon:'⏰',color:'#4f8aff',
+    name:{ru:'Времена',en:'Tenses',es:'Tiempos verbales',pt:'Tempos verbais',de:'Zeitformen',fr:'Temps verbaux',uk:'Часи',tr:'Zamanlar',zh:'时态',ar:'الأزمنة'},
+    desc:{ru:'Present, Past, Future',en:'Present, Past, Future',es:'Present, Past, Future',pt:'Present, Past, Future',de:'Present, Past, Future',fr:'Present, Past, Future',uk:'Present, Past, Future',tr:'Present, Past, Future',zh:'现在 · 过去 · 将来',ar:'الحاضر والماضي والمستقبل'}},
+  {id:'articles',icon:'📰',color:'#2ecc71',
+    name:{ru:'Артикли',en:'Articles',es:'Artículos',pt:'Artigos',de:'Artikel',fr:'Articles',uk:'Артиклі',tr:'Artikeller',zh:'冠词',ar:'أدوات التعريف'},
+    desc:{ru:'когда a, an, the',en:'when to use a, an, the',es:'cuándo usar a, an, the',pt:'quando usar a, an, the',de:'wann a, an, the',fr:'quand utiliser a, an, the',uk:'коли a, an, the',tr:'a, an, the ne zaman',zh:'a, an, the 何时用',ar:'متى تستخدم a, an, the'}},
+  {id:'prepositions',icon:'📍',color:'#e74c3c',
+    name:{ru:'Предлоги',en:'Prepositions',es:'Preposiciones',pt:'Preposições',de:'Präpositionen',fr:'Prépositions',uk:'Прийменники',tr:'Edatlar',zh:'介词',ar:'حروف الجر'},
+    desc:{ru:'at, in, on, to и другие',en:'at, in, on, to and more',es:'at, in, on, to y otras',pt:'at, in, on, to e outras',de:'at, in, on, to und mehr',fr:'at, in, on, to et d’autres',uk:'at, in, on, to та інші',tr:'at, in, on, to ve diğerleri',zh:'at, in, on, to 等',ar:'at, in, on, to وأخرى'}},
+  {id:'phrasal_verbs',icon:'🔗',color:'#ffb830',
+    name:{ru:'Фразовые глаголы',en:'Phrasal Verbs',es:'Verbos compuestos',pt:'Verbos frasais',de:'Phrasal Verbs',fr:'Verbes à particule',uk:'Фразові дієслова',tr:'Phrasal verbler',zh:'短语动词',ar:'الأفعال المركبة'},
+    desc:{ru:'take off, give up, look forward to',en:'take off, give up, look forward to',es:'take off, give up, look forward to',pt:'take off, give up, look forward to',de:'take off, give up, look forward to',fr:'take off, give up, look forward to',uk:'take off, give up, look forward to',tr:'take off, give up, look forward to',zh:'take off, give up, look forward to',ar:'take off, give up, look forward to'}},
+  {id:'collocations',icon:'🤝',color:'#a78bfa',
+    name:{ru:'Словосочетания',en:'Collocations',es:'Colocaciones',pt:'Colocações',de:'Kollokationen',fr:'Collocations',uk:'Сполучення',tr:'Eş dizimler',zh:'搭配',ar:'المتلازمات اللفظية'},
+    desc:{ru:'make / do / take',en:'make / do / take',es:'make / do / take',pt:'make / do / take',de:'make / do / take',fr:'make / do / take',uk:'make / do / take',tr:'make / do / take',zh:'make / do / take',ar:'make / do / take'}},
+  {id:'word_formation',icon:'🔤',color:'#f472b6',
+    name:{ru:'Словообразование',en:'Word Formation',es:'Formación de palabras',pt:'Formação de palavras',de:'Wortbildung',fr:'Formation de mots',uk:'Словотвір',tr:'Kelime türetme',zh:'构词',ar:'تكوين الكلمات'},
+    desc:{ru:'decide → decision',en:'decide → decision',es:'decide → decision',pt:'decide → decision',de:'decide → decision',fr:'decide → decision',uk:'decide → decision',tr:'decide → decision',zh:'decide → decision',ar:'decide → decision'}},
+  {id:'time_practice',icon:'🕒',color:'#00d4aa',
+    name:{ru:'Время',en:'Telling Time',es:'La hora',pt:'As horas',de:'Uhrzeit',fr:'L’heure',uk:'Час',tr:'Saatler',zh:'时间表达',ar:'الوقت'},
+    desc:{ru:'8:15, quarter past, half to',en:'8:15, quarter past, half to',es:'8:15, quarter past, half to',pt:'8:15, quarter past, half to',de:'8:15, quarter past, half to',fr:'8:15, quarter past, half to',uk:'8:15, quarter past, half to',tr:'8:15, quarter past, half to',zh:'8:15, quarter past, half to',ar:'8:15, quarter past, half to'}},
+  {id:'sentence_order',icon:'↔️',color:'#4f8aff',
+    name:{ru:'Порядок слов',en:'Word Order',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung',fr:'Ordre des mots',uk:'Порядок слів',tr:'Sözcük dizimi',zh:'语序',ar:'ترتيب الكلمات'},
+    desc:{ru:'собери предложение',en:'build the sentence',es:'arma la oración',pt:'monte a frase',de:'Satz zusammenbauen',fr:'construis la phrase',uk:'склади речення',tr:'cümleyi kur',zh:'组合句子',ar:'كوّن الجملة'}},
+  {id:'gap_fill',icon:'▣',color:'#ff6b6b',
+    name:{ru:'Пропуски',en:'Gap Fill',es:'Rellenar huecos',pt:'Preencher lacunas',de:'Lückentext',fr:'Texte à trous',uk:'Заповни пропуски',tr:'Boşluk doldurma',zh:'填空',ar:'املأ الفراغ'},
+    desc:{ru:'вставь нужное слово',en:'pick the right word',es:'elige la palabra correcta',pt:'escolha a palavra certa',de:'wähle das richtige Wort',fr:'choisis le bon mot',uk:'обери правильне слово',tr:'doğru kelimeyi seç',zh:'选出正确的词',ar:'اختر الكلمة الصحيحة'}},
+  {id:'translation_chunks',icon:'⇄',color:'#9b59b6',
+    name:{ru:'Перевод фраз',en:'Phrase Translation',es:'Traducir frases',pt:'Traduzir frases',de:'Phrasen übersetzen',fr:'Traduire des phrases',uk:'Переклад фраз',tr:'Cümle çevirisi',zh:'短语翻译',ar:'ترجمة العبارات'},
+    desc:{ru:'без дословности',en:'natural, not literal',es:'natural, no literal',pt:'natural, não literal',de:'natürlich, nicht wörtlich',fr:'naturel, pas littéral',uk:'природно, не дослівно',tr:'doğal, kelime kelime değil',zh:'自然不直译',ar:'طبيعي وليس حرفي'}},
+  {id:'conditionals',icon:'⇆',color:'#06b6d4',
+    name:{ru:'Условные',en:'Conditionals',es:'Condicionales',pt:'Condicionais',de:'Konditionalsätze',fr:'Conditionnels',uk:'Умовні',tr:'Şart cümleleri',zh:'条件句',ar:'الجمل الشرطية'},
+    desc:{ru:'if / unless / would',en:'if / unless / would',es:'if / unless / would',pt:'if / unless / would',de:'if / unless / would',fr:'if / unless / would',uk:'if / unless / would',tr:'if / unless / would',zh:'if / unless / would',ar:'if / unless / would'}},
+  {id:'irregular_verbs',icon:'⚡',color:'#f59e0b',
+    name:{ru:'Неправильные глаголы',en:'Irregular Verbs',es:'Verbos irregulares',pt:'Verbos irregulares',de:'Unregelmäßige Verben',fr:'Verbes irréguliers',uk:'Неправильні дієслова',tr:'Düzensiz fiiller',zh:'不规则动词',ar:'الأفعال الشاذة'},
+    desc:{ru:'go → went → gone',en:'go → went → gone',es:'go → went → gone',pt:'go → went → gone',de:'go → went → gone',fr:'go → went → gone',uk:'go → went → gone',tr:'go → went → gone',zh:'go → went → gone',ar:'go → went → gone'}},
+  {id:'modals',icon:'◐',color:'#8b5cf6',
+    name:{ru:'Модальные',en:'Modal Verbs',es:'Verbos modales',pt:'Verbos modais',de:'Modalverben',fr:'Verbes modaux',uk:'Модальні',tr:'Yardımcı fiiller',zh:'情态动词',ar:'الأفعال الناقصة'},
+    desc:{ru:'can, must, should, might',en:'can, must, should, might',es:'can, must, should, might',pt:'can, must, should, might',de:'can, must, should, might',fr:'can, must, should, might',uk:'can, must, should, might',tr:'can, must, should, might',zh:'can, must, should, might',ar:'can, must, should, might'}},
 ];
 
 function openDrillPicker(){
