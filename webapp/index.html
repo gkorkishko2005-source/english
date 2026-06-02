@@ -1715,15 +1715,36 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .tc-mode.on{border-color:var(--a);background:rgba(var(--ar),.1);color:var(--a)}
 
 /* ══ ERROR DIARY ══ */
-.ed-week{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
-.ed-week-hdr{display:flex;align-items:center;gap:10px;padding:12px 15px;cursor:pointer}
-.ed-week-title{font-size:13px;font-weight:700;flex:1}
-.ed-count{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;background:rgba(255,107,107,.12);color:var(--rd)}
-.ed-row{display:flex;flex-direction:column;gap:2px;padding:10px 15px;border-top:1px solid var(--b1)}
-.ed-wrong{font-size:13px;font-weight:600;color:var(--rd);text-decoration:line-through}
-.ed-right{font-size:13px;font-weight:600;color:var(--a2)}
-.ed-exp{font-size:11px;color:var(--t3);margin-top:2px}
-.ed-empty{text-align:center;padding:24px;color:var(--t3);font-size:13px}
+.ed-week{background:rgba(255,255,255,.026);border:1px solid rgba(255,255,255,.05);border-radius:15px;margin-bottom:8px;overflow:hidden}
+.ed-week-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.ed-week-title{font-size:12.5px;font-weight:850;flex:1;color:var(--t1)}
+.ed-count{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:100px;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.14);color:var(--a)}
+.ed-row{display:flex;flex-direction:column;gap:4px;padding:11px 14px;border-top:1px solid rgba(255,255,255,.045);cursor:pointer;transition:background .15s}
+.ed-row:hover{background:rgba(255,255,255,.028)}
+.ed-wrong{font-size:12.5px;font-weight:760;color:#ff8b8b;text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:rgba(255,107,107,.5)}
+.ed-right{font-size:12.5px;font-weight:820;color:var(--a2)}
+.ed-exp{font-size:11px;color:rgba(148,163,184,.68);line-height:1.35;margin-top:1px}
+.ed-empty{text-align:center;padding:24px;color:var(--t3);font-size:12.5px;border:1px dashed rgba(255,255,255,.07);border-radius:15px;background:rgba(255,255,255,.018)}
+.ed-chat-card{display:grid;gap:12px;min-width:230px;max-width:100%;background:linear-gradient(145deg,rgba(var(--ar),.075),rgba(255,255,255,.025));border:1px solid rgba(var(--ar),.13);border-radius:16px;padding:14px}
+.ed-chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ed-chat-kicker{font-size:10px;font-weight:900;letter-spacing:.65px;text-transform:uppercase;color:var(--a);margin-bottom:3px}
+.ed-chat-title{font-size:15px;font-weight:900;color:var(--t1);letter-spacing:-.15px}
+.ed-chat-sub{font-size:11.5px;color:rgba(148,163,184,.72);line-height:1.4;margin-top:4px}
+.ed-chat-score{min-width:46px;text-align:center;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.03);border-radius:13px;padding:7px 8px}
+.ed-chat-score b{display:block;font-size:18px;color:var(--t1);line-height:1}
+.ed-chat-score span{display:block;font-size:9.5px;color:var(--t3);font-weight:800;text-transform:uppercase;margin-top:3px}
+.ed-chat-list{display:grid;gap:7px}
+.ed-chat-item{border:1px solid rgba(255,255,255,.045);background:rgba(255,255,255,.026);border-radius:12px;padding:9px 10px}
+.ed-chat-pair{display:grid;gap:3px;font-size:12px;line-height:1.35}
+.ed-chat-pair .bad{color:#ff8b8b;text-decoration:line-through;text-decoration-color:rgba(255,107,107,.45)}
+.ed-chat-pair .good{color:var(--a2);font-weight:820}
+.ed-chat-note{font-size:10.5px;color:rgba(148,163,184,.64);line-height:1.35;margin-top:5px}
+.ed-chat-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ed-chat-tag{font-size:10px;color:rgba(148,163,184,.76);font-weight:800;border:1px solid rgba(255,255,255,.045);background:rgba(255,255,255,.026);border-radius:999px;padding:4px 7px}
+.ed-chat-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ed-chat-btn{border:1px solid rgba(var(--ar),.18);background:rgba(var(--ar),.10);color:var(--a);border-radius:11px;padding:9px 10px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer}
+.ed-chat-btn.ghost{border-color:rgba(255,255,255,.055);background:rgba(255,255,255,.026);color:var(--t2)}
+.ed-chat-btn:active{transform:scale(.97)}
 
 /* ══ CONTINUE LESSON CARD ══ */
 .continue-card{position:relative;display:flex;align-items:stretch;gap:14px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));border:1px solid rgba(var(--ar),.18);border-radius:var(--r);padding:20px 16px 20px 22px;margin:16px 0 14px;cursor:pointer;overflow:hidden;transition:.18s}
@@ -3419,7 +3440,7 @@ function buildChips(){
     {text:L.c_sp,icon:2,fn:()=>chipAction(()=>sendChip(L.c_sp))},
     {text:L.c_vc,icon:3,fn:()=>chipAction(()=>sendChip(L.c_vc))},
     {text:L.c_id,icon:5,fn:()=>chipAction(()=>sendChip(L.c_id))},
-    {text:L.c_er,icon:6,fn:()=>chipAction(()=>sendChip(L.c_er))},
+    {text:L.c_er,icon:6,fn:()=>chipAction(()=>openErrorDiaryChat(true))},
     {text:{ru:'Объясни проще',en:'Explain simply',es:'Explica simple',de:'Einfach erklären',fr:'Explique simplement',pt:'Explique simples',uk:'Поясни простіше',tr:'Basitçe açıkla',zh:'简单解释',ar:'اشرح ببساطة'}[lang]||'Explain simply',icon:7,fn:()=>chipAction(()=>openChat('explain_simple'))},
   ];
   items.forEach(item=>{
@@ -4749,7 +4770,7 @@ async function doChat(text){
     try{syncToServer();}catch(e){}
     // Extract errors from ALEX reply
     const replyText=document.querySelector('#cmsgs .msg.bot:last-child .mbub')?.innerText||'';
-    try{extractErrorsFromReply(replyText);}catch(e){}
+    try{extractErrorsFromReply(data.reply||replyText,text);}catch(e){}
     // Weekly challenge progress is tracked by concrete actions in trackM().
   }catch(e){
     rmTyping();
@@ -4798,6 +4819,7 @@ function maybePostIdiom(){
 }
 
 function openChat(topic){
+  if(topic==='mistakes'){openErrorDiaryChat(false);return;}
   if(topic==='toefl'){openExamPrep();return;}
   if(topic==='lesson'){goTab('learn');switchLearnTab('course');renderCourse();return;}
   if(topic==='words_new'){goTab('learn');switchLearnTab('cards');initLearn();return;}
@@ -9703,12 +9725,94 @@ async function submitTextCheck(){
 /* ══════════════════════════════════════════════════
    📚  SMART ERROR DIARY
 ══════════════════════════════════════════════════ */
-function saveError(wrong,right,explanation){
-  const errors=LS.getJ('error_diary')||[];
-  const today=new Date().toISOString().slice(0,10);
-  errors.unshift({wrong,right,explanation,date:today,id:Date.now()});
-  if(errors.length>100)errors.splice(100);
-  LS.setJ('error_diary',errors);
+let _mistakeFetchTs=0;
+function cleanMistakeText(v,limit=220){
+  return String(v||'').replace(/\s+/g,' ').replace(/[<>{}]/g,'').trim().slice(0,limit);
+}
+function mistakeKey(e){
+  return (cleanMistakeText(e.wrong||e.original,120)+' -> '+cleanMistakeText(e.right||e.corrected,120)).toLowerCase();
+}
+function normalizeMistake(e){
+  return {
+    id:e.id||('m'+Date.now()+Math.floor(Math.random()*9999)),
+    server_id:e.server_id||null,
+    wrong:cleanMistakeText(e.wrong||e.original,220),
+    right:cleanMistakeText(e.right||e.corrected,220),
+    explanation:cleanMistakeText(e.explanation||e.note||'',360),
+    category:cleanMistakeText(e.category||'grammar',40)||'grammar',
+    date:String(e.date||new Date().toISOString().slice(0,10)).slice(0,10),
+    synced:!!e.synced
+  };
+}
+function mergeErrorDiary(items){
+  const current=(LS.getJ('error_diary')||[]).map(normalizeMistake);
+  const map=new Map();
+  current.concat(items.map(normalizeMistake)).forEach(e=>{
+    if(!e.wrong||!e.right||e.wrong.toLowerCase()===e.right.toLowerCase())return;
+    const k=mistakeKey(e);
+    const prev=map.get(k);
+    if(!prev||String(e.date||'')>=String(prev.date||''))map.set(k,e);
+  });
+  const merged=[...map.values()].sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.id).localeCompare(String(a.id))).slice(0,120);
+  LS.setJ('error_diary',merged);
+  return merged;
+}
+function saveError(wrong,right,explanation,category='grammar'){
+  const item=normalizeMistake({wrong,right,explanation,category,date:new Date().toISOString().slice(0,10),synced:false});
+  if(!item.wrong||!item.right||item.wrong.toLowerCase()===item.right.toLowerCase())return false;
+  const before=LS.getJ('error_diary')||[];
+  if(before.some(e=>mistakeKey(e)===mistakeKey(item)))return false;
+  const merged=mergeErrorDiary([item]);
+  try{syncMistakeToServer(item);}catch(_){}
+  return merged.some(e=>e.id===item.id);
+}
+async function syncMistakeToServer(item){
+  if(!API||!window._uid||!item||item.synced)return;
+  try{
+    const r=await fetch(`${API}/api/mistakes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({
+        uid:window._uid,
+        init_data:tg?.initData||'',
+        original:item.wrong,
+        corrected:item.right,
+        explanation:item.explanation,
+        category:item.category||'grammar'
+      })
+    });
+    if(!r.ok)return;
+    const data=await r.json().catch(()=>({}));
+    const errors=(LS.getJ('error_diary')||[]).map(normalizeMistake);
+    const idx=errors.findIndex(e=>e.id===item.id||mistakeKey(e)===mistakeKey(item));
+    if(idx>=0){
+      errors[idx].synced=true;
+      if(data.id)errors[idx].server_id=data.id;
+      LS.setJ('error_diary',errors);
+    }
+  }catch(e){console.warn('mistake sync',e);}
+}
+async function syncUnsyncedMistakes(){
+  const errors=(LS.getJ('error_diary')||[]).map(normalizeMistake).filter(e=>!e.synced);
+  for(const e of errors.slice(0,8))await syncMistakeToServer(e);
+}
+async function refreshErrorDiaryFromServer(force=false){
+  if(!API||!window._uid)return LS.getJ('error_diary')||[];
+  if(!force&&Date.now()-_mistakeFetchTs<45000)return LS.getJ('error_diary')||[];
+  _mistakeFetchTs=Date.now();
+  try{
+    await syncUnsyncedMistakes();
+    const r=await fetch(`${API}/api/mistakes/${window._uid}?limit=80`,{
+      headers:{'X-Telegram-Init-Data':tg?.initData||''}
+    });
+    if(!r.ok)return LS.getJ('error_diary')||[];
+    const data=await r.json();
+    const serverItems=(data.mistakes||[]).map(row=>normalizeMistake({
+      id:'srv-'+row.id,server_id:row.id,wrong:row.original,right:row.corrected,
+      explanation:row.explanation,category:row.category,date:row.date,synced:true
+    }));
+    return mergeErrorDiary(serverItems);
+  }catch(e){console.warn('mistake fetch',e);return LS.getJ('error_diary')||[];}
 }
 
 function renderErrorDiary(){
@@ -9726,9 +9830,10 @@ function renderErrorDiary(){
     );
     return;
   }
-  const errors=LS.getJ('error_diary')||[];
+  const errors=(LS.getJ('error_diary')||[]).map(normalizeMistake);
   if(!errors.length){
     wrap.innerHTML=`<div class="ed-empty">${({ru:'Ошибок пока нет — начни общаться с ALEX.',en:'No errors yet — start chatting with ALEX.',es:'Aún no hay errores — empieza a chatear con ALEX.',pt:'Ainda sem erros — comece a conversar com o ALEX.',de:'Noch keine Fehler — fang an, mit ALEX zu chatten.',fr:'Pas encore d’erreurs — commence à discuter avec ALEX.',uk:'Помилок поки немає — почни спілкуватися з ALEX.',tr:'Henüz hata yok — ALEX ile sohbete başla.',zh:'还没有错误——开始和 ALEX 聊天吧。',ar:'لا أخطاء بعد — ابدأ الدردشة مع ALEX.'}[lang]||'No errors yet — start chatting with ALEX.')}</div>`;
+    refreshErrorDiaryFromServer().then(()=>{const fresh=LS.getJ('error_diary')||[];if(fresh.length)renderErrorDiary();}).catch(()=>{});
     return;
   }
   // Group by week
@@ -9745,10 +9850,10 @@ function renderErrorDiary(){
     const wDate=new Date(wk);
     const label=wDate.toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{month:'long',day:'numeric'});
     const block=document.createElement('div');block.className='ed-week';
-    block.innerHTML=`<div class="ed-week-hdr"><div class="ed-week-title">${({ru:'Неделя от',en:'Week of',es:'Semana del',pt:'Semana de',de:'Woche vom',fr:'Semaine du',uk:'Тиждень від',tr:'Hafta',zh:'本周起',ar:'أسبوع'}[lang]||'Week of')} ${label}</div><div class="ed-count">${errs.length} ${({ru:'ошибок',en:'errors',es:'errores',pt:'erros',de:'Fehler',fr:'erreurs',uk:'помилок',tr:'hata',zh:'个错误',ar:'أخطاء'}[lang]||'errors')}</div></div>`;
+    block.innerHTML=`<div class="ed-week-hdr"><div class="ed-week-title">${({ru:'Неделя от',en:'Week of',es:'Semana del',pt:'Semana de',de:'Woche vom',fr:'Semaine du',uk:'Тиждень від',tr:'Hafta',zh:'本周起',ar:'أسبوع'}[lang]||'Week of')} ${safeHTML(label)}</div><div class="ed-count">${errs.length} ${({ru:'ошибок',en:'errors',es:'errores',pt:'erros',de:'Fehler',fr:'erreurs',uk:'помилок',tr:'hata',zh:'个错误',ar:'أخطاء'}[lang]||'errors')}</div></div>`;
     errs.slice(0,5).forEach(e=>{
       const row=document.createElement('div');row.className='ed-row';
-      row.innerHTML=`<div class="ed-wrong">${e.wrong}</div><div class="ed-right">✓ ${e.right}</div><div class="ed-exp">${e.explanation||''}</div>`;
+      row.innerHTML=`<div class="ed-wrong">${safeHTML(e.wrong)}</div><div class="ed-right">${safeHTML(e.right)}</div><div class="ed-exp">${safeHTML(e.explanation||'')}</div>`;
       row.onclick=()=>sendChip(({ru:`Объясни разницу между "${e.wrong}" и "${e.right}"`,en:`Explain the difference between "${e.wrong}" and "${e.right}"`,es:`Explica la diferencia entre "${e.wrong}" y "${e.right}"`,pt:`Explique a diferença entre "${e.wrong}" e "${e.right}"`,de:`Erkläre den Unterschied zwischen "${e.wrong}" und "${e.right}"`,fr:`Explique la différence entre "${e.wrong}" et "${e.right}"`,uk:`Поясни різницю між "${e.wrong}" і "${e.right}"`,tr:`"${e.wrong}" ile "${e.right}" arasındaki farkı açıkla`,zh:`解释一下 "${e.wrong}" 和 "${e.right}" 的区别`,ar:`اشرح الفرق بين "${e.wrong}" و "${e.right}"`}[lang]||`Explain the difference between "${e.wrong}" and "${e.right}"`));
       block.appendChild(row);
     });
@@ -9759,26 +9864,97 @@ function renderErrorDiary(){
     }
     wrap.appendChild(block);
   });
+  const beforeLen=errors.length;
+  refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});
+}
+
+function errorDiaryCategories(errors){
+  const counts={};
+  errors.forEach(e=>{const k=(e.category||'grammar').toLowerCase();counts[k]=(counts[k]||0)+1;});
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,4);
+}
+function renderErrorDiaryChatCard(errors=(LS.getJ('error_diary')||[])){
+  errors=errors.map(normalizeMistake);
+  const has=errors.length>0;
+  const latest=errors.slice(0,4);
+  const labels={
+    kicker:{ru:'Дневник ошибок',en:'Error diary',es:'Diario de errores',pt:'Diário de erros',de:'Fehlertagebuch',fr:'Journal des erreurs',uk:'Щоденник помилок',tr:'Hata günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Error diary',
+    title:has?({ru:'Вот что ALEX уже заметил',en:'What ALEX has noticed',es:'Lo que ALEX ya notó',pt:'O que ALEX já notou',de:'Was ALEX bemerkt hat',fr:'Ce qu’ALEX a repéré',uk:'Що ALEX вже помітив',tr:'ALEX’in fark ettikleri',zh:'ALEX 已注意到的内容',ar:'ما لاحظه ALEX'}[lang]||'What ALEX has noticed'):({ru:'Ошибок пока нет',en:'No mistakes yet',es:'Aún no hay errores',pt:'Ainda sem erros',de:'Noch keine Fehler',fr:'Pas encore d’erreurs',uk:'Помилок поки немає',tr:'Henüz hata yok',zh:'还没有错误',ar:'لا أخطاء بعد'}[lang]||'No mistakes yet'),
+    sub:has?({ru:'Нажми на строку в прогрессе или попроси ALEX разобрать повторяющиеся паттерны.',en:'Tap an entry in Progress or ask ALEX to review repeated patterns.',es:'Toca una entrada en Progreso o pide a ALEX revisar patrones.',pt:'Toque uma entrada no Progresso ou peça ao ALEX revisar padrões.',de:'Tippe einen Eintrag im Fortschritt an oder bitte ALEX um Musteranalyse.',fr:'Touche une entrée dans Progression ou demande à ALEX d’analyser les motifs.',uk:'Натисни запис у прогресі або попроси ALEX розібрати патерни.',tr:'İlerleme bölümünde bir kayda dokun veya ALEX’ten kalıpları incelemesini iste.',zh:'在进度中点条目，或让 ALEX 分析重复模式。',ar:'اضغط على إدخال في التقدم أو اطلب من ALEX تحليل الأنماط.'}[lang]||'Ask ALEX to review repeated patterns.'):({ru:'Напиши ALEX фразу на английском или открой проверку текста — исправления попадут сюда.',en:'Write ALEX an English sentence or open Text Check — corrections will appear here.',es:'Escribe una frase en inglés o abre Text Check: las correcciones aparecerán aquí.',pt:'Escreva uma frase em inglês ou abra Text Check — as correções aparecerão aqui.',de:'Schreibe ALEX einen englischen Satz oder öffne Text Check — Korrekturen erscheinen hier.',fr:'Écris une phrase en anglais ou ouvre Text Check — les corrections apparaîtront ici.',uk:'Напиши ALEX фразу англійською або відкрий перевірку тексту — виправлення з’являться тут.',tr:'ALEX’e İngilizce bir cümle yaz veya Text Check’i aç — düzeltmeler burada görünür.',zh:'给 ALEX 写一句英文或打开文本检查，纠正会显示在这里。',ar:'اكتب جملة إنجليزية لـ ALEX أو افتح فحص النص — ستظهر التصحيحات هنا.'}[lang]||'Corrections will appear here.'),
+    ask:{ru:'Разобрать с ALEX',en:'Review with ALEX',es:'Revisar con ALEX',pt:'Revisar com ALEX',de:'Mit ALEX prüfen',fr:'Revoir avec ALEX',uk:'Розібрати з ALEX',tr:'ALEX ile incele',zh:'让 ALEX 复盘',ar:'راجع مع ALEX'}[lang]||'Review with ALEX',
+    check:{ru:'Проверить текст',en:'Check text',es:'Revisar texto',pt:'Revisar texto',de:'Text prüfen',fr:'Vérifier texte',uk:'Перевірити текст',tr:'Metni kontrol et',zh:'检查文本',ar:'افحص النص'}[lang]||'Check text',
+    entries:{ru:'ошибок',en:'items',es:'errores',pt:'erros',de:'Fehler',fr:'erreurs',uk:'помилок',tr:'hata',zh:'条',ar:'أخطاء'}[lang]||'items'
+  };
+  const tags=errorDiaryCategories(errors).map(([k,n])=>`<span class="ed-chat-tag">${safeHTML(k)} · ${n}</span>`).join('');
+  const list=has?`<div class="ed-chat-list">${latest.map(e=>`<div class="ed-chat-item">
+      <div class="ed-chat-pair"><span class="bad">${safeHTML(e.wrong)}</span><span class="good">${safeHTML(e.right)}</span></div>
+      ${e.explanation?`<div class="ed-chat-note">${safeHTML(e.explanation)}</div>`:''}
+    </div>`).join('')}</div>`:'';
+  return `<div class="ed-chat-card">
+    <div class="ed-chat-head">
+      <div><div class="ed-chat-kicker">${labels.kicker}</div><div class="ed-chat-title">${labels.title}</div><div class="ed-chat-sub">${labels.sub}</div></div>
+      <div class="ed-chat-score"><b>${errors.length}</b><span>${labels.entries}</span></div>
+    </div>
+    ${list}
+    ${tags?`<div class="ed-chat-tags">${tags}</div>`:''}
+    <div class="ed-chat-actions">
+      <button class="ed-chat-btn" onclick="askAlexFromDiary()">${labels.ask}</button>
+      <button class="ed-chat-btn ghost" onclick="openTextChecker()">${labels.check}</button>
+    </div>
+  </div>`;
+}
+async function openErrorDiaryChat(showUser=false){
+  if(!hasChatAccess()){showChatPaywall();return;}
+  goTab('chat');
+  if(showUser)addMsg('user',L.c_er);
+  const local=LS.getJ('error_diary')||[];
+  addMsg('bot',renderErrorDiaryChatCard(local));
+  const fresh=await refreshErrorDiaryFromServer(true);
+  if(fresh.length!==local.length){
+    addMsg('bot',renderErrorDiaryChatCard(fresh));
+    try{renderErrorDiary();}catch(_){}
+  }
+}
+async function askAlexFromDiary(){
+  if(!hasChatAccess()){showChatPaywall();return;}
+  const errors=(await refreshErrorDiaryFromServer(false)).map(normalizeMistake).slice(0,10);
+  if(!errors.length){toast(({ru:'Сначала накопи пару исправлений',en:'Collect a few corrections first'}[lang]||'Collect a few corrections first'),'');return;}
+  const list=errors.map((e,i)=>`${i+1}. Wrong: ${e.wrong}\nCorrect: ${e.right}\nNote: ${e.explanation||e.category}`).join('\n\n');
+  const prompt=({ru:`Разбери мой дневник ошибок. Найди 2-3 повторяющихся паттерна, объясни их просто и дай короткое упражнение без лишней воды.\n\n${list}`,en:`Review my error diary. Find 2-3 repeated patterns, explain them simply, and give me one short targeted exercise.\n\n${list}`,es:`Revisa mi diario de errores. Encuentra 2-3 patrones repetidos, explícalos simple y dame un ejercicio corto.\n\n${list}`,pt:`Revise meu diário de erros. Encontre 2-3 padrões repetidos, explique de forma simples e dê um exercício curto.\n\n${list}`}[lang]||`Review my error diary. Find 2-3 repeated patterns, explain them simply, and give me one short targeted exercise.\n\n${list}`);
+  addMsg('user',({ru:'Разбери мой дневник ошибок',en:'Review my error diary',es:'Revisa mi diario de errores',pt:'Revise meu diário de erros'}[lang]||'Review my error diary'));
+  await doChat(prompt);
 }
 
 /* Auto-extract errors from ALEX responses */
-function extractErrorsFromReply(reply){
-  // Look for correction patterns: ✅ word → word, or "should be X" patterns
+function extractErrorsFromReply(reply,userText=''){
+  const raw=String(reply||'');
+  const input=cleanMistakeText(userText,500);
+  if(/^(review my error diary|разбери мой дневник ошибок)/i.test(input))return;
+  const englishWords=(input.match(/[A-Za-z][A-Za-z'-]*/g)||[]).length;
+  const replyLooksCorrective=/\b(corrected|correction|fixed|should be|instead of|mistake|grammar)\b|исправ|ошиб|лучше|нужно заменить/i.test(raw);
+  if(englishWords<2||!replyLooksCorrective)return;
   const corrections=[];
-  const lines=reply.split('\n');
-  lines.forEach(line=>{
-    // Pattern: ~~wrong~~ → correct or wrong → ✅ correct
-    const m=line.match(/[~~](.+?)[~~].*?[→:]\s*(.+)/);
-    if(m)corrections.push({wrong:m[1].trim(),right:m[2].trim(),explanation:'Grammar correction'});
-    // Pattern: ✅ "correct" instead of "wrong"
-    const m2=line.match(/instead of [""'](.+?)[""']/i);
-    if(m2&&line.includes('✅')){
-      const correct=line.match(/✅\s*[""'](.+?)[""']/)?.[1];
-      if(correct)corrections.push({wrong:m2[1].trim(),right:correct.trim(),explanation:line.slice(0,80)});
+  const lines=raw.split('\n').map(x=>x.trim()).filter(Boolean);
+  const correctionLabel=/^(corrected|correction|fixed|исправлено|правильно|versión corregida|corrigido|korrigiert|corrigé)\s*[:：-]\s*(.+)$/i;
+  for(const line of lines){
+    const arrow=line.match(/(?:❌|wrong|mistake|ошибка|incorrect)?\s*["“]?([^"”→]{2,160})["”]?\s*(?:→|=>|->)\s*(?:✅|correct)?\s*["“]?([^"”|]{2,180})["”]?/i);
+    if(arrow)corrections.push({wrong:arrow[1],right:arrow[2],explanation:'ALEX correction',category:'grammar'});
+    const wr=line.match(/(?:wrong|original|ошибка|было)\s*[:：]\s*["“]?(.+?)["”]?\s*(?:;|,|\|)\s*(?:correct|corrected|should be|исправлено|стало)\s*[:：]?\s*["“]?(.+?)["”]?$/i);
+    if(wr)corrections.push({wrong:wr[1],right:wr[2],explanation:'ALEX correction',category:'grammar'});
+    const should=line.match(/["“]?(.{2,120}?)["”]?\s+(?:should be|лучше|нужно заменить на)\s+["“]?(.{2,140}?)["”]?[\.;]?$/i);
+    if(should)corrections.push({wrong:should[1],right:should[2],explanation:line.slice(0,180),category:'grammar'});
+    const lab=line.match(correctionLabel);
+    if(lab&&input&&/[a-zA-Z]/.test(input)&&input.toLowerCase()!==cleanMistakeText(lab[2],500).toLowerCase()){
+      corrections.push({wrong:input,right:lab[2],explanation:'Whole-sentence correction',category:'grammar'});
     }
-  });
-  corrections.forEach(c=>saveError(c.wrong,c.right,c.explanation));
-  if(corrections.length)bumpStat('errors',corrections.length);
+  }
+  if(!corrections.length&&input&&/[a-zA-Z]/.test(input)&&/\b(corrected|correction|исправ|ошиб|mistake|grammar|should be)\b/i.test(raw)){
+    const m=raw.match(/(?:Corrected|Correction|Fixed|Исправлено|Правильно)\s*[:：]\s*["“]?(.+?)["”]?(?:\n|$)/i);
+    if(m)corrections.push({wrong:input,right:m[1],explanation:'Whole-sentence correction',category:'grammar'});
+  }
+  let added=0;
+  corrections.forEach(c=>{if(saveError(c.wrong,c.right,c.explanation,c.category))added++;});
+  if(added){bumpStat('errors',added);try{renderErrorDiary();}catch(_){}try{syncToServer();}catch(_){}}
 }
 
 /* ══════════════════════════════════════════════════

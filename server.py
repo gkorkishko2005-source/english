@@ -906,6 +906,87 @@ async def handle_transcribe(request):
         logger.error(f"transcribe error: {e}")
         return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── MISTAKES / ERROR DIARY ───────────────────────────────────────────────────
+def _auth_uid_from_request(request, uid: int, init_data: str):
+    if REQUIRE_TG_INIT_DATA and BOT_TOKEN and not _is_local_request(request):
+        ok, reason, signed_uid = _verify_telegram_init_data(init_data, uid)
+        if not ok:
+            logger.warning("blocked mistakes uid=%s signed_uid=%s reason=%s", uid, signed_uid, reason)
+            return False, reason, uid
+        if signed_uid and not uid:
+            uid = signed_uid
+    return True, "", uid
+
+def _mistake_row(row):
+    d = dict(row)
+    for key in ("date", "created_at"):
+        if d.get(key) is not None and hasattr(d[key], "isoformat"):
+            d[key] = d[key].isoformat()
+    return {
+        "id": d.get("id"),
+        "original": d.get("original") or "",
+        "corrected": d.get("corrected") or "",
+        "explanation": d.get("explanation") or "",
+        "category": d.get("category") or "grammar",
+        "date": str(d.get("date") or "")[:10],
+        "created_at": d.get("created_at"),
+    }
+
+async def handle_mistakes_get(request):
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+        limit = max(1, min(100, int(request.query.get("limit", "50"))))
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import get_mistakes, get_mistake_count
+        rows = await get_mistakes(uid, limit=limit)
+        count = await get_mistake_count(uid)
+        return web.json_response({"mistakes":[_mistake_row(r) for r in rows], "count": count},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"mistakes get error: {e}")
+        return web.json_response({"mistakes":[],"count":0},headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_mistakes_post(request):
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0))
+    except Exception:
+        return web.json_response({"error":"bad request"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
+    original = str(body.get("original") or body.get("wrong") or "").strip()
+    corrected = str(body.get("corrected") or body.get("right") or "").strip()
+    explanation = str(body.get("explanation") or "").strip()
+    category = str(body.get("category") or "grammar").strip()[:40] or "grammar"
+    if not uid or not original or not corrected:
+        return web.json_response({"error":"empty mistake"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import db, log_mistake, get_mistake_count, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        exists = await db(
+            "SELECT id FROM mistakes WHERE uid=? AND lower(original)=lower(?) AND lower(corrected)=lower(?) LIMIT 1",
+            uid, original[:300], corrected[:300], fetch="one"
+        )
+        if not exists:
+            await log_mistake(uid, original, corrected, explanation, category)
+        count = await get_mistake_count(uid)
+        mid = exists["id"] if exists else None
+        return web.json_response({"ok":True,"id":mid,"count":count},headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"mistakes post error: {e}")
+        return web.json_response({"error":str(e)[:160]},status=500,headers={"Access-Control-Allow-Origin":"*"})
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -995,6 +1076,8 @@ def create_app():
     app.router.add_post("/api/credits/grant",handle_grant_credits)
     app.router.add_post("/api/tts",handle_tts)
     app.router.add_post("/api/transcribe",handle_transcribe)
+    app.router.add_get("/api/mistakes/{uid}",handle_mistakes_get)
+    app.router.add_post("/api/mistakes",handle_mistakes_post)
     app.router.add_post("/api/sync_stats",handle_sync_stats)
     app.router.add_get("/health",handle_health)
     app.router.add_get("/api/admin/stats",handle_admin_stats)

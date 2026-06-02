@@ -1354,16 +1354,31 @@ async def cmd_mistakes(m: Message):
     uid  = m.from_user.id
     lang = await get_lang(uid)
     rows = await get_mistakes(uid, limit=10)
+    ru = lang == "ru"
     if not rows:
-        await m.answer("No mistakes yet." if lang!="ru" else "Ошибок пока нет.")
-        return
-    text = f"<b>{'Recent mistakes' if lang!='ru' else 'Последние ошибки'}</b>\n\n"
-    for i, r in enumerate(rows, 1):
-        text += (
-            f"<b>{i}.</b> <code>{r['original'][:50]}</code>\n"
-            f"   → <i>{r['corrected'][:50]}</i>\n"
-            f"   {r['explanation'][:80]}\n\n"
+        await m.answer(
+            "Пока пусто.\n\nПиши ALEX на английском или проверь текст в приложении — исправления появятся здесь."
+            if ru else
+            "Nothing here yet.\n\nWrite to ALEX in English or check a text in the app — corrections will appear here."
         )
+        return
+    text = (
+        "<b>Дневник ошибок ALEX</b>\n"
+        "Последние исправления из чата и проверки текста.\n\n"
+        if ru else
+        "<b>ALEX Error Diary</b>\n"
+        "Recent corrections from chat and text checks.\n\n"
+    )
+    for i, r in enumerate(rows, 1):
+        original = html.escape(str(r["original"])[:90], quote=False)
+        corrected = html.escape(str(r["corrected"])[:90], quote=False)
+        explanation = html.escape(str(r["explanation"] or "")[:120], quote=False)
+        text += (
+            f"<b>{i}.</b> <s>{original}</s>\n"
+            f"<b>→</b> <code>{corrected}</code>\n"
+            f"<i>{explanation}</i>\n\n"
+        )
+    text += "Открой WebApp, чтобы попросить ALEX разобрать повторяющиеся паттерны." if ru else "Open the WebApp to ask ALEX to review repeated patterns."
     await m.answer(text.rstrip())
 
 @dp.message(Command("interests"))
