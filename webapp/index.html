@@ -1839,8 +1839,11 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .qg .qbi{background:var(--e2);border:1px solid var(--b1);color:var(--t2)}
 .qg .qbi svg{stroke:var(--t2)}
 
-/* ── Model picker (mpop) flat look ─────────────────────────────── */
-.mpop{background:var(--bg);border:1px solid var(--b1);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+/* ── Model picker (mpop) flat look ───────────────────────────────
+   Background must be opaque so the popover sits above the messages
+   without bleeding. var(--bg) was undefined and rendered as
+   transparent — picker became unreadable on top of chat. */
+.mpop{background:var(--e1);border:1px solid var(--b1);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
 .mpop-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);padding:10px 14px 6px}
 .mopt{background:transparent;border:0;border-bottom:1px solid var(--b1);padding:12px 14px;transition:background .12s}
 .mopt:last-child{border-bottom:0}
