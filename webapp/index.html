@@ -3170,6 +3170,9 @@ const LS = {
   getJ: k=>{ try{return JSON.parse(LS.get(k)||'null')}catch{return null} },
   setJ: (k,v)=>{ LS.set(k,JSON.stringify(v)) },
 };
+function appWarn(scope,err){
+  try{console.warn('[PolyGlotty]',scope,err&&err.message?err.message:err);}catch(_){}
+}
 
 /* Full set of UI / bot languages. Every code here needs a matching
    entry in LANGS below; anything missing falls back to LANGS.en. */
@@ -5864,7 +5867,7 @@ async function rate(q){
       :({ru:`Следующий показ через ${days} дн.`,en:`Next review in ${days} days.`,es:`Próximo repaso en ${days} días.`,pt:`Próxima revisão em ${days} dias.`,de:`Nächste Wiederholung in ${days} Tagen.`,fr:`Prochaine révision dans ${days} jours.`,uk:`Наступний показ через ${days} дн.`,tr:`Sonraki tekrar ${days} gün sonra.`,zh:`下次复习在 ${days} 天后。`,ar:`المراجعة التالية بعد ${days} أيام.`}[lang]||`Next review in ${days} days.`);
     setTimeout(()=>{try{toast(txt,'📅');}catch(_){}},900);
   }
-  if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch{}
+  if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch(e){appWarn('rate_card sync failed',e);}
   cIdx++;
   if(q<3){
     showCardHelp(c,q);
@@ -6627,14 +6630,14 @@ async function saveRem(){
   if(window._d)window._d.remind_time=selTime;
   updateProfileUI(window._d||{});
   try{scheduleReminder(selTime);}catch(e){}
-  if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch{}
+  if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:selTime})});}catch(e){appWarn('set_reminder sync failed',e);}
   closeRemModal();toast((L.remsav||'Reminder: ')+selTime,'⏰');
 }
 async function disableRem(){
   LS.set('app_remind','');LS.set('remind_time_str','');
   if(window._d)window._d.remind_time='';
   updateProfileUI(window._d||{});
-  if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:'off'})});}catch{}
+  if(API&&window._uid)try{await fetch(`${API}/api/set_reminder`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,remind_time:'off'})});}catch(e){appWarn('disable_reminder sync failed',e);}
   closeRemModal();toast(L.remoff||'Reminders disabled','🔕');
 }
 
@@ -10347,7 +10350,14 @@ function _platCopy(){
         ['Analytics and Score Ring', 'included'],
         ['Themes and expanded course', 'included'],
       ]
-    }[lang]||[],
+    }[lang]||[
+      ['A0–C2 course', '65 lessons'],
+      ['Exam Hub', 'TOEFL · IELTS · CAE'],
+      ['SM-2 flashcards', 'unlimited'],
+      ['Roleplay and text check', 'included'],
+      ['Analytics and Score Ring', 'included'],
+      ['Themes and expanded course', 'included'],
+    ],
     foot:{ru:'Каждый план уже включает стартовые кредиты ALEX, чтобы можно было пользоваться чатом сразу. Дополнительные кредиты докупаются на вкладке справа.', en:'Every plan ships with starter ALEX credits so you can use the chat right away. Top up extra credits on the tab to the right.'}[lang]||'Each plan includes starter ALEX credits.'
   };
 }
@@ -10358,21 +10368,31 @@ function _credCopy(){
     rows:{
       ru:[
         ['Haiku 4.5 — быстрый','1 кр / сообщение'],
-        ['Sonnet 4 — умный','5 кр'],
-        ['Sonnet 4.6 — точный','6 кр'],
-        ['Opus 4.7 — глубокий','18 кр'],
-        ['Opus 4.8 — максимум','22 кр'],
+        ['Sonnet 4 — баланс','4 кр'],
+        ['Sonnet 4.6 — глубже','5 кр'],
+        ['Opus 4.1 — глубокий','12 кр'],
+        ['Opus 4.7 — глубокий+','14 кр'],
+        ['Opus 4.8 — максимум','18 кр'],
         ['Голос ALEX (TTS+STT)','+5 кр'],
       ],
       en:[
         ['Haiku 4.5 — fast','1 cr / message'],
-        ['Sonnet 4 — smart','5 cr'],
-        ['Sonnet 4.6 — precise','6 cr'],
-        ['Opus 4.7 — deep','18 cr'],
-        ['Opus 4.8 — max','22 cr'],
+        ['Sonnet 4 — balanced','4 cr'],
+        ['Sonnet 4.6 — deeper','5 cr'],
+        ['Opus 4.1 — deep','12 cr'],
+        ['Opus 4.7 — deep+','14 cr'],
+        ['Opus 4.8 — max','18 cr'],
         ['Voice ALEX (TTS+STT)','+5 cr'],
       ]
-    }[lang]||[],
+    }[lang]||[
+      ['Haiku 4.5 — fast','1 cr / message'],
+      ['Sonnet 4 — balanced','4 cr'],
+      ['Sonnet 4.6 — deeper','5 cr'],
+      ['Opus 4.1 — deep','12 cr'],
+      ['Opus 4.7 — deep+','14 cr'],
+      ['Opus 4.8 — max','18 cr'],
+      ['Voice ALEX (TTS+STT)','+5 cr'],
+    ],
     foot:{ru:'Кредиты не сгорают. Работают с Platform или без неё.', en:'Credits never expire. Work with or without Platform.'}[lang]||'Credits never expire.'
   };
 }
@@ -10417,9 +10437,9 @@ function renderPremPlans(){
     host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const credLbl = `${p.credits.toLocaleString(lang==='ru'?'ru-RU':'en-US')} ${({ru:'кредитов',en:'credits',es:'créditos',pt:'créditos',de:'Credits',fr:'crédits',uk:'кредитів',tr:'kredi',zh:'积分',ar:'رصيد'}[lang]||'credits')}`;
-      /* Mental anchor: Haiku 1 cr/msg, Sonnet 4 = 5 cr/msg (current pricing). */
+      /* Mental anchor: Haiku 1 cr/msg, Sonnet 4 = 4 cr/msg. */
       const msgsHaiku = p.credits;
-      const msgsSonnet = Math.floor(p.credits/5);
+      const msgsSonnet = Math.floor(p.credits/4);
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
       const rate = `<b>${p.perMsg.toFixed(2)} ⭐ ${({ru:'/ сообщение',en:'/ message',es:'/ mensaje',pt:'/ mensagem',de:'/ Nachricht',fr:'/ message',uk:'/ повідомлення',tr:'/ mesaj',zh:'/ 条消息',ar:'/ رسالة'}[lang]||'/ message')}</b>${usd}`;
       const detail = lang==='ru'
@@ -11663,7 +11683,7 @@ function addLocalXP(amount){
     saveXP(d.xp);
     addWeeklyXP(amount);
     if(API&&window._uid){
-      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:amount})}).catch(function(){});
+      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:amount})}).catch(function(e){appWarn('add_xp sync failed',e);});
     }
     // Animate XP display
     const xpEl=document.getElementById('xpv');
@@ -12248,7 +12268,7 @@ function toggleSettingsTools(){
 function syncToServer(){
   if(!API||!window._uid)return;
   var stats=LS.getJ('local_stats')||{};var xp=loadXP();
-  fetch(API+'/api/sync_stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:xp,sessions:stats.sessions||0,words:stats.words||0,tests:stats.tests||0,errors:stats.errors||0,streak:window._d?.streak||0,level:LS.get('ob_level')||'B1'})}).catch(function(){});
+  fetch(API+'/api/sync_stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:xp,sessions:stats.sessions||0,words:stats.words||0,tests:stats.tests||0,errors:stats.errors||0,streak:window._d?.streak||0,level:LS.get('ob_level')||'B1'})}).catch(function(e){appWarn('sync_stats failed',e);});
 }
 function syncFromServer(){
   if(!API||!window._uid)return;

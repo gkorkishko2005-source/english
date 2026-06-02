@@ -128,10 +128,10 @@ def is_test_payment_user(uid: int) -> bool:
     return uid in ADMIN_IDS or uid in TEST_PAYMENT_USER_IDS
 
 # ══ PREMIUM PRICES (Telegram Stars) ══════════════════════════════════════════
-# 3 плана с разными баффами
+# Legacy ALEX subscription plans. Active invoices still use Telegram Stars only.
 PREMIUM_PLANS = {
     "basic": {
-        "stars": 650, "months": 1, "price_usd": 899,  # cents for card payments
+        "stars": 650, "months": 1, "price_usd": 899,
         "label_ru": "Basic · 1 мес", "label_en": "Basic · 1 mo",
         "tier": "basic",
         "model": "sonnet4", "msg_limit": 45, "history": 35, "max_tokens": 700,
@@ -2263,7 +2263,7 @@ async def cmd_premium(msg: Message):
             "299 ⭐ / мес (+30 кр) · 1 290 ⭐ / 6 мес (+150 кр) · 4 990 ⭐ навсегда (+500 кр)\n\n"
             "<b>Кредиты ALEX</b>\n"
             "Отдельный баланс для чата. Тратятся за каждое сообщение и не сгорают.\n"
-            "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Opus 4.8: 22 · Voice +5\n"
+            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
             "Пакеты: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
             "<i>Оплата Telegram Stars</i>"
@@ -2274,7 +2274,7 @@ async def cmd_premium(msg: Message):
             "299 ⭐ / mo (+30 cr) · 1 290 ⭐ / 6 mo (+150 cr) · 4 990 ⭐ lifetime (+500 cr)\n\n"
             "<b>ALEX credits</b>\n"
             "Separate chat balance. Spent per message and never expire.\n"
-            "Haiku 1 · Sonnet 4: 5 · Sonnet 4.6: 6 · Opus 4.7: 18 · Opus 4.8: 22 · Voice +5\n"
+            "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
             "Packs: 100 / 500 (−20%) / 2 000 (−33%)\n"
             f"{status_block}\n\n"
             "<i>Telegram Stars only</i>"
@@ -2346,8 +2346,8 @@ async def cmd_premium(msg: Message):
         "└ Расширенные истории, сценарии и отчёты\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/мес\n"
         "├ 260 quota points/день\n"
-        "├ Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
-        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
+        "├ Модели: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7/4.8\n"
+        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-18 points\n"
         "├ TOEFL, персональный план и сертификаты\n"
         "├ 100 карточек / 4 часа и максимум аудио\n"
         "└ Длинная история диалога\n\n"
@@ -2376,8 +2376,8 @@ async def cmd_premium(msg: Message):
         "└ More stories, scenarios and reports\n\n"
         f"<b>Ultimate</b> — {u_stars} ⭐/mo\n"
         "├ 260 quota points/day\n"
-        "├ Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7\n"
-        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-14 points\n"
+        "├ Models: Haiku 4.5, Sonnet 4/4.6, Opus 4.1/4.7/4.8\n"
+        "├ Haiku = 1, Sonnet = 4-5, Opus = 12-18 points\n"
         "├ TOEFL, personal plan and certificates\n"
         "├ 100 cards / 4 hours and max audio practice\n"
         "└ Long chat history\n\n"
