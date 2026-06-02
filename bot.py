@@ -664,17 +664,24 @@ async def send_reminder(uid: int):
     due_cnt   = len(await get_due_words(uid, limit=10))
     due_idioms = len(await get_due_idioms(uid, limit=5))
 
+    # Minimal grammar: bold title, then plain inline rows. No decorative
+    # glyphs (◌ ▥ ⌖ ⌁) before each line — they read as noise.
+    ru_ = lang == "ru"
     interest_hint = ""
     if interests:
         first = interests.split(",")[0].strip()
-        interest_hint = f"\n⌁ {'Сегодня разберём тему' if lang=='ru' else 'Today: topic'}: <b>{html.escape(first, quote=False)}</b>"
+        interest_hint = f"\n\n{'Сегодня тема' if ru_ else 'Today'}: <b>{html.escape(first, quote=False)}</b>"
 
-    header_ru = "<b>Практика английского.</b>"
-    header_en = "<b>English practice.</b>"
-    text = (header_ru if lang=="ru" else header_en) + interest_hint
-    if streak > 2: text += f"\n\n▥ Streak: <b>{streak}</b>"
-    if due_cnt:    text += f"\n◌ <b>{due_cnt}</b> {'слов на повторение' if lang=='ru' else 'words due'} → /vocab"
-    if due_idioms: text += f"\n◆ <b>{due_idioms}</b> {'идиом на повторение' if lang=='ru' else 'idioms due'} → /vocab"
+    text = ("<b>Время английского</b>" if ru_ else "<b>Time for English</b>") + interest_hint
+    rows_extra = []
+    if streak > 2:
+        rows_extra.append(f"Streak: <b>{streak}</b>")
+    if due_cnt:
+        rows_extra.append(f"{'Слов на повторение' if ru_ else 'Words to review'}: <b>{due_cnt}</b>  /vocab")
+    if due_idioms:
+        rows_extra.append(f"{'Идиом на повторение' if ru_ else 'Idioms to review'}: <b>{due_idioms}</b>  /vocab")
+    if rows_extra:
+        text += "\n\n" + "\n".join(rows_extra)
     # Bot-side messages always carry a Channel button so the reader has
     # somewhere to go when they're not ready to open the app.
     app_url = webapp_url()
@@ -706,10 +713,10 @@ async def send_weekly_report(uid: int):
             url=channel_url())])
         kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
         await bot.send_message(uid,
-            f"▥ <b>{'Еженедельный отчёт' if ru else 'Weekly Report'}</b>\n\n"
-            f"⌖ {stats['level']} · {stats['rank']} · {stats['xp']} XP\n"
-            f"▥ Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-            f"◌ Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>",
+            f"<b>{'Отчёт за неделю' if ru else 'Weekly report'}</b>\n\n"
+            f"{stats['level']} · {stats['rank']} · <b>{stats['xp']}</b> XP\n"
+            f"Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
+            f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>",
             reply_markup=kb
         )
     except Exception: pass
@@ -781,14 +788,12 @@ async def send_daily_word(uid: int):
             "app to lock it in with flashcards."
         )
         await bot.send_message(uid,
-            f"◌ <b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
-            f"<b>{w['word']}</b>\n"
-            f"<code>{w['ph']}</code>\n"
+            f"<b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
+            f"<b>{w['word']}</b>  <code>{w['ph']}</code>\n"
             f"{w['tr']}\n\n"
             f"<i>{w['ex']}</i>\n\n"
-            f"<b>{'Как использовать:' if ru else 'How to use it:'}</b> "
-            f"{how_to_ru if ru else how_to_en}\n\n"
-            f"<i>{motivation_line(lang)}</i>",
+            f"<b>{'Как использовать' if ru else 'How to use'}</b>\n"
+            f"{how_to_ru if ru else how_to_en}",
             parse_mode="HTML", reply_markup=kb
         )
     except Exception as e:
@@ -1032,35 +1037,31 @@ async def cmd_start(message: Message):
         "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
     )
     name_html = html.escape(name, quote=False)
-    # The previous welcome text had a "tap here to start learning"
-    # link that pointed back to the bot the user was already in —
-    # pointless. The Open-App button below already takes them in.
+    # Minimal welcome: short pitch, single feature list, channel link.
+    # No "tap here" self-link (the Open-App button below handles that),
+    # no empty motivation italics, no decorative glyphs.
     channel_link = html_link(channel_url(), "канал с ежедневными словами", bold=True) if ru else html_link(channel_url(), "daily English channel", bold=True)
     text = (
         f"<b>Привет, {name_html}!</b>{badge}\n\n"
         f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
-        f"Тренируй английский каждый день без отдельного приложения.\n\n"
-        f"<b>Внутри:</b>\n"
-        f"• даёт бесплатный курс A0-C2, карточки, drills, аудирование и путь\n"
-        f"• открывает живой чат с ALEX по любой подписке\n"
-        f"• исправляет ошибки и объясняет грамматику\n"
-        f"• открывает roleplay и проверку текста на Pro\n"
-        f"• готовит к TOEFL на Ultimate и ведёт прогресс\n\n"
-        f"Больше короткой практики: {channel_link}."
-        f"\n\n<i>{motivation_line('ru')}</i>"
+        f"Курсы, карточки, экзамены и живой чат с ALEX — без отдельного приложения.\n\n"
+        f"<b>Внутри</b>\n"
+        f"• Бесплатный курс A0–C2 · карточки · аудирование\n"
+        f"• Чат с ALEX по любой подписке\n"
+        f"• Roleplay и проверка текста — Pro\n"
+        f"• TOEFL · IELTS · CAE — Ultimate\n\n"
+        f"Короткая ежедневная практика: {channel_link}."
         f"{ref_line}"
     ) if ru else (
         f"<b>Hey, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> is an AI English tutor in Telegram.\n"
-        f"Practice English every day without installing another app.\n\n"
-        f"<b>Inside:</b>\n"
-        f"• gives a free A0-C2 course, flashcards, drills, listening and paths\n"
-        f"• unlocks live ALEX chat with any subscription\n"
-        f"• corrects mistakes and explains grammar\n"
-        f"• unlocks roleplay and text check on Pro\n"
-        f"• helps with TOEFL on Ultimate and tracks progress\n\n"
-        f"More short practice: {channel_link}."
-        f"\n\n<i>{motivation_line('en')}</i>"
+        f"<b>PolyGlotty</b> is an AI English tutor inside Telegram.\n"
+        f"Course, flashcards, exam prep and live ALEX chat — no extra app to install.\n\n"
+        f"<b>Inside</b>\n"
+        f"• Free A0–C2 course · flashcards · listening\n"
+        f"• ALEX chat on any subscription\n"
+        f"• Roleplay and text check — Pro\n"
+        f"• TOEFL · IELTS · CAE — Ultimate\n\n"
+        f"Short daily practice: {channel_link}."
         f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
@@ -1110,18 +1111,16 @@ async def cmd_share(message: Message):
     cta = html_link(link, "если хочешь начать учить английский — жми сюда", bold=True) if ru else html_link(link, "tap here to start learning English", bold=True)
     channel = html_link(channel_url(), "канал PolyGlotty", bold=True) if ru else html_link(channel_url(), "PolyGlotty channel", bold=True)
     text = (
-        "<b>Пригласи друга в PolyGlotty</b>\n\n"
-        "Отправь другу одну фразу вместо длинной ссылки:\n"
-        f"{cta}\n\n"
-        f"Канал для ежедневной практики: {channel}\n\n"
-        "Бонус: друг получает +50 XP, ты получаешь +150 XP за нового пользователя.\n"
+        "<b>Пригласи друга</b>\n\n"
+        f"{cta}\n"
+        f"{channel}\n\n"
+        "Бонус: другу +50 XP, тебе +150 XP за каждого нового пользователя.\n"
         f"Приглашено: <b>{ref_count}</b>"
     ) if ru else (
-        "<b>Invite a friend to PolyGlotty</b>\n\n"
-        "Send one clean phrase instead of a raw link:\n"
-        f"{cta}\n\n"
-        f"Daily practice channel: {channel}\n\n"
-        "Bonus: your friend gets +50 XP, you get +150 XP for a new user.\n"
+        "<b>Invite a friend</b>\n\n"
+        f"{cta}\n"
+        f"{channel}\n\n"
+        "Bonus: +50 XP for your friend, +150 XP for you.\n"
         f"Invited: <b>{ref_count}</b>"
     )
     # The Share button hands off to the inline "invite" flow so that
@@ -1145,12 +1144,12 @@ async def cmd_channel(message: Message):
     ru = lang == "ru"
     link = html_link(channel_url(), "открыть канал PolyGlotty", bold=True) if ru else html_link(channel_url(), "open the PolyGlotty channel", bold=True)
     text = (
-        f"{ICON['channel']} <b>Канал PolyGlotty</b>\n\n"
-        "Там будут короткие посты: слово дня, пример, перевод и ссылка на практику.\n\n"
+        "<b>Канал PolyGlotty</b>\n\n"
+        "Короткие посты: слово дня, пример, перевод и ссылка на практику.\n\n"
         f"{link}"
     ) if ru else (
-        f"{ICON['channel']} <b>PolyGlotty Channel</b>\n\n"
-        "Short posts: word of the day, example, translation and a link to practice.\n\n"
+        "<b>PolyGlotty channel</b>\n\n"
+        "Short posts: word of the day, example, translation and a practice link.\n\n"
         f"{link}"
     )
     await message.answer(
@@ -1177,12 +1176,12 @@ async def cmd_level(m: Message):
 @dp.message(Command("lesson"))
 async def cmd_lesson(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer(f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
+    await m.answer("<b>Grammar lessons</b>" if lang!="ru" else "<b>Уроки грамматики</b>", reply_markup=lesson_kb(lang))
 
 @dp.message(Command("vocab"))
 async def cmd_vocab(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer(f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
+    await m.answer("<b>Vocabulary</b>" if lang!="ru" else "<b>Словарь</b>", reply_markup=vocab_kb(lang))
 
 @dp.message(Command("roleplay"))
 async def cmd_roleplay(m: Message):
@@ -1339,17 +1338,22 @@ async def cmd_stats(m: Message):
                "📙 Pre-Intermediate":1000,"⭐ Intermediate":1500,
                "🌟 Upper-Intermediate":2500,"💫 Advanced":4000,"🏆 Master":9999}
     nxt = nxt_xp.get(stats["rank"],9999)
-    bar = "█"*min(10,int(xp/nxt*10))+"░"*max(0,10-int(xp/nxt*10))
-    await m.answer(
-        f"{ICON['progress']} <b>{'Прогресс' if lang=='ru' else 'Progress'}</b>\n\n"
+    # Clean stats: plain typographic hierarchy, no decorative glyphs,
+    # no ASCII progress bar. Profession and interests appear as their
+    # own labelled rows, not as captioned icons.
+    ru_ = lang == "ru"
+    body = (
+        f"<b>{'Прогресс' if ru_ else 'Progress'}</b>\n\n"
         f"{stats['level']} · {stats['rank']}\n"
-        f"XP: <b>{xp}</b> [{bar}]\n\n"
+        f"XP: <b>{xp}</b> / {nxt}\n\n"
         f"Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
         f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>\n"
-        f"Errors: <b>{stats['errors']}</b> · TOEFL: <b>{stats['toefl']}</b>\n\n"
-        + (f"{ICON['lesson']} <i>{profession}</i>\n" if profession else "")
-        + f"{ICON['vocab']} <i>{interest_line}</i>"
+        f"Errors: <b>{stats['errors']}</b> · TOEFL: <b>{stats['toefl']}</b>"
     )
+    if profession:
+        body += f"\n\n{'Профессия' if ru_ else 'Profession'}: <i>{html.escape(str(profession), quote=False)}</i>"
+    body += f"\n{'Интересы' if ru_ else 'Interests'}: <i>{html.escape(interest_line, quote=False)}</i>"
+    await m.answer(body)
 
 @dp.message(Command("mistakes"))
 async def cmd_mistakes(m: Message):
@@ -1357,12 +1361,16 @@ async def cmd_mistakes(m: Message):
     lang = await get_lang(uid)
     rows = await get_mistakes(uid, limit=10)
     if not rows:
-        await m.answer("✓ No mistakes yet." if lang=="en" else "✓ Ошибок пока нет.")
+        await m.answer("No mistakes yet." if lang!="ru" else "Ошибок пока нет.")
         return
-    text = f"{ICON['warn']} <b>{'Recent mistakes' if lang=='en' else 'Последние ошибки'}</b>\n\n"
+    text = f"<b>{'Recent mistakes' if lang!='ru' else 'Последние ошибки'}</b>\n\n"
     for i, r in enumerate(rows, 1):
-        text += f"{i}. <code>{r['original'][:50]}</code>\n   → <i>{r['corrected'][:50]}</i>\n   {r['explanation'][:80]}\n\n"
-    await m.answer(text)
+        text += (
+            f"<b>{i}.</b> <code>{r['original'][:50]}</code>\n"
+            f"   → <i>{r['corrected'][:50]}</i>\n"
+            f"   {r['explanation'][:80]}\n\n"
+        )
+    await m.answer(text.rstrip())
 
 @dp.message(Command("interests"))
 async def cmd_interests(m: Message):
@@ -1371,8 +1379,9 @@ async def cmd_interests(m: Message):
     rows = await get_all_interests(uid)
     current = ", ".join(r["interest"] for r in rows) if rows else ("пусто" if lang=="ru" else "empty")
     await m.answer(
-        f"🎮 <b>{'Интересы:' if lang=='ru' else 'Interests:'}</b> <i>{current}</i>\n\n"
-        f"{'Напиши через запятую (ALEX также запоминает сам из разговора):' if lang=='ru' else 'Write comma-separated (ALEX also auto-saves from chat):'}\n"
+        f"<b>{'Интересы' if lang=='ru' else 'Interests'}</b>\n\n"
+        f"{'Сейчас' if lang=='ru' else 'Now'}: <i>{html.escape(current, quote=False)}</i>\n\n"
+        f"{'Напиши через запятую — ALEX также запоминает их из разговора.' if lang=='ru' else 'Write comma-separated — ALEX also picks them up from chat.'}\n"
         f"<code>gaming, music, travel, tech</code>"
     )
     waiting[uid] = "set_interests"
@@ -1382,12 +1391,10 @@ async def cmd_remind(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
     text = (
         "<b>Ежедневное напоминание</b>\n\n"
-        "Выбери время, когда ALEX будет мягко возвращать тебя к английскому.\n\n"
-        f"<i>{motivation_line('ru')}</i>"
+        "Выбери время, когда ALEX будет мягко возвращать тебя к английскому."
     ) if lang == "ru" else (
         "<b>Daily reminder</b>\n\n"
-        "Choose when ALEX should bring you back to English practice.\n\n"
-        f"<i>{motivation_line('en')}</i>"
+        "Choose when ALEX should bring you back to English practice."
     )
     await m.answer(text, reply_markup=remind_kb())
 
@@ -1405,41 +1412,35 @@ async def cmd_help(m: Message):
         ])
     await m.answer(
         ("<b>PolyGlotty · AI-репетитор английского</b>\n\n"
-         "<b>Что доступно в приложении:</b>\n"
-         "• Бесплатный курс A0-C2\n"
+         "<b>В приложении</b>\n"
+         "• Бесплатный курс A0–C2\n"
          "• Карточки и повторение\n"
-         "• Grammar games\n"
-         "• Story Mode\n"
-         "• TOEFL практика\n"
-         "• Чат с ALEX по подписке\n\n"
-         "/app — открыть приложение\n"
+         "• Grammar games · Story Mode\n"
+         "• Подготовка к TOEFL · IELTS · CAE\n"
+         "• Чат с ALEX по любой подписке\n\n"
+         "<b>Команды</b>\n"
+         "/app — приложение\n"
          "/menu — кнопки без команд\n"
-         "/premium — подписка\n"
-         "/share — пригласить друга и получить XP\n"
+         "/premium — подписки\n"
+         "/share — пригласить друга\n"
+         "/channel — канал\n"
          "/support — поддержка\n"
-         "/channel — канал с ежедневной практикой\n"
-         "/terms — условия и границы ответственности\n"
-         "/rules — правила сервиса\n"
-         "/start — главное меню\n\n"
-         f"{html_link(public_bot_url(), 'открыть бота', bold=True)}") if lang=="ru" else
-        ("<b>PolyGlotty · AI English Tutor</b>\n\n"
-         "<b>Inside the app:</b>\n"
-         "• Free A0-C2 course\n"
-         "• Flashcards & review\n"
-         "• Grammar games\n"
-         "• Story Mode\n"
-         "• TOEFL practice\n"
-         "• ALEX chat with subscription\n\n"
+         "/terms · /rules · /privacy — правовая часть") if lang=="ru" else
+        ("<b>PolyGlotty · AI English tutor</b>\n\n"
+         "<b>Inside the app</b>\n"
+         "• Free A0–C2 course\n"
+         "• Flashcards and review\n"
+         "• Grammar games · Story Mode\n"
+         "• TOEFL · IELTS · CAE prep\n"
+         "• ALEX chat on any subscription\n\n"
+         "<b>Commands</b>\n"
          "/app — open the app\n"
          "/menu — buttons without commands\n"
-         "/premium — subscription\n"
-         "/share — invite a friend and earn XP\n"
+         "/premium — subscriptions\n"
+         "/share — invite a friend\n"
+         "/channel — channel\n"
          "/support — support\n"
-         "/channel — daily practice channel\n"
-         "/terms — terms and responsibility limits\n"
-         "/rules — service rules\n"
-         "/start — main menu\n\n"
-         f"{html_link(public_bot_url(), 'open the bot', bold=True)}"),
+         "/terms · /rules · /privacy — legal"),
         reply_markup=kb
     )
 
@@ -1834,8 +1835,8 @@ async def cb_remind(cb: CallbackQuery):
         except Exception as e: logger.warning(e)
         await cb.answer(f"✓ {data}")
         await cb.message.edit_text(
-            (f"<b>Reminder set: {data}</b>\n\n<i>{motivation_line('en')}</i>" if lang=="en"
-             else f"<b>Напоминание: {data}</b>\n\n<i>{motivation_line('ru')}</i>")
+            f"<b>Reminder set</b>\n{data}" if lang=="en"
+            else f"<b>Напоминание установлено</b>\n{data}"
         )
 
 # ══════════════════════════════════════════════════════════════════
