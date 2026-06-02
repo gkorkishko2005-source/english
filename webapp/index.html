@@ -1877,20 +1877,32 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
    Background must be opaque so the popover sits above the messages
    without bleeding. var(--bg) was undefined and rendered as
    transparent — picker became unreadable on top of chat. */
-.mpop{background:var(--e1);border:1px solid var(--b1);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
-.mpop-title{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);padding:10px 14px 6px}
-.mopt{background:transparent;border:0;border-bottom:1px solid var(--b1);padding:12px 14px;transition:background .12s}
-.mopt:last-child{border-bottom:0}
-.mopt:hover{background:var(--e2)}
-.mopt:active{background:var(--e3)}
-.mopt.on{background:rgba(var(--ar),.05)}
-.mopt.locked{opacity:.45}
-.mopt-name{font-size:13px;font-weight:700;color:var(--t1)}
-.mopt-sub{font-size:11px;color:var(--t3);margin-top:2px}
-.mt-cell{width:24px;height:24px;border-radius:7px;background:var(--e2);border:1px solid var(--b1);color:var(--t1);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-.mt-low,.mt-mid,.mt-hi{background:var(--e2);color:var(--t1)}
-.mopt-lock{font-size:9.5px;font-weight:700;color:var(--t3);background:var(--e2);border:1px solid var(--b1);padding:2px 7px;border-radius:7px;margin-left:6px;letter-spacing:.4px}
+.mpop{width:min(286px,calc(100vw - 24px));padding:8px;background:linear-gradient(180deg,rgba(20,36,63,.98),rgba(13,27,51,.98));border:1px solid rgba(var(--ar),.14);border-radius:16px;box-shadow:0 18px 46px rgba(0,0,0,.32)}
+.mpop::after{content:attr(data-foot);display:block;margin:7px 8px 2px;padding-top:8px;border-top:1px solid var(--b1);font-size:10.5px;line-height:1.25;color:var(--t3)}
+.mpop-title{font-size:10.5px;font-weight:750;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);padding:7px 8px 8px}
+.mopt{grid-template-columns:1fr auto 18px;min-height:46px;height:auto;background:transparent;border:1px solid transparent;border-radius:11px;padding:9px 9px 9px 11px;gap:8px;transition:background .14s,border-color .14s,transform .14s}
+.mopt+.mopt{margin-top:3px}
+.mopt:hover{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.055)}
+.mopt:active{background:rgba(255,255,255,.055);transform:scale(.985)}
+.mopt.on{background:linear-gradient(135deg,rgba(var(--ar),.16),rgba(0,212,170,.07));border-color:rgba(var(--ar),.36)}
+.mopt.locked{opacity:.48}
+.mopt-top{display:flex;align-items:center;gap:7px}
+.mopt-name{font-size:13px;font-weight:760;color:var(--t1);letter-spacing:.1px}
+.mpop .mopt-sub{display:block!important;font-size:10.5px;color:var(--t3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpop .mopt-tier{display:inline-flex!important;align-items:center;justify-content:center;height:18px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.045);border:1px solid var(--b1);color:var(--t2);font-size:9.5px;font-weight:750;letter-spacing:.25px;text-transform:uppercase}
+.mopt-meta{gap:5px}
+.mt-cell{min-width:28px;height:22px;border-radius:7px;background:rgba(255,255,255,.045);border:1px solid var(--b1);color:var(--t1);font-size:11px;font-weight:760;display:inline-flex;align-items:center;justify-content:center;padding:0 7px}
+.mt-low{background:rgba(0,212,170,.13);border-color:rgba(0,212,170,.22);color:var(--a2)}
+.mt-mid{background:rgba(var(--ar),.13);border-color:rgba(var(--ar),.25);color:var(--a)}
+.mt-hi{background:rgba(255,184,48,.13);border-color:rgba(255,184,48,.24);color:var(--gd)}
+.mopt-lock{font-size:9.5px;font-weight:800;color:var(--t2);background:rgba(255,255,255,.045);border:1px solid var(--b1);padding:3px 7px;border-radius:999px;letter-spacing:.35px;text-transform:uppercase}
+.mopt:not(.locked) .mopt-lock{display:none!important}
+.mopt.locked .mopt-lock{display:inline-flex!important}
 .mopt-check{color:var(--a)}
+.mopt-check svg{filter:drop-shadow(0 0 7px rgba(var(--ar),.25))}
+[data-mode=light] .mpop::after{border-top-color:rgba(0,0,0,.06);color:rgba(0,0,0,.42)}
+[data-mode=light] .mpop .mopt-sub{color:rgba(0,0,0,.44)}
+[data-mode=light] .mpop .mopt-tier,[data-mode=light] .mopt-lock{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.06);color:rgba(0,0,0,.5)}
 
 /* ── Chat header bar with the credit chip is already minimal; keep
        the model toggle (.mtoggle) in sync. */
@@ -2355,33 +2367,33 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="mpop" id="modelm" onclick="event.stopPropagation()">
       <div class="mpop-title" id="model-mtit">Model</div>
       <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
         <div class="mopt-meta"><div class="mt-cell mt-low">1</div></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="sonnet4" onclick="selectModel('sonnet4')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
         <div class="mopt-meta"><div class="mt-cell mt-mid">4</div><span class="mopt-lock" style="display:none">BASIC</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
         <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" style="display:none">PRO</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="opus41" onclick="selectModel('opus41')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div></div><div class="mopt-sub"></div></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
         <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">18</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
       <button class="mopt" data-m="opus48" onclick="selectModel('opus48')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.8</div></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">22</div><span class="mopt-lock" style="display:none">ULT</span></div>
+        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.8</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
+        <div class="mopt-meta"><div class="mt-cell mt-hi">18</div><span class="mopt-lock" style="display:none">ULT</span></div>
         <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
       </button>
     </div>
@@ -3615,32 +3627,35 @@ function openModelPicker(){
 }
 function updateModelOptions(){
   const cur=getChosenModel();
-  // localized table headers + cells
+  // Compact model table. Server still validates tier, model and quota cost.
   const T={
-    ru:{title:'Model',
-        fast:'быстро',classic:'стабильно',smart:'умно',deep:'глубоко',max:'макс',
-        haiku:'Быстро и экономно',sonnet4:'Старая рабочая версия',sonnet:'Разборы и исправления',opus41:'Глубокие задачи',opus:'Глубокая аналитика',opus48:'Максимум качества'},
-    en:{title:'Model',
-        fast:'fast',classic:'classic',smart:'smart',deep:'deep',max:'max',
-        haiku:'Fast and efficient',sonnet4:'Older stable version',sonnet:'Corrections and reasoning',opus41:'Deep tasks',opus:'Deep analysis',opus48:'Maximum quality'},
-    es:{title:'Model',
-        fast:'rápido',classic:'clásico',smart:'listo',deep:'profundo',max:'máx.',
-        haiku:'Rápido y eficiente',sonnet4:'Versión estable anterior',sonnet:'Correcciones y razonamiento',opus41:'Tareas profundas',opus:'Análisis profundo',opus48:'Máxima calidad'},
-    pt:{title:'Model',
-        fast:'rápido',classic:'clássico',smart:'inteligente',deep:'profundo',max:'máx.',
-        haiku:'Rápido e eficiente',sonnet4:'Versão estável anterior',sonnet:'Correções e raciocínio',opus41:'Tarefas profundas',opus:'Análise profunda',opus48:'Qualidade máxima'},
+    ru:{title:'Model',foot:'Quota points списываются только за ответ ALEX.',
+        fast:'fast',balance:'balance',deep:'deep',max:'max',
+        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
+    en:{title:'Model',foot:'Quota points are charged only when ALEX answers.',
+        fast:'fast',balance:'balance',deep:'deep',max:'max',
+        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
+    es:{title:'Model',foot:'Los quota points se gastan solo cuando ALEX responde.',
+        fast:'fast',balance:'balance',deep:'deep',max:'max',
+        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
+    pt:{title:'Model',foot:'Quota points são cobrados só quando ALEX responde.',
+        fast:'fast',balance:'balance',deep:'deep',max:'max',
+        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
   };
   const t=T[lang]||T.en;
   const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   setT('model-mtit',t.title);
+  const pop=document.getElementById('modelm');if(pop)pop.dataset.foot=t.foot;
+  const cost=(n,load)=>`${n} ${n===1?t.p:t.ps} · ${load}`;
   const data={
-    haiku:{name:'Haiku 4.5',tag:t.fast,sub:t.haiku,pts:'1'},
-    sonnet4:{name:'Sonnet 4',tag:t.classic,sub:t.sonnet4,pts:'5'},
-    sonnet:{name:'Sonnet 4.6',tag:t.smart,sub:t.sonnet,pts:'6'},
-    opus41:{name:'Opus 4.1',tag:t.deep,sub:t.opus41,pts:'14'},
-    opus:{name:'Opus 4.7',tag:t.deep,sub:t.opus,pts:'18'},
-    opus48:{name:'Opus 4.8',tag:t.max,sub:t.opus48||t.opus,pts:'22'}
+    haiku:{name:'Haiku 4.5',tag:t.fast,sub:cost(1,t.low),pts:'1'},
+    sonnet4:{name:'Sonnet 4',tag:t.balance,sub:cost(4,t.mid),pts:'4'},
+    sonnet:{name:'Sonnet 4.6',tag:t.balance,sub:cost(5,t.mid),pts:'5'},
+    opus41:{name:'Opus 4.1',tag:t.deep,sub:cost(12,t.high),pts:'12'},
+    opus:{name:'Opus 4.7',tag:t.deep,sub:cost(14,t.high),pts:'14'},
+    opus48:{name:'Opus 4.8',tag:t.max,sub:cost(18,t.high),pts:'18'}
   };
+  const req={sonnet4:'Basic+',sonnet:'Pro+',opus41:'Ultimate',opus:'Ultimate',opus48:'Ultimate'};
   document.querySelectorAll('#modelm .mopt').forEach(row=>{
     const m=row.dataset.m,ok=modelAllowedForTier(m),meta=data[m]||data.haiku;
     row.classList.toggle('on',ok&&m===cur);
@@ -3649,7 +3664,7 @@ function updateModelOptions(){
     const tag=row.querySelector('.mopt-tier');if(tag)tag.textContent=meta.tag;
     const sub=row.querySelector('.mopt-sub');if(sub)sub.textContent=meta.sub;
     const cell=row.querySelector('.mt-cell');if(cell)cell.textContent=meta.pts;
-    const lock=row.querySelector('.mopt-lock');if(lock)lock.style.display=ok?'none':'inline-block';
+    const lock=row.querySelector('.mopt-lock');if(lock)lock.textContent=req[m]||'';
   });
 }
 function updateChatModelStrip(){
