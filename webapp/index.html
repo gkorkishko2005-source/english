@@ -1127,10 +1127,6 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rem-hero[data-phase=evening] .rem-mark svg{stroke:#ff8a6b}
 .rem-hero[data-phase=night] .rem-mark svg{stroke:#a594ff}
 .rem-hand{transform-origin:24px 24px;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
-.rem-hero[data-phase=morning] .rem-hand{transform:rotate(-30deg)}
-.rem-hero[data-phase=day] .rem-hand{transform:rotate(25deg)}
-.rem-hero[data-phase=evening] .rem-hand{transform:rotate(82deg)}
-.rem-hero[data-phase=night] .rem-hand{transform:rotate(145deg)}
 .rem-hero.tick .rem-mark{transform:scale(1.06)}
 .rem-readout{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:7px}
 .rem-input{color:var(--t1);font-family:var(--f);font-size:46px;font-weight:800;text-align:center;letter-spacing:2px;line-height:1;font-variant-numeric:tabular-nums}
@@ -6723,6 +6719,9 @@ function _remUpdateDisplay(){
   const hero=document.getElementById('rem-hero');
   if(hero){
     hero.dataset.phase=phase;
+    // Real clock hour-hand: 30° per hour + 0.5° per minute, from 12 o'clock.
+    const hand=hero.querySelector('.rem-hand');
+    if(hand)hand.style.transform='rotate('+(((remH%12)+remM/60)*30)+'deg)';
     if(phase!==_remLastPhase){
       _remLastPhase=phase;
       hero.classList.remove('tick');void hero.offsetWidth;hero.classList.add('tick');
