@@ -1126,7 +1126,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .rem-hero[data-phase=day] .rem-mark svg{stroke:#ffb830}
 .rem-hero[data-phase=evening] .rem-mark svg{stroke:#ff8a6b}
 .rem-hero[data-phase=night] .rem-mark svg{stroke:#a594ff}
-.rem-hand{transform-origin:24px 24px;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.rem-hand{transform-origin:24px 24px;transition:transform .4s cubic-bezier(.2,.8,.2,1);stroke-width:2.6}
+.rem-hand-m{transform-origin:24px 24px;transition:transform .4s cubic-bezier(.2,.8,.2,1);stroke-width:1.8}
 .rem-hero.tick .rem-mark{transform:scale(1.06)}
 .rem-readout{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:7px}
 .rem-input{color:var(--t1);font-family:var(--f);font-size:46px;font-weight:800;text-align:center;letter-spacing:2px;line-height:1;font-variant-numeric:tabular-nums}
@@ -2647,8 +2648,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         <div class="rem-mark" aria-hidden="true">
           <svg viewBox="0 0 48 48">
             <circle cx="24" cy="24" r="15"></circle>
-            <path class="rem-hand" d="M24 24V13"></path>
-            <path d="M24 24h9"></path>
+            <path class="rem-hand-m" d="M24 24V10"></path>
+            <path class="rem-hand" d="M24 24V15"></path>
             <path d="M12 8L7 13M36 8l5 5"></path>
           </svg>
         </div>
@@ -6719,9 +6720,11 @@ function _remUpdateDisplay(){
   const hero=document.getElementById('rem-hero');
   if(hero){
     hero.dataset.phase=phase;
-    // Real clock hour-hand: 30° per hour + 0.5° per minute, from 12 o'clock.
+    // Real clock hands, from 12 o'clock: hour = 30°/h + 0.5°/min, minute = 6°/min.
     const hand=hero.querySelector('.rem-hand');
     if(hand)hand.style.transform='rotate('+(((remH%12)+remM/60)*30)+'deg)';
+    const handM=hero.querySelector('.rem-hand-m');
+    if(handM)handM.style.transform='rotate('+(remM*6)+'deg)';
     if(phase!==_remLastPhase){
       _remLastPhase=phase;
       hero.classList.remove('tick');void hero.offsetWidth;hero.classList.add('tick');
