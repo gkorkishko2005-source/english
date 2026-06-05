@@ -2526,33 +2526,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <!-- Admin Dashboard (visible only to admins) -->
   <div class="admin-panel" id="admin-panel" style="display:none"></div>
 
-  <!-- Collapsible Tools section -->
-  <button class="tools-toggle" onclick="toggleSettingsTools()" type="button">
-    <span class="tools-toggle-main">
-      <span class="tools-toggle-ico"><svg viewBox="0 0 24 24"><path d="M5 6h14M8 12h8M10 18h4"/><circle cx="5" cy="6" r="1.5"/><circle cx="8" cy="12" r="1.5"/><circle cx="10" cy="18" r="1.5"/></svg></span>
-      <span id="tools-toggle-lbl">Инструменты</span>
-    </span>
-    <svg class="tools-arrow" id="tools-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  <div id="settings-tools" class="tools-grid" style="display:none">
-    <button class="tool-card share" onclick="shareProgress()" type="button">
-      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M8 12h8"/><path d="M13 7l5 5-5 5"/><rect x="3" y="5" width="8" height="14" rx="3"/></svg></div>
-      <div class="tool-title" id="share-lbl">Share progress</div><div class="tool-sub" id="share-sub">Ready post</div>
-    </button>
-    <button class="tool-card export" onclick="exportProgress()" type="button">
-      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h5"/><path d="M10 14h6M10 17h4"/></svg></div>
-      <div class="tool-title" id="export-lbl">Export report</div><div class="tool-sub" id="export-sub">Copy or download</div>
-    </button>
-    <button class="tool-card cert" onclick="generateCertificate()" type="button">
-      <div class="tool-ico"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16" rx="3"/><path d="M8 9h8M8 13h5"/><path d="M15 16l1.2 1.2L19 14.5"/></svg></div>
-      <div class="tool-title" id="cert-lbl">Certificate</div><div class="tool-sub" id="cert-sub">Achievement card</div>
-    </button>
-    <button class="tool-card terms" onclick="openTermsRules()" type="button">
-      <div class="tool-ico"><svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 012 2v16l-4-2-3 2-3-2-4 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
-      <div class="tool-title" id="terms-lbl">Terms & Rules</div><div class="tool-sub" id="terms-sub">Service policy</div>
-    </button>
-  </div>
-
   <!-- Compact quick-toggles row: Dark + Sound -->
   <div class="set-grid-2">
     <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
@@ -3248,30 +3221,6 @@ function applyLang(){
   // Sound toggle label (was hard-coded "Sound")
   var sfxT=document.getElementById('sfx-text');
   if(sfxT)sfxT.textContent={ru:'Звук',en:'Sound',es:'Sonido',de:'Ton',fr:'Son',pt:'Som',uk:'Звук',tr:'Ses',zh:'声音',ar:'صوت'}[lang]||'Sound';
-  /* Settings · Tools section labels — moved out of drawProgress() so
-     they get localised even for users who never visit the Progress
-     screen. Includes the section toggle, four tool titles, four
-     subtitles and the certificate's translated copy. */
-  try{
-    var ttl=document.getElementById('tools-toggle-lbl');
-    if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
-    var sl=document.getElementById('share-lbl');
-    if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
-    var elx=document.getElementById('export-lbl');
-    if(elx)elx.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
-    var cl=document.getElementById('cert-lbl');
-    if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
-    var tml=document.getElementById('terms-lbl');
-    if(tml)tml.textContent={ru:'Условия и правила',en:'Terms & Rules',es:'Términos y reglas',de:'Bedingungen & Regeln',fr:'Conditions et règles',pt:'Termos e regras',uk:'Умови та правила',tr:'Şartlar ve kurallar',zh:'条款与规则',ar:'الشروط والقواعد'}[lang]||'Terms & Rules';
-    var ss=document.getElementById('share-sub');
-    if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',de:'Telegram-Beitrag',fr:'Post Telegram',pt:'Post para Telegram',uk:'Пост для Telegram',tr:'Telegram gönderisi',zh:'Telegram 帖子',ar:'منشور تيليجرام'}[lang]||'Telegram post';
-    var esb=document.getElementById('export-sub');
-    if(esb)esb.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',de:'Kopieren oder herunterladen',fr:'Copier ou télécharger',pt:'Copiar ou baixar',uk:'Скопіювати або завантажити',tr:'Kopyala veya indir',zh:'复制或下载',ar:'انسخ أو نزّل'}[lang]||'Copy or download';
-    var cs=document.getElementById('cert-sub');
-    if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',de:'Erfolgskarte',fr:'Carte de réussite',pt:'Cartão de conquista',uk:'Картка досягнення',tr:'Başarı kartı',zh:'成就卡片',ar:'بطاقة الإنجاز'}[lang]||'Achievement card';
-    var tsb=document.getElementById('terms-sub');
-    if(tsb)tsb.textContent={ru:'Политика сервиса',en:'Service policy',es:'Política del servicio',de:'Servicebedingungen',fr:'Politique de service',pt:'Política do serviço',uk:'Політика сервісу',tr:'Hizmet politikası',zh:'服务政策',ar:'سياسة الخدمة'}[lang]||'Service policy';
-  }catch(_){}
   // Refresh theme toggle label (lazy-applied)
   try{const m=LS.get('dark_mode')||'dark';const t=document.getElementById('dl-text');
        if(t)t.textContent=m==='light'
@@ -4133,18 +4082,6 @@ function drawProgress(){
   try{syncFromServer();}catch(e){}
   // Periodic sync every 60s
   setInterval(function(){try{syncToServer();}catch(e){}},60000);
-  // Wave 5 button labels
-  try{
-    var sl=document.getElementById('share-lbl');if(sl)sl.textContent={ru:'Поделиться прогрессом',en:'Share progress',es:'Compartir progreso',de:'Fortschritt teilen',fr:'Partager le progrès',pt:'Compartilhar progresso',uk:'Поділитись прогресом',tr:'İlerlemeyi paylaş',zh:'分享进度',ar:'مشاركة التقدم'}[lang]||'Share progress';
-    var el2=document.getElementById('export-lbl');if(el2)el2.textContent={ru:'Экспорт отчёта',en:'Export report',es:'Exportar informe',de:'Bericht exportieren',fr:'Exporter le rapport',pt:'Exportar relatório',uk:'Експорт звіту',tr:'Raporu dışa aktar',zh:'导出报告',ar:'تصدير التقرير'}[lang]||'Export report';
-    var cl=document.getElementById('cert-lbl');if(cl)cl.textContent={ru:'Сертификат',en:'Certificate',es:'Certificado',de:'Zertifikat',fr:'Certificat',pt:'Certificado',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'شهادة'}[lang]||'Certificate';
-    var termsLbl=document.getElementById('terms-lbl');if(termsLbl)termsLbl.textContent={ru:'Условия и правила',en:'Terms & Rules',es:'Términos y reglas',de:'Bedingungen & Regeln',fr:'Conditions et règles',pt:'Termos e regras',uk:'Умови та правила',tr:'Şartlar ve kurallar',zh:'条款与规则',ar:'الشروط والقواعد'}[lang]||'Terms & Rules';
-    var ttl=document.getElementById('tools-toggle-lbl');if(ttl)ttl.textContent={ru:'Инструменты',en:'Tools',es:'Herramientas',de:'Werkzeuge',fr:'Outils',pt:'Ferramentas',uk:'Інструменти',tr:'Araçlar',zh:'工具',ar:'أدوات'}[lang]||'Tools';
-    var ss=document.getElementById('share-sub');if(ss)ss.textContent={ru:'Пост для Telegram',en:'Telegram post',es:'Post para Telegram',de:'Telegram-Beitrag',fr:'Post Telegram',pt:'Post para Telegram',uk:'Пост для Telegram',tr:'Telegram gönderisi',zh:'Telegram 帖子',ar:'منشور تيليجرام'}[lang]||'Telegram post';
-    var es=document.getElementById('export-sub');if(es)es.textContent={ru:'Скопировать или скачать',en:'Copy or download',es:'Copiar o descargar',de:'Kopieren oder herunterladen',fr:'Copier ou télécharger',pt:'Copiar ou baixar',uk:'Скопіювати або завантажити',tr:'Kopyala veya indir',zh:'复制或下载',ar:'انسخ أو نزّل'}[lang]||'Copy or download';
-    var cs=document.getElementById('cert-sub');if(cs)cs.textContent={ru:'Карточка достижения',en:'Achievement card',es:'Tarjeta de logro',de:'Erfolgskarte',fr:'Carte de réussite',pt:'Cartão de conquista',uk:'Картка досягнення',tr:'Başarı kartı',zh:'成就卡片',ar:'بطاقة الإنجاز'}[lang]||'Achievement card';
-    var ts=document.getElementById('terms-sub');if(ts)ts.textContent={ru:'Политика сервиса',en:'Service policy',es:'Política del servicio',de:'Servicebedingungen',fr:'Politique de service',pt:'Política do serviço',uk:'Політика сервісу',tr:'Hizmet politikası',zh:'服务政策',ar:'سياسة الخدمة'}[lang]||'Service policy';
-  }catch(e){}
 
   // Achievements
   try{renderAchievements();}catch(e){}
@@ -5614,9 +5551,587 @@ workflow|рабочий процесс|Work|B2
 yearly|ежегодный|Time|B1
 zero|ноль|Core|A2
 zone|зона|Travel|A2
+abandon|покидать, бросать|Emotion|C1
+absorb|поглощать, впитывать|Study|B2
+abstract|абстрактный|Study|C1
+accompany|сопровождать|Daily|B2
+accumulate|накапливать|Business|C1
+accustomed|привыкший|Daily|C1
+acknowledge|признавать|Speaking|C1
+adequate|достаточный, адекватный|Study|B2
+adjacent|соседний, смежный|Travel|C1
+adjust|регулировать, настраивать|Daily|B1
+admire|восхищаться|Emotion|B1
+admit|признавать, допускать|Speaking|B2
+adopt|принимать, перенимать|Society|B2
+afterwards|потом, впоследствии|Time|B1
+aggressive|агрессивный|Emotion|B2
+alert|настороженный, бдительный|Health|B2
+allocate|распределять, выделять|Business|C1
+ambition|амбиция, стремление|Work|B2
+ample|обширный, достаточный|Study|C1
+ancestor|предок|Society|C1
+annoy|раздражать|Emotion|B1
+anxiety|тревога, беспокойство|Health|B2
+appeal|обращение, привлекательность|Society|B2
+appliance|бытовой прибор|Daily|B1
+appoint|назначать|Work|B2
+appreciate|ценить, быть благодарным|Emotion|B1
+appropriate|подходящий, уместный|Study|B2
+approve|одобрять|Business|B2
+arise|возникать|Study|C1
+ashamed|пристыжённый|Emotion|B2
+aspect|аспект, сторона|Study|B2
+assemble|собирать, монтировать|Work|B2
+assign|назначать, поручать|Work|B2
+assume|предполагать|Study|B2
+assure|заверять, уверять|Speaking|B2
+attain|достигать|Work|C1
+attitude|отношение, позиция|Speaking|B1
+attractive|привлекательный|Emotion|B1
+authentic|подлинный, настоящий|Society|C1
+awkward|неловкий, неуклюжий|Emotion|B2
+barely|едва, еле-еле|Time|B2
+beforehand|заранее|Time|B2
+behave|вести себя|Society|B1
+beneath|под, ниже|Travel|B2
+betray|предавать|Emotion|C1
+beverage|напиток|Food|B1
+bias|предвзятость|Society|C1
+bid|предложение цены, ставка|Business|B2
+blame|винить|Emotion|B1
+bold|смелый, дерзкий|Emotion|B2
+boost|повышать, усиливать|Business|B2
+border|граница|Travel|B1
+breeze|лёгкий ветерок|Nature|B2
+bribe|взятка, подкупать|Society|C1
+brilliant|блестящий, великолепный|Emotion|B1
+broad|широкий|Study|B2
+burden|бремя, ноша|Emotion|C1
+cabinet|шкаф; кабинет министров|Society|B2
+calculate|вычислять|Study|B1
+campaign|кампания|Society|B2
+cancel|отменять|Daily|B1
+candidate|кандидат|Work|B2
+capable|способный|Work|B2
+capture|захватывать, запечатлеть|Study|B2
+casual|повседневный, непринуждённый|Daily|B2
+ceiling|потолок|Daily|B1
+cease|прекращать|Study|C1
+chamber|палата, камера|Society|C1
+charity|благотворительность|Society|B2
+cherish|дорожить, лелеять|Emotion|C1
+chronic|хронический|Health|C1
+civilian|гражданский, мирный житель|Society|C1
+clarity|ясность|Study|B2
+clumsy|неуклюжий|Emotion|B2
+coast|побережье|Travel|B1
+coincide|совпадать|Study|C1
+collapse|рушиться, обвал|Society|C1
+colleague|коллега|Work|B1
+combine|сочетать, объединять|Study|B1
+commute|ездить на работу|Travel|B2
+compassion|сострадание|Emotion|C1
+compel|вынуждать|Society|C1
+compensate|компенсировать|Business|C1
+compile|составлять, собирать|Study|C1
+comprehend|понимать, постигать|Study|C1
+conceal|скрывать|Emotion|C1
+concentrate|сосредоточиться|Study|B1
+conduct|проводить, вести|Study|B2
+confront|противостоять|Emotion|C1
+congestion|перегруженность, затор|Travel|C1
+conquer|завоёвывать, покорять|Society|C1
+conscience|совесть|Emotion|C1
+consent|согласие|Society|C1
+conserve|сохранять, беречь|Nature|B2
+considerable|значительный|Study|C1
+constant|постоянный|Time|B2
+constitute|составлять, представлять собой|Society|C1
+consult|консультироваться|Work|B2
+consume|потреблять|Business|B2
+contemplate|размышлять, обдумывать|Emotion|C1
+contemporary|современный|Society|C1
+contempt|презрение|Emotion|C1
+controversy|спор, полемика|Society|C1
+convenient|удобный|Daily|B1
+convey|передавать (смысл)|Speaking|C1
+cope|справляться|Emotion|B2
+cordial|сердечный, тёплый|Speaking|C1
+courage|смелость, мужество|Emotion|B2
+courteous|вежливый, учтивый|Speaking|C1
+crawl|ползти|Daily|B2
+creative|творческий|Study|B1
+crisis|кризис|Society|B2
+critical|критический, важный|Study|B2
+cruel|жестокий|Emotion|B2
+cultivate|выращивать, развивать|Nature|C1
+cunning|хитрый|Emotion|C1
+cure|лечить, лекарство|Health|B1
+curiosity|любопытство|Emotion|B2
+dawn|рассвет|Time|B2
+dazzle|ослеплять, поражать|Emotion|C1
+decline|снижение; отклонять|Business|B2
+decorate|украшать|Daily|B1
+deed|поступок, дело|Society|C1
+defeat|поражение; побеждать|Society|B2
+defend|защищать|Society|B1
+deficit|дефицит|Business|C1
+delicate|хрупкий, деликатный|Emotion|C1
+delight|восторг, радость|Emotion|B2
+deny|отрицать|Speaking|B2
+deploy|развёртывать, размещать|Tech|C1
+deprive|лишать|Society|C1
+descend|спускаться|Travel|C1
+deserve|заслуживать|Emotion|B2
+desperate|отчаянный|Emotion|B2
+destiny|судьба|Society|C1
+detect|обнаруживать|Tech|B2
+deteriorate|ухудшаться|Health|C1
+devote|посвящать|Emotion|C1
+diagnose|диагностировать|Health|C1
+dignity|достоинство|Society|C1
+diminish|уменьшать(ся)|Study|C1
+disappoint|разочаровывать|Emotion|B1
+disaster|катастрофа|Society|B2
+disclose|раскрывать, разглашать|Business|C1
+discreet|осторожный, сдержанный|Speaking|C1
+disgust|отвращение|Emotion|C1
+dismiss|увольнять; отвергать|Work|C1
+disorder|беспорядок; расстройство|Health|C1
+dispute|спор; оспаривать|Society|C1
+distinct|отчётливый, особый|Study|C1
+distinguish|различать|Study|C1
+distract|отвлекать|Study|B2
+distribute|распространять, раздавать|Business|B2
+disturb|беспокоить, тревожить|Emotion|B2
+diverse|разнообразный|Society|B2
+divine|божественный|Society|C1
+dominate|доминировать|Society|C1
+donate|жертвовать, дарить|Society|B2
+drift|дрейфовать, плыть по течению|Nature|C1
+eager|жаждущий, нетерпеливый|Emotion|B2
+earn|зарабатывать|Money|B1
+ease|лёгкость; облегчать|Health|B2
+elaborate|подробный; уточнять|Study|C1
+elegant|элегантный|Emotion|B2
+eligible|имеющий право|Society|C1
+eliminate|устранять|Study|B2
+embrace|обнимать; принимать|Emotion|C1
+emerge|появляться, возникать|Study|C1
+emotion|эмоция, чувство|Emotion|B1
+empathy|сочувствие, эмпатия|Emotion|C1
+emphasize|подчёркивать|Speaking|B2
+empower|расширять права, давать силы|Society|C1
+enclose|прилагать, вкладывать|Business|B2
+enforce|обеспечивать соблюдение|Society|C1
+enormous|огромный|Study|B2
+enrich|обогащать|Study|C1
+enroll|записываться, зачисляться|Study|B2
+enthusiasm|энтузиазм|Emotion|B2
+envy|зависть|Emotion|B2
+era|эпоха|Time|B2
+erupt|извергаться, вспыхивать|Nature|C1
+eternal|вечный|Time|C1
+evident|очевидный|Study|C1
+evolve|развиваться, эволюционировать|Study|C1
+exaggerate|преувеличивать|Speaking|C1
+exceed|превышать|Business|C1
+excel|преуспевать|Work|C1
+exclude|исключать|Study|B2
+exhausted|измотанный|Health|B2
+expertise|компетентность, опыт|Work|C1
+expose|подвергать; разоблачать|Society|C1
+extend|продлевать, расширять|Daily|B1
+extract|извлекать; выдержка|Study|C1
+fabric|ткань|Daily|B2
+fade|увядать, тускнеть|Nature|B2
+faint|слабый; падать в обморок|Health|C1
+faithful|верный, преданный|Emotion|C1
+fascinate|очаровывать|Emotion|B2
+fatigue|усталость|Health|C1
+feasible|осуществимый|Business|C1
+fertile|плодородный|Nature|C1
+fierce|свирепый, яростный|Emotion|C1
+flavour|вкус, аромат|Food|B1
+flaw|изъян, недостаток|Study|C1
+flee|бежать, спасаться|Society|C1
+flourish|процветать|Society|C1
+forbid|запрещать|Society|B2
+forecast|прогноз|Nature|B2
+foresee|предвидеть|Study|C1
+forgive|прощать|Emotion|B2
+fortune|удача; состояние|Money|B2
+fragment|фрагмент, обломок|Study|C1
+frustrate|расстраивать, мешать|Emotion|B2
+fulfil|выполнять, осуществлять|Work|C1
+fund|финансировать; фонд|Money|B2
+fury|ярость|Emotion|C1
+gather|собирать(ся)|Daily|B1
+gaze|пристальный взгляд|Emotion|C1
+generosity|щедрость|Emotion|C1
+gesture|жест|Speaking|B2
+glance|беглый взгляд|Daily|B2
+glimpse|мимолётный взгляд|Daily|C1
+gloomy|мрачный|Emotion|C1
+glory|слава|Society|C1
+govern|управлять, править|Society|C1
+graceful|грациозный|Emotion|C1
+grant|предоставлять; грант|Money|B2
+grasp|схватить; понять|Study|C1
+grateful|благодарный|Emotion|B1
+grief|горе, скорбь|Emotion|C1
+grim|суровый, мрачный|Emotion|C1
+guilt|вина|Emotion|B2
+harsh|суровый, резкий|Emotion|B2
+haste|спешка|Time|C1
+heal|исцелять, заживать|Health|B2
+heritage|наследие|Society|C1
+hesitant|нерешительный|Emotion|C1
+hollow|пустой, полый|Nature|C1
+honesty|честность|Emotion|B2
+hostile|враждебный|Emotion|C1
+humble|скромный|Emotion|C1
+humid|влажный|Nature|B2
+hunger|голод|Health|B1
+identical|идентичный|Study|B2
+idle|праздный, бездействующий|Daily|C1
+ignite|воспламенять|Nature|C1
+illustrate|иллюстрировать|Study|B2
+imitate|подражать|Study|B2
+immense|громадный|Study|C1
+immune|невосприимчивый, иммунный|Health|C1
+impose|навязывать, вводить|Society|C1
+impressive|впечатляющий|Emotion|B2
+inclined|склонный|Emotion|C1
+indicate|указывать|Study|B2
+indifferent|равнодушный|Emotion|C1
+indulge|потакать, баловать|Emotion|C1
+infer|делать вывод|Study|C1
+inflict|наносить, причинять|Society|C1
+ingredient|ингредиент|Food|B1
+inhabit|населять, обитать|Nature|C1
+inherent|присущий, врождённый|Study|C1
+inherit|наследовать|Society|C1
+initiate|начинать, инициировать|Business|C1
+innovate|внедрять новшества|Business|C1
+inquire|спрашивать, осведомляться|Speaking|C1
+insist|настаивать|Speaking|B2
+inspire|вдохновлять|Emotion|B2
+integrate|интегрировать, объединять|Society|C1
+integrity|честность, целостность|Society|C1
+intense|интенсивный, сильный|Emotion|B2
+intent|намерение|Speaking|C1
+interpret|толковать, переводить|Speaking|B2
+intimate|близкий, интимный|Emotion|C1
+intrigue|интриговать; интрига|Emotion|C1
+intuitive|интуитивный|Study|C1
+invade|вторгаться|Society|C1
+invaluable|неоценимый|Study|C1
+investigate|расследовать|Society|B2
+invisible|невидимый|Study|B2
+irritate|раздражать|Emotion|B2
+isolate|изолировать|Health|C1
+jealous|ревнивый, завистливый|Emotion|B2
+joyful|радостный|Emotion|B2
+keen|увлечённый, острый|Emotion|B2
+labour|труд, работа|Work|B2
+landscape|пейзаж, ландшафт|Nature|B2
+lately|в последнее время|Time|B1
+lawn|газон|Daily|B2
+leak|утечка; протекать|Tech|B2
+lean|наклоняться; худой|Daily|B2
+legacy|наследие|Society|C1
+legislation|законодательство|Society|C1
+leisure|досуг|Daily|B2
+liable|ответственный; склонный|Business|C1
+liberate|освобождать|Society|C1
+linger|задерживаться, медлить|Time|C1
+literacy|грамотность|Study|C1
+loyalty|верность, лояльность|Emotion|B2
+luxury|роскошь|Money|B2
+magnificent|великолепный|Emotion|C1
+majority|большинство|Society|B2
+mature|зрелый|Emotion|B2
+meaningful|значимый, осмысленный|Emotion|B2
+mechanism|механизм|Tech|B2
+mediate|посредничать|Society|C1
+melancholy|меланхолия, грусть|Emotion|C1
+mercy|милосердие, пощада|Emotion|C1
+merge|сливать(ся), объединять|Business|B2
+merit|достоинство, заслуга|Study|C1
+mighty|могучий|Emotion|C1
+mimic|имитировать|Study|C1
+minimal|минимальный|Study|B2
+mischief|озорство, проказа|Emotion|C1
+modify|изменять, модифицировать|Tech|B2
+moisture|влага|Nature|C1
+momentum|импульс, движущая сила|Study|C1
+monotonous|монотонный|Emotion|C1
+moral|моральный, нравственный|Society|B2
+mortal|смертный|Society|C1
+mutual|взаимный|Society|C1
+naive|наивный|Emotion|C1
+narrate|повествовать|Speaking|C1
+nasty|противный, мерзкий|Emotion|B2
+navigate|ориентироваться, вести|Travel|B2
+nevertheless|тем не менее|Speaking|C1
+nominate|выдвигать, назначать|Society|C1
+notion|понятие, представление|Study|C1
+nourish|питать, кормить|Health|C1
+nuisance|неприятность, помеха|Daily|C1
+obedient|послушный|Emotion|C1
+obey|подчиняться|Society|B2
+oblige|обязывать|Society|C1
+obscure|неясный, малоизвестный|Study|C1
+obsess|быть одержимым|Emotion|C1
+obstinate|упрямый|Emotion|C1
+occasion|случай, повод|Daily|B1
+occupy|занимать|Daily|B2
+offend|обижать, оскорблять|Emotion|B2
+ongoing|продолжающийся|Time|B2
+optimistic|оптимистичный|Emotion|B2
+orchestrate|организовывать, оркестровать|Business|C1
+outline|план, набросок; обрисовать|Study|B2
+outstanding|выдающийся|Emotion|B2
+overcome|преодолевать|Emotion|B2
+overlook|упускать из виду; выходить на|Study|C1
+overseas|за границей|Travel|B2
+overtake|обгонять, опережать|Travel|C1
+overwhelming|подавляющий, ошеломляющий|Emotion|C1
+panic|паника|Emotion|B2
+paradox|парадокс|Study|C1
+passion|страсть, увлечение|Emotion|B2
+patience|терпение|Emotion|B2
+peculiar|странный, особенный|Emotion|C1
+penalty|штраф, наказание|Society|B2
+perceive|воспринимать|Study|C1
+permanent|постоянный|Time|B2
+persist|упорствовать, сохраняться|Study|C1
+pessimistic|пессимистичный|Emotion|C1
+phenomenon|явление, феномен|Study|C1
+pierce|пронзать, прокалывать|Daily|C1
+plead|умолять; заявлять|Speaking|C1
+pledge|обещание, клятва|Society|C1
+plentiful|обильный|Nature|C1
+polite|вежливый|Speaking|B1
+ponder|размышлять|Emotion|C1
+portion|порция, часть|Food|B1
+portray|изображать|Study|C1
+possess|обладать|Society|C1
+postpone|откладывать|Daily|B2
+poverty|бедность|Society|B2
+praise|похвала; хвалить|Emotion|B2
+precaution|предосторожность|Health|C1
+precede|предшествовать|Time|C1
+prejudice|предрассудок|Society|C1
+preliminary|предварительный|Study|C1
+prestige|престиж|Society|C1
+presume|предполагать|Study|C1
+prevail|преобладать, побеждать|Society|C1
+profound|глубокий|Study|C1
+prohibit|запрещать|Society|C1
+prominent|видный, выдающийся|Society|C1
+prone|склонный, подверженный|Health|C1
+prosper|процветать|Business|C1
+provoke|провоцировать|Emotion|C1
+prudent|благоразумный|Emotion|C1
+pursue|преследовать, добиваться|Work|B2
+puzzle|загадка; озадачивать|Study|B2
+quaint|причудливый, старомодный|Travel|C1
+qualify|квалифицировать(ся)|Work|B2
+quarrel|ссора; ссориться|Emotion|C1
+quench|утолять|Food|C1
+radiant|сияющий|Emotion|C1
+rage|ярость|Emotion|C1
+random|случайный|Study|B2
+ratio|соотношение|Study|C1
+react|реагировать|Study|B1
+reassure|успокаивать, заверять|Emotion|C1
+rebel|бунтовать; бунтарь|Society|C1
+recall|вспоминать; отзыв|Study|B2
+recede|отступать, убывать|Nature|C1
+reckless|безрассудный|Emotion|C1
+reconcile|примирять|Emotion|C1
+refine|совершенствовать, очищать|Study|C1
+refrain|воздерживаться|Speaking|C1
+refuge|убежище|Society|C1
+regret|сожалеть; сожаление|Emotion|B2
+rehearse|репетировать|Speaking|B2
+reinforce|укреплять, усиливать|Study|C1
+rejoice|радоваться|Emotion|C1
+relentless|неумолимый, упорный|Emotion|C1
+relevant|уместный, актуальный|Study|B2
+relieve|облегчать|Health|B2
+remedy|средство, лекарство|Health|C1
+renew|обновлять, продлевать|Daily|B2
+renowned|известный, прославленный|Society|C1
+repair|чинить; ремонт|Daily|B1
+resemble|походить, напоминать|Study|C1
+resent|возмущаться, обижаться|Emotion|C1
+reside|проживать|Society|C1
+resign|уходить в отставку|Work|C1
+resilient|жизнестойкий, упругий|Emotion|C1
+resist|сопротивляться|Society|B2
+respond|отвечать, реагировать|Speaking|B1
+restore|восстанавливать|Society|B2
+restrain|сдерживать|Emotion|C1
+restrict|ограничивать|Society|B2
+retreat|отступать; отступление|Society|C1
+reveal|раскрывать, обнаруживать|Speaking|B2
+revise|пересматривать, повторять|Study|B2
+revive|оживлять, возрождать|Health|C1
+ridiculous|нелепый, смешной|Emotion|B2
+righteous|праведный|Society|C1
+rigid|жёсткий, негибкий|Study|C1
+rigorous|строгий, тщательный|Study|C1
+roam|бродить, странствовать|Travel|C1
+robust|крепкий, надёжный|Tech|C1
+rough|грубый, неровный|Daily|B2
+rural|сельский|Travel|B2
+sacred|священный|Society|C1
+sacrifice|жертва; жертвовать|Emotion|C1
+scarce|скудный, дефицитный|Society|C1
+scatter|разбрасывать, рассеивать|Nature|C1
+scheme|схема, план|Business|B2
+scold|ругать, бранить|Emotion|C1
+scope|объём, охват|Study|C1
+scorn|презрение|Emotion|C1
+scrutiny|пристальное изучение|Study|C1
+seal|печать; запечатывать|Daily|B2
+seek|искать|Study|B2
+seize|хватать, захватывать|Society|C1
+seldom|редко|Time|B2
+sensible|благоразумный|Emotion|B2
+sensitive|чувствительный|Emotion|B2
+serene|безмятежный|Emotion|C1
+severe|суровый, серьёзный|Health|B2
+shallow|мелкий, поверхностный|Nature|B2
+shatter|разбивать вдребезги|Emotion|C1
+shelter|укрытие; укрывать|Society|B2
+shrink|сжиматься, уменьшаться|Study|B2
+sigh|вздох; вздыхать|Emotion|B2
+slender|стройный, тонкий|Daily|C1
+soak|замачивать, пропитывать|Daily|B2
+soar|взмывать, резко расти|Business|C1
+solemn|торжественный, серьёзный|Emotion|C1
+solitude|уединение|Emotion|C1
+soothe|успокаивать|Emotion|C1
+sophisticated|изощрённый, утончённый|Study|C1
+sorrow|печаль, скорбь|Emotion|C1
+spacious|просторный|Daily|B2
+spare|запасной; уделять|Daily|B2
+sparkle|искриться, сверкать|Nature|C1
+splendid|великолепный|Emotion|C1
+spoil|портить, баловать|Emotion|B2
+spread|распространять(ся)|Society|B1
+stable|стабильный, устойчивый|Business|B2
+stark|резкий, суровый|Study|C1
+startle|испугать, поразить|Emotion|C1
+steep|крутой|Travel|B2
+stern|строгий, суровый|Emotion|C1
+stimulate|стимулировать|Study|C1
+sting|жалить; жало|Nature|B2
+stir|мешать, размешивать|Food|B2
+strain|напряжение, нагрузка|Health|C1
+stride|шагать; большой шаг|Daily|C1
+strive|стремиться|Work|C1
+stumble|спотыкаться|Daily|B2
+sturdy|крепкий, прочный|Daily|C1
+subsequent|последующий|Time|C1
+substantial|существенный|Study|C1
+succeed|преуспевать|Work|B1
+suffer|страдать|Health|B2
+summit|вершина; саммит|Travel|B2
+superb|превосходный|Emotion|B2
+superior|превосходящий, высший|Study|C1
+suppress|подавлять|Emotion|C1
+surge|всплеск, резкий рост|Business|C1
+surpass|превосходить|Study|C1
+surrender|сдаваться|Society|C1
+suspend|приостанавливать|Business|C1
+suspicious|подозрительный|Emotion|B2
+sustain|поддерживать, выдерживать|Nature|C1
+swift|быстрый, стремительный|Time|C1
+sympathy|сочувствие|Emotion|B2
+tackle|решать, браться за|Work|B2
+tactic|тактика|Business|B2
+tedious|утомительный, скучный|Emotion|C1
+temper|нрав, характер|Emotion|C1
+tempt|искушать, соблазнять|Emotion|C1
+tender|нежный, ласковый|Emotion|C1
+tense|напряжённый|Emotion|B2
+terrify|ужасать|Emotion|B2
+testify|свидетельствовать|Society|C1
+thrive|процветать, преуспевать|Business|C1
+thrust|толкать, совать|Daily|C1
+tidy|опрятный, аккуратный|Daily|B1
+timid|робкий, застенчивый|Emotion|C1
+tolerate|терпеть, переносить|Emotion|B2
+torment|мучение; мучить|Emotion|C1
+trace|след; прослеживать|Study|B2
+trait|черта (характера)|Emotion|C1
+tranquil|спокойный, тихий|Emotion|C1
+transform|преобразовывать|Study|B2
+transparent|прозрачный|Study|B2
+treasure|сокровище; дорожить|Emotion|B2
+tremble|дрожать|Emotion|C1
+trigger|вызывать; спусковой крючок|Tech|C1
+triumph|триумф, победа|Emotion|C1
+trivial|тривиальный, незначительный|Study|C1
+turmoil|смятение, беспорядок|Society|C1
+ultimate|конечный, окончательный|Study|C1
+unanimous|единогласный|Society|C1
+uncover|раскрывать, обнаруживать|Study|C1
+undergo|претерпевать, проходить|Health|C1
+undertake|предпринимать, браться|Work|C1
+uneasy|тревожный, беспокойный|Emotion|C1
+unfold|разворачиваться, раскрываться|Study|C1
+unify|объединять|Society|C1
+unique|уникальный|Study|B2
+unite|объединять(ся)|Society|B2
+unveil|представлять, обнародовать|Business|C1
+upbringing|воспитание|Society|C1
+uphold|поддерживать, отстаивать|Society|C1
+upright|прямой, вертикальный|Daily|C1
+urban|городской|Travel|B2
+urge|побуждать; настоятельное желание|Emotion|C1
+utilize|использовать, утилизировать|Tech|C1
+utmost|крайний, величайший|Study|C1
+vacant|свободный, незанятый|Travel|B2
+vain|тщеславный; напрасный|Emotion|C1
+vanish|исчезать|Study|C1
+vast|обширный, огромный|Study|B2
+venture|рискованное предприятие|Business|C1
+verify|проверять, подтверждать|Tech|B2
+versatile|разносторонний, универсальный|Work|C1
+vibrant|яркий, оживлённый|Emotion|C1
+vicious|злобный, порочный|Emotion|C1
+vigorous|энергичный|Health|C1
+violate|нарушать|Society|C1
+virtue|добродетель|Society|C1
+vivid|яркий, живой|Emotion|B2
+vow|клятва; клясться|Emotion|C1
+vulnerable|уязвимый|Emotion|C1
+wander|бродить, блуждать|Travel|B2
+weary|усталый, утомлённый|Emotion|C1
+weep|плакать, рыдать|Emotion|C1
+weird|странный|Emotion|B2
+whisper|шептать; шёпот|Speaking|B2
+wholesome|полезный, здоровый|Health|C1
+wicked|злой, нечестивый|Emotion|C1
+widespread|широко распространённый|Society|C1
+wisdom|мудрость|Emotion|B2
+withdraw|снимать, отзывать, отступать|Business|C1
+withstand|выдерживать, противостоять|Study|C1
+worship|поклоняться; поклонение|Society|C1
+worthwhile|стоящий, полезный|Study|C1
+yearn|тосковать, жаждать|Emotion|C1
+yield|уступать; давать (урожай)|Business|C1
+zeal|рвение, усердие|Emotion|C1
 `;
 (function expandVocabDeck(){
-  const need=Math.max(0,500-VOCAB_DECK.length);
+  const need=Math.max(0,1200-VOCAB_DECK.length);
   const start=VOCAB_DECK.length+1;
   EXTRA_VOCAB_PACK.trim().split('\n').map(function(row){return row.trim();}).filter(Boolean).slice(0,need).forEach(function(row,i){
     const parts=row.split('|').map(function(v){return (v||'').trim();});
@@ -8171,9 +8686,12 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
     ${failed?`<button class="course-retry-btn" type="button" onclick="courseRetryStage('${id}','${part}')">${({ru:'Перепройти этап',en:'Retry stage',es:'Repetir etapa',pt:'Refazer etapa',de:'Etappe wiederholen',fr:'Refaire l’étape',uk:'Пройти етап знову',tr:'Aşamayı tekrarla',zh:'重做此阶段',ar:'إعادة المرحلة'}[lang]||'Retry stage')}</button>`:''}
   </div>`;
 }
+const COURSE_SENTENCE_RU={"i am a student at the new school":"Я учусь в новой школе.","you are at home this evening":"Сегодня вечером ты дома.","he is my best friend":"Он мой лучший друг.","she is here in the classroom":"Она здесь, в классе.","it is an interesting book":"Это интересная книга.","we are busy today":"Сегодня мы заняты.","they are tired after the long trip":"Они устали после долгой поездки.","i have a new phone":"У меня есть новый телефон.","you have a black bag":"У тебя есть чёрная сумка.","she has a small car":"У неё есть маленькая машина.","he has many friends":"У него много друзей.","we have an english class today":"Сегодня у нас урок английского.","they have a good idea":"У них есть хорошая идея.","i have the key to the room":"У меня есть ключ от комнаты.","i study english every morning":"Я учу английский каждое утро.","he speaks four languages at work":"На работе он говорит на четырёх языках.","they live in a small city near the river":"Они живут в маленьком городе у реки.","she does not drink coffee only tea":"Она не пьёт кофе, только чай.","we usually start work at nine":"Обычно мы начинаем работу в девять.","my brother works in a hospital":"Мой брат работает в больнице.","i rarely go to bed before midnight":"Я редко ложусь спать до полуночи.","do you speak english at work":"Ты говоришь по-английски на работе?","where does he live now":"Где он сейчас живёт?","when do they usually study":"Когда они обычно занимаются?","what does she do in the evenings":"Что она делает по вечерам?","why do you ask the same question":"Почему ты задаёшь один и тот же вопрос?","how does the new system work":"Как работает новая система?","which book do you prefer":"Какую книгу ты предпочитаешь?","i watched the whole lesson yesterday evening":"Вчера вечером я посмотрел весь урок.","she went home late after the meeting":"После встречи она поздно ушла домой.","we finished the project last friday":"Мы закончили проект в прошлую пятницу.","he did not call back yesterday":"Вчера он не перезвонил.","did you see the message i sent two days ago":"Ты видел сообщение, которое я отправил два дня назад?","i visited my parents last weekend":"В прошлые выходные я навестил родителей.","they returned from the trip three days ago":"Они вернулись из поездки три дня назад.","i am going to study english tonight":"Сегодня вечером я собираюсь заниматься английским.","i will help you with the report no problem":"Я помогу тебе с отчётом, без проблем.","it will probably rain in the afternoon":"Днём, наверное, пойдёт дождь.","look at the sky it is going to snow":"Посмотри на небо — сейчас пойдёт снег.","we will arrange the meeting tomorrow":"Мы договоримся о встрече завтра.","i am going to visit my grandmother on sunday":"В воскресенье я собираюсь навестить бабушку.","i promise i will call you when i arrive":"Обещаю, я позвоню тебе, когда приеду.","turn left at the corner of the bank":"Поверни налево на углу у банка.","the museum is opposite the central park":"Музей напротив центрального парка.","go straight for two blocks on this street":"Иди прямо два квартала по этой улице.","the cafe is next to the new hotel":"Кафе рядом с новым отелем.","excuse me how do i get to the train station":"Извините, как пройти к вокзалу?","take the second avenue and turn right":"Сверни на вторую улицу и поверни направо.","the library is between the school and the post office":"Библиотека находится между школой и почтой.","hello my name is alex":"Привет, меня зовут Алекс.","i am from spain and i live in madrid":"Я из Испании и живу в Мадриде.","i am twenty years old":"Мне двадцать лет.","nice to meet you anna":"Приятно познакомиться, Анна.","please come in and sit down":"Пожалуйста, заходи и садись.","thanks for the help yesterday":"Спасибо за вчерашнюю помощь.","welcome to our school":"Добро пожаловать в нашу школу.","my mother is kind and patient":"Моя мама добрая и терпеливая.","his sister is young and bright":"Его сестра молодая и умная.","her brother is tall and quiet":"Её брат высокий и тихий.","our parents live in another city":"Наши родители живут в другом городе.","their child is only four years old":"Их ребёнку всего четыре года.","my family has five people in it":"В моей семье пять человек.","his daughter is now at university":"Его дочь сейчас учится в университете.","i have three books and four pens":"У меня три книги и четыре ручки.","the ticket costs ten dollars":"Билет стоит десять долларов.","she is twenty years old":"Ей двадцать лет.","my phone number has nine digits":"В моём номере телефона девять цифр.","we meet at six in the evening":"Мы встречаемся в шесть вечера.","there are five students in the room":"В комнате пять студентов.","he waited for two hours":"Он ждал два часа.","he is my best friend from school":"Он мой лучший друг со школы.","she works as a teacher in the city":"Она работает учительницей в городе.","they study english with us every friday":"Они учат английский вместе с нами каждую пятницу.","i sent the report to him yesterday":"Вчера я отправил ему отчёт.","give the book to her please":"Дай ей книгу, пожалуйста.","we invited them to the party":"Мы пригласили их на вечеринку.","tell me about the new project":"Расскажи мне о новом проекте.","this is my new phone":"Это мой новый телефон.","her bag is on the chair":"Её сумка на стуле.","their house has a beautiful garden":"У их дома красивый сад.","our office is on the fifth floor":"Наш офис на пятом этаже.","the blue jacket is mine":"Синяя куртка моя.","is this notebook yours":"Это твоя тетрадь?","the decision is hers not ours":"Решение за ней, а не за нами.","i see three black cats in the yard":"Я вижу трёх чёрных кошек во дворе.","there are two buses to the airport":"В аэропорт ходят два автобуса.","these boxes are too heavy to lift":"Эти коробки слишком тяжёлые, чтобы их поднять.","many children play in the park":"Много детей играет в парке.","five women are waiting in the queue":"Пять женщин стоят в очереди.","i bought two new books yesterday":"Вчера я купил две новые книги.","i always carry my glasses in this bag":"Я всегда ношу очки в этой сумке.","i need a new pen for the exam":"Мне нужна новая ручка для экзамена.","she eats an apple every morning":"Она ест яблоко каждое утро.","please open the door for me":"Пожалуйста, открой мне дверь.","an hour later he came back":"Час спустя он вернулся.","we saw a strange animal in the garden":"Мы видели странное животное в саду.","i study at the university near my house":"Я учусь в университете рядом с домом.","look at the picture on the wall":"Посмотри на картину на стене.","this book is new and very interesting":"Эта книга новая и очень интересная.","that house across the street is old":"Тот дом через дорогу старый.","these shoes are clean and dry":"Эти туфли чистые и сухие.","those people over there are tourists":"Те люди вон там — туристы.","this is john speaking who is there":"Это Джон. Кто это?","that picture on the wall is mine":"Та картина на стене моя.","these keys are not yours":"Эти ключи не твои.","there is a wooden table in the kitchen":"На кухне стоит деревянный стол.","there are three comfortable chairs in the room":"В комнате три удобных стула.","there is a small park near my house":"Рядом с моим домом есть маленький парк.","are there any students in the library now":"В библиотеке сейчас есть студенты?","there is a beautiful garden behind the building":"За зданием есть красивый сад.","there are five rooms on this floor":"На этом этаже пять комнат.","is there a train station near the hotel":"Рядом с отелем есть вокзал?","i often study english at night":"Я часто занимаюсь английским по ночам.","she never drinks strong coffee":"Она никогда не пьёт крепкий кофе.","he is always busy on mondays":"По понедельникам он всегда занят.","we usually meet on sunday afternoons":"Обычно мы встречаемся в воскресенье днём.","they sometimes work from home":"Иногда они работают из дома.","she rarely answers her phone at lunch":"Она редко отвечает на звонки во время обеда.","my team meets weekly to plan the week":"Моя команда собирается раз в неделю, чтобы спланировать неделю.","the cat is under the kitchen table":"Кошка под кухонным столом.","the book is on the wooden desk":"Книга на деревянном столе.","the garage is behind the main building":"Гараж за главным зданием.","there is a picture above the door":"Над дверью висит картина.","the library is between the school and the park":"Библиотека между школой и парком.","the shop is right next to my house":"Магазин прямо рядом с моим домом.","i can swim two kilometres without stopping":"Я могу проплыть два километра без остановки.","she can speak three languages fluently":"Она свободно говорит на трёх языках.","they cannot come to the meeting today":"Сегодня они не могут прийти на встречу.","can you help me with the homework":"Ты можешь помочь мне с домашним заданием?","he can drive but he does not own a car":"Он умеет водить, но у него нет машины.","we can cook dinner together on sunday":"В воскресенье мы можем приготовить ужин вместе.","my sister can sing very well":"Моя сестра очень хорошо поёт.","i like reading detective novels":"Я люблю читать детективы.","she loves cooking on weekends":"Она обожает готовить по выходным.","they hate waiting in long queues":"Они терпеть не могут стоять в длинных очередях.","we enjoy walking in the park after dinner":"Нам нравится гулять в парке после ужина.","he likes swimming in the morning":"Он любит плавать по утрам.","i love watching old films on rainy evenings":"Я обожаю смотреть старые фильмы дождливыми вечерами.","do you enjoy writing emails or do you prefer calls":"Тебе нравится писать письма или ты предпочитаешь звонки?","i have many useful books at home":"Дома у меня много полезных книг.","there is not much time before the exam":"До экзамена осталось мало времени.","do you have any clean water":"У тебя есть чистая вода?","we have several options to discuss":"У нас есть несколько вариантов для обсуждения.","she drinks little coffee in the evening":"Вечером она пьёт мало кофе.","i need a few minutes to finish":"Мне нужно несколько минут, чтобы закончить.","that is enough work for today":"На сегодня работы достаточно.","this city is bigger than mine":"Этот город больше моего.","english is more useful now than ever":"Сейчас английский полезен как никогда.","this was the best answer in the class":"Это был лучший ответ в классе.","the new car is faster than the old one":"Новая машина быстрее старой.","that was the worst film of the year":"Это был худший фильм года.","cats are smaller than most dogs":"Кошки меньше большинства собак.","my sister is taller than me":"Моя сестра выше меня.","the train is slower than the plane":"Поезд медленнее самолёта.","i am studying english right now":"Прямо сейчас я занимаюсь английским.","she is meeting tom tonight at seven":"Сегодня в семь она встречается с Томом.","they are working from home this week":"На этой неделе они работают из дома.","he is cooking dinner in the kitchen":"Он готовит ужин на кухне.","we are running late for the meeting":"Мы опаздываем на встречу.","are you typing the report":"Ты печатаешь отчёт?","the kids are shopping with their mother":"Дети ходят по магазинам с мамой.","i was sleeping at midnight when the phone rang":"В полночь я спал, когда зазвонил телефон.","they were playing in the garden when i arrived":"Они играли в саду, когда я пришёл.","she was reading her book all evening yesterday":"Вчера весь вечер она читала книгу.","we were cooking dinner when the lights went out":"Мы готовили ужин, когда погас свет.","he was waiting for the bus in the rain":"Он ждал автобус под дождём.","while i was studying my sister was watching a film":"Пока я занимался, сестра смотрела фильм.","they were staying at a small hotel last summer":"Прошлым летом они жили в маленьком отеле.","i have visited london three times":"Я был в Лондоне три раза.","she has never tried sushi before":"Она никогда раньше не пробовала суши.","have you ever flown to asia":"Ты когда-нибудь летал в Азию?","he has just finished his homework":"Он только что закончил домашнее задание.","we have already seen this film":"Мы уже видели этот фильм.","they have been to paris twice":"Они были в Париже дважды.","i have not eaten japanese food yet":"Я ещё не пробовал японскую еду.","you have to wear a seat belt by law":"По закону ты обязан пристёгиваться ремнём.","you should rest today and drink water":"Сегодня тебе стоит отдохнуть и пить воду.","you must be careful with hot coffee":"Будь осторожен с горячим кофе.","i would suggest you take an early train":"Я бы посоветовал тебе сесть на ранний поезд.","the doctor warned him not to eat too much salt":"Врач предупредил его не есть слишком много соли.","my advice is to call them this afternoon":"Мой совет — позвонить им сегодня днём.","they had to leave the meeting early":"Им пришлось уйти со встречи пораньше.","i want to improve my pronunciation":"Я хочу улучшить произношение.","she enjoys learning new languages":"Ей нравится учить новые языки.","they decided to start the course this monday":"Они решили начать курс в этот понедельник.","i hope to visit italy next summer":"Я надеюсь съездить в Италию следующим летом.","he avoids speaking in big groups":"Он избегает выступать в больших группах.","we finished writing the report at midnight":"Мы закончили писать отчёт в полночь.","she prefers reading to watching films":"Она предпочитает чтение просмотру фильмов.","if water freezes it becomes ice":"Если вода замерзает, она превращается в лёд.","if i have time i will call you tonight":"Если у меня будет время, я позвоню тебе вечером.","if you study daily you will improve quickly":"Если будешь заниматься каждый день, ты быстро улучшишь язык.","if it rains the streets get wet":"Если идёт дождь, улицы становятся мокрыми.","unless you hurry you will miss the train":"Если не поторопишься, опоздаешь на поезд.","i will pass the exam if i study hard":"Я сдам экзамен, если буду усердно заниматься.","if you melt ice you get water":"Если растопить лёд, получится вода.","i am a student and he is my friend":"Я студент, а он мой друг.","i have a book and she has a phone":"У меня есть книга, а у неё телефон.","she usually studies english in the evening":"Обычно она занимается английским по вечерам.","where does your sister work now":"Где сейчас работает твоя сестра?","yesterday we finished the project after lunch":"Вчера после обеда мы закончили проект.","i am going to study english every evening this week":"На этой неделе я собираюсь заниматься английским каждый вечер.","go straight for two blocks and turn left at the corner":"Иди прямо два квартала и поверни налево на углу.","i have just finished my homework and i am free now":"Я только что закончил домашнее задание и теперь свободен.","if you practice every day you will speak fluently soon":"Если будешь практиковаться каждый день, скоро заговоришь свободно.","although it rained we continued the trip and enjoyed every minute":"Хотя шёл дождь, мы продолжили поездку и наслаждались каждой минутой.","the report was reviewed by the manager last week":"На прошлой неделе отчёт проверил менеджер.","my name is alex and i am from belarus":"Меня зовут Алекс, и я из Беларуси.","my mother is kind and my father is funny":"Моя мама добрая, а папа весёлый.","i have ten books and twenty pens":"У меня десять книг и двадцать ручек.","she is a teacher and he is my friend":"Она учительница, а он мой друг.","this is my phone and her bag is on the table":"Это мой телефон, а её сумка на столе.","these boxes are heavy and the children are tired":"Эти коробки тяжёлые, а дети устали.","i need a pen and the door is open":"Мне нужна ручка, и дверь открыта.","this book is new and those shoes are clean":"Эта книга новая, а те туфли чистые.","there is a table and there are three chairs":"Здесь есть стол и три стула.","she never drinks coffee but i often have tea":"Она никогда не пьёт кофе, а я часто пью чай.","the book is on the desk and the cat is under the table":"Книга на столе, а кошка под столом.","she can speak english and i can swim very well":"Она говорит по-английски, а я очень хорошо плаваю.","i like reading books and she loves cooking dinner":"Я люблю читать книги, а она обожает готовить ужин.","i have some water but i do not have much time":"У меня есть немного воды, но мало времени.","this city is bigger than mine but yours is the best":"Этот город больше моего, но твой — самый лучший.","i am studying now and she is meeting tom tonight":"Сейчас я занимаюсь, а она вечером встречается с Томом.","they were playing football when i arrived home":"Они играли в футбол, когда я пришёл домой.","i have visited london but she has never tried sushi":"Я был в Лондоне, а она никогда не пробовала суши.","you should rest today and you must be careful tomorrow":"Сегодня тебе стоит отдохнуть, а завтра будь осторожен.","i want to improve and she enjoys learning english with me":"Я хочу совершенствоваться, а ей нравится учить английский вместе со мной.","if you study every day you will improve quickly":"Если будешь заниматься каждый день, ты быстро улучшишь язык.","i have learned ten new words this week":"На этой неделе я выучил десять новых слов.","she has already finished the quarterly report":"Она уже закончила квартальный отчёт.","have you ever been to london for work":"Ты когда-нибудь бывал в Лондоне по работе?","we have lived in this city for five years":"Мы живём в этом городе пять лет.","he has not called back yet":"Он ещё не перезвонил.","i have just completed the application form":"Я только что заполнил заявку.","the team has had a recent achievement":"У команды недавно был успех.","if i have time i will call you tomorrow":"Если у меня будет время, я позвоню тебе завтра.","if it rains we will stay home":"Если пойдёт дождь, мы останемся дома.","if you practice daily you will improve":"Если будешь заниматься каждый день, ты станешь лучше.","if i were rich i would travel around the world":"Если бы я был богат, я бы путешествовал по всему миру.","if she knew the truth she would tell us":"Если бы она знала правду, она бы нам сказала.","i would imagine this is impossible without help":"Думаю, без помощи это невозможно.","i doubt they will arrive on time":"Сомневаюсь, что они приедут вовремя.","although the meeting was hard the team continued":"Хотя встреча была тяжёлой, команда продолжила работу.","as a result the data quality improved significantly":"В результате качество данных заметно улучшилось.","however the methodology still needs review":"Однако методологию всё ещё нужно пересмотреть.","he missed the deadline because of unexpected traffic":"Он не уложился в срок из-за неожиданных пробок.","in fact the consequence was even more profound":"На самом деле последствия оказались ещё серьёзнее.","moreover the framework needs further refinement":"Более того, систему нужно ещё доработать.","the notion of remote work has profound implications":"Идея удалённой работы имеет глубокие последствия.","the application was updated by the team yesterday":"Вчера команда обновила приложение.","english is spoken in many countries worldwide":"На английском говорят во многих странах мира.","the task has been completed ahead of schedule":"Задача выполнена раньше срока.","a new bridge is being constructed across the river":"Через реку строят новый мост.","the findings can be interpreted in two ways":"Результаты можно истолковать двояко.","the decision was justified by the available data":"Решение было обосновано имеющимися данными.","the framework will be reviewed next quarter":"Систему пересмотрят в следующем квартале.","this approach tends to work well in small teams":"Этот подход обычно хорошо работает в небольших командах.","it is likely to change in the coming months":"Скорее всего, в ближайшие месяцы это изменится.","he may have misunderstood the fundamental point":"Возможно, он неправильно понял главную мысль.","i would rather not comment until i have the data":"Я бы предпочёл не комментировать, пока у меня нет данных.","that is by no means a definitive answer":"Это ни в коем случае не окончательный ответ.","the notion is arguably plausible but not yet valid":"Идея, пожалуй, правдоподобна, но пока не доказана.","we must distinguish between perception and reality":"Нужно различать восприятие и реальность.","nevertheless the underlying concept remains useful":"Тем не менее основная идея остаётся полезной.","furthermore it constitutes a more efficient framework":"Более того, это более эффективная система.","therefore i support the proposed approach":"Поэтому я поддерживаю предложенный подход.","on the contrary the results indicate a profound shift":"Напротив, результаты указывают на глубокий сдвиг.","firstly the approach comprises three significant steps":"Во-первых, подход состоит из трёх важных шагов.","the principle is fundamentally sound indeed":"Принцип действительно фундаментально верен.","we must justify each step from the data":"Каждый шаг мы должны обосновать данными.","it could be argued that the policy was premature given the consequence":"Можно утверждать, что эта политика была преждевременной, учитывая последствия.","rarely have we seen such rapid growth in a single fiscal year":"Редко мы видели столь стремительный рост за один финансовый год.","what strikes me most is the resilience of the team under sustained pressure":"Больше всего меня поражает стойкость команды под постоянным давлением.","the assumption that markets self correct is increasingly contested in academic literature":"Предположение, что рынки сами себя корректируют, всё чаще оспаривается в научной литературе.","should you require additional data do not hesitate to let me know":"Если вам понадобятся дополнительные данные, не стесняйтесь сообщить мне.","the notion that nuance is dispensable would be naive":"Считать, что нюансами можно пренебречь, было бы наивно.","were it not for the framework the audience would not perceive the depth":"Если бы не эта система, аудитория не уловила бы всю глубину.","let us not cut corners on quality even under deadline pressure":"Давай не будем экономить на качестве, даже под давлением сроков.","it is time to get the ball rolling on the next phase":"Пора запускать следующий этап.","after three workshops we are finally on the same page":"После трёх семинаров мы наконец пришли к единому мнению.","we need to think outside the box to justify the new framework":"Нам нужно мыслить нестандартно, чтобы обосновать новую систему.","eventually they bit the bullet and acknowledged the mistake publicly":"В конце концов они собрались с духом и публично признали ошибку.","the team agreed to touch base every monday to reflect on progress":"Команда договорилась созваниваться каждый понедельник, чтобы обсуждать прогресс.","by friday we should wrap up the report and indicate the next steps":"К пятнице нам нужно завершить отчёт и обозначить следующие шаги.","i had finished the report before he arrived":"Я закончил отчёт до того, как он пришёл.","she had left the office when i finally called":"Она уже ушла из офиса, когда я наконец позвонил.","they had already eaten dinner by eight":"К восьми они уже поужинали.","by the time we arrived the meeting had started":"К тому времени, как мы приехали, встреча уже началась.","he had never seen such evidence before":"Раньше он никогда не видел таких доказательств.","we had completed the project before the deadline":"Мы завершили проект до дедлайна.","by 2025 she had become a senior researcher":"К 2025 году она стала старшим научным сотрудником.","i have been studying english for two hours":"Я занимаюсь английским уже два часа.","she has been working in this office all day":"Она работает в этом офисе весь день.","they have been waiting at the station since noon":"Они ждут на вокзале с полудня.","we have been discussing the proposal for hours":"Мы обсуждаем предложение уже несколько часов.","he has been running every morning lately":"В последнее время он бегает каждое утро.","i have been thinking about your offer":"Я думаю над твоим предложением.","the team has been preparing the report for three weeks":"Команда готовит отчёт уже три недели.","i will be flying to berlin at noon":"В полдень я буду лететь в Берлин.","she will be studying for the exam tonight":"Сегодня вечером она будет готовиться к экзамену.","we will be waiting for you at the airport":"Мы будем ждать тебя в аэропорту.","by this time tomorrow he will be presenting the results":"Завтра в это же время он будет представлять результаты.","at eight in the morning i will be running in the park":"В восемь утра я буду бегать в парке.","they will be discussing the budget all afternoon":"Весь день они будут обсуждать бюджет.","my team will be working remotely next week":"На следующей неделе моя команда будет работать удалённо.","english is spoken in many countries":"На английском говорят во многих странах.","the house was built in 1990":"Дом построили в 1990 году.","the task is being done by the team right now":"Сейчас команда выполняет эту задачу.","a new policy will be introduced next month":"В следующем месяце введут новые правила.","the decision has been made by the committee":"Решение принял комитет.","this report was written by the assistant":"Этот отчёт написал ассистент.","the process is reviewed every quarter":"Процесс пересматривают каждый квартал.","she said that she was tired":"Она сказала, что устала.","he told me he liked strong coffee":"Он сказал мне, что любит крепкий кофе.","they reported that they would come on monday":"Они сообщили, что придут в понедельник.","the manager mentioned that the meeting was cancelled":"Менеджер упомянул, что встреча отменена.","she explained that the message had arrived late":"Она объяснила, что сообщение пришло поздно.","he commented on the recent conversation":"Он прокомментировал недавний разговор.","the speaker proposed a new approach":"Выступающий предложил новый подход.","if i had more time i would travel around asia":"Если бы у меня было больше времени, я бы путешествовал по Азии.","if she had studied harder she would have passed":"Если бы она училась усерднее, она бы сдала.","i would help if i could find a way":"Я бы помог, если бы нашёл способ.","if they had warned us we would have left earlier":"Если бы они нас предупредили, мы бы ушли раньше.","imagine what would happen if we lost the data":"Представь, что было бы, если бы мы потеряли данные.","i doubt he would propose such a plan":"Сомневаюсь, что он предложил бы такой план.","if we had known the truth we would have acted differently":"Если бы мы знали правду, мы бы поступили иначе.","her car is here so she must be inside":"Её машина здесь, значит, она наверняка внутри.","he might be at the meeting now":"Возможно, сейчас он на встрече.","she cannot be serious about quitting":"Не может быть, чтобы она всерьёз собралась уволиться.","the report must have arrived by now":"Отчёт наверняка уже пришёл.","perhaps the data was lost during the transfer":"Возможно, данные потерялись при передаче.","surely they will respond by tomorrow":"Наверняка они ответят к завтрашнему дню.","it is obviously a recent achievement":"Это явно недавнее достижение.","you like coffee in the morning do you not":"Ты любишь кофе по утрам, не так ли?","she is ready for the meeting is she not":"Она готова к встрече, не так ли?","they did not call back did they":"Они так и не перезвонили, верно?","the report has been completed has it not":"Отчёт ведь уже готов, не так ли?","surely you imagine the answer do you not":"Ты ведь представляешь ответ, не так ли?","we will be discussing this later will we not":"Мы обсудим это позже, не так ли?","he proposes a new approach does he not":"Он предлагает новый подход, не так ли?","although it was late i continued studying":"Хотя было поздно, я продолжал заниматься.","however i needed more practice with grammar":"Однако мне нужно было больше практики с грамматикой.","despite the rain we went out for a walk":"Несмотря на дождь, мы вышли на прогулку.","moreover the data clearly supports the proposal":"Более того, данные ясно подтверждают предложение.","because the topic is recent the evidence is limited":"Поскольку тема новая, доказательств немного.","though the period was short the achievement was real":"Хотя срок был коротким, достижение было настоящим.","surely the process is more efficient now":"Несомненно, теперь процесс эффективнее.","do not give up on the project so easily":"Не сдавайся так легко с этим проектом.","i am looking for my house keys":"Я ищу ключи от дома.","please turn on the light in the kitchen":"Пожалуйста, включи свет на кухне.","i will pick up the parcel after work":"Я заберу посылку после работы.","we need to find a quiet place to meet":"Нам нужно найти тихое место для встречи.","switch off the device when you leave":"Выключай устройство, когда уходишь.","i cannot figure out how this process works":"Я никак не пойму, как работает этот процесс.","i will have finished the report by friday morning":"К утру пятницы я закончу отчёт.","she will have left the office by noon":"К полудню она уже уйдёт из офиса.","they will have completed the course by autumn":"К осени они завершат курс.","by 2030 the company will have launched ten products":"К 2030 году компания выпустит десять продуктов.","by the time you arrive i will have prepared lunch":"К твоему приходу я приготовлю обед.","we will have lived here for ten years next month":"В следующем месяце исполнится десять лет, как мы здесь живём.","the data will have been reviewed by tuesday":"К вторнику данные будут проверены.","if i had studied harder i would know the answer now":"Если бы я учился усерднее, я бы сейчас знал ответ.","if she had left earlier she would be here at this moment":"Если бы она вышла раньше, сейчас была бы уже здесь.","if i were braver i would have tried the new method":"Будь я смелее, я бы попробовал новый метод.","if we acknowledged the problem the consequences would be clearer":"Если бы мы признали проблему, последствия были бы яснее.","if they had followed the framework the result would be different":"Если бы они следовали системе, результат был бы другим.","if she had reflected on it she would understand the implication":"Если бы она об этом подумала, она бы поняла, что это значит.","if i were in your position i would have justified the choice":"Будь я на твоём месте, я бы обосновал этот выбор.","you should have called me before the meeting":"Тебе стоило позвонить мне перед встречей.","she must have forgotten the deadline":"Она, должно быть, забыла о дедлайне.","he could have helped us if he had time":"Он мог бы нам помочь, если бы у него было время.","they might have misinterpreted the data":"Возможно, они неправильно истолковали данные.","we regret that we did not acknowledge their work":"Мы сожалеем, что не отметили их работу.","the decision was significant in hindsight":"Оглядываясь назад, это решение было важным.","i should have criticised the proposal earlier":"Мне стоило раскритиковать предложение раньше.","i had my phone repaired at the new shop":"Я отдал телефон в ремонт в новом магазине.","she got her hair cut by a professional stylist":"Она подстриглась у профессионального стилиста.","the room needs to be cleaned before the guests arrive":"Комнату нужно убрать до прихода гостей.","it is widely believed that the framework is valid":"Многие считают, что эта система верна.","he is said to have inferred the result correctly":"Говорят, что он сделал правильный вывод.","the findings are perceived as fundamental":"Эти результаты воспринимают как основополагающие.","this conclusion is plausible but inevitable improvement is needed":"Этот вывод правдоподобен, но доработка неизбежно нужна.","i wish i knew the answer to this question":"Жаль, что я не знаю ответа на этот вопрос.","if only i had listened to the advice earlier":"Если бы я только раньше прислушался к совету.","she wishes she lived closer to her family":"Она жалеет, что живёт не ближе к семье.","i wish you would acknowledge the problem":"Как бы я хотел, чтобы ты признал проблему.","in hindsight i should have reflected more carefully":"Оглядываясь назад, мне стоило подумать тщательнее.","we regret that the consequence was so profound":"Мы сожалеем, что последствия оказались такими серьёзными.","if only the implication were less significant":"Если бы только это значило не так много.","the student who studies daily improves rapidly":"Студент, который занимается каждый день, быстро прогрессирует.","this is the book which helped me understand the concept":"Это книга, которая помогла мне понять идею.","the app that i use every day is helpful for memorisation":"Приложение, которым я пользуюсь каждый день, помогает запоминать.","the framework which was launched in 2024 has been widely adopted":"Эта система, запущенная в 2024 году, получила широкое распространение.","the notion that the principle is universal is plausible":"Идея о том, что этот принцип универсален, правдоподобна.","the data which we inferred contradicts the original claim":"Данные, которые мы вывели, противоречат изначальному утверждению.","the perspective that she derived was valid":"Вывод, к которому она пришла, был обоснованным.","i used to play football every weekend":"Раньше я играл в футбол каждые выходные.","i am used to working late at the office":"Я привык работать допоздна в офисе.","she got used to the city after a few months":"Через несколько месяцев она привыкла к городу.","we used to acknowledge the issue but did nothing about it":"Раньше мы признавали проблему, но ничего с ней не делали.","in hindsight the team was used to making compromises":"Оглядываясь назад, команда привыкла идти на компромиссы.","the audience is now used to a higher register":"Теперь аудитория привыкла к более высокому стилю.","she got used to the nuance of formal english":"Она привыкла к тонкостям формального английского.","i do understand your point and i will reflect on it":"Я действительно понимаю твою мысль и обдумаю её.","she did finish the task before the deadline":"Она всё-таки закончила задачу до дедлайна.","we do need more practice with the new framework":"Нам действительно нужно больше практики с новой системой.","he did acknowledge the contradiction in the data":"Он всё же признал противоречие в данных.","i do regret that i did not justify my position clearly":"Я и правда сожалею, что не обосновал свою позицию ясно.","the principle does indicate a profound shift":"Этот принцип действительно указывает на глубокий сдвиг.","we do perceive the consequence as significant":"Мы действительно считаем последствия значимыми.","never have i seen such profound progress in a single quarter":"Никогда я не видел такого значительного прогресса за один квартал.","rarely do we acknowledge the implication of our choices":"Редко мы осознаём последствия своих решений.","only then did i perceive the contradiction":"Только тогда я заметил противоречие.","hardly had we justified the framework when the data shifted":"Едва мы обосновали систему, как данные изменились.","seldom does the principle apply in such complex cases":"Редко этот принцип применим в столь сложных случаях.","not only did she comprise the proposal she also defended it":"Она не только составила предложение, но и отстояла его.","little did the team realise the consequence":"Команда и не подозревала о последствиях.","what i need is regular practice with native speakers":"Что мне нужно — так это регулярная практика с носителями языка.","it was the deadline that worried the whole team":"Именно дедлайн волновал всю команду.","the thing i want is conceptual clarity":"Чего я хочу — так это концептуальной ясности.","what strikes me is the audience's engagement":"Что меня поражает — так это вовлечённость аудитории.","it was the framework that made the difference":"Именно эта система всё изменила.","what we acknowledge is the profound implication":"Что мы признаём — так это глубокие последствия.","it is the notion of nuance that distinguishes c1 from b2":"Именно понятие нюанса отличает C1 от B2.","i suggest that he be present at the meeting":"Я предлагаю, чтобы он присутствовал на встрече.","they demanded that she leave the project":"Они потребовали, чтобы она покинула проект.","it is vital that we acknowledge the consequence":"Крайне важно, чтобы мы признали последствия.","the committee proposed that the framework be revised":"Комитет предложил пересмотреть систему.","it is paramount that the audience perceive our intent":"Первостепенно важно, чтобы аудитория уловила наш замысел.","we recommend that the implication be reflected in the final report":"Мы рекомендуем отразить эти последствия в итоговом отчёте.","it is significant that the principle constitute the core":"Важно, чтобы этот принцип составлял основу.","in light of the new data we revised our framework":"В свете новых данных мы пересмотрели нашу систему.","on the contrary the method is consistently efficient":"Напротив, метод неизменно эффективен.","consequently the result indicates a significant trend":"Следовательно, результат указывает на значимую тенденцию.","furthermore the principle constitutes the core argument":"Более того, этот принцип составляет основной аргумент.","with regard to the implication more research is paramount":"Что касается последствий, дальнейшие исследования крайне важны.","by contrast the alternative is nowhere near as plausible":"Для сравнения, альтернатива далеко не так правдоподобна.","all the same we should acknowledge the counterargument":"Тем не менее нам стоит признать контраргумент.","the more we practise the better we perceive nuance":"Чем больше мы практикуемся, тем тоньше улавливаем нюансы.","this concept is nowhere near as fundamental as the previous one":"Эта идея далеко не так фундаментальна, как предыдущая.","the faster we acknowledge the issue the sooner we resolve it":"Чем быстрее мы признаём проблему, тем скорее её решим.","the framework is considerably more plausible than the alternative":"Эта система значительно правдоподобнее альтернативы.","twice as many students justified their answers this year":"В этом году вдвое больше студентов обосновали свои ответы.","by far the most significant consequence is the loss of clarity":"Самое значимое последствие — это потеря ясности.","the data is far less reliable when the sample comprises one group":"Данные гораздо менее надёжны, когда выборка состоит из одной группы.","i can justify the choice if you want me to":"Я могу обосновать этот выбор, если хочешь.","she reflects on the issue more than i do":"Она размышляет над этим вопросом больше, чем я.","i acknowledged the first claim but not the second":"Я признал первое утверждение, но не второе.","the new framework is more plausible than the old one":"Новая система правдоподобнее старой.","do the findings indicate a profound shift i believe so":"Указывают ли результаты на глубокий сдвиг? Думаю, да.","if the data contradicts the principle the principle must be revised and rightly so":"Если данные противоречат принципу, принцип нужно пересмотреть — и это правильно.","the implication is significant the consequence even more so":"Последствия значительны, а итог — ещё больше.","having acknowledged the issue the committee proposed a new framework":"Признав проблему, комитет предложил новую систему.","feeling that the implication was profound she reflected on the data":"Чувствуя, что последствия серьёзны, она обдумала данные.","written in a high register the text appeals to a specialised audience":"Написанный в высоком стиле, текст рассчитан на специализированную аудиторию.","given the consequence the principle must be re examined":"Учитывая последствия, принцип нужно пересмотреть.","considering the nuance involved we cannot justify a hasty conclusion":"Учитывая все нюансы, мы не можем оправдать поспешный вывод.","taking into account the evidence the notion is plausible":"Принимая во внимание доказательства, идея правдоподобна.","inferred from the findings the framework comprises three significant elements":"Согласно выводам, система состоит из трёх важных элементов.","i would greatly appreciate your assistance with this matter":"Я был бы очень признателен за вашу помощь в этом вопросе.","could you help us prepare the report":"Не могли бы вы помочь нам подготовить отчёт?","give us a hand with the slides would you":"Поможешь нам со слайдами, ладно?","we hereby acknowledge the receipt of your submission":"Настоящим мы подтверждаем получение вашей заявки.","thanks for getting back to me i really appreciate it":"Спасибо, что ответил, — я очень это ценю.","the audience perceived the speaker as paramount in the field":"Аудитория воспринимала выступающего как ключевую фигуру в этой области.","it is paramount that the nuance not be lost on the reader":"Крайне важно, чтобы читатель не упустил нюанс.","the new framework opened a can of worms for the audit team":"Новая система обернулась клубком проблем для аудиторов.","by revising the criteria management moved the goalposts halfway through":"Изменив критерии, руководство поменяло правила игры на полпути.","the proposal is a double edged sword with profound implications":"Это предложение — палка о двух концах с серьёзными последствиями.","the elephant in the room is the principle we keep avoiding":"Очевидная проблема, которую все обходят, — это принцип, который мы избегаем обсуждать.","it was a pyrrhic victory the consequence outweighed the gain":"Это была пиррова победа: последствия перевесили выгоду.","we must distinguish between rhetoric and substance":"Нужно отличать риторику от сути.","the notion has nuance that monolingual idioms cannot capture":"В этой идее есть нюанс, который не передать идиомами одного языка.","the evidence strongly indicates that the claim is plausible":"Доказательства убедительно указывают на правдоподобность утверждения.","admittedly a fair objection would be the cost involved":"Надо признать, справедливым возражением была бы стоимость.","it could be argued that the framework is fundamentally flawed":"Можно утверждать, что система в основе своей ошибочна.","in other words the principle no longer constitutes sufficient justification":"Иначе говоря, этот принцип больше не является достаточным обоснованием.","granted the consequence is significant yet the alternative is worse":"Да, последствия значительны, но альтернатива хуже.","therefore the proposal is paramount for the audience we address":"Поэтому это предложение крайне важно для аудитории, к которой мы обращаемся.","we should acknowledge the counterargument before we justify our position":"Прежде чем обосновывать свою позицию, нам стоит признать контраргумент.","the narrator sounds polite yet the subtext is bitter":"Рассказчик звучит вежливо, но подтекст горький.","the praise may be ironic the audience should infer the opposite":"Похвала может быть ироничной — аудитории следует понять обратное.","the silence reveals the underlying conflict more than any speech":"Молчание выдаёт скрытый конфликт сильнее любых слов.","satire allows the author to criticise without overt accusation":"Сатира позволяет автору критиковать без прямых обвинений.","understatement can indicate a profound emotional impact":"Сдержанность может указывать на глубокое эмоциональное воздействие.","we must distinguish sincerity from sarcasm in this passage":"В этом отрывке нужно отличить искренность от сарказма.","the principle that style reflects meaning is fundamental":"Принцип, что стиль отражает смысл, основополагающий.","the advisor recommends adding a research seminar":"Научный руководитель советует добавить исследовательский семинар.","the student asks to extend the deadline by one week":"Студент просит продлить срок на неделю.","they agree to meet again after the midterm":"Они договариваются встретиться снова после промежуточного экзамена.","the professor allows a late submission only this time":"Профессор разрешает сдать позже только в этот раз.","the student plans to switch from chemistry to biology":"Студент планирует перейти с химии на биологию.","first the researchers measured the reaction time":"Сначала исследователи измерили время реакции.","however the data did not support the original hypothesis":"Однако данные не подтвердили исходную гипотезу.","in conclusion additional experiments were required":"В заключение потребовались дополнительные эксперименты.","the lecturer compares two competing theories":"Лектор сравнивает две конкурирующие теории.","the study found a strong correlation between sleep and memory":"Исследование выявило сильную связь между сном и памятью.","the author argues that early industrial cities had unhealthy housing":"Автор утверждает, что в ранних промышленных городах было нездоровое жильё.","the passage compares two theories of memory":"В тексте сравниваются две теории памяти.","the article explains how solar mini grids reach remote villages":"Статья объясняет, как солнечные мини-сети доходят до отдалённых деревень.","the text traces the development of cuneiform writing":"Текст прослеживает развитие клинописи.","the author presents evidence that coral bleaching is temperature driven":"Автор приводит доказательства, что обесцвечивание кораллов вызвано температурой.","please write your surname in block letters":"Пожалуйста, напишите фамилию печатными буквами.","the deposit is fifty pounds due on friday":"Залог составляет пятьдесят фунтов и вносится в пятницу.","office hours are from nine thirty to five":"Приёмные часы с половины десятого до пяти.","the library is opposite the main entrance":"Библиотека напротив главного входа.","the café is on your left as you walk in":"Кафе слева от вас, когда вы входите.","tours start every half hour from the reception desk":"Экскурсии начинаются каждые полчаса от стойки регистрации.","children under five are not allowed in the lab":"Детям до пяти лет вход в лабораторию запрещён.","the exit is located at the far end of the corridor":"Выход находится в дальнем конце коридора.","i think the data sample is too small":"Думаю, выборка данных слишком мала.","actually the methodology section needs more detail":"На самом деле раздел методологии нужно расписать подробнее.","surely we should add a control group":"Несомненно, нам стоит добавить контрольную группу.","my tutor suggested a different approach":"Мой научный руководитель предложил другой подход.","we finally agreed on the structure of the report":"Мы наконец согласовали структуру отчёта.","first the researchers measured the surface temperature":"Сначала исследователи измерили температуру поверхности.","in addition satellite imagery confirmed the pattern":"Кроме того, спутниковые снимки подтвердили эту закономерность.","however deeper layers showed a different result":"Однако более глубокие слои показали другой результат.","in summary the model is reliable only at the surface":"В итоге модель надёжна только у поверхности.","the conclusion challenges the original hypothesis":"Вывод ставит под сомнение исходную гипотезу.","the library opens at nine and closes at six on weekdays":"В будни библиотека открывается в девять и закрывается в шесть.","residents must register before using the gym":"Жильцы должны зарегистрироваться, прежде чем пользоваться спортзалом.","a late return fee applies after five days":"После пяти дней взимается штраф за просрочку.","the course requires no prior experience":"Для курса не нужен предыдущий опыт.","parking is free for the first two hours":"Первые два часа парковка бесплатная.","the author argues that wetlands act as natural carbon stores":"Автор утверждает, что водно-болотные угодья служат природными хранилищами углерода.","the study contrasts urban and rural sleep patterns":"Исследование сопоставляет режимы сна в городе и в сельской местности.","researchers documented a forty percent decline in pollinators":"Исследователи зафиксировали сокращение числа опылителей на сорок процентов.","the passage describes three competing theories of language origin":"В тексте описаны три конкурирующие теории происхождения языка.","the data challenges long held assumptions about coral resilience":"Данные ставят под сомнение давние представления о выносливости кораллов.","overall the number of visitors rose steadily between 2015 and 2022":"В целом число посетителей стабильно росло с 2015 по 2022 год.","the figure peaked at around twenty thousand in 2019":"Показатель достиг пика около двадцати тысяч в 2019 году.","in contrast the rural figure remained nearly flat":"Напротив, показатель в сельской местности почти не менялся.","by the end of the period the urban figure was twice as high":"К концу периода городской показатель был вдвое выше.","despite a brief dip in 2020 the trend recovered":"Несмотря на кратковременный спад в 2020 году, тенденция восстановилась.","some people argue that homework strengthens learning while others claim it harms wellbeing":"Одни считают, что домашние задания улучшают обучение, другие утверждают, что они вредят благополучию.","in my opinion moderate homework is beneficial when paired with feedback":"По-моему, умеренная домашняя работа полезна, когда сопровождается обратной связью.","for example brief daily practice improves retention more than weekend marathons":"Например, короткая ежедневная практика улучшает запоминание лучше, чем марафоны по выходным.","on the other hand excessive workloads can lead to burnout":"С другой стороны, чрезмерная нагрузка может привести к выгоранию.","in conclusion the quality of homework matters more than its quantity":"В заключение: качество домашней работы важнее её количества.","in this essay i will weigh the importance of culture against economic growth":"В этом эссе я взвешу важность культуры и экономического роста.","the data clearly show that public transport reduces congestion":"Данные ясно показывают, что общественный транспорт снижает заторы.","i would therefore recommend extending the cycle network across the district":"Поэтому я бы рекомендовал расширить сеть велодорожек по всему району.","in my view balance is preferable to a strict choice":"На мой взгляд, баланс лучше строгого выбора.","although both arguments have merit the second is more compelling":"Хотя оба аргумента весомы, второй убедительнее.","she sounded reluctant when she agreed to the change":"Она согласилась на изменение неохотно.","he emphasised that the result was unexpected":"Он подчеркнул, что результат был неожиданным.","they were divided on the practical value of the method":"Мнения о практической ценности метода разделились.","her tone hinted at frustration despite her polite words":"Её тон намекал на досаду, несмотря на вежливые слова.","most participants agreed though one remained sceptical":"Большинство участников согласились, хотя один остался скептичным.","the first picture shows a couple deciding on a holiday destination":"На первой картинке пара выбирает, куда поехать в отпуск.","i would say the main challenge here is uncertainty":"Я бы сказал, что главная сложность здесь — неопределённость.","that is a fair point i would add that personal taste also matters":"Справедливое замечание — я бы добавил, что личный вкус тоже важен.","could i just come in here i think we are missing one aspect":"Можно я вставлю слово? По-моему, мы упускаем один момент.","to sum up i would prioritise safety over cost":"Подводя итог, я бы поставил безопасность выше стоимости.","this strategy tends to work better in small teams than in large organisations":"Эта стратегия обычно работает лучше в небольших командах, чем в крупных организациях.","furthermore the new approach reduces costs without lowering quality":"Более того, новый подход снижает затраты, не ухудшая качество.","what strikes me most is the resilience of the team under pressure":"Больше всего меня поражает стойкость команды под давлением.","let us touch base on monday and get the ball rolling next week":"Давай созвонимся в понедельник и запустим дело на следующей неделе.","the speaker implies that the deadline has already passed":"Говорящий намекает, что срок уже прошёл.","the student asks the advisor to extend the deadline by one week":"Студент просит научного руководителя продлить срок на неделю.","the professor concludes that further research is required":"Профессор заключает, что нужны дальнейшие исследования.","the town in which i grew up has changed completely":"Город, в котором я вырос, полностью изменился.","the list of new books is on the shelf next to the desk":"Список новых книг лежит на полке рядом со столом.","the main idea covers the whole passage not a single paragraph":"Главная мысль охватывает весь текст, а не один абзац.","the library is opposite the main entrance next to the gallery":"Библиотека напротив главного входа, рядом с галереей.","my tutor suggested a different approach to the methodology":"Мой научный руководитель предложил другой подход к методологии.","the course requires no prior experience and is free for residents":"Для курса не нужен предыдущий опыт, и он бесплатный для жильцов.","the clarity of her response was widely praised by the committee":"Ясность её ответа высоко оценил комитет.","to sum up i would prioritise safety over cost in this scenario":"Подводя итог, в этом случае я бы поставил безопасность выше стоимости."};
+function _courseNormKey(s){return String(s||'').toLowerCase().replace(/[.!?,;:]/g,'').replace(/[\u2014\u2013-]/g,' ').replace(/\s+/g,' ').trim();}
 function courseSentenceTranslation(sentence){
   if(lang==='en')return sentence;
   const raw=String(sentence||'').trim();
+  if(lang==='ru'){const _k=_courseNormKey(raw); if(COURSE_SENTENCE_RU[_k])return COURSE_SENTENCE_RU[_k];}
   const phraseKey=raw.toLowerCase().replace(/[.!?]/g,'').replace(/\s+/g,' ');
   const phraseMap={
     'i am ready':{ru:'я готов / готова',es:'estoy listo / lista',pt:'estou pronto / pronta'},
@@ -11068,9 +11586,6 @@ function updateNewLabels(){
   const qb4s=document.getElementById('qb4s');if(qb4s)qb4s.textContent={ru:'Ошибки в тексте',en:'Find text errors',es:'Errores en texto',de:'Textfehler finden',fr:'Erreurs dans le texte',pt:'Erros no texto',uk:'Помилки в тексті',tr:'Metin hataları',zh:'查找文本错误',ar:'أخطاء النص'}[lang]||'Find text errors';
   // Error diary labels
   renderErrorDiary();
-  // Share streak label
-  const sl=document.getElementById('share-lbl');
-  if(sl)sl.textContent={ru:'Поделиться стриком',en:'Share streak',es:'Compartir racha',de:'Serie teilen',fr:'Partager série'}[lang]||'Share streak';
 }
 
 /* ══ Hook into doChat to extract errors & increment challenge ══ */
@@ -12275,44 +12790,6 @@ function safeHTML(v){
   if(typeof v==='object'){try{v=v.en||v.ru||v.text||JSON.stringify(v);}catch(_){v='';}}
   return String(v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
 }
-let lastExportReport='';
-function shareProgress(){
-  var d=window._d||{};var stats=LS.getJ('local_stats')||{};
-  var name=displayName(d);
-  var level=LS.get('ob_level')||d.level||'A1';
-  var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
-  var rank=rankOf(xp);
-  var shareLabel={ru:'Поделиться',en:'Share',es:'Compartir',pt:'Compartilhar',de:'Teilen',fr:'Partager',uk:'Поділитися',tr:'Paylaş',zh:'分享',ar:'مشاركة'}[lang]||'Share';
-  var html='<div class="share-card"><div class="share-card-name">'+safeHTML(name)+'</div><div class="share-card-level">'+safeHTML(level)+' - '+safeHTML(rank.r)+'</div><div class="share-card-stats"><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ffb830">'+xp+'</div><div class="share-card-stat-lbl">XP</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#ff6b6b">'+streak+'</div><div class="share-card-stat-lbl">'+({ru:'Стрик',en:'Streak',es:'Racha',pt:'Sequência',de:'Serie',fr:'Série',uk:'Серія',tr:'Seri',zh:'连胜',ar:'سلسلة'}[lang]||'Streak')+'</div></div><div class="share-card-stat"><div class="share-card-stat-val" style="color:#2ecc71">'+words+'</div><div class="share-card-stat-lbl">'+({ru:'Слова',en:'Words',es:'Palabras',pt:'Palavras',de:'Wörter',fr:'Mots',uk:'Слова',tr:'Kelime',zh:'词汇',ar:'كلمات'}[lang]||'Words')+'</div></div></div><div class="share-card-footer">PolyGlotty - AI English Tutor</div></div>';
-  html+='<button class="share-btn" onclick="doShareTg()"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/></svg>'+shareLabel+'</button>';
-  addMsg('bot',html);
-  try{sfx.correct();}catch(e){}
-}
-function doShareTg(){
-  var d=window._d||{};var xp=d.xp||0;var streak=d.streak||0;var level=LS.get('ob_level')||'A1';
-  var botName=window.BOT_NAME||'PolyGlotty_bot';
-  var link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
-  var text=displayName(d)+' - '+level+' | '+xp+' XP | '+streak+' days streak\n\nLearn English with AI: @'+botName;
-  if(tg?.openTelegramLink){tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));}
-  else if(navigator.share){navigator.share({text:text,url:link}).catch(function(){});}
-  else{try{navigator.clipboard.writeText(text);toast(({ru:'Скопировано!',en:'Copied!',es:'¡Copiado!',pt:'Copiado!',de:'Kopiert!',fr:'Copié !',uk:'Скопійовано!',tr:'Kopyalandı!',zh:'已复制！',ar:'تم النسخ!'}[lang]||'Copied!'),'✅');}catch(e){}}
-}
-
-/* ══ CERTIFICATE ══ */
-function generateCertificate(){
-  var d=window._d||{};var name=displayName(d);
-  var level=LS.get('ob_level')||'A1';var uid=window._uid||0;
-  var date=new Date().toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{year:'numeric',month:'long',day:'numeric'});
-  var certId='PG-'+level+'-'+uid+'-'+Date.now().toString(36).toUpperCase();
-  var certTitle={ru:'Сертификат достижения',en:'Certificate of Achievement',es:'Certificado de Logro',de:'Leistungszertifikat',fr:'Certificat de Réussite',pt:'Certificado de Conquista',uk:'Сертифікат досягнення',tr:'Başarı Sertifikası',zh:'成就证书',ar:'شهادة إنجاز'}[lang]||'Certificate of Achievement';
-  var certThis={ru:'Настоящим подтверждается, что',en:'This certifies that',es:'Se certifica que',de:'Hiermit wird bestätigt, dass',fr:'Ceci certifie que',pt:'Certifica-se que',uk:'Цим засвідчується, що',tr:'Bu belge şunu onaylar:',zh:'特此证明',ar:'يشهد بأن'}[lang]||'This certifies that';
-  var certCompleted={ru:'успешно завершил программу',en:'has completed the',es:'ha completado el',de:'hat abgeschlossen',fr:'a terminé le',pt:'completou o',uk:'успішно завершив програму',tr:'programı tamamladı',zh:'已完成',ar:'أتم بنجاح'}[lang]||'has completed the';
-  var certProgram={ru:'Программа изучения английского языка<br>PolyGlotty AI Academy',en:'English Proficiency Program<br>PolyGlotty AI Academy',es:'Programa de Inglés<br>PolyGlotty AI Academy',de:'Englischprogramm<br>PolyGlotty AI Academy',fr:'Programme d\'anglais<br>PolyGlotty AI Academy',pt:'Programa de Inglês<br>PolyGlotty AI Academy',uk:'Програма вивчення англійської<br>PolyGlotty AI Academy',tr:'İngilizce Programı<br>PolyGlotty AI Academy',zh:'英语能力课程<br>PolyGlotty AI Academy',ar:'برنامج إتقان الإنجليزية<br>PolyGlotty AI Academy'}[lang]||'English Proficiency Program<br>PolyGlotty AI Academy';
-  var shareBtn={ru:'Поделиться',en:'Share',es:'Compartir',de:'Teilen',fr:'Partager',pt:'Compartilhar',uk:'Поділитись',tr:'Paylaş',zh:'分享',ar:'مشاركة'}[lang]||'Share';
-  addMsg('bot','<div class="cert-wrap"><div class="cert-title">'+safeHTML(certTitle)+'</div><div class="cert-seal"><svg viewBox="0 0 24 24"><path d="M12 3l2.4 5 5.4.8-3.9 3.8.9 5.4L12 15.5 7.2 18l.9-5.4-3.9-3.8 5.4-.8L12 3Z"/></svg></div><div class="cert-desc">'+safeHTML(certThis)+'</div><div class="cert-name">'+safeHTML(name)+'</div><div class="cert-desc">'+safeHTML(certCompleted)+'</div><div class="cert-level">'+safeHTML(level)+' Level</div><div class="cert-desc">'+certProgram+'</div><div class="cert-date">'+safeHTML(date)+'</div><div class="cert-date" style="margin-top:4px;font-size:9px">ID: '+safeHTML(certId)+'</div></div><button class="share-btn" onclick="doShareTg()" style="background:#d4a843"><svg viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/></svg>'+shareBtn+'</button>');
-  haptic('success');try{fireConfetti();}catch(e){}
-}
-
 /* ══ ADMIN DASHBOARD ══ */
 function renderAdminPanel(){
   var el=document.getElementById('admin-panel');if(!el)return;
@@ -12328,50 +12805,6 @@ function loadAdminStats(){
     var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=(v==null||v==='')?'--':v;};
     e('adm-users',d.total_users);e('adm-today',d.today_active);e('adm-prem',d.premium_users);e('adm-msgs',d.today_messages);
   }).catch(function(){});
-}
-
-/* ══ GIFT SUBSCRIPTION ══ */
-/* openGiftSub was removed — gifting Premium is implemented natively
-   by Telegram Stars; users can simply transfer Stars to each other. */
-
-function openTermsRules(){
-  haptic('light');
-  openMod('termsm');
-}
-
-/* ══ EXPORT PROGRESS ══ */
-function exportProgress(){
-  var d=window._d||{};var stats=LS.getJ('local_stats')||{};
-  var name=displayName(d);var level=LS.get('ob_level')||'A1';
-  var xp=d.xp||0;var streak=d.streak||0;var words=Math.max(d.words||0,stats.words||0);
-  var sessions=Math.max(d.sessions||0,stats.sessions||0);var tests=Math.max(d.tests||0,stats.tests||0);
-  var text='=== PolyGlotty Progress ===\n\nName: '+name+'\nLevel: '+level+'\nXP: '+xp+'\nStreak: '+streak+' days\nSessions: '+sessions+'\nWords: '+words+'\nTests: '+tests+'\n\n'+new Date().toLocaleString()+'\n@PolyGlotty_bot';
-  lastExportReport=text;
-  try{navigator.clipboard.writeText(text);toast(({ru:'Отчёт скопирован',en:'Report copied',es:'Informe copiado',pt:'Relatório copiado',de:'Bericht kopiert',fr:'Rapport copié',uk:'Звіт скопійовано',tr:'Rapor kopyalandı',zh:'报告已复制',ar:'تم نسخ التقرير'}[lang]||'Report copied'),'✅');}catch(e){}
-  var title={ru:'Отчёт готов',en:'Report ready',es:'Informe listo',pt:'Relatório pronto',de:'Bericht fertig',fr:'Rapport prêt',uk:'Звіт готовий',tr:'Rapor hazır',zh:'报告就绪',ar:'التقرير جاهز'}[lang]||'Report ready';
-  var dl={ru:'Скачать .txt',en:'Download .txt',es:'Descargar .txt',pt:'Baixar .txt',de:'.txt herunterladen',fr:'Télécharger .txt',uk:'Завантажити .txt',tr:'.txt indir',zh:'下载 .txt',ar:'تنزيل .txt'}[lang]||'Download .txt';
-  addMsg('bot','<div class="tool-result"><div class="tool-result-title">'+title+'</div><pre class="tool-pre">'+safeHTML(text)+'</pre></div><button class="share-btn" onclick="downloadExportReport()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M12 3v12"/><path d="M8 11l4 4 4-4"/></svg>'+dl+'</button>');
-}
-function downloadExportReport(){
-  if(!lastExportReport){exportProgress();return;}
-  try{
-    var blob=new Blob([lastExportReport],{type:'text/plain;charset=utf-8'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.download='polyglotty-progress.txt';
-    document.body.appendChild(a);a.click();a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url);},1200);
-  }catch(e){
-    try{navigator.clipboard.writeText(lastExportReport);toast(({ru:'Скопировано',en:'Copied',es:'Copiado',pt:'Copiado',de:'Kopiert',fr:'Copié',uk:'Скопійовано',tr:'Kopyalandı',zh:'已复制',ar:'تم النسخ'}[lang]||'Copied'),'✅');}catch(_){}
-  }
-}
-
-/* ══ COLLAPSIBLE SETTINGS ══ */
-function toggleSettingsTools(){
-  var el=document.getElementById('settings-tools');var arr=document.getElementById('tools-arrow');
-  if(!el)return;
-  if(el.style.display==='none'){el.style.display='grid';if(arr)arr.style.transform='rotate(180deg)';}
-  else{el.style.display='none';if(arr)arr.style.transform='';}
-  haptic('light');
 }
 
 /* ══ SERVER SYNC ══ */

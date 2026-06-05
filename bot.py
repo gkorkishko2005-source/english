@@ -672,6 +672,19 @@ async def send_reminder(uid: int):
         rows_extra.append(f"{'Идиом на повторение' if ru_ else 'Idioms to review'}: <b>{due_idioms}</b>  /vocab")
     if rows_extra:
         text += "\n\n" + "\n".join(rows_extra)
+    # Word of the day now rides along with the daily reminder instead of
+    # being a separate 09:00 push, so the user gets one message at the
+    # time they picked.
+    try:
+        w = random.choice(DAILY_WORDS)
+        text += (
+            f"\n\n<b>{'Слово дня' if ru_ else 'Word of the day'}</b>\n"
+            f"<b>{w['word']}</b>  <code>{w['ph']}</code>\n"
+            f"{w['tr']}\n"
+            f"<i>{w['ex']}</i>"
+        )
+    except Exception:
+        pass
     # Bot-side messages always carry a Channel button so the reader has
     # somewhere to go when they're not ready to open the app.
     app_url = webapp_url()
@@ -789,20 +802,37 @@ async def send_daily_word(uid: int):
     except Exception as e:
         logger.warning(f"daily_word to {uid}: {e}")
 
+async def send_scheduled_push(uid: int):
+    """Single daily push at the user's chosen reminder time.
+    Sunday  -> weekly report (instead of the reminder + word of the day).
+    Mon-Sat -> personal reminder with the word of the day attached."""
+    is_sunday = False
+    try:
+        from datetime import datetime
+        try:
+            from zoneinfo import ZoneInfo
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+        except Exception:
+            now = datetime.now()
+        is_sunday = now.weekday() == 6  # Mon=0 ... Sun=6
+    except Exception:
+        is_sunday = False
+    if is_sunday:
+        await send_weekly_report(uid)
+    else:
+        await send_reminder(uid)
+
 async def schedule_all():
+    # One consolidated daily push per user, fired at the time they chose
+    # in reminders. The content depends on the weekday (see
+    # send_scheduled_push). Users with reminders disabled get nothing.
     rows = await db("SELECT uid, remind_time FROM users WHERE remind_time IS NOT NULL AND remind_time != 'off'", fetch="all")
     if rows:
         for r in rows:
             try:
                 h, m = map(int, r["remind_time"].split(":"))
-                scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[r["uid"]],id=f"remind_{r['uid']}",replace_existing=True)
+                scheduler.add_job(send_scheduled_push,"cron",hour=h,minute=m,args=[r["uid"]],id=f"push_{r['uid']}",replace_existing=True)
             except Exception: pass
-    all_users = await db("SELECT uid FROM users", fetch="all")
-    if all_users:
-        for r in all_users:
-            scheduler.add_job(send_weekly_report,"cron",day_of_week="sun",hour=19,args=[r["uid"]],id=f"weekly_{r['uid']}",replace_existing=True)
-            # Daily word at 9:00 AM
-            scheduler.add_job(send_daily_word,"cron",hour=9,minute=0,args=[r["uid"]],id=f"daily_{r['uid']}",replace_existing=True)
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
@@ -831,16 +861,20 @@ async def handle_inline(query: InlineQuery):
         # style ("🎧 Нажми, чтобы найти песню" / "⭐ Telegram звёзды
         # берут здесь"). The whole label is the hyperlink, no raw URL
         # in the text.
+        ref_href = html.escape(ref_link, quote=True)
+        ch_href = html.escape(ch_url, quote=True)
         msg = (
-            f'🎓 <a href="{html.escape(ref_link, quote=True)}"><b>'
-            f'{"Нажми сюда, чтобы открыть PolyGlotty" if ru else "Tap here to open PolyGlotty"}'
-            f'</b></a>\n'
-            f'📡 <a href="{html.escape(ch_url, quote=True)}"><b>'
-            f'{"Канал с ежедневной практикой" if ru else "Channel with daily practice"}'
-            f'</b></a>\n\n'
-            f'<i>'
-            f'{"AI-репетитор английского в Telegram: чат, ошибки, слова, TOEFL." if ru else "AI English tutor in Telegram: chat, corrections, vocabulary, TOEFL."}'
-            f'</i>'
+            f'<b>🎓 PolyGlotty — AI-репетитор английского в Telegram</b>\n\n'
+            f'<blockquote>Курс A0–C2, карточки, экзамены и живой чат с ALEX — '
+            f'прямо в Telegram, без отдельного приложения.</blockquote>\n'
+            f'🚀 <a href="{ref_href}"><b>Открыть PolyGlotty и забрать +50 XP</b></a>\n'
+            f'📡 <a href="{ch_href}"><b>Канал с ежедневной практикой</b></a>'
+        ) if ru else (
+            f'<b>🎓 PolyGlotty — an AI English tutor inside Telegram</b>\n\n'
+            f'<blockquote>A0–C2 course, flashcards, exams and live ALEX chat — '
+            f'right inside Telegram, no extra app to install.</blockquote>\n'
+            f'🚀 <a href="{ref_href}"><b>Open PolyGlotty and grab +50 XP</b></a>\n'
+            f'📡 <a href="{ch_href}"><b>Channel with daily practice</b></a>'
         )
         results = [InlineQueryResultArticle(
             id="invite",
@@ -1009,10 +1043,16 @@ async def cmd_start(message: Message):
         text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
         switch_inline_query="invite"
     )])
-    kb_buttons.append([InlineKeyboardButton(
-        text=f"{ICON['channel']} Канал PolyGlotty" if ru else f"{ICON['channel']} PolyGlotty Channel",
-        url=channel_url()
-    )])
+    kb_buttons.append([
+        InlineKeyboardButton(
+            text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
+            url=channel_url()
+        ),
+        InlineKeyboardButton(
+            text="📜 Правила" if ru else "📜 Rules",
+            callback_data="open_terms"
+        ),
+    ])
 
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
 
@@ -1021,7 +1061,7 @@ async def cmd_start(message: Message):
         is_prem = await check_premium(uid)
     except Exception:
         pass
-    badge = " · Premium" if is_prem else ""
+    badge = " ⭐️" if is_prem else ""
 
     ref_line = "\n\nБонус за приглашение начислен: +50 XP тебе, +150 XP другу." if (ru and ref_applied) else (
         "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
@@ -1033,29 +1073,29 @@ async def cmd_start(message: Message):
     channel_link = html_link(channel_url(), "канал с ежедневными словами", bold=True) if ru else html_link(channel_url(), "daily English channel", bold=True)
     text = (
         f"<b>Привет, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram.\n"
-        f"Курсы, карточки, экзамены и живой чат с ALEX — без отдельного приложения.\n\n"
-        f"<b>Бесплатно</b>\n"
+        f"<b>PolyGlotty</b> — AI-репетитор английского прямо в Telegram.\n"
+        f"Курс, карточки, экзамены и живой чат с ALEX — без отдельного приложения.\n\n"
+        f"<blockquote><b>Бесплатно</b>\n"
         f"• Курс A0–C2, карточки, аудирование, drills\n"
-        f"• Прогресс, дерево роста, ежедневные цели\n\n"
-        f"<b>По подписке</b>\n"
+        f"• Прогресс, дерево роста, ежедневные цели</blockquote>\n"
+        f"<blockquote><b>По подписке</b>\n"
         f"• Живой чат с ALEX, roleplay, проверка текста\n"
         f"• Подготовка к TOEFL · IELTS · CAE\n"
-        f"• Кредиты ALEX докупаются отдельно\n\n"
-        f"Короткая ежедневная практика: {channel_link}."
+        f"• Кредиты ALEX докупаются отдельно</blockquote>\n"
+        f"Жми <b>«Открыть приложение»</b>, чтобы начать. Ежедневная практика — в {channel_link}."
         f"{ref_line}"
     ) if ru else (
         f"<b>Hey, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> is an AI English tutor inside Telegram.\n"
+        f"<b>PolyGlotty</b> is an AI English tutor right inside Telegram.\n"
         f"Course, flashcards, exam prep and live ALEX chat — no extra app to install.\n\n"
-        f"<b>Free</b>\n"
+        f"<blockquote><b>Free</b>\n"
         f"• A0–C2 course, flashcards, listening, drills\n"
-        f"• Progress, growth tree, daily goals\n\n"
-        f"<b>With subscription</b>\n"
+        f"• Progress, growth tree, daily goals</blockquote>\n"
+        f"<blockquote><b>With subscription</b>\n"
         f"• Live ALEX chat, roleplay, text check\n"
         f"• TOEFL · IELTS · CAE preparation\n"
-        f"• ALEX credits available as top-ups\n\n"
-        f"Short daily practice: {channel_link}."
+        f"• ALEX credits available as top-ups</blockquote>\n"
+        f"Tap <b>“Open App”</b> to begin. Daily practice lives in the {channel_link}."
         f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
@@ -1102,20 +1142,27 @@ async def cmd_share(message: Message):
     except Exception as e:
         logger.warning(f"share stats failed uid={uid}: {e}")
     link = referral_url(uid)
-    cta = html_link(link, "если хочешь начать учить английский — жми сюда", bold=True) if ru else html_link(link, "tap here to start learning English", bold=True)
-    channel = html_link(channel_url(), "канал PolyGlotty", bold=True) if ru else html_link(channel_url(), "PolyGlotty channel", bold=True)
+    link_code = html.escape(link, quote=False)
     text = (
-        "<b>Пригласи друга</b>\n\n"
-        f"{cta}\n"
-        f"{channel}\n\n"
-        "Бонус: другу +50 XP, тебе +150 XP за каждого нового пользователя.\n"
-        f"Приглашено: <b>{ref_count}</b>"
+        "<b>🎓 Приглашай друзей в PolyGlotty</b>\n\n"
+        "Поделись английским с друзьями — и получай XP за каждого, кто начнёт учиться.\n\n"
+        "<blockquote><b>Награда за приглашение</b>\n"
+        "• Другу — <b>+50 XP</b> на старт\n"
+        "• Тебе — <b>+150 XP</b> за каждого нового ученика</blockquote>\n"
+        "<b>Твоя ссылка</b> — нажми, чтобы скопировать:\n"
+        f"<code>{link_code}</code>\n\n"
+        f"<blockquote>👥 Уже приглашено: <b>{ref_count}</b></blockquote>\n"
+        "Жми <b>«Поделиться»</b> — друг получит готовое приглашение со ссылкой внутри."
     ) if ru else (
-        "<b>Invite a friend</b>\n\n"
-        f"{cta}\n"
-        f"{channel}\n\n"
-        "Bonus: +50 XP for your friend, +150 XP for you.\n"
-        f"Invited: <b>{ref_count}</b>"
+        "<b>🎓 Invite friends to PolyGlotty</b>\n\n"
+        "Share English with your friends — and earn XP for everyone who starts learning.\n\n"
+        "<blockquote><b>Referral reward</b>\n"
+        "• Your friend — <b>+50 XP</b> to start\n"
+        "• You — <b>+150 XP</b> for every new learner</blockquote>\n"
+        "<b>Your link</b> — tap to copy:\n"
+        f"<code>{link_code}</code>\n\n"
+        f"<blockquote>👥 Invited so far: <b>{ref_count}</b></blockquote>\n"
+        "Tap <b>“Share”</b> — your friend gets a ready invite with the link inside."
     )
     # The Share button hands off to the inline "invite" flow so that
     # the sent message contains HTML-linked call-to-action labels
@@ -1158,6 +1205,12 @@ async def cmd_channel(message: Message):
 async def cb_open_premium(cb: CallbackQuery):
     await cb.answer()
     await cmd_premium(cb.message)
+
+@dp.callback_query(F.data == "open_terms")
+async def cb_open_terms(cb: CallbackQuery):
+    await cb.answer()
+    lang = await get_lang(cb.from_user.id) or "ru"
+    await send_terms(cb.message, lang)
 
 @dp.message(Command("lang"))
 async def cmd_lang(m: Message):
@@ -1400,10 +1453,12 @@ async def cmd_remind(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
     text = (
         "<b>Ежедневное напоминание</b>\n\n"
-        "Выбери время, когда ALEX будет мягко возвращать тебя к английскому."
+        "Выбери время, когда ALEX будет возвращать тебя к английскому.\n"
+        "В это же время придёт слово дня, а по воскресеньям — отчёт за неделю."
     ) if lang == "ru" else (
         "<b>Daily reminder</b>\n\n"
-        "Choose when ALEX should bring you back to English practice."
+        "Choose when ALEX should bring you back to English practice.\n"
+        "The word of the day arrives at the same time, and on Sundays — your weekly report."
     )
     await m.answer(text, reply_markup=remind_kb())
 
@@ -1417,39 +1472,43 @@ async def cmd_help(m: Message):
             [InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
                                   web_app=WebAppInfo(url=app_url))],
             [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
-            [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url())],
+            [InlineKeyboardButton(text=f"{ICON['share']} Пригласить друга" if lang=="ru" else f"{ICON['share']} Invite a friend", switch_inline_query="invite")],
+            [
+                InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url()),
+                InlineKeyboardButton(text="📜 Правила" if lang=="ru" else "📜 Rules", callback_data="open_terms"),
+            ],
         ])
     await m.answer(
         ("<b>PolyGlotty · AI-репетитор английского</b>\n\n"
-         "<b>В приложении</b>\n"
+         "<blockquote><b>В приложении</b>\n"
          "• Бесплатный курс A0–C2\n"
-         "• Карточки и повторение\n"
+         "• Карточки и повторение (SRS)\n"
          "• Grammar games · Story Mode\n"
          "• Подготовка к TOEFL · IELTS · CAE\n"
-         "• Чат с ALEX по любой подписке\n\n"
-         "<b>Команды</b>\n"
+         "• Чат с ALEX по подписке</blockquote>\n"
+         "<blockquote expandable><b>Команды</b>\n"
          "/app — приложение\n"
          "/menu — кнопки без команд\n"
-         "/premium — подписки\n"
+         "/premium — подписки и кредиты\n"
          "/share — пригласить друга\n"
          "/channel — канал\n"
          "/support — поддержка\n"
-         "/terms · /rules · /privacy — правовая часть") if lang=="ru" else
+         "/terms · /rules · /privacy — правовая часть</blockquote>") if lang=="ru" else
         ("<b>PolyGlotty · AI English tutor</b>\n\n"
-         "<b>Inside the app</b>\n"
+         "<blockquote><b>Inside the app</b>\n"
          "• Free A0–C2 course\n"
-         "• Flashcards and review\n"
+         "• Flashcards and review (SRS)\n"
          "• Grammar games · Story Mode\n"
          "• TOEFL · IELTS · CAE prep\n"
-         "• ALEX chat on any subscription\n\n"
-         "<b>Commands</b>\n"
+         "• ALEX chat on subscription</blockquote>\n"
+         "<blockquote expandable><b>Commands</b>\n"
          "/app — open the app\n"
          "/menu — buttons without commands\n"
-         "/premium — subscriptions\n"
+         "/premium — subscriptions & credits\n"
          "/share — invite a friend\n"
          "/channel — channel\n"
          "/support — support\n"
-         "/terms · /rules · /privacy — legal"),
+         "/terms · /rules · /privacy — legal</blockquote>"),
         reply_markup=kb
     )
 
@@ -1511,19 +1570,41 @@ async def cmd_paysupport(m: Message):
 @dp.message(Command("terms"))
 @dp.message(Command("rules"))
 async def cmd_terms(m: Message):
-    await m.answer(
-        ("<b>PolyGlotty Terms and Rules</b>\n\n"
-         "1. <b>Service scope.</b> PolyGlotty is an educational Telegram WebApp for English learning. It is not an official school, exam center, legal advisor, medical service, financial advisor or government institution.\n\n"
-         "2. <b>No guaranteed results.</b> PolyGlotty helps users study consistently, but does not guarantee admission, employment, exam scores, fluent speaking within a fixed time, or the same progress speed for every user.\n\n"
-         "3. <b>AI can be wrong.</b> ALEX can explain, check texts and help users practise, but AI may make mistakes, miss context or give inaccurate wording. Important information should be verified. AI replies are not professional advice.\n\n"
-         "4. <b>Payments.</b> Digital subscriptions are paid through Telegram Stars and linked to the user's Telegram ID. If payment succeeded but access did not appear, contact /paysupport with the plan, payment time and screenshot.\n\n"
-         "5. <b>Outside our control.</b> PolyGlotty does not control Telegram, Telegram WebView, Telegram Stars, App Store, Google Play, banks, Anthropic, AI models, TTS/STT providers, Railway, internet connection, devices, operating systems or regional restrictions.\n\n"
-         "6. <b>Limits and sustainability.</b> Limits, models, quota costs, XP rewards, prices, plan contents and feature access may change to keep the service sustainable, prevent abuse and adapt to provider pricing.\n\n"
-         "7. <b>Fair use.</b> Users must not bypass limits, create fake accounts, automate requests, scrape content, abuse payments, attack APIs, send spam, or present internal progress certificates as official accredited documents.\n\n"
-         "8. <b>Data and safety.</b> Do not send passwords, bank details, documents, private conversations, medical records, addresses or other sensitive data. Details: /privacy.\n\n"
-         "9. <b>Support.</b> Requests are handled in queue, so replies may not be instant. App questions: /support. Payment questions: /paysupport.\n\n"
-         "By continuing to use the bot or buying a subscription, you agree to these rules.")
+    lang = await get_lang(m.from_user.id) or "ru"
+    await send_terms(m, lang)
+
+async def send_terms(target, lang: str):
+    ru = lang == "ru"
+    text = (
+        "<b>📜 Условия и правила PolyGlotty</b>\n\n"
+        "<blockquote expandable>"
+        "1. <b>О сервисе.</b> PolyGlotty — образовательное Telegram-приложение для изучения английского. Это не официальная школа, экзаменационный центр, юридическая, медицинская или финансовая консультация и не государственное учреждение.\n\n"
+        "2. <b>Без гарантии результата.</b> PolyGlotty помогает заниматься регулярно, но не гарантирует поступление, трудоустройство, баллы за экзамен, свободную речь за фиксированный срок или одинаковую скорость прогресса для всех.\n\n"
+        "3. <b>ИИ может ошибаться.</b> ALEX объясняет, проверяет тексты и помогает практиковаться, но ИИ может ошибаться, терять контекст или давать неточные формулировки. Важную информацию стоит перепроверять. Ответы ИИ — не профессиональная консультация.\n\n"
+        "4. <b>Оплата.</b> Подписки оплачиваются через Telegram Stars и привязаны к твоему Telegram ID. Если оплата прошла, а доступ не появился — напиши в /paysupport (план, время оплаты, скриншот).\n\n"
+        "5. <b>Вне нашего контроля.</b> PolyGlotty не управляет Telegram, Telegram WebView, Telegram Stars, App Store, Google Play, банками, Anthropic, моделями ИИ, TTS/STT-провайдерами, Railway, интернет-соединением, устройствами, ОС и региональными ограничениями.\n\n"
+        "6. <b>Лимиты и устойчивость.</b> Лимиты, модели, стоимость в кредитах, награды XP, цены, состав планов и доступ к функциям могут меняться, чтобы сервис оставался устойчивым и защищённым от злоупотреблений.\n\n"
+        "7. <b>Честное использование.</b> Запрещено обходить лимиты, создавать фейковые аккаунты, автоматизировать запросы, скрапить контент, злоупотреблять платежами, атаковать API, рассылать спам и выдавать внутренние сертификаты прогресса за официальные документы.\n\n"
+        "8. <b>Данные и безопасность.</b> Не отправляй пароли, банковские данные, документы, личную переписку, медицинские записи, адреса и другие чувствительные данные. Подробнее: /privacy.\n\n"
+        "9. <b>Поддержка.</b> Обращения обрабатываются в очереди, ответ может быть не мгновенным. Вопросы по приложению: /support. По оплате: /paysupport."
+        "</blockquote>\n"
+        "<i>Продолжая пользоваться ботом или оформляя подписку, ты соглашаешься с этими правилами.</i>"
+    ) if ru else (
+        "<b>📜 PolyGlotty Terms and Rules</b>\n\n"
+        "<blockquote expandable>"
+        "1. <b>Service scope.</b> PolyGlotty is an educational Telegram WebApp for English learning. It is not an official school, exam center, legal advisor, medical service, financial advisor or government institution.\n\n"
+        "2. <b>No guaranteed results.</b> PolyGlotty helps users study consistently, but does not guarantee admission, employment, exam scores, fluent speaking within a fixed time, or the same progress speed for every user.\n\n"
+        "3. <b>AI can be wrong.</b> ALEX can explain, check texts and help users practise, but AI may make mistakes, miss context or give inaccurate wording. Important information should be verified. AI replies are not professional advice.\n\n"
+        "4. <b>Payments.</b> Digital subscriptions are paid through Telegram Stars and linked to the user's Telegram ID. If payment succeeded but access did not appear, contact /paysupport with the plan, payment time and screenshot.\n\n"
+        "5. <b>Outside our control.</b> PolyGlotty does not control Telegram, Telegram WebView, Telegram Stars, App Store, Google Play, banks, Anthropic, AI models, TTS/STT providers, Railway, internet connection, devices, operating systems or regional restrictions.\n\n"
+        "6. <b>Limits and sustainability.</b> Limits, models, quota costs, XP rewards, prices, plan contents and feature access may change to keep the service sustainable, prevent abuse and adapt to provider pricing.\n\n"
+        "7. <b>Fair use.</b> Users must not bypass limits, create fake accounts, automate requests, scrape content, abuse payments, attack APIs, send spam, or present internal progress certificates as official accredited documents.\n\n"
+        "8. <b>Data and safety.</b> Do not send passwords, bank details, documents, private conversations, medical records, addresses or other sensitive data. Details: /privacy.\n\n"
+        "9. <b>Support.</b> Requests are handled in queue, so replies may not be instant. App questions: /support. Payment questions: /paysupport."
+        "</blockquote>\n"
+        "<i>By continuing to use the bot or buying a subscription, you agree to these rules.</i>"
     )
+    await target.answer(text)
 
 @dp.message(Command("privacy"))
 async def cmd_privacy(m: Message):
@@ -1832,7 +1913,8 @@ async def cb_remind(cb: CallbackQuery):
     data = cb.data.replace("remind_","")
     if data == "off":
         await update_user(uid, remind_time="off")
-        if scheduler.get_job(f"remind_{uid}"): scheduler.remove_job(f"remind_{uid}")
+        for jid in (f"push_{uid}", f"remind_{uid}", f"weekly_{uid}", f"daily_{uid}"):
+            if scheduler.get_job(jid): scheduler.remove_job(jid)
         lang = await get_lang(uid) or "ru"
         await cb.answer(); await cb.message.edit_text("Reminders disabled." if lang=="en" else "Напоминания выключены.")
     else:
@@ -1840,7 +1922,7 @@ async def cb_remind(cb: CallbackQuery):
         await update_user(uid, remind_time=data)
         try:
             h, m = map(int, data.split(":"))
-            scheduler.add_job(send_reminder,"cron",hour=h,minute=m,args=[uid],id=f"remind_{uid}",replace_existing=True)
+            scheduler.add_job(send_scheduled_push,"cron",hour=h,minute=m,args=[uid],id=f"push_{uid}",replace_existing=True)
         except Exception as e: logger.warning(e)
         await cb.answer(f"✓ {data}")
         await cb.message.edit_text(
@@ -2244,28 +2326,36 @@ async def cmd_premium(msg: Message):
         if credits_balance > 0:
             status_lines.append("◦ " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
                                           if ru else f"ALEX credits: {credits_balance:,}"))
-        status_block = ("\n\n" + "\n".join(status_lines)) if status_lines else ""
+        if status_lines:
+            status_title = "Твой статус" if ru else "Your status"
+            status_block = f"\n<blockquote><b>{status_title}</b>\n" + "\n".join(status_lines) + "</blockquote>"
+        else:
+            status_block = ""
 
         text = (
-            "<b>PolyGlotty Plans</b>\n\n"
-            "<b>Платформа</b>\n"
+            "<b>⭐️ PolyGlotty · подписка и кредиты</b>\n\n"
+            "<blockquote><b>▣ Платформа</b>\n"
             "Курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
-            "299 ⭐ / мес (+30 кр) · 1 290 ⭐ / 6 мес (+150 кр) · 4 990 ⭐ навсегда (+500 кр)\n\n"
-            "<b>Кредиты ALEX</b>\n"
-            "Отдельный баланс для чата. Тратятся за каждое сообщение и не сгорают.\n"
+            "• 1 мес — <b>299 ⭐</b> (+30 кр)\n"
+            "• 6 мес — <b>1 290 ⭐</b> (+150 кр · −28%)\n"
+            "• Навсегда — <b>4 990 ⭐</b> (+500 кр)</blockquote>\n"
+            "<blockquote><b>◦ Кредиты ALEX</b>\n"
+            "Отдельный баланс для чата. Тратятся за сообщение и не сгорают.\n"
             "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
-            "Пакеты: 100 / 500 (−20%) / 2 000 (−33%)\n"
+            "Пакеты: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
             f"{status_block}\n\n"
-            "<i>Оплата Telegram Stars</i>"
+            "<i>Оплата через Telegram Stars</i>"
         ) if ru else (
-            "<b>PolyGlotty Plans</b>\n\n"
-            "<b>Platform</b>\n"
+            "<b>⭐️ PolyGlotty · subscription & credits</b>\n\n"
+            "<blockquote><b>▣ Platform</b>\n"
             "A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
-            "299 ⭐ / mo (+30 cr) · 1 290 ⭐ / 6 mo (+150 cr) · 4 990 ⭐ lifetime (+500 cr)\n\n"
-            "<b>ALEX credits</b>\n"
+            "• 1 mo — <b>299 ⭐</b> (+30 cr)\n"
+            "• 6 mo — <b>1 290 ⭐</b> (+150 cr · −28%)\n"
+            "• Lifetime — <b>4 990 ⭐</b> (+500 cr)</blockquote>\n"
+            "<blockquote><b>◦ ALEX credits</b>\n"
             "Separate chat balance. Spent per message and never expire.\n"
             "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
-            "Packs: 100 / 500 (−20%) / 2 000 (−33%)\n"
+            "Packs: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
             f"{status_block}\n\n"
             "<i>Telegram Stars only</i>"
         )
