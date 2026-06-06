@@ -722,7 +722,8 @@ async def send_weekly_report(uid: int):
             f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>",
             reply_markup=kb
         )
-    except Exception: pass
+    except Exception as e:
+        logger.warning(f"weekly_report to {uid}: {e}")
 
 # ══ DAILY WORD PUSH ══════════════════════════════════════════════════════════
 DAILY_WORDS = [
@@ -759,49 +760,6 @@ DAILY_WORDS = [
     {"word":"Idiosyncratic","ph":"/ˌɪdiəsɪŋˈkrætɪk/","tr":"Своеобразный","ex":"He has an idiosyncratic style."},
 ]
 
-async def send_daily_word(uid: int):
-    """Send daily word of the day to user."""
-    import random
-    lang = await get_lang(uid) or "ru"
-    ru = lang == "ru"
-    w = random.choice(DAILY_WORDS)
-    try:
-        from aiogram.types import WebAppInfo
-        app_url = webapp_url()
-        kb = None
-        if app_url:
-            kb = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text=f"{ICON['app']} Учить в приложении" if ru else f"{ICON['app']} Learn in app",
-                                      web_app=WebAppInfo(url=app_url))],
-                [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
-                                      url=channel_url())],
-            ])
-        # Tier-agnostic "how to use" line. The previous wording assumed
-        # the reader had a Basic subscription ("В Basic ALEX исправит…")
-        # which was wrong for free-tier readers — and this message goes
-        # to every user, regardless of tier.
-        how_to_ru = (
-            "прочитай пример вслух, придумай своё предложение с этим словом "
-            "и попробуй использовать его сегодня в сообщении или разговоре. "
-            "Открой приложение, чтобы закрепить слово в карточках."
-        )
-        how_to_en = (
-            "read the example aloud, write your own sentence with this word, "
-            "and try to use it in a message or conversation today. Open the "
-            "app to lock it in with flashcards."
-        )
-        await bot.send_message(uid,
-            f"<b>{'Слово дня' if ru else 'Word of the day'}</b>\n\n"
-            f"<b>{w['word']}</b>  <code>{w['ph']}</code>\n"
-            f"{w['tr']}\n\n"
-            f"<i>{w['ex']}</i>\n\n"
-            f"<b>{'Как использовать' if ru else 'How to use'}</b>\n"
-            f"{how_to_ru if ru else how_to_en}",
-            parse_mode="HTML", reply_markup=kb
-        )
-    except Exception as e:
-        logger.warning(f"daily_word to {uid}: {e}")
-
 async def send_scheduled_push(uid: int):
     """Single daily push at the user's chosen reminder time.
     Sunday  -> weekly report (instead of the reminder + word of the day).
@@ -832,7 +790,8 @@ async def schedule_all():
             try:
                 h, m = map(int, r["remind_time"].split(":"))
                 scheduler.add_job(send_scheduled_push,"cron",hour=h,minute=m,args=[r["uid"]],id=f"push_{r['uid']}",replace_existing=True)
-            except Exception: pass
+            except Exception as e:
+                logger.warning(f"schedule_all: bad remind_time for uid={r['uid']}: {e}")
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
@@ -968,10 +927,24 @@ async def cmd_start(message: Message):
     uid  = message.from_user.id
     name = user_display_name(message.from_user)
 
+    is_new_user = False
     try:
+        is_new_user = (await get_user(uid)) is None
         await upsert_user(uid, name)
     except Exception as e:
         logger.error(f"upsert_user error: {e}")
+
+    # New users get a default daily reminder at 19:00 (Europe/Moscow) so
+    # they receive the word of the day and the Sunday weekly report out of
+    # the box. Existing users who never configured a time are left untouched
+    # (their silence is respected — see /remind to opt in or out).
+    if is_new_user:
+        try:
+            await update_user(uid, remind_time="19:00")
+            scheduler.add_job(send_scheduled_push, "cron", hour=19, minute=0,
+                              args=[uid], id=f"push_{uid}", replace_existing=True)
+        except Exception as e:
+            logger.warning(f"default reminder setup failed uid={uid}: {e}")
 
     # Handle deep links
     args = message.text.split(maxsplit=1)[1] if len(message.text.split()) > 1 else ""

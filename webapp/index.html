@@ -6394,80 +6394,504 @@ async function rate(q){
 
 /* ══ EXAM PREP: TOEFL / IELTS, offline-first ══ */
 const EXAM_BANK={
-  toefl:{
-    reading:[
-      {topic:'Campus ecology',passage:'A university notice explains that the campus will replace several lawns with native plants. The change is expected to reduce water use, support local insects and lower maintenance costs. Some students worry the new areas will look less formal, but the project team says signs will explain the environmental purpose.',q:'What is the main purpose of the project?',o:['To make the campus more formal','To reduce water use and support local ecology','To build new classrooms','To remove student signs'],a:1},
-      {topic:'Academic planning',passage:'A professor tells students that the final paper should compare two sources rather than summarize one article. Students must explain the authors’ positions, evaluate the evidence and include a short conclusion that states their own view.',q:'What does the professor want students to do?',o:['Only summarize one article','Compare sources and evaluate evidence','Avoid giving an opinion','Write without a conclusion'],a:1},
-      {topic:'Industrial Revolution',passage:'The early Industrial Revolution transformed cities by drawing rural workers into new factories. Wages rose for some, but housing was crowded and air quality fell sharply. Reformers later pushed for sanitation laws that we still benefit from today.',q:'According to the passage, what was a NEGATIVE consequence of early industrial growth?',o:['Lower factory wages','Crowded housing and worse air','Decline of urban populations','A return to rural farming'],a:1},
-      {topic:'Marine biology',passage:'Coral reefs survive by hosting tiny algae inside their tissue. The algae provide food through photosynthesis; in return the coral offers shelter. When ocean temperatures rise above a threshold, the coral expels the algae and turns white — a process known as bleaching.',q:'Why does coral expel its algae?',o:['Because algae produce too much food','Because temperatures rise above a threshold','To attract bigger fish','To build a stronger skeleton'],a:1},
-      {topic:'History of writing',passage:'Cuneiform, one of the earliest writing systems, began as simple pictures pressed into clay with a reed. Over centuries it became more abstract: symbols stood for sounds, not just objects. This shift allowed scribes to record laws, contracts and even poetry.',q:'How did cuneiform change over time?',o:['It stayed purely pictorial','It moved from pictures to sound-based symbols','It was carved into stone instead of clay','It lost its use for recording laws'],a:1},
-      {topic:'Sleep research',passage:'Studies show that adolescents need about nine hours of sleep, yet most get fewer than seven on school nights. Sleep deprivation impairs memory consolidation and emotional regulation. Some districts have begun shifting school start times later to address the problem.',q:'What does the passage suggest about teenagers and sleep?',o:['They sleep more than they need','They get less sleep than recommended','Sleep does not affect their grades','Earlier start times improve sleep'],a:1},
-      {topic:'Cognitive science',passage:'The “spacing effect” describes the finding that information is retained better when study sessions are separated by intervals rather than crammed together. Although intuitive review feels more productive in one long session, spaced repetition produces stronger long-term memory.',q:'Why is spaced repetition more effective than cramming?',o:['It feels more productive','It produces stronger long-term memory','It uses less material','It avoids breaks entirely'],a:1},
-      {topic:'Renewable energy',passage:'Wind farms produce electricity without burning fuel, but they depend on consistent wind patterns and well-maintained turbines. Critics note that intermittent generation can stress an electrical grid that is built around steady output from gas or nuclear plants.',q:'What is one concern about wind power mentioned in the passage?',o:['Wind power burns extra fuel','Intermittent generation stresses the grid','It cannot operate at night','It requires no maintenance'],a:1}
+  "toefl": {
+    "reading": [
+      {
+        "topic": "Dendrochronology",
+        "passage": "Dendrochronology is the science of dating events by analysing the annual growth rings of trees. In temperate climates a tree adds one ring per year; wide rings form in favourable seasons and narrow rings in years of drought or cold. Because the resulting sequence of wide and narrow rings is irregular, it functions almost like a fingerprint for a span of years. By overlapping the ring patterns of living trees with those of older, dead timber found in buildings or buried in bogs, researchers can extend an unbroken chronology back thousands of years. This master sequence then allows wood of unknown age to be matched and dated precisely.",
+        "q": "It can be inferred from the passage that dating a piece of old timber is possible because",
+        "o": [
+          "every tree species produces rings of identical width",
+          "the irregular ring pattern of a period is distinctive enough to be matched",
+          "drought years leave no rings at all",
+          "dead trees stop forming rings after burial"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Loss aversion",
+        "passage": "Behavioural economists have repeatedly found that people feel the pain of a loss more intensely than the pleasure of an equivalent gain, a tendency called loss aversion. In experiments, losing fifty dollars typically produces a stronger emotional reaction than winning fifty dollars. This asymmetry helps explain several puzzles: why investors hold falling stocks too long, why consumers value a product more once they own it, and why warranties and insurance sell so well. Critics caution, however, that the effect weakens when stakes are very small or when participants have time to deliberate carefully rather than respond instinctively.",
+        "q": "According to the passage, all of the following are explained by loss aversion EXCEPT",
+        "o": [
+          "investors holding declining stocks too long",
+          "the strong sales of insurance products",
+          "people valuing items more once they own them",
+          "the tendency to deliberate carefully over decisions"
+        ],
+        "a": 3
+      },
+      {
+        "topic": "C4 photosynthesis",
+        "passage": "Most plants use a photosynthetic pathway known as C3, which works well in cool, moist conditions but loses efficiency in heat because the key enzyme begins to fix oxygen instead of carbon dioxide, wasting energy. Certain plants, including maize and sugarcane, evolved a modified route called C4 photosynthesis. They first capture carbon dioxide in outer cells and concentrate it in specialised interior cells, where the enzyme operates in a carbon-rich environment that suppresses the wasteful oxygen reaction. This adaptation allows C4 plants to thrive in hot, sunny climates where C3 plants struggle.",
+        "q": "According to the passage, what is the main advantage of the C4 pathway in hot climates?",
+        "o": [
+          "It concentrates carbon dioxide so the enzyme avoids the wasteful oxygen reaction",
+          "It eliminates the need for the key enzyme entirely",
+          "It allows the plant to photosynthesise in darkness",
+          "It stores oxygen for use during droughts"
+        ],
+        "a": 0
+      },
+      {
+        "topic": "Roman concrete",
+        "passage": "Roman harbour structures made of concrete have endured beneath seawater for two thousand years, while modern marine concrete often crumbles within decades. Researchers discovered that the Roman mixture contained volcanic ash, which reacted slowly with seawater to grow rare interlocking mineral crystals. Rather than degrading the structure, the constant intrusion of seawater actually strengthened it over time by feeding this mineral growth. The finding has inspired engineers to test ash-based recipes that might produce more durable and less carbon-intensive concrete today.",
+        "q": "The word \"endured\" in the passage is closest in meaning to",
+        "o": [
+          "collapsed",
+          "survived",
+          "dissolved",
+          "floated"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Corvid cognition",
+        "passage": "Crows, ravens and other corvids display problem-solving abilities once thought unique to primates. In controlled studies, some corvids bend wire into hooks to retrieve food, recognise individual human faces, and appear to plan for future needs by caching food in locations they will revisit. The author presents these examples not to argue that birds think exactly as humans do, but to challenge the long-standing assumption that advanced cognition requires the particular brain structure found in mammals. Corvid brains are organised very differently, yet achieve comparable feats.",
+        "q": "Why does the author mention crows bending wire and caching food?",
+        "o": [
+          "to prove that corvids are more intelligent than primates",
+          "to illustrate that complex cognition can arise from a different brain structure",
+          "to show that birds imitate human tool use",
+          "to argue that all birds can recognise faces"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Seafloor spreading",
+        "passage": "The theory of seafloor spreading holds that new oceanic crust forms at mid-ocean ridges, where molten rock rises, cools and pushes older crust outward on either side. Strong support came from magnetic surveys: as the rock cools, it locks in the direction of Earth’s magnetic field, which has reversed many times. The seafloor therefore shows symmetrical bands of normal and reversed magnetism mirrored on both sides of a ridge. Sediment thickness offered further evidence, since crust farther from the ridge is older and has accumulated more sediment.",
+        "q": "Which of the following is NOT mentioned as evidence for seafloor spreading?",
+        "o": [
+          "symmetrical magnetic bands on either side of a ridge",
+          "greater sediment thickness farther from the ridge",
+          "the locking-in of magnetic direction as rock cools",
+          "the discovery of fossils identical on distant continents"
+        ],
+        "a": 3
+      },
+      {
+        "topic": "The printing press",
+        "passage": "When movable-type printing spread through Europe in the fifteenth century, its most immediate effect was not a sudden rise in literacy, which remained low for generations. Instead, the press transformed how knowledge circulated among the already literate. Identical copies meant that scholars in distant cities could reference the same page, errors could be catalogued and corrected across editions, and controversial ideas spread faster than authorities could suppress them. Standardisation, more than mass readership, was the early revolution.",
+        "q": "It can be inferred from the passage that, in its first generations, the printing press primarily",
+        "o": [
+          "caused literacy rates to rise sharply across Europe",
+          "changed how knowledge moved among those who could already read",
+          "was used mainly by religious authorities to suppress ideas",
+          "reduced the number of errors that scholars made"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Urban heat islands",
+        "passage": "Cities are typically several degrees warmer than the surrounding countryside, a phenomenon called the urban heat island. Dark asphalt and rooftops absorb solar radiation during the day and release it slowly at night, while the scarcity of vegetation reduces the cooling effect of evaporation from leaves. Tall buildings also trap heat by limiting airflow. Planners increasingly counter the effect with reflective light-coloured surfaces, expanded tree cover and rooftop gardens, which together lower both daytime temperatures and night-time heat release.",
+        "q": "According to the passage, vegetation helps cool cities mainly because",
+        "o": [
+          "leaves reflect nearly all incoming sunlight",
+          "evaporation from leaves provides a cooling effect",
+          "plants block wind between tall buildings",
+          "trees absorb heat and store it underground"
+        ],
+        "a": 1
+      }
     ],
-    listening:[
-      {topic:'Office hours',transcript:'A student asks a professor whether she can change her presentation topic. The professor agrees, but reminds her that the new topic must still connect to the course theme and include at least one academic source.',q:'What condition does the professor give?',o:['The topic must be shorter','The topic must connect to the course theme','The student must present alone','The student must use no sources'],a:1},
-      {topic:'Library announcement',transcript:'The library will close the second floor for repairs next week. Study rooms on the first floor will remain open, and students can reserve extra seats through the online system.',q:'What will remain available?',o:['Second-floor study rooms','First-floor study rooms','All repair areas','The closed reading hall'],a:1},
-      {topic:'Biology lecture',transcript:'In today’s lecture the professor explains that mitochondria were probably once independent bacteria absorbed by a larger cell. The professor emphasises that this “endosymbiosis” theory is supported by the fact that mitochondria still carry their own circular DNA.',q:'What evidence supports the endosymbiosis theory?',o:['Mitochondria have circular DNA','Bacteria are larger than cells','Mitochondria float outside the cell','Cells reject mitochondria'],a:0},
-      {topic:'Group project',transcript:'Three students discuss splitting a research project. Maya offers to handle the survey design, Jin volunteers to do the statistics, and Carla agrees to write the introduction. They agree to meet again on Thursday to review draft sections.',q:'What will Jin do?',o:['Design the survey','Run the statistics','Write the introduction','Schedule the meeting'],a:1},
-      {topic:'Art history',transcript:'The professor compares two impressionist painters. While Monet focused on the changing effects of light on a single object across time, Degas preferred dynamic scenes of dancers in motion. Both rejected the highly polished finish demanded by official academies.',q:'What did Monet and Degas have in common?',o:['Both painted dancers','Both rejected the academic polished finish','Both focused on still lifes','Both worked only outdoors'],a:1},
-      {topic:'Career services',transcript:'An adviser tells students that mock interviews are the most effective preparation step. Students should book a 30-minute slot, bring a current résumé and prepare two questions of their own. Walk-ins are rarely possible during exam weeks.',q:'What does the adviser recommend?',o:['Walking in during exams','Booking a mock interview slot','Skipping the résumé','Avoiding personal questions'],a:1},
-      {topic:'Geology field trip',transcript:'A teaching assistant explains that the field trip will examine sedimentary rock formations along the river bank. Students must wear closed shoes, bring a notebook and stay together — the path becomes slippery after rain.',q:'Why must students stay together?',o:['Because the path is slippery','Because the bus is small','Because they share one notebook','Because nobody knows the way'],a:0},
-      {topic:'Music theory',transcript:'The lecturer notes that the pentatonic scale has only five notes per octave. Its simplicity makes it easy to improvise with, which is why it appears in folk music across many cultures, from Celtic ballads to Chinese guzheng pieces.',q:'Why is the pentatonic scale common in folk music worldwide?',o:['It has seven complex notes','Its simplicity makes improvisation easy','It belongs to one culture only','It cannot be sung'],a:1}
+    "listening": [
+      {
+        "topic": "Office hours (thesis)",
+        "transcript": "Student: Professor, I read that coastal towns with more tourism also report higher average incomes, so I want to argue that tourism raises local wages. Professor: Be careful. You’ve found that the two things occur together, but occurring together doesn’t prove one causes the other. Wealthier regions might simply attract more tourists in the first place. Before you make a causal claim, you need evidence that rules out that alternative.",
+        "q": "What is the professor’s main concern about the student’s argument?",
+        "o": [
+          "The student has not collected any data on incomes",
+          "The student treats a correlation as if it proves causation",
+          "The student is writing about the wrong town",
+          "The student’s thesis is too narrow for the assignment"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Biology lecture (extremophiles)",
+        "transcript": "Lecturer: We usually assume life depends on sunlight, but consider the deep-sea vent communities. There is no light kilometres down, yet dense ecosystems thrive. The base of that food web is not a plant. It is bacteria that draw energy from chemicals dissolved in the vent fluid, a process we call chemosynthesis. Everything else there ultimately depends on those bacteria.",
+        "q": "According to the lecturer, what supports the deep-sea vent food web?",
+        "o": [
+          "Plants that survive in very low light",
+          "Energy carried down from surface waters",
+          "Bacteria that obtain energy from chemicals",
+          "Heat converted directly into food by animals"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "Group project",
+        "transcript": "Maya: So for the climate poster, I’ll gather the temperature graphs. Jin: I can format the references and proofread. Carla: Then I’ll write the summary and design the layout — I’ve done posters before. Maya: Perfect, and let’s all meet Thursday to check Carla’s draft before we print.",
+        "q": "What will Carla be responsible for?",
+        "o": [
+          "Gathering the temperature graphs",
+          "Formatting the references",
+          "Writing the summary and designing the layout",
+          "Printing the final poster"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "Art history (critics)",
+        "transcript": "Lecturer: When the Impressionists first exhibited, critics were harsh. Reviewers complained the paintings looked unfinished, like rough sketches rather than serious works, because the brushstrokes were loose and visible. What the critics dismissed as carelessness, the painters intended deliberately — they wanted to capture a fleeting moment of light, not a polished studio scene.",
+        "q": "Why did early critics dislike Impressionist paintings?",
+        "o": [
+          "The subjects were considered offensive",
+          "The paintings looked unfinished because of loose, visible brushstrokes",
+          "The colours were too dark and muddy",
+          "The works were too large for galleries"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Registration (transcript)",
+        "transcript": "Adviser: You want to drop the statistics course after the deadline? Student: Yes, is that possible? Adviser: It is, but a late drop leaves a W on your transcript. It won’t lower your grade point average, but graduate schools can see it. If you think you can still pass, finishing might look better. Student: I’ll think it over.",
+        "q": "What does the adviser say about a late drop?",
+        "o": [
+          "It is not allowed after the deadline",
+          "It leaves a mark on the transcript that schools can see",
+          "It automatically lowers the grade point average",
+          "It requires the professor’s written permission"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Geology lecture (erratics)",
+        "transcript": "Lecturer: Scattered across this valley are huge boulders made of granite — but the bedrock here is limestone. So where did they come from? These are glacial erratics. An advancing glacier picked them up far to the north, carried them along, and dropped them here when the ice melted. By mapping the rock type back to its source, we can actually reconstruct the direction the ancient ice flowed.",
+        "q": "According to the lecturer, what can the boulders tell researchers?",
+        "o": [
+          "The age of the surrounding limestone",
+          "The direction in which the ancient glacier moved",
+          "The temperature of the valley today",
+          "The depth of the local groundwater"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Career services",
+        "transcript": "Adviser: The biggest mistake students make is rewriting their resume over and over and never practising out loud. Honestly, one mock interview teaches you more than ten more edits to the document. You hear how you actually sound, you stumble somewhere safe, and you fix it before the real thing. Book one with us this week.",
+        "q": "What does the adviser emphasise?",
+        "o": [
+          "Editing the resume as many times as possible",
+          "That a mock interview is more valuable than further resume edits",
+          "Avoiding interviews until the resume is perfect",
+          "Memorising answers word for word"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Music theory (mode)",
+        "transcript": "Lecturer: Take the same melody and play it in a major mode — it sounds bright, almost cheerful. Now shift it to a minor mode by lowering a couple of notes, and suddenly the very same tune feels sad or tense. The notes are nearly identical; it is the pattern of intervals between them that changes the emotional colour entirely.",
+        "q": "According to the lecturer, what mainly changes the emotional feel of the melody?",
+        "o": [
+          "The pattern of intervals between the notes",
+          "The speed at which it is played",
+          "The instrument that performs it",
+          "The volume of the performance"
+        ],
+        "a": 0
+      }
     ],
-    writing:[
-      {topic:'Independent · agree/disagree',prompt:'Do you agree or disagree? Students learn better when they study in small groups rather than alone. Use specific reasons and examples (≥300 words, ~25 min).'},
-      {topic:'Independent · preference',prompt:'Some people prefer to live in a small town, while others prefer a big city. Which do you prefer? Support your choice with specific reasons.'},
-      {topic:'Independent · advantages',prompt:'In your opinion, what is the single most important quality a good teacher should have? Explain with examples.'},
-      {topic:'Integrated · classroom vs online',prompt:'A reading argues that traditional classroom lectures are more effective. A lecture, however, claims online formats give students more flexibility. Summarise both positions and explain how they relate.'},
-      {topic:'Integrated · technology in school',prompt:'A reading lists three benefits of giving every student a tablet at school. A short lecture challenges each benefit. Write a response that summarises the lecture and connects it to the reading.'},
-      {topic:'Academic discussion',prompt:'Your professor writes: “Should students take a gap year before university?” Two classmates have already replied. Write your own opinion (≥100 words) clearly building on or disagreeing with their points.'}
+    "writing": [
+      {
+        "topic": "Independent · agree/disagree",
+        "prompt": "Do you agree or disagree? Students learn better when they study in small groups rather than alone. Use specific reasons and examples (≥300 words, ~25 min)."
+      },
+      {
+        "topic": "Independent · preference",
+        "prompt": "Some people prefer to live in a small town, while others prefer a big city. Which do you prefer? Support your choice with specific reasons."
+      },
+      {
+        "topic": "Independent · advantages",
+        "prompt": "In your opinion, what is the single most important quality a good teacher should have? Explain with examples."
+      },
+      {
+        "topic": "Integrated · classroom vs online",
+        "prompt": "A reading argues that traditional classroom lectures are more effective. A lecture, however, claims online formats give students more flexibility. Summarise both positions and explain how they relate."
+      },
+      {
+        "topic": "Integrated · technology in school",
+        "prompt": "A reading lists three benefits of giving every student a tablet at school. A short lecture challenges each benefit. Write a response that summarises the lecture and connects it to the reading."
+      },
+      {
+        "topic": "Academic discussion",
+        "prompt": "Your professor writes: “Should students take a gap year before university?” Two classmates have already replied. Write your own opinion (≥100 words) clearly building on or disagreeing with their points."
+      }
     ],
-    speaking:[
-      {topic:'Task 1 · independent (45s)',prompt:'Describe a skill you want to improve. Explain why it matters and how you plan to practise it. Prep 15s, speak 45s.'},
-      {topic:'Task 1 · independent (45s)',prompt:'Some people prefer to study at home, others in a library. Which do you prefer and why?'},
-      {topic:'Task 2 · campus situation (60s)',prompt:'A friend is nervous about giving a presentation. Give two practical suggestions and explain why they would help.'},
-      {topic:'Task 2 · announcement reaction (60s)',prompt:'The university has announced that the cafeteria will close at 8 pm instead of 11 pm. A student disagrees. Summarise her two reasons.'},
-      {topic:'Task 3 · academic concept (60s)',prompt:'Using the term “opportunity cost”, explain a real-life choice you or someone you know has had to make.'},
-      {topic:'Task 4 · academic lecture (60s)',prompt:'Summarise the two strategies a professor described for memorising vocabulary in a foreign language.'}
+    "speaking": [
+      {
+        "topic": "Task 1 · independent (45s)",
+        "prompt": "Describe a skill you want to improve. Explain why it matters and how you plan to practise it. Prep 15s, speak 45s."
+      },
+      {
+        "topic": "Task 1 · independent (45s)",
+        "prompt": "Some people prefer to study at home, others in a library. Which do you prefer and why?"
+      },
+      {
+        "topic": "Task 2 · campus situation (60s)",
+        "prompt": "A friend is nervous about giving a presentation. Give two practical suggestions and explain why they would help."
+      },
+      {
+        "topic": "Task 2 · announcement reaction (60s)",
+        "prompt": "The university has announced that the cafeteria will close at 8 pm instead of 11 pm. A student disagrees. Summarise her two reasons."
+      },
+      {
+        "topic": "Task 3 · academic concept (60s)",
+        "prompt": "Using the term “opportunity cost”, explain a real-life choice you or someone you know has had to make."
+      },
+      {
+        "topic": "Task 4 · academic lecture (60s)",
+        "prompt": "Summarise the two strategies a professor described for memorising vocabulary in a foreign language."
+      }
     ]
   },
-  ielts:{
-    reading:[
-      {topic:'Urban transport',passage:'Many cities are investing in bicycle lanes because they reduce congestion and pollution. However, successful cycling networks require safe junctions, clear signs and reliable maintenance throughout the year.',q:'Which factor is mentioned as necessary for successful cycling networks?',o:['Higher parking prices','Safe junctions and maintenance','Fewer public buses','Longer car journeys'],a:1},
-      {topic:'Workplace learning',passage:'Companies increasingly offer short online courses to employees. These courses are flexible and inexpensive, but they work best when managers give employees time to complete them during working hours.',q:'When do online courses work best?',o:['When workers study only at night','When managers provide time for study','When courses are very long','When there is no manager support'],a:1},
-      {topic:'Sleep and shift work',passage:'Workers on rotating night shifts often report poor sleep quality and higher rates of illness. Researchers attribute this to disruption of the circadian rhythm — the internal clock that regulates hormones such as melatonin. Bright morning light and consistent sleep windows can ease the effect, but cannot remove it entirely.',q:'Which statement is true according to the passage?',o:['Night-shift workers always sleep better','Disrupted circadian rhythm causes health issues','Melatonin is unrelated to shift work','Morning light worsens the problem'],a:1},
-      {topic:'Modern architecture',passage:'Many contemporary buildings now include “green roofs” planted with vegetation. The benefits go beyond appearance: roof gardens reduce heat absorption, provide insulation and slow down rainwater runoff. Construction costs are higher, but operational savings often pay back within a decade.',q:'According to the passage, what is one PRACTICAL benefit of a green roof?',o:['Higher construction costs','Slower rainwater runoff','Increased heat absorption','Longer payback period'],a:1},
-      {topic:'Coffee economics',passage:'The price farmers receive for coffee beans is set on a global market, but the price you pay in a café reflects mostly local costs: rent, wages and equipment. As a result, large fluctuations on the wholesale market are barely visible to the customer.',q:'Why are global price swings barely visible in cafés?',o:['Customers refuse higher prices','Café prices are dominated by local costs','Coffee is not sold globally','Farmers set retail prices directly'],a:1},
-      {topic:'Volcanic warning',passage:'Modern monitoring uses small earthquakes, gas emissions and ground swelling to predict an eruption. While the technology cannot give an exact day, it can issue warnings several days in advance, enough to evacuate nearby villages and divert flights.',q:'What can current monitoring do?',o:['Predict the exact eruption day','Provide several days’ advance warning','Stop the eruption itself','Replace evacuation plans'],a:1},
-      {topic:'Reading habits',passage:'Surveys suggest that people who read fiction regularly score slightly higher on tests of empathy. Researchers hypothesise that imagining characters’ perspectives is a kind of practice for understanding real people. The effect is small but consistent across cultures.',q:'What does the research suggest about fiction readers?',o:['They lose interest in real people','They score slightly higher on empathy','They prefer non-fiction','They have weaker imagination'],a:1},
-      {topic:'Renewable rural electricity',passage:'In remote villages, solar mini-grids can supply electricity faster than waiting for the national grid. Each system requires upfront investment, but maintenance is light and the panels last about twenty years. Users pay a small monthly fee that funds repairs.',q:'According to the passage, what does the monthly fee fund?',o:['Building national grids','Repairs of the solar system','Diesel imports','Government subsidies'],a:1}
+  "ielts": {
+    "reading": [
+      {
+        "topic": "Bioluminescence",
+        "passage": "Many deep-sea creatures produce their own light through a chemical reaction, a trait known as bioluminescence. The functions vary widely. Some anglerfish dangle a glowing lure to attract prey toward their jaws. Others flash brightly to startle a predator and escape in the confusion. Perhaps the most surprising use is camouflage: certain squid generate a faint downward glow that matches the dim light filtering from above, erasing the dark silhouette they would otherwise cast to predators looking up from below.",
+        "q": "According to the passage, how does the squid use bioluminescence?",
+        "o": [
+          "To attract prey toward its mouth",
+          "To startle and confuse predators",
+          "To erase its silhouette by matching the light from above",
+          "To communicate with other squid"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "The decline of cursive",
+        "passage": "As keyboards replace pens, many schools have reduced or dropped cursive handwriting instruction. Supporters of the change argue that classroom time is better spent on digital skills. Opponents counter that the loss is significant: historians warn that future generations may be unable to read older handwritten documents, and some researchers claim the physical act of forming joined letters aids memory. Whatever the merits, once cursive disappears from the curriculum the skill is unlikely to return, making the decision effectively permanent.",
+        "q": "What does the passage suggest about removing cursive from the curriculum?",
+        "o": [
+          "It can easily be reversed in later years",
+          "It is effectively a permanent change",
+          "It has improved students’ digital skills",
+          "It is opposed by most historians and researchers"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "The tragedy of the commons",
+        "passage": "When a resource is shared by many and owned by no one — a common pasture, a fishery, the atmosphere — each user gains the full benefit of using a little more, while the cost of overuse is spread across everyone. Acting rationally for themselves, individuals therefore tend to exhaust the resource, a pattern economists call the tragedy of the commons. The classic example is overgrazing. Solutions usually involve either dividing the resource into private parcels or establishing enforceable limits agreed and policed by the whole community.",
+        "q": "According to the passage, which approach is offered as a solution?",
+        "o": [
+          "Encouraging each user to act in pure self-interest",
+          "Removing all ownership of the resource",
+          "Setting enforceable limits policed by the community",
+          "Increasing the number of people who share the resource"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "Sleep and memory",
+        "passage": "Sleep does more than rest the body; it consolidates memory. During deep sleep the brain appears to replay the day’s experiences, transferring fragile new memories into more stable long-term storage. Experiments show that students who sleep after studying recall more than those who stay awake the same number of hours. Crucially, the benefit depends on timing: sleep must follow learning fairly soon. A nap days later does little, suggesting the consolidation window is limited.",
+        "q": "What does the passage say is crucial for sleep to benefit memory?",
+        "o": [
+          "The total number of hours slept",
+          "That sleep follows the learning fairly soon",
+          "That the learner naps during the day",
+          "That studying happens in deep sleep"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Greenwashing",
+        "passage": "As consumers grow more environmentally conscious, some companies exaggerate or fabricate the ecological benefits of their products — a practice called greenwashing. A label may shout that a bottle is recyclable while staying silent about the energy-hungry process used to make it. Regulators and watchdog groups increasingly demand that environmental claims be backed by verifiable figures rather than vague words like natural or eco-friendly, which carry no fixed legal meaning.",
+        "q": "According to the passage, what do regulators increasingly require of environmental claims?",
+        "o": [
+          "That they use words like natural and eco-friendly",
+          "That they appear on every product label",
+          "That they be supported by verifiable figures",
+          "That they be approved by consumers first"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "The 15-minute city",
+        "passage": "Urban planners have promoted the idea of the fifteen-minute city, in which residents can reach work, shops, schools and healthcare within a short walk or cycle. Advocates highlight reduced traffic, cleaner air and stronger local communities. Yet the model faces a stubborn obstacle. Concentrating amenities in convenient neighbourhoods tends to raise their desirability, driving up housing costs and risking the displacement of the very residents the design was meant to serve.",
+        "q": "According to the passage, what is a major obstacle to the fifteen-minute city?",
+        "o": [
+          "It increases traffic congestion",
+          "It rises housing costs and may displace residents",
+          "It reduces the number of local shops",
+          "It weakens local communities"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Language extinction",
+        "passage": "Of the roughly seven thousand languages spoken today, linguists estimate that nearly half may disappear within a century. A language is considered endangered not simply when few people speak it, but when children stop learning it as their first language, because once a generation grows up speaking only a dominant tongue, transmission breaks and the language cannot recover naturally. Efforts to revive endangered languages therefore focus heavily on early childhood programmes and on giving the language practical value in daily life.",
+        "q": "According to the passage, the key sign that a language is endangered is that",
+        "o": [
+          "it has fewer than a thousand speakers",
+          "it lacks a written form",
+          "children stop learning it as their first language",
+          "it borrows many words from a dominant language"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "The placebo effect",
+        "passage": "In drug trials, some patients given an inactive pill nonetheless report real improvement — the placebo effect. This poses a challenge for researchers: how do you know a medicine works, rather than merely triggering the patient’s own expectations? The standard answer is the controlled trial, in which one group receives the genuine drug and another the placebo, with neither patients nor doctors knowing who got which. Only if the drug group improves significantly more than the placebo group can the benefit be attributed to the medicine and separated from expectation.",
+        "q": "According to the passage, why is the placebo group used in drug trials?",
+        "o": [
+          "To give untreated patients a chance to recover",
+          "To separate the drug’s real effect from the effect of expectation",
+          "To reduce the cost of producing the genuine drug",
+          "To ensure doctors know who received the medicine"
+        ],
+        "a": 1
+      }
     ],
-    listening:[
-      {topic:'Booking a course',transcript:'A caller wants to book an evening English course. The receptionist says the Tuesday class is full, but there are places in the Thursday group. The caller chooses Thursday because it finishes earlier.',q:'Which class does the caller choose?',o:['Tuesday morning','Tuesday evening','Thursday evening','Friday afternoon'],a:2},
-      {topic:'Museum visit',transcript:'A guide explains that the museum tour starts at ten fifteen near the main desk. Visitors should keep their tickets because they need them for the workshop after lunch.',q:'Why should visitors keep their tickets?',o:['For the workshop after lunch','For a restaurant discount','For the bus home','For the gift shop'],a:0},
-      {topic:'Doctor appointment',transcript:'A receptionist explains that Dr. Patel is fully booked on Tuesday and Wednesday morning. A 4 pm slot is open Wednesday afternoon or any time Friday. The patient picks Wednesday at 4.',q:'When is the appointment?',o:['Tuesday morning','Wednesday morning','Wednesday afternoon','Friday morning'],a:2},
-      {topic:'Volunteer briefing',transcript:'A coordinator tells new volunteers that the festival runs Saturday from nine in the morning to seven in the evening. Volunteers do four-hour shifts and must arrive twenty minutes early to collect their pass.',q:'How long is each volunteer shift?',o:['Two hours','Three hours','Four hours','The whole day'],a:2},
-      {topic:'Bus information',transcript:'A passenger asks for the fastest way from the city centre to the airport. The clerk explains the express bus leaves every twenty minutes and takes about forty-five minutes, while the regular bus is cheaper but takes over an hour.',q:'What is the main advantage of the express bus?',o:['It is cheaper','It runs all night','It is much faster','It stops at the city centre only'],a:2},
-      {topic:'University orientation',transcript:'A speaker welcomes new international students and reminds them to attend the campus tour at 2 pm. Those who miss it can join a smaller tour on Friday, but the main session covers the cafeteria, library and health centre.',q:'What does the main tour include?',o:['Only the library','Cafeteria, library and health centre','Only the health centre','None of the campus'],a:1},
-      {topic:'Course feedback',transcript:'A tutor invites students to submit anonymous feedback by Friday. She emphasises that comments on lecture pace and example clarity are more useful than general satisfaction scores.',q:'What type of feedback does the tutor want?',o:['Only positive comments','Comments on pace and clarity','Only satisfaction scores','Comments about the room'],a:1},
-      {topic:'Travel arrangement',transcript:'Two friends plan a weekend trip. One prefers the early train at six because it is cheaper, but the other does not want to wake up that early and suggests the eight-thirty option, which is still discounted.',q:'Which train do they finally consider?',o:['The 6:00 train','The 8:30 train','The 11:00 train','None of the trains'],a:1}
+    "listening": [
+      {
+        "topic": "Flat enquiry",
+        "transcript": "Caller: I’m interested in the two-bedroom flat on Mill Road. Could you tell me what’s included in the rent? Agent: Of course. Water and heating are included in the monthly figure. Electricity and internet, however, you’d arrange and pay for yourself. Caller: Good to know. And is it furnished? Agent: It comes with the larger furniture — beds, sofa, table — but not kitchen equipment.",
+        "q": "Which costs must the caller pay separately, in addition to the rent?",
+        "o": [
+          "Water and heating",
+          "Electricity and internet",
+          "Beds and sofa",
+          "Nothing extra"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Field trip",
+        "transcript": "Tutor: A few reminders for Saturday’s coastal field trip. The walk is long, so wear sturdy boots, not trainers. The café at the site closed last month, so please bring a packed lunch — there’s nowhere to buy food. We’ll provide the clipboards and sample bags, so you don’t need to bring those.",
+        "q": "What does the tutor tell students they must bring themselves?",
+        "o": [
+          "A packed lunch",
+          "Clipboards and sample bags",
+          "Money for the café",
+          "Sample bags only"
+        ],
+        "a": 0
+      },
+      {
+        "topic": "Gym membership",
+        "transcript": "Receptionist: The standard membership gives you the gym floor and the pool. Customer: And the classes — yoga, spin? Receptionist: Those are extra on the standard plan. But honestly, if you’re mainly here for classes, the premium plan includes all of them and works out cheaper than paying per class. Customer: That settles it then — the classes are really what I want.",
+        "q": "Why does the receptionist suggest the premium plan?",
+        "o": [
+          "It is the only plan that includes the pool",
+          "For someone wanting classes, it is better value than paying per class",
+          "It is the cheapest plan overall",
+          "It does not require a contract"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Library induction",
+        "transcript": "Librarian: A quick note on the journals. The bound academic journals on the second floor are reference-only — you can read and photocopy them here, but they cannot be taken out of the building. Books on the ground floor can be borrowed for three weeks. The short-loan shelf behind me is overnight only.",
+        "q": "What is the rule for the academic journals?",
+        "o": [
+          "They can be borrowed for three weeks",
+          "They are reference-only and cannot leave the building",
+          "They are overnight loans only",
+          "They cannot be photocopied"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Volunteer briefing",
+        "transcript": "Coordinator: We need cover across the whole weekend, but I’ll be honest about where help matters most. Friday evening is quiet. Sunday is steady. It’s Saturday — especially the afternoon — when visitor numbers peak and we’re always short-handed. So if you can only do one day, please make it Saturday.",
+        "q": "When are the most volunteers needed?",
+        "o": [
+          "Friday evening",
+          "Sunday",
+          "Saturday",
+          "Equally on all days"
+        ],
+        "a": 2
+      },
+      {
+        "topic": "Research methods",
+        "transcript": "Lecturer: Choosing your method depends on your question. If you want numbers — how many, how often — a questionnaire reaching hundreds of people works well. But if you want to understand why people feel a certain way, the depth of one-to-one interviews is far more revealing, even though you’ll talk to far fewer participants.",
+        "q": "According to the lecturer, when are interviews more suitable than questionnaires?",
+        "o": [
+          "When you need responses from hundreds of people",
+          "When you want to understand the reasons behind people’s feelings",
+          "When you need exact numerical totals",
+          "When time is very limited"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Seminar change",
+        "transcript": "Tutor: One change to next week’s seminar. We were going to start with the group debate, but the guest speaker has been delayed, so we’ll move the debate to the following week. Instead, each of you will give your short individual presentation first. Please have your slides ready — that’s now happening next week, not later.",
+        "q": "What will students do in next week’s seminar?",
+        "o": [
+          "Take part in the group debate",
+          "Give their individual presentations",
+          "Meet the guest speaker",
+          "Submit their slides only"
+        ],
+        "a": 1
+      },
+      {
+        "topic": "Urban bees",
+        "transcript": "Speaker: People assume cities are bad for bees, but rooftop gardens and parks can actually offer plenty of flowers. The real problem isn’t food — it’s shelter. As old walls and wild patches get cleaned up or paved over, the bees lose the gaps and bare ground where many species nest. Without nesting sites, the flowers alone aren’t enough.",
+        "q": "According to the speaker, what is the main threat to bees in cities?",
+        "o": [
+          "A shortage of flowers",
+          "Too much pollution from traffic",
+          "The loss of nesting sites",
+          "Competition from other insects"
+        ],
+        "a": 2
+      }
     ],
-    writing:[
-      {topic:'Task 1 · line chart',prompt:'You should spend 20 minutes on this task. The line chart shows monthly visitors to a national park from 2018 to 2023. Summarise the key features and make comparisons (≥150 words).'},
-      {topic:'Task 1 · letter (GT)',prompt:'You recently bought a product online that arrived damaged. Write a letter to the company. Describe the problem, explain how it affected you and say what action you want them to take.'},
-      {topic:'Task 1 · process diagram',prompt:'The diagram below shows the process of recycling plastic bottles. Summarise the stages in your own words (≥150 words, ~20 min).'},
-      {topic:'Task 2 · agree/disagree',prompt:'Some people think children should start learning a foreign language at primary school. To what extent do you agree or disagree? (≥250 words, ~40 min).'},
-      {topic:'Task 2 · two views',prompt:'Some people believe governments should subsidise public transport. Others say cars give people necessary freedom. Discuss both views and give your own opinion.'},
-      {topic:'Task 2 · advantages/disadvantages',prompt:'Working from home is becoming more common. What are the advantages and disadvantages of this trend for employees and employers?'}
+    "writing": [
+      {
+        "topic": "Task 1 · line chart",
+        "prompt": "You should spend 20 minutes on this task. The line chart shows monthly visitors to a national park from 2018 to 2023. Summarise the key features and make comparisons (≥150 words)."
+      },
+      {
+        "topic": "Task 1 · letter (GT)",
+        "prompt": "You recently bought a product online that arrived damaged. Write a letter to the company. Describe the problem, explain how it affected you and say what action you want them to take."
+      },
+      {
+        "topic": "Task 1 · process diagram",
+        "prompt": "The diagram below shows the process of recycling plastic bottles. Summarise the stages in your own words (≥150 words, ~20 min)."
+      },
+      {
+        "topic": "Task 2 · agree/disagree",
+        "prompt": "Some people think children should start learning a foreign language at primary school. To what extent do you agree or disagree? (≥250 words, ~40 min)."
+      },
+      {
+        "topic": "Task 2 · two views",
+        "prompt": "Some people believe governments should subsidise public transport. Others say cars give people necessary freedom. Discuss both views and give your own opinion."
+      },
+      {
+        "topic": "Task 2 · advantages/disadvantages",
+        "prompt": "Working from home is becoming more common. What are the advantages and disadvantages of this trend for employees and employers?"
+      }
     ],
-    speaking:[
-      {topic:'Part 1 · personal',prompt:'Speak about your home. What kind of place is it? What do you like about it? Would you change anything?'},
-      {topic:'Part 1 · routine',prompt:'Talk about how you usually spend your weekends. Do they differ from your weekdays?'},
-      {topic:'Part 2 · 2-min talk',prompt:'Describe a useful app you use. You should say what it does, how often you use it and why it is useful. Prep 1 min, speak ~2 min.'},
-      {topic:'Part 2 · 2-min talk',prompt:'Describe a person who taught you something important. Say who they are, what they taught you and why it mattered.'},
-      {topic:'Part 3 · discussion',prompt:'Do you think technology makes education more equal? Give reasons and examples.'},
-      {topic:'Part 3 · discussion',prompt:'How might the cities of the future differ from the cities of today? Consider transport, work and housing.'}
+    "speaking": [
+      {
+        "topic": "Part 1 · personal",
+        "prompt": "Speak about your home. What kind of place is it? What do you like about it? Would you change anything?"
+      },
+      {
+        "topic": "Part 1 · routine",
+        "prompt": "Talk about how you usually spend your weekends. Do they differ from your weekdays?"
+      },
+      {
+        "topic": "Part 2 · 2-min talk",
+        "prompt": "Describe a useful app you use. You should say what it does, how often you use it and why it is useful. Prep 1 min, speak ~2 min."
+      },
+      {
+        "topic": "Part 2 · 2-min talk",
+        "prompt": "Describe a person who taught you something important. Say who they are, what they taught you and why it mattered."
+      },
+      {
+        "topic": "Part 3 · discussion",
+        "prompt": "Do you think technology makes education more equal? Give reasons and examples."
+      },
+      {
+        "topic": "Part 3 · discussion",
+        "prompt": "How might the cities of the future differ from the cities of today? Consider transport, work and housing."
+      }
     ]
   }
 };
