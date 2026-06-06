@@ -8175,7 +8175,7 @@ const GALAXY_COURSE=[
     {q:'Choose: Firstly, costs dropped. ___, quality improved.',o:['Furthermore','Despite','Although','Unless'],a:0}
   ]},
   {id:'c2-nuance',level:'C2',color:'#16a085',title:{ru:'Нюансы и регистр',en:'Nuance and register'},sub:{ru:'high-register English',en:'high-register English'},rule:{ru:'C2 = тонкая работа с регистром: hedge phrases (it could be argued), inversion (rarely have we seen), cleft (What I appreciate is…), nominalisation (the assumption that…).',en:'C2 = fine-tuned register: hedging (it could be argued), inversion (rarely have we seen), cleft (What I appreciate is…), nominalisation (the assumption that…).'},examples:['It could be argued that the policy was premature, given the consequence.','Rarely have we seen such rapid growth in a single fiscal year.','What strikes me most is the resilience of the team under sustained pressure.','The assumption that markets self-correct is increasingly contested in academic literature.','Should you require additional data, do not hesitate to let me know.','The notion that nuance is dispensable would be naive.','Were it not for the framework, the audience would not perceive the depth.'],words:['rarely','assumption','resilience','contested','argued','notion','nuance','perceive','framework','audience'],q:'Choose: ___ have we seen results so quickly.',o:['Hardly','Rarely','Barely','All'],a:1,build:'What strikes me most is the resilience of the team under pressure.',dictation:'It could be argued that the policy was premature. Rarely have we seen such rapid adoption. What concerns me most is the lack of transparency. Should you require more data, do not hesitate to ask.',focus:['Inversion with rarely/hardly creates a formal tone.','Cleft "What X is Y" emphasises a key idea.','Don’t overuse formality — it tires the reader.'],focus_ru:['Инверсия с rarely/hardly даёт официальный тон.','Cleft "What X is Y" акцентирует ключевую идею.','Не злоупотребляй формальностью — это утомляет читателя.'],practice:[
-    {q:'Choose: ___ should we underestimate the risks.',o:['Never','Rarely','Hardly','All correct'],a:3},
+    {q:'Choose: ___ should we underestimate the risks.',o:['Never','Seldom','Rarely','All correct'],a:3},
     {q:'Choose: What ___ me is the silence of the board.',o:['strikes','strike','striking','struck'],a:0},
     {q:'Choose: It ___ argued that the rule is outdated.',o:['could be','should being','can to be','will being'],a:0},
     {q:'Pick the natural sentence.',o:['Should you need help, just ask.','If should you need help, just ask.','You should need help, just ask.','If need you help, just ask.'],a:0},
@@ -9201,10 +9201,20 @@ function courseErrorSet(ls){
     add(base.replace(/\bat\b/i,'in'),'prep');
     add(base.replace(/\bfor\b/i,'since'),'prep');
     add(base.replace(/\bsince\b/i,'for'),'prep');
-    add(base.replace(/\bthe\b/i,'a'),'prep');
+    /* NOTE: a deliberate the→a substitution was removed here. Definite vs
+       indefinite articles are usually both grammatical (e.g. "after the
+       meeting" / "after a meeting"), so swapping them produced sentences
+       that were presented as mistakes but read as perfectly correct
+       English. Verb-agreement and in/on/at swaps below stay because they
+       reliably create genuine errors. */
     const words=base.replace(/[.!?]/g,'').split(/\s+/).filter(Boolean);
     if(words.length>2)add([words[1],words[0],...words.slice(2)].join(' ')+'.','order');
-    if(words.length>3)add([words[0],words[2],words[1],...words.slice(3)].join(' ')+'.','order');
+    /* Skip the 2nd/3rd-word swap when the moved word is an adverb: swapping
+       an adverb past an auxiliary ("has already" → "already has",
+       "will probably" → "probably will") yields a perfectly valid variant,
+       not a mistake. Only swap when it reliably breaks the sentence. */
+    const _adv=new Set(['already','probably','never','often','usually','always','sometimes','rarely','seldom','just','still','also','definitely','certainly','clearly']);
+    if(words.length>3&&!_adv.has((words[2]||'').toLowerCase()))add([words[0],words[2],words[1],...words.slice(3)].join(' ')+'.','order');
   }
   /* Bounded fallback bank. */
   const filler=[
