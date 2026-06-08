@@ -243,21 +243,21 @@ def clear_ctx(uid): session_ctx.pop(uid, None)
 FOOTER = "\n\n<i>────────────────</i>\n<i>/lesson · /vocab · /test · /toefl · /roleplay · /story · /help</i>"
 
 ICON = {
-    "app": "▣",
-    "premium": "◇",
-    "lesson": "▤",
-    "vocab": "◌",
-    "test": "✓",
-    "menu": "☰",
-    "support": "?",
-    "share": "↗",
-    "channel": "◎",
-    "platform": "▣",
-    "credits": "◦",
-    "audio": "◍",
-    "progress": "▥",
-    "success": "✓",
-    "warn": "!",
+    "app": "🚀",
+    "premium": "💎",
+    "lesson": "📘",
+    "vocab": "🗂",
+    "test": "📝",
+    "menu": "📋",
+    "support": "💬",
+    "share": "🎁",
+    "channel": "📣",
+    "platform": "🚀",
+    "credits": "🪙",
+    "audio": "🔊",
+    "progress": "📊",
+    "success": "✅",
+    "warn": "⚠️",
 }
 
 # ══════════════════════════════════════════════════════════════════
@@ -326,7 +326,7 @@ async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str =
 
     if level_change:
         direction, new_level = level_change.split(":")
-        mark = "▥" if direction == "up" else "◦"
+        mark = "📈" if direction == "up" else "📉"
         msg = (f"\n\n{mark} <b>Уровень изменён на {new_level}</b>" if lang=="ru"
                else f"\n\n{mark} <b>Level adjusted to {new_level}</b>")
         result += msg
@@ -409,7 +409,7 @@ async def run_toefl_listening(uid: int, message: Message):
 
     audio_bytes = await text_to_speech(transcript)
 
-    type_icon = "◦" if content_type == "dialogue" else "▤"
+    type_icon = "💬" if content_type == "dialogue" else "📘"
     caption_detail = f"<i>{setting}</i>\n" if setting else ""
 
     if audio_bytes:
@@ -499,12 +499,12 @@ async def finish_toefl_listening(uid: int, message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
-    ru = [["▤ Урок грамматики","◌ Словарь"],["◇ Ролевой диалог","▧ Story Quest"],
-          ["✓ Тест","◍ TOEFL"],["✎ Проверить текст","⌁ Тон фразы"],
-          ["◦ Разговор","△ Дебаты"],["◆ Идиомы","! Мои ошибки"],["▥ Прогресс",""]]
-    en = [["▤ Grammar Lesson","◌ Vocabulary"],["◇ Roleplay","▧ Story Quest"],
-          ["✓ Test","◍ TOEFL"],["✎ Check Writing","⌁ Tone Editor"],
-          ["◦ Speaking","△ Debate"],["◆ Idioms","! My Mistakes"],["▥ Progress",""]]
+    ru = [["📚 Урок грамматики","📝 Словарь"],["🎭 Ролевой диалог","🎮 Story Quest"],
+          ["✅ Тест","🎓 TOEFL"],["✍️ Проверить текст","🎨 Тон фразы"],
+          ["💬 Разговор","⚔️ Дебаты"],["🗣 Идиомы","❌ Мои ошибки"],["📊 Прогресс",""]]
+    en = [["📚 Grammar Lesson","📝 Vocabulary"],["🎭 Roleplay","🎮 Story Quest"],
+          ["✅ Test","🎓 TOEFL"],["✍️ Check Writing","🎨 Tone Editor"],
+          ["💬 Speaking","⚔️ Debate"],["🗣 Idioms","❌ My Mistakes"],["📊 Progress",""]]
     rows_data = ru if lang=="ru" else en
     rows = []
     for row in rows_data:
@@ -545,66 +545,66 @@ def story_kb(lang):
 
 def lesson_kb(lang):
     items = {
-        "lesson_tenses":       ("▤ Времена глагола","▤ Verb Tenses"),
-        "lesson_conditionals": ("◇ Условные","◇ Conditionals"),
-        "lesson_modal":        ("◦ Модальные глаголы","◦ Modal Verbs"),
-        "lesson_passive":      ("↔ Пассивный залог","↔ Passive Voice"),
-        "lesson_articles":     ("• Артикли","• Articles"),
-        "lesson_prepositions": ("⌖ Предлоги","⌖ Prepositions"),
-        "lesson_phrasal":      ("∞ Фразовые глаголы","∞ Phrasal Verbs"),
-        "lesson_reported":     ("◌ Косвенная речь","◌ Reported Speech"),
-        "lesson_subjunctive":  ("△ Сослагательное","△ Subjunctive"),
-        "lesson_inversion":    ("⇄ Инверсия C1-C2","⇄ Inversion C1-C2"),
+        "lesson_tenses":       ("⏳ Времена глагола","⏳ Verb Tenses"),
+        "lesson_conditionals": ("🔀 Условные","🔀 Conditionals"),
+        "lesson_modal":        ("🗝 Модальные глаголы","🗝 Modal Verbs"),
+        "lesson_passive":      ("🔄 Пассивный залог","🔄 Passive Voice"),
+        "lesson_articles":     ("🔤 Артикли","🔤 Articles"),
+        "lesson_prepositions": ("📍 Предлоги","📍 Prepositions"),
+        "lesson_phrasal":      ("🧩 Фразовые глаголы","🧩 Phrasal Verbs"),
+        "lesson_reported":     ("💬 Косвенная речь","💬 Reported Speech"),
+        "lesson_subjunctive":  ("🎯 Сослагательное","🎯 Subjunctive"),
+        "lesson_inversion":    ("🔁 Инверсия C1-C2","🔁 Inversion C1-C2"),
     }
     return _simple_kb(items, lang)
 
 def vocab_kb(lang):
     items = {
-        "vocab_new":         ("＋ Новые слова","＋ New Words"),
-        "vocab_review":      ("↻ Повторение SM-2","↻ SM-2 Review"),
-        "vocab_flashcards":  ("▧ Флэш-карточки","▧ Flashcards"),
-        "vocab_collocations":("∞ Коллокации","∞ Collocations"),
-        "vocab_idioms_adv":  ("◆ Продвинутые идиомы","◆ Advanced Idioms"),
-        "vocab_topic":       ("▣ По теме","▣ By Topic"),
-        "daily_quiz":        ("◌ Ежедневный квиз","◌ Daily Quiz"),
-        "idioms_cultural":   ("◇ Культурные идиомы","◇ Cultural Idioms"),
+        "vocab_new":         ("✨ Новые слова","✨ New Words"),
+        "vocab_review":      ("🔁 Повторение SM-2","🔁 SM-2 Review"),
+        "vocab_flashcards":  ("🃏 Флэш-карточки","🃏 Flashcards"),
+        "vocab_collocations":("🔗 Коллокации","🔗 Collocations"),
+        "vocab_idioms_adv":  ("💠 Продвинутые идиомы","💠 Advanced Idioms"),
+        "vocab_topic":       ("🗂 По теме","🗂 By Topic"),
+        "daily_quiz":        ("🎲 Ежедневный квиз","🎲 Daily Quiz"),
+        "idioms_cultural":   ("🌍 Культурные идиомы","🌍 Cultural Idioms"),
     }
     return _simple_kb(items, lang)
 
 def test_kb(lang):
     items = {
-        "test_grammar":   ("▤ Грамматика","▤ Grammar"),
-        "test_vocab":     ("◌ Лексика","◌ Vocabulary"),
-        "test_reading":   ("▥ Чтение","▥ Reading"),
-        "test_writing":   ("✎ Письмо","✎ Writing"),
-        "test_mixed":     ("◇ Смешанный","◇ Mixed"),
-        "test_placement": ("⌖ Определить уровень","⌖ Placement Test"),
+        "test_grammar":   ("📘 Грамматика","📘 Grammar"),
+        "test_vocab":     ("🗂 Лексика","🗂 Vocabulary"),
+        "test_reading":   ("📖 Чтение","📖 Reading"),
+        "test_writing":   ("✍️ Письмо","✍️ Writing"),
+        "test_mixed":     ("🎲 Смешанный","🎲 Mixed"),
+        "test_placement": ("🎯 Определить уровень","🎯 Placement Test"),
     }
     return _simple_kb(items, lang)
 
 def toefl_kb(lang):
     items = {
-        "toefl_reading":   ("▥ Reading","▥ Reading"),
-        "toefl_listening": ("◍ Listening + Audio","◍ Listening + Audio"),
-        "toefl_speaking1": ("◦ Speaking Independent","◦ Speaking Independent"),
-        "toefl_speaking2": ("◇ Speaking Integrated","◇ Speaking Integrated"),
-        "toefl_writing1":  ("✎ Writing Independent","✎ Writing Independent"),
-        "toefl_writing2":  ("✎ Writing Integrated","✎ Writing Integrated"),
-        "toefl_full":      ("▣ Полный мини-тест","▣ Full Mini-Test"),
-        "toefl_strategy":  ("⌁ Стратегии","⌁ Strategies"),
-        "toefl_score":     ("▥ Мои баллы","▥ My Scores"),
+        "toefl_reading":   ("📖 Reading","📖 Reading"),
+        "toefl_listening": ("🎧 Listening + Audio","🎧 Listening + Audio"),
+        "toefl_speaking1": ("🎙 Speaking Independent","🎙 Speaking Independent"),
+        "toefl_speaking2": ("🗣 Speaking Integrated","🗣 Speaking Integrated"),
+        "toefl_writing1":  ("✍️ Writing Independent","✍️ Writing Independent"),
+        "toefl_writing2":  ("📝 Writing Integrated","📝 Writing Integrated"),
+        "toefl_full":      ("🏆 Полный мини-тест","🏆 Full Mini-Test"),
+        "toefl_strategy":  ("💡 Стратегии","💡 Strategies"),
+        "toefl_score":     ("📊 Мои баллы","📊 My Scores"),
     }
     return _simple_kb(items, lang)
 
 def talk_kb(lang):
     items = {
-        "talk_daily":     ("◌ Повседневная жизнь","◌ Daily Life"),
-        "talk_travel":    ("↗ Путешествия","↗ Travel"),
-        "talk_work":      ("▣ Работа","▣ Work"),
-        "talk_debate":    ("△ Дебаты","△ Debate"),
-        "talk_business":  ("◇ Бизнес English","◇ Business English"),
-        "talk_free":      ("◦ Свободная беседа","◦ Free Chat"),
-        "talk_interview": ("▤ Mock Interview","▤ Mock Interview"),
+        "talk_daily":     ("☀️ Повседневная жизнь","☀️ Daily Life"),
+        "talk_travel":    ("✈️ Путешествия","✈️ Travel"),
+        "talk_work":      ("💼 Работа","💼 Work"),
+        "talk_debate":    ("⚔️ Дебаты","⚔️ Debate"),
+        "talk_business":  ("📈 Бизнес English","📈 Business English"),
+        "talk_free":      ("💬 Свободная беседа","💬 Free Chat"),
+        "talk_interview": ("🤝 Mock Interview","🤝 Mock Interview"),
     }
     return _simple_kb(items, lang)
 
@@ -620,18 +620,18 @@ def remind_kb():
     ])
 
 def flashcard_kb(word_id: int, lang: str):
-    opts = [("! Не знал",1),("◦ Почти",2),("◇ Помнил",4),("✓ Легко",5)] if lang=="ru" else [("! Forgot",1),("◦ Hard",2),("◇ Good",4),("✓ Easy",5)]
+    opts = [("😵 Не знал",1),("😅 Почти",2),("🙂 Помнил",4),("😎 Легко",5)] if lang=="ru" else [("😵 Forgot",1),("😅 Hard",2),("🙂 Good",4),("😎 Easy",5)]
     return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=l,callback_data=f"fc_{word_id}_{q}") for l,q in opts]])
 
 def shadowing_kb(lang: str):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="◍ Ещё раз" if lang=="ru" else "◍ Hear again", callback_data="shadow_repeat"),
-        InlineKeyboardButton(text="✎ Написать" if lang=="ru" else "✎ Write it", callback_data="shadow_write"),
+        InlineKeyboardButton(text="🔁 Ещё раз" if lang=="ru" else "🔁 Hear again", callback_data="shadow_repeat"),
+        InlineKeyboardButton(text="✍️ Написать" if lang=="ru" else "✍️ Write it", callback_data="shadow_write"),
     ]])
 
 def pronunciation_kb(lang: str):
     return InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="◍ Записать голосовое" if lang=="ru" else "◍ Record voice", callback_data="pronounce_record"),
+        InlineKeyboardButton(text="🎙 Записать голосовое" if lang=="ru" else "🎙 Record voice", callback_data="pronounce_record"),
         InlineKeyboardButton(text="✎ Написать" if lang=="ru" else "✎ Type instead", callback_data="shadow_write"),
     ]])
 
@@ -1209,7 +1209,7 @@ async def cmd_roleplay(m: Message):
     if not await has_access(m.from_user.id, "pro"):
         await send_upgrade_hint(m, "pro", lang, "Roleplay")
         return
-    await m.answer("◇ <b>Roleplay</b>", reply_markup=roleplay_kb(lang))
+    await m.answer("🎭 <b>Roleplay</b>", reply_markup=roleplay_kb(lang))
 
 @dp.message(Command("story"))
 async def cmd_story(m: Message):
@@ -1217,7 +1217,7 @@ async def cmd_story(m: Message):
     if not await has_access(m.from_user.id, "basic"):
         await send_upgrade_hint(m, "basic", lang, "Story Quest")
         return
-    await m.answer("▧ <b>Story Quest</b>", reply_markup=story_kb(lang))
+    await m.answer("🎮 <b>Story Quest</b>", reply_markup=story_kb(lang))
 
 @dp.message(Command("debate"))
 async def cmd_debate(m: Message):
@@ -1248,12 +1248,12 @@ async def cmd_toefl(m: Message):
     if not await has_access(m.from_user.id, "ultimate"):
         await send_upgrade_hint(m, "ultimate", lang, "TOEFL")
         return
-    await m.answer("◍ <b>TOEFL iBT</b>", reply_markup=toefl_kb(lang))
+    await m.answer("🎓 <b>TOEFL iBT</b>", reply_markup=toefl_kb(lang))
 
 @dp.message(Command("talk"))
 async def cmd_talk(m: Message):
     lang = await get_lang(m.from_user.id)
-    await m.answer("◦ <b>Speaking</b>", reply_markup=talk_kb(lang))
+    await m.answer("💬 <b>Speaking</b>", reply_markup=talk_kb(lang))
 
 @dp.message(Command("tone"))
 async def cmd_tone(m: Message):
@@ -1602,7 +1602,7 @@ async def cmd_reset(m: Message):
     uid = m.from_user.id
     lang = await get_lang(uid)
     clear_history(uid); waiting.pop(uid,None); clear_ctx(uid)
-    await m.answer("↻ Reset." if lang=="en" else "↻ Сброшен.")
+    await m.answer("🔄 Reset." if lang=="en" else "🔄 Сброшен.")
 
 # ══════════════════════════════════════════════════════════════════
 #  CALLBACK
@@ -1617,7 +1617,7 @@ async def cb_lang(cb: CallbackQuery):
     await cb.answer("✓")
     name = html.escape(user_display_name(cb.from_user), quote=False)
     await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\nPolyGlotty готов к практике.", reply_markup=main_kb(lang))
-    await cb.message.answer("⌖ <b>Level</b>", reply_markup=level_kb())
+    await cb.message.answer("🎯 <b>Level</b>", reply_markup=level_kb())
 
 @dp.callback_query(F.data == "back_main")
 async def cb_back(cb: CallbackQuery):
@@ -1744,7 +1744,7 @@ async def cb_vocab(cb: CallbackQuery):
         word = due[0]
         set_ctx(uid, review_queue=due, review_idx=0)
         await cb.message.answer(
-            f"▧ <b>Card 1/{len(due)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\n"
+            f"🃏 <b>Card 1/{len(due)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\n"
             f"{'Помнишь перевод?' if lang=='ru' else 'Remember the translation?'}",
             reply_markup=flashcard_kb(word["id"], lang)
         )
@@ -1779,7 +1779,7 @@ async def cb_flashcard(cb: CallbackQuery):
     if idx < len(queue):
         word = queue[idx]
         await cb.message.answer(
-            f"▧ <b>Card {idx+1}/{len(queue)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>",
+            f"🃏 <b>Card {idx+1}/{len(queue)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>",
             reply_markup=flashcard_kb(word["id"], lang)
         )
     else:
@@ -2261,43 +2261,43 @@ async def cmd_premium(msg: Message):
     if True:
         plat_kb = [
             [InlineKeyboardButton(
-                text=("▣ Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "▣ Platform · 1 mo — 299 ⭐ + 30 cr"),
+                text=("🚀 Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "🚀 Platform · 1 mo — 299 ⭐ + 30 cr"),
                 callback_data="plat_buy:plat_1m"
             )],
             [InlineKeyboardButton(
-                text=("▣ Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "▣ Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
+                text=("🚀 Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
                 callback_data="plat_buy:plat_6m"
             )],
             [InlineKeyboardButton(
-                text=("▣ Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "▣ Platform · lifetime — 4 990 ⭐ + 500 cr"),
+                text=("🚀 Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "🚀 Platform · lifetime — 4 990 ⭐ + 500 cr"),
                 callback_data="plat_buy:plat_life"
             )],
             [InlineKeyboardButton(
-                text=("◦ 100 кредитов ALEX — 149 ⭐" if ru else "◦ 100 ALEX credits — 149 ⭐"),
+                text=("🪙 100 кредитов ALEX — 149 ⭐" if ru else "🪙 100 ALEX credits — 149 ⭐"),
                 callback_data="credit_buy:credits_100"
             )],
             [InlineKeyboardButton(
-                text=("◦ 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "◦ 500 ALEX credits — 599 ⭐ (−20%)"),
+                text=("🪙 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "🪙 500 ALEX credits — 599 ⭐ (−20%)"),
                 callback_data="credit_buy:credits_500"
             )],
             [InlineKeyboardButton(
-                text=("◦ 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "◦ 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
+                text=("🪙 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "🪙 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
                 callback_data="credit_buy:credits_2000"
             )],
         ]
         status_lines = []
         if platform_info.get("active"):
             if platform_info.get("lifetime"):
-                status_lines.append("▣ " + ("Платформа: навсегда" if ru else "Platform: lifetime"))
+                status_lines.append("🚀 " + ("Платформа: навсегда" if ru else "Platform: lifetime"))
             elif platform_info.get("until"):
                 from datetime import datetime
                 try:
                     d = datetime.fromisoformat(platform_info["until"]).date().isoformat()
-                    status_lines.append("▣ " + (f"Платформа активна до {d}" if ru else f"Platform active until {d}"))
+                    status_lines.append("🚀 " + (f"Платформа активна до {d}" if ru else f"Platform active until {d}"))
                 except Exception:
-                    status_lines.append("▣ " + ("Платформа активна" if ru else "Platform active"))
+                    status_lines.append("🚀 " + ("Платформа активна" if ru else "Platform active"))
         if credits_balance > 0:
-            status_lines.append("◦ " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
+            status_lines.append("🪙 " + (f"Кредитов ALEX: {credits_balance:,}".replace(",", " ")
                                           if ru else f"ALEX credits: {credits_balance:,}"))
         if status_lines:
             status_title = "Твой статус" if ru else "Your status"
@@ -2307,12 +2307,12 @@ async def cmd_premium(msg: Message):
 
         text = (
             "<b>⭐️ PolyGlotty · подписка и кредиты</b>\n\n"
-            "<blockquote><b>▣ Платформа</b>\n"
+            "<blockquote><b>🚀 Платформа</b>\n"
             "Курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
             "• 1 мес — <b>299 ⭐</b> (+30 кр)\n"
             "• 6 мес — <b>1 290 ⭐</b> (+150 кр · −28%)\n"
             "• Навсегда — <b>4 990 ⭐</b> (+500 кр)</blockquote>\n"
-            "<blockquote><b>◦ Кредиты ALEX</b>\n"
+            "<blockquote><b>🪙 Кредиты ALEX</b>\n"
             "Отдельный баланс для чата. Тратятся за сообщение и не сгорают.\n"
             "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
             "Пакеты: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
@@ -2320,12 +2320,12 @@ async def cmd_premium(msg: Message):
             "<i>Оплата через Telegram Stars</i>"
         ) if ru else (
             "<b>⭐️ PolyGlotty · subscription & credits</b>\n\n"
-            "<blockquote><b>▣ Platform</b>\n"
+            "<blockquote><b>🚀 Platform</b>\n"
             "A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
             "• 1 mo — <b>299 ⭐</b> (+30 cr)\n"
             "• 6 mo — <b>1 290 ⭐</b> (+150 cr · −28%)\n"
             "• Lifetime — <b>4 990 ⭐</b> (+500 cr)</blockquote>\n"
-            "<blockquote><b>◦ ALEX credits</b>\n"
+            "<blockquote><b>🪙 ALEX credits</b>\n"
             "Separate chat balance. Spent per message and never expire.\n"
             "Haiku 1 · Sonnet 4: 4 · Sonnet 4.6: 5 · Opus 4.1: 12 · Opus 4.7: 14 · Opus 4.8: 18 · Voice +5\n"
             "Packs: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
@@ -2480,16 +2480,16 @@ async def on_payment_success(msg: Message):
                     await grant_credits_via_server(uid, starter_credits)
                 except Exception as e:
                     logger.warning("starter credit grant failed uid=%s credits=%s: %s", uid, starter_credits, e)
-            starter_line_ru = f"\n◦ +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
-            starter_line_en = f"\n◦ +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
+            starter_line_ru = f"\n🪙 +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
+            starter_line_en = f"\n🪙 +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
             text = (
-                f"✓ <b>Оплата прошла</b>\n\n"
-                f"▣ <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
+                f"🎉 <b>Оплата прошла</b>\n\n"
+                f"🚀 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
                 f"Курс, экзамены, расширенные карточки и аналитика — открыты.{starter_line_ru}\n\n"
                 f"Кредиты ALEX докупаются отдельно в /premium, когда захочешь больше чата."
                 if ru else
-                f"✓ <b>Payment successful</b>\n\n"
-                f"▣ <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
+                f"🎉 <b>Payment successful</b>\n\n"
+                f"🚀 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
                 f"Course, exams, expanded cards and analytics are unlocked.{starter_line_en}\n\n"
                 f"Top up ALEX credits in /premium when you want more chat."
             )
@@ -2511,12 +2511,12 @@ async def on_payment_success(msg: Message):
                                  parse_mode="HTML")
                 return
             text = (
-                f"✓ <b>Кредиты зачислены</b>\n\n"
-                f"◦ +<b>{credits}</b> кредитов ALEX в твой пул.\n\n"
+                f"🎉 <b>Кредиты зачислены</b>\n\n"
+                f"🪙 +<b>{credits}</b> кредитов ALEX в твой пул.\n\n"
                 f"Кредиты тратятся за каждое сообщение и не сгорают."
                 if ru else
-                f"✓ <b>Credits added</b>\n\n"
-                f"◦ +<b>{credits}</b> ALEX credits in your pool.\n\n"
+                f"🎉 <b>Credits added</b>\n\n"
+                f"🪙 +<b>{credits}</b> ALEX credits in your pool.\n\n"
                 f"Credits are spent per message and never expire."
             )
             await msg.answer(text, parse_mode="HTML")
@@ -2534,7 +2534,7 @@ async def on_payment_success(msg: Message):
         months = plan["months"]
         label = plan["label_ru"] if ru else plan["label_en"]
         tier = plan.get("tier", "basic")
-        tier_icon = {"basic":"◇","pro":"◆","ultimate":"▣"}.get(tier,"◇")
+        tier_icon = {"basic":"💠","pro":"💎","ultimate":"🚀"}.get(tier,"💠")
         tier_scope_ru = {
             "basic": "ALEX Chat, Sonnet 4, голосовые ответы и AI-подсказки активны.",
             "pro": "Pro-функции, Sonnet 4.6, roleplay, проверка текста и отчёты активны.",
