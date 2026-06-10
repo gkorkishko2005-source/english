@@ -1304,7 +1304,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-plan:first-child{border-top:0}
 .prem-plan:active{background:var(--e2)}
 .prem-plan.pp-pop{}
-.pp-popular{position:absolute;top:14px;right:0;font-size:10px;font-weight:700;color:var(--a);letter-spacing:.4px;text-transform:uppercase}
+.pp-popular{display:inline-block;margin-bottom:7px;padding:2px 8px;border-radius:100px;background:rgba(var(--ar),.14);font-size:9.5px;font-weight:800;color:var(--a);letter-spacing:.5px;text-transform:uppercase}
 .pp-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .pp-name{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.1px}
 .pp-name small{font-weight:500;color:var(--t3);font-size:12px;margin-left:6px}
@@ -9407,6 +9407,18 @@ function _openCourseLessonInner(id){
   window['course_target_'+courseKey(id)]=target;
   window['course_targets_'+courseKey(id)]=coursePuzzleTargets(ls);
   window['course_dictation_'+courseKey(id)]=dictation;
+  /* Build the "listen & choose" options: correct sentence + 2 distractors
+     drawn from the lesson's other examples (deterministic per lesson id). */
+  (function(){
+    const norm=s=>normalizeCourseText(s);
+    const cnorm=norm(dictation);
+    const pool=[];
+    (ls.examples||[]).forEach(e=>{const t=_firstSentence(e);if(t&&norm(t)!==cnorm&&!pool.some(p=>norm(p)===norm(t)))pool.push(t);});
+    (coursePuzzleTargets(ls)||[]).forEach(e=>{const t=_firstSentence(e);if(t&&norm(t)!==cnorm&&!pool.some(p=>norm(p)===norm(t)))pool.push(t);});
+    const distract=shuffleCourseWords(pool,id+'_dx').slice(0,2);
+    const opts=[{text:dictation,ok:true},...distract.map(t=>({text:t,ok:false}))];
+    window['course_dictopts_'+courseKey(id)]=shuffleCourseWords(opts,id+'_do');
+  })();
   const focus=(ls.focus&&ls.focus.length)?ls.focus:[
     ({ru:'Прочитай правило и найди эту же структуру в примерах.',en:'Read the rule and find the same structure in the examples.',es:'Lee la regla y encuentra la misma estructura en los ejemplos.',pt:'Leia a regra e encontre a mesma estrutura nos exemplos.',de:'Lies die Regel und finde dieselbe Struktur in den Beispielen.',fr:'Lis la règle et retrouve la même structure dans les exemples.',uk:'Прочитай правило й знайди ту саму структуру в прикладах.',tr:'Kuralı oku ve aynı yapıyı örneklerde bul.',zh:'阅读规则，并在例句中找出相同的结构。',ar:'اقرأ القاعدة وابحث عن البنية نفسها في الأمثلة.'}[lang]||'Read the rule and find the same structure in the examples.'),
     ({ru:'Скажи один пример вслух, затем переходи к практике.',en:'Say one example aloud, then move to practice.',es:'Di un ejemplo en voz alta y luego pasa a la práctica.',pt:'Diga um exemplo em voz alta e depois vá para a prática.',de:'Sprich ein Beispiel laut aus, dann geh zur Übung über.',fr:'Dis un exemple à voix haute, puis passe à la pratique.',uk:'Скажи один приклад уголос, а потім переходь до практики.',tr:'Bir örneği sesli söyle, sonra pratiğe geç.',zh:'大声说出一个例句，然后进入练习。',ar:'انطق مثالًا بصوت عالٍ، ثم انتقل إلى التطبيق.'}[lang]||'Say one example aloud, then move to practice.'),
@@ -9504,10 +9516,11 @@ function _openCourseLessonInner(id){
     <div class="course-section ${listenDone?'done':''}" data-course-stage="listen" id="course-section-listen">
       <div class="course-section-head"><div class="course-section-index">${listenIdx}</div><div><div class="course-section-title">${courseT('listen')}</div><div class="course-section-sub">${({ru:'Диктант и короткая проверка понимания.',en:'Dictation and a short comprehension check.',es:'Dictado y una breve comprobación de comprensión.',pt:'Ditado e uma breve verificação de compreensão.',de:'Diktat und eine kurze Verständniskontrolle.',fr:'Dictée et une courte vérification de compréhension.',uk:'Диктант і коротка перевірка розуміння.',tr:'Dikte ve kısa bir anlama kontrolü.',zh:'听写以及一次简短的理解检查。',ar:'إملاء وفحص قصير للفهم.'}[lang]||'Dictation and a short comprehension check.')}</div></div>${listenDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-build">
-      <div class="course-lab">${({ru:'Слуховой диктант',en:'Listening dictation',es:'Dictado auditivo',pt:'Ditado auditivo',de:'Hördiktat',fr:'Dictée à l’écoute',uk:'Слуховий диктант',tr:'Dinleme diktesi',zh:'听力听写',ar:'إملاء سمعي'}[lang]||'Listening dictation')}</div>
-      <div class="course-note">${({ru:'Нажми “Слушать” и запиши фразу по памяти. Текст не показывается заранее.',en:'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.',es:'Pulsa “Escuchar” y escribe la frase de memoria. El texto no se muestra de antemano.',pt:'Toque em “Ouvir” e digite a frase de memória. O texto não é mostrado antes.',de:'Tippe auf „Anhören“ und schreibe den Satz aus dem Gedächtnis. Der Text wird vorher nicht angezeigt.',fr:'Appuie sur « Écouter » et écris la phrase de mémoire. Le texte n’est pas affiché à l’avance.',uk:'Натисни «Слухати» і запиши фразу з пам’яті. Текст не показується заздалегідь.',tr:'“Dinle”ye dokun ve cümleyi hafızandan yaz. Metin önceden gösterilmez.',zh:'点击“收听”并凭记忆写出句子。句子不会提前显示。',ar:'اضغط «استمع» واكتب الجملة من الذاكرة. لا يظهر النص مسبقًا.'}[lang]||'Tap “Listen” and type the phrase from memory. The sentence is not shown in advance.')}</div>
-      <input class="course-inp" id="cd-inp-${id}" placeholder="${({ru:'Напиши услышанную фразу',en:'Type what you heard',es:'Escribe lo que escuchaste',pt:'Digite o que você ouviu',de:'Tippe, was du gehört hast',fr:'Écris ce que tu as entendu',uk:'Напиши почуту фразу',tr:'Duyduğunu yaz',zh:'写出你听到的内容',ar:'اكتب ما سمعته'}[lang]||'Type what you heard')}">
-      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button><button class="course-mini-btn" onclick="checkCourseDictation('${id}')">${({ru:'Проверить',en:'Check',es:'Comprobar',pt:'Verificar',de:'Prüfen',fr:'Vérifier',uk:'Перевірити',tr:'Kontrol et',zh:'检查',ar:'تحقّق'}[lang]||'Check')}</button></div>
+      <div class="course-lab">${({ru:'Слушай и выбирай',en:'Listen and choose',es:'Escucha y elige',pt:'Ouça e escolha',de:'Hören und wählen',fr:'Écoute et choisis',uk:'Слухай і обирай',tr:'Dinle ve seç',zh:'听音选句',ar:'استمع واختر'}[lang]||'Listen and choose')}</div>
+      <div class="course-note">${({ru:'Нажми “Слушать” и выбери фразу, которую услышал. Если звук не работает — нажми “Показать текст”.',en:'Tap “Listen” and choose the sentence you heard. If there is no sound, tap “Show text”.',es:'Pulsa “Escuchar” y elige la frase que oíste. Si no hay sonido, pulsa “Mostrar texto”.',pt:'Toque em “Ouvir” e escolha a frase que ouviu. Se não houver som, toque em “Mostrar texto”.',de:'Tippe auf „Anhören“ und wähle den gehörten Satz. Kein Ton? Tippe auf „Text zeigen“.',fr:'Appuie sur « Écouter » et choisis la phrase entendue. Pas de son ? Appuie sur « Afficher le texte ».',uk:'Натисни «Слухати» й обери почуту фразу. Якщо немає звуку — натисни «Показати текст».',tr:'“Dinle”ye dokun ve duyduğun cümleyi seç. Ses yoksa “Metni göster”e dokun.',zh:'点击“收听”并选择你听到的句子。若没有声音，点击“显示文本”。',ar:'اضغط «استمع» واختر الجملة التي سمعتها. إذا لم يكن هناك صوت، اضغط «إظهار النص».'}[lang]||'Tap “Listen” and choose the sentence you heard. If there is no sound, tap “Show text”.')}</div>
+      <div class="course-mini-actions"><button class="course-mini-btn" onclick="speakCourseDictation('${id}')">🔊 ${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button><button class="course-mini-btn" onclick="revealCourseDictation('${id}')">${({ru:'Показать текст',en:'Show text',es:'Mostrar texto',pt:'Mostrar texto',de:'Text zeigen',fr:'Afficher le texte',uk:'Показати текст',tr:'Metni göster',zh:'显示文本',ar:'إظهار النص'}[lang]||'Show text')}</button></div>
+      <div class="course-rule" id="cd-text-${id}" style="display:none"></div>
+      ${(window['course_dictopts_'+courseKey(id)]||[{text:dictation,ok:true}]).map(o=>`<div class="course-opt" onclick="answerCourseDictation('${id}',${o.ok?'true':'false'},this)">${safeHTML(o.text)}</div>`).join('')}
       <div class="course-result" id="cd-res-${id}"></div>
       </div>
       <div class="course-build">
@@ -9925,21 +9938,29 @@ function checkCourseBuilder(id,suffix){
     try{trackM('drill');}catch(e){}
   }
 }
-function checkCourseDictation(id){
-  const target=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
-  const inp=document.getElementById('cd-inp-'+id);
-  const ok=normalizeCourseText(inp&&inp.value)===normalizeCourseText(target);
+function answerCourseDictation(id,ok,el){
+  const box=el&&el.parentNode;
+  if(box){
+    /* Lock further taps once answered correctly. */
+    if(box.getAttribute('data-cd-locked')==='1')return;
+    if(ok)box.setAttribute('data-cd-locked','1');
+  }
   const res=document.getElementById('cd-res-'+id);if(!res)return;
+  if(el){el.classList.add(ok?'ok':'bad');}
+  if(ok&&box){
+    /* Reveal the correct option among the rest (none needed — el is correct). */
+    box.querySelectorAll('.course-opt').forEach(o=>{if(o!==el)o.style.pointerEvents='none';});
+  }
   res.className='course-result '+(ok?'ok':'bad');
-  const attemptsKey='course_attempt_dictation_'+id;
-  const attempts=(parseInt(LS.get(attemptsKey)||'0',10)||0)+(!ok?1:0);
-  if(!ok)LS.set(attemptsKey,String(attempts));
   res.textContent=ok
-    ?({ru:'Слух отлично сработал. Идём дальше.',en:'Good listening. Keep going.',es:'Buena escucha. Sigue así.',pt:'Boa escuta. Continue.',de:'Gut gehört. Weiter so.',fr:'Bonne écoute. Continue.',uk:'Чудовий слух. Рухаймося далі.',tr:'İyi dinledin. Devam et.',zh:'听得不错，继续。',ar:'استماع جيّد. واصِل.'}[lang]||'Good listening. Keep going.')
-    :(attempts<2
-      ?({ru:'Не совсем. Послушай ещё раз и проверь артикли/окончания.',en:'Not quite. Listen again and check articles/endings.',es:'No del todo. Escucha otra vez y revisa artículos/terminaciones.',pt:'Não exatamente. Ouça de novo e verifique artigos/terminações.',de:'Nicht ganz. Hör nochmal und prüfe Artikel/Endungen.',fr:'Pas tout à fait. Réécoute et vérifie articles/terminaisons.',uk:'Не зовсім. Послухай ще раз і перевір артиклі/закінчення.',tr:'Tam değil. Tekrar dinle ve artikelleri/ekleri kontrol et.',zh:'不太对。再听一遍，检查冠词和词尾。',ar:'ليس تمامًا. استمع مجددًا وتحقّق من الأدوات/النهايات.'}[lang]||'Not quite. Listen again and check articles/endings.')
-      :({ru:'Подсказка: фраза начинается с “',en:'Hint: the phrase starts with “',es:'Pista: la frase empieza por “',pt:'Dica: a frase começa com “',de:'Tipp: Der Satz beginnt mit „',fr:'Indice : la phrase commence par « ',uk:'Підказка: фраза починається з “',tr:'İpucu: cümle şununla başlar: “',zh:'提示：句子以“',ar:'تلميح: تبدأ الجملة بـ "'}[lang]||'Hint: the phrase starts with “')+target.split(' ').slice(0,3).join(' ')+'...”');
+    ?({ru:'Верно — это и была услышанная фраза. Идём дальше.',en:'Correct — that was the sentence. Keep going.',es:'Correcto: esa era la frase. Sigue así.',pt:'Correto — era essa a frase. Continue.',de:'Richtig — das war der Satz. Weiter so.',fr:'Correct — c’était la phrase. Continue.',uk:'Правильно — це й була та фраза. Рухаймося далі.',tr:'Doğru — cümle buydu. Devam et.',zh:'正确——就是这句。继续。',ar:'صحيح — كانت هذه الجملة. واصِل.'}[lang]||'Correct — that was the sentence. Keep going.')
+    :({ru:'Не совсем. Послушай ещё раз или открой “Показать текст”.',en:'Not quite. Listen again or tap “Show text”.',es:'No del todo. Escucha otra vez o pulsa “Mostrar texto”.',pt:'Não exatamente. Ouça de novo ou toque em “Mostrar texto”.',de:'Nicht ganz. Hör nochmal oder tippe „Text zeigen“.',fr:'Pas tout à fait. Réécoute ou appuie sur « Afficher le texte ».',uk:'Не зовсім. Послухай ще раз або натисни «Показати текст».',tr:'Tam değil. Tekrar dinle ya da “Metni göster”e dokun.',zh:'不太对。再听一遍或点击“显示文本”。',ar:'ليس تمامًا. استمع مجددًا أو اضغط «إظهار النص».'}[lang]||'Not quite. Listen again or tap “Show text”.');
   if(ok){courseMarkPart(id,'dictation',true);try{trackM('listen');}catch(e){}}
+}
+function revealCourseDictation(id){
+  const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
+  const el=document.getElementById('cd-text-'+id);if(!el)return;
+  el.textContent=text;el.style.display='';
 }
 function checkCourseReading(id,picked){
   const ok=!!picked;
@@ -9964,10 +9985,28 @@ function speakCourseLine(id,idx){
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 function speakCourseDictation(id){
-  if(!('speechSynthesis' in window))return;
   const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
-  const u=courseUtterance(text);
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  const res=document.getElementById('cd-res-'+id);
+  if(!('speechSynthesis' in window)){
+    if(res){res.className='course-result';res.textContent=({ru:'Звук недоступен на этом устройстве — нажми “Показать текст”.',en:'Audio is not available on this device — tap “Show text”.',es:'El audio no está disponible en este dispositivo: pulsa “Mostrar texto”.',pt:'O áudio não está disponível neste dispositivo — toque em “Mostrar texto”.',de:'Audio ist auf diesem Gerät nicht verfügbar — tippe „Text zeigen“.',fr:'L’audio n’est pas disponible sur cet appareil — appuie sur « Afficher le texte ».',uk:'Звук недоступний на цьому пристрої — натисни «Показати текст».',tr:'Bu cihazda ses yok — “Metni göster”e dokun.',zh:'此设备无法播放音频——请点击“显示文本”。',ar:'الصوت غير متاح على هذا الجهاز — اضغط «إظهار النص».'}[lang]||'Audio is not available on this device — tap “Show text”.');}
+    revealCourseDictation(id);
+    return;
+  }
+  function play(){
+    const u=courseUtterance(text);
+    try{speechSynthesis.cancel();}catch(e){}
+    speechSynthesis.speak(u);
+  }
+  /* On many WebViews the voice list is empty until onvoiceschanged fires. */
+  const voices=(speechSynthesis.getVoices&&speechSynthesis.getVoices())||[];
+  if(!voices.length){
+    let done=false;
+    const go=()=>{if(done)return;done=true;play();};
+    try{speechSynthesis.onvoiceschanged=go;}catch(e){}
+    setTimeout(go,350);
+  } else {
+    play();
+  }
 }
 function answerCoursePractice(id,qi,picked){
   const practice=window['course_practice_'+courseKey(id)]||[];
@@ -12182,11 +12221,15 @@ function ggReset(gid){
 }
 function ggCheck(gid){
   const slots=document.getElementById(gid+'-slots');
+  if(!slots)return;
+  /* XP is awarded once per puzzle — block re-checking a solved board. */
+  if(slots.getAttribute('data-gg-done')==='1')return;
   const words=[...slots.querySelectorAll('.gg-word')].map(w=>w.dataset.w);
   const answer=words.join(' ');
   const correct=window['_gg_'+gid];
   const res=document.getElementById(gid+'-res');
   if(answer===correct){
+    slots.setAttribute('data-gg-done','1');
     haptic('success');
     res.innerHTML=`<span class="gg-ok">${({ru:'Правильно',en:'Correct',es:'Correcto',pt:'Correto',de:'Richtig',fr:'Correct',uk:'Правильно',tr:'Doğru',zh:'正确',ar:'صحيح'}[lang]||'Correct')} +8 XP</span>`;
     addLocalXP(8);trackM('tests');trackM('game');bumpStat('tests');toast('+8 XP','✓');
