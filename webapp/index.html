@@ -1589,6 +1589,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-note{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-top:8px}
 .course-hint{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(255,184,48,.075);border:1px solid rgba(255,184,48,.18);border-radius:10px;padding:8px 9px;margin-top:7px}
 .course-ai{width:100%;border:1px solid rgba(var(--ar),.28);background:rgba(var(--ar),.1);color:var(--a);border-radius:10px;padding:10px 12px;font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer;margin-top:10px}
+/* "Ask ALEX" affordances inside lessons/exams */
+.course-ask{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(var(--ar),.24);background:rgba(var(--ar),.07);color:var(--a);border-radius:100px;padding:6px 11px;font-family:var(--f);font-size:11px;font-weight:800;cursor:pointer;margin-top:9px}
+.course-ask:active{opacity:.7}
+.course-ask svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ask-fab{position:fixed;z-index:9000;transform:translate(-50%,-100%);background:linear-gradient(135deg,#4f8aff,#00d4aa);color:#fff;border:none;border-radius:100px;padding:8px 14px;font-family:var(--f);font-size:12.5px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28);display:none;align-items:center;gap:6px;white-space:nowrap}
+.ask-fab.show{display:inline-flex;animation:askPop .14s ease}
+.ask-fab svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+@keyframes askPop{from{transform:translate(-50%,-100%) scale(.85);opacity:0}to{transform:translate(-50%,-100%) scale(1);opacity:1}}
 .course-lab{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--t3);margin:11px 0 7px}
 .course-build{background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:8px}
 .course-slots,.course-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:38px}
@@ -4677,9 +4685,9 @@ async function sendMsg(){
   haptic('light');try{sfx.send();}catch(e){}
   inp.value='';grow(inp);addMsg('user',text);await doChat(text);
 }
-async function sendChip(text){if(busy)return;if(!hasChatAccess()){showChatPaywall();return;}addMsg('user',text);goTab('chat');await doChat(text);}
+async function sendChip(text,mode){if(busy)return;if(!hasChatAccess()){showChatPaywall();return;}addMsg('user',text);goTab('chat');await doChat(text,mode);}
 
-async function doChat(text){
+async function doChat(text,mode){
   if(!hasChatAccess()){showChatPaywall();return;}
   if(typeof setChipsBusy==='undefined')window.setChipsBusy=function(){};
   busy=true;document.getElementById('sndb').disabled=true;
@@ -4691,7 +4699,7 @@ async function doChat(text){
     const r=await fetch(`${API}/api/chat`,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
-      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel(),voice:!!window._voicePending,init_data:tg?.initData||''}),
+      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,chosen_model:getChosenModel(),voice:!!window._voicePending,mode:mode||'',init_data:tg?.initData||''}),
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
@@ -7450,8 +7458,8 @@ function askExamAI(id){
   const st=examState[id];if(!st)return;
   if(!hasTier('basic')){showTierPaywall('basic',({ru:'AI-разбор экзамена',en:'AI exam feedback',es:'Análisis de examen con IA',pt:'Análise de exame com IA',de:'KI-Prüfungsanalyse',fr:'Analyse d’examen par IA',uk:'AI-розбір екзамену',tr:'Yapay zekâ sınav analizi',zh:'AI 考试点评',ar:'تحليل الامتحان بالذكاء الاصطناعي'}[lang]||'AI exam feedback'));return;}
   const txt=(document.getElementById(id+'-txt')?.value||'').trim();
-  const prompt=`${examTitle(st.exam)} ${st.section} feedback. Task: ${st.task.prompt||st.task.q}. My answer: ${txt||'(I need guidance before answering)'}. Give a score-style review, corrections and a better sample answer.`;
-  sendChip(prompt);
+  const prompt=`${examTitle(st.exam)} · ${st.section}.\nTask: ${st.task.prompt||st.task.q}\nMy answer: ${txt||'(I have not answered yet — I need guidance on how to approach this)'}\nGive a score-style review, point out exactly what to fix, then show one stronger sample answer and the one rule I should remember.`;
+  sendChip(prompt,'lesson_help');
 }
 
 function renderAudio(data){
@@ -9407,6 +9415,7 @@ function _openCourseLessonInner(id){
   window['course_target_'+courseKey(id)]=target;
   window['course_targets_'+courseKey(id)]=coursePuzzleTargets(ls);
   window['course_dictation_'+courseKey(id)]=dictation;
+  window._curCourseId=id;  /* used by "Ask ALEX" context resolver */
   /* Build the "listen & choose" options: correct sentence + 2 distractors
      drawn from the lesson's other examples (deterministic per lesson id). */
   (function(){
@@ -9465,6 +9474,8 @@ function _openCourseLessonInner(id){
       <div class="course-track" id="course-track-${id}">${trackHtml}</div>
     </div>
     <div class="course-rule-compact"><b>${({ru:'Правило',en:'Rule',es:'Regla',pt:'Regra',de:'Regel',fr:'Règle',uk:'Правило',tr:'Kural',zh:'规则',ar:'القاعدة'}[lang]||'Rule')}</b><span>${safeHTML(ruleText)}</span></div>
+    <button class="course-ask" type="button" onclick="askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>
+    <div class="course-hint" style="margin-top:7px">${({ru:'Совет: выдели любое слово или фразу в уроке — появится кнопка «Спросить ALEX».',en:'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.',es:'Consejo: selecciona cualquier palabra o frase de la lección y aparecerá un botón “Preguntar a ALEX”.',pt:'Dica: selecione qualquer palavra ou frase da lição — aparecerá um botão “Perguntar ao ALEX”.',de:'Tipp: Markiere ein Wort oder einen Satz in der Lektion — ein „ALEX fragen“-Button erscheint.',fr:'Astuce : sélectionne un mot ou une phrase de la leçon — un bouton « Demander à ALEX » apparaît.',uk:'Порада: виділи будь-яке слово чи фразу в уроці — з’явиться кнопка «Запитати ALEX».',tr:'İpucu: derste herhangi bir kelime veya cümleyi seç — “ALEX’e sor” düğmesi belirir.',zh:'提示：在课程中选中任意单词或短语，会弹出“问问 ALEX”按钮。',ar:'نصيحة: حدّد أي كلمة أو عبارة في الدرس — سيظهر زر «اسأل ALEX».'}[lang]||'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.')}</div>
     <div class="course-insight">
       <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${safeHTML(insight.pattern[lang]||insight.pattern.en)}</div></div>
       <div class="course-insight-card"><div class="course-insight-label">${({ru:'Не попадайся',en:'Watch out',es:'Cuidado',pt:'Atenção',de:'Achtung',fr:'Attention',uk:'Не попадайся',tr:'Dikkat',zh:'注意',ar:'انتبه'}[lang]||'Watch out')}</div><div class="course-insight-text">${safeHTML(insight.mistake[lang]||insight.mistake.en)}</div></div>
@@ -9962,6 +9973,113 @@ function revealCourseDictation(id){
   const el=document.getElementById('cd-text-'+id);if(!el)return;
   el.textContent=text;el.style.display='';
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   ASK ALEX FROM A LESSON / EXAM
+   Subscribers (or anyone with chat access) can select any text inside a
+   lesson or exam task and ask ALEX about it, or tap an explicit button.
+   The selection + nearby task context is sent to /api/chat in
+   "lesson_help" mode so ALEX answers like a tutor, anchored to the task.
+   ══════════════════════════════════════════════════════════════════ */
+const ASK_ALEX_SVG='<svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.6-.8L3 21l1.9-5.4A8.38 8.38 0 0 1 4 12a8.5 8.5 0 0 1 8.5-8.5A8.38 8.38 0 0 1 21 11.5z"/></svg>';
+function _askAlexLabel(){return ({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX');}
+function _askAlexExplainLabel(){return ({ru:'Объяснить тему с ALEX',en:'Explain this with ALEX',es:'Explícame con ALEX',pt:'Explicar com ALEX',de:'Mit ALEX erklären',fr:'Expliquer avec ALEX',uk:'Пояснити з ALEX',tr:'ALEX ile açıkla',zh:'让 ALEX 讲解',ar:'اشرح مع ALEX'}[lang]||'Explain this with ALEX');}
+/* Build a short context string from the DOM node the selection sits in. */
+function _askAlexContext(node){
+  const parts=[];
+  try{
+    const ls=(typeof GALAXY_COURSE!=='undefined')&&GALAXY_COURSE.find(x=>x.id===window._curCourseId);
+    if(ls){
+      parts.push('Lesson: '+(ls.title&&(ls.title[lang]||ls.title.en)||''));
+      const rule=(typeof courseShortRule==='function')?courseShortRule(ls):'';
+      if(rule)parts.push('Topic/rule: '+rule);
+    }
+    let el=node&&node.nodeType===3?node.parentElement:node;
+    if(el&&el.closest){
+      const sec=el.closest('.course-section');
+      if(sec){const t=sec.querySelector('.course-section-title');if(t&&t.textContent.trim())parts.push('Task: '+t.textContent.trim());}
+      const task=el.closest('.exam-task');
+      if(task){
+        const k=task.querySelector('.exam-kicker');if(k&&k.textContent.trim())parts.push('Exam section: '+k.textContent.trim());
+        const p=task.querySelector('.exam-prompt');if(p&&p.textContent.trim())parts.push('Question: '+p.textContent.trim().slice(0,300));
+      }
+    }
+  }catch(_){}
+  return parts.join('\n');
+}
+/* Send a selected fragment to ALEX. */
+function askAlexAboutText(sel,node){
+  if(!hasChatAccess()){showChatPaywall();return;}
+  const ctx=_askAlexContext(node);
+  const clean=String(sel||'').replace(/\s+/g,' ').trim().slice(0,400);
+  const ask=({ru:'Объясни простыми словами: что это значит, почему так и какое тут правило. Дай один похожий пример.',en:'Explain in simple terms: what it means, why it is like this, and the rule behind it. Give one similar example.',es:'Explícalo de forma sencilla: qué significa, por qué es así y la regla. Da un ejemplo similar.',pt:'Explique de forma simples: o que significa, por que é assim e a regra. Dê um exemplo parecido.',de:'Erkläre es einfach: Bedeutung, warum es so ist und die Regel. Gib ein ähnliches Beispiel.',fr:'Explique simplement : sens, pourquoi c’est ainsi et la règle. Donne un exemple similaire.',uk:'Поясни простими словами: що це означає, чому так і яке тут правило. Дай один схожий приклад.',tr:'Basitçe açıkla: ne anlama geliyor, neden böyle ve kuralı ne. Benzer bir örnek ver.',zh:'用简单的话解释：这是什么意思、为什么这样、背后的规则，并给一个类似的例子。',ar:'اشرح ببساطة: ماذا يعني، ولماذا هكذا، والقاعدة. وأعطِ مثالًا مشابهًا.'}[lang]||'Explain in simple terms: what it means, why it is like this, and the rule behind it. Give one similar example.');
+  const msg=(ctx?ctx+'\n':'')+`Selected: "${clean}"\n${ask}`;
+  sendChip(msg,'lesson_help');
+}
+/* Explicit button: explain the whole lesson topic. */
+function askCourseAI(id){
+  if(!hasChatAccess()){showChatPaywall();return;}
+  const ls=(typeof GALAXY_COURSE!=='undefined')&&GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const title=ls.title&&(ls.title[lang]||ls.title.en)||'';
+  const rule=(typeof courseShortRule==='function')?courseShortRule(ls):'';
+  const ex=(ls.examples||[]).slice(0,3).join(' / ');
+  const ask=({ru:'Объясни мне эту тему простыми словами: правило, один понятный пример и один короткий вопрос для проверки.',en:'Explain this topic to me simply: the rule, one clear example, and one short check question.',es:'Explícame este tema de forma sencilla: la regla, un ejemplo claro y una pregunta breve.',pt:'Explique este tema de forma simples: a regra, um exemplo claro e uma pergunta curta.',de:'Erkläre mir dieses Thema einfach: die Regel, ein klares Beispiel und eine kurze Kontrollfrage.',fr:'Explique-moi ce sujet simplement : la règle, un exemple clair et une courte question.',uk:'Поясни мені цю тему простими словами: правило, один зрозумілий приклад і одне коротке питання.',tr:'Bu konuyu bana basitçe açıkla: kural, net bir örnek ve kısa bir kontrol sorusu.',zh:'用简单的话给我讲解这个主题：规则、一个清晰的例子和一个简短的检查问题。',ar:'اشرح لي هذا الموضوع ببساطة: القاعدة، مثال واضح، وسؤال قصير للتحقق.'}[lang]||'Explain this topic to me simply: the rule, one clear example, and one short check question.');
+  const msg=`Lesson: ${title}\n${rule?'Topic/rule: '+rule+'\n':''}${ex?'Examples: '+ex+'\n':''}${ask}`;
+  sendChip(msg,'lesson_help');
+}
+/* Floating selection button. */
+function _askFab(){
+  let f=document.getElementById('ask-alex-fab');
+  if(!f){
+    f=document.createElement('button');f.id='ask-alex-fab';f.className='ask-fab';
+    f.innerHTML=ASK_ALEX_SVG+'<span>'+_askAlexLabel()+'</span>';
+    /* keep the text selection alive when the button is pressed */
+    f.addEventListener('mousedown',e=>e.preventDefault());
+    f.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+    f.addEventListener('click',_onAskFabClick);
+    document.body.appendChild(f);
+  }
+  return f;
+}
+function _hideAskFab(){const f=document.getElementById('ask-alex-fab');if(f)f.classList.remove('show');}
+function _onAskFabClick(e){
+  try{e.preventDefault();e.stopPropagation();}catch(_){}
+  _hideAskFab();
+  const d=window._askSel;if(!d||!d.text)return;
+  askAlexAboutText(d.text,d.node);
+  try{window.getSelection().removeAllRanges();}catch(_){}
+  window._askSel=null;
+}
+function _onSelectionMaybe(){
+  setTimeout(()=>{
+    let sel;try{sel=window.getSelection&&window.getSelection();}catch(_){return;}
+    if(!sel||sel.isCollapsed){_hideAskFab();return;}
+    const txt=String(sel).replace(/\s+/g,' ').trim();
+    if(txt.length<2||txt.length>400){_hideAskFab();return;}
+    let node=sel.anchorNode;let el=node&&node.nodeType===3?node.parentElement:node;
+    /* Only inside the Learn screen (lessons + exams), never in chat. */
+    if(!el||!el.closest||!el.closest('#s-learn')){_hideAskFab();return;}
+    if(el.closest('input,textarea')){_hideAskFab();return;}
+    window._askSel={text:txt,node:el};
+    const f=_askFab();
+    try{
+      const r=sel.getRangeAt(0).getBoundingClientRect();
+      const x=Math.min(window.innerWidth-72,Math.max(72,r.left+r.width/2));
+      const y=Math.max(46,r.top-8);
+      f.style.left=x+'px';f.style.top=y+'px';
+    }catch(_){}
+    f.classList.add('show');
+  },10);
+}
+function _initAskAlexSelection(){
+  if(window._askAlexInit)return;window._askAlexInit=true;
+  document.addEventListener('mouseup',_onSelectionMaybe);
+  document.addEventListener('touchend',_onSelectionMaybe);
+  document.addEventListener('selectionchange',()=>{let s;try{s=window.getSelection();}catch(_){return;}if(!s||s.isCollapsed)_hideAskFab();});
+  /* Hide while scrolling so the button never floats over the wrong spot. */
+  document.addEventListener('scroll',_hideAskFab,true);
+}
+try{_initAskAlexSelection();}catch(_){}
 function checkCourseReading(id,picked){
   const ok=!!picked;
   const res=document.getElementById('cr-res-'+id);if(!res)return;

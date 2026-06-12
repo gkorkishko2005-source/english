@@ -336,9 +336,19 @@ async def handle_chat(request):
         except Exception as e:
             logger.warning(f"user data error: {e}")
 
+    # Client may request a specific tutoring mode (e.g. "Ask ALEX" inside a
+    # lesson/exam sends mode="lesson_help"). Whitelist to known modes so a
+    # spoofed value can never inject prompt behaviour. Default stays "correction".
+    _ALLOWED_MODES = {
+        "correction", "lesson_help", "grammar", "vocab", "speaking",
+        "tone_editor", "test", "toefl",
+    }
+    req_mode = str(body.get("mode", "") or "").strip().lower()
+    chat_mode = req_mode if req_mode in _ALLOWED_MODES else "correction"
+
     try:
         from prompts import build_system
-        system = build_system(level, lang, interests, profession, "correction")
+        system = build_system(level, lang, interests, profession, chat_mode)
     except Exception:
         system = f"You are ALEX, a friendly English tutor. The student's level is {level}."
 
