@@ -31,7 +31,7 @@
 [data-mode=light] .mopt:hover,[data-mode=light] .mopt.on{background:rgba(0,0,0,.06)!important}
 [data-mode=light] .mt-cell{background:rgba(0,0,0,.06)!important;color:rgba(0,0,0,.58)!important}
 [data-mode=light] .msg.bot .mbub{background:rgba(0,0,0,.04)!important;color:#1a1a2e}
-[data-mode=light] .msg.user .mbub{background:#3478f6!important}
+[data-mode=light] .msg.user .mbub{background:rgba(52,120,246,.10)!important;border-color:rgba(52,120,246,.22)!important;color:#1a1a2e!important}
 [data-mode=light] .chip{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.08)!important;color:#1a1a2e!important}
 [data-mode=light] .hero{background:linear-gradient(135deg,#e8eef8,#f0f4ff)!important}
 [data-mode=light] .challenge-card{background:linear-gradient(135deg,rgba(52,120,246,.06),rgba(0,180,170,.03))!important;border-color:rgba(52,120,246,.12)!important}
@@ -441,10 +441,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
    tail (one rounded corner cut to 4px) but lose the heavy accent
    fill on user messages — a subtle tint reads as "yours" without
    shouting. */
-.chdr{padding:11px 14px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.chtxt{display:flex;align-items:center;gap:7px;min-height:28px}
-.chnm{font-size:14.5px;font-weight:850;letter-spacing:.1px}
-.odot{width:6px;height:6px;border-radius:50%;background:var(--a2);opacity:.85}
+.chdr{padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chav{width:34px;height:34px;border-radius:11px;overflow:hidden;flex-shrink:0;background:#0e1626;border:1px solid var(--b1)}
+.chtxt{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:34px}
+.chnm{font-size:15px;font-weight:800;letter-spacing:.1px;line-height:1.05}
+.chst{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--t3);line-height:1}
+.odot{width:6px;height:6px;border-radius:50%;background:var(--a2);opacity:.9;flex-shrink:0}
 .hbtns{margin-left:auto;display:flex;align-items:center;gap:4px}
 .hbtn{background:none;border:none;cursor:pointer;color:var(--t3);padding:6px;border-radius:8px;transition:.15s;display:flex;align-items:center;justify-content:center}
 .hbtn:hover{color:var(--t2);background:var(--e2)}
@@ -2348,7 +2350,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 <!-- CHAT -->
 <div class="screen" id="s-chat">
   <div class="chdr">
-    <div class="chtxt"><div class="chnm">ALEX</div></div>
+    <div class="chav"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M8 2H32A6 6 0 0 1 38 8V25A6 6 0 0 1 32 31H17L8 39V31A6 6 0 0 1 2 25V8A6 6 0 0 1 8 2Z" fill="none" stroke="#9aebbc" stroke-width="3" stroke-linejoin="round"/><g transform="translate(20 17)"><ellipse rx="8.5" ry="5.2" transform="rotate(35)" fill="none" stroke="#9aebbc" stroke-width="3"/><ellipse rx="8.5" ry="5.2" transform="rotate(-35)" fill="none" stroke="#4f8aff" stroke-width="3"/></g></svg></div>
+    <div class="chtxt"><div class="chnm">ALEX</div><div class="chst"><span class="odot"></span><span id="online-lbl">Online</span></div></div>
     <div class="hbtns">
       <button class="credit-chip" id="credit-chip" style="display:none" onclick="openPremium(null,'credits')" type="button" title="ALEX credits">
         <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>
