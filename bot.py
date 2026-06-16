@@ -59,6 +59,12 @@ BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
 OFFICIAL_CHANNEL_URL = os.getenv("OFFICIAL_CHANNEL_URL", "https://t.me/polyglotty_daily").strip()
+# Target for the daily "word of the day" channel post. Defaults to the
+# @username derived from OFFICIAL_CHANNEL_URL. Override with a numeric
+# -100... id here if the channel is private.
+WOTD_CHANNEL = (os.getenv("WOTD_CHANNEL_ID", "") or "").strip()
+# Daily channel post time (Europe/Moscow), HH:MM. Empty/"off" disables it.
+WOTD_POST_TIME = (os.getenv("WOTD_POST_TIME", "12:00") or "12:00").strip()
 
 # Cache-bust the WebApp URL by appending the index.html mtime as ?v=.
 # Telegram caches WebView contents per URL, and "no-cache" headers alone
@@ -760,6 +766,52 @@ DAILY_WORDS = [
     {"word":"Idiosyncratic","ph":"/ˌɪdiəsɪŋˈkrætɪk/","tr":"Своеобразный","ex":"He has an idiosyncratic style."},
 ]
 
+def wotd_channel_target():
+    """Where to post the daily word: explicit override, else the public
+    @handle taken from OFFICIAL_CHANNEL_URL. Returns "" when neither is set."""
+    if WOTD_CHANNEL:
+        return WOTD_CHANNEL
+    handle = channel_handle()  # e.g. "@polyglotty_daily"
+    return handle if handle and handle != "@" else ""
+
+def _wotd_for_today():
+    """Pick a word deterministically by day-of-year so the channel rotates
+    through the whole list without repeats inside one cycle."""
+    try:
+        from datetime import datetime
+        try:
+            from zoneinfo import ZoneInfo
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+        except Exception:
+            now = datetime.now()
+        idx = (now.timetuple().tm_yday - 1) % len(DAILY_WORDS)
+        return DAILY_WORDS[idx]
+    except Exception:
+        return random.choice(DAILY_WORDS)
+
+async def post_channel_wotd():
+    """Post the word of the day into the official channel (bot must be an
+    admin there with "post messages"). Bilingual RU + EN."""
+    target = wotd_channel_target()
+    if not target:
+        logger.info("post_channel_wotd: no channel target configured, skipping")
+        return
+    w = _wotd_for_today()
+    text = (
+        "🗓 <b>Слово дня · Word of the day</b>\n\n"
+        f"<b>{html.escape(w['word'], quote=False)}</b>  <code>{html.escape(w['ph'], quote=False)}</code>\n"
+        f"🇷🇺 {html.escape(w['tr'], quote=False)}\n"
+        f"<i>{html.escape(w['ex'], quote=False)}</i>\n\n"
+        "#WordOfTheDay #English"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
+        text="📚 Учить в PolyGlotty · Learn", url=public_bot_url())]])
+    try:
+        await bot.send_message(target, text, reply_markup=kb)
+        logger.info(f"post_channel_wotd: posted '{w['word']}' to {target}")
+    except Exception as e:
+        logger.warning(f"post_channel_wotd to {target} failed: {e}")
+
 async def send_scheduled_push(uid: int):
     """Single daily push at the user's chosen reminder time.
     Sunday  -> weekly report (instead of the reminder + word of the day).
@@ -792,6 +844,17 @@ async def schedule_all():
                 scheduler.add_job(send_scheduled_push,"cron",hour=h,minute=m,args=[r["uid"]],id=f"push_{r['uid']}",replace_existing=True)
             except Exception as e:
                 logger.warning(f"schedule_all: bad remind_time for uid={r['uid']}: {e}")
+    # Single global job: post the word of the day into the official channel
+    # once a day at WOTD_POST_TIME (Europe/Moscow). Independent of per-user
+    # reminders. Disabled if no channel target or time is "off".
+    if wotd_channel_target() and WOTD_POST_TIME.lower() != "off":
+        try:
+            wh, wm = map(int, WOTD_POST_TIME.split(":"))
+            scheduler.add_job(post_channel_wotd, "cron", hour=wh, minute=wm,
+                              id="wotd_channel", replace_existing=True)
+            logger.info(f"schedule_all: channel word-of-day at {WOTD_POST_TIME} MSK -> {wotd_channel_target()}")
+        except Exception as e:
+            logger.warning(f"schedule_all: bad WOTD_POST_TIME '{WOTD_POST_TIME}': {e}")
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
@@ -2597,6 +2660,18 @@ async def cmd_admin_grant(msg: Message):
         await msg.answer(f"✓ Granted {months} months of Premium to uid {target_uid}")
     except Exception as e:
         await msg.answer(f"{ICON['warn']} Error: {e}")
+
+@dp.message(Command("admin_wotd"))
+async def cmd_admin_wotd(msg: Message):
+    """Admin-only: post the word of the day to the channel right now (test)."""
+    if msg.from_user.id not in ADMIN_IDS:
+        return  # Silently ignore
+    target = wotd_channel_target()
+    if not target:
+        await msg.answer(f"{ICON['warn']} No channel target. Set OFFICIAL_CHANNEL_URL or WOTD_CHANNEL_ID.")
+        return
+    await post_channel_wotd()
+    await msg.answer(f"✓ Word of the day posted to {target} (check the channel).")
 
 async def main():
     await db_init()
