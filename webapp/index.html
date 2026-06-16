@@ -776,11 +776,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 /* ══ STORY MODE ══ */
 .story-grid-wrap{padding:4px 0}
 .story-grid{display:flex;gap:8px;flex-wrap:wrap}
-.story-card{flex:1;min-width:90px;padding:16px 12px;background:var(--e2);border:1px solid var(--b2);border-radius:var(--r2);cursor:pointer;text-align:center;transition:.2s}
+.story-card{position:relative;flex:1;min-width:90px;padding:16px 12px;background:var(--e2);border:1px solid var(--b2);border-radius:var(--r2);cursor:pointer;text-align:center;transition:.2s}
 .story-card:active{transform:scale(.95)}
+.story-card.done{border-color:rgba(0,212,170,.45);background:linear-gradient(180deg,rgba(0,212,170,.10),var(--e2))}
+.story-badge{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--a2);color:#04221b;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;line-height:1}
 .story-emoji{font-size:28px;margin-bottom:6px}
 .story-title{font-size:12px;font-weight:700;margin-bottom:2px}
 .story-scenes{font-size:10px;color:var(--t3)}
+.story-scenes.done{color:var(--a2);font-weight:700}
 .story-scene{padding:4px 0}
 .story-opts{display:flex;flex-direction:column;gap:6px}
 .story-opt{padding:10px 12px;background:var(--e2);border:1.5px solid var(--b2);border-radius:var(--r2);font-size:13px;cursor:pointer;transition:.2s;line-height:1.4}
@@ -12795,14 +12798,29 @@ const STORIES=[
    ]},
 ];
 let storyState=null;
+function storyDoneMap(){return LS.getJ('story_done')||{};}
+function markStoryDone(id,score,total){
+  const map=storyDoneMap();
+  const prev=map[id]||{};
+  /* Keep the best score ever achieved on this story. */
+  map[id]={best:Math.max(prev.best||0,score),total:total};
+  LS.setJ('story_done',map);
+}
 function openStoryMode(){
   haptic('light');
+  const done=storyDoneMap();
   const grid=STORIES.map(s=>{
     const t=s.title[lang]||s.title.en;
-    return `<div class="story-card" onclick="startStory('${s.id}')">
+    const d=done[s.id];const isDone=!!d;
+    const doneLabel=({ru:'Пройдено',en:'Completed',es:'Completado',pt:'Concluído',de:'Abgeschlossen',fr:'Terminé',uk:'Пройдено',tr:'Tamamlandı',zh:'已完成',ar:'مكتمل'}[lang]||'Completed');
+    const sub=isDone
+      ?`<div class="story-scenes done">${doneLabel} · ${d.best}/${d.total}</div>`
+      :`<div class="story-scenes">${s.scenes.length} ${({ru:'сцен',en:'scenes',es:'escenas',pt:'cenas',de:'Szenen',fr:'scènes',uk:'сцен',tr:'sahne',zh:'个场景',ar:'مشاهد'}[lang]||'scenes')}</div>`;
+    return `<div class="story-card${isDone?' done':''}" onclick="startStory('${s.id}')">
+      ${isDone?'<div class="story-badge">✓</div>':''}
       <div class="story-emoji">${s.emoji||'📖'}</div>
       <div class="story-title">${t}</div>
-      <div class="story-scenes">${s.scenes.length} ${({ru:'сцен',en:'scenes',es:'escenas',pt:'cenas',de:'Szenen',fr:'scènes',uk:'сцен',tr:'sahne',zh:'个场景',ar:'مشاهد'}[lang]||'scenes')}</div>
+      ${sub}
     </div>`;
   }).join('');
   const title=({ru:'Выбери историю',en:'Choose a story',es:'Elige una historia',pt:'Escolha uma história',de:'Wähle eine Geschichte',fr:'Choisis une histoire',uk:'Обери історію',tr:'Bir hikâye seç',zh:'选择一个故事',ar:'اختر قصة'}[lang]||'Choose a story');
@@ -12823,6 +12841,7 @@ function showScene(){
     const total=story.scenes.length;
     const pct=Math.round(storyState.score/total*100);
     const xp=storyState.score*5;
+    try{markStoryDone(story.id,storyState.score,total);}catch(e){}
     addLocalXP(xp);bumpStat('tests');try{trackM('story');}catch(e){}
     addPractice(`<div class="story-end">
       <div class="gg-title">${({ru:'История завершена',en:'Story complete',es:'Historia completada',pt:'História concluída',de:'Geschichte abgeschlossen',fr:'Histoire terminée',uk:'Історію завершено',tr:'Hikâye tamamlandı',zh:'故事完成',ar:'اكتملت القصة'}[lang]||'Story complete')}</div>
