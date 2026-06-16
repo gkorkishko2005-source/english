@@ -964,25 +964,31 @@ def user_display_name(user) -> str:
 
 async def setup_bot_profile():
     """Apply BotFather growth basics from prompt.rtf: searchable name, about text, commands, WebApp menu."""
-    commands = [
-        BotCommand(command="start", description="Open app / Главное меню"),
-        BotCommand(command="app", description="Open WebApp / Открыть приложение"),
-        BotCommand(command="menu", description="Button menu / Меню кнопок"),
-        BotCommand(command="premium", description="Plans and limits / Подписки"),
-        BotCommand(command="share", description="Invite friends / Пригласить друзей"),
-        BotCommand(command="channel", description="Official channel / Канал"),
-        BotCommand(command="lesson", description="Grammar lesson / Урок грамматики"),
-        BotCommand(command="vocab", description="Vocabulary practice / Слова"),
-        BotCommand(command="test", description="English test / Тест"),
-        BotCommand(command="toefl", description="TOEFL practice / TOEFL"),
-        BotCommand(command="roleplay", description="Roleplay scenarios / Сценки"),
-        BotCommand(command="story", description="Interactive stories / Истории"),
-        BotCommand(command="help", description="How to use / Помощь"),
-        BotCommand(command="support", description="Support / Поддержка"),
-        BotCommand(command="paysupport", description="Payment support / Оплата"),
-        BotCommand(command="terms", description="Terms / Условия"),
-        BotCommand(command="rules", description="Service rules / Правила сервиса"),
-        BotCommand(command="privacy", description="Privacy / Данные"),
+    # Compact command menu: only the everyday actions, single-language
+    # descriptions (no "EN / RU" clutter). Less-used commands (toefl,
+    # roleplay, channel, support, paysupport, terms, rules, privacy) still
+    # work as handlers — they're just hidden from the "/" menu.
+    commands_en = [
+        BotCommand(command="start", description="Main menu"),
+        BotCommand(command="app", description="Open the app"),
+        BotCommand(command="lesson", description="Grammar lesson"),
+        BotCommand(command="vocab", description="Vocabulary"),
+        BotCommand(command="test", description="English test"),
+        BotCommand(command="story", description="Interactive stories"),
+        BotCommand(command="premium", description="Plans and limits"),
+        BotCommand(command="share", description="Invite a friend"),
+        BotCommand(command="help", description="How to use"),
+    ]
+    commands_ru = [
+        BotCommand(command="start", description="Главное меню"),
+        BotCommand(command="app", description="Открыть приложение"),
+        BotCommand(command="lesson", description="Урок грамматики"),
+        BotCommand(command="vocab", description="Слова"),
+        BotCommand(command="test", description="Тест"),
+        BotCommand(command="story", description="Истории"),
+        BotCommand(command="premium", description="Подписки"),
+        BotCommand(command="share", description="Пригласить друга"),
+        BotCommand(command="help", description="Помощь"),
     ]
     app_url = webapp_url()
     try:
@@ -992,8 +998,8 @@ async def setup_bot_profile():
         await bot.set_my_short_description(BOT_PROFILE["short_ru"], language_code="ru")
         await bot.set_my_description(BOT_PROFILE["description_default"])
         await bot.set_my_description(BOT_PROFILE["description_ru"], language_code="ru")
-        await bot.set_my_commands(commands)
-        await bot.set_my_commands(commands, language_code="ru")
+        await bot.set_my_commands(commands_en)
+        await bot.set_my_commands(commands_ru, language_code="ru")
         if app_url:
             await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Open App", web_app=WebAppInfo(url=app_url)))
         logger.info("Bot profile metadata updated")
@@ -1121,32 +1127,20 @@ async def cmd_start(message: Message):
     # Minimal welcome: short pitch, single feature list, channel link.
     # No "tap here" self-link (the Open-App button below handles that),
     # no empty motivation italics, no decorative glyphs.
-    channel_link = html_link(channel_url(), "канал с ежедневными словами", bold=True) if ru else html_link(channel_url(), "daily English channel", bold=True)
+    channel_link = html_link(channel_url(), "канал со словами дня", bold=True) if ru else html_link(channel_url(), "daily words channel", bold=True)
+    # Compact welcome: one-line pitch + one feature line. The buttons below
+    # already cover Plans / Lesson / Vocab / Test, so no long blockquote menu.
     text = (
         f"<b>Привет, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> — AI-репетитор английского прямо в Telegram.\n"
-        f"Курс, карточки, экзамены и живой чат с ALEX — без отдельного приложения.\n\n"
-        f"<blockquote><b>Бесплатно</b>\n"
-        f"• Курс A0–C2, карточки, аудирование, drills\n"
-        f"• Прогресс, дерево роста, ежедневные цели</blockquote>\n"
-        f"<blockquote><b>По подписке</b>\n"
-        f"• Живой чат с ALEX, roleplay, проверка текста\n"
-        f"• Подготовка к TOEFL · IELTS · CAE\n"
-        f"• Кредиты ALEX докупаются отдельно</blockquote>\n"
-        f"Жми <b>«Открыть приложение»</b>, чтобы начать. Ежедневная практика — в {channel_link}."
+        f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram: курс A0–C2, "
+        f"карточки, экзамены и живой чат с ALEX.\n\n"
+        f"Жми <b>«Открыть приложение»</b> — и за дело. Слова дня — в {channel_link}."
         f"{ref_line}"
     ) if ru else (
         f"<b>Hey, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> is an AI English tutor right inside Telegram.\n"
-        f"Course, flashcards, exam prep and live ALEX chat — no extra app to install.\n\n"
-        f"<blockquote><b>Free</b>\n"
-        f"• A0–C2 course, flashcards, listening, drills\n"
-        f"• Progress, growth tree, daily goals</blockquote>\n"
-        f"<blockquote><b>With subscription</b>\n"
-        f"• Live ALEX chat, roleplay, text check\n"
-        f"• TOEFL · IELTS · CAE preparation\n"
-        f"• ALEX credits available as top-ups</blockquote>\n"
-        f"Tap <b>“Open App”</b> to begin. Daily practice lives in the {channel_link}."
+        f"<b>PolyGlotty</b> — an AI English tutor in Telegram: A0–C2 course, "
+        f"flashcards, exam prep and a live ALEX chat.\n\n"
+        f"Tap <b>“Open App”</b> to begin. Daily words live in the {channel_link}."
         f"{ref_line}"
     )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
