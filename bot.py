@@ -733,37 +733,37 @@ async def send_weekly_report(uid: int):
 
 # ══ DAILY WORD PUSH ══════════════════════════════════════════════════════════
 DAILY_WORDS = [
-    {"word":"Perseverance","ph":"/ˌpɜːsɪˈvɪərəns/","tr":"Настойчивость","ex":"Success requires perseverance."},
-    {"word":"Eloquent","ph":"/ˈeləkwənt/","tr":"Красноречивый","ex":"She gave an eloquent speech."},
-    {"word":"Ambiguous","ph":"/æmˈbɪɡjuəs/","tr":"Двусмысленный","ex":"The instructions were ambiguous."},
-    {"word":"Resilient","ph":"/rɪˈzɪliənt/","tr":"Устойчивый","ex":"Children are remarkably resilient."},
-    {"word":"Procrastinate","ph":"/prəˈkræstɪneɪt/","tr":"Откладывать","ex":"Stop procrastinating and start working."},
-    {"word":"Inevitable","ph":"/ɪnˈevɪtəbl/","tr":"Неизбежный","ex":"Change is inevitable in life."},
-    {"word":"Comprehensive","ph":"/ˌkɒmprɪˈhensɪv/","tr":"Всесторонний","ex":"We need a comprehensive plan."},
-    {"word":"Deteriorate","ph":"/dɪˈtɪəriəreɪt/","tr":"Ухудшаться","ex":"The weather began to deteriorate."},
-    {"word":"Spontaneous","ph":"/spɒnˈteɪniəs/","tr":"Спонтанный","ex":"It was a spontaneous decision."},
-    {"word":"Ubiquitous","ph":"/juːˈbɪkwɪtəs/","tr":"Повсеместный","ex":"Smartphones are now ubiquitous."},
-    {"word":"Pragmatic","ph":"/præɡˈmætɪk/","tr":"Прагматичный","ex":"We need a pragmatic approach."},
-    {"word":"Empathy","ph":"/ˈempəθi/","tr":"Эмпатия","ex":"Show empathy towards others."},
-    {"word":"Hypothesis","ph":"/haɪˈpɒθəsɪs/","tr":"Гипотеза","ex":"We tested the hypothesis carefully."},
-    {"word":"Notorious","ph":"/nəˈtɔːriəs/","tr":"Печально известный","ex":"The city is notorious for traffic."},
-    {"word":"Meticulous","ph":"/mɪˈtɪkjʊləs/","tr":"Скрупулёзный","ex":"She is meticulous about details."},
-    {"word":"Serendipity","ph":"/ˌserənˈdɪpɪti/","tr":"Счастливая случайность","ex":"Finding this book was pure serendipity."},
-    {"word":"Juxtapose","ph":"/ˈdʒʌkstəpəʊz/","tr":"Сопоставлять","ex":"The artist juxtaposed light and dark."},
-    {"word":"Epitome","ph":"/ɪˈpɪtəmi/","tr":"Воплощение","ex":"She is the epitome of elegance."},
-    {"word":"Conundrum","ph":"/kəˈnʌndrəm/","tr":"Головоломка","ex":"This presents a real conundrum."},
-    {"word":"Ephemeral","ph":"/ɪˈfemərəl/","tr":"Мимолётный","ex":"Fame can be ephemeral."},
-    {"word":"Paradigm","ph":"/ˈpærədaɪm/","tr":"Парадигма","ex":"A paradigm shift in thinking."},
-    {"word":"Aesthetic","ph":"/iːsˈθetɪk/","tr":"Эстетический","ex":"The room has a minimalist aesthetic."},
-    {"word":"Dichotomy","ph":"/daɪˈkɒtəmi/","tr":"Дихотомия","ex":"The dichotomy between rich and poor."},
-    {"word":"Candid","ph":"/ˈkændɪd/","tr":"Откровенный","ex":"Let me be candid with you."},
-    {"word":"Tenacious","ph":"/tɪˈneɪʃəs/","tr":"Цепкий","ex":"She is tenacious in her pursuit."},
-    {"word":"Anomaly","ph":"/əˈnɒməli/","tr":"Аномалия","ex":"The data showed an anomaly."},
-    {"word":"Versatile","ph":"/ˈvɜːsətaɪl/","tr":"Универсальный","ex":"He is a versatile musician."},
-    {"word":"Mundane","ph":"/mʌnˈdeɪn/","tr":"Обыденный","ex":"Escape from the mundane routine."},
-    {"word":"Nuance","ph":"/ˈnjuːɑːns/","tr":"Нюанс","ex":"Appreciate the nuance of language."},
-    {"word":"Catalyst","ph":"/ˈkætəlɪst/","tr":"Катализатор","ex":"The event was a catalyst for change."},
-    {"word":"Idiosyncratic","ph":"/ˌɪdiəsɪŋˈkrætɪk/","tr":"Своеобразный","ex":"He has an idiosyncratic style."},
+    {"word":"Perseverance","ph":"/ˌpɜːsɪˈvɪərəns/","pos":"noun","tr":"Настойчивость, упорство","def":"Continued effort to do something despite difficulties or delay in success.","ex":"Success requires perseverance.","syn":"persistence, determination, tenacity"},
+    {"word":"Eloquent","ph":"/ˈeləkwənt/","pos":"adjective","tr":"Красноречивый","def":"Fluent and persuasive in speaking or writing.","ex":"She gave an eloquent speech.","syn":"articulate, expressive, fluent"},
+    {"word":"Ambiguous","ph":"/æmˈbɪɡjuəs/","pos":"adjective","tr":"Двусмысленный, неоднозначный","def":"Open to more than one interpretation; not clear.","ex":"The instructions were ambiguous.","syn":"unclear, vague, equivocal"},
+    {"word":"Resilient","ph":"/rɪˈzɪliənt/","pos":"adjective","tr":"Стойкий, жизнестойкий","def":"Able to recover quickly from difficult conditions.","ex":"Children are remarkably resilient.","syn":"tough, adaptable, hardy"},
+    {"word":"Procrastinate","ph":"/prəˈkræstɪneɪt/","pos":"verb","tr":"Откладывать, медлить","def":"To delay or postpone action; to put off doing something.","ex":"Stop procrastinating and start working.","syn":"delay, stall, dawdle"},
+    {"word":"Inevitable","ph":"/ɪnˈevɪtəbl/","pos":"adjective","tr":"Неизбежный","def":"Certain to happen; impossible to avoid or prevent.","ex":"Change is inevitable in life.","syn":"unavoidable, certain, inescapable"},
+    {"word":"Comprehensive","ph":"/ˌkɒmprɪˈhensɪv/","pos":"adjective","tr":"Всесторонний, полный","def":"Complete and including everything that is necessary.","ex":"We need a comprehensive plan.","syn":"thorough, complete, extensive"},
+    {"word":"Deteriorate","ph":"/dɪˈtɪəriəreɪt/","pos":"verb","tr":"Ухудшаться","def":"To become progressively worse in quality or condition.","ex":"The weather began to deteriorate.","syn":"worsen, decline, degrade"},
+    {"word":"Spontaneous","ph":"/spɒnˈteɪniəs/","pos":"adjective","tr":"Спонтанный, непроизвольный","def":"Done naturally, without being planned in advance.","ex":"It was a spontaneous decision.","syn":"impulsive, unplanned, instinctive"},
+    {"word":"Ubiquitous","ph":"/juːˈbɪkwɪtəs/","pos":"adjective","tr":"Повсеместный","def":"Present, appearing, or found everywhere.","ex":"Smartphones are now ubiquitous.","syn":"omnipresent, widespread, pervasive"},
+    {"word":"Pragmatic","ph":"/præɡˈmætɪk/","pos":"adjective","tr":"Прагматичный","def":"Dealing with things sensibly and realistically.","ex":"We need a pragmatic approach.","syn":"practical, realistic, sensible"},
+    {"word":"Empathy","ph":"/ˈempəθi/","pos":"noun","tr":"Эмпатия, сопереживание","def":"The ability to understand and share another person's feelings.","ex":"Show empathy towards others.","syn":"compassion, understanding, sensitivity"},
+    {"word":"Hypothesis","ph":"/haɪˈpɒθəsɪs/","pos":"noun","tr":"Гипотеза","def":"A proposed explanation made as a starting point for testing.","ex":"We tested the hypothesis carefully.","syn":"theory, premise, assumption"},
+    {"word":"Notorious","ph":"/nəˈtɔːriəs/","pos":"adjective","tr":"Печально известный","def":"Famous or well known, typically for something bad.","ex":"The city is notorious for traffic.","syn":"infamous, disreputable, well-known"},
+    {"word":"Meticulous","ph":"/mɪˈtɪkjʊləs/","pos":"adjective","tr":"Скрупулёзный, дотошный","def":"Showing great attention to detail; very careful and precise.","ex":"She is meticulous about details.","syn":"thorough, precise, scrupulous"},
+    {"word":"Serendipity","ph":"/ˌserənˈdɪpɪti/","pos":"noun","tr":"Счастливая случайность","def":"The occurrence of finding pleasant things by chance.","ex":"Finding this book was pure serendipity.","syn":"chance, fortune, luck"},
+    {"word":"Juxtapose","ph":"/ˈdʒʌkstəpəʊz/","pos":"verb","tr":"Сопоставлять, противопоставлять","def":"To place two things close together for contrasting effect.","ex":"The artist juxtaposed light and dark.","syn":"contrast, compare, set side by side"},
+    {"word":"Epitome","ph":"/ɪˈpɪtəmi/","pos":"noun","tr":"Воплощение, образец","def":"A perfect example of a particular quality or type.","ex":"She is the epitome of elegance.","syn":"embodiment, essence, personification"},
+    {"word":"Conundrum","ph":"/kəˈnʌndrəm/","pos":"noun","tr":"Головоломка, дилемма","def":"A confusing and difficult problem or question.","ex":"This presents a real conundrum.","syn":"puzzle, riddle, dilemma"},
+    {"word":"Ephemeral","ph":"/ɪˈfemərəl/","pos":"adjective","tr":"Мимолётный, недолговечный","def":"Lasting for a very short time.","ex":"Fame can be ephemeral.","syn":"fleeting, transient, short-lived"},
+    {"word":"Paradigm","ph":"/ˈpærədaɪm/","pos":"noun","tr":"Парадигма, образец","def":"A typical example or model of something.","ex":"A paradigm shift in thinking.","syn":"model, pattern, framework"},
+    {"word":"Aesthetic","ph":"/iːsˈθetɪk/","pos":"adjective","tr":"Эстетический","def":"Concerned with beauty or the appreciation of beauty.","ex":"The room has a minimalist aesthetic.","syn":"artistic, tasteful, stylish"},
+    {"word":"Dichotomy","ph":"/daɪˈkɒtəmi/","pos":"noun","tr":"Дихотомия, разделение","def":"A division or contrast between two opposed things.","ex":"The dichotomy between rich and poor.","syn":"division, contrast, split"},
+    {"word":"Candid","ph":"/ˈkændɪd/","pos":"adjective","tr":"Откровенный, искренний","def":"Truthful and straightforward; frank.","ex":"Let me be candid with you.","syn":"frank, honest, direct"},
+    {"word":"Tenacious","ph":"/tɪˈneɪʃəs/","pos":"adjective","tr":"Цепкий, упорный","def":"Holding firmly to something; persistent and determined.","ex":"She is tenacious in her pursuit.","syn":"persistent, determined, dogged"},
+    {"word":"Anomaly","ph":"/əˈnɒməli/","pos":"noun","tr":"Аномалия, отклонение","def":"Something that deviates from what is standard or expected.","ex":"The data showed an anomaly.","syn":"irregularity, deviation, oddity"},
+    {"word":"Versatile","ph":"/ˈvɜːsətaɪl/","pos":"adjective","tr":"Универсальный, разносторонний","def":"Able to adapt to or be used for many functions.","ex":"He is a versatile musician.","syn":"adaptable, flexible, all-round"},
+    {"word":"Mundane","ph":"/mʌnˈdeɪn/","pos":"adjective","tr":"Обыденный, скучный","def":"Lacking interest or excitement; dull and ordinary.","ex":"Escape from the mundane routine.","syn":"ordinary, dull, routine"},
+    {"word":"Nuance","ph":"/ˈnjuːɑːns/","pos":"noun","tr":"Нюанс, тонкость","def":"A subtle difference in meaning, expression, or sound.","ex":"Appreciate the nuance of language.","syn":"subtlety, shade, distinction"},
+    {"word":"Catalyst","ph":"/ˈkætəlɪst/","pos":"noun","tr":"Катализатор","def":"A person or thing that causes an event or change.","ex":"The event was a catalyst for change.","syn":"trigger, stimulus, spark"},
+    {"word":"Idiosyncratic","ph":"/ˌɪdiəsɪŋˈkrætɪk/","pos":"adjective","tr":"Своеобразный, индивидуальный","def":"Peculiar or distinctive to a particular individual.","ex":"He has an idiosyncratic style.","syn":"distinctive, peculiar, individual"},
 ]
 
 def wotd_channel_target():
@@ -797,15 +797,30 @@ async def post_channel_wotd():
         logger.info("post_channel_wotd: no channel target configured, skipping")
         return
     w = _wotd_for_today()
-    text = (
-        "🗓 <b>Слово дня · Word of the day</b>\n\n"
-        f"<b>{html.escape(w['word'], quote=False)}</b>  <code>{html.escape(w['ph'], quote=False)}</code>\n"
-        f"🇷🇺 {html.escape(w['tr'], quote=False)}\n"
-        f"<i>{html.escape(w['ex'], quote=False)}</i>\n\n"
-        "#WordOfTheDay #English"
-    )
+    esc = lambda k: html.escape(str(w.get(k, "")), quote=False)
+    parts = [
+        "🗓 <b>Слово дня · Word of the day</b>",
+        "",
+        f"🔤 <b>{esc('word')}</b>  <code>{esc('ph')}</code>",
+    ]
+    if w.get("pos"):
+        parts.append(f"<i>{esc('pos')}</i>")
+    parts.append("")
+    parts.append(f"🇷🇺 <b>Перевод:</b> {esc('tr')}")
+    if w.get("def"):
+        parts.append(f"🇬🇧 <b>Meaning:</b> {esc('def')}")
+    parts.append("")
+    parts.append(f"📝 <b>Пример · Example:</b>\n<i>{esc('ex')}</i>")
+    if w.get("syn"):
+        parts.append("")
+        parts.append(f"🔁 <b>Синонимы · Synonyms:</b> {esc('syn')}")
+    parts.append("")
+    parts.append("💡 Сохрани слово и попробуй составить с ним своё предложение.")
+    parts.append("")
+    parts.append("#WordOfTheDay #English #Vocabulary")
+    text = "\n".join(parts)
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
-        text="📚 Учить в PolyGlotty · Learn", url=public_bot_url())]])
+        text="📚 Учить слова в PolyGlotty · Learn", url=public_bot_url())]])
     try:
         await bot.send_message(target, text, reply_markup=kb)
         logger.info(f"post_channel_wotd: posted '{w['word']}' to {target}")

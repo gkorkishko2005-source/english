@@ -7420,8 +7420,10 @@ function openExamPrep(){
   </div>`);
 }
 function runExamTask(exam,section){
-  const task=pickExamTask(exam,section);if(!task)return;
+  let task=pickExamTask(exam,section);if(!task)return;
   const id='exam-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999);
+  /* Reading/Listening tasks carry o[]/a — shuffle so the answer isn't always A. */
+  if(Array.isArray(task.o)&&typeof task.a==='number')task=shuffleMCQ(task,id);
   examState[id]={exam,section,task};
   const kicker=examTitle(exam)+' · '+section.toUpperCase();
   let body='';
@@ -9438,7 +9440,7 @@ function _openCourseLessonInner(id){
   const grammarLabel=(ls.grammar&&(ls.grammar[lang]||ls.grammar.en))||(ls.sub&&((ls.sub[lang]||ls.sub.en)))||'Rule';
   const ruleText=courseShortRule(ls);
   const insight=courseLessonInsight(ls);
-  const practice=coursePracticeSet(ls);
+  const practice=coursePracticeSet(ls).map((q,qi)=>shuffleMCQ(q,courseKey(id)+'_p'+qi));
   window['course_practice_'+courseKey(id)]=practice;
   const partState=courseStoredParts(id,practice);
   const requiredParts=courseRequiredParts(id);
@@ -9559,6 +9561,22 @@ function shuffleCourseWords(words,id){
   let seed=String(id).split('').reduce((a,c)=>a+c.charCodeAt(0),17);
   for(let i=arr.length-1;i>0;i--){seed=(seed*9301+49297)%233280;const j=seed%(i+1);const t=arr[i];arr[i]=arr[j];arr[j]=t;}
   return arr;
+}
+/* Multiple-choice option shuffle. Authored question banks tend to put the
+   correct answer at index 0, so without this the right choice is almost
+   always option A. We pair each option with its index, deterministically
+   reorder by a string seed, then remap `a` to the new position of the old
+   answer. Deterministic so re-renders of the same question keep one order. */
+function shuffleMCQ(q,seedStr){
+  if(!q||!Array.isArray(q.o)||q.o.length<2||typeof q.a!=='number')return q;
+  /* Hash the seed string to an int, then shuffle with the Park-Miller LCG
+     (same generator as seededShuffle) — it spreads positions far more evenly
+     than shuffleCourseWords' lightweight LCG, so no position is favoured. */
+  let h=2166136261;const s='mcq_'+seedStr;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  const order=seededShuffle(q.o.map((text,i)=>({text,i})),(h>>>0)%2147483647||1);
+  const a=order.findIndex(p=>p.i===q.a);
+  return Object.assign({},q,{o:order.map(p=>p.text),a:a<0?0:a});
 }
 function courseReadingText(ls){
   if(ls.reading)return lang==='ru'
