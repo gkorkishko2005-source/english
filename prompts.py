@@ -9,12 +9,22 @@ INTEREST_TAG = re.compile(r'\[SAVE_INTEREST:\s*([^\]]+)\]')
 
 
 def build_system(level: str, lang: str, interests: str = "", profession: str = "", mode: str = "general") -> str:
-    lang_rule = (
-        "Explain everything in Russian. Grammar rules, tips, and feedback must be in Russian. "
-        "Keep English examples, exercises, and quoted text in English."
-        if lang == "ru" else
-        "Respond entirely in English."
-    )
+    _LANG_NAMES = {
+        "ru": "Russian", "es": "Spanish", "pt": "Portuguese", "de": "German",
+        "fr": "French", "uk": "Ukrainian", "tr": "Turkish", "zh": "Chinese",
+        "ar": "Arabic",
+    }
+    if lang == "en":
+        lang_rule = "Respond entirely in English."
+    elif lang in _LANG_NAMES:
+        _ln = _LANG_NAMES[lang]
+        lang_rule = (
+            f"Explain everything in {_ln}. Grammar rules, tips, and feedback must be in {_ln}. "
+            "Keep English examples, exercises, and quoted text in English. "
+            f"Never reply in any language other than {_ln} (for explanations) or English (for examples)."
+        )
+    else:
+        lang_rule = "Respond entirely in English."
 
     interests_ctx = ""
     if interests:
