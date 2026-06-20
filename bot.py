@@ -1006,6 +1006,32 @@ async def setup_bot_profile():
     except Exception as e:
         logger.warning(f"setup_bot_profile failed: {e}")
 
+# Telegram message effect for purchase celebrations (🎉 confetti). Only works
+# in private chats; if the running API/aiogram version rejects it we fall back
+# to a plain message.
+CELEBRATE_EFFECT_ID = "5046509860389126442"
+
+async def send_celebration(msg: Message, text: str):
+    try:
+        await msg.answer(text, parse_mode="HTML", message_effect_id=CELEBRATE_EFFECT_ID)
+    except Exception as e:
+        logger.warning(f"celebration effect unavailable, sending plain: {e}")
+        await msg.answer(text, parse_mode="HTML")
+
+def _greeting_by_time(ru: bool) -> str:
+    """Time-of-day greeting in Europe/Moscow, mirroring the app's warm welcome."""
+    try:
+        h = datetime.now(ZoneInfo("Europe/Moscow")).hour
+    except Exception:
+        h = 12
+    if 5 <= h < 12:
+        return "Доброе утро" if ru else "Good morning"
+    if 12 <= h < 18:
+        return "Добрый день" if ru else "Good afternoon"
+    if 18 <= h < 23:
+        return "Добрый вечер" if ru else "Good evening"
+    return "Доброй ночи" if ru else "Good night"
+
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     uid  = message.from_user.id
@@ -1113,36 +1139,51 @@ async def cmd_start(message: Message):
 
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
 
-    is_prem = False
+    tier = "free"
     try:
-        is_prem = await check_premium(uid)
+        tier = await get_access_tier(uid)
     except Exception:
         pass
+    is_prem = tier != "free"
     badge = " ⭐️" if is_prem else ""
+    tier_label = {"basic": "Basic", "pro": "Pro", "ultimate": "Ultimate"}.get(tier, "Premium")
+    greet = _greeting_by_time(ru)
 
     ref_line = "\n\nБонус за приглашение начислен: +50 XP тебе, +150 XP другу." if (ru and ref_applied) else (
         "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
     )
     name_html = html.escape(name, quote=False)
-    # Minimal welcome: short pitch, single feature list, channel link.
-    # No "tap here" self-link (the Open-App button below handles that),
-    # no empty motivation italics, no decorative glyphs.
     channel_link = html_link(channel_url(), "канал со словами дня", bold=True) if ru else html_link(channel_url(), "daily words channel", bold=True)
-    # Compact welcome: one-line pitch + one feature line. The buttons below
-    # already cover Plans / Lesson / Vocab / Test, so no long blockquote menu.
-    text = (
-        f"<b>Привет, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram: курс A0–C2, "
-        f"карточки, экзамены и живой чат с ALEX.\n\n"
-        f"Жми <b>«Открыть приложение»</b> — и за дело. Слова дня — в {channel_link}."
-        f"{ref_line}"
-    ) if ru else (
-        f"<b>Hey, {name_html}!</b>{badge}\n\n"
-        f"<b>PolyGlotty</b> — an AI English tutor in Telegram: A0–C2 course, "
-        f"flashcards, exam prep and a live ALEX chat.\n\n"
-        f"Tap <b>“Open App”</b> to begin. Daily words live in the {channel_link}."
-        f"{ref_line}"
-    )
+    # Subscribers get a warm "welcome back" that names their plan; free users
+    # get the product pitch + channel link. Greeting is time-of-day aware.
+    if is_prem:
+        text = (
+            f"<b>{greet}, {name_html}!</b>{badge}\n\n"
+            f"С возвращением. Твой план <b>{tier_label}</b> активен — "
+            f"курс A0–C2, экзамены, расширенные карточки и чат с ALEX без лишних лимитов.\n\n"
+            f"Жми <b>«Открыть приложение»</b> и продолжай с того места, где остановился."
+            f"{ref_line}"
+        ) if ru else (
+            f"<b>{greet}, {name_html}!</b>{badge}\n\n"
+            f"Welcome back. Your <b>{tier_label}</b> plan is active — "
+            f"the full A0–C2 course, exams, expanded cards and ALEX chat without the usual limits.\n\n"
+            f"Tap <b>“Open App”</b> and pick up where you left off."
+            f"{ref_line}"
+        )
+    else:
+        text = (
+            f"<b>{greet}, {name_html}!</b>\n\n"
+            f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram: курс A0–C2, "
+            f"карточки, экзамены и живой чат с ALEX.\n\n"
+            f"Жми <b>«Открыть приложение»</b> — и за дело. Слова дня — в {channel_link}."
+            f"{ref_line}"
+        ) if ru else (
+            f"<b>{greet}, {name_html}!</b>\n\n"
+            f"<b>PolyGlotty</b> — an AI English tutor in Telegram: A0–C2 course, "
+            f"flashcards, exam prep and a live ALEX chat.\n\n"
+            f"Tap <b>“Open App”</b> to begin. Daily words live in the {channel_link}."
+            f"{ref_line}"
+        )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
 
 @dp.message(Command("menu"))
@@ -2565,7 +2606,7 @@ async def on_payment_success(msg: Message):
                 f"Course, exams, expanded cards and analytics are unlocked.{starter_line_en}\n\n"
                 f"Top up ALEX credits in /premium when you want more chat."
             )
-            await msg.answer(text, parse_mode="HTML")
+            await send_celebration(msg, text)
             logger.info("Platform granted uid=%s period=%s starter_credits=%s", uid, period, starter_credits)
         except Exception as e:
             logger.error(f"platform payment handler error: {e}")
@@ -2591,7 +2632,7 @@ async def on_payment_success(msg: Message):
                 f"🪙 +<b>{credits}</b> ALEX credits in your pool.\n\n"
                 f"Credits are spent per message and never expire."
             )
-            await msg.answer(text, parse_mode="HTML")
+            await send_celebration(msg, text)
             logger.info("Credits granted uid=%s credits=%s", uid, credits)
         except Exception as e:
             logger.error(f"credits payment handler error: {e}")
@@ -2643,7 +2684,7 @@ async def on_payment_success(msg: Message):
             f"Open the app — your subscription is already synced.\n\n"
             f"Thank you for your support."
         )
-        await msg.answer(text, parse_mode="HTML")
+        await send_celebration(msg, text)
         logger.info(f"Premium granted: uid={uid} plan={plan_id} months={months}")
 
     except Exception as e:
