@@ -2381,46 +2381,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <div class="cmsgs" id="cmsgs"></div>
   <div class="chips" id="chips"></div>
   <div class="inrow">
-    <!-- Model picker lives inline in the composer (visible from Basic+) -->
-    <div class="mbar" id="mbar" style="display:none">
-    <button class="mtoggle" onclick="event.stopPropagation();openModelPicker()" type="button">
-      <span class="mt-name" id="mt-name">Haiku</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mt-arr"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="mpop" id="modelm" onclick="event.stopPropagation()">
-      <div class="mpop-title" id="model-mtit">Model</div>
-      <button class="mopt" data-m="haiku" onclick="selectModel('haiku')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Haiku 4.5</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-low">1</div></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="sonnet4" onclick="selectModel('sonnet4')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-mid">4</div><span class="mopt-lock" style="display:none">BASIC</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="sonnet" onclick="selectModel('sonnet')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Sonnet 4.6</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-mid">5</div><span class="mopt-lock" style="display:none">PRO</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="opus41" onclick="selectModel('opus41')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.1</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">12</div><span class="mopt-lock" style="display:none">ULT</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="opus" onclick="selectModel('opus')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.7</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">14</div><span class="mopt-lock" style="display:none">ULT</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      <button class="mopt" data-m="opus48" onclick="selectModel('opus48')" type="button">
-        <div class="mopt-main"><div class="mopt-top"><div class="mopt-name">Opus 4.8</div><span class="mopt-tier"></span></div><div class="mopt-sub"></div></div>
-        <div class="mopt-meta"><div class="mt-cell mt-hi">18</div><span class="mopt-lock" style="display:none">ULT</span></div>
-        <div class="mopt-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      </button>
-      </div>
-    </div>
     <textarea class="cinp" id="cinp" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
     <button class="micb" id="micb" onclick="toggleMic()"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></button>
     <button class="sndb" id="sndb" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -2435,12 +2395,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <div class="learn-tabs">
     <div class="learn-tab on" id="lt-course" onclick="switchLearnTab('course')"><span id="lt-course-lbl">Course</span></div>
     <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
-    <div class="learn-tab" id="lt-games" onclick="switchLearnTab('games')"><span id="lt-games-lbl">Games</span></div>
     <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Exams</span></div>
-  </div>
-  <!-- GAMES panel -->
-  <div id="learn-games-panel" style="display:none">
-    <div class="practice-dock" id="practice-dock"></div>
   </div>
   <!-- COURSE panel -->
   <div id="learn-course-panel">
@@ -3228,7 +3183,6 @@ function applyLang(){
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
   // Build chips
   buildChips();
-  renderPracticeDock();
   // Session panel
   document.getElementById('sp-title').textContent=L.chats;
   document.getElementById('sp-new').textContent=L.new_chat;
@@ -3583,105 +3537,11 @@ function showChatPaywall(){
   openPremium(msg,'credits');
   toast(msg,'💳');
 }
-/* Chat model picker — compact Claude choices gated per subscription.
-   Server re-validates so a cheating client cannot bypass tier limits. */
-function modelChoicesForTier(){
-  /* Single subscription (Platform) or any active chat access unlocks every
-     model — cost is paid per answer in quota points, not gated by a tier. */
-  if(platformActive||chatCredits>0)return ['haiku','sonnet4','sonnet','opus41','opus','opus48'];
-  const tier=(premiumTier||'').toLowerCase();
-  if(tier==='ultimate')return ['haiku','sonnet4','sonnet','opus41','opus','opus48'];
-  if(tier==='pro')return ['haiku','sonnet4','sonnet'];
-  if(tier==='basic')return ['haiku','sonnet4'];
-  return [];
-}
-function modelAllowedForTier(m){
-  return modelChoicesForTier().includes(m);
-}
-function getChosenModel(){
-  if(!isPremium&&!platformActive&&!(chatCredits>0))return 'auto';
-  const v=LS.get('app_model_choice')||'haiku';
-  // sanitize against the user's actual tier
-  return modelAllowedForTier(v)?v:'haiku';
-}
-function pickModel(m){
-  if(!isPremium&&!platformActive&&!(chatCredits>0)){openPremium();return;}
-  if(!modelAllowedForTier(m)){openPremium();return;}
-  if(!['haiku','sonnet4','sonnet','opus41','opus','opus48'].includes(m))return;
-  LS.set('app_model_choice',m);
-  try{sfx.tap();}catch(e){}haptic('light');
-  updateChatModelStrip();
-  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
-  toast(({ru:'Модель: ',en:'Model: ',es:'Modelo: ',pt:'Modelo: ',de:'Modell: ',fr:'Modèle : ',uk:'Модель: ',tr:'Model: ',zh:'模型：',ar:'النموذج: '}[lang]||'Model: ')+names[m],'⚙️');
-}
-function selectModel(m){
-  pickModel(m);
-  if(modelAllowedForTier(m))document.getElementById('modelm')?.classList.remove('open');
-}
-function openModelPicker(){
-  if(!isPremium&&!platformActive&&!(chatCredits>0)){openPremium();return;}
-  updateModelOptions();
-  document.getElementById('modelm')?.classList.toggle('open');
-}
-function updateModelOptions(){
-  const cur=getChosenModel();
-  // Compact model table. Server still validates tier, model and quota cost.
-  const T={
-    ru:{title:'Model',foot:'Quota points списываются только за ответ ALEX.',
-        fast:'fast',balance:'balance',deep:'deep',max:'max',
-        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
-    en:{title:'Model',foot:'Quota points are charged only when ALEX answers.',
-        fast:'fast',balance:'balance',deep:'deep',max:'max',
-        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
-    es:{title:'Model',foot:'Los quota points se gastan solo cuando ALEX responde.',
-        fast:'fast',balance:'balance',deep:'deep',max:'max',
-        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
-    pt:{title:'Model',foot:'Quota points são cobrados só quando ALEX responde.',
-        fast:'fast',balance:'balance',deep:'deep',max:'max',
-        p:'point',ps:'points',low:'low use',mid:'balanced use',high:'high use'},
-  };
-  const t=T[lang]||T.en;
-  const setT=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  setT('model-mtit',t.title);
-  const pop=document.getElementById('modelm');if(pop)pop.dataset.foot=t.foot;
-  const cost=(n,load)=>`${n} ${n===1?t.p:t.ps} · ${load}`;
-  const data={
-    haiku:{name:'Haiku 4.5',tag:t.fast,sub:cost(1,t.low),pts:'1'},
-    sonnet4:{name:'Sonnet 4',tag:t.balance,sub:cost(4,t.mid),pts:'4'},
-    sonnet:{name:'Sonnet 4.6',tag:t.balance,sub:cost(5,t.mid),pts:'5'},
-    opus41:{name:'Opus 4.1',tag:t.deep,sub:cost(12,t.high),pts:'12'},
-    opus:{name:'Opus 4.7',tag:t.deep,sub:cost(14,t.high),pts:'14'},
-    opus48:{name:'Opus 4.8',tag:t.max,sub:cost(18,t.high),pts:'18'}
-  };
-  /* No tier names — a single subscription (or credits) unlocks every model;
-     a locked row only ever means "no chat access yet". */
-  const lockLbl={ru:'Подписка',en:'Subscribe',es:'Suscríbete',pt:'Assine',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscribe';
-  const req={haiku:'',sonnet4:lockLbl,sonnet:lockLbl,opus41:lockLbl,opus:lockLbl,opus48:lockLbl};
-  document.querySelectorAll('#modelm .mopt').forEach(row=>{
-    const m=row.dataset.m,ok=modelAllowedForTier(m),meta=data[m]||data.haiku;
-    row.classList.toggle('on',ok&&m===cur);
-    row.classList.toggle('locked',!ok);
-    const name=row.querySelector('.mopt-name');if(name)name.textContent=meta.name;
-    const tag=row.querySelector('.mopt-tier');if(tag)tag.textContent=meta.tag;
-    const sub=row.querySelector('.mopt-sub');if(sub)sub.textContent=meta.sub;
-    const cell=row.querySelector('.mt-cell');if(cell)cell.textContent=meta.pts;
-    const lock=row.querySelector('.mopt-lock');if(lock)lock.textContent=req[m]||'';
-  });
-}
-function updateChatModelStrip(){
-  const bar=document.getElementById('mbar');
-  if(!bar)return;
-  const canPick=isPremium||platformActive;
-  bar.style.display=canPick?'flex':'none';
-  if(!canPick)return;
-  const cur=getChosenModel();
-  const names={haiku:'Haiku 4.5',sonnet4:'Sonnet 4',sonnet:'Sonnet 4.6',opus41:'Opus 4.1',opus:'Opus 4.7',opus48:'Opus 4.8'};
-  const lbl=document.getElementById('mt-name');if(lbl)lbl.textContent=names[cur]||'Haiku';
-}
-document.addEventListener('click',function(e){
-  const pop=document.getElementById('modelm');
-  if(pop&&pop.classList.contains('open')&&!e.target.closest('.mbar'))pop.classList.remove('open');
-});
+/* ALEX runs on a single model — Sonnet 4.6. The in-chat model picker was
+   removed; these stubs stay as stable hooks so existing call sites keep
+   working without a selector UI. The server also forces this one model. */
+function getChosenModel(){return 'sonnet';}
+function updateChatModelStrip(){/* no model picker — nothing to render */}
 
 function maybeOnboardChat(){
   if(!hasChatAccess())return;
@@ -10554,7 +10414,6 @@ function updateLearnHeader(){
       const titles={
         course:{ru:'Курс',en:'Course',es:'Curso',pt:'Curso',de:'Kurs',fr:'Cours',uk:'Курс',tr:'Kurs',zh:'课程',ar:'الدورة'},
         cards:{ru:'Карточки',en:'Flashcards',es:'Tarjetas',pt:'Cartões',de:'Karten',fr:'Cartes',uk:'Картки',tr:'Kartlar',zh:'卡片',ar:'البطاقات'},
-        games:{ru:'Игры',en:'Games',es:'Juegos',pt:'Jogos',de:'Spiele',fr:'Jeux',uk:'Ігри',tr:'Oyunlar',zh:'游戏',ar:'ألعاب'},
         road:{ru:'Экзамены',en:'Exams',es:'Exámenes',pt:'Exames',de:'Prüfungen',fr:'Examens',uk:'Іспити',tr:'Sınavlar',zh:'考试',ar:'اختبارات'}
       };
       h1.textContent=(titles[learnTab]||titles.course)[lang]||(titles[learnTab]||titles.course).en;
@@ -10578,7 +10437,6 @@ function switchLearnTab(tab){
   learnTab=tab;
   document.getElementById('learn-course-panel').style.display=tab==='course'?'':'none';
   document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';
-  document.getElementById('learn-games-panel').style.display=tab==='games'?'':'none';
   document.getElementById('learn-road-panel').style.display=tab==='road'?'':'none';
   document.querySelectorAll('.learn-tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('lt-'+tab)?.classList.add('on');
@@ -11780,30 +11638,15 @@ function _credCopy(){
     sub:{ru:'Тратятся за каждое сообщение. Не сгорают.',en:'Spent per chat message. Never expire.'}[lang]||'Spent per chat message. Never expire.',
     rows:{
       ru:[
-        ['Haiku 4.5 — быстрый','1 кр / сообщение'],
-        ['Sonnet 4 — баланс','4 кр'],
-        ['Sonnet 4.6 — глубже','5 кр'],
-        ['Opus 4.1 — глубокий','12 кр'],
-        ['Opus 4.7 — глубокий+','14 кр'],
-        ['Opus 4.8 — максимум','18 кр'],
+        ['Sonnet 4.6 — умный чат','6 кр / сообщение'],
         ['Голос ALEX (TTS+STT)','+5 кр'],
       ],
       en:[
-        ['Haiku 4.5 — fast','1 cr / message'],
-        ['Sonnet 4 — balanced','4 cr'],
-        ['Sonnet 4.6 — deeper','5 cr'],
-        ['Opus 4.1 — deep','12 cr'],
-        ['Opus 4.7 — deep+','14 cr'],
-        ['Opus 4.8 — max','18 cr'],
+        ['Sonnet 4.6 — smart chat','6 cr / message'],
         ['Voice ALEX (TTS+STT)','+5 cr'],
       ]
     }[lang]||[
-      ['Haiku 4.5 — fast','1 cr / message'],
-      ['Sonnet 4 — balanced','4 cr'],
-      ['Sonnet 4.6 — deeper','5 cr'],
-      ['Opus 4.1 — deep','12 cr'],
-      ['Opus 4.7 — deep+','14 cr'],
-      ['Opus 4.8 — max','18 cr'],
+      ['Sonnet 4.6 — smart chat','6 cr / message'],
       ['Voice ALEX (TTS+STT)','+5 cr'],
     ],
     foot:{ru:'Кредиты не сгорают. Работают с Platform или без неё.', en:'Credits never expire. Work with or without Platform.'}[lang]||'Credits never expire.'
@@ -11850,14 +11693,13 @@ function renderPremPlans(){
     host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const credLbl = `${p.credits.toLocaleString(lang==='ru'?'ru-RU':'en-US')} ${({ru:'кредитов',en:'credits',es:'créditos',pt:'créditos',de:'Credits',fr:'crédits',uk:'кредитів',tr:'kredi',zh:'积分',ar:'رصيد'}[lang]||'credits')}`;
-      /* Mental anchor: Haiku 1 cr/msg, Sonnet 4 = 4 cr/msg. */
-      const msgsHaiku = p.credits;
-      const msgsSonnet = Math.floor(p.credits/4);
+      /* Mental anchor: single model — Sonnet 4.6 = 6 cr/msg. */
+      const msgsSonnet = Math.floor(p.credits/6);
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
       const rate = `<b>${p.perMsg.toFixed(2)} ⭐ ${({ru:'/ сообщение',en:'/ message',es:'/ mensaje',pt:'/ mensagem',de:'/ Nachricht',fr:'/ message',uk:'/ повідомлення',tr:'/ mesaj',zh:'/ 条消息',ar:'/ رسالة'}[lang]||'/ message')}</b>${usd}`;
       const detail = lang==='ru'
-        ? `≈ ${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`
-        : `≈ ${msgsHaiku} Haiku · ${msgsSonnet} Sonnet 4`;
+        ? `≈ ${msgsSonnet} ${({ru:'сообщений'}[lang]||'messages')} Sonnet 4.6`
+        : `≈ ${msgsSonnet} messages with Sonnet 4.6`;
       return `<div class="prem-plan" onclick="selectPlan('${p.id}')">
         ${popMark}
         <div class="pp-row">
@@ -12301,7 +12143,7 @@ For ${scaleLabel}. Use half-point granularity for IELTS (5.0, 5.5, 6.0…). Stud
     const r=await fetch(`${API}/api/chat`,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
-      body:JSON.stringify({uid:window._uid||0,message:payload,bot_lang:bl,chosen_model:'sonnet4',init_data:tg?.initData||''}),
+      body:JSON.stringify({uid:window._uid||0,message:payload,bot_lang:bl,chosen_model:'sonnet',init_data:tg?.initData||''}),
       signal:AbortSignal.timeout(60000)
     });
     const d=await r.json();
@@ -12360,11 +12202,9 @@ function updateNewLabels(){
   // Learn tabs
   const ltco=document.getElementById('lt-course-lbl');
   const ltc=document.getElementById('lt-cards-lbl');
-  const ltg=document.getElementById('lt-games-lbl');
   const ltr=document.getElementById('lt-road-lbl');
   if(ltco)ltco.textContent={ru:'Курс',en:'Course',es:'Curso',de:'Kurs',fr:'Cours'}[lang]||'Course';
   if(ltc)ltc.textContent={ru:'Карточки',en:'Flashcards',es:'Tarjetas',de:'Karten',fr:'Cartes'}[lang]||'Flashcards';
-  if(ltg)ltg.textContent={ru:'Игры',en:'Games',es:'Juegos',pt:'Jogos',de:'Spiele',fr:'Jeux',uk:'Ігри',tr:'Oyunlar',zh:'游戏',ar:'ألعاب'}[lang]||'Games';
   if(ltr)ltr.textContent={ru:'Экзамены',en:'Exams',es:'Exámenes',de:'Prüfungen',fr:'Examens',pt:'Exames',uk:'Іспити',tr:'Sınavlar',zh:'考试',ar:'اختبارات'}[lang]||'Exams';
   // Quick start buttons
   const qb2=document.getElementById('qb2t');if(qb2)qb2.textContent={ru:'Сценки',en:'Roleplay',es:'Escenas',de:'Rollenspiel',fr:'Saynètes'}[lang]||'Roleplay';

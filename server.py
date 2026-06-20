@@ -33,7 +33,7 @@ MODEL_ECONOMY = {
     "sonnet": {
         "model": SONNET_PLUS_MODEL,
         "weight": 5,
-        "max_tokens": {"pro": 1050, "ultimate": 1300},
+        "max_tokens": {"free": 750, "basic": 850, "pro": 1050, "ultimate": 1300},
         "input_per_m": 3.00,
         "output_per_m": 15.00,
     },
@@ -417,31 +417,10 @@ async def handle_chat(request):
         # for in credits (priced per model), so nothing is tier-gated.
         tier_key = "platform"
     tier_cfg = TIER_ECONOMY[tier_key]
-    chosen = str(body.get("chosen_model", "haiku")).lower()
-    if chosen not in {*MODEL_ECONOMY.keys(), "auto"}:
-        chosen = "haiku"
-
-    is_complex = any(kw in message.lower() for kw in [
-        "correct", "grammar", "explain", "mistake", "essay", "toefl",
-        "ошибк", "грамматик", "исправ", "объясни", "анализ", "разбор",
-        "почему", "правило", "эссе", "тест",
-    ])
-    if chosen == "auto":
-        if tier_key == "basic" and is_complex:
-            model_key = "sonnet4"
-        elif tier_key in ("pro", "ultimate", "platform") and is_complex:
-            model_key = "sonnet"
-        else:
-            model_key = "haiku"
-    else:
-        model_key = chosen
-    if model_key not in tier_cfg["models"]:
-        if chosen.startswith("opus") and "sonnet" in tier_cfg["models"]:
-            model_key = "sonnet"
-        elif chosen in {"sonnet", "sonnet4"} and "sonnet4" in tier_cfg["models"]:
-            model_key = "sonnet4"
-        else:
-            model_key = "haiku" if "haiku" in tier_cfg["models"] else tier_cfg["models"][0]
+    # ALEX runs on one model for everyone — Sonnet 4.6. The per-tier model
+    # picker was removed; chosen_model from the client is ignored so a user
+    # cannot request a different (pricier) model. Credits are the real gate.
+    model_key = "sonnet"
 
     model_cfg = MODEL_ECONOMY[model_key]
     # "platform" reuses the "ultimate" token budgets (full model pool parity).
@@ -481,12 +460,13 @@ async def handle_chat(request):
         msg_count = int(quota_usage.get("quota_used") or 0)
         cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
         used_cost = max(float(quota_usage.get("ai_cost") or 0.0), _daily_ai_costs.get(cost_key, 0.0))
-        if used_cost >= float(tier_cfg["daily_budget"]) and model_key != "haiku":
-            model_key = "haiku"
-            model_cfg = MODEL_ECONOMY["haiku"]
-            chat_model = model_cfg["model"]
-            max_tokens = model_cfg["max_tokens"].get(tier_key, 600)
-            weight = model_cfg["weight"]
+        # Single-model world: there is no cheaper model to fall back to, so
+        # when a legacy/grandfathered user exceeds their daily AI-cost budget
+        # we stop for the day instead of downgrading. Credit users have an
+        # effectively unlimited budget, so this never fires for them.
+        if used_cost >= float(tier_cfg["daily_budget"]):
+            limit_msg = _limit_message(lang, tier_key, msg_count, msg_limit)
+            return web.json_response({"reply": limit_msg, "limit": True, "limit_tier": tier_key}, headers={"Access-Control-Allow-Origin":"*"})
         if msg_count + weight > msg_limit:
             limit_msg = _limit_message(lang, tier_key, msg_count, msg_limit)
             return web.json_response({"reply": limit_msg, "limit": True, "limit_tier": tier_key}, headers={"Access-Control-Allow-Origin":"*"})
