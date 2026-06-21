@@ -2115,7 +2115,7 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .growth-hero{background:transparent;border:1px solid var(--b1);border-radius:14px;
   padding:7px 16px 9px;margin-bottom:11px;display:flex;flex-direction:column;
   align-items:stretch;gap:5px}
-.growth-stage{position:relative;width:100%;height:78px;display:flex;
+.growth-stage{position:relative;width:100%;height:118px;display:flex;
   align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px}
 .growth-svg{display:flex;align-items:flex-end;justify-content:center;
   width:100%;height:100%;color:var(--t1);transform-origin:50% 100%;
@@ -11704,9 +11704,12 @@ const CREDIT_PACK_DEFS=[
 let _premTab='credits';   // default: fast path to the goal — buy credits
 
 function switchPremTab(tab){
+  /* Re-run the full panel render so the cross-link ("→ Подписка" /
+     "← Назад к кредитам"), trust line, headline and info block all
+     update — not just the plan cards. Otherwise the back-link never
+     appears and the user gets stuck on the subscription view. */
   _premTab=tab;
-  document.querySelectorAll('.prem-tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===tab));
-  renderPremPlans();
+  openPremium(undefined, tab);
 }
 
 function _platCopy(){
