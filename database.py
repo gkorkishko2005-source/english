@@ -1,6 +1,7 @@
 """
 LinguaMax DB v4
 """
+from __future__ import annotations
 
 import os
 import logging
@@ -214,11 +215,44 @@ CREATE TABLE IF NOT EXISTS fsrs_review_log (
     duration_ms  INTEGER
 );
 
+-- ══ AI BILLING v2 (reserve→reconcile, layered on chat_credits wallet) ══
+-- app_config: runtime-tunable billing config (no deploy needed). Values are
+-- JSON-encoded strings keyed by the same names as billing_config defaults.
+CREATE TABLE IF NOT EXISTS app_config (
+    key        TEXT PRIMARY KEY,
+    value      TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- billing_ledger: every money/credit movement. credits is SIGNED
+-- (+topup/+allowance/+refund, -spend). meta is free-form context.
+CREATE TABLE IF NOT EXISTS billing_ledger (
+    id      BIGSERIAL PRIMARY KEY,
+    uid     BIGINT,
+    type    TEXT,                       -- topup | spend | refund | allowance
+    credits INTEGER DEFAULT 0,
+    meta    TEXT DEFAULT '',
+    ts      TIMESTAMPTZ DEFAULT NOW()
+);
+-- ai_usage_log: authoritative per-request token accounting for v2 users.
+CREATE TABLE IF NOT EXISTS ai_usage_log (
+    id              BIGSERIAL PRIMARY KEY,
+    uid             BIGINT,
+    model           TEXT,
+    input_tokens    INTEGER DEFAULT 0,
+    output_tokens   INTEGER DEFAULT 0,
+    cost_usd        DOUBLE PRECISION DEFAULT 0,
+    credits_charged INTEGER DEFAULT 0,
+    ts              TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_state  ON vocabulary(uid, state);
 CREATE INDEX IF NOT EXISTS idx_sessions_uid ON sessions(uid);
 CREATE INDEX IF NOT EXISTS idx_mistakes_uid ON mistakes(uid);
 CREATE INDEX IF NOT EXISTS idx_frl_uid_time ON fsrs_review_log(uid, review_dt DESC);
+CREATE INDEX IF NOT EXISTS idx_ledger_uid_ts ON billing_ledger(uid, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_ausage_uid_ts ON ai_usage_log(uid, ts DESC);
+CREATE INDEX IF NOT EXISTS idx_ausage_ts ON ai_usage_log(ts);
 """
 
 SCHEMA_SQLITE = """
@@ -291,6 +325,19 @@ CREATE TABLE IF NOT EXISTS fsrs_review_log (
     elapsed_days REAL, scheduled_days REAL,
     state_before TEXT, duration_ms INTEGER
 );
+CREATE TABLE IF NOT EXISTS app_config (
+    key TEXT PRIMARY KEY, value TEXT, updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS billing_ledger (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, type TEXT,
+    credits INTEGER DEFAULT 0, meta TEXT DEFAULT '', ts TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS ai_usage_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, model TEXT,
+    input_tokens INTEGER DEFAULT 0, output_tokens INTEGER DEFAULT 0,
+    cost_usd REAL DEFAULT 0, credits_charged INTEGER DEFAULT 0,
+    ts TEXT DEFAULT (datetime('now'))
+);
 """
 
 
@@ -313,6 +360,9 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS platform_lifetime BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN platform_lifetime INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS chat_credits INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN chat_credits INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS grandfathered_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN grandfathered_tier TEXT DEFAULT ''",
+        # ── AI billing v2: monthly subscription allowance (separate from credits) ──
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS monthly_allowance_left INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN monthly_allowance_left INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS allowance_reset_at TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN allowance_reset_at TEXT",
         # ── FSRS spaced-repetition fields (extends existing SM-2 vocab) ──
         # We keep the legacy `interval / ease / reviews` columns intact so
         # nothing breaks during the rollout; FSRS reads its own columns.
@@ -681,6 +731,209 @@ VOICE_CREDIT_SURCHARGE = 5
 def credits_for_message(model: str, voice: bool = False) -> int:
     base = ALEX_CREDIT_COST.get((model or "").lower(), 1)
     return base + (VOICE_CREDIT_SURCHARGE if voice else 0)
+
+
+# ══════════════════════════════════════════════════════════════════
+#  AI BILLING v2 — atomic reserve / refund + ledger + usage + config
+#  Layered ON TOP of the existing chat_credits wallet. The "wallet" a
+#  user can draw on = monthly subscription allowance (used first) PLUS
+#  prepaid credits (used next). Nothing here ever lets a balance go
+#  negative, and every spend is a reserve that is reconciled against
+#  the real token usage afterwards (refunding the unused part).
+# ══════════════════════════════════════════════════════════════════
+
+async def get_wallet(uid: int) -> dict:
+    """Current spendable buckets for a user."""
+    u = await get_user(uid) or {}
+    return {
+        "credits": int(u.get("chat_credits") or 0),
+        "allowance": int(u.get("monthly_allowance_left") or 0),
+        "allowance_reset_at": u.get("allowance_reset_at"),
+    }
+
+
+async def reserve_funds(uid: int, amount: int) -> dict | None:
+    """Atomically reserve `amount` credits — drawing from the monthly allowance
+    first, then the prepaid credit balance. Guarded so neither bucket can go
+    negative. Returns the breakdown on success, or None if the user can't cover
+    `amount` (or lost a concurrent race)."""
+    if amount <= 0:
+        return {"allowance_taken": 0, "credits_taken": 0, "allowance_left": None, "credits_left": None}
+    u = await get_user(uid) or {}
+    old_allow = int(u.get("monthly_allowance_left") or 0)
+    old_cred = int(u.get("chat_credits") or 0)
+    if old_allow + old_cred < amount:
+        return None
+    allowance_taken = min(old_allow, amount)
+    credits_taken = amount - allowance_taken
+    if USE_POSTGRES:
+        row = await db(
+            "UPDATE users SET monthly_allowance_left=monthly_allowance_left-?, "
+            "chat_credits=chat_credits-? "
+            "WHERE uid=? AND monthly_allowance_left>=? AND chat_credits>=? "
+            "RETURNING monthly_allowance_left, chat_credits",
+            allowance_taken, credits_taken, uid, allowance_taken, credits_taken,
+            fetch="one",
+        )
+        if not row:
+            return None
+        new_allow = int(row.get("monthly_allowance_left") or 0)
+        new_cred = int(row.get("chat_credits") or 0)
+    else:
+        await db(
+            "UPDATE users SET monthly_allowance_left=monthly_allowance_left-?, "
+            "chat_credits=chat_credits-? "
+            "WHERE uid=? AND monthly_allowance_left>=? AND chat_credits>=?",
+            allowance_taken, credits_taken, uid, allowance_taken, credits_taken,
+        )
+        u2 = await get_user(uid) or {}
+        new_allow = int(u2.get("monthly_allowance_left") or 0)
+        new_cred = int(u2.get("chat_credits") or 0)
+        # Confirm the guarded update actually applied.
+        if new_allow != old_allow - allowance_taken or new_cred != old_cred - credits_taken:
+            return None
+    return {
+        "allowance_taken": allowance_taken, "credits_taken": credits_taken,
+        "allowance_left": new_allow, "credits_left": new_cred,
+    }
+
+
+async def refund_funds(uid: int, to_allowance: int, to_credits: int):
+    """Return unused reserved credits to the buckets they came from."""
+    ta = int(max(0, to_allowance)); tc = int(max(0, to_credits))
+    if ta == 0 and tc == 0:
+        return
+    await db(
+        "UPDATE users SET monthly_allowance_left=COALESCE(monthly_allowance_left,0)+?, "
+        "chat_credits=COALESCE(chat_credits,0)+? WHERE uid=?",
+        ta, tc, uid,
+    )
+
+
+async def set_allowance(uid: int, credits: int, reset_at):
+    await upsert_user(uid, "")
+    await db("UPDATE users SET monthly_allowance_left=?, allowance_reset_at=? WHERE uid=?",
+             int(credits), reset_at, uid)
+
+
+async def ledger_add(uid: int, type_: str, credits: int, meta: str = ""):
+    await db("INSERT INTO billing_ledger (uid, type, credits, meta) VALUES (?, ?, ?, ?)",
+             uid, str(type_), int(credits), str(meta)[:500])
+
+
+async def usage_log_add(uid: int, model: str, input_tokens: int,
+                        output_tokens: int, cost_usd: float, credits_charged: int):
+    await db(
+        "INSERT INTO ai_usage_log (uid, model, input_tokens, output_tokens, cost_usd, credits_charged) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        uid, str(model), int(input_tokens), int(output_tokens), float(cost_usd), int(credits_charged),
+    )
+
+
+async def usage_today_tokens(uid: int) -> int:
+    """Total tokens (in+out) this user has consumed today — for per-user limits."""
+    if USE_POSTGRES:
+        r = await db("SELECT COALESCE(SUM(input_tokens+output_tokens),0) AS t "
+                     "FROM ai_usage_log WHERE uid=? AND ts::date=CURRENT_DATE", uid, fetch="one")
+    else:
+        r = await db("SELECT COALESCE(SUM(input_tokens+output_tokens),0) AS t "
+                     "FROM ai_usage_log WHERE uid=? AND date(ts)=date('now')", uid, fetch="one")
+    return int((r or {}).get("t") or 0)
+
+
+async def usage_today_cost_global() -> float:
+    """Total Anthropic spend across ALL users today — for the global budget gate."""
+    if USE_POSTGRES:
+        r = await db("SELECT COALESCE(SUM(cost_usd),0) AS c FROM ai_usage_log WHERE ts::date=CURRENT_DATE", fetch="one")
+    else:
+        r = await db("SELECT COALESCE(SUM(cost_usd),0) AS c FROM ai_usage_log WHERE date(ts)=date('now')", fetch="one")
+    return float((r or {}).get("c") or 0.0)
+
+
+async def ledger_topups_today_credits() -> int:
+    """Total credits sold (topped up) across ALL users today — revenue proxy."""
+    if USE_POSTGRES:
+        r = await db("SELECT COALESCE(SUM(credits),0) AS c FROM billing_ledger "
+                     "WHERE type='topup' AND ts::date=CURRENT_DATE", fetch="one")
+    else:
+        r = await db("SELECT COALESCE(SUM(credits),0) AS c FROM billing_ledger "
+                     "WHERE type='topup' AND date(ts)=date('now')", fetch="one")
+    return int((r or {}).get("c") or 0)
+
+
+async def usage_today_credits_charged() -> int:
+    """Total credits actually charged (reconciled) across ALL users today."""
+    if USE_POSTGRES:
+        r = await db("SELECT COALESCE(SUM(credits_charged),0) AS c FROM ai_usage_log "
+                     "WHERE ts::date=CURRENT_DATE", fetch="one")
+    else:
+        r = await db("SELECT COALESCE(SUM(credits_charged),0) AS c FROM ai_usage_log "
+                     "WHERE date(ts)=date('now')", fetch="one")
+    return int((r or {}).get("c") or 0)
+
+
+async def top_token_users_today(limit: int = 10) -> list:
+    """Heaviest token consumers today (catch bots / runaway usage). Returns
+    [{uid, tokens, cost_usd, msgs}] sorted by tokens desc."""
+    if USE_POSTGRES:
+        rows = await db(
+            "SELECT uid, COALESCE(SUM(input_tokens+output_tokens),0) AS tokens, "
+            "COALESCE(SUM(cost_usd),0) AS cost_usd, COUNT(*) AS msgs "
+            "FROM ai_usage_log WHERE ts::date=CURRENT_DATE "
+            "GROUP BY uid ORDER BY tokens DESC LIMIT ?", int(limit), fetch="all")
+    else:
+        rows = await db(
+            "SELECT uid, COALESCE(SUM(input_tokens+output_tokens),0) AS tokens, "
+            "COALESCE(SUM(cost_usd),0) AS cost_usd, COUNT(*) AS msgs "
+            "FROM ai_usage_log WHERE date(ts)=date('now') "
+            "GROUP BY uid ORDER BY tokens DESC LIMIT ?", int(limit), fetch="all")
+    return [{"uid": int(r["uid"]), "tokens": int(r["tokens"] or 0),
+             "cost_usd": float(r["cost_usd"] or 0.0), "msgs": int(r["msgs"] or 0)}
+            for r in (rows or [])]
+
+
+async def user_cost_vs_revenue_today(limit: int = 10) -> list:
+    """Per-user today: API cost vs credits topped up (revenue proxy). Used to flag
+    users whose Anthropic cost exceeds what they paid in. Returns rows where
+    cost_usd > 0, sorted by cost desc."""
+    if USE_POSTGRES:
+        rows = await db(
+            "SELECT u.uid AS uid, COALESCE(c.cost_usd,0) AS cost_usd, "
+            "COALESCE(t.credits,0) AS topup_credits "
+            "FROM (SELECT uid, SUM(cost_usd) AS cost_usd FROM ai_usage_log "
+            "      WHERE ts::date=CURRENT_DATE GROUP BY uid) c "
+            "LEFT JOIN (SELECT uid, SUM(credits) AS credits FROM billing_ledger "
+            "      WHERE type='topup' AND ts::date=CURRENT_DATE GROUP BY uid) t ON t.uid=c.uid "
+            "JOIN (SELECT DISTINCT uid FROM ai_usage_log WHERE ts::date=CURRENT_DATE) u ON u.uid=c.uid "
+            "ORDER BY cost_usd DESC LIMIT ?", int(limit), fetch="all")
+    else:
+        rows = await db(
+            "SELECT c.uid AS uid, COALESCE(c.cost_usd,0) AS cost_usd, "
+            "COALESCE(t.credits,0) AS topup_credits "
+            "FROM (SELECT uid, SUM(cost_usd) AS cost_usd FROM ai_usage_log "
+            "      WHERE date(ts)=date('now') GROUP BY uid) c "
+            "LEFT JOIN (SELECT uid, SUM(credits) AS credits FROM billing_ledger "
+            "      WHERE type='topup' AND date(ts)=date('now') GROUP BY uid) t ON t.uid=c.uid "
+            "ORDER BY c.cost_usd DESC LIMIT ?", int(limit), fetch="all")
+    return [{"uid": int(r["uid"]), "cost_usd": float(r["cost_usd"] or 0.0),
+             "topup_credits": int(r["topup_credits"] or 0)} for r in (rows or [])]
+
+
+# ── app_config (runtime billing config, no deploy needed) ──────────
+async def config_get_all() -> dict:
+    rows = await db("SELECT key, value FROM app_config", fetch="all") or []
+    return {r["key"]: r["value"] for r in rows}
+
+
+async def config_set(key: str, value: str):
+    if USE_POSTGRES:
+        await db("INSERT INTO app_config (key, value, updated_at) VALUES (?, ?, NOW()) "
+                 "ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()",
+                 str(key), str(value))
+    else:
+        await db("INSERT INTO app_config (key, value, updated_at) VALUES (?, ?, datetime('now')) "
+                 "ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=datetime('now')",
+                 str(key), str(value))
 
 
 async def add_xp(uid: int, amount: int):

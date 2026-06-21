@@ -195,6 +195,45 @@ def _limit_message(lang: str, tier: str, used: int, quota: int) -> str:
         '</div>'
     )
 
+def _billing_block_message(lang: str, reason: str) -> dict:
+    """Response payload when AI billing v2 blocks a request BEFORE any API call.
+    reason ∈ insufficient_funds | daily_token_limit | global_budget."""
+    ru = lang == "ru"
+    if reason == "insufficient_funds":
+        if ru:
+            card = ('<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+                    '<div class="limit-title">Нужны кредиты ALEX</div>'
+                    '<div class="limit-text">Закончились кредиты и месячный лимит подписки. '
+                    'Пополни баланс, чтобы продолжить — кредиты не сгорают.</div>'
+                    '<button class="chip" onclick="openPremium()">Купить кредиты</button></div>')
+        else:
+            card = ('<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+                    '<div class="limit-title">ALEX credits required</div>'
+                    '<div class="limit-text">Your subscription allowance and credits are used up. '
+                    'Top up to keep chatting — credits never expire.</div>'
+                    '<button class="chip" onclick="openPremium()">Buy credits</button></div>')
+        return {"reply": card, "premium_required": True, "credits_required": True}
+    if reason == "daily_token_limit":
+        card = ('<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+                '<div class="limit-title">Дневной лимит достигнут</div>'
+                '<div class="limit-text">Сегодня ты много занимался. Продолжим завтра — '
+                'паузы помогают закреплять материал.</div></div>') if ru else (
+                '<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+                '<div class="limit-title">Daily limit reached</div>'
+                '<div class="limit-text">You\'ve studied a lot today. Let\'s continue tomorrow — '
+                'breaks help things stick.</div></div>')
+        return {"reply": card, "limit": True}
+    # global_budget
+    card = ('<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+            '<div class="limit-title">ALEX немного перегружен</div>'
+            '<div class="limit-text">Сейчас слишком много запросов. Загляни чуть позже — '
+            'скоро всё освободится.</div></div>') if ru else (
+            '<div class="limit-card"><div class="limit-kicker">ALEX Chat</div>'
+            '<div class="limit-title">ALEX is busy right now</div>'
+            '<div class="limit-text">Too many requests at the moment. Please try again a bit '
+            'later.</div></div>')
+    return {"reply": card, "limit": True, "busy": True}
+
 # ── STATIC ──────────────────────────────────────────────────────────────────
 async def handle_index(request):
     html_path = WEBAPP_DIR / "index.html"
@@ -253,6 +292,7 @@ async def handle_user(request):
                 "referrals": 0,
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
                 "is_premium": False,
+                "is_admin": uid in ADMIN_IDS,
             }, headers={"Access-Control-Allow-Origin": "*"})
         xp         = await get_xp(uid) or 0
         level      = await get_level(uid) or "B1"
@@ -286,6 +326,7 @@ async def handle_user(request):
             "toefl_scores": [],
             "due_words": [],
             "is_premium": is_prem,
+            "is_admin": uid in ADMIN_IDS,
         }, headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
         logger.error(f"handle_user error: {e}")
@@ -354,6 +395,29 @@ async def handle_chat(request):
 
     bl = str(body.get("bot_lang", "Respond in Russian."))
 
+    # ── ALEX REPLY-LANGUAGE HARD LOCK ─────────────────────────────────────────
+    # The "Ответы ALEX" setting decides which language ALEX explains in. We do
+    # NOT trust the free-text bot_lang alone (older clients leaked 'ar'): we
+    # whitelist a language code (answer_lang from the client, else the user's
+    # stored UI lang) and build the directive server-side. Explanations go in the
+    # chosen language; English examples/target words always stay English.
+    _LANG_NAMES = {
+        "ru": "Russian", "en": "English", "es": "Spanish", "pt": "Portuguese",
+        "de": "German", "fr": "French", "uk": "Ukrainian", "tr": "Turkish",
+        "zh": "Chinese", "ar": "Arabic", "ja": "Japanese", "ko": "Korean",
+    }
+    ans_code = str(body.get("answer_lang", "") or "").strip().lower()
+    if ans_code not in _LANG_NAMES:
+        ans_code = lang if lang in _LANG_NAMES else "ru"
+    ans_name = _LANG_NAMES[ans_code]
+    lang_lock = (
+        "\n\nLANGUAGE LOCK (highest priority — overrides any other instruction):\n"
+        f"- Write ALL explanations, feedback, corrections and questions in {ans_name}.\n"
+        "- Keep English example sentences, target vocabulary and quoted student text in English.\n"
+        f"- Never switch the explanation language to anything other than {ans_name}, "
+        "even if the student writes in a different language.\n"
+    )
+
     fmt = (
         "\n\nFORMATTING (mandatory):\n"
         "- **bold** NOT <b> tags\n"
@@ -364,7 +428,7 @@ async def handle_chat(request):
         "- NEVER use HTML tags\n"
         "- Keep responses concise and engaging\n"
     )
-    system = system + fmt + "\n" + bl
+    system = system + fmt + "\n" + bl + lang_lock
 
     # Check premium for model selection and limits
     user_premium = False
@@ -372,6 +436,10 @@ async def handle_chat(request):
     chat_credits = 0
     grandfathered = ""
     uses_credits = False    # True = new modular path; False = legacy bundle path
+    reservation = None      # v2 reserve→reconcile hold (None = legacy/no-charge path)
+    bcfg = None             # loaded billing config (v2)
+    billing_v2 = False      # v2 reserve→reconcile active for this request
+    bill_model_key = None   # logical model chosen by determine_model (v2)
     if uid:
         try:
             from database import check_premium, get_premium_info, get_credits, grandfather_legacy_tier
@@ -395,7 +463,41 @@ async def handle_chat(request):
     # they are on the new model: ALEX is purely credit-based.
     if tier_key == "free" and not grandfathered:
         uses_credits = True
-        if chat_credits <= 0:
+        # Load billing config once and decide v2 vs legacy. If v2 is enabled we
+        # run reserve→reconcile (allowance first, then prepaid credits); else we
+        # fall back to the legacy per-message spend_credits path below.
+        try:
+            from billing_config import load_config
+            bcfg = await load_config()
+            billing_v2 = bool(bcfg.get("BILLING_V2_ENABLED"))
+        except Exception as e:
+            logger.warning("billing config load failed uid=%s: %s", uid, e)
+            bcfg = None
+            billing_v2 = False
+
+        is_voice = bool(body.get("voice"))
+        if billing_v2 and bcfg:
+            # v2: subscription allowance OR prepaid credits, both with margin.
+            from ai_billing import (ensure_allowance, determine_model,
+                                    reserve_amount, can_spend, reserve as _reserve)
+            try:
+                await ensure_allowance(uid, bcfg)   # refill monthly pool if due
+            except Exception as e:
+                logger.warning("ensure_allowance failed uid=%s: %s", uid, e)
+            bill_model_key = determine_model(bcfg, chat_mode)   # chat→haiku, exam→sonnet
+            need = reserve_amount(bcfg, voice=is_voice)
+            ok, why = await can_spend(uid, bcfg, need)
+            if not ok:
+                # Funds / daily-token / global-budget gate failed → clear error,
+                # NO API call (owner never goes negative).
+                return web.json_response(_billing_block_message(lang, why),
+                                         headers={"Access-Control-Allow-Origin":"*"})
+            reservation = await _reserve(uid, bcfg, voice=is_voice)
+            if reservation is None:
+                return web.json_response(_billing_block_message(lang, "insufficient_funds"),
+                                         headers={"Access-Control-Allow-Origin":"*"})
+        elif chat_credits <= 0:
+            # Legacy credit path: hard gate on empty wallet.
             msg = (
                 '<div class="limit-card">'
                 '<div class="limit-kicker">ALEX Chat</div>'
@@ -417,16 +519,20 @@ async def handle_chat(request):
         # for in credits (priced per model), so nothing is tier-gated.
         tier_key = "platform"
     tier_cfg = TIER_ECONOMY[tier_key]
-    # ALEX runs on one model for everyone — Sonnet 4.6. The per-tier model
-    # picker was removed; chosen_model from the client is ignored so a user
-    # cannot request a different (pricier) model. Credits are the real gate.
-    model_key = "sonnet"
+    # ALEX model: v2 picks per-mode (Haiku for chat, Sonnet for graded work) via
+    # determine_model; legacy stays on Sonnet. chosen_model from the client is
+    # ignored either way so a user cannot request a different (pricier) model.
+    model_key = bill_model_key if (billing_v2 and uses_credits and bill_model_key) else "sonnet"
 
     model_cfg = MODEL_ECONOMY[model_key]
     # "platform" reuses the "ultimate" token budgets (full model pool parity).
     mt_tier = "ultimate" if tier_key == "platform" else tier_key
     chat_model = model_cfg.get("model_by_tier", {}).get(tier_key, model_cfg["model"])
     max_tokens = model_cfg["max_tokens"].get(mt_tier, 500)
+    # v2 caps OUTPUT at the configured MAX_TOKENS_PER_REPLY so the up-front
+    # reserve (sized on that cap) always covers the real reply.
+    if billing_v2 and bcfg:
+        max_tokens = min(max_tokens, int(bcfg.get("MAX_TOKENS_PER_REPLY", 1000)))
     weight = int(model_cfg["weight"])
     msg_limit = int(tier_cfg["quota"])
 
@@ -506,6 +612,13 @@ async def handle_chat(request):
             data = r.json()
             if "error" in data:
                 logger.error(f"Anthropic error: {data['error']}")
+                # No reply was produced → fully refund the v2 reserve.
+                if reservation is not None:
+                    try:
+                        from ai_billing import cancel as _bill_cancel
+                        await _bill_cancel(uid, reservation, meta="api_error")
+                    except Exception as ce:
+                        logger.warning("reserve cancel failed uid=%s: %s", uid, ce)
                 return web.json_response({"error": data["error"].get("message","API error")[:200]}, status=500)
             reply = data["content"][0]["text"].strip()
             if uid not in ADMIN_IDS:
@@ -519,6 +632,13 @@ async def handle_chat(request):
                     logger.warning("quota DB cost update failed uid=%s: %s", uid, e)
     except Exception as e:
         logger.error(f"Chat failed: {e}")
+        # Exception before a usable reply → fully refund the v2 reserve.
+        if reservation is not None:
+            try:
+                from ai_billing import cancel as _bill_cancel
+                await _bill_cancel(uid, reservation, meta="exception")
+            except Exception as ce:
+                logger.warning("reserve cancel failed uid=%s: %s", uid, ce)
         return web.json_response({"error": str(e)[:150]}, status=500)
 
     _histories[uid].append({"role": "assistant", "content": reply})
@@ -534,7 +654,21 @@ async def handle_chat(request):
     # are NOT charged credits. New users pay per-message in credits priced
     # by model (Haiku=1, Sonnet4=4, etc.) via credits_for_message().
     new_balance = None
-    if uses_credits and uid:
+    if uses_credits and uid and billing_v2 and reservation is not None and bcfg:
+        # v2: reconcile the reserve against real token usage (refund the unused
+        # part, allowance first) and write the authoritative usage_log row.
+        try:
+            from ai_billing import reconcile
+            from database import get_wallet
+            real_cost = _estimate_ai_cost(model_key, data.get("usage") or {})
+            await reconcile(uid, bcfg, model_key, reservation,
+                            data.get("usage") or {}, real_cost)
+            w = await get_wallet(uid)
+            new_balance = int(w.get("allowance", 0)) + int(w.get("credits", 0))
+        except Exception as e:
+            logger.warning("v2 reconcile failed uid=%s: %s", uid, e)
+    elif uses_credits and uid:
+        # Legacy per-message spend (v2 disabled or config unavailable).
         try:
             from database import credits_for_message, spend_credits, get_credits
             cost = credits_for_message(model_key, voice=bool(body.get("voice")))
@@ -791,9 +925,20 @@ async def handle_grant_credits(request):
     if secret != BOT_SECRET:
         return web.json_response({"error":"unauthorized"},status=403)
     try:
-        from database import add_credits
-        await add_credits(uid, credits)
-        return web.json_response({"ok":True,"uid":uid,"credits":credits},
+        # Route through ai_billing.topup so the purchase is also recorded in the
+        # billing ledger (type=topup) — that's what the admin revenue metric and
+        # per-user cost-vs-revenue alerts read from. Falls back to a raw
+        # add_credits if the billing module is unavailable.
+        meta = str(body.get("meta") or "stars")
+        try:
+            from ai_billing import topup
+            new_balance = await topup(uid, credits, meta=meta)
+        except Exception as e:
+            logger.warning("ai_billing.topup failed uid=%s, falling back: %s", uid, e)
+            from database import add_credits, get_credits
+            await add_credits(uid, credits)
+            new_balance = await get_credits(uid)
+        return web.json_response({"ok":True,"uid":uid,"credits":credits,"balance":new_balance},
                                   headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
@@ -1046,6 +1191,56 @@ async def handle_admin_stats(request):
         result["today_messages"] = sum(v for k,v in _msg_counts.items() if str(_today_date) in k)
     except Exception:
         pass
+
+    # ── AI billing metrics (v2) ─────────────────────────────────────────────
+    # Revenue/cost/margin for today + heaviest token users + budget alerts.
+    billing = {}
+    try:
+        from billing_config import load_config, price_per_credit
+        from database import (usage_today_cost_global, usage_today_credits_charged,
+                              ledger_topups_today_credits, top_token_users_today,
+                              user_cost_vs_revenue_today)
+        bcfg = await load_config()
+        cost_usd = await usage_today_cost_global()
+        topup_credits = await ledger_topups_today_credits()
+        charged_credits = await usage_today_credits_charged()
+        # Revenue proxy: credits sold today × USD price per credit (after fee/markup).
+        ppc = price_per_credit(bcfg, "sonnet")
+        revenue_usd = round(topup_credits * ppc, 4)
+        margin_usd = round(revenue_usd - cost_usd, 4)
+        margin_pct = round((margin_usd / revenue_usd * 100.0), 1) if revenue_usd > 0 else None
+        budget = float(bcfg.get("GLOBAL_DAILY_BUDGET_USD", 25.0))
+        budget_used_pct = round((cost_usd / budget * 100.0), 1) if budget > 0 else 0.0
+        alerts = []
+        if budget_used_pct >= 80.0:
+            alerts.append({"type": "global_budget", "level": "warn" if budget_used_pct < 100 else "crit",
+                           "msg": f"Global daily budget at {budget_used_pct}% (${cost_usd:.2f}/${budget:.2f})"})
+        # Flag users whose Anthropic cost today exceeds their top-up revenue.
+        try:
+            for row in await user_cost_vs_revenue_today(20):
+                rev = round(row["topup_credits"] * ppc, 4)
+                if row["cost_usd"] > rev and row["cost_usd"] >= 0.01:
+                    alerts.append({"type": "user_unprofitable", "level": "warn", "uid": row["uid"],
+                                   "msg": f"uid {row['uid']}: cost ${row['cost_usd']:.2f} > revenue ${rev:.2f}"})
+        except Exception as e:
+            logger.warning(f"admin user_cost_vs_revenue: {e}")
+        billing = {
+            "cost_usd_today": round(cost_usd, 4),
+            "revenue_usd_today": revenue_usd,
+            "margin_usd_today": margin_usd,
+            "margin_pct_today": margin_pct,
+            "credits_sold_today": topup_credits,
+            "credits_charged_today": charged_credits,
+            "global_budget_usd": budget,
+            "global_budget_used_pct": budget_used_pct,
+            "price_per_credit_usd": round(ppc, 5),
+            "top_token_users": await top_token_users_today(10),
+            "alerts": alerts,
+            "v2_enabled": bool(bcfg.get("BILLING_V2_ENABLED")),
+        }
+    except Exception as e:
+        logger.warning(f"admin billing metrics: {e}")
+    result["billing"] = billing
     return web.json_response(result, headers={"Access-Control-Allow-Origin":"*"})
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
