@@ -1338,13 +1338,14 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .prem-tab:active{opacity:.6}
 .credit-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.25);font-size:11px;font-weight:800;color:var(--a);letter-spacing:.2px;cursor:pointer}
 .credit-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-/* Plan list — flat rows, no gradients */
-.prem-plans{display:flex;flex-direction:column;gap:0;padding:0 18px 8px}
-.prem-plan{position:relative;background:transparent;border:0;border-top:1px solid var(--b1);border-radius:0;padding:14px 0;cursor:pointer;transition:background .15s}
-.prem-plan:first-child{border-top:0}
-.prem-plan:active{background:var(--e2)}
-.prem-plan.pp-pop{}
-.pp-popular{display:inline-block;margin-bottom:7px;padding:2px 8px;border-radius:100px;background:rgba(var(--ar),.14);font-size:9.5px;font-weight:800;color:var(--a);letter-spacing:.5px;text-transform:uppercase}
+/* Plan list — elevated cards with depth */
+.prem-plans{display:flex;flex-direction:column;gap:10px;padding:4px 18px 8px}
+.prem-plan{position:relative;background:var(--e1);border:1px solid var(--b1);border-top:1px solid var(--edge,rgba(255,255,255,.08));border-radius:14px;padding:14px 15px;box-shadow:var(--sh,0 1px 3px rgba(0,0,0,.18));transition:transform .15s,box-shadow .15s}
+.prem-plan:active{transform:scale(.99)}
+/* Recommended pack — bigger, accent gradient outline, lifted */
+.prem-plan.pp-rec{border:1.5px solid var(--a);background:linear-gradient(180deg,rgba(var(--ar),.10),rgba(var(--ar),.02));box-shadow:0 6px 22px rgba(var(--ar),.22);transform:scale(1.015)}
+.prem-plan.pp-rec:active{transform:scale(1.0)}
+.pp-popular{position:absolute;top:-9px;left:14px;padding:3px 10px;border-radius:100px;background:var(--a);font-size:9.5px;font-weight:900;color:#fff;letter-spacing:.6px;text-transform:uppercase;box-shadow:0 2px 8px rgba(var(--ar),.4)}
 .pp-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .pp-name{font-size:15px;font-weight:700;color:var(--t1);letter-spacing:-.1px}
 .pp-name small{font-weight:500;color:var(--t3);font-size:12px;margin-left:6px}
@@ -1352,6 +1353,24 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .pp-meta{font-size:11.5px;color:var(--t3);margin-top:5px;line-height:1.4;font-variant-numeric:tabular-nums}
 .pp-meta b{color:var(--a);font-weight:700}
 .pp-save{font-size:10.5px;font-weight:700;color:var(--a);margin-left:6px;letter-spacing:.2px}
+/* Bold action button — the most prominent element on every card */
+.pp-cta{display:block;width:100%;margin-top:11px;padding:11px 0;border:0;border-radius:11px;background:var(--e3,rgba(255,255,255,.06));color:var(--t1);font-family:var(--f);font-size:14px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:transform .12s,filter .12s}
+.pp-cta:active{transform:scale(.97);filter:brightness(.92)}
+.pp-cta.rec{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;box-shadow:0 4px 14px rgba(var(--ar),.35)}
+/* Single high-trust line (kept visible, slightly larger) */
+.prem-trust{margin:12px 18px 2px;text-align:center;font-size:13px;font-weight:600;color:var(--t2);display:flex;align-items:center;justify-content:center;gap:6px}
+.prem-trust svg{width:15px;height:15px;stroke:var(--green);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* Secondary link to the other product (subscription ⇄ credits) */
+.prem-switch{margin:10px 18px 0;text-align:center}
+.prem-switch button{background:transparent;border:0;color:var(--a);font-family:var(--f);font-size:13px;font-weight:600;cursor:pointer;padding:6px 10px;border-radius:9px}
+.prem-switch button:active{opacity:.6}
+/* Collapsed economics details */
+.prem-econ{margin:12px 18px 4px;border-top:1px solid var(--b1);padding-top:8px}
+.prem-econ>summary{list-style:none;cursor:pointer;font-size:12px;color:var(--t3);font-weight:600;padding:4px 0;display:flex;align-items:center;gap:6px}
+.prem-econ>summary::-webkit-details-marker{display:none}
+.prem-econ>summary::after{content:'▾';margin-left:auto;transition:transform .2s}
+.prem-econ[open]>summary::after{transform:rotate(180deg)}
+.prem-econ .prem-econ-body{font-size:11px;color:var(--t3);line-height:1.55;padding:6px 0 2px}
 /* Comparison + summary blocks */
 .prem-proof{margin:8px 18px 0;padding:10px 12px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);font-size:11.5px;line-height:1.5;color:var(--t2)}
 .prem-proof b{color:var(--t1);font-weight:700}
@@ -2021,10 +2040,12 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 
 /* Quad stat cards — flat, mono icons, one number colour */
 #s-progress .s4{gap:8px;margin-bottom:4px}
-#s-progress .s4c{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;border-radius:12px;padding:14px 12px;position:relative;overflow:hidden}
+#s-progress .s4c{background:var(--e1)!important;border:1px solid var(--b1)!important;
+  border-top:1px solid var(--edge)!important;
+  box-shadow:var(--sh)!important;border-radius:12px;padding:14px 12px;position:relative;overflow:hidden;
+  transition:transform .15s ease,box-shadow .2s ease}
 #s-progress .s4c::before{display:none!important}
-#s-progress .s4c:active{background:var(--e2);transform:scale(.985)}
+#s-progress .s4c:active{background:var(--e2)!important;transform:scale(.985)}
 #s-progress .s4ca{font-size:14px;color:var(--t3);position:absolute;top:10px;right:12px}
 #s-progress .s4ci-svg{width:30px!important;height:30px!important;background:var(--e2)!important;
   border:1px solid var(--b1)!important;border-radius:9px;margin-bottom:10px}
@@ -2092,9 +2113,9 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
    restrained — small type, a single hairline divider, the accent
    colour reserved for the progress bar and the SVG's blossoms. */
 .growth-hero{background:transparent;border:1px solid var(--b1);border-radius:14px;
-  padding:12px 16px 12px;margin-bottom:14px;display:flex;flex-direction:column;
-  align-items:stretch;gap:9px}
-.growth-stage{position:relative;width:100%;height:74px;display:flex;
+  padding:7px 16px 9px;margin-bottom:11px;display:flex;flex-direction:column;
+  align-items:stretch;gap:5px}
+.growth-stage{position:relative;width:100%;height:78px;display:flex;
   align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px}
 .growth-svg{display:flex;align-items:flex-end;justify-content:center;
   width:100%;height:100%;color:var(--t1);transform-origin:50% 100%;
@@ -2122,15 +2143,20 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
   .growth-hero[data-mood] .growth-svg,
   .growth-hero[data-mood] .growth-stage{animation:none!important;transition:none}
 }
-.growth-meta{text-align:center;margin-top:-4px}
-.growth-title{font-size:17px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
-  margin-bottom:2px}
-.growth-sub{font-size:11.5px;color:var(--t3);font-weight:600;letter-spacing:.3px;
+.growth-meta{text-align:center;margin-top:1px}
+.growth-title{font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
+  margin-bottom:1px}
+.growth-sub{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.3px;
   text-transform:uppercase}
 .growth-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden;
   margin:0 4px}
-.growth-fill{height:100%;background:linear-gradient(90deg,var(--a),var(--green));border-radius:100px;
-  transition:width .9s cubic-bezier(.22,1,.36,1)}
+.growth-fill{position:relative;height:100%;background:linear-gradient(90deg,var(--a),var(--green));border-radius:100px;
+  transition:width .9s cubic-bezier(.22,1,.36,1);overflow:hidden}
+.growth-fill::after{content:'';position:absolute;inset:0;border-radius:100px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:translateX(-100%);animation:growthSheen 1.6s ease-out .45s 1}
+@keyframes growthSheen{to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.growth-fill::after{animation:none;display:none}}
 .growth-foot{display:flex;justify-content:space-between;align-items:baseline;
   font-size:11px;color:var(--t3);font-weight:600;padding:0 4px;
   font-variant-numeric:tabular-nums;letter-spacing:.2px}
@@ -2860,12 +2886,15 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
       <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
       <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div>
     </div>
-    <!-- Modular billing: two products as tabs -->
-    <div class="prem-tabs" id="prem-tabs">
+    <!-- Modular billing: tabs kept for logic but hidden — credits is the
+         default fast path; the subscription is reachable via a secondary link. -->
+    <div class="prem-tabs" id="prem-tabs" style="display:none">
       <button class="prem-tab on" data-tab="platform" type="button" onclick="switchPremTab('platform')"><span id="prem-tab-platform-lbl">Platform</span></button>
       <button class="prem-tab" data-tab="credits" type="button" onclick="switchPremTab('credits')"><span id="prem-tab-credits-lbl">ALEX credits</span></button>
     </div>
     <div class="prem-plans" id="prem-plans"></div>
+    <div class="prem-trust" id="prem-trust"></div>
+    <div class="prem-switch" id="prem-switch"></div>
     <div class="prem-proof" id="prem-proof"></div>
     <div class="prem-info" id="prem-info"></div>
     <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Close</div>
@@ -11660,13 +11689,19 @@ const PLATFORM_PLAN_DEFS=[
   {id:'plat_6m',  stars:1290, period:'6m',       monthly:215, save:28, starterCredits:150, popular:true},
   {id:'plat_life',stars:4990, period:'lifetime', monthly:null,save:null, starterCredits:500},
 ];
+/* perCr = stars per CREDIT (stars/credits). This is the honest unit — a credit
+   is the billed unit; a chat message costs a variable number of credits by
+   real token usage (v2). AVG_CR_PER_MSG is a conservative blended estimate
+   (normal chat runs on Haiku ≈1–2 cr; graded/exam work on Sonnet costs more)
+   used only for the "≈ N messages" anchor, so we slightly under-promise. */
+const AVG_CR_PER_MSG=3;
 const CREDIT_PACK_DEFS=[
-  {id:'credits_100',  stars:149,  credits:100,  perMsg:1.49},
-  {id:'credits_500',  stars:599,  credits:500,  perMsg:1.20, popular:true},
-  {id:'credits_2000', stars:1990, credits:2000, perMsg:1.00},
+  {id:'credits_100',  stars:149,  credits:100,  perCr:1.49},
+  {id:'credits_500',  stars:599,  credits:500,  perCr:1.20, popular:true},
+  {id:'credits_2000', stars:1990, credits:2000, perCr:1.00},
 ];
 
-let _premTab='platform';
+let _premTab='credits';   // default: fast path to the goal — buy credits
 
 function switchPremTab(tab){
   _premTab=tab;
@@ -11741,12 +11776,14 @@ function _usdFromStars(stars){return (stars*0.0145).toFixed(stars>=500?0:1);}
 function renderPremPlans(){
   const host=document.getElementById('prem-plans');
   if(!host)return;
-  const popLbl={ru:'ВЫГОДНО',en:'BEST VALUE',es:'MEJOR',pt:'MELHOR',de:'TOP-WERT',fr:'MEILLEUR',uk:'ВИГІДНО',tr:'EN İYİ',zh:'超值',ar:'الأفضل'}[lang]||'BEST VALUE';
+  const popLbl={ru:'РЕКОМЕНДУЕМ',en:'RECOMMENDED',es:'RECOMENDADO',pt:'RECOMENDADO',de:'EMPFOHLEN',fr:'RECOMMANDÉ',uk:'РЕКОМЕНДУЄМО',tr:'ÖNERİLEN',zh:'推荐',ar:'موصى به'}[lang]||'RECOMMENDED';
+  const buyLbl=({ru:'Купить за',en:'Buy for',es:'Comprar por',pt:'Comprar por',de:'Kaufen für',fr:'Acheter pour',uk:'Купити за',tr:'Satın al',zh:'购买',ar:'شراء بـ'}[lang]||'Buy for');
   if(_premTab==='platform'){
     const owns=hasPlatform();
     const crLbl=({ru:'стартовых кредитов ALEX',en:'starter ALEX credits',es:'créditos ALEX de inicio',pt:'créditos ALEX iniciais',de:'Start-ALEX-Credits',fr:'crédits ALEX de départ',uk:'стартових кредитів ALEX',tr:'başlangıç ALEX kredisi',zh:'ALEX 起始积分',ar:'رصيد ALEX مبدئي'}[lang]||'starter ALEX credits');
     host.innerHTML = PLATFORM_PLAN_DEFS.map(p=>{
       const dim = owns && p.period!=='lifetime' ? 'style="opacity:.45;pointer-events:none"' : '';
+      const recCls = p.popular ? ' pp-rec' : '';
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const save = p.save ? `<span class="pp-save">−${p.save}%</span>` : '';
       const monthly = p.monthly!=null
@@ -11754,7 +11791,7 @@ function renderPremPlans(){
         : ({ru:'один раз',en:'one-time',es:'pago único',pt:'pagamento único',de:'einmalig',fr:'paiement unique',uk:'одноразово',tr:'tek seferlik',zh:'一次性',ar:'مرة واحدة'}[lang]||'one-time');
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
       const starter = p.starterCredits ? `<div class="pp-meta" style="color:var(--a)">+ ${p.starterCredits} ${crLbl}</div>` : '';
-      return `<div class="prem-plan" ${dim} onclick="selectPlan('${p.id}')">
+      return `<div class="prem-plan${recCls}" ${dim}>
         ${popMark}
         <div class="pp-row">
           <span class="pp-name">${_platLabel(p.period)}${save}</span>
@@ -11762,27 +11799,30 @@ function renderPremPlans(){
         </div>
         <div class="pp-meta"><b>${monthly}</b>${usd}</div>
         ${starter}
+        <button class="pp-cta${p.popular?' rec':''}" type="button" onclick="selectPlan('${p.id}')">${buyLbl} ${_starsFmt(p.stars)}</button>
       </div>`;
     }).join('');
   } else {
     host.innerHTML = CREDIT_PACK_DEFS.map(p=>{
+      const recCls = p.popular ? ' pp-rec' : '';
       const popMark = p.popular ? `<span class="pp-popular">${popLbl}</span>` : '';
       const credLbl = `${p.credits.toLocaleString(lang==='ru'?'ru-RU':'en-US')} ${({ru:'кредитов',en:'credits',es:'créditos',pt:'créditos',de:'Credits',fr:'crédits',uk:'кредитів',tr:'kredi',zh:'积分',ar:'رصيد'}[lang]||'credits')}`;
-      /* Mental anchor: single model — Sonnet 4.6 = 6 cr/msg. */
-      const msgsSonnet = Math.floor(p.credits/6);
+      /* Honest unit: stars per CREDIT (= stars/credits), not per message. */
+      const perCrLbl = ({ru:'/ кредит',en:'/ credit',es:'/ crédito',pt:'/ crédito',de:'/ Credit',fr:'/ crédit',uk:'/ кредит',tr:'/ kredi',zh:'/ 积分',ar:'/ رصيد'}[lang]||'/ credit');
       const usd = ` · ≈ $${_usdFromStars(p.stars)}`;
-      const rate = `<b>${p.perMsg.toFixed(2)} ⭐ ${({ru:'/ сообщение',en:'/ message',es:'/ mensaje',pt:'/ mensagem',de:'/ Nachricht',fr:'/ message',uk:'/ повідомлення',tr:'/ mesaj',zh:'/ 条消息',ar:'/ رسالة'}[lang]||'/ message')}</b>${usd}`;
-      const detail = lang==='ru'
-        ? `≈ ${msgsSonnet} ${({ru:'сообщений'}[lang]||'messages')} Sonnet 4.6`
-        : `≈ ${msgsSonnet} messages with Sonnet 4.6`;
-      return `<div class="prem-plan" onclick="selectPlan('${p.id}')">
+      const rate = `<b>${p.perCr.toFixed(2)} ⭐ ${perCrLbl}</b>${usd}`;
+      /* Anchor: estimated chat messages (model-agnostic; conservative avg). */
+      const msgs = Math.floor(p.credits/AVG_CR_PER_MSG);
+      const detail = ({ru:`≈ ${msgs} сообщений чата`,en:`≈ ${msgs} chat messages`,es:`≈ ${msgs} mensajes de chat`,pt:`≈ ${msgs} mensagens de chat`,de:`≈ ${msgs} Chat-Nachrichten`,fr:`≈ ${msgs} messages de chat`,uk:`≈ ${msgs} повідомлень чату`,tr:`≈ ${msgs} sohbet mesajı`,zh:`≈ ${msgs} 条聊天`,ar:`≈ ${msgs} رسالة دردشة`}[lang]||`≈ ${msgs} chat messages`);
+      return `<div class="prem-plan${recCls}">
         ${popMark}
         <div class="pp-row">
           <span class="pp-name">${credLbl}</span>
           <span class="pp-price">${_starsFmt(p.stars)}</span>
         </div>
         <div class="pp-meta">${rate}</div>
-        <div class="pp-meta" style="color:var(--t3)">${detail}</div>
+        <div class="pp-meta" style="color:var(--t1);font-weight:600">${detail}</div>
+        <button class="pp-cta${p.popular?' rec':''}" type="button" onclick="selectPlan('${p.id}')">${buyLbl} ${_starsFmt(p.stars)}</button>
       </div>`;
     }).join('');
   }
@@ -11804,9 +11844,31 @@ function openPremium(highlightFeature, initialTab){
   if(credLbl)credLbl.textContent=_credCopy().title;
   document.querySelectorAll('.prem-tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===_premTab));
 
-  if(title)title.textContent=_premTab==='platform'?_platCopy().title:_credCopy().title;
-  if(sub)sub.textContent=highlightFeature||(_premTab==='platform'?_platCopy().sub:_credCopy().sub);
+  /* Value-driven headline (credits = the default fast path). */
+  const credTitle=({ru:'ALEX готов помочь — выбери пакет',en:'ALEX is ready — pick a pack',es:'ALEX está listo — elige un paquete',pt:'ALEX está pronto — escolha um pacote',de:'ALEX ist bereit — wähle ein Paket',fr:'ALEX est prêt — choisis un pack',uk:'ALEX готовий — обери пакет',tr:'ALEX hazır — bir paket seç',zh:'ALEX 已就绪 — 选择套餐',ar:'ALEX جاهز — اختر باقة'}[lang]||'ALEX is ready — pick a pack');
+  const credSub=({ru:'Умный чат, голос и разбор ошибок — кредитами.',en:'Smart chat, voice and mistake review — paid in credits.',es:'Chat inteligente, voz y revisión de errores.',pt:'Chat inteligente, voz e revisão de erros.',de:'Smarter Chat, Sprache und Fehleranalyse.',fr:'Chat intelligent, voix et analyse des erreurs.',uk:'Розумний чат, голос і розбір помилок.',tr:'Akıllı sohbet, ses ve hata analizi.',zh:'智能聊天、语音和错误分析。',ar:'دردشة ذكية وصوت وتحليل الأخطاء.'}[lang]||'Smart chat, voice and mistake review.');
+  if(title)title.textContent=_premTab==='platform'?_platCopy().title:credTitle;
+  if(sub)sub.textContent=highlightFeature||(_premTab==='platform'?_platCopy().sub:credSub);
   if(free)free.textContent={ru:'Закрыть',en:'Close',es:'Cerrar',de:'Schliessen',fr:'Fermer',pt:'Fechar',uk:'Закрити',tr:'Kapat',zh:'关闭',ar:'إغلاق'}[lang]||'Close';
+
+  /* One high-trust line, always visible. */
+  const trust=document.getElementById('prem-trust');
+  if(trust){
+    if(_premTab==='credits'){
+      trust.style.display='flex';
+      trust.innerHTML='<svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'+({ru:'Кредиты не сгорают',en:'Credits never expire',es:'Los créditos no caducan',pt:'Os créditos não expiram',de:'Credits verfallen nie',fr:'Les crédits n\'expirent jamais',uk:'Кредити не згорають',tr:'Krediler süresiz',zh:'积分永不过期',ar:'الرصيد لا ينتهي'}[lang]||'Credits never expire');
+    } else { trust.style.display='none'; trust.innerHTML=''; }
+  }
+
+  /* Secondary cross-link to the other product. */
+  const sw=document.getElementById('prem-switch');
+  if(sw){
+    if(_premTab==='credits'){
+      sw.innerHTML=`<button type="button" onclick="switchPremTab('platform')">${({ru:'Нужен безлимит? → Подписка',en:'Need unlimited? → Subscription',es:'¿Sin límites? → Suscripción',pt:'Sem limites? → Assinatura',de:'Unbegrenzt? → Abo',fr:'Illimité ? → Abonnement',uk:'Потрібен безліміт? → Підписка',tr:'Sınırsız mı? → Abonelik',zh:'需要无限？→ 订阅',ar:'بلا حدود؟ → اشتراك'}[lang]||'Need unlimited? → Subscription')}</button>`;
+    } else {
+      sw.innerHTML=`<button type="button" onclick="switchPremTab('credits')">${({ru:'← Назад к кредитам ALEX',en:'← Back to ALEX credits',es:'← Volver a créditos',pt:'← Voltar aos créditos',de:'← Zurück zu Credits',fr:'← Retour aux crédits',uk:'← Назад до кредитів',tr:'← Kredilere dön',zh:'← 返回积分',ar:'← العودة إلى الرصيد'}[lang]||'← Back to ALEX credits')}</button>`;
+    }
+  }
 
   /* Status banner (proof line) — first thing the user sees under tabs. */
   const proof=document.getElementById('prem-proof');
@@ -11827,28 +11889,33 @@ function openPremium(highlightFeature, initialTab){
     proof.innerHTML = lines.join(' · ');
   }
 
-  /* Compact info table — what you get + per-message economics. */
+  /* Info area. Platform keeps the full "what's included" table; credits hides
+     the long economics under a "Details" disclosure (trust line stays above). */
   const infoHost=document.getElementById('prem-info');
   if(infoHost){
-    const copy = _premTab==='platform' ? _platCopy() : _credCopy();
-    const hLabel = _premTab==='platform'
-      ? ({ru:'Что входит',en:"What's included"}[lang]||"What's included")
-      : ({ru:'Сколько стоит сообщение',en:'Per-message price'}[lang]||'Per-message price');
-    const rowsHTML = copy.rows.map(r=>`<div class="row"><span>${safeHTML(r[0])}</span><span>${safeHTML(r[1])}</span></div>`).join('');
-    const econLabel={ru:'Экономика',en:'Economics'}[lang]||'Economics';
-    /* Tiny footer explaining the split + Stars-to-dollar reality. */
-    const splitFoot = _premTab==='platform'
-      ? `${copy.foot}<br>${({ru:'Lifetime окупает себя примерно за 17 месяцев подписки.',en:'Lifetime pays off after about 17 months of monthly billing.'}[lang]||'')}`
-      : `${copy.foot}<br>${({ru:'Курс цены примерный: 1 ⭐ ≈ $0.0145.',en:'Approximate USD value: 1 ⭐ ≈ $0.0145.'}[lang]||'')}`;
-    infoHost.innerHTML = `
-      <div class="prem-info-section">
-        <div class="prem-info-h">${hLabel}</div>
-        <div class="prem-info-list">${rowsHTML}</div>
-      </div>
-      <div class="prem-info-section">
-        <div class="prem-info-h">${econLabel}</div>
-        <div class="prem-info-foot">${splitFoot}</div>
-      </div>`;
+    if(_premTab==='platform'){
+      const copy=_platCopy();
+      const hLabel=({ru:'Что входит',en:"What's included"}[lang]||"What's included");
+      const rowsHTML=copy.rows.map(r=>`<div class="row"><span>${safeHTML(r[0])}</span><span>${safeHTML(r[1])}</span></div>`).join('');
+      const econLabel={ru:'Экономика',en:'Economics'}[lang]||'Economics';
+      const splitFoot=`${copy.foot}<br>${({ru:'Lifetime окупает себя примерно за 17 месяцев подписки.',en:'Lifetime pays off after about 17 months of monthly billing.'}[lang]||'')}`;
+      infoHost.innerHTML=`
+        <div class="prem-info-section">
+          <div class="prem-info-h">${hLabel}</div>
+          <div class="prem-info-list">${rowsHTML}</div>
+        </div>
+        <div class="prem-info-section">
+          <div class="prem-info-h">${econLabel}</div>
+          <div class="prem-info-foot">${splitFoot}</div>
+        </div>`;
+    } else {
+      const moreLbl=({ru:'Подробнее о кредитах',en:'About credits',es:'Sobre los créditos',pt:'Sobre os créditos',de:'Über Credits',fr:'À propos des crédits',uk:'Докладніше про кредити',tr:'Krediler hakkında',zh:'关于积分',ar:'حول الرصيد'}[lang]||'About credits');
+      const body=({
+        ru:'Кредиты списываются по реальному расходу токенов. Обычный чат идёт на быстрой модели (≈1–2 кр), разбор грамматики и экзамены — на более умной. Голос +5 кр (озвучка и распознавание). Цена в $ примерная: 1 ⭐ ≈ $0.0145.',
+        en:'Credits are charged by real token usage. Normal chat runs on a fast model (≈1–2 cr); grammar review and exams use a smarter one. Voice +5 cr (speech in & out). USD value is approximate: 1 ⭐ ≈ $0.0145.'
+      }[lang]||'Credits are charged by real token usage. Normal chat ≈1–2 cr; grammar/exams cost more. Voice +5 cr. 1 ⭐ ≈ $0.0145.');
+      infoHost.innerHTML=`<details class="prem-econ"><summary>${moreLbl}</summary><div class="prem-econ-body">${body}</div></details>`;
+    }
   }
 
   renderPremPlans();

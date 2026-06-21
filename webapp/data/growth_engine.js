@@ -39,12 +39,29 @@
   }
   function rng(seed){return function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
   function css(el,k,fb){return (getComputedStyle(el).getPropertyValue(k)||fb).trim()||fb}
+  /* ── Stage colour ramp ─────────────────────────────────────────
+     Progress should read as colour, not a flat blue blueprint. The
+     foliage hue walks the life cycle:
+       1 Seedling · 2 Sprout  → fresh green
+       3 Bud                  → blue (a closed bud about to open)
+       4 Bloom                → teal-green stem (petals stay pink/gold)
+       5 Bush · 6 Sapling     → blue-green → blue
+       7 Tree · 8 Grand Tree  → saturated green → vivid teal
+     We interpolate between the anchors using the float stage so the
+     colour drifts smoothly as XP climbs. */
+  var STAGE_HEX=['#5fce72','#54c98a','#4f9bf0','#3fb89a','#34b0a8','#3aa0d8','#2fc55f','#1fd6a0'];
+  function hx(h){h=String(h).replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+  function mix(a,b,t){var x=hx(a),y=hx(b);return'rgb('+Math.round(lerp(x[0],y[0],t))+','+Math.round(lerp(x[1],y[1],t))+','+Math.round(lerp(x[2],y[2],t))+')'}
+  function stageHue(sf){var s=clamp(Math.floor(sf),1,8),p=clamp(sf-s,0,1);return mix(STAGE_HEX[s-1],STAGE_HEX[Math.min(7,s)],p)}
 
   function Engine(container,opt){
     opt=opt||{};this.c=container;this.stage=clamp(opt.stage||1,1,8);this.targetStage=this.stage;
     this.xp=opt.xp||0;this.maxXp=opt.maxXp||100;this.mood=opt.mood||'fresh';this.prevMood=this.mood;
     this.moodBlend=1;this.onTap=opt.onTap;this.rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.a=css(container,'--a','#4f8aff');this.t=css(container,'--t1','#eef2ff');
+    /* Foliage colour (set per-frame in draw via stageHue) + a warm
+       fruit tone so berries pop against green/teal leaves. */
+    this.fol=stageHue(this.stage);this.fruitCol='#ffb454';
     this.cv=document.createElement('canvas');this.cv.setAttribute('role','img');this.cv.style.cssText='width:100%;height:100%;display:block;pointer-events:none';
     this.ctx=this.cv.getContext('2d');container.innerHTML='';container.appendChild(this.cv);
     this.w=this.h=1;this.base=1;this.br=[];this.leaves=[];this.fruit=[];this.fallen=[];this.puffs=[];this.parts=[];
@@ -111,22 +128,24 @@
   Engine.prototype.buildYoung=function(sf){
     var H=this.h, x=this.w*.5, b=this.base, r=rng(this.seed), h;
     this.dirt=[[-18,2],[0,-1],[16,1]].map(function(d){return{x:x+d[0],y:b+d[1],r:1+r()*1.3}});
-    if(sf<1.8){h=H*(.08+.04*(sf-1));this.branch(x,b,x+r()*4-2,b-h,2,1);this.addLeaf(x-4,b-h*.55,-2.75,H*.043,H*.015,1);this.addLeaf(x+4,b-h*.55,-.38,H*.043,H*.015,2);return}
-    if(sf<2.8){h=H*(.22+.08*(sf-2));this.branch(x,b,x+2,b-h,2.2,1);
-      for(var i=0;i<5;i++){var yy=b-h*(.25+i*.15),side=i%2?-1:1;this.addLeaf(x+side*4,yy,side<0?Math.PI+.45:-.45,H*.05,H*.014,i)}
+    /* Young stages are scaled up to fill the stage box — a seedling that
+       only occupied ~10% of the frame read as broken empty padding. */
+    if(sf<1.8){h=H*(.30+.12*(sf-1));this.branch(x,b,x+r()*4-2,b-h,2.2,1);this.addLeaf(x-4,b-h*.55,-2.75,H*.07,H*.024,1);this.addLeaf(x+4,b-h*.55,-.38,H*.07,H*.024,2);return}
+    if(sf<2.8){h=H*(.46+.12*(sf-2));this.branch(x,b,x+2,b-h,2.4,1);
+      for(var i=0;i<5;i++){var yy=b-h*(.25+i*.15),side=i%2?-1:1;this.addLeaf(x+side*4,yy,side<0?Math.PI+.45:-.45,H*.07,H*.02,i)}
       return}
-    if(sf<3.8){h=H*.39;this.branch(x,b,x,b-h,2.4,1);this.addLeaf(x-9,b-h*.35,Math.PI+.35,H*.058,H*.016,3);this.addLeaf(x+9,b-h*.35,-.35,H*.058,H*.016,4);
-      this.addLeaf(x-7,b-h*.58,Math.PI+.55,H*.05,H*.014,5);this.addLeaf(x+7,b-h*.58,-.55,H*.05,H*.014,6);
-      this.bud={x:x,y:b-h,r:H*.035};return}
-    h=H*.42;this.branch(x,b,x,b-h,2.6,1);this.addLeaf(x-10,b-h*.35,Math.PI+.35,H*.06,H*.017,7);this.addLeaf(x+10,b-h*.35,-.35,H*.06,H*.017,8);
-    this.addLeaf(x-8,b-h*.55,Math.PI+.55,H*.052,H*.015,9);this.addLeaf(x+8,b-h*.55,-.55,H*.052,H*.015,10);this.flower={x:x,y:b-h,r:H*.055};
+    if(sf<3.8){h=H*.62;this.branch(x,b,x,b-h,2.6,1);this.addLeaf(x-9,b-h*.35,Math.PI+.35,H*.078,H*.022,3);this.addLeaf(x+9,b-h*.35,-.35,H*.078,H*.022,4);
+      this.addLeaf(x-7,b-h*.58,Math.PI+.55,H*.066,H*.019,5);this.addLeaf(x+7,b-h*.58,-.55,H*.066,H*.019,6);
+      this.bud={x:x,y:b-h,r:H*.05};return}
+    h=H*.66;this.branch(x,b,x,b-h,2.8,1);this.addLeaf(x-10,b-h*.35,Math.PI+.35,H*.08,H*.023,7);this.addLeaf(x+10,b-h*.35,-.35,H*.08,H*.023,8);
+    this.addLeaf(x-8,b-h*.55,Math.PI+.55,H*.07,H*.02,9);this.addLeaf(x+8,b-h*.55,-.55,H*.07,H*.02,10);this.flower={x:x,y:b-h,r:H*.08};
   };
 
   Engine.prototype.buildTree=function(sf){
     var H=this.h,W=this.w,x=W*.5,b=this.base,st=clamp(sf,5,8),depth=Math.round(lerp(3,6,(st-5)/3)),rr=rng(this.seed);
-    var trunk=lerp(H*.16,H*.32,(st-5)/3), baseW=lerp(7,W*.15,(st-5)/3), topW=lerp(3,7,(st-5)/3);
+    var trunk=lerp(H*.20,H*.34,(st-5)/3), baseW=lerp(7,W*.15,(st-5)/3), topW=lerp(3,7,(st-5)/3);
     this.branch(x,b,x,b-trunk,baseW,2);this.branch(x-baseW*.35,b,x-3,b-trunk*.38,baseW*.45,5);this.branch(x+baseW*.35,b,x+3,b-trunk*.38,baseW*.45,6);
-    var self=this, tipY=b-trunk, scale=lerp(H*.095,H*.18,(st-5)/3), spread=lerp(.72,.78,(st-5)/3);
+    var self=this, tipY=b-trunk, scale=lerp(H*.11,H*.19,(st-5)/3), spread=lerp(.72,.78,(st-5)/3);
     function rec(x,y,len,ang,w,d,seed,side){
       if(d<=0||len<5){self.addLeaf(x,y,ang,len*.33,H*.012,seed);return}
       var nx=x+Math.cos(ang)*len, ny=y+Math.sin(ang)*len, sway=(rr()-.5)*.28, a1=ang-(.48+rr()*.18)*side+sway, a2=ang+(.34+rr()*.22)*side-sway*.4;
@@ -174,6 +193,7 @@
 
   Engine.prototype.draw=function(t){
     var c=this.ctx,W=this.w,H=this.h,b=this.base,sf=this.stageFloat();c.clearRect(0,0,W,H);c.lineCap='round';c.lineJoin='round';
+    this.fol=stageHue(sf);
     this.drawAtmosphere(c,t);
     c.strokeStyle=this.t;c.fillStyle=this.t;c.globalAlpha=.32;c.beginPath();c.moveTo(W*.16,b);c.quadraticCurveTo(W*.5,b-5,W*.84,b);c.stroke();c.globalAlpha=1;
     this.drawWeatherBack(c,t);
@@ -231,7 +251,10 @@
   Engine.prototype.drawRoots=function(c){if(!this.roots)return;c.strokeStyle=this.t;c.globalAlpha=.55;for(var i=0;i<this.roots.length;i++){var r=this.roots[i];this.taper(c,r[0],r[1],r[2],r[3],3,1.2)}c.globalAlpha=1};
   Engine.prototype.taper=function(c,x1,y1,x2,y2,w1,w2){var n=7;for(var i=0;i<n;i++){var a=i/n,b=(i+1)/n;c.lineWidth=lerp(w1,w2,a);c.beginPath();c.moveTo(lerp(x1,x2,a),lerp(y1,y2,a));c.lineTo(lerp(x1,x2,b),lerp(y1,y2,b));c.stroke()}};
   Engine.prototype.drawBranches=function(c,t){
-    c.strokeStyle=this.t;for(var i=0;i<this.br.length;i++){var b=this.br[i],n=noise(b.x2*.01,b.y2*.01,t*.22)*.9,amp=(MOOD[this.mood]||MOOD.fresh)[0],dx=n*amp*10*(1-b.w/18);
+    /* Young plants (≤ Bloom) are mostly stem, so tint the stem with the
+       stage colour; mature trees keep a neutral woody outline so the
+       coloured canopy reads against it. */
+    c.strokeStyle=this.stageFloat()<4.7?this.fol:this.t;for(var i=0;i<this.br.length;i++){var b=this.br[i],n=noise(b.x2*.01,b.y2*.01,t*.22)*.9,amp=(MOOD[this.mood]||MOOD.fresh)[0],dx=n*amp*10*(1-b.w/18);
       this.taper(c,b.x1,b.y1,b.x2+dx,b.y2,b.w,b.w*.35);if(this.stageFloat()>=7&&b.w>4){c.globalAlpha=.26;c.lineWidth=1;c.beginPath();c.moveTo(lerp(b.x1,b.x2,.45)+2,b.y1+(b.y2-b.y1)*.45);c.lineTo(lerp(b.x1,b.x2,.45)-3,b.y1+(b.y2-b.y1)*.45+5);c.stroke();c.globalAlpha=1}}
   };
   Engine.prototype.drawLeaf=function(c,L,t){
@@ -241,17 +264,17 @@
        then a single vein. Keeps the minimal grammar but stops the
        leaves from looking like wireframes. */
     c.beginPath();c.moveTo(0,0);c.bezierCurveTo(len*.35,-w,len*.72,-w,len,0);c.bezierCurveTo(len*.72,w,len*.35,w,0,0);
-    c.fillStyle=this.t;c.globalAlpha=.16;c.fill();
-    c.strokeStyle=this.t;c.globalAlpha=.82;c.lineWidth=1.1;c.stroke();
-    c.globalAlpha=.34;c.lineWidth=.9;c.beginPath();c.moveTo(0,0);c.lineTo(len*.86,0);c.stroke();
+    c.fillStyle=this.fol;c.globalAlpha=.22;c.fill();
+    c.strokeStyle=this.fol;c.globalAlpha=.9;c.lineWidth=1.1;c.stroke();
+    c.globalAlpha=.4;c.lineWidth=.9;c.beginPath();c.moveTo(0,0);c.lineTo(len*.86,0);c.stroke();
     c.restore();c.globalAlpha=1;
   };
   Engine.prototype.drawLeaves=function(c,t){for(var i=0;i<this.leaves.length;i++)this.drawLeaf(c,this.leaves[i],t)};
-  Engine.prototype.drawFruit=function(c,t){c.fillStyle=this.a;for(var i=0;i<this.fruit.length;i++){var f=this.fruit[i];if(f.hide>0)continue;c.globalAlpha=.86*f.grow;c.beginPath();c.arc(f.x,f.y,f.r*f.grow,0,TWO);c.fill()}c.globalAlpha=1};
+  Engine.prototype.drawFruit=function(c,t){c.fillStyle=this.fruitCol;for(var i=0;i<this.fruit.length;i++){var f=this.fruit[i];if(f.hide>0)continue;c.globalAlpha=.9*f.grow;c.beginPath();c.arc(f.x,f.y,f.r*f.grow,0,TWO);c.fill()}c.globalAlpha=1};
   Engine.prototype.drawYoungExtras=function(c,sf,t){
-    if(this.bud){var b=this.bud;c.strokeStyle=this.t;c.globalAlpha=.82;c.beginPath();c.moveTo(b.x,b.y+b.r);c.bezierCurveTo(b.x-b.r,b.y,b.x-b.r*.4,b.y-b.r,b.x,b.y-b.r*1.2);c.bezierCurveTo(b.x+b.r*.4,b.y-b.r,b.x+b.r,b.y,b.x,b.y+b.r);c.stroke();c.globalAlpha=.18;c.fillStyle=this.a;c.fill();c.globalAlpha=1}
-    if(this.flower){var f=this.flower;c.strokeStyle=this.a;c.fillStyle=this.a;for(var i=0;i<5;i++){var a=-Math.PI/2+i*TWO/5;c.globalAlpha=.22;c.beginPath();c.ellipse(f.x+Math.cos(a)*f.r*.45,f.y+Math.sin(a)*f.r*.45,f.r*.48,f.r*.23,a,0,TWO);c.fill();c.globalAlpha=.85;c.stroke()}c.globalAlpha=.9;c.beginPath();c.arc(f.x,f.y,f.r*.15,0,TWO);c.fill();c.strokeStyle=this.t;c.globalAlpha=.45;for(i=0;i<7;i++){a=i*TWO/7;c.beginPath();c.moveTo(f.x,f.y);c.lineTo(f.x+Math.cos(a)*f.r*.42,f.y+Math.sin(a)*f.r*.42);c.stroke()}c.globalAlpha=1}
-    if(sf>=8){c.fillStyle=this.a;for(i=0;i<5;i++){c.globalAlpha=.35+.28*Math.sin(t*2+i);c.beginPath();c.arc(this.w*(.28+i*.11),this.h*(.1+.035*(i%2)),1.4,0,TWO);c.fill()}c.globalAlpha=1}
+    if(this.bud){var b=this.bud;c.strokeStyle=this.fol;c.globalAlpha=.88;c.beginPath();c.moveTo(b.x,b.y+b.r);c.bezierCurveTo(b.x-b.r,b.y,b.x-b.r*.4,b.y-b.r,b.x,b.y-b.r*1.2);c.bezierCurveTo(b.x+b.r*.4,b.y-b.r,b.x+b.r,b.y,b.x,b.y+b.r);c.stroke();c.globalAlpha=.2;c.fillStyle=this.fol;c.fill();c.globalAlpha=1}
+    if(this.flower){var f=this.flower,PET='#ff6fb5',CTR='#ffce4d';c.strokeStyle=PET;c.fillStyle=PET;for(var i=0;i<5;i++){var a=-Math.PI/2+i*TWO/5;c.globalAlpha=.26;c.beginPath();c.ellipse(f.x+Math.cos(a)*f.r*.45,f.y+Math.sin(a)*f.r*.45,f.r*.48,f.r*.23,a,0,TWO);c.fill();c.globalAlpha=.9;c.stroke()}c.globalAlpha=1;c.fillStyle=CTR;c.beginPath();c.arc(f.x,f.y,f.r*.18,0,TWO);c.fill();c.strokeStyle=CTR;c.globalAlpha=.5;for(i=0;i<7;i++){a=i*TWO/7;c.beginPath();c.moveTo(f.x,f.y);c.lineTo(f.x+Math.cos(a)*f.r*.42,f.y+Math.sin(a)*f.r*.42);c.stroke()}c.globalAlpha=1}
+    if(sf>=8){c.fillStyle=this.fol;for(i=0;i<5;i++){c.globalAlpha=.35+.28*Math.sin(t*2+i);c.beginPath();c.arc(this.w*(.28+i*.11),this.h*(.1+.035*(i%2)),1.4,0,TWO);c.fill()}c.globalAlpha=1}
   };
   Engine.prototype.drawWeatherBack=function(c,t){
     if(this.mood==='rainy'){c.strokeStyle='rgba(150,170,200,.42)';c.lineWidth=1.2;c.beginPath();c.arc(this.w*.34+Math.sin(t*.45)*5,this.h*.16,18,Math.PI,TWO);c.arc(this.w*.48+Math.sin(t*.45)*5,this.h*.13,25,Math.PI,TWO);c.arc(this.w*.64+Math.sin(t*.45)*5,this.h*.17,18,Math.PI,TWO);c.stroke()}

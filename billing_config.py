@@ -19,6 +19,8 @@ Money model (all amounts in *credits* unless noted):
                              their prepaid credits). Separate pool.
 """
 
+from __future__ import annotations
+
 import os
 import json
 import time
@@ -36,6 +38,15 @@ _DEFAULTS = {
     "TOKENS_PER_CREDIT": 1000,
     "MARKUP": 0.6,
     "PLATFORM_FEE": 0.30,
+    # Real money the owner RECEIVES on withdrawal per 1 Telegram Star, AFTER
+    # Telegram's commission — NOT the ~$0.0145 retail price a user pays. Margin
+    # and admin revenue are computed from THIS so the numbers reflect payout
+    # reality, not the sticker price. Owner can refine without a deploy.
+    "STAR_PAYOUT_USD": 0.013,
+    # Blended selling rate across the credit packs (stars charged per credit).
+    # Used only to estimate owner revenue in the admin panel from credits sold.
+    # Packs: 149⭐/100, 599⭐/500, 1990⭐/2000 → ≈1.0–1.49 ⭐/cr, blended ~1.2.
+    "SELL_STARS_PER_CREDIT": 1.2,
     # Which logical model each chat mode runs on. Plain conversation → cheap
     # Haiku; graded / exam / grammar work → Sonnet. Owner-overridable.
     "MODEL_BY_MODE": {
@@ -71,6 +82,8 @@ _ENV_SCALARS = {
     "BILLING_TOKENS_PER_CREDIT": ("TOKENS_PER_CREDIT", int),
     "BILLING_MARKUP": ("MARKUP", float),
     "BILLING_PLATFORM_FEE": ("PLATFORM_FEE", float),
+    "BILLING_STAR_PAYOUT_USD": ("STAR_PAYOUT_USD", float),
+    "BILLING_SELL_STARS_PER_CREDIT": ("SELL_STARS_PER_CREDIT", float),
     "BILLING_MAX_TOKENS_PER_REPLY": ("MAX_TOKENS_PER_REPLY", int),
     "BILLING_MAX_INPUT_TOKENS": ("MAX_INPUT_TOKENS", int),
     "BILLING_VOICE_SURCHARGE_CREDITS": ("VOICE_SURCHARGE_CREDITS", int),
@@ -194,7 +207,19 @@ def price_per_credit(cfg: dict, model: str = "sonnet") -> float:
     return (cpc / (1.0 - markup)) / (1.0 - fee)
 
 
-def stars_per_credit(cfg: dict, model: str = "sonnet", usd_per_star: float = 0.013) -> float:
-    """Convert price_per_credit (USD) into Telegram Stars. usd_per_star is the
-    approximate payout value of 1 Star (~$0.013). Owner can refine."""
+def stars_per_credit(cfg: dict, model: str = "sonnet", usd_per_star: float | None = None) -> float:
+    """Convert price_per_credit (USD) into Telegram Stars. usd_per_star defaults
+    to the configured STAR_PAYOUT_USD (real per-star payout). Owner can refine."""
+    if usd_per_star is None:
+        usd_per_star = float(cfg.get("STAR_PAYOUT_USD", 0.013))
     return price_per_credit(cfg, model) / max(1e-6, usd_per_star)
+
+
+def owner_revenue_usd(cfg: dict, credits_sold: int) -> float:
+    """Real USD the owner nets from selling `credits_sold` credits, based on the
+    blended pack rate (stars/credit) and the configured per-star PAYOUT (after
+    Telegram's cut) — not the retail sticker price. This is the number the admin
+    margin is measured against."""
+    sell_rate = float(cfg.get("SELL_STARS_PER_CREDIT", 1.2))
+    payout = float(cfg.get("STAR_PAYOUT_USD", 0.013))
+    return max(0, int(credits_sold)) * sell_rate * payout

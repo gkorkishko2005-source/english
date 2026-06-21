@@ -1196,7 +1196,7 @@ async def handle_admin_stats(request):
     # Revenue/cost/margin for today + heaviest token users + budget alerts.
     billing = {}
     try:
-        from billing_config import load_config, price_per_credit
+        from billing_config import load_config, price_per_credit, owner_revenue_usd
         from database import (usage_today_cost_global, usage_today_credits_charged,
                               ledger_topups_today_credits, top_token_users_today,
                               user_cost_vs_revenue_today)
@@ -1204,9 +1204,10 @@ async def handle_admin_stats(request):
         cost_usd = await usage_today_cost_global()
         topup_credits = await ledger_topups_today_credits()
         charged_credits = await usage_today_credits_charged()
-        # Revenue proxy: credits sold today × USD price per credit (after fee/markup).
-        ppc = price_per_credit(bcfg, "sonnet")
-        revenue_usd = round(topup_credits * ppc, 4)
+        # Real owner revenue: credits sold × blended pack rate × per-star PAYOUT
+        # (after Telegram's cut) — measured against actual Anthropic spend.
+        ppc = price_per_credit(bcfg, "haiku")  # credits priced at Haiku economics
+        revenue_usd = round(owner_revenue_usd(bcfg, topup_credits), 4)
         margin_usd = round(revenue_usd - cost_usd, 4)
         margin_pct = round((margin_usd / revenue_usd * 100.0), 1) if revenue_usd > 0 else None
         budget = float(bcfg.get("GLOBAL_DAILY_BUDGET_USD", 25.0))
@@ -1218,7 +1219,7 @@ async def handle_admin_stats(request):
         # Flag users whose Anthropic cost today exceeds their top-up revenue.
         try:
             for row in await user_cost_vs_revenue_today(20):
-                rev = round(row["topup_credits"] * ppc, 4)
+                rev = round(owner_revenue_usd(bcfg, row["topup_credits"]), 4)
                 if row["cost_usd"] > rev and row["cost_usd"] >= 0.01:
                     alerts.append({"type": "user_unprofitable", "level": "warn", "uid": row["uid"],
                                    "msg": f"uid {row['uid']}: cost ${row['cost_usd']:.2f} > revenue ${rev:.2f}"})
