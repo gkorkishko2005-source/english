@@ -9169,13 +9169,26 @@ function _courseUpdateStepbar(id){
   const prev=document.getElementById('course-nav-prev-'+id);
   const next=document.getElementById('course-nav-next-'+id);
   if(prev)prev.disabled=(i<=0);
-  if(next)next.disabled=(i>=total-1);
+  /* On the last step "Дальше" has no next stage — relabel to "Завершить"
+     and keep it enabled so it scrolls the learner to the summary card. */
+  if(next){
+    const last=(i>=total-1);
+    next.disabled=false;
+    const lbl=next.querySelector('span')||next;
+    lbl.textContent=last
+      ?({ru:'Завершить',en:'Finish',es:'Finalizar',pt:'Concluir',de:'Abschließen',fr:'Terminer',uk:'Завершити',tr:'Bitir',zh:'完成',ar:'إنهاء'}[lang]||'Finish')
+      :({ru:'Дальше',en:'Next',es:'Siguiente',pt:'Próximo',de:'Weiter',fr:'Suivant',uk:'Далі',tr:'İleri',zh:'下一步',ar:'التالي'}[lang]||'Next');
+  }
 }
 function courseStepNav(id,dir){
   const stages=_courseStageEls();if(!stages.length)return;
   let i=stages.findIndex(el=>el.classList.contains('active'));if(i<0)i=0;
   const ni=Math.min(stages.length-1,Math.max(0,i+dir));
-  if(ni===i)return;
+  if(ni===i){
+    /* Already on the last step: "Завершить" scrolls to the summary card. */
+    if(dir>0){const c=document.getElementById('course-complete-'+id);if(c&&c.scrollIntoView)try{c.scrollIntoView({behavior:'smooth',block:'center'});}catch(_){c.scrollIntoView();}}
+    return;
+  }
   openCourseStage(id,stages[ni].dataset.courseStage);
 }
 function refreshCourseStageList(id){
