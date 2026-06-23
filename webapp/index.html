@@ -962,23 +962,37 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .dwarr:disabled{opacity:.25;cursor:default}
 
 /* Flashcard */
-.fcs{perspective:900px;height:236px;cursor:pointer;margin-bottom:13px;overflow:hidden;user-select:none}
+.fcs{perspective:1000px;height:236px;cursor:pointer;margin-bottom:13px;overflow:hidden;user-select:none}
 .fci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
 @keyframes wcardIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 .fci.flip{transform:rotateY(180deg)}
-.fcf{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
-.fcfr{background:linear-gradient(145deg,var(--e1),rgba(var(--ar),.035));border:1px solid var(--b2);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden}
+/* Glassmorphism faces: translucent (~0.85) + backdrop blur for depth */
+.fcf{position:absolute;inset:0;backface-visibility:hidden;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+/* 1px gradient inner border (0.1 → 0 white) — soft glowing edge */
+.fcf::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(150deg,rgba(255,255,255,.1),rgba(255,255,255,0) 55%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1}
+.fcfr{background:linear-gradient(145deg,color-mix(in srgb,var(--e1) 85%,transparent),color-mix(in srgb,var(--e2) 80%,transparent));border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.28);overflow:hidden}
 .fcfr::after{content:'';position:absolute;right:-42px;top:-42px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.16),transparent 68%);pointer-events:none}
-.fcbk{background:linear-gradient(145deg,rgba(var(--ar),.12),rgba(0,212,170,.06));border:1px solid rgba(var(--ar),.2);transform:rotateY(180deg);box-shadow:0 4px 24px rgba(0,0,0,.15);overflow:hidden}
+.fcbk{background:linear-gradient(145deg,rgba(var(--ar),.13),rgba(0,212,170,.07));border:1px solid rgba(255,255,255,.05);transform:rotateY(180deg);box-shadow:0 8px 30px rgba(0,0,0,.28);overflow:hidden}
 .fcbk::after{content:'';position:absolute;left:-44px;bottom:-54px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,170,.13),transparent 68%);pointer-events:none}
+/* One-shot light glint sweeping the contour on each new card (600ms) */
+.fc-sheen{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;z-index:2;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.16) 50%,transparent 68%);transform:translateX(-120%)}
+.fcs.fc-shine .fc-sheen{animation:fcSheen .6s ease-out 1}
+@keyframes fcSheen{0%{opacity:0;transform:translateX(-120%)}18%{opacity:1}100%{opacity:0;transform:translateX(120%)}}
 .fcbg{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:11px}
 .fcw{font-size:clamp(17px,5vw,24px);font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:8px;word-break:break-word;max-width:100%}
+/* "Example" peek button under the word */
+.fc-eye{margin:0 0 8px;display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;border:1px solid rgba(var(--ar),.22);background:rgba(var(--ar),.08);color:var(--a);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.fc-eye:active{transform:scale(.94);background:rgba(var(--ar),.16)}
+.fc-eye svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
 .fcp{font-size:13px;color:var(--a);margin-bottom:7px;font-weight:700}
 .fctr{font-size:21px;font-weight:700;color:var(--a);margin-bottom:8px}
 .fcex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.5;max-width:95%}
-.fch{position:absolute;bottom:10px;font-size:10.5px;color:var(--t2);opacity:.92;letter-spacing:.2px;font-weight:600}
-.fcmeta{display:flex;gap:6px;position:absolute;top:13px;left:13px;z-index:2}
-.fcmeta span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.55px;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);border-radius:100px;padding:3px 7px}
+/* Flip hint: pulsing two-arrow icon instead of text */
+.fch{position:absolute;bottom:9px;color:var(--a);opacity:.9;display:flex;align-items:center;justify-content:center}
+.fch svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:fcFlipPulse 1.8s ease-in-out infinite}
+@keyframes fcFlipPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.14)}}
+.fcmeta{display:flex;gap:6px;position:absolute;top:13px;left:13px;z-index:3}
+.fcmeta span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.55px;color:var(--a);background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);border-radius:100px;padding:3px 7px;transition:box-shadow .25s,border-color .25s,color .25s}
 .fcuse{margin-top:10px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.08);border:1px solid rgba(var(--ar),.09);font-size:11px;color:var(--t2);line-height:1.35;max-width:96%}
 .fc-help{background:var(--e1);border:1px solid rgba(var(--ar),.18);border-radius:var(--r);padding:13px;margin-bottom:12px;box-shadow:0 8px 22px rgba(0,0,0,.08)}
 .fc-help-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
@@ -2606,7 +2620,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
       <div class="fcs" id="fcs" onclick="flipCard()">
         <div class="fci" id="fci">
-          <div class="fcf fcfr"><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint"></div></div>
+          <div class="fcf fcfr"><span class="fc-sheen" aria-hidden="true"></span><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><button class="fc-eye" id="fc-eye" type="button" onclick="event.stopPropagation();showCardExample()" aria-label="Example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span id="fc-eye-lbl">Example</span></button><div class="fcp" id="fcph"></div><div class="fch" id="fchint" aria-label="Flip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div></div>
           <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div><div class="fcuse" id="fcuse"></div></div>
         </div>
       </div>
@@ -3417,7 +3431,8 @@ function applyLang(){
   // Learn
   updateLearnHeader();
   document.getElementById('rev-lbl').textContent=L.rev;
-  document.getElementById('fchint').textContent=L.tap_flip+' ↕';
+  var _fh=document.getElementById('fchint');if(_fh)_fh.setAttribute('aria-label',L.tap_flip);
+  var _fe=document.getElementById('fc-eye-lbl');if(_fe)_fe.textContent=({ru:'Пример',en:'Example',es:'Ejemplo',pt:'Exemplo',de:'Beispiel',fr:'Exemple',uk:'Приклад',tr:'Örnek',zh:'例句',ar:'مثال'}[lang]||'Example');
   document.getElementById('fcbg2').textContent=L.translation;
   document.getElementById('rb1l').textContent=L.again;document.getElementById('rb2l').textContent=L.hard;
   document.getElementById('rb3l').textContent=L.good;document.getElementById('rb4l').textContent=L.easy;
@@ -6815,14 +6830,25 @@ function showCard(i){
   document.getElementById('fcph').textContent=c.phonetic||'';
   document.getElementById('fctr2').textContent=c.translation||'';
   document.getElementById('fcex').textContent=c.example||'';
-  const lvl=document.getElementById('fclevel');if(lvl){lvl.textContent=c.level||'B1';const lc=levelColor(c.level||'B1');lvl.style.color=lc;if(lc.charAt(0)==='#'){lvl.style.background=lc+'1a';lvl.style.borderColor=lc+'2e';}}
-  const topic=document.getElementById('fctopic');if(topic)topic.textContent=c.topic||'Core';
+  const lc=levelColor(c.level||'B1');const isHex=lc.charAt(0)==='#';
+  const lvl=document.getElementById('fclevel');if(lvl){lvl.textContent=c.level||'B1';lvl.style.color=lc;if(isHex){lvl.style.background=lc+'1a';lvl.style.borderColor=lc+'2e';lvl.style.boxShadow='0 0 12px '+lc+'44';}}
+  const topic=document.getElementById('fctopic');if(topic){topic.textContent=c.topic||'Core';if(isHex)topic.style.boxShadow='0 0 10px '+lc+'30';}
+  // One-shot contour glint on every new card
+  const fcs=document.getElementById('fcs');if(fcs){fcs.classList.remove('fc-shine');void fcs.offsetWidth;fcs.classList.add('fc-shine');}
   const use=document.getElementById('fcuse');if(use)use.textContent=(({ru:'Используй в контексте: ',en:'Use in context: ',es:'Úsalo en contexto: ',pt:'Use no contexto: ',de:'Im Kontext verwenden: ',fr:'Utilise en contexte : ',uk:'Вживай у контексті: ',tr:'Bağlamda kullan: ',zh:'在语境中使用：',ar:'استخدمها في سياق: '}[lang]||'Use in context: '))+(c.word||'');
   document.getElementById('fctr').textContent=`${i+1} / ${cards.length}`;
   document.getElementById('pfill').style.width=(i/cards.length*100)+'%';
   document.getElementById('rrow').classList.add('hid');
 }
 function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');try{sfx.flip();}catch(e){}}
+/* "Example" eye button: brief toast with a sentence using the current word. */
+function showCardExample(){
+  const c=cards[cIdx];if(!c)return;
+  let ex=(c.example||'').trim();
+  if(!ex){const w=c.word||'';ex=w?`I use "${w}" in a sentence.`:'';}
+  if(ex)toast(ex,'👁');
+  try{haptic('light');}catch(e){}
+}
 function cardHelpExamples(c){
   const w=c.word||'word';
   const ex=(c.example||'').trim();
