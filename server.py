@@ -804,6 +804,36 @@ async def handle_set_reminder(request):
             logger.warning(f"set_reminder failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
+# ── COMPLETE DAY (server-authoritative streak) ─────────────────────────────────
+async def handle_complete_day(request):
+    """Count today's streak on the SERVER. The day boundary is computed from
+    server UTC + the user's timezone offset, so the reminder time / device
+    clock cannot inflate the streak. Bumps at most once per server-day."""
+    if request.method == "OPTIONS":
+        return web.json_response({"ok":True},headers={
+            "Access-Control-Allow-Origin":"*",
+            "Access-Control-Allow-Methods":"POST, OPTIONS",
+            "Access-Control-Allow-Headers":"Content-Type"})
+    try:
+        body = await request.json()
+        uid = int(body.get("uid",0) or 0)
+        tz = int(body.get("tz_offset_min",0) or 0)
+    except Exception:
+        return web.json_response({"ok":False},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    if not uid:
+        return web.json_response({"ok":False},headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import complete_day, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        res = await complete_day(uid, tz)
+        return web.json_response({"ok":True, **res},headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"complete_day error uid={uid}: {e}")
+        return web.json_response({"ok":False},headers={"Access-Control-Allow-Origin":"*"})
+
 # ── AUDIO TASK ────────────────────────────────────────────────────────────────
 async def handle_audio_task(request):
     try:
@@ -1150,11 +1180,14 @@ async def handle_sync_stats(request):
         words = int(body.get("words",0))
         tests = int(body.get("tests",0))
         errors = int(body.get("errors",0))
-        streak = int(body.get("streak",0))
         level = body.get("level","B1")
-        # Update with GREATEST to never decrease
+        # Update with GREATEST to never decrease. NOTE: streak and last_active
+        # are deliberately NOT written here — they are owned exclusively by the
+        # server-authoritative /api/complete_day endpoint. Letting the client
+        # push a streak (or stamp last_active=today on every sync) is exactly
+        # what allowed the reminder/clock streak-inflation exploit.
         try:
-            await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),?), sessions=GREATEST(COALESCE(sessions,0),?), words=GREATEST(COALESCE(words,0),?), tests=GREATEST(COALESCE(tests,0),?), mistakes=GREATEST(COALESCE(mistakes,0),?), streak=GREATEST(COALESCE(streak,0),?), level=?, last_active=CURRENT_DATE WHERE uid=?", xp, sessions, words, tests, errors, streak, level, uid)
+            await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),?), sessions=GREATEST(COALESCE(sessions,0),?), words=GREATEST(COALESCE(words,0),?), tests=GREATEST(COALESCE(tests,0),?), mistakes=GREATEST(COALESCE(mistakes,0),?), level=? WHERE uid=?", xp, sessions, words, tests, errors, level, uid)
         except Exception as e:
             logger.debug(f"sync update: {e}")
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
@@ -1261,6 +1294,8 @@ def create_app():
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)
+    app.router.add_post("/api/complete_day",handle_complete_day)
+    app.router.add_route("OPTIONS","/api/complete_day",handle_complete_day)
     app.router.add_post("/api/audio_task",handle_audio_task)
     app.router.add_get("/api/premium/{uid}",handle_check_premium)
     app.router.add_post("/api/premium/grant",handle_grant_premium)

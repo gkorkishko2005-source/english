@@ -957,6 +957,42 @@ async def update_streak(uid: int):
 async def get_streak_count(uid: int) -> int:
     u = await get_user(uid); return (u.get("streak") or 0) if u else 0
 
+async def complete_day(uid: int, tz_offset_min: int = 0) -> dict:
+    """Server-authoritative daily streak.
+
+    The "day" is derived from the SERVER clock (UTC) shifted by the user's
+    timezone offset — never from the client's device clock and never from the
+    reminder time. This closes the exploit where moving the reminder time (or
+    the device clock/timezone) made the app count a day for the next day:
+      * the boundary is decided here, on the server, from datetime.now(utc);
+      * a spoofed tz offset is clamped to ±14h, so it can only shift the
+        boundary by hours, never grant an extra calendar day;
+      * the stored last_active date guarantees the streak is bumped AT MOST
+        once per server-day (idempotent), and resets to 1 after a gap.
+    Returns {"streak": int, "counted": bool}.
+    """
+    from datetime import datetime, timedelta, timezone
+    user = await get_user(uid)
+    if not user:
+        return {"streak": 0, "counted": False}
+    try:
+        tz = max(-14 * 60, min(14 * 60, int(tz_offset_min)))
+    except Exception:
+        tz = 0
+    now = datetime.now(timezone.utc) + timedelta(minutes=tz)
+    today_d = now.date()
+    today_s = today_d.isoformat()
+    yest_s = (now - timedelta(days=1)).date().isoformat()
+    last = str(user.get("last_active") or "")[:10]
+    cur = int(user.get("streak") or 0)
+    # Idempotent guard: already counted today → no change, no inflation.
+    if last == today_s:
+        return {"streak": cur, "counted": False}
+    new = cur + 1 if last == yest_s else 1
+    store = today_d if USE_POSTGRES else today_s
+    await db("UPDATE users SET streak=?, last_active=? WHERE uid=?", new, store, uid)
+    return {"streak": new, "counted": True}
+
 def get_rank(xp: int) -> str:
     if xp < 100:   return "🌱 Seedling"
     if xp < 300:   return "📗 Beginner"

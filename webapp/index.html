@@ -4308,6 +4308,12 @@ function todayMissions(){
      exam-style listening task. The random pool was dropped because
      the chat/roleplay/mini-game variants only duplicated other
      tabs and diluted the message of "what should I do today". */
+  /* Cards goal must be ACHIEVABLE: cap it at the user's actual daily card
+     limit (free tier = 5), otherwise the goal can never complete even though
+     every reviewed card increments the counter. Stays configurable via
+     cardLimitConfig() — no hard-coded mismatch. */
+  let ct=10;
+  try{const cl=(typeof cardLimitConfig==='function')?cardLimitConfig().limit:10;ct=Math.max(1,Math.min(10,cl));}catch(e){}
   return [
     {id:'today_lesson', key:'lesson', target:1,  xp:10, label:{
       ru:'Пройди 1 урок курса',  en:'Complete 1 course lesson',
@@ -4315,12 +4321,12 @@ function todayMissions(){
       de:'1 Kurslektion absolvieren', fr:'Termine 1 leçon du cours',
       uk:'Пройди 1 урок курсу',  tr:'1 ders bitir',
       zh:'完成 1 节课程',         ar:'أكمل درسًا واحدًا من الدورة'}},
-    {id:'today_cards',  key:'words',  target:10, xp:9, label:{
-      ru:'Повтори 10 карточек',  en:'Review 10 flashcards',
-      es:'Repasa 10 tarjetas',   pt:'Revise 10 cartões',
-      de:'10 Karten wiederholen', fr:'Révise 10 cartes',
-      uk:'Повтори 10 карток',    tr:'10 kartı tekrar et',
-      zh:'复习 10 张卡片',        ar:'راجع 10 بطاقات'}},
+    {id:'today_cards',  key:'words',  target:ct, xp:9, label:{
+      ru:'Повтори '+ct+' карточек',  en:'Review '+ct+' flashcards',
+      es:'Repasa '+ct+' tarjetas',   pt:'Revise '+ct+' cartões',
+      de:ct+' Karten wiederholen', fr:'Révise '+ct+' cartes',
+      uk:'Повтори '+ct+' карток',    tr:ct+' kartı tekrar et',
+      zh:'复习 '+ct+' 张卡片',        ar:'راجع '+ct+' بطاقات'}},
     {id:'today_exam',   key:'listen', target:1,  xp:8, label:{
       ru:'1 экзамен. задание (TOEFL/IELTS)', en:'1 exam task (TOEFL/IELTS)',
       es:'1 tarea de examen',    pt:'1 tarefa de exame',
@@ -4342,14 +4348,37 @@ function completeDailyStreak(){
   const prev=LS.get('streak_done_date');
   if(!window._d)window._d={streak:0,xp:0};
   const base=Number(window._d.streak||0);
-  window._d.streak=(prev===prevDayKey())?base+1:Math.max(1,base+1);
+  /* Local OPTIMISTIC value only. Continue the streak only if the previous
+     completion was literally yesterday; otherwise RESET to 1. (The old code
+     did base+1 in both branches, so the streak never reset — a separate
+     inflation bug.) The server reconciles this below and has the final say. */
+  const local=(prev===prevDayKey())?base+1:1;
+  window._d.streak=local;
   LS.set('streak_done_date',today);
-  LS.set('local_streak',String(window._d.streak));
+  LS.set('local_streak',String(local));
   renderHome(window._d);
-  try{animateStreakComplete(window._d.streak);}catch(e){}
+  try{animateStreakComplete(local);}catch(e){}
   try{renderBadges();renderAchievements();}catch(e){}
+  /* AUTHORITATIVE: the day boundary is decided on the SERVER (UTC + the
+     user's timezone), never the device clock or the reminder time, so
+     changing the reminder cannot count an extra day. Reconcile with it. */
+  try{serverCompleteDay();}catch(e){}
   try{syncToServer();}catch(e){}
   return true;
+}
+async function serverCompleteDay(){
+  if(!(typeof API!=='undefined'&&API&&window._uid))return;
+  try{
+    const r=await fetch(`${API}/api/complete_day`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,tz_offset_min:-(new Date().getTimezoneOffset())})});
+    if(!r.ok)return;
+    const j=await r.json();
+    if(j&&j.ok&&typeof j.streak==='number'){
+      if(!window._d)window._d={};
+      window._d.streak=j.streak;
+      LS.set('local_streak',String(j.streak));
+      try{renderHome(window._d);renderBadges();renderAchievements();}catch(e){}
+    }
+  }catch(e){}
 }
 function checkDailyStreakCompletion(sv){
   if(!enoughMissionsForStreak(sv))return;
@@ -7496,8 +7525,18 @@ function runExamTask(exam,section){
   const kicker=examTitle(exam)+' · '+section.toUpperCase();
   let body='';
   if(section==='reading'||section==='listening'){
-    body+=`<div class="exam-passage">${safeHTML(section==='listening'?task.transcript:task.passage)}</div>`;
-    if(section==='listening')body+=`<div class="exam-actions"><button class="exam-btn" onclick="speakExamTask('${id}')">${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button></div>`;
+    if(section==='listening'){
+      /* AUDIO-FIRST: transcript is hidden behind "Показать текст" so listening
+         truly tests listening. If TTS is unavailable on this device, say so
+         UP FRONT (before the user taps) instead of duplicating with two
+         text buttons. Single audio button + single transcript toggle. */
+      const avail=listenTTSAvailable();
+      body+=`<div class="exam-actions"><button class="exam-btn" onclick="speakExamTask('${id}')">🔊 ${({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen')}</button><button class="exam-btn" onclick="toggleExamTranscript('${id}',this)">${({ru:'Показать текст',en:'Show text',es:'Mostrar texto',pt:'Mostrar texto',de:'Text anzeigen',fr:'Afficher le texte',uk:'Показати текст',tr:'Metni göster',zh:'显示文本',ar:'إظهار النص'}[lang]||'Show text')}</button></div>`;
+      body+=`<div class="course-result" id="${id}-snd"${avail?' style="display:none"':''}>${avail?'':({ru:'Звук недоступен на этом устройстве — открой текст.',en:'Audio unavailable on this device — open the text.',es:'Audio no disponible en este dispositivo: abre el texto.',pt:'Áudio indisponível neste dispositivo — abra o texto.',de:'Audio auf diesem Gerät nicht verfügbar – öffne den Text.',fr:'Audio indisponible sur cet appareil — ouvre le texte.',uk:'Звук недоступний на цьому пристрої — відкрий текст.',tr:'Bu cihazda ses kullanılamıyor — metni aç.',zh:'此设备无法播放音频——请打开文本。',ar:'الصوت غير متاح على هذا الجهاز — افتح النص.'}[lang]||'Audio unavailable on this device — open the text.')}</div>`;
+      body+=`<div class="exam-passage" id="${id}-tr" style="display:none">${safeHTML(task.transcript)}</div>`;
+    }else{
+      body+=`<div class="exam-passage">${safeHTML(task.passage)}</div>`;
+    }
     body+=`<div class="exam-prompt">${safeHTML(task.q)}</div><div class="lt-opts">${task.o.map((o,i)=>`<div class="lt-opt" onclick="answerExamTask('${id}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('')}</div>`;
   }else{
     body+=`<div class="exam-prompt">${safeHTML(task.prompt)}</div><textarea class="exam-area" id="${id}-txt" placeholder="${section==='writing'?({ru:'Напиши ответ или план',en:'Write your response or plan',es:'Escribe tu respuesta o plan',pt:'Escreva sua resposta ou plano',de:'Schreibe deine Antwort oder einen Plan',fr:'Rédige ta réponse ou ton plan',uk:'Напиши відповідь або план',tr:'Yanıtını veya planını yaz',zh:'写下你的回答或提纲',ar:'اكتب إجابتك أو خطتك'}[lang]||'Write your response or plan'):({ru:'Запиши краткий план ответа',en:'Write a short answer plan',es:'Escribe un plan breve de respuesta',pt:'Escreva um plano breve de resposta',de:'Schreibe einen kurzen Antwortplan',fr:'Note un bref plan de réponse',uk:'Запиши короткий план відповіді',tr:'Kısa bir yanıt planı yaz',zh:'写一个简短的答题提纲',ar:'اكتب خطة إجابة موجزة'}[lang]||'Write a short answer plan')}"></textarea>`;
@@ -7515,9 +7554,28 @@ function answerExamTask(id,picked){
   else toast(({ru:'Посмотри правильный ответ',en:'Check the correct answer',es:'Mira la respuesta correcta',pt:'Veja a resposta correta',de:'Sieh dir die richtige Antwort an',fr:'Regarde la bonne réponse',uk:'Поглянь на правильну відповідь',tr:'Doğru cevaba bak',zh:'看看正确答案',ar:'انظر إلى الإجابة الصحيحة'}[lang]||'Check the correct answer'),'⚠️');
 }
 function speakExamTask(id){
-  const st=examState[id];if(!st||!('speechSynthesis' in window))return;
-  const u=new SpeechSynthesisUtterance(st.task.transcript||st.task.prompt||'');
-  u.lang='en-US';u.rate=.86;speechSynthesis.cancel();speechSynthesis.speak(u);
+  const st=examState[id];if(!st)return;
+  /* SOURCE GUARD: speak ONLY this task's own transcript, read from
+     examState[id] (bound to the current task id). Never a global/previous
+     value. Listening tasks must have a transcript; if missing, report
+     unavailable instead of speaking something unrelated. */
+  const text=(st.section==='listening'?st.task.transcript:(st.task.transcript||st.task.prompt))||'';
+  const note=document.getElementById(id+'-snd');
+  playListenTTS(text,(s)=>{
+    if(!note)return;
+    if(s==='unavailable'){
+      note.textContent=({ru:'Звук недоступен на этом устройстве — открой текст.',en:'Audio is not available on this device — open the transcript.',es:'El audio no está disponible en este dispositivo: abre el texto.',pt:'O áudio não está disponível neste dispositivo — abra o texto.',de:'Audio ist auf diesem Gerät nicht verfügbar — öffne den Text.',fr:'L’audio n’est pas disponible sur cet appareil — ouvre le texte.',uk:'Звук недоступний на цьому пристрої — відкрий текст.',tr:'Bu cihazda ses yok — metni aç.',zh:'此设备无法播放音频——请打开文本。',ar:'الصوت غير متاح على هذا الجهاز — افتح النص.'}[lang]||'Audio is not available on this device — open the transcript.');
+      const tb=document.getElementById(id+'-tr');if(tb)tb.style.display='';
+    } else {note.textContent='';}
+  });
+}
+function toggleExamTranscript(id,btn){
+  const tb=document.getElementById(id+'-tr');if(!tb)return;
+  const show=tb.style.display==='none';
+  tb.style.display=show?'':'none';
+  if(btn)btn.textContent=show
+    ?({ru:'Скрыть текст',en:'Hide text',es:'Ocultar texto',pt:'Ocultar texto',de:'Text ausblenden',fr:'Masquer le texte',uk:'Сховати текст',tr:'Metni gizle',zh:'隐藏文本',ar:'إخفاء النص'}[lang]||'Hide text')
+    :({ru:'Показать текст',en:'Show text',es:'Mostrar texto',pt:'Mostrar texto',de:'Text zeigen',fr:'Afficher le texte',uk:'Показати текст',tr:'Metni göster',zh:'显示文本',ar:'إظهار النص'}[lang]||'Show text');
 }
 function localExamChecklist(id){
   const st=examState[id];const res=document.getElementById(id+'-res');if(!st||!res)return;
@@ -8660,7 +8718,9 @@ GALAXY_COURSE.push(
          ("Key examples for …:") or markup ("·", "___", "→", "*"). */
       const clean=s=>String(s||'').replace(/[_*→]/g,'').replace(/\s+·\s+/g,' ').replace(/\s{2,}/g,' ').trim();
       const src=(examples.length?examples:[ls.build]).map(clean).filter(s=>s&&!/[:]/.test(s)).slice(0,3);
-      ls.reading=(src.length?src.join(' ')+' ':'')+'Read each sentence, then use the same pattern when you answer.';
+      /* Reading is CONTENT only — never append a meta-instruction like
+         "use the same pattern when you answer." (that leaked into the text). */
+      ls.reading=src.length?src.join(' '):clean(ls.build||(ls.title&&ls.title.en)||topic);
     }
     if(!ls.grammar)ls.grammar={ru:ls.sub?.ru||'Правило',en:ls.sub?.en||'Rule'};
     if(!Array.isArray(ls.practice)||!ls.practice.length){
@@ -9089,6 +9149,22 @@ function courseVocabWords(ls){
   }
   return merged.slice(0,COURSE_VOCAB_TARGET);
 }
+/* POLYSEMY GUARD: a word can have several senses (name = имя / название,
+   from = из / от, age = возраст / эпоха). Two options are ambiguous if their
+   translations share ANY sense. We split each translation on / , ; "или"/"or"
+   and treat the result as a set of senses, so a distractor can never be a valid
+   alternative translation of the correct answer. */
+function _wordSenseSet(w){
+  const t=courseWordTranslation(w);
+  return new Set(String(t||'').toLowerCase()
+    .split(/[\/,;]|\bили\b|\bor\b/)
+    .map(s=>s.trim()).filter(Boolean));
+}
+function _sensesClash(a,b){
+  const A=_wordSenseSet(a),B=_wordSenseSet(b);
+  for(const s of A)if(s&&B.has(s))return true;
+  return false;
+}
 function courseWordOptions(correct,mode,pool){
   /* Distractors must be the same level/topic as the answer. Prefer words from
      the lesson's own pool (passed in); only fall back to the global dictionary
@@ -9098,7 +9174,7 @@ function courseWordOptions(correct,mode,pool){
   const picks=[];
   const drawFrom=list=>{
     const arr=(list||[]).map(w=>String(w||'').toLowerCase())
-      .filter(w=>w&&w!==correct&&COURSE_WORD_I18N[w]&&!picks.includes(w));
+      .filter(w=>w&&w!==correct&&COURSE_WORD_I18N[w]&&!picks.includes(w)&&!_sensesClash(w,correct));
     for(let i=0;i<arr.length&&picks.length<3;i++){
       const w=arr[(seed+i*7)%arr.length];
       if(!picks.includes(w))picks.push(w);
@@ -9378,8 +9454,15 @@ function courseErrorSet(ls){
      substitutions over every example we have, plus a curated bank of
      generic-but-distinct fallbacks so the loop always terminates. */
   const bases=[];
-  if(Array.isArray(ls.examples))ls.examples.forEach(e=>{if(e)bases.push(e);});
-  if(ls.build&&!bases.includes(ls.build))bases.push(ls.build);
+  /* Only CLEAN plain sentences may seed the error task. Dialogue stubs
+     ("Q: ... A: ..."), strategy lines (with ":"), cloze ("___"), error
+     markup ("*"/"→") would otherwise produce confusing items like
+     "Q: She implies the report are overdue. A: ...". The is→are swap itself
+     is a DELIBERATE subject-verb-agreement error — that is the whole point of
+     the task — we just want it injected into a clean carrier sentence. */
+  const okBase=s=>{s=String(s||'').trim();return !!s&&!/[:_*→]/.test(s)&&!/^[QA]\b/i.test(s);};
+  if(Array.isArray(ls.examples))ls.examples.forEach(e=>{if(okBase(e))bases.push(String(e).trim());});
+  if(ls.build&&okBase(ls.build)&&!bases.includes(ls.build))bases.push(String(ls.build).trim());
   if(!bases.length)bases.push('I am ready.');
   const out=[];
   const seen=new Set();
@@ -9796,10 +9879,26 @@ function shuffleMCQ(q,seedStr){
   const a=order.findIndex(p=>p.i===q.a);
   return Object.assign({},q,{o:order.map(p=>p.text),a:a<0?0:a});
 }
+/* GUARD: strip service prefixes / instruction markers that occasionally leak
+   from authored or AI-generated lesson copy into the learner-facing text, e.g.
+   "Key examples for <topic>:" or "Read each sentence, then use the same pattern
+   when you answer." Applied at the render boundary so EVERY reading is clean,
+   regardless of source. */
+function stripServiceText(s){
+  let t=String(s||'');
+  t=t.replace(/^\s*(key\s+examples?|examples?|sample\s+sentences?|ключевы[ейхм]+\s+примеры?|примеры?|образц[ыа])\b[^:.!?\n]{0,40}:\s*/i,'');
+  t=t.replace(/\b(read each sentence[,]?\s*then\s*)?use the same pattern( when you answer)?\.?/ig,'');
+  t=t.replace(/\bread each sentence[,]?\s*then\s*answer\.?/ig,'');
+  t=t.replace(/\s{2,}/g,' ').trim();
+  return t;
+}
 function courseReadingText(ls){
-  if(ls.reading)return lang==='ru'
-    ?`Текст для проверки: ${ls.reading}`
-    :`Reading check: ${ls.reading}`;
+  if(ls.reading){
+    const r=stripServiceText(ls.reading);
+    return lang==='ru'
+      ?`Текст для проверки: ${r}`
+      :`Reading check: ${r}`;
+  }
   const title=ls.title[lang]||ls.title.en;
   const ex=(ls.examples||[]).slice(0,2).join(' ');
   return lang==='ru'
@@ -10412,28 +10511,16 @@ function speakCourseLine(id,idx){
   speechSynthesis.cancel();speechSynthesis.speak(u);
 }
 function speakCourseDictation(id){
+  /* SOURCE GUARD: read ONLY this lesson's own dictation text, keyed by
+     courseKey(id). Never a shared/previous global. */
   const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
   const res=document.getElementById('cd-res-'+id);
-  if(!('speechSynthesis' in window)){
-    if(res){res.className='course-result';res.textContent=({ru:'Звук недоступен на этом устройстве — нажми “Показать текст”.',en:'Audio is not available on this device — tap “Show text”.',es:'El audio no está disponible en este dispositivo: pulsa “Mostrar texto”.',pt:'O áudio não está disponível neste dispositivo — toque em “Mostrar texto”.',de:'Audio ist auf diesem Gerät nicht verfügbar — tippe „Text zeigen“.',fr:'L’audio n’est pas disponible sur cet appareil — appuie sur « Afficher le texte ».',uk:'Звук недоступний на цьому пристрої — натисни «Показати текст».',tr:'Bu cihazda ses yok — “Metni göster”e dokun.',zh:'此设备无法播放音频——请点击“显示文本”。',ar:'الصوت غير متاح على هذا الجهاز — اضغط «إظهار النص».'}[lang]||'Audio is not available on this device — tap “Show text”.');}
-    revealCourseDictation(id);
-    return;
-  }
-  function play(){
-    const u=courseUtterance(text);
-    try{speechSynthesis.cancel();}catch(e){}
-    speechSynthesis.speak(u);
-  }
-  /* On many WebViews the voice list is empty until onvoiceschanged fires. */
-  const voices=(speechSynthesis.getVoices&&speechSynthesis.getVoices())||[];
-  if(!voices.length){
-    let done=false;
-    const go=()=>{if(done)return;done=true;play();};
-    try{speechSynthesis.onvoiceschanged=go;}catch(e){}
-    setTimeout(go,350);
-  } else {
-    play();
-  }
+  playListenTTS(text,(s)=>{
+    if(s==='unavailable'){
+      if(res){res.className='course-result';res.textContent=({ru:'Звук недоступен на этом устройстве — нажми “Показать текст”.',en:'Audio is not available on this device — tap “Show text”.',es:'El audio no está disponible en este dispositivo: pulsa “Mostrar texto”.',pt:'O áudio não está disponível neste dispositivo — toque em “Mostrar texto”.',de:'Audio ist auf diesem Gerät nicht verfügbar — tippe „Text zeigen“.',fr:'L’audio n’est pas disponible sur cet appareil — appuie sur « Afficher le texte ».',uk:'Звук недоступний на цьому пристрої — натисни «Показати текст».',tr:'Bu cihazda ses yok — “Metni göster”e dokun.',zh:'此设备无法播放音频——请点击“显示文本”。',ar:'الصوت غير متاح على هذا الجهاز — اضغط «إظهار النص».'}[lang]||'Audio is not available on this device — tap “Show text”.');}
+      revealCourseDictation(id);
+    } else if(s==='ok'&&res){res.textContent='';}
+  });
 }
 function answerCoursePractice(id,qi,picked){
   const practice=window['course_practice_'+courseKey(id)]||[];
@@ -12603,6 +12690,51 @@ function fallbackSpeak(text){
     if(enVoice)u.voice=enVoice;
     speechSynthesis.speak(u);
   }
+}
+/* Is any audio output path usable on this device? Used to show a
+   "sound unavailable" status BEFORE the user taps Listen. */
+function listenTTSAvailable(){try{return !!(typeof API!=='undefined'&&API)||('speechSynthesis' in window);}catch(_){return false;}}
+/* Robust listening playback for lessons/exams.
+   `text` is ALWAYS passed in explicitly by the caller (bound to the current
+   task) — there is no shared "last text" global, so one task can never play
+   another task's audio. Prefers real server audio (so Listen produces sound,
+   not a text fallback); falls back to SpeechSynthesis with a voices-ready
+   guard (empty voice list on first tap is the #1 cause of "no sound" on
+   mobile WebViews). Calls statusCb('ok'|'unavailable'|'empty'). */
+async function playListenTTS(text,statusCb){
+  const clean=cleanTTSInput(text);
+  if(!clean){if(statusCb)statusCb('empty');return false;}
+  /* Stop anything currently playing so a new task never overlaps/continues
+     a previous one. */
+  try{if(_ttsAudio){_ttsAudio.pause();_ttsAudio=null;}}catch(_){}
+  try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(_){}
+  if(typeof API!=='undefined'&&API){
+    try{
+      const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean,lang:'en'})});
+      if(r.ok){
+        const url=URL.createObjectURL(await r.blob());
+        _ttsAudio=new Audio(url);
+        _ttsAudio.onended=()=>{try{URL.revokeObjectURL(url);}catch(_){}};
+        _ttsAudio.onerror=()=>{try{URL.revokeObjectURL(url);}catch(_){}_ssSpeak(clean);};
+        await _ttsAudio.play();
+        if(statusCb)statusCb('ok');
+        return true;
+      }
+    }catch(_){/* fall through to speech synthesis */}
+  }
+  if('speechSynthesis' in window){_ssSpeak(clean);if(statusCb)statusCb('ok');return true;}
+  if(statusCb)statusCb('unavailable');
+  return false;
+}
+/* SpeechSynthesis with the voices-ready guard (voices are often [] until
+   onvoiceschanged fires on iOS/Android WebViews). */
+function _ssSpeak(text){
+  if(!('speechSynthesis' in window))return;
+  const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=0.86;
+  const go=()=>{try{speechSynthesis.cancel();}catch(_){}try{speechSynthesis.speak(u);}catch(_){}};
+  const voices=(speechSynthesis.getVoices&&speechSynthesis.getVoices())||[];
+  if(!voices.length){let done=false;const fire=()=>{if(done)return;done=true;go();};try{speechSynthesis.onvoiceschanged=fire;}catch(_){}setTimeout(fire,350);}
+  else go();
 }
 
 /* ══ HAPTIC FEEDBACK ══ */
