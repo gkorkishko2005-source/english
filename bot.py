@@ -213,7 +213,7 @@ BOT_PROFILE = {
     "name_default": "PolyGlotty English",
     "name_ru": "PolyGlotty English",
     "short_default": "English tutor in Telegram: free A0-C2 course, ALEX chat with subscription, grammar, TOEFL and streaks.",
-    "short_ru": "Репетитор английского в Telegram: бесплатный курс A0-C2, чат ALEX по подписке, грамматика, TOEFL и стрик.",
+    "short_ru": "Репетитор английского в Telegram: бесплатный курс A0-C2, чат ALEX по подписке, грамматика, TOEFL и ударный режим (дни подряд).",
     "description_default": (
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
         "Free: A0-C2 course, flashcards, drills, listening, growth tree.\n"
@@ -222,7 +222,7 @@ BOT_PROFILE = {
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
-        "Бесплатно: курс A0-C2, карточки, drills, аудирование, дерево роста.\n"
+        "Бесплатно: курс A0-C2, карточки, упражнения, аудирование, дерево роста.\n"
         "По подписке: живой чат ALEX, roleplay, проверка текста, подготовка к TOEFL · IELTS · CAE. Кредиты ALEX можно докупать отдельно.\n\n"
         "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules."
     ),
@@ -505,7 +505,7 @@ async def finish_toefl_listening(uid: int, message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
-    ru = [["📚 Урок грамматики","📝 Словарь"],["🎭 Ролевой диалог","🎮 Story Quest"],
+    ru = [["📚 Урок грамматики","📝 Словарь"],["🎭 Ролевой диалог","🎮 Квест-история"],
           ["✅ Тест","🎓 TOEFL"],["✍️ Проверить текст","🎨 Тон фразы"],
           ["💬 Разговор","⚔️ Дебаты"],["🗣 Идиомы","❌ Мои ошибки"],["📊 Прогресс",""]]
     en = [["📚 Grammar Lesson","📝 Vocabulary"],["🎭 Roleplay","🎮 Story Quest"],
@@ -567,7 +567,7 @@ def lesson_kb(lang):
 def vocab_kb(lang):
     items = {
         "vocab_new":         ("✨ Новые слова","✨ New Words"),
-        "vocab_review":      ("🔁 Повторение SM-2","🔁 SM-2 Review"),
+        "vocab_review":      ("🔁 Умное повторение","🔁 Smart Review"),
         "vocab_flashcards":  ("🃏 Флэш-карточки","🃏 Flashcards"),
         "vocab_collocations":("🔗 Коллокации","🔗 Collocations"),
         "vocab_idioms_adv":  ("💠 Продвинутые идиомы","💠 Advanced Idioms"),
@@ -1098,6 +1098,10 @@ async def cmd_start(message: Message):
     # WebApp button
     app_url = webapp_url()
 
+    # Newcomers were overwhelmed by ~10 buttons on the very first screen.
+    # The greeting now shows ONE large call-to-action (Open App), with
+    # everything else collapsed behind a single "📋 Меню" button. Channel
+    # and Rules sit at the bottom as low-emphasis secondary links.
     kb_buttons = []
     if app_url:
         kb_buttons.append([InlineKeyboardButton(
@@ -1105,26 +1109,8 @@ async def cmd_start(message: Message):
             web_app=WebAppInfo(url=app_url)
         )])
     kb_buttons.append([InlineKeyboardButton(
-        text=f"{ICON['premium']} Подписки" if ru else f"{ICON['premium']} Plans",
-        callback_data="open_premium"
-    )])
-    kb_buttons.append([
-        InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
-        InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab"),
-        InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
-    ])
-    kb_buttons.append([
-        InlineKeyboardButton(text=f"{ICON['menu']} Меню" if ru else f"{ICON['menu']} Menu", callback_data="quick_menu"),
-        InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
-    ])
-    ref_link = referral_url(uid)
-    # The Share button uses switch_inline_query so the user picks any
-    # chat and the bot answers inline with a rich message containing
-    # clickable HTML links inside the text (see handle_inline, "invite"
-    # branch). t.me/share/url cannot carry inline HTML links.
-    kb_buttons.append([InlineKeyboardButton(
-        text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
-        switch_inline_query="invite"
+        text=f"{ICON['menu']} Меню" if ru else f"{ICON['menu']} Menu",
+        callback_data="quick_menu"
     )])
     kb_buttons.append([
         InlineKeyboardButton(
@@ -1200,20 +1186,36 @@ async def cmd_menu(message: Message):
 async def cb_quick_menu(cb: CallbackQuery):
     uid = cb.from_user.id
     lang = await get_lang(uid) or "ru"
+    ru = lang == "ru"
     action = cb.data.replace("quick_", "")
     await cb.answer()
     if action == "lesson":
-        await cb.message.answer(f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
+        await cb.message.answer(f"{ICON['lesson']} <b>Уроки грамматики</b>" if ru else f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
     elif action == "vocab":
-        await cb.message.answer(f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
+        await cb.message.answer(f"{ICON['vocab']} <b>Словарь</b>" if ru else f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
     elif action == "test":
-        await cb.message.answer(f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
+        await cb.message.answer(f"{ICON['test']} <b>Тесты</b>" if ru else f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
         await send_support_prompt(cb.message, uid)
-    else:
+    elif action == "grid":
         await cb.message.answer(
-            "Меню кнопок включено." if lang == "ru" else "Button menu is enabled.",
+            "Все функции — на клавиатуре ниже." if ru else "All features are on the keyboard below.",
             reply_markup=main_kb(lang),
+        )
+    else:  # "menu" — the collapsed sections from /start
+        menu = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
+             InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab")],
+            [InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
+             InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
+            [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
+             InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
+            [InlineKeyboardButton(text="⌨️ Все функции" if ru else "⌨️ All features", callback_data="quick_grid")],
+        ])
+        await cb.message.answer(
+            "<b>📋 Меню</b>\nВыбери раздел — или жми «Открыть приложение» для полного курса."
+            if ru else "<b>📋 Menu</b>\nPick a section — or tap “Open App” for the full course.",
+            reply_markup=menu,
         )
 
 @dp.message(Command("share"))
@@ -2047,7 +2049,7 @@ MENU_RU = {
     "◦ Разговор":"talk","△ Дебаты":"debate","◆ Идиомы":"idioms","! Мои ошибки":"mistakes","▥ Прогресс":"stats",
     # Legacy labels kept so older Telegram keyboards still route correctly.
     "📚 Урок грамматики":"lesson","📝 Словарь":"vocab","🎭 Ролевой диалог":"roleplay",
-    "🎮 Story Quest":"story","✅ Тест":"test","🎓 TOEFL":"toefl",
+    "🎮 Квест-история":"story","🎮 Story Quest":"story","✅ Тест":"test","🎓 TOEFL":"toefl",
     "✍️ Проверить текст":"writing","🎨 Тон фразы":"tone","💬 Разговор":"talk",
     "⚔️ Дебаты":"debate","🗣 Идиомы":"idioms","❌ Мои ошибки":"mistakes","📊 Прогресс":"stats",
 }
@@ -2372,32 +2374,10 @@ async def cmd_premium(msg: Message):
     # grandfathered users keep their remaining access but renew via the
     # Platform plan like everybody else.
     if True:
-        plat_kb = [
-            [InlineKeyboardButton(
-                text=("🚀 Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "🚀 Platform · 1 mo — 299 ⭐ + 30 cr"),
-                callback_data="plat_buy:plat_1m"
-            )],
-            [InlineKeyboardButton(
-                text=("🚀 Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"),
-                callback_data="plat_buy:plat_6m"
-            )],
-            [InlineKeyboardButton(
-                text=("🚀 Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "🚀 Platform · lifetime — 4 990 ⭐ + 500 cr"),
-                callback_data="plat_buy:plat_life"
-            )],
-            [InlineKeyboardButton(
-                text=("🪙 100 кредитов ALEX — 149 ⭐" if ru else "🪙 100 ALEX credits — 149 ⭐"),
-                callback_data="credit_buy:credits_100"
-            )],
-            [InlineKeyboardButton(
-                text=("🪙 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "🪙 500 ALEX credits — 599 ⭐ (−20%)"),
-                callback_data="credit_buy:credits_500"
-            )],
-            [InlineKeyboardButton(
-                text=("🪙 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "🪙 2 000 ALEX credits — 1 990 ⭐ (−33%)"),
-                callback_data="credit_buy:credits_2000"
-            )],
-        ]
+        # Slimmed-down bot paywall: two headline plans + one app button +
+        # one "all plans" expander. The full tariff showcase (every plan and
+        # credit pack) lives in the mini-app paywall; the bot no longer
+        # repeats the same six options as text, buttons AND cards.
         status_lines = []
         if platform_info.get("active"):
             if platform_info.get("lifetime"):
@@ -2414,38 +2394,49 @@ async def cmd_premium(msg: Message):
                                           if ru else f"ALEX credits: {credits_balance:,}"))
         if status_lines:
             status_title = "Твой статус" if ru else "Your status"
-            status_block = f"\n<blockquote><b>{status_title}</b>\n" + "\n".join(status_lines) + "</blockquote>"
+            status_block = f"\n<blockquote><b>{status_title}</b>\n" + "\n".join(status_lines) + "</blockquote>\n"
         else:
             status_block = ""
 
+        app_url = webapp_url()
+        kb_rows = [
+            [InlineKeyboardButton(
+                text=("🚀 Платформа · 1 мес — 299 ⭐" if ru else "🚀 Platform · 1 mo — 299 ⭐"),
+                callback_data="plat_buy:plat_1m"
+            )],
+            [InlineKeyboardButton(
+                text=("🚀 Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ (−28%)"),
+                callback_data="plat_buy:plat_6m"
+            )],
+        ]
+        if app_url:
+            kb_rows.append([InlineKeyboardButton(
+                text=(f"{ICON['app']} Оформить в приложении" if ru else f"{ICON['app']} Subscribe in the app"),
+                web_app=WebAppInfo(url=app_url + "&open=billing")
+            )])
+        kb_rows.append([InlineKeyboardButton(
+            text=("📋 Все тарифы и кредиты" if ru else "📋 All plans & credits"),
+            callback_data="prem_all"
+        )])
+
         text = (
-            "<b>⭐️ PolyGlotty · подписка и кредиты</b>\n\n"
+            "<b>⭐️ PolyGlotty · подписка</b>\n\n"
             "<blockquote><b>🚀 Платформа</b>\n"
-            "Курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. К каждому плану — стартовые кредиты ALEX.\n"
-            "• 1 мес — <b>299 ⭐</b> (+30 кр)\n"
-            "• 6 мес — <b>1 290 ⭐</b> (+150 кр · −28%)\n"
-            "• Навсегда — <b>4 990 ⭐</b> (+500 кр)</blockquote>\n"
-            "<blockquote><b>🪙 Кредиты ALEX</b>\n"
-            "Отдельный баланс для чата. Тратятся за сообщение и не сгорают.\n"
-            "Sonnet 4.6: 6 кр / сообщение · Голос +5\n"
-            "Пакеты: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
-            f"{status_block}\n\n"
-            "<i>Оплата через Telegram Stars</i>"
+            "Курс A0–C2, экзамены, аналитика, безлимит карточек, roleplay и проверка текста. "
+            "К каждому плану — стартовые кредиты ALEX для чата.</blockquote>\n"
+            f"{status_block}"
+            "Выбери план ниже или открой витрину тарифов в приложении.\n"
+            "<i>Оплата через Telegram Stars.</i>"
         ) if ru else (
-            "<b>⭐️ PolyGlotty · subscription & credits</b>\n\n"
+            "<b>⭐️ PolyGlotty · subscription</b>\n\n"
             "<blockquote><b>🚀 Platform</b>\n"
-            "A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. Each plan includes starter ALEX credits.\n"
-            "• 1 mo — <b>299 ⭐</b> (+30 cr)\n"
-            "• 6 mo — <b>1 290 ⭐</b> (+150 cr · −28%)\n"
-            "• Lifetime — <b>4 990 ⭐</b> (+500 cr)</blockquote>\n"
-            "<blockquote><b>🪙 ALEX credits</b>\n"
-            "Separate chat balance. Spent per message and never expire.\n"
-            "Sonnet 4.6: 6 cr / message · Voice +5\n"
-            "Packs: 100 · 500 (−20%) · 2 000 (−33%)</blockquote>"
-            f"{status_block}\n\n"
-            "<i>Telegram Stars only</i>"
+            "A0–C2 course, exams, analytics, unlimited cards, roleplay and text check. "
+            "Each plan includes starter ALEX credits for chat.</blockquote>\n"
+            f"{status_block}"
+            "Pick a plan below or open the full tariff showcase in the app.\n"
+            "<i>Telegram Stars only.</i>"
         )
-        await msg.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=plat_kb))
+        await msg.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=kb_rows))
         return
 
 # ══ LEGACY PREMIUM BUY CALLBACK (retired) ═════════════════════════════════
@@ -2459,6 +2450,32 @@ async def cb_prem_buy(cb: CallbackQuery):
     except Exception:
         pass
     await cmd_premium(cb.message)
+
+# ── "Все тарифы" — full list of plans + credit packs, one card = one button ──
+@dp.callback_query(F.data == "prem_all")
+async def cb_prem_all(cb: CallbackQuery):
+    await cb.answer()
+    ru = (await get_lang(cb.from_user.id) or "ru") == "ru"
+    rows = [
+        [InlineKeyboardButton(text=("🚀 Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "🚀 Platform · 1 mo — 299 ⭐ + 30 cr"), callback_data="plat_buy:plat_1m")],
+        [InlineKeyboardButton(text=("🚀 Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"), callback_data="plat_buy:plat_6m")],
+        [InlineKeyboardButton(text=("🚀 Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "🚀 Platform · lifetime — 4 990 ⭐ + 500 cr"), callback_data="plat_buy:plat_life")],
+        [InlineKeyboardButton(text=("🪙 100 кредитов ALEX — 149 ⭐" if ru else "🪙 100 ALEX credits — 149 ⭐"), callback_data="credit_buy:credits_100")],
+        [InlineKeyboardButton(text=("🪙 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "🪙 500 ALEX credits — 599 ⭐ (−20%)"), callback_data="credit_buy:credits_500")],
+        [InlineKeyboardButton(text=("🪙 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "🪙 2 000 ALEX credits — 1 990 ⭐ (−33%)"), callback_data="credit_buy:credits_2000")],
+    ]
+    text = (
+        "<b>📋 Все тарифы PolyGlotty</b>\n\n"
+        "<b>🚀 Платформа</b> — курс, экзамены и безлимит карточек.\n"
+        "<b>🪙 Кредиты ALEX</b> — баланс для чата, тратятся за сообщение и не сгорают.\n\n"
+        "<i>Оплата через Telegram Stars.</i>"
+    ) if ru else (
+        "<b>📋 All PolyGlotty plans</b>\n\n"
+        "<b>🚀 Platform</b> — course, exams and unlimited cards.\n"
+        "<b>🪙 ALEX credits</b> — chat balance, spent per message, never expire.\n\n"
+        "<i>Telegram Stars only.</i>"
+    )
+    await cb.message.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=rows))
 
 # ── Invoice helpers (shared by callback + deep-link /start) ──────────────
 async def _send_platform_invoice(uid: int, plan_id: str, ru: bool) -> bool:

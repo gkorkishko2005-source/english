@@ -14123,6 +14123,13 @@ async function init(){
     try{renderHome(d);}catch(e){console.warn('renderHome',e);}
     try{renderProgress(d);}catch(e){console.warn('renderProgress',e);}
 
+    // Deep link from the bot "Оформить в приложении" button (?open=billing):
+    // jump straight to the in-app paywall showcase once the UI is ready.
+    try{
+      const _op=new URLSearchParams(location.search).get('open');
+      if(_op==='billing'||_op==='paywall'){setTimeout(()=>{try{openPremium();}catch(e){console.warn('openPremium deep link',e);}},500);}
+    }catch(e){}
+
     // Restore chat messages
     try{
       const s=getSes(curSid);
