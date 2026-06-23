@@ -2074,6 +2074,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
   text-transform:none;cursor:pointer}
 
 /* Quad stat cards — flat, mono icons, one number colour */
+/* Page sits 7% darker than the cards so every card reads as a raised
+   surface (works in both themes via color-mix). */
+#s-progress{background:color-mix(in srgb,var(--e0) 93%,#000)}
+html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#000)}
 #s-progress .s4{gap:8px;margin-bottom:4px}
 #s-progress .s4c{background:var(--e1)!important;border:1px solid var(--b1)!important;
   border-top:1px solid var(--edge)!important;
@@ -2103,8 +2107,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
    perspective so bars at the edges appeared to sit at different
    heights. We kill the 3D entirely so every bar grows straight up
    from a single shared baseline. */
-#s-progress .chart-wrap{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;perspective:none!important;padding:14px 14px 12px;border-radius:12px}
+#s-progress .chart-wrap{background:var(--e1)!important;border:1px solid var(--b1)!important;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;perspective:none!important;padding:14px 14px 12px;border-radius:12px}
 #s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:112px;margin:0;
   transform:none!important;transform-origin:50% 100%;overflow:visible;
   border-bottom:1px solid var(--b1);padding-bottom:0}
@@ -2141,13 +2145,44 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 #s-progress .chart-empty{text-align:center;font-size:11.5px;color:var(--t3);padding:6px 0 2px;
   font-weight:500}
 
+/* ── CEFR path ladder ─────────────────────────────────────────────
+   Seven badges A0→C2. Passed levels carry a tint of their own colour,
+   the current level glows, future levels are greyed with a padlock. */
+#s-progress .cefr-card{padding:12px 12px;border-radius:12px}
+#s-progress .cefr-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+#s-progress .cefr-badge{position:relative;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:4px;min-height:50px;padding:6px 1px;
+  border-radius:11px;background:var(--e2);border:1px solid var(--b1);overflow:hidden;
+  transition:transform .15s ease}
+#s-progress .cefr-badge .cefr-lvl{font-size:12.5px;font-weight:900;letter-spacing:.2px;line-height:1}
+#s-progress .cefr-badge .cefr-ico svg,
+#s-progress .cefr-badge .cefr-lock svg{width:12px;height:12px;fill:none;stroke:currentColor;
+  stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;display:block}
+#s-progress .cefr-badge .cefr-now{font-size:8px;line-height:1}
+#s-progress .cefr-badge.future{color:var(--t3);opacity:.55}
+#s-progress .cefr-badge.future .cefr-lock svg{opacity:.8}
+#s-progress .cefr-badge.current{transform:translateY(-1px)}
+
+/* ── Exam prep rows ───────────────────────────────────────────────── */
+#s-progress .exam-prep-card{padding:6px 14px}
+#s-progress .exam-row{display:flex;align-items:center;gap:10px;padding:9px 0}
+#s-progress .exam-row+.exam-row{border-top:1px solid var(--b1)}
+#s-progress .exam-badge{flex-shrink:0;min-width:56px;text-align:center;font-size:11px;
+  font-weight:800;padding:3px 8px;border-radius:8px;border:1px solid;letter-spacing:.3px}
+#s-progress .exam-track{flex:1;height:6px;border-radius:100px;background:var(--e3);overflow:hidden}
+#s-progress .exam-fill{height:100%;border-radius:100px;
+  transition:width .18s cubic-bezier(.4,1,.4,1)}
+#s-progress .exam-pct{flex-shrink:0;font-size:11px;font-weight:700;color:var(--t2);
+  min-width:34px;text-align:right;font-variant-numeric:tabular-nums}
+
 /* ── Growth hero — the learner's tree ─────────────────────────────
    The visual centre of the Progress screen. We give the SVG real
    room to breathe (the whole point is that the learner can see
    the tree growing), but everything else around it stays
    restrained — small type, a single hairline divider, the accent
    colour reserved for the progress bar and the SVG's blossoms. */
-.growth-hero{background:transparent;border:1px solid var(--b1);border-radius:14px;
+.growth-hero{background:var(--e1);border:1px solid var(--b1);border-radius:14px;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh);
   padding:7px 16px 9px;margin-bottom:11px;display:flex;flex-direction:column;
   align-items:stretch;gap:5px}
 .growth-stage{position:relative;width:100%;height:118px;display:flex;
@@ -2198,13 +2233,13 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .growth-foot span:first-child{color:var(--t1);font-weight:700;font-size:12px}
 
 /* TOEFL card — flat */
-#s-progress .toefl-card{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;padding:14px 16px;border-radius:12px}
+#s-progress .toefl-card{background:var(--e1)!important;border:1px solid var(--b1)!important;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;padding:14px 16px;border-radius:12px}
 #s-progress .toefl-empty{font-size:12px;color:var(--t3);text-align:center;padding:4px 0}
 
 /* Achievements button — flat with hairline border */
-#s-progress .ach-home-btn{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;padding:13px 14px;border-radius:12px;font-size:13px;font-weight:600}
+#s-progress .ach-home-btn{background:var(--e1)!important;border:1px solid var(--b1)!important;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;padding:13px 14px;border-radius:12px;font-size:13px;font-weight:600}
 #s-progress .ach-home-btn svg{stroke:var(--t2)!important;fill:none!important}
 #s-progress .ach-home-btn:active{background:var(--e2)}
 #s-progress .ach-home-cnt{margin-left:auto;font-size:11px;color:var(--t3);font-weight:700;
@@ -2212,8 +2247,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
   padding:2px 8px;border-radius:100px}
 
 /* Error diary cards — match flat hairline aesthetic */
-#s-progress #errdiary-wrap > *{background:transparent!important;border:1px solid var(--b1)!important;
-  box-shadow:none!important;border-radius:12px}
+#s-progress #errdiary-wrap > *{background:var(--e1)!important;border:1px solid var(--b1)!important;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;border-radius:12px}
 
 /* ── Learn / Path · premium dark minimalism ──────────────────────
    Claude-like calm + English Galaxy structure: keep cards, but let
@@ -2578,6 +2613,13 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="chart" id="chart"></div>
     <div class="chartdays" id="chartdays"></div>
   </div>
+  <!-- CEFR path: the full ladder A0→C2; passed levels in their colour,
+       current level bright, future levels greyed with a lock. -->
+  <div class="sec"><span id="cefr-path-lbl"></span></div>
+  <div class="card cefr-card"><div class="cefr-grid" id="cefr-grid"></div></div>
+  <!-- Exam prep: only shown when the learner has touched an exam course. -->
+  <div class="sec" id="exam-prep-sec" style="display:none"><span id="exam-prep-lbl"></span></div>
+  <div class="card exam-prep-card" id="exam-prep-card" style="display:none"><div id="exam-prep-list"></div></div>
   <div class="sec"><span>TOEFL</span></div>
   <div class="card toefl-card"><div id="toefll" class="toefl-empty"></div></div>
   <!-- Error Diary -->
@@ -2976,7 +3018,7 @@ const LANGS = {
     dw:'Слова дня',dwa:'+ Ещё',rev:'Очередь повторений',tap_flip:'Нажми чтобы перевернуть',translation:'ПЕРЕВОД',
     again:'Снова',hard:'Сложно',good:'Хорошо',easy:'Легко',
     all_done:'Всё повторено!',all_done_s:'Нет карточек на сегодня.',lnw:'Выучить 5 новых слов',ffact:'Факт об английском',
-    prog:'Прогресс',progs:'Твой путь обучения',stats:'Статистика',sess:'Сессии',wl:'Слов изучено',td:'Тестов пройдено',ef:'Ошибок',tw:'На этой неделе',notoefl:'TOEFL сессий пока нет',
+    prog:'Прогресс',progs:'Твой путь обучения',stats:'Статистика',sess:'Сессии',wl:'Слов изучено',td:'Тестов пройдено',ef:'Дневник ошибок',tw:'На этой неделе',notoefl:'TOEFL сессий пока нет',
     settings:'Настройки',uilang:'Язык интерфейса',botlang:'Язык ответов бота',theme:'Тема оформления',persona:'Личность ALEX',
     p1n:'Дружелюбный',p1s:'Тёплый и поддерживающий',p2n:'Профессор',p2s:'Формальный и точный',p3n:'Геймер',p3s:'Расслабленный, сленг',p4n:'Британец',p4s:'Остроумный и саркастичный',
     myprof:'Мой профиль',lvt:'Уровень',lvs:'Скажи ALEX чтобы изменить',proft:'О себе',remt:'Напоминание',ints:'Интересы',intedit:'Изменить в чате',
@@ -4149,7 +4191,7 @@ function drawProgress(){
     const isToday=i===today;
     const bv=document.createElement('div');
     bv.className='bbv'+(v===0?' bbv-zero':'');
-    bv.textContent=v>0?`${v} XP`:'0';
+    bv.textContent=v>0?`${v} XP`:'';
     bc.appendChild(bv);
     const bb=document.createElement('div');
     bb.className='bb'+(isToday?' td':'')+(v===0?' zero':'');
@@ -4163,6 +4205,89 @@ function drawProgress(){
   const sc=d.toefl_scores||[],tl=document.getElementById('toefll');
   if(tl){if(sc.length){tl.className='';tl.innerHTML=sc.map((s,i)=>`<div class="toefl-row" style="animation-delay:${i*.07}s"><span class="toefl-name">${safeHTML(s.section)}</span><div class="toefl-track"><div class="toefl-fill" style="width:${Math.max(0,Math.min(100,s.score/s.max*100))}%"></div></div><span class="toefl-score">${s.score}/${s.max}</span></div>`).join('');}
   else{tl.className='toefl-empty';tl.textContent=L.notoefl;}}
+  // CEFR ladder + exam prep
+  try{renderCefrPath(d);}catch(e){}
+  try{renderExamPrep(d);}catch(e){}
+  // Micro-animation: re-fill the XP/level bars when the tab is entered.
+  try{refillProgressBars();}catch(e){}
+}
+
+/* On entering the Progress tab, briefly reset the growth XP fill to 0
+   and let CSS animate it back to its target — a 150–200ms "pour". */
+function refillProgressBars(){
+  const fill=document.getElementById('growth-fill');
+  if(fill){
+    const target=fill.style.width||'0%';
+    fill.style.transition='none';
+    fill.style.width='0%';
+    // force reflow so the next change animates
+    void fill.offsetWidth;
+    requestAnimationFrame(()=>{
+      fill.style.transition='width .18s cubic-bezier(.4,1,.4,1)';
+      fill.style.width=target;
+    });
+  }
+}
+
+/* rgba() from a #rrggbb hex with explicit alpha. */
+function hexA(hex,a){
+  if(typeof hex!=='string'||hex.charAt(0)!=='#'||hex.length<7)return hex;
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+/* CEFR path: the full ladder A0→C2 — passed levels tinted in their own
+   colour, the current level bright, future levels greyed with a lock. */
+function renderCefrPath(d){
+  const grid=document.getElementById('cefr-grid');if(!grid)return;
+  const lbl=document.getElementById('cefr-path-lbl');
+  if(lbl)lbl.textContent=({ru:'Твой путь (CEFR)',en:'Your path (CEFR)',es:'Tu camino (CEFR)',pt:'Seu caminho (CEFR)',de:'Dein Weg (CEFR)',fr:'Ton parcours (CEFR)',uk:'Твій шлях (CEFR)',tr:'Yolun (CEFR)',zh:'你的路径 (CEFR)',ar:'مسارك (CEFR)'}[lang]||'Your path (CEFR)');
+  const ladder=['A0','A1','A2','B1','B2','C1','C2'];
+  let ci=ladder.indexOf(String((d&&d.level)||LS.get('ob_level')||'A1').replace(/\+/,'').toUpperCase());
+  if(ci<0)ci=1;
+  const lockSvg='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const checkSvg='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+  grid.innerHTML=ladder.map((lv,i)=>{
+    const c=(typeof levelColor==='function'?levelColor(lv):'var(--a)');
+    if(i<ci)return `<div class="cefr-badge passed" style="background:${hexA(c,.16)};border-color:${hexA(c,.42)};color:${c}"><span class="cefr-lvl">${lv}</span><span class="cefr-ico">${checkSvg}</span></div>`;
+    if(i===ci)return `<div class="cefr-badge current" style="background:${hexA(c,.30)};border-color:${c};color:#fff;box-shadow:0 0 0 1px ${c},0 8px 18px ${hexA(c,.34)}"><span class="cefr-lvl">${lv}</span><span class="cefr-now">●</span></div>`;
+    return `<div class="cefr-badge future"><span class="cefr-lvl">${lv}</span><span class="cefr-lock">${lockSvg}</span></div>`;
+  }).join('');
+}
+
+/* Per-exam course completion (done/total → pct) from local course state. */
+function examCourseProgress(){
+  const done=LS.getJ('course_done')||{};
+  const res={TOEFL:{done:0,total:0},IELTS:{done:0,total:0},CAE:{done:0,total:0}};
+  (typeof GALAXY_COURSE!=='undefined'?GALAXY_COURSE:[]).forEach(ls=>{
+    if(res[ls.level]){res[ls.level].total++;if(done[ls.id])res[ls.level].done++;}
+  });
+  Object.keys(res).forEach(k=>{const r=res[k];r.pct=r.total?Math.round(r.done/r.total*100):0;});
+  return res;
+}
+
+/* Exam prep: only shown when the learner has touched an exam course. */
+function renderExamPrep(d){
+  const sec=document.getElementById('exam-prep-sec'),
+        card=document.getElementById('exam-prep-card'),
+        list=document.getElementById('exam-prep-list');
+  if(!sec||!card||!list)return;
+  const prog=examCourseProgress();
+  const COLORS={TOEFL:'#a78bfa',IELTS:'#ff6b6b',CAE:'#00d4aa'};
+  const order=['TOEFL','IELTS','CAE'];
+  const active=order.filter(ex=>prog[ex].done>0);
+  if(d&&d.toefl_scores&&d.toefl_scores.length&&active.indexOf('TOEFL')<0)active.push('TOEFL');
+  if(!active.length){sec.style.display='none';card.style.display='none';return;}
+  sec.style.display='';card.style.display='';
+  const lbl=document.getElementById('exam-prep-lbl');
+  if(lbl)lbl.textContent=({ru:'Подготовка к экзаменам',en:'Exam prep',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до іспитів',tr:'Sınav hazırlığı',zh:'考试准备',ar:'التحضير للامتحان'}[lang]||'Exam prep');
+  list.innerHTML=active.map(ex=>{
+    const c=COLORS[ex],p=prog[ex];
+    return `<div class="exam-row"><span class="exam-badge" style="background:${hexA(c,.16)};border-color:${hexA(c,.42)};color:${c}">${ex}</span><div class="exam-track"><div class="exam-fill" data-pct="${p.pct}" style="width:0%;background:${c}"></div></div><span class="exam-pct">${p.pct}%</span></div>`;
+  }).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    list.querySelectorAll('.exam-fill').forEach(f=>{f.style.width=(f.dataset.pct||0)+'%';});
+  }));
 }
 
 function alexLockedCard(title,sub,feature){
