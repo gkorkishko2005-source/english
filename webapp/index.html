@@ -6665,17 +6665,49 @@ function cardLimitConfig(){
   if(hasTier('basic'))return {limit:30,hours:5};
   return {limit:5,hours:5};
 }
+function cardWindowKey(){
+  /* Tier is loaded asynchronously (and reset to '' on any network error),
+     so it must NOT be part of the storage key — otherwise the daily count
+     "moved" to a new bucket and looked reset every time the tier flipped or
+     the user navigated away and back before the tier re-resolved. The key
+     is now stable per user for the whole day's rolling window. */
+  const uid=window._uid||'local';
+  return `cards_window_${uid}`;
+}
+/* One-time carry-over from the old tier-scoped keys (cards_window_<uid>_<tier>)
+   so an in-progress window isn't lost on upgrade to this build. Picks the
+   highest still-valid `used` among any legacy buckets for this user. */
+function _migrateLegacyCardWindow(now,ms){
+  try{
+    const uid=window._uid||'local';
+    const prefix=`cards_window_${uid}_`;
+    const keys=[];
+    try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf(prefix)===0)keys.push(k);}}catch(_){}
+    try{Object.keys(_LS_MEM||{}).forEach(k=>{if(k.indexOf(prefix)===0&&keys.indexOf(k)<0)keys.push(k);});}catch(_){}
+    let best=null;
+    keys.forEach(k=>{
+      const v=LS.getJ(k);
+      if(v&&v.start&&now<Number(v.start)+ms){
+        if(!best||Number(v.used||0)>Number(best.used||0))best={start:Number(v.start),used:Number(v.used||0)};
+      }
+      LS.del(k);
+    });
+    return best;
+  }catch(e){return null;}
+}
 function cardWindowInfo(){
   const cfg=cardLimitConfig();
   const ms=cfg.hours*60*60*1000;
   const now=Date.now();
-  const tier=(premiumTier||'free').toLowerCase();
-  const uid=window._uid||'local';
-  const key=`cards_window_${uid}_${tier}`;
-  let state=LS.getJ(key)||{};
-  if(!state.start||now>=Number(state.start)+ms){
+  const key=cardWindowKey();
+  let state=LS.getJ(key);
+  if(!state||!state.start)state=_migrateLegacyCardWindow(now,ms);
+  if(!state||!state.start||now>=Number(state.start)+ms){
     state={start:now,used:0};
     LS.setJ(key,state);
+  }else{
+    // Persist any value adopted from migration under the stable key.
+    LS.setJ(key,{start:Number(state.start),used:Number(state.used||0)});
   }
   const used=Math.max(0,Math.min(cfg.limit,parseInt(state.used||0,10)||0));
   return {key,start:Number(state.start),used,limit:cfg.limit,hours:cfg.hours,resetAt:Number(state.start)+ms,remaining:Math.max(0,cfg.limit-used)};
