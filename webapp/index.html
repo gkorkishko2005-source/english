@@ -1607,6 +1607,8 @@ nav{flex-shrink:0;height:calc(var(--nav)+var(--safe));padding-bottom:calc(var(--
 .course-section-index{width:24px;height:24px;border-radius:9px;background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);color:var(--a);font-size:11px;font-weight:950;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .course-section-title{font-size:12px;font-weight:950;color:var(--t1);line-height:1.2}
 .course-section-sub{font-size:10.5px;color:var(--t2);line-height:1.35;margin-top:2px}
+.course-section-sub::before{content:"→ ";color:var(--lesson-color,var(--a));font-weight:900}
+.course-step-counter{display:inline-flex;align-items:center;font-size:11px;font-weight:800;color:var(--lesson-color,var(--a));background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.18);padding:2px 8px;border-radius:999px;margin-bottom:8px}
 .course-section-done{margin-left:auto;font-size:9px;font-weight:900;color:var(--a2);background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.20);padding:3px 7px;border-radius:999px;white-space:nowrap}
 .course-vocab-grid{display:grid;gap:7px}
 .course-vocab-card{background:var(--e2);border:1px solid var(--b1);border-radius:14px;padding:14px 12px}
@@ -9349,6 +9351,7 @@ function renderBuilderMulti(id,targets,mode){
   /* Render a flat list of mini-puzzle cards, one per target sentence. The
      existing coursePickWord / checkCourseBuilder / resetCourseBuilder API
      already takes a suffix — we extend it with "_i" for each sentence. */
+  const total=targets.length;
   return targets.map((target,i)=>{
     const suffix=(mode?mode:'')+'_'+i;
     const words=courseWords(target);
@@ -9356,9 +9359,10 @@ function renderBuilderMulti(id,targets,mode){
     const promptHtml=mode==='native'
       ?`<div class="course-puzzle-prompt">${safeHTML(courseSentenceTranslation(target))}</div>`
       :'';
+    const of=(i+1)+' / '+total;
     const label=mode==='native'
-      ?({ru:`Перевод #${i+1}`,en:`Translation #${i+1}`,es:`Traducción n.º ${i+1}`,pt:`Tradução nº ${i+1}`,de:`Übersetzung #${i+1}`,fr:`Traduction n° ${i+1}`,uk:`Переклад #${i+1}`,tr:`Çeviri #${i+1}`,zh:`翻译 #${i+1}`,ar:`الترجمة #${i+1}`}[lang]||`Translation #${i+1}`)
-      :({ru:`Предложение #${i+1}`,en:`Sentence #${i+1}`,es:`Frase n.º ${i+1}`,pt:`Frase nº ${i+1}`,de:`Satz #${i+1}`,fr:`Phrase n° ${i+1}`,uk:`Речення #${i+1}`,tr:`Cümle #${i+1}`,zh:`句子 #${i+1}`,ar:`الجملة #${i+1}`}[lang]||`Sentence #${i+1}`);
+      ?({ru:`Перевод · ${of}`,en:`Translation · ${of}`,es:`Traducción · ${of}`,pt:`Tradução · ${of}`,de:`Übersetzung · ${of}`,fr:`Traduction · ${of}`,uk:`Переклад · ${of}`,tr:`Çeviri · ${of}`,zh:`翻译 · ${of}`,ar:`الترجمة · ${of}`}[lang]||`Translation · ${of}`)
+      :({ru:`Предложение · ${of}`,en:`Sentence · ${of}`,es:`Frase · ${of}`,pt:`Frase · ${of}`,de:`Satz · ${of}`,fr:`Phrase · ${of}`,uk:`Речення · ${of}`,tr:`Cümle · ${of}`,zh:`句子 · ${of}`,ar:`الجملة · ${of}`}[lang]||`Sentence · ${of}`);
     return `<div class="course-build">
       <div class="course-lab">${label}</div>
       ${promptHtml}
@@ -9695,6 +9699,7 @@ function _openCourseLessonInner(id){
           return practice.map((q,qi)=>{
             const st=pState[qi];const done=st==='ok';const failed=st==='bad';
             return `<div class="course-practice-card ${done?'done':''}" id="course-q-${id}-${qi}">
+              <div class="course-step-counter">${qi+1} / ${practice.length}</div>
               <div class="course-qtext">${safeHTML(q.q)}</div>
               ${q.o.map((o,i)=>{
                 const isAns=i===q.a;
