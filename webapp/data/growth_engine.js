@@ -24,7 +24,7 @@
   'use strict';
 
   var TWO=Math.PI*2, DPR=Math.min(2,window.devicePixelRatio||1);
-  var MOOD={fresh:[.05,.18],breezy:[.12,.38],windy:[.32,.9],rainy:[.18,1.15]};
+  var MOOD={fresh:[.05,.18],breezy:[.12,.38],windy:[.32,.9],rainy:[.18,1.15],wilt:[.03,.07],radiant:[.06,.20]};
   var STAGE_NAMES=['Seedling','Sprout','Bud','Bloom','Bush','Sapling','Tree','Grand Tree'];
 
   function clamp(v,a,b){return v<a?a:v>b?b:v}
@@ -57,6 +57,8 @@
   function Engine(container,opt){
     opt=opt||{};this.c=container;this.stage=clamp(opt.stage||1,1,8);this.targetStage=this.stage;
     this.xp=opt.xp||0;this.maxXp=opt.maxXp||100;this.mood=opt.mood||'fresh';this.prevMood=this.mood;
+    /* Foliage is tinted by the learner's CEFR level when provided. */
+    this.levelCol=(typeof opt.levelCol==='string'&&opt.levelCol.charAt(0)==='#')?opt.levelCol:null;
     this.moodBlend=1;this.onTap=opt.onTap;this.rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.a=css(container,'--a','#4f8aff');this.t=css(container,'--t1','#eef2ff');
     /* Foliage colour (set per-frame in draw via stageHue) + a warm
@@ -87,6 +89,7 @@
   Engine.prototype.setStage=function(n){n=clamp(n||1,1,8);if(n===this.targetStage)return;if(this.rm){this.stage=this.targetStage=n;this.build();return}
     this.fromStage=this.stage;this.targetStage=n;this.trans=0;this.transDur=2200+Math.random()*700;};
   Engine.prototype.setMood=function(m){if(!MOOD[m])m='fresh';if(m===this.mood)return;this.prevMood=this.mood;this.mood=m;this.moodBlend=0};
+  Engine.prototype.setLevelColor=function(hex){this.levelCol=(typeof hex==='string'&&hex.charAt(0)==='#')?hex:null;};
   Engine.prototype.setXp=function(x,max){
     var prev=this.lastXpSeen, next=x||0;
     this.xp=next;this.maxXp=max||this.maxXp||100;
@@ -179,7 +182,7 @@
 
   Engine.prototype.puff=function(x,y,col){for(var i=0;i<8;i++)this.puffs.push({x:x,y:y,vx:(Math.random()-.5)*42,vy:-Math.random()*34,r:1+Math.random()*2,a:1,c:col})};
   Engine.prototype.updateParticles=function(dt,t){
-    var want=this.mood==='rainy'?Math.floor(46*this.cap):this.mood==='windy'?Math.floor(12*this.cap):this.mood==='breezy'?6:(this.stageFloat()>=5?6:0);
+    var want=this.mood==='rainy'?Math.floor(46*this.cap):this.mood==='windy'?Math.floor(12*this.cap):this.mood==='radiant'?Math.floor(11*this.cap):this.mood==='breezy'?6:this.mood==='wilt'?0:(this.stageFloat()>=5?6:0);
     while(this.parts.length<want)this.parts.push({life:0,type:''});
     for(var i=0;i<this.parts.length;i++){var p=this.parts[i];if(p.life<=0)this.spawnParticle(p,i,t);p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.y>this.base&&p.type==='rain'){this.puff(p.x,this.base,'rgba(160,180,210,.55)');p.life=0}}
     for(i=this.puffs.length-1;i>=0;i--){var q=this.puffs[i];q.a-=dt*1.8;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;if(q.a<=0)this.puffs.splice(i,1)}
@@ -187,13 +190,15 @@
   Engine.prototype.spawnParticle=function(p,i,t){
     var W=this.w,H=this.h,b=this.base,m=(this.moodBlend<1&&Math.random()>this.moodBlend?this.prevMood:this.mood),r=Math.random;p.life=1+r()*3;p.age=0;
     if(m==='rainy'){p.type='rain';p.x=r()*W+40;p.y=-20-r()*H*.4;p.vx=-95;p.vy=360+r()*90;p.life=2}
-    else if(m==='fresh'){p.type='fly';p.cx=W*(.28+r()*.48);p.cy=H*(.12+r()*.18);p.x=p.cx;p.y=p.cy;p.vx=p.vy=0;p.life=6+r()*4;p.phase=r()*TWO}
+    else if(m==='fresh'||m==='radiant'){p.type='fly';p.cx=W*(.28+r()*.48);p.cy=H*(.12+r()*.18);p.x=p.cx;p.y=p.cy;p.vx=p.vy=0;p.life=6+r()*4;p.phase=r()*TWO}
     else{p.type='leaf';p.x=-20-r()*W*.2;p.y=H*(.12+r()*.42);p.vx=(m==='windy'?180:70)+r()*80;p.vy=(m==='windy'?36:22)+r()*42;p.life=(m==='windy'?2.6:5)+r()*2;p.rot=r()*TWO}
   };
 
   Engine.prototype.draw=function(t){
     var c=this.ctx,W=this.w,H=this.h,b=this.base,sf=this.stageFloat();c.clearRect(0,0,W,H);c.lineCap='round';c.lineJoin='round';
-    this.fol=stageHue(sf);
+    /* Foliage colour: CEFR-level tint blended with the life-cycle hue so
+       progress reads as colour. Falls back to the stage ramp. */
+    this.fol=this.levelCol?mix(this.levelCol,STAGE_HEX[clamp(Math.floor(sf),1,8)-1],.32):stageHue(sf);
     this.drawAtmosphere(c,t);
     c.strokeStyle=this.t;c.fillStyle=this.t;c.globalAlpha=.32;c.beginPath();c.moveTo(W*.16,b);c.quadraticCurveTo(W*.5,b-5,W*.84,b);c.stroke();c.globalAlpha=1;
     this.drawWeatherBack(c,t);
@@ -214,7 +219,9 @@
        for the middle moods. Painted as a single soft radial so it
        reads as "light in the room" rather than a sticker. */
     var cx,cy,r1,r2,stop;
-    if(m==='fresh'){cx=W*.78;cy=H*.18;r2=Math.max(W,H)*.95;stop='rgba(255,214,158,0.18)'}
+    if(m==='radiant'){cx=W*.7;cy=H*.16;r2=Math.max(W,H)*1.05;stop='rgba(255,224,150,0.30)'}
+    else if(m==='fresh'){cx=W*.78;cy=H*.18;r2=Math.max(W,H)*.95;stop='rgba(255,214,158,0.18)'}
+    else if(m==='wilt'){cx=W*.5;cy=H*.2;r2=Math.max(W,H);stop='rgba(120,128,140,0.10)'}
     else if(m==='rainy'){cx=W*.4;cy=H*.12;r2=Math.max(W,H)*1.05;stop='rgba(120,140,170,0.16)'}
     else if(m==='windy'){cx=W*.2;cy=H*.22;r2=Math.max(W,H);stop='rgba(180,195,220,0.13)'}
     else {cx=W*.7;cy=H*.22;r2=Math.max(W,H);stop='rgba(210,200,240,0.13)'}
@@ -301,11 +308,18 @@
   function replaceLegacyHook(){
     var stageEl=document.querySelector('.growth-stage');if(!stageEl)return null;
     var old=window.renderGrowth, handle=null;
+    function levelHex(d){
+      try{
+        var lv=String((d&&d.level)||(window.LS&&LS.get&&LS.get('ob_level'))||'A1').toUpperCase().replace('+','');
+        if(window.LEVEL_COLORS&&window.LEVEL_COLORS[lv])return window.LEVEL_COLORS[lv];
+      }catch(_){}
+      return null;
+    }
     function sync(d){
-      d=d||window._d||{};var xp=d.xp||0,info=stageInfo(xp),max=info.max-info.min,stage=info.stage,mood=moodFromLegacy(),localXp=xp-info.min;
+      d=d||window._d||{};var xp=d.xp||0,info=stageInfo(xp),max=info.max-info.min,stage=info.stage,mood=moodFromLegacy(),localXp=xp-info.min,lc=levelHex(d);
       if(window.RANKS){try{var r=window.RANKS.find(function(a,i){return xp<((window.RANKS[i+1]||{}).min||9999)});if(r){stage=r.stage||stage;max=(r.max||xp+100)-(r.min||0);localXp=xp-(r.min||0)}}catch(_){}}
-      if(!handle)handle=mount(stageEl,{stage:stage,mood:mood,xp:localXp,maxXp:max});
-      else{handle.setStage(stage);handle.setMood(mood);handle.setXp(localXp,max)}
+      if(!handle)handle=mount(stageEl,{stage:stage,mood:mood,xp:localXp,maxXp:max,levelCol:lc});
+      else{handle.setStage(stage);handle.setMood(mood);handle.setLevelColor(lc);handle.setXp(localXp,max)}
     }
     ['growth-svg','growth-weather'].forEach(function(id){var e=document.getElementById(id);if(e)e.remove()});
     window.renderGrowth=function(d){if(old)try{old(d)}catch(_){};sync(d)};

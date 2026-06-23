@@ -2181,12 +2181,73 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    the tree growing), but everything else around it stays
    restrained — small type, a single hairline divider, the accent
    colour reserved for the progress bar and the SVG's blossoms. */
-.growth-hero{background:var(--e1);border:1px solid var(--b1);border-radius:14px;
-  box-shadow:inset 0 1px 0 var(--edge),var(--sh);
+.growth-hero{position:relative;background:var(--e1);border:1px solid var(--b1);border-radius:14px;
+  box-shadow:inset 0 1px 0 var(--edge),var(--sh);overflow:hidden;
   padding:7px 16px 9px;margin-bottom:11px;display:flex;flex-direction:column;
   align-items:stretch;gap:5px}
-.growth-stage{position:relative;width:100%;height:118px;display:flex;
-  align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px}
+.growth-stage{position:relative;width:100%;height:150px;display:flex;
+  align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px;
+  transition:filter .6s ease,transform .6s ease}
+
+/* ── Time-of-day backdrop ─────────────────────────────────────────
+   Driven by data-tod (dawn / day / sunset / night) from the user's
+   local hour. A quiet wash behind the plant; the canvas atmosphere
+   layers on top. */
+.growth-hero[data-tod] .growth-stage{background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 70%)}
+.growth-hero[data-tod="dawn"]   .growth-stage{background:linear-gradient(180deg,rgba(255,176,122,.16),rgba(120,140,200,.10) 60%,transparent)}
+.growth-hero[data-tod="day"]    .growth-stage{background:linear-gradient(180deg,rgba(120,180,255,.12),rgba(180,230,255,.05) 55%,transparent)}
+.growth-hero[data-tod="sunset"] .growth-stage{background:linear-gradient(180deg,rgba(255,120,90,.16),rgba(150,80,160,.10) 60%,transparent)}
+.growth-hero[data-tod="night"]  .growth-stage{background:linear-gradient(180deg,rgba(30,40,80,.30),rgba(10,16,40,.14) 60%,transparent)}
+html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:linear-gradient(180deg,rgba(60,72,120,.16),rgba(120,130,180,.06) 60%,transparent)}
+
+/* Drooping (inactivity) vs radiant (daily goal done). */
+.growth-hero[data-mood="wilt"]    .growth-stage{filter:saturate(.62) brightness(.92);transform:translateY(2px) scaleY(.985)}
+.growth-hero[data-mood="radiant"] .growth-stage{filter:saturate(1.12) brightness(1.07) drop-shadow(0 0 10px rgba(255,224,150,.35))}
+@media(prefers-reduced-motion:reduce){.growth-stage{transition:none}}
+
+/* ── Weeds (error diary) ──────────────────────────────────────────
+   Small sprigs along the soil line; their count tracks the number of
+   open error-diary entries. They wilt away when the diary is cleared. */
+.growth-weeds{position:absolute;left:18px;right:18px;top:7px;height:150px;
+  display:flex;align-items:flex-end;justify-content:space-around;
+  pointer-events:none;z-index:2}
+.growth-weeds .weed{width:14px;height:22px;opacity:0;transform:translateY(6px) scale(.6);
+  transform-origin:50% 100%;animation:weedGrow .5s cubic-bezier(.22,1,.36,1) forwards}
+.growth-weeds .weed svg{width:100%;height:100%;display:block;fill:none;
+  stroke:#7c9a5a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+@keyframes weedGrow{to{opacity:1;transform:translateY(0) scale(1)}}
+.growth-weeds.clearing .weed{animation:weedClear .55s ease forwards}
+@keyframes weedClear{to{opacity:0;transform:translateY(8px) scale(.4) rotate(8deg)}}
+.growth-hero.bloom-burst .growth-stage{animation:bloomBurst .8s ease}
+@keyframes bloomBurst{0%{filter:none}40%{filter:saturate(1.3) brightness(1.12) drop-shadow(0 0 14px rgba(120,230,170,.5))}100%{filter:none}}
+@media(prefers-reduced-motion:reduce){.growth-weeds .weed{animation:none;opacity:1;transform:none}.growth-hero.bloom-burst .growth-stage{animation:none}}
+
+/* History icon button in the Progress header. */
+#s-progress .phdr{position:relative}
+.phdr-text{min-width:0;flex:1}
+.prog-hist-btn{flex-shrink:0;width:34px;height:34px;display:flex;align-items:center;
+  justify-content:center;border-radius:10px;background:var(--e2);border:1px solid var(--b1);
+  color:var(--t2);cursor:pointer;transition:transform .15s ease,background .15s ease}
+.prog-hist-btn svg{width:18px;height:18px}
+.prog-hist-btn:active{transform:scale(.92);background:var(--e3)}
+
+/* Congratulation modal. */
+.congrat-emoji{font-size:46px;text-align:center;margin:10px 0 2px;line-height:1;
+  animation:congratPop .5s cubic-bezier(.22,1.4,.5,1)}
+@keyframes congratPop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.congrat-msg{padding:6px 22px 4px;text-align:center;font-size:14px;color:var(--t2);line-height:1.5}
+.congrat-ok{margin:16px auto 18px;display:block;min-width:140px;padding:11px 20px;
+  border:none;border-radius:12px;background:var(--a);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.congrat-ok:active{transform:scale(.97)}
+
+/* Progress history log rows. */
+.phist-row{display:flex;align-items:center;gap:12px;padding:11px 2px}
+.phist-row+.phist-row{border-top:1px solid var(--b1)}
+.phist-ico{flex-shrink:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;background:var(--e2);border:1px solid var(--b1);font-size:15px}
+.phist-main{flex:1;min-width:0}
+.phist-lbl{font-size:13px;color:var(--t2);font-weight:600}
+.phist-val{font-size:13px;color:var(--t1);font-weight:800;font-variant-numeric:tabular-nums}
 .growth-svg{display:flex;align-items:flex-end;justify-content:center;
   width:100%;height:100%;color:var(--t1);transform-origin:50% 100%;
   transition:transform .4s ease,filter .4s ease,opacity .4s ease}
@@ -2565,16 +2626,24 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 
 <!-- PROGRESS -->
 <div class="screen" id="s-progress">
-  <div class="phdr"><div class="ptit" id="p-tit"></div><div class="psub" id="p-sub"></div></div>
+  <div class="phdr">
+    <div class="phdr-text"><div class="ptit" id="p-tit"></div><div class="psub" id="p-sub"></div></div>
+    <!-- History: opens a short progress log over the hero card. -->
+    <button class="prog-hist-btn" id="prog-hist-btn" onclick="openProgressHistory()" aria-label="History">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4"/><path d="M12 8v4l3 2"/></svg>
+    </button>
+  </div>
   <!-- Growth hero: the learner's tree at the current stage.
-       The SVG itself is rendered by renderGrowth(d) — 8 botanical
-       stages from sprout to grand tree. Level chip + CEFR + XP
-       progress sit below as quiet metadata. -->
-  <div class="growth-hero" id="growth-hero" data-mood="fresh">
+       The plant is drawn by the Canvas GrowthEngine (data/growth_engine.js),
+       which colours foliage by CEFR level, droops on inactivity and glows
+       when the daily goal is met. The card background shifts with the time
+       of day, and "weeds" sprout when the error diary has entries. -->
+  <div class="growth-hero" id="growth-hero" data-mood="fresh" data-tod="day">
     <div class="growth-stage">
       <div class="growth-weather" id="growth-weather" aria-hidden="true"></div>
       <div class="growth-svg" id="growth-svg"></div>
     </div>
+    <div class="growth-weeds" id="growth-weeds" aria-hidden="true"></div>
     <div class="growth-meta">
       <div class="growth-title" id="growth-title">—</div>
       <div class="growth-sub" id="growth-sub">—</div>
@@ -2802,6 +2871,24 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="mtit" id="ach-mtit">🏅 Achievements</div>
     <div style="padding:4px 16px 20px" id="achievements-wrap"></div>
+  </div>
+</div>
+
+<!-- PROGRESS HISTORY MODAL -->
+<div class="mov" id="proghist" style="display:none" onclick="closeMod('proghist')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:84vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit" id="proghist-tit">History</div>
+    <div style="padding:4px 16px 22px" id="proghist-body"></div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENT CONGRATULATION MODAL -->
+<div class="mov" id="congrat" style="display:none" onclick="closeMod('congrat')">
+  <div class="msh" onclick="event.stopPropagation()" style="text-align:center"><div class="mhnd"></div>
+    <div class="congrat-emoji" id="congrat-emoji">🏅</div>
+    <div class="mtit" id="congrat-tit" style="text-align:center">Congratulations!</div>
+    <div class="congrat-msg" id="congrat-msg"></div>
+    <button class="congrat-ok" onclick="closeMod('congrat')" id="congrat-ok">OK</button>
   </div>
 </div>
 
@@ -4035,17 +4122,116 @@ function _growthCopy(){
    CSS layer (and the Codex-illustrated SVG overlays) can react. */
 function _getGrowthMood(){
   const today=localDayKey();
+  /* Daily goal met today → the plant glows. */
+  if(LS.get('streak_done_date')===today)return 'radiant';
   const last=LS.get('growth_last_visit')||LS.get('streak_done_date');
   if(!last)return 'fresh';
   try{
     const a=new Date(today+'T00:00:00');
     const b=new Date(last +'T00:00:00');
     const days=Math.max(0,Math.round((a-b)/86400000));
-    if(days<=1)return 'fresh';
-    if(days<=3)return 'breezy';
-    if(days<=7)return 'windy';
-    return 'rainy';
+    if(days<=1)return 'fresh';   // active today/yesterday
+    if(days<=7)return 'wilt';    // 2-7 idle days → drooping
+    return 'rainy';              // long absence → rain
   }catch(_){return 'fresh';}
+}
+
+/* Time-of-day bucket from the user's local hour (device tz already
+   reflects UTC + offset). Drives the .growth-hero[data-tod] backdrop. */
+function _timeOfDay(){
+  const h=new Date().getHours();
+  if(h>=5&&h<10)return 'dawn';
+  if(h>=10&&h<17)return 'day';
+  if(h>=17&&h<21)return 'sunset';
+  return 'night';
+}
+
+/* Weeds = open error-diary entries. Renders up to 5 sprigs; when the
+   diary clears (count goes >0 → 0) the weeds wilt away and the plant
+   gives a small celebratory bloom. */
+let _prevWeedCount=null;
+function renderGrowthWeeds(count){
+  const host=document.getElementById('growth-weeds');
+  const hero=document.getElementById('growth-hero');
+  if(!host)return;
+  count=Math.max(0,count|0);
+  const cleared=(_prevWeedCount!==null&&_prevWeedCount>0&&count===0);
+  if(cleared){
+    host.classList.add('clearing');
+    if(hero){hero.classList.add('bloom-burst');setTimeout(()=>hero.classList.remove('bloom-burst'),850);}
+    setTimeout(()=>{host.classList.remove('clearing');host.innerHTML='';},600);
+    _prevWeedCount=0;
+    return;
+  }
+  host.classList.remove('clearing');
+  const n=Math.min(5,count);
+  const weed='<svg viewBox="0 0 14 22"><path d="M7 22V8"/><path d="M7 13C7 9 3 9 2 6c4 0 5 3 5 5"/><path d="M7 11c0-3 4-3 5-6-4 0-5 3-5 5"/></svg>';
+  host.innerHTML=Array.from({length:n}).map((_,i)=>`<span class="weed" style="animation-delay:${i*60}ms"></span>`).join('');
+  host.querySelectorAll('.weed').forEach(w=>{w.innerHTML=weed;});
+  _prevWeedCount=count;
+}
+
+/* ── Progress history log ─────────────────────────────────────────
+   A compact, read-only snapshot of the learner's journey assembled
+   from the data we already track locally + on the server. */
+function openProgressHistory(){
+  const tit=document.getElementById('proghist-tit');
+  if(tit)tit.textContent=({ru:'История прогресса',en:'Progress history',es:'Historial de progreso',pt:'Histórico de progresso',de:'Fortschrittsverlauf',fr:'Historique de progression',uk:'Історія прогресу',tr:'İlerleme geçmişi',zh:'进度历史',ar:'سجل التقدم'}[lang]||'Progress history');
+  const body=document.getElementById('proghist-body');
+  if(!body){openMod('proghist');return;}
+  const d=window._d||{};
+  const stats=LS.getJ('local_stats')||{};
+  const xp=Math.max(d.xp||0,0);
+  const lvl=(d.level||LS.get('ob_level')||'A1');
+  const streak=Math.max(d.streak||0, +(LS.get('streak_count')||0));
+  const words=Math.max(d.words||0,stats.words||0);
+  const tests=Math.max(d.tests||0,stats.tests||0);
+  const sess=Math.max(d.sessions||0,stats.sessions||0);
+  const weekXp=(LS.getJ('weekly_xp')||[]).reduce((a,b)=>a+(b||0),0);
+  const ach=Object.keys(LS.getJ('achievements_unlocked')||{}).length;
+  let stageName='';
+  try{const c=_growthCopy(),r=rankOf(xp);stageName=(c[r.r]&&(c[r.r][lang]||c[r.r].en))||r.r;}catch(_){}
+  const T=(k)=>({
+    lvl:{ru:'Текущий уровень',en:'Current level',es:'Nivel actual',pt:'Nível atual',de:'Aktuelles Niveau',fr:'Niveau actuel',uk:'Поточний рівень',tr:'Mevcut seviye',zh:'当前等级',ar:'المستوى الحالي'},
+    xp:{ru:'Всего XP',en:'Total XP',es:'XP total',pt:'XP total',de:'Gesamt-XP',fr:'XP total',uk:'Всього XP',tr:'Toplam XP',zh:'总 XP',ar:'إجمالي XP'},
+    stage:{ru:'Стадия растения',en:'Plant stage',es:'Etapa de la planta',pt:'Estágio da planta',de:'Pflanzenstadium',fr:'Stade de la plante',uk:'Стадія рослини',tr:'Bitki aşaması',zh:'植物阶段',ar:'مرحلة النبتة'},
+    streak:{ru:'Серия дней',en:'Day streak',es:'Racha de días',pt:'Sequência de dias',de:'Tagesserie',fr:'Série de jours',uk:'Серія днів',tr:'Gün serisi',zh:'连续天数',ar:'سلسلة الأيام'},
+    week:{ru:'XP за неделю',en:'XP this week',es:'XP esta semana',pt:'XP esta semana',de:'XP diese Woche',fr:'XP cette semaine',uk:'XP за тиждень',tr:'Bu hafta XP',zh:'本周 XP',ar:'XP هذا الأسبوع'},
+    words:{ru:'Слов изучено',en:'Words learned',es:'Palabras aprendidas',pt:'Palavras aprendidas',de:'Gelernte Wörter',fr:'Mots appris',uk:'Слів вивчено',tr:'Öğrenilen kelime',zh:'已学单词',ar:'كلمات تعلمتها'},
+    tests:{ru:'Тестов пройдено',en:'Tests passed',es:'Pruebas superadas',pt:'Testes feitos',de:'Tests bestanden',fr:'Tests réussis',uk:'Тестів пройдено',tr:'Geçilen test',zh:'通过测试',ar:'اختبارات مجتازة'},
+    sess:{ru:'Сессий',en:'Sessions',es:'Sesiones',pt:'Sessões',de:'Sitzungen',fr:'Sessions',uk:'Сесій',tr:'Oturum',zh:'学习次数',ar:'جلسات'},
+    ach:{ru:'Достижений открыто',en:'Achievements unlocked',es:'Logros desbloqueados',pt:'Conquistas desbloqueadas',de:'Erfolge freigeschaltet',fr:'Succès débloqués',uk:'Досягнень відкрито',tr:'Açılan başarı',zh:'已解锁成就',ar:'إنجازات مفتوحة'}
+  }[k][lang]||{
+    lvl:'Current level',xp:'Total XP',stage:'Plant stage',streak:'Day streak',week:'XP this week',words:'Words learned',tests:'Tests passed',sess:'Sessions',ach:'Achievements unlocked'
+  }[k]);
+  const rows=[
+    ['🎯',T('lvl'),lvl],
+    ['🌱',T('stage'),stageName],
+    ['✨',T('xp'),xp.toLocaleString(lang==='ru'?'ru-RU':'en-US')],
+    ['🔥',T('streak'),streak],
+    ['📅',T('week'),weekXp.toLocaleString(lang==='ru'?'ru-RU':'en-US')+' XP'],
+    ['📖',T('words'),words],
+    ['📝',T('tests'),tests],
+    ['💬',T('sess'),sess],
+    ['🏅',T('ach'),ach]
+  ];
+  body.innerHTML=rows.map(r=>`<div class="phist-row"><div class="phist-ico">${r[0]}</div><div class="phist-main"><span class="phist-lbl">${safeHTML(r[1])}</span></div><span class="phist-val">${safeHTML(String(r[2]))}</span></div>`).join('');
+  openMod('proghist');
+}
+
+/* Achievement congratulation modal — shown when a badge is tapped. */
+function openCongrat(emoji,title,desc){
+  const e=document.getElementById('congrat-emoji'),t=document.getElementById('congrat-tit'),
+        m=document.getElementById('congrat-msg'),ok=document.getElementById('congrat-ok');
+  if(e)e.textContent=emoji||'🏅';
+  if(t)t.textContent=({ru:'Поздравляем!',en:'Congratulations!',es:'¡Felicidades!',pt:'Parabéns!',de:'Glückwunsch!',fr:'Félicitations !',uk:'Вітаємо!',tr:'Tebrikler!',zh:'恭喜！',ar:'تهانينا!'}[lang]||'Congratulations!');
+  if(m){
+    const intro=({ru:'Достижение разблокировано',en:'Achievement unlocked',es:'Logro desbloqueado',pt:'Conquista desbloqueada',de:'Erfolg freigeschaltet',fr:'Succès débloqué',uk:'Досягнення розблоковано',tr:'Başarı açıldı',zh:'成就已解锁',ar:'تم فتح الإنجاز'}[lang]||'Achievement unlocked');
+    m.innerHTML=`<b style="color:var(--t1)">${safeHTML(title||'')}</b><br>${safeHTML(desc||intro)}`;
+  }
+  if(ok)ok.textContent=({ru:'Класс!',en:'Awesome!',es:'¡Genial!',pt:'Ótimo!',de:'Super!',fr:'Super !',uk:'Клас!',tr:'Harika!',zh:'太棒了！',ar:'رائع!'}[lang]||'Awesome!');
+  try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback)Telegram.WebApp.HapticFeedback.notificationOccurred('success');}catch(_){}
+  openMod('congrat');
 }
 
 function renderGrowth(d){
@@ -4059,6 +4245,10 @@ function renderGrowth(d){
   /* The mood drives the weather overlay + plant animation class. */
   const mood=_getGrowthMood();
   host.setAttribute('data-mood',mood);
+  /* Time-of-day backdrop. */
+  try{host.setAttribute('data-tod',_timeOfDay());}catch(_){}
+  /* Weeds reflect the open error-diary count. */
+  try{renderGrowthWeeds((LS.getJ('error_diary')||[]).length);}catch(_){}
   /* The SVG slot. */
   const svgHost=document.getElementById('growth-svg');
   if(svgHost){
@@ -13247,19 +13437,32 @@ function renderBadges(){
   const badges=getProfileBadges();
   const prem=LS.get('is_premium')==='true';
   let html='';
-  if(prem)html+='<span class="pbadge pbadge-prem">👑 Premium</span>';
-  if((window._d?.streak||0)>=7)html+='<span class="pbadge pbadge-streak">🔥 '+window._d.streak+'</span>';
-  badges.slice(0,3).forEach(b=>{
+  if(prem)html+='<span class="pbadge pbadge-prem" data-cg="prem" style="cursor:pointer">👑 Premium</span>';
+  if((window._d?.streak||0)>=7)html+='<span class="pbadge pbadge-streak" data-cg="streak" style="cursor:pointer">🔥 '+window._d.streak+'</span>';
+  badges.slice(0,3).forEach((b,i)=>{
     const title=(b.title&&(b.title[lang]||b.title.en))||'';
-    html+='<span class="pbadge pbadge-master">'+b.badge+' '+safeHTML(title)+'</span>';
+    html+='<span class="pbadge pbadge-master" data-cg="ach" data-i="'+i+'" style="cursor:pointer">'+b.badge+' '+safeHTML(title)+'</span>';
   });
   if(badges.length>3){
     const more={ru:'ещё',en:'more',es:'más',pt:'mais',de:'mehr',fr:'plus',uk:'ще',tr:'daha',zh:'更多',ar:'المزيد'}[lang]||'more';
-    html+='<span class="pbadge pbadge-master">+'+(badges.length-3)+' '+more+'</span>';
+    html+='<span class="pbadge pbadge-master" data-cg="all" style="cursor:pointer">+'+(badges.length-3)+' '+more+'</span>';
   }
   el.innerHTML=html;
-  el.style.cursor='pointer';
-  el.onclick=()=>{try{openAchModal();}catch(e){}};
+  /* Each badge opens a short congratulation; the "+N more" chip opens
+     the full achievements modal. */
+  el.querySelectorAll('.pbadge').forEach(node=>{
+    node.onclick=(ev)=>{
+      ev.stopPropagation();
+      const kind=node.getAttribute('data-cg');
+      try{
+        if(kind==='all'){openAchModal();return;}
+        if(kind==='prem'){openCongrat('👑','Premium',({ru:'Спасибо за поддержку PolyGlotty!',en:'Thanks for supporting PolyGlotty!',es:'¡Gracias por apoyar a PolyGlotty!',pt:'Obrigado por apoiar o PolyGlotty!',de:'Danke, dass du PolyGlotty unterstützt!',fr:'Merci de soutenir PolyGlotty !',uk:'Дякуємо за підтримку PolyGlotty!',tr:'PolyGlotty’yi desteklediğin için teşekkürler!',zh:'感谢支持 PolyGlotty！',ar:'شكرًا لدعمك PolyGlotty!'}[lang]||'Thanks for supporting PolyGlotty!'));return;}
+        if(kind==='streak'){const s=window._d?.streak||0;openCongrat('🔥',s+' '+({ru:'дней подряд',en:'day streak',es:'días seguidos',pt:'dias seguidos',de:'Tage in Folge',fr:'jours d’affilée',uk:'днів поспіль',tr:'gün üst üste',zh:'天连续',ar:'يومًا متتاليًا'}[lang]||'day streak'),({ru:'Так держать — не разрывай серию!',en:'Keep it up — don’t break the streak!',es:'¡Sigue así, no rompas la racha!',pt:'Continue assim — não quebre a sequência!',de:'Weiter so — halte die Serie!',fr:'Continue — ne casse pas la série !',uk:'Так тримати — не переривай серію!',tr:'Böyle devam — seriyi bozma!',zh:'继续保持，别中断连续！',ar:'واصل — لا تكسر السلسلة!'}[lang]||'Keep it up — don’t break the streak!'));return;}
+        const idx=+node.getAttribute('data-i')||0;const b=badges[idx];
+        if(b){const t=(b.title&&(b.title[lang]||b.title.en))||'';const ds=(b.desc&&(b.desc[lang]||b.desc.en))||'';openCongrat(b.badge||'🏅',t,ds);}
+      }catch(e){try{openAchModal();}catch(_){}}
+    };
+  });
 }
 function openAchModal(){
   openMod('achm');
