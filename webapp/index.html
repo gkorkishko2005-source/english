@@ -972,18 +972,14 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .fcf::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(150deg,rgba(255,255,255,.1),rgba(255,255,255,0) 55%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:1}
 .fcfr{background:linear-gradient(145deg,color-mix(in srgb,var(--e1) 85%,transparent),color-mix(in srgb,var(--e2) 80%,transparent));border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.28);overflow:hidden}
 .fcfr::after{content:'';position:absolute;right:-42px;top:-42px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.16),transparent 68%);pointer-events:none}
-.fcbk{background:linear-gradient(145deg,rgba(var(--ar),.13),rgba(0,212,170,.07));border:1px solid rgba(255,255,255,.05);transform:rotateY(180deg);box-shadow:0 8px 30px rgba(0,0,0,.28);overflow:hidden}
-.fcbk::after{content:'';position:absolute;left:-44px;bottom:-54px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,170,.13),transparent 68%);pointer-events:none}
+.fcbk{background:linear-gradient(145deg,color-mix(in srgb,var(--e1) 85%,transparent),color-mix(in srgb,var(--e2) 80%,transparent));border:1px solid rgba(255,255,255,.05);transform:rotateY(180deg);box-shadow:0 8px 30px rgba(0,0,0,.28);overflow:hidden}
+.fcbk::after{content:'';position:absolute;right:-42px;top:-42px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(var(--ar),.16),transparent 68%);pointer-events:none}
 /* One-shot light glint sweeping the contour on each new card (600ms) */
 .fc-sheen{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;z-index:2;background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.16) 50%,transparent 68%);transform:translateX(-120%)}
 .fcs.fc-shine .fc-sheen{animation:fcSheen .6s ease-out 1}
 @keyframes fcSheen{0%{opacity:0;transform:translateX(-120%)}18%{opacity:1}100%{opacity:0;transform:translateX(120%)}}
 .fcbg{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);margin-bottom:11px}
 .fcw{font-size:clamp(17px,5vw,24px);font-weight:800;color:var(--t1);line-height:1.2;margin-bottom:8px;word-break:break-word;max-width:100%}
-/* "Example" peek button under the word */
-.fc-eye{margin:0 0 8px;display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:100px;border:1px solid rgba(var(--ar),.22);background:rgba(var(--ar),.08);color:var(--a);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-.fc-eye:active{transform:scale(.94);background:rgba(var(--ar),.16)}
-.fc-eye svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
 .fcp{font-size:13px;color:var(--a);margin-bottom:7px;font-weight:700}
 .fctr{font-size:21px;font-weight:700;color:var(--a);margin-bottom:8px}
 .fcex{font-size:13px;color:var(--t2);font-style:italic;line-height:1.5;max-width:95%}
@@ -2620,7 +2616,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
       <div class="fcs" id="fcs" onclick="flipCard()">
         <div class="fci" id="fci">
-          <div class="fcf fcfr"><span class="fc-sheen" aria-hidden="true"></span><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><button class="fc-eye" id="fc-eye" type="button" onclick="event.stopPropagation();showCardExample()" aria-label="Example"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><span id="fc-eye-lbl">Example</span></button><div class="fcp" id="fcph"></div><div class="fch" id="fchint" aria-label="Flip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div></div>
+          <div class="fcf fcfr"><span class="fc-sheen" aria-hidden="true"></span><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint" aria-label="Flip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div></div>
           <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div><div class="fcuse" id="fcuse"></div></div>
         </div>
       </div>
@@ -3432,7 +3428,6 @@ function applyLang(){
   updateLearnHeader();
   document.getElementById('rev-lbl').textContent=L.rev;
   var _fh=document.getElementById('fchint');if(_fh)_fh.setAttribute('aria-label',L.tap_flip);
-  var _fe=document.getElementById('fc-eye-lbl');if(_fe)_fe.textContent=({ru:'Пример',en:'Example',es:'Ejemplo',pt:'Exemplo',de:'Beispiel',fr:'Exemple',uk:'Приклад',tr:'Örnek',zh:'例句',ar:'مثال'}[lang]||'Example');
   document.getElementById('fcbg2').textContent=L.translation;
   document.getElementById('rb1l').textContent=L.again;document.getElementById('rb2l').textContent=L.hard;
   document.getElementById('rb3l').textContent=L.good;document.getElementById('rb4l').textContent=L.easy;
@@ -6841,14 +6836,6 @@ function showCard(i){
   document.getElementById('rrow').classList.add('hid');
 }
 function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');try{sfx.flip();}catch(e){}}
-/* "Example" eye button: brief toast with a sentence using the current word. */
-function showCardExample(){
-  const c=cards[cIdx];if(!c)return;
-  let ex=(c.example||'').trim();
-  if(!ex){const w=c.word||'';ex=w?`I use "${w}" in a sentence.`:'';}
-  if(ex)toast(ex,'👁');
-  try{haptic('light');}catch(e){}
-}
 function cardHelpExamples(c){
   const w=c.word||'word';
   const ex=(c.example||'').trim();
