@@ -314,6 +314,8 @@ async def ask_alex(uid: int, user_text: str, mode: str = "general", extra: str =
     for interest in INTEREST_TAG.findall(reply):
         await save_interest(uid, interest.strip(), source="auto")
     clean = INTEREST_TAG.sub("", reply).strip()
+    # Dense layout: collapse blank lines between paragraphs (matches prompt LAYOUT rule).
+    clean = re.sub(r"\n[ \t]*\n+", "\n", clean)
 
     # Адаптивная сложность
     has_complex = any(p in user_text.lower() for p in [

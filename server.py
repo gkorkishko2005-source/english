@@ -1,7 +1,7 @@
 """
 LinguaMax - API server v3
 """
-import os, json, logging, hmac, hashlib, time
+import os, json, logging, hmac, hashlib, time, re
 from pathlib import Path
 from urllib.parse import parse_qsl
 from aiohttp import web
@@ -621,6 +621,9 @@ async def handle_chat(request):
                         logger.warning("reserve cancel failed uid=%s: %s", uid, ce)
                 return web.json_response({"error": data["error"].get("message","API error")[:200]}, status=500)
             reply = data["content"][0]["text"].strip()
+            # Dense layout: collapse blank lines between paragraphs so ALEX
+            # replies render tight (matches the prompt's LAYOUT rule).
+            reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
             if uid not in ADMIN_IDS:
                 cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
                 ai_cost = _estimate_ai_cost(model_key, data.get("usage") or {})

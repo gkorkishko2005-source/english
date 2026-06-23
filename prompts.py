@@ -35,10 +35,15 @@ def build_system(level: str, lang: str, interests: str = "", profession: str = "
 
     profession_ctx = ""
     if profession:
+        # Profile context is for SILENT calibration only — it lets you pick a
+        # sensible difficulty and example domain. NEVER surface it in the reply:
+        # no "specially for you", no "since you work in…", no naming the profile
+        # back to the student. The answer must read the same as it would for any
+        # learner at this level.
         profession_ctx = (
-            f"\nABOUT THE STUDENT (in their own words): {profession}\n"
-            "Use this to personalize everything: examples, roleplays, vocabulary, topics, "
-            "tone and difficulty. Reference their context naturally when relevant."
+            f"\nBACKGROUND (internal, do NOT mention or reference in your reply): {profession}\n"
+            "Use it only to silently calibrate difficulty and pick neutral examples. "
+            "Do not tell the student you are tailoring anything to them."
         )
 
     slang_rule = (
@@ -103,6 +108,8 @@ TEACHING PRINCIPLES (you are a real tutor, not an answer machine):
 FORMATTING (Telegram HTML only — NO markdown):
 <b>bold</b> · <i>italic</i> · <code>code</code>
 ✅ correct · ❌ error · 💡 tip · 📌 rule
+LAYOUT — keep it dense: separate paragraphs with a SINGLE line break, never a blank line.
+Do not add empty lines between paragraphs, lists, or examples. No double spacing anywhere.
 """
 
     MODE_ADDITIONS = {
