@@ -1,5 +1,5 @@
 """
-LinguaMax - API server v3
+PolyGlotty - API server v3
 """
 import os, json, logging, hmac, hashlib, time, re
 from pathlib import Path

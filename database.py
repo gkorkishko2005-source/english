@@ -1,5 +1,5 @@
 """
-LinguaMax DB v4
+PolyGlotty DB v4
 """
 from __future__ import annotations
 
@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS users (
     platform_lifetime   BOOLEAN DEFAULT FALSE,
     chat_credits        INTEGER DEFAULT 0,
     grandfathered_tier  TEXT DEFAULT '',
+    sub_exp_notified    TEXT DEFAULT '',
     ref_by          BIGINT,
     referrals       INTEGER DEFAULT 0,
     created_at      TIMESTAMPTZ DEFAULT NOW()
@@ -265,6 +266,7 @@ CREATE TABLE IF NOT EXISTS users (
     premium_until TEXT, premium_tier TEXT DEFAULT '',
     platform_until TEXT, platform_lifetime INTEGER DEFAULT 0,
     chat_credits INTEGER DEFAULT 0, grandfathered_tier TEXT DEFAULT '',
+    sub_exp_notified TEXT DEFAULT '',
     ref_by INTEGER, referrals INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
@@ -371,6 +373,10 @@ async def db_init():
         "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS state TEXT DEFAULT 'new'"  if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN state TEXT DEFAULT 'new'",
         "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS lapses INTEGER DEFAULT 0"  if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN lapses INTEGER DEFAULT 0",
         "ALTER TABLE vocabulary ADD COLUMN IF NOT EXISTS last_review_dt TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE vocabulary ADD COLUMN last_review_dt TEXT",
+        # ── Subscription-expiry reminders: marker of the last expiry push
+        # sent ("<until-date>:<days-left>"), so we never re-send the same
+        # 3/2/1-day notice and reset automatically when the sub is extended.
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_exp_notified TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN sub_exp_notified TEXT DEFAULT ''",
     ]
     for stmt in migrations:
         try:

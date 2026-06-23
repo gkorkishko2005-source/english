@@ -1,5 +1,5 @@
 """
-LinguaMax · Переводы интерфейса
+PolyGlotty · Переводы интерфейса
 Языки интерфейса: ru, en
 (Обучение всегда на английском, но объяснения на языке интерфейса)
 """
@@ -38,7 +38,7 @@ T = {
 
 "help": {
     "ru": (
-        "<b>LinguaMax ALEX · Справка</b>\n\n"
+        "<b>PolyGlotty ALEX · Справка</b>\n\n"
         "<b>Обучение:</b>\n"
         "/lesson — урок по грамматике\n"
         "/vocab — словарный тренажёр\n"
@@ -64,7 +64,7 @@ T = {
         "🎤 Напиши по-английски — ALEX исправит ошибки"
     ),
     "en": (
-        "<b>LinguaMax ALEX · Help</b>\n\n"
+        "<b>PolyGlotty ALEX · Help</b>\n\n"
         "<b>Learning:</b>\n"
         "/lesson — grammar lesson\n"
         "/vocab — vocabulary trainer\n"

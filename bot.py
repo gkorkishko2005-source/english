@@ -1,5 +1,5 @@
 """
-LinguaMax ALEX v4
+PolyGlotty ALEX v4
 """
 
 import asyncio
@@ -849,6 +849,92 @@ async def send_scheduled_push(uid: int):
     else:
         await send_reminder(uid)
 
+# ── Subscription-expiry reminders ────────────────────────────────────
+# A once-a-day scan that warns users 3, 2 and 1 day before their ALEX
+# subscription / platform access lapses, so they can renew without a gap.
+SUB_EXPIRY_CHECK_TIME = os.getenv("SUB_EXPIRY_CHECK_TIME", "11:00")  # MSK, "off" to disable
+
+def _sub_expiry_text(days: int, lang: str) -> str:
+    # Brief (master spec) text, localised. Russian copy is verbatim.
+    word = {
+        "ru": "дн.", "uk": "дн.", "en": "day(s)", "es": "día(s)", "pt": "dia(s)",
+        "de": "Tag(e)", "fr": "jour(s)", "tr": "gün", "zh": "天", "ar": "يوم",
+    }
+    body = {
+        "ru": f"Ваша подписка на PolyGlotty истекает через {days} дн. Продлите, чтобы сохранить доступ к ALEX и курсам.",
+        "en": f"Your PolyGlotty subscription expires in {days} day(s). Renew to keep access to ALEX and courses.",
+        "es": f"Tu suscripción a PolyGlotty vence en {days} día(s). Renueva para conservar el acceso a ALEX y los cursos.",
+        "pt": f"Sua assinatura PolyGlotty expira em {days} dia(s). Renove para manter o acesso ao ALEX e aos cursos.",
+        "de": f"Dein PolyGlotty-Abo läuft in {days} Tag(en) ab. Verlängere, um den Zugang zu ALEX und Kursen zu behalten.",
+        "fr": f"Ton abonnement PolyGlotty expire dans {days} jour(s). Renouvelle pour garder l'accès à ALEX et aux cours.",
+        "uk": f"Ваша підписка на PolyGlotty закінчується через {days} дн. Продовжте, щоб зберегти доступ до ALEX і курсів.",
+        "tr": f"PolyGlotty aboneliğin {days} gün içinde sona eriyor. ALEX ve kurslara erişimi sürdürmek için yenile.",
+        "zh": f"你的 PolyGlotty 订阅将在 {days} 天后到期。续订以保留对 ALEX 和课程的访问。",
+        "ar": f"اشتراكك في PolyGlotty ينتهي خلال {days} يوم. جدّد للحفاظ على الوصول إلى ALEX والدورات.",
+    }
+    return body.get(lang, body["en"])
+
+async def send_sub_expiry(uid: int, days: int, lang: str):
+    text = "<b>PolyGlotty</b>\n\n" + html.escape(_sub_expiry_text(days, lang), quote=False)
+    rows = []
+    app_url = webapp_url()
+    if app_url:
+        rows.append([InlineKeyboardButton(
+            text="Продлить подписку" if lang == "ru" else "Renew subscription",
+            web_app=WebAppInfo(url=app_url))])
+    kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
+    try:
+        await bot.send_message(uid, text, reply_markup=kb)
+    except Exception as e:
+        logger.warning(f"sub-expiry push failed uid={uid}: {e}")
+
+async def notify_expiring_subs():
+    """Warn users 3/2/1 days before ALEX/platform access lapses.
+    One push per (expiry-date, days-left) bucket — deduped via
+    users.sub_exp_notified, which also resets when the sub is extended."""
+    import math
+    from datetime import datetime, timezone
+    try:
+        rows = await db(
+            "SELECT uid, lang, premium_until, platform_until, platform_lifetime, sub_exp_notified "
+            "FROM users WHERE premium_until IS NOT NULL OR platform_until IS NOT NULL",
+            fetch="all")
+    except Exception as e:
+        logger.warning(f"notify_expiring_subs query failed: {e}")
+        return
+    if not rows:
+        return
+    now = datetime.now(timezone.utc)
+    for r in rows:
+        try:
+            lifetime = bool(r.get("platform_lifetime"))
+            soonest = None
+            for col in ("premium_until", "platform_until"):
+                if col == "platform_until" and lifetime:
+                    continue
+                raw = r.get(col)
+                if not raw:
+                    continue
+                dt = raw if isinstance(raw, datetime) else datetime.fromisoformat(str(raw))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                if dt <= now:
+                    continue
+                if soonest is None or dt < soonest:
+                    soonest = dt
+            if soonest is None:
+                continue
+            days_left = max(0, math.ceil((soonest - now).total_seconds() / 86400.0))
+            if days_left not in (1, 2, 3):
+                continue
+            marker = f"{soonest.date().isoformat()}:{days_left}"
+            if (r.get("sub_exp_notified") or "") == marker:
+                continue
+            await send_sub_expiry(r["uid"], days_left, r.get("lang") or "ru")
+            await db("UPDATE users SET sub_exp_notified=? WHERE uid=?", marker, r["uid"])
+        except Exception as e:
+            logger.warning(f"notify_expiring_subs uid={r.get('uid')}: {e}")
+
 async def schedule_all():
     # One consolidated daily push per user, fired at the time they chose
     # in reminders. The content depends on the weekday (see
@@ -872,6 +958,16 @@ async def schedule_all():
             logger.info(f"schedule_all: channel word-of-day at {WOTD_POST_TIME} MSK -> {wotd_channel_target()}")
         except Exception as e:
             logger.warning(f"schedule_all: bad WOTD_POST_TIME '{WOTD_POST_TIME}': {e}")
+    # Single global job: scan once a day for subscriptions expiring in
+    # 3 / 2 / 1 days and send a renewal nudge (Europe/Moscow). "off" disables.
+    if SUB_EXPIRY_CHECK_TIME.lower() != "off":
+        try:
+            sh, sm = map(int, SUB_EXPIRY_CHECK_TIME.split(":"))
+            scheduler.add_job(notify_expiring_subs, "cron", hour=sh, minute=sm,
+                              id="sub_expiry", replace_existing=True)
+            logger.info(f"schedule_all: subscription-expiry scan at {SUB_EXPIRY_CHECK_TIME} MSK")
+        except Exception as e:
+            logger.warning(f"schedule_all: bad SUB_EXPIRY_CHECK_TIME '{SUB_EXPIRY_CHECK_TIME}': {e}")
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE

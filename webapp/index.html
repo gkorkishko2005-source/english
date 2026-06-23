@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>LinguaMax · ALEX</title>
+<title>PolyGlotty · ALEX</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -266,7 +266,7 @@ body{background:var(--e0);color:var(--t1);font-family:var(--f);font-size:15px;-w
 /* ══ SHELL ══ */
 #app{width:100%;max-width:420px;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--e0)}
 .screens{flex:1;overflow:hidden;position:relative}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:20px 15px calc(var(--nav) + var(--safe) + 18px);display:none}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:20px 16px calc(var(--nav) + var(--safe) + 20px);display:none}
 .screen.active{display:block;animation:pg .25s ease}
 .screen::-webkit-scrollbar{width:0}
 #s-chat{padding:0}#s-chat.active{display:flex;flex-direction:column}
@@ -1189,6 +1189,13 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .rem-hero[data-phase=day] .rem-phase{color:#ffb830;background:rgba(255,184,48,.12);border-color:rgba(255,184,48,.28)}
 .rem-hero[data-phase=evening] .rem-phase{color:#ff8a6b;background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.26)}
 .rem-hero[data-phase=night] .rem-phase{color:#a594ff;background:rgba(141,121,255,.14);border-color:rgba(141,121,255,.28)}
+.rem-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.rem-preset{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:var(--r2);background:var(--e2);border:1.5px solid var(--b1);color:var(--t1);font-family:var(--f);cursor:pointer;transition:transform .15s,border-color .2s,background .2s}
+.rem-preset:active{transform:scale(.95)}
+.rem-preset.on{border-color:var(--a);background:rgba(var(--ar),.10);box-shadow:0 0 0 3px rgba(var(--ar),.08)}
+.rem-preset-t{font-size:15px;font-weight:800;letter-spacing:.3px}
+.rem-preset-l{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--t2)}
+.rem-preset.on .rem-preset-l{color:var(--a)}
 #rem-drum{margin-top:16px}
 .rem-actions{margin-top:16px}
 .rem-actions .msav{margin-top:0}
@@ -1839,6 +1846,15 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .ed-right{font-size:12.5px;font-weight:820;color:var(--a2)}
 .ed-exp{font-size:11px;color:rgba(148,163,184,.68);line-height:1.35;margin-top:1px}
 .ed-empty{text-align:center;padding:24px;color:var(--t3);font-size:12.5px;border:1px dashed rgba(255,255,255,.07);border-radius:15px;background:rgba(255,255,255,.018)}
+.ed-rec-head{font-size:12px;font-weight:700;color:var(--t2);line-height:1.4;margin:0 4px 8px}
+.ed-rec{background:linear-gradient(145deg,rgba(var(--ar),.07),rgba(0,212,170,.03));border:1px solid rgba(var(--ar),.13);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:transform .15s,border-color .2s}
+.ed-rec:active{transform:scale(.985)}
+.ed-rec:hover{border-color:rgba(var(--ar),.28)}
+.ed-rec-top{display:flex;align-items:center;gap:8px}
+.ed-rec-name{font-size:13px;font-weight:850;color:var(--t1);flex:1}
+.ed-rec-cnt{font-size:11px;font-weight:800;color:var(--a);background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.22);border-radius:100px;padding:2px 9px;font-variant-numeric:tabular-nums}
+.ed-rec-act{font-size:11.5px;font-weight:700;color:var(--a2);margin-top:5px}
+.ed-rec-sub{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);margin:14px 4px 6px}
 .ed-chat-card{display:grid;gap:12px;min-width:230px;max-width:100%;background:linear-gradient(145deg,rgba(var(--ar),.075),rgba(255,255,255,.025));border:1px solid rgba(var(--ar),.13);border-radius:16px;padding:14px}
 .ed-chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .ed-chat-kicker{font-size:10px;font-weight:900;letter-spacing:.65px;text-transform:uppercase;color:var(--a);margin-bottom:3px}
@@ -2312,6 +2328,12 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:li
 #s-progress .toefl-card{background:var(--e1)!important;border:1px solid var(--b1)!important;
   box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;padding:14px 16px;border-radius:12px}
 #s-progress .toefl-empty{font-size:12px;color:var(--t3);text-align:center;padding:4px 0}
+.toefl-cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;
+  padding:12px 16px;border:none;border-radius:var(--r2);background:var(--gb);color:#fff;
+  font-family:var(--f);font-size:13.5px;font-weight:800;letter-spacing:.2px;cursor:pointer;
+  box-shadow:0 6px 16px rgba(var(--ar),.28);transition:transform .15s,box-shadow .2s}
+.toefl-cta-btn:active{transform:scale(.97)}
+.toefl-cta-btn svg{width:17px;height:17px;flex:none}
 
 /* Achievements button — flat with hairline border */
 #s-progress .ach-home-btn{background:var(--e1)!important;border:1px solid var(--b1)!important;
@@ -2322,8 +2344,12 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:li
   font-variant-numeric:tabular-nums;background:var(--e2);border:1px solid var(--b1);
   padding:2px 8px;border-radius:100px}
 
-/* Error diary cards — match flat hairline aesthetic */
-#s-progress #errdiary-wrap > *{background:var(--e1)!important;border:1px solid var(--b1)!important;
+/* Error diary / recommendation cards — match flat hairline aesthetic.
+   Scoped to card elements so plain text headers/labels stay transparent. */
+#s-progress #errdiary-wrap > .ed-week,
+#s-progress #errdiary-wrap > .ed-empty,
+#s-progress #errdiary-wrap > .ed-rec,
+#s-progress #errdiary-wrap > .ed-row{background:var(--e1)!important;border:1px solid var(--b1)!important;
   box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;border-radius:12px}
 
 /* ── Learn / Path · premium dark minimalism ──────────────────────
@@ -2481,7 +2507,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 <body>
 <div id="loader">
   <div class="lboot"><span></span><span></span><span></span></div>
-  <div class="ll">Lingua<span>Max</span></div>
+  <div class="ll">Poly<span>Glotty</span></div>
   <div id="loader-anim"></div>
   <div class="loader-quote" id="loader-quote"></div>
 </div>
@@ -2791,9 +2817,9 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     </div>
   </details>
 
-  <!-- Interests -->
-  <div class="sec"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
-  <div id="intwrap"></div>
+  <!-- Interests — hidden from settings UI (feature pending rework) -->
+  <div class="sec" id="int-sec" style="display:none"><span id="int-lbl"></span><span class="seca" onclick="openChat('interests_add')" id="int-edit-lbl"></span></div>
+  <div id="intwrap" style="display:none"></div>
   <div style="height:8px"></div>
 </div>
 
@@ -2840,6 +2866,11 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
           <div class="rem-input" id="rem-time-disp">08:00</div>
           <div class="rem-phase" id="rem-phase-lbl">Morning</div>
         </div>
+      </div>
+      <div class="rem-presets" id="rem-presets">
+        <button type="button" class="rem-preset" data-phase="morning" onclick="remPreset(8,0)"><span class="rem-preset-t">08:00</span><span class="rem-preset-l" id="rem-pre-m">Morning</span></button>
+        <button type="button" class="rem-preset" data-phase="day" onclick="remPreset(13,0)"><span class="rem-preset-t">13:00</span><span class="rem-preset-l" id="rem-pre-d">Daytime</span></button>
+        <button type="button" class="rem-preset" data-phase="evening" onclick="remPreset(20,0)"><span class="rem-preset-t">20:00</span><span class="rem-preset-l" id="rem-pre-e">Evening</span></button>
       </div>
       <div class="time-drum-wrap" id="rem-drum">
         <div class="time-drum-sel"></div>
@@ -3439,7 +3470,9 @@ function applyLang(){
   document.getElementById('psl1').textContent=L.sess;document.getElementById('psl2').textContent=L.wl;
   document.getElementById('psl3').textContent=L.td;document.getElementById('psl4').textContent=L.ef;
   document.getElementById('tw-lbl').textContent=L.tw;
-  document.getElementById('toefll').textContent=L.notoefl;
+  // TOEFL block is re-rendered by drawProgress() (handles empty CTA + scores);
+  // only set placeholder text here if it has not been populated yet.
+  var _tl=document.getElementById('toefll');if(_tl&&!_tl.children.length)_tl.textContent=L.notoefl;
   // Settings
   document.getElementById('set-tit').textContent=L.settings;
   var lsl=document.getElementById('lang-sec-lbl');
@@ -3453,6 +3486,7 @@ function applyLang(){
   var ps=document.getElementById('prof-sav');if(ps)ps.textContent=L.save;
   document.getElementById('rem-mtit').textContent=L.remt;
   document.getElementById('rem-sav').textContent=L.save;document.getElementById('rem-dis').textContent=L.disrem;document.getElementById('rem-can').textContent=L.cancel;
+  try{var _pm=document.getElementById('rem-pre-m');if(_pm)_pm.textContent=_remPhaseLabel('morning');var _pd=document.getElementById('rem-pre-d');if(_pd)_pd.textContent=_remPhaseLabel('day');var _pe=document.getElementById('rem-pre-e');if(_pe)_pe.textContent=_remPhaseLabel('evening');}catch(e){}
   document.getElementById('cfmt').textContent=L.cfmt;document.getElementById('cfms').textContent=L.cfms;
   document.getElementById('cfmd').textContent=L.yescl;document.getElementById('cfmc').textContent=L.cancel;
   // Sound toggle label (was hard-coded "Sound")
@@ -4411,7 +4445,12 @@ function drawProgress(){
   // TOEFL
   const sc=d.toefl_scores||[],tl=document.getElementById('toefll');
   if(tl){if(sc.length){tl.className='';tl.innerHTML=sc.map((s,i)=>`<div class="toefl-row" style="animation-delay:${i*.07}s"><span class="toefl-name">${safeHTML(s.section)}</span><div class="toefl-track"><div class="toefl-fill" style="width:${Math.max(0,Math.min(100,s.score/s.max*100))}%"></div></div><span class="toefl-score">${s.score}/${s.max}</span></div>`).join('');}
-  else{tl.className='toefl-empty';tl.textContent=L.notoefl;}}
+  else{
+    tl.className='';
+    const _cta=({ru:'Начать первую сессию TOEFL',en:'Start your first TOEFL session',es:'Inicia tu primera sesión TOEFL',pt:'Inicie sua primeira sessão TOEFL',de:'Erste TOEFL-Sitzung starten',fr:'Commencer ta première session TOEFL',uk:'Почати першу сесію TOEFL',tr:'İlk TOEFL oturumunu başlat',zh:'开始你的第一次 TOEFL 训练',ar:'ابدأ أول جلسة TOEFL'}[lang]||'Start your first TOEFL session');
+    const _sub=({ru:'Сессий пока нет — пройди тренировку, и баллы появятся здесь.',en:'No sessions yet — take a practice and your scores will appear here.',es:'Aún no hay sesiones — practica y tus puntajes aparecerán aquí.',pt:'Ainda sem sessões — pratique e suas notas aparecerão aqui.',de:'Noch keine Sitzungen — übe und deine Werte erscheinen hier.',fr:'Aucune session — entraîne-toi et tes scores apparaîtront ici.',uk:'Сесій ще немає — пройди тренування, і бали з’являться тут.',tr:'Henüz oturum yok — alıştırma yap, puanların burada görünsün.',zh:'还没有训练记录——做一次练习，分数会显示在这里。',ar:'لا جلسات بعد — تدرّب وستظهر درجاتك هنا.'}[lang]||'No sessions yet — take a practice and your scores will appear here.');
+    tl.innerHTML=`<div class="toefl-empty">${safeHTML(_sub)}</div><button class="toefl-cta-btn" onclick="openExamPrep()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8V4z"/></svg><span>${safeHTML(_cta)}</span></button>`;
+  }}
   // CEFR ladder + exam prep
   try{renderCefrPath(d);}catch(e){}
   try{renderExamPrep(d);}catch(e){}
@@ -8225,6 +8264,22 @@ function _remUpdateDisplay(){
     }
   }
   const pl=document.getElementById('rem-phase-lbl');if(pl)pl.textContent=_remPhaseLabel(phase);
+  _remSyncPresets();
+}
+// Quick presets: highlight the chip that matches the current time exactly.
+function _remSyncPresets(){
+  const map={'8:0':'morning','13:0':'day','20:0':'evening'};
+  const cur=remH+':'+remM, active=map[cur]||'';
+  document.querySelectorAll('#rem-presets .rem-preset').forEach(function(b){
+    b.classList.toggle('on',b.dataset.phase===active);
+  });
+}
+function remPreset(h,m){
+  remH=Math.max(0,Math.min(23,h|0));remM=Math.max(0,Math.min(59,m|0));
+  if(_drum.h)_drum.h.setIndex(remH);
+  if(_drum.m)_drum.m.setIndex(remM);
+  _remUpdateDisplay();
+  try{sfx&&sfx.tap&&sfx.tap();}catch(e){}
 }
 
 function openRemModal(){
@@ -11941,7 +11996,7 @@ function renderErrorDiary(){
   const wrap=document.getElementById('errdiary-wrap');
   const lbl=document.getElementById('errdiary-lbl');
   const cta=document.getElementById('errdiary-cta');
-  if(lbl)lbl.textContent={ru:'Дневник ошибок',en:'Error Diary',es:'Diario de errores',de:'Fehlertagebuch',fr:'Journal des erreurs',pt:'Diário de erros',uk:'Щоденник помилок',tr:'Hata günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Error Diary';
+  if(lbl)lbl.textContent={ru:'Активные рекомендации от ALEX',en:'Active recommendations from ALEX',es:'Recomendaciones activas de ALEX',de:'Aktive Empfehlungen von ALEX',fr:'Recommandations actives d’ALEX',pt:'Recomendações ativas do ALEX',uk:'Активні рекомендації від ALEX',tr:'ALEX’ten etkin öneriler',zh:'ALEX 的实时建议',ar:'توصيات ALEX النشطة'}[lang]||'Active recommendations from ALEX';
   if(cta)cta.textContent=hasTier('basic')?({ru:'Спросить ALEX →',en:'Ask ALEX →',es:'Preguntar a ALEX →',de:'ALEX fragen →',fr:'Demander ALEX →',pt:'Perguntar ao ALEX →',uk:'Запитати ALEX →',tr:'ALEX\'a sor →',zh:'问ALEX →',ar:'اسأل ALEX →'}[lang]||'Ask ALEX →'):(({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription'));
   if(!wrap)return;
   if(!hasTier('basic')){
@@ -11954,37 +12009,47 @@ function renderErrorDiary(){
   }
   const errors=(LS.getJ('error_diary')||[]).map(normalizeMistake);
   if(!errors.length){
-    wrap.innerHTML=`<div class="ed-empty">${({ru:'Ошибок пока нет — начни общаться с ALEX.',en:'No errors yet — start chatting with ALEX.',es:'Aún no hay errores — empieza a chatear con ALEX.',pt:'Ainda sem erros — comece a conversar com o ALEX.',de:'Noch keine Fehler — fang an, mit ALEX zu chatten.',fr:'Pas encore d’erreurs — commence à discuter avec ALEX.',uk:'Помилок поки немає — почни спілкуватися з ALEX.',tr:'Henüz hata yok — ALEX ile sohbete başla.',zh:'还没有错误——开始和 ALEX 聊天吧。',ar:'لا أخطاء بعد — ابدأ الدردشة مع ALEX.'}[lang]||'No errors yet — start chatting with ALEX.')}</div>`;
+    wrap.innerHTML=`<div class="ed-empty">${({ru:'Пока нет рекомендаций — пообщайся с ALEX, и он подскажет, над чем поработать.',en:'No recommendations yet — chat with ALEX and it will suggest what to work on.',es:'Aún no hay recomendaciones — habla con ALEX y te sugerirá en qué trabajar.',pt:'Ainda sem recomendações — converse com o ALEX e ele sugerirá no que focar.',de:'Noch keine Empfehlungen — chatte mit ALEX und es schlägt vor, woran du arbeiten solltest.',fr:'Pas encore de recommandations — discute avec ALEX et il te dira sur quoi travailler.',uk:'Поки немає рекомендацій — поспілкуйся з ALEX, і він підкаже, над чим попрацювати.',tr:'Henüz öneri yok — ALEX ile sohbet et, neye çalışacağını önersin.',zh:'暂无建议——和 ALEX 聊聊，它会告诉你该练什么。',ar:'لا توصيات بعد — تحدّث مع ALEX وسيقترح ما يجب التركيز عليه.'}[lang]||'No recommendations yet — chat with ALEX and it will suggest what to work on.')}</div>`;
     refreshErrorDiaryFromServer().then(()=>{const fresh=LS.getJ('error_diary')||[];if(fresh.length)renderErrorDiary();}).catch(()=>{});
     return;
   }
-  // Group by week
-  const weeks={};
-  errors.forEach(e=>{
-    const d=new Date(e.date);
-    const ws=new Date(d);ws.setDate(d.getDate()-d.getDay());
-    const wk=ws.toISOString().slice(0,10);
-    if(!weeks[wk])weeks[wk]=[];
-    weeks[wk].push(e);
-  });
   wrap.innerHTML='';
-  Object.entries(weeks).slice(0,4).forEach(([wk,errs])=>{
-    const wDate=new Date(wk);
-    const label=wDate.toLocaleDateString(lang==='ru'?'ru-RU':'en-US',{month:'long',day:'numeric'});
-    const block=document.createElement('div');block.className='ed-week';
-    block.innerHTML=`<div class="ed-week-hdr"><div class="ed-week-title">${({ru:'Неделя от',en:'Week of',es:'Semana del',pt:'Semana de',de:'Woche vom',fr:'Semaine du',uk:'Тиждень від',tr:'Hafta',zh:'本周起',ar:'أسبوع'}[lang]||'Week of')} ${safeHTML(label)}</div><div class="ed-count">${errs.length} ${({ru:'ошибок',en:'errors',es:'errores',pt:'erros',de:'Fehler',fr:'erreurs',uk:'помилок',tr:'hata',zh:'个错误',ar:'أخطاء'}[lang]||'errors')}</div></div>`;
-    errs.slice(0,5).forEach(e=>{
-      const row=document.createElement('div');row.className='ed-row';
-      row.innerHTML=`<div class="ed-wrong">${safeHTML(e.wrong)}</div><div class="ed-right">${safeHTML(e.right)}</div><div class="ed-exp">${safeHTML(e.explanation||'')}</div>`;
-      row.onclick=()=>sendChip(({ru:`Объясни разницу между "${e.wrong}" и "${e.right}"`,en:`Explain the difference between "${e.wrong}" and "${e.right}"`,es:`Explica la diferencia entre "${e.wrong}" y "${e.right}"`,pt:`Explique a diferença entre "${e.wrong}" e "${e.right}"`,de:`Erkläre den Unterschied zwischen "${e.wrong}" und "${e.right}"`,fr:`Explique la différence entre "${e.wrong}" et "${e.right}"`,uk:`Поясни різницю між "${e.wrong}" і "${e.right}"`,tr:`"${e.wrong}" ile "${e.right}" arasındaki farkı açıkla`,zh:`解释一下 "${e.wrong}" 和 "${e.right}" 的区别`,ar:`اشرح الفرق بين "${e.wrong}" و "${e.right}"`}[lang]||`Explain the difference between "${e.wrong}" and "${e.right}"`));
-      block.appendChild(row);
-    });
-    if(errs.length>5){
-      const more=document.createElement('div');more.style.cssText='padding:8px 15px;font-size:12px;color:var(--t3)';
-      more.textContent=`+${errs.length-5} ${({ru:'ещё',en:'more',es:'más',pt:'mais',de:'mehr',fr:'de plus',uk:'ще',tr:'daha',zh:'更多',ar:'أخرى'}[lang]||'more')}`;
-      block.appendChild(more);
-    }
-    wrap.appendChild(block);
+  // Active recommendations: derive focus areas from the user's real mistake
+  // history. Top error categories become "work on this" cards; tapping one
+  // asks ALEX for targeted practice on that exact pattern.
+  const cats=errorDiaryCategories(errors); // [[category,count],…] up to 4
+  const catName={
+    grammar:{ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'},
+    vocabulary:{ru:'Лексика',en:'Vocabulary',es:'Vocabulario',pt:'Vocabulário',de:'Wortschatz',fr:'Vocabulaire',uk:'Лексика',tr:'Kelime',zh:'词汇',ar:'المفردات'},
+    spelling:{ru:'Орфография',en:'Spelling',es:'Ortografía',pt:'Ortografia',de:'Rechtschreibung',fr:'Orthographe',uk:'Орфографія',tr:'Yazım',zh:'拼写',ar:'الإملاء'},
+    punctuation:{ru:'Пунктуация',en:'Punctuation',es:'Puntuación',pt:'Pontuação',de:'Zeichensetzung',fr:'Ponctuation',uk:'Пунктуація',tr:'Noktalama',zh:'标点',ar:'الترقيم'},
+    article:{ru:'Артикли',en:'Articles',es:'Artículos',pt:'Artigos',de:'Artikel',fr:'Articles',uk:'Артиклі',tr:'Artikeller',zh:'冠词',ar:'أدوات التعريف'},
+    preposition:{ru:'Предлоги',en:'Prepositions',es:'Preposiciones',pt:'Preposições',de:'Präpositionen',fr:'Prépositions',uk:'Прийменники',tr:'Edatlar',zh:'介词',ar:'حروف الجر'},
+    tense:{ru:'Времена',en:'Tenses',es:'Tiempos verbales',pt:'Tempos verbais',de:'Zeitformen',fr:'Temps',uk:'Часи',tr:'Zamanlar',zh:'时态',ar:'الأزمنة'},
+    word_order:{ru:'Порядок слов',en:'Word order',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung',fr:'Ordre des mots',uk:'Порядок слів',tr:'Sözcük dizimi',zh:'语序',ar:'ترتيب الكلمات'}
+  };
+  const lblName=function(k){const m=catName[k]||catName[k.replace(/s$/,'')]||catName[k.replace(/\s+/g,'_')];return (m&&(m[lang]||m.en))||(k.charAt(0).toUpperCase()+k.slice(1));};
+  const headTxt={ru:`ALEX заметил ${errors.length} ошибок. Рекомендую поработать над:`,en:`ALEX spotted ${errors.length} mistakes. Recommended focus areas:`,es:`ALEX detectó ${errors.length} errores. Áreas recomendadas:`,pt:`ALEX notou ${errors.length} erros. Áreas recomendadas:`,de:`ALEX hat ${errors.length} Fehler bemerkt. Empfohlene Schwerpunkte:`,fr:`ALEX a repéré ${errors.length} erreurs. Axes recommandés :`,uk:`ALEX помітив ${errors.length} помилок. Рекомендую попрацювати над:`,tr:`ALEX ${errors.length} hata fark etti. Önerilen alanlar:`,zh:`ALEX 发现了 ${errors.length} 个错误。建议重点练习：`,ar:`لاحظ ALEX ${errors.length} خطأ. مجالات التركيز المقترحة:`}[lang]||`ALEX spotted ${errors.length} mistakes. Recommended focus areas:`;
+  const practiceLbl={ru:'Тренировать с ALEX →',en:'Practice with ALEX →',es:'Practicar con ALEX →',pt:'Praticar com ALEX →',de:'Mit ALEX üben →',fr:'S’entraîner avec ALEX →',uk:'Тренувати з ALEX →',tr:'ALEX ile çalış →',zh:'与 ALEX 练习 →',ar:'تدرّب مع ALEX →'}[lang]||'Practice with ALEX →';
+  const head=document.createElement('div');head.className='ed-rec-head';head.textContent=headTxt;wrap.appendChild(head);
+  cats.forEach(([cat,n])=>{
+    const name=lblName(cat);
+    const card=document.createElement('div');card.className='ed-rec';
+    card.innerHTML=`<div class="ed-rec-top"><span class="ed-rec-name">${safeHTML(name)}</span><span class="ed-rec-cnt">${n}</span></div><div class="ed-rec-act">${practiceLbl}</div>`;
+    card.onclick=()=>{
+      if(!hasChatAccess()){showChatPaywall();return;}
+      sendChip(({ru:`Дай мне короткую тренировку на тему «${name}» — это моя слабая зона по дневнику ошибок.`,en:`Give me a short practice on "${name}" — it's my weak area from the error log.`,es:`Dame una práctica corta sobre "${name}" — es mi punto débil según el registro de errores.`,pt:`Dê-me uma prática curta sobre "${name}" — é meu ponto fraco no registro de erros.`,de:`Gib mir eine kurze Übung zu "${name}" — das ist laut Fehlerprotokoll meine Schwäche.`,fr:`Donne-moi un court exercice sur « ${name} » — c'est mon point faible d'après le journal d'erreurs.`,uk:`Дай мені коротку вправу на тему «${name}» — це моя слабка зона за щоденником помилок.`,tr:`"${name}" konusunda kısa bir alıştırma ver — hata kaydıma göre zayıf alanım.`,zh:`给我一个关于"${name}"的简短练习——这是我错误记录里的薄弱点。`,ar:`أعطني تدريبًا قصيرًا حول "${name}" — إنها نقطة ضعفي حسب سجل الأخطاء.`}[lang]||`Give me a short practice on "${name}" — it's my weak area from the error log.`));
+    };
+    wrap.appendChild(card);
+  });
+  // Compact context: the most recent corrections that feed these recommendations.
+  const recentLbl={ru:'Последние исправления',en:'Recent corrections',es:'Correcciones recientes',pt:'Correções recentes',de:'Neueste Korrekturen',fr:'Corrections récentes',uk:'Останні виправлення',tr:'Son düzeltmeler',zh:'最近的纠正',ar:'أحدث التصحيحات'}[lang]||'Recent corrections';
+  const recentHead=document.createElement('div');recentHead.className='ed-rec-sub';recentHead.textContent=recentLbl;wrap.appendChild(recentHead);
+  errors.slice(0,3).forEach(e=>{
+    const row=document.createElement('div');row.className='ed-row';
+    row.innerHTML=`<div class="ed-wrong">${safeHTML(e.wrong)}</div><div class="ed-right">${safeHTML(e.right)}</div><div class="ed-exp">${safeHTML(e.explanation||'')}</div>`;
+    row.onclick=()=>sendChip(({ru:`Объясни разницу между "${e.wrong}" и "${e.right}"`,en:`Explain the difference between "${e.wrong}" and "${e.right}"`,es:`Explica la diferencia entre "${e.wrong}" y "${e.right}"`,pt:`Explique a diferença entre "${e.wrong}" e "${e.right}"`,de:`Erkläre den Unterschied zwischen "${e.wrong}" und "${e.right}"`,fr:`Explique la différence entre "${e.wrong}" et "${e.right}"`,uk:`Поясни різницю між "${e.wrong}" і "${e.right}"`,tr:`"${e.wrong}" ile "${e.right}" arasındaki farkı açıkla`,zh:`解释一下 "${e.wrong}" 和 "${e.right}" 的区别`,ar:`اشرح الفرق بين "${e.wrong}" و "${e.right}"`}[lang]||`Explain the difference between "${e.wrong}" and "${e.right}"`));
+    wrap.appendChild(row);
   });
   const beforeLen=errors.length;
   refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});

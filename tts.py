@@ -1,5 +1,5 @@
 """
-LinguaMax · TTS + STT модуль
+PolyGlotty · TTS + STT модуль
 TTS: gTTS (бесплатно) или ElevenLabs (высокое качество)
 STT: OpenAI Whisper API (произношение + анализ)
 """

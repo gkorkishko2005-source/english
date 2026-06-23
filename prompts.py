@@ -1,5 +1,5 @@
 """
-LinguaMax · Промпты v4
+PolyGlotty · Промпты v4
 """
 
 import re
