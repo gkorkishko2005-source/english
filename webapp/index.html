@@ -872,6 +872,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .chip-smart{border-color:rgba(var(--ar),.4);color:var(--a);font-weight:700}
 .chip-smart svg{width:15px;height:15px;stroke-width:2.2}
+/* Welcome suggestions: single compact horizontal-scroll strip inside a
+   bot bubble, so the hints never stack into rows and crowd the messages. */
+.hint-chips-row{display:flex;flex-wrap:nowrap;gap:7px;margin-top:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 20px),transparent)}
+.hint-chips-row::-webkit-scrollbar{display:none}
 /* disabled chip state while bot is typing */
 .chip.disabled{opacity:.35;pointer-events:none}
 
@@ -1946,6 +1950,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .set-acc-ico svg{stroke:var(--t2);width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .set-acc-bd{padding:0 14px 14px;border-top:1px solid var(--b1)}
 .set-acc[open] summary{border-bottom:0}
+.prof-hint{font-size:11.5px;color:var(--t3);margin-top:7px;line-height:1.4}
 
 /* ── Settings · reminder row ───────────────────────────────────── */
 .srow{padding:14px 14px;border-bottom:1px solid var(--b1);transition:background .15s}
@@ -2771,6 +2776,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <summary><span class="set-acc-ico about"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="4"/><circle cx="10" cy="11" r="2"/><path d="M14 10h3M14 14h3M8 16c.8-1.5 3.2-1.5 4 0"/></svg></span><span id="prof-mtit">About you</span></summary>
     <div class="set-acc-bd" id="about-access">
       <textarea class="minp" id="profinp" rows="3" oninput="profDraft(this.value)" onblur="saveProfSilent()" style="resize:none;min-height:78px;line-height:1.5;margin-top:0"></textarea>
+      <div class="prof-hint" id="prof-hint"></div>
       <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">Save</button>
     </div>
   </details>
@@ -2847,7 +2853,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
     <div class="mbdy">
       <div class="cfmbox">
-        <div class="cfmic"><svg viewBox="0 0 48 48" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round"><circle cx="24" cy="24" r="22" fill="rgba(255,107,107,.08)"/><polyline points="14 20 16 38 32 38 34 20"/><path d="M10 20h28M20 20v-4a2 2 0 014 0v4"/><line x1="20" y1="27" x2="20" y2="33"/><line x1="28" y1="27" x2="28" y2="33"/></svg></div>
+        <div class="cfmic"><svg viewBox="0 0 48 48" fill="none" stroke="url(#cfmTrashGrad)" stroke-width="2" stroke-linecap="round"><defs><linearGradient id="cfmTrashGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4f8aff"/><stop offset="1" stop-color="#00d4aa"/></linearGradient></defs><circle cx="24" cy="24" r="22" fill="rgba(79,138,255,.08)"/><polyline points="14 20 16 38 32 38 34 20"/><path d="M10 20h28M20 20v-4a2 2 0 014 0v4"/><line x1="20" y1="27" x2="20" y2="33"/><line x1="28" y1="27" x2="28" y2="33"/></svg></div>
         <div class="cfmt" id="cfmt"></div>
         <div class="cfms" id="cfms"></div>
         <button class="cfmd" onclick="doClear()" id="cfmd"></button>
@@ -3120,7 +3126,7 @@ const LANGS = {
     notift:'Пиши по-английски — исправлю! 👋',notifcta:'Открыть чат →',
     nosessiont:'Новая беседа',profpt:'Расскажи о себе',remsav:'Напоминание: ',remoff:'Напоминания отключены',psav:'Сохранено',
     blsav:'Язык бота: ',no_prof:'Не задана',no_rem:'Не задано',
-    profinpp:'Напр.: я разработчик, увлекаюсь играми, готовлюсь к интервью на английском',intemt:'Добавить интересы',intems:'Общайся с ALEX — он запомнит',
+    profinpp:'Например: изучаю английский для работы или путешествий',profhint:'Информация поможет ALEX подбирать актуальные примеры',intemt:'Добавить интересы',intems:'Общайся с ALEX — он запомнит',
   },
   en:{greet:h=>h<12?'Good morning,':h<18?'Good afternoon,':h<23?'Good evening,':'Good night,',
     streak_t:'Day streak',streak:'Streak',words:'Words',tests:'Tests',
@@ -3144,7 +3150,7 @@ const LANGS = {
     notift:"Write in English — I'll correct you! 👋",notifcta:'Open chat →',
     nosessiont:'New chat',profpt:'Tell us about you',remsav:'Reminder: ',remoff:'Reminders disabled',psav:'Saved',
     blsav:'Bot language: ',no_prof:'Not set',no_rem:'Not set',
-    profinpp:'E.g. developer into gaming, prepping for a job interview in English',intemt:'Add your interests',intems:"Chat with ALEX — he'll remember",
+    profinpp:'E.g. I’m learning English for work or travel',profhint:'This helps ALEX pick relevant examples',intemt:'Add your interests',intems:"Chat with ALEX — he'll remember",
   },
   es:{greet:h=>h<12?'Buenos días,':h<18?'Buenas tardes,':'Buenas noches,',
     streak_t:'Días seguidos',streak:'Racha',words:'Palabras',tests:'Pruebas',
@@ -3168,7 +3174,7 @@ const LANGS = {
     notift:'¡Escribe en inglés — te corrijo! 👋',notifcta:'Abrir chat →',
     nosessiont:'Nuevo chat',profpt:'Cuéntanos sobre ti',remsav:'Recordatorio: ',remoff:'Recordatorios desactivados',psav:'Guardado',
     blsav:'Idioma bot: ',no_prof:'No definida',no_rem:'No definido',
-    profinpp:'Ej.: desarrollador, me gustan los videojuegos, preparo una entrevista',intemt:'Añadir intereses',intems:'Habla con ALEX — él recordará',
+    profinpp:'Ej.: aprendo inglés para el trabajo o viajar',profhint:'Esto ayuda a ALEX a elegir ejemplos relevantes',intemt:'Añadir intereses',intems:'Habla con ALEX — él recordará',
   },
   pt:{greet:h=>h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,',
     streak_t:'Dias seguidos',streak:'Sequência',words:'Palavras',tests:'Testes',
@@ -3192,7 +3198,7 @@ const LANGS = {
     notift:'Escreva em inglês — vou corrigir! 👋',notifcta:'Abrir chat →',
     nosessiont:'Novo chat',profpt:'Fale sobre você',remsav:'Lembrete: ',remoff:'Lembretes desativados',psav:'Salvo',
     blsav:'Idioma bot: ',no_prof:'Não definida',no_rem:'Não definido',
-    profinpp:'Ex.: desenvolvedor, gosto de games, preparo uma entrevista',intemt:'Adicionar interesses',intems:'Converse com o ALEX — ele lembrará',
+    profinpp:'Ex.: aprendo inglês para o trabalho ou viagens',profhint:'Isso ajuda o ALEX a escolher exemplos relevantes',intemt:'Adicionar interesses',intems:'Converse com o ALEX — ele lembrará',
   },
   de:{greet:h=>h<12?'Guten Morgen,':h<18?'Guten Tag,':'Guten Abend,',
     streak_t:'Tage in Folge',streak:'Streak',words:'Wörter',tests:'Tests',
@@ -3216,7 +3222,7 @@ const LANGS = {
     notift:'Schreibe auf Englisch — ich korrigiere! 👋',notifcta:'Chat öffnen →',
     nosessiont:'Neuer Chat',profpt:'Erzähle uns von dir',remsav:'Erinnerung: ',remoff:'Erinnerungen aus',psav:'Gespeichert',
     blsav:'Bot-Sprache: ',no_prof:'Nicht gesetzt',no_rem:'Nicht gesetzt',
-    profinpp:'Z.B.: Entwickler, mag Games, Vorbereitung auf ein Vorstellungsgespräch',intemt:'Interessen hinzufügen',intems:'Chatte mit ALEX — er merkt es sich',
+    profinpp:'Z.B.: Ich lerne Englisch für Beruf oder Reisen',profhint:'Das hilft ALEX, passende Beispiele zu wählen',intemt:'Interessen hinzufügen',intems:'Chatte mit ALEX — er merkt es sich',
   },
   fr:{greet:h=>h<12?'Bonjour,':h<18?'Bon après-midi,':'Bonsoir,',
     streak_t:'Jours d’affilée',streak:'Série',words:'Mots',tests:'Tests',
@@ -3240,7 +3246,7 @@ const LANGS = {
     notift:'Écris en anglais — je corrige ! 👋',notifcta:'Ouvrir le chat →',
     nosessiont:'Nouveau chat',profpt:'Parle-nous de toi',remsav:'Rappel : ',remoff:'Rappels désactivés',psav:'Enregistré',
     blsav:'Langue du bot : ',no_prof:'Non défini',no_rem:'Non défini',
-    profinpp:'Ex. : développeur, fan de jeux, prépare un entretien en anglais',intemt:'Ajouter des intérêts',intems:'Parle à ALEX — il s’en souviendra',
+    profinpp:'Ex. : j’apprends l’anglais pour le travail ou les voyages',profhint:'Cela aide ALEX à choisir des exemples pertinents',intemt:'Ajouter des intérêts',intems:'Parle à ALEX — il s’en souviendra',
   },
   uk:{greet:h=>h<12?'Доброго ранку,':h<18?'Доброго дня,':h<23?'Доброго вечора,':'Доброї ночі,',
     streak_t:'Днів поспіль',streak:'Стрік',words:'Слова',tests:'Тести',
@@ -3264,7 +3270,7 @@ const LANGS = {
     notift:'Пиши англійською — виправлю! 👋',notifcta:'Відкрити чат →',
     nosessiont:'Новий чат',profpt:'Розкажи про себе',remsav:'Нагадування: ',remoff:'Нагадування вимкнено',psav:'Збережено',
     blsav:'Мова бота: ',no_prof:'Не задано',no_rem:'Не задано',
-    profinpp:'Напр.: розробник, люблю ігри, готуюсь до інтерв’ю англійською',intemt:'Додати інтереси',intems:'Спілкуйся з ALEX — він запам’ятає',
+    profinpp:'Напр.: вивчаю англійську для роботи чи подорожей',profhint:'Це допоможе ALEX добирати доречні приклади',intemt:'Додати інтереси',intems:'Спілкуйся з ALEX — він запам’ятає',
   },
   tr:{greet:h=>h<12?'Günaydın,':h<18?'İyi günler,':'İyi akşamlar,',
     streak_t:'Üst üste gün',streak:'Seri',words:'Kelimeler',tests:'Testler',
@@ -3288,7 +3294,7 @@ const LANGS = {
     notift:'İngilizce yaz — düzeltirim! 👋',notifcta:'Sohbeti aç →',
     nosessiont:'Yeni sohbet',profpt:'Kendinden bahset',remsav:'Hatırlatma: ',remoff:'Hatırlatmalar kapalı',psav:'Kaydedildi',
     blsav:'Bot dili: ',no_prof:'Ayarlı değil',no_rem:'Ayarlı değil',
-    profinpp:'Ör.: yazılımcı, oyun severim, İngilizce mülakata hazırlanıyorum',intemt:'İlgi alanı ekle',intems:'ALEX ile konuş — hatırlar',
+    profinpp:'Ör.: işim veya seyahat için İngilizce öğreniyorum',profhint:'Bu, ALEX’in uygun örnekler seçmesine yardımcı olur',intemt:'İlgi alanı ekle',intems:'ALEX ile konuş — hatırlar',
   },
   zh:{greet:h=>h<12?'早上好,':h<18?'下午好,':'晚上好,',
     streak_t:'连续天数',streak:'连胜',words:'单词',tests:'测验',
@@ -3312,7 +3318,7 @@ const LANGS = {
     notift:'用英文写——我来纠正！👋',notifcta:'打开聊天 →',
     nosessiont:'新对话',profpt:'介绍一下自己',remsav:'提醒：',remoff:'提醒已关闭',psav:'已保存',
     blsav:'机器人语言：',no_prof:'未设置',no_rem:'未设置',
-    profinpp:'例如：开发者，喜欢游戏，准备英语面试',intemt:'添加兴趣',intems:'与 ALEX 聊天——他会记住',
+    profinpp:'例如：我为工作或旅行学习英语',profhint:'这有助于 ALEX 选择相关的例子',intemt:'添加兴趣',intems:'与 ALEX 聊天——他会记住',
   },
   ar:{greet:h=>h<12?'صباح الخير,':h<18?'مساء الخير,':'مساء الخير,',
     streak_t:'أيام متتالية',streak:'سلسلة',words:'كلمات',tests:'اختبارات',
@@ -3336,7 +3342,7 @@ const LANGS = {
     notift:'اكتب بالإنجليزية — سأصحح! 👋',notifcta:'افتح المحادثة →',
     nosessiont:'محادثة جديدة',profpt:'أخبرنا عنك',remsav:'تذكير: ',remoff:'التذكيرات متوقفة',psav:'تم الحفظ',
     blsav:'لغة البوت: ',no_prof:'غير محدد',no_rem:'غير محدد',
-    profinpp:'مثلا: مطور، أحب الألعاب، أستعد لمقابلة بالإنجليزية',intemt:'إضافة اهتمامات',intems:'تحدث مع ALEX — سيتذكر',
+    profinpp:'مثلا: أتعلّم الإنجليزية للعمل أو السفر',profhint:'يساعد هذا ALEX على اختيار أمثلة مناسبة',intemt:'إضافة اهتمامات',intems:'تحدث مع ALEX — سيتذكر',
   },
 };
 
@@ -3433,6 +3439,7 @@ function applyLang(){
   document.getElementById('int-lbl').textContent=L.ints;document.getElementById('int-edit-lbl').textContent=L.intedit;
   document.getElementById('prof-mtit').textContent=L.proft;
   var pi=document.getElementById('profinp');if(pi)pi.placeholder=L.profinpp;
+  var ph=document.getElementById('prof-hint');if(ph)ph.textContent=L.profhint;
   var ps=document.getElementById('prof-sav');if(ps)ps.textContent=L.save;
   document.getElementById('rem-mtit').textContent=L.remt;
   document.getElementById('rem-sav').textContent=L.save;document.getElementById('rem-dis').textContent=L.disrem;document.getElementById('rem-can').textContent=L.cancel;
@@ -4524,6 +4531,7 @@ function updateProfileUI(d){
     return;
   }else if(box&&hasTier('basic')&&!document.getElementById('profinp')){
     box.innerHTML=`<textarea class="minp" id="profinp" rows="3" oninput="profDraft(this.value)" onblur="saveProfSilent()" style="resize:none;min-height:78px;line-height:1.5;margin-top:0" placeholder="${safeHTML(L.profinpp||'')}"></textarea>
+      <div class="prof-hint" id="prof-hint">${safeHTML(L.profhint||'')}</div>
       <button class="msav" onclick="saveProf()" id="prof-sav" style="margin-top:10px">${safeHTML(L.save||'Save')}</button>`;
   }
   const ab=document.getElementById('profinp');
@@ -4805,9 +4813,20 @@ function _sEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;
 function _sesType(s){return (s&&s.type&&SES_ICONS[s.type])?s.type:'chat';}
 function _sesPreview(s){
   if(!s||!s.msgs||!s.msgs.length)return '';
-  const u=s.msgs.find(m=>m&&m.role==='user');
-  let t=((u&&u.content)||s.msgs[0].content||'').replace(/\s+/g,' ').trim();
+  // Show the most recent message so the preview differs from the title
+  // (the title is derived from the first user message).
+  let t='';
+  for(let i=s.msgs.length-1;i>=0;i--){
+    const m=s.msgs[i];if(!m||!m.content)continue;
+    const c=String(m.content).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+    if(c){t=c;break;}
+  }
   if(!t)return '';
+  // Never duplicate the title: if the preview begins with the title text,
+  // drop it so only one conversation name is shown.
+  const norm=x=>String(x||'').replace(/[…\s]+/g,' ').trim().toLowerCase();
+  const tt=norm(s.title);
+  if(tt&&norm(t).slice(0,tt.length)===tt)return '';
   if(t.length>60)t=t.slice(0,60)+'…';
   return _sEsc(t);
 }
@@ -5230,18 +5249,26 @@ function openChat(topic){
 function quickHintChips(){
   /* Welcome quick-action chips. The prompt sent to ALEX stays in
      English (English is what users are practising); the chip label
-     is localised across all 10 interface languages. */
+     is localised across all 10 interface languages.
+     Rendered as a single horizontal-scroll strip so the suggestions
+     stay compact and leave more room for the conversation itself. */
   const lbl={
-    about:({ru:'О ALEX',en:'About ALEX',es:'Sobre ALEX',pt:'Sobre o ALEX',de:'Über ALEX',fr:'À propos d’ALEX',uk:'Про ALEX',tr:'ALEX hakkında',zh:'关于 ALEX',ar:'عن ALEX'}[lang]||'About ALEX'),
+    write:({ru:'Написать пару фраз',en:'Write a few sentences',es:'Escribir frases',pt:'Escrever frases',de:'Sätze schreiben',fr:'Écrire des phrases',uk:'Написати кілька фраз',tr:'Birkaç cümle yaz',zh:'写几句话',ar:'اكتب بضع جمل'}[lang]||'Write a few sentences'),
+    check:({ru:'Проверка',en:'Text check',es:'Revisar texto',pt:'Revisar texto',de:'Textprüfung',fr:'Vérification',uk:'Перевірка',tr:'Metin kontrolü',zh:'文本检查',ar:'فحص النص'}[lang]||'Text check'),
+    speak:({ru:'Поговорить',en:'Speaking',es:'Hablar',pt:'Falar',de:'Sprechen',fr:'Parler',uk:'Розмова',tr:'Konuşma',zh:'口语',ar:'محادثة'}[lang]||'Speaking'),
     grammar:({ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'}[lang]||'Grammar'),
-    check:({ru:'Проверка',en:'Text check',es:'Revisar texto',pt:'Revisar texto',de:'Textprüfung',fr:'Vérification',uk:'Перевірка',tr:'Metin kontrolü',zh:'文本检查',ar:'فحص النص'}[lang]||'Text check')
+    words:({ru:'Новые слова',en:'New words',es:'Palabras nuevas',pt:'Palavras novas',de:'Neue Wörter',fr:'Nouveaux mots',uk:'Нові слова',tr:'Yeni kelimeler',zh:'新词',ar:'كلمات جديدة'}[lang]||'New words'),
+    about:({ru:'О ALEX',en:'About ALEX',es:'Sobre ALEX',pt:'Sobre o ALEX',de:'Über ALEX',fr:'À propos d’ALEX',uk:'Про ALEX',tr:'ALEX hakkında',zh:'关于 ALEX',ar:'عن ALEX'}[lang]||'About ALEX')
   };
   const labels=[
-    ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0',lbl.about],
+    ['I want to write a few sentences for you to correct.','M12 20h9 M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z',lbl.write],
+    ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z',lbl.check],
+    ["Let's practice speaking English.",'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',lbl.speak],
     ['Give me a grammar quiz','M4 5h16M4 12h10M4 19h16',lbl.grammar],
-    ['Fix my text: I go to school yesterday','M4 20h4l10-10a2.8 2.8 0 00-4-4L4 16v4z',lbl.check]
+    ['Teach me 5 new useful words.','M3 9h18M9 21V9 M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',lbl.words],
+    ['Tell me about yourself','M12 12a4 4 0 100-8 4 4 0 000 8z M4 21a8 8 0 0116 0',lbl.about]
   ];
-  return `<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:5px">${labels.map(x=>`<button class="chip chip-smart" onclick="sendChip('${safeHTML(x[0])}')"><svg viewBox="0 0 24 24"><path d="${x[1]}"/></svg>${safeHTML(x[2])}</button>`).join('')}</div>`;
+  return `<div class="hint-chips-row">${labels.map(x=>`<button class="chip chip-smart" onclick="sendChip('${safeHTML(x[0])}')"><svg viewBox="0 0 24 24"><path d="${x[1]}"/></svg>${safeHTML(x[2])}</button>`).join('')}</div>`;
 }
 
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}

@@ -38,12 +38,15 @@ def build_system(level: str, lang: str, interests: str = "", profession: str = "
         # Profile context is for SILENT calibration only — it lets you pick a
         # sensible difficulty and example domain. NEVER surface it in the reply:
         # no "specially for you", no "since you work in…", no naming the profile
-        # back to the student. The answer must read the same as it would for any
-        # learner at this level.
+        # back to the student, and never quote or paraphrase this field. The
+        # answer must read the same as it would for any learner at this level.
         profession_ctx = (
             f"\nBACKGROUND (internal, do NOT mention or reference in your reply): {profession}\n"
-            "Use it only to silently calibrate difficulty and pick neutral examples. "
-            "Do not tell the student you are tailoring anything to them."
+            "STRICT RULES for this field:\n"
+            "- Never reveal, name, quote, or paraphrase that this information exists or where it came from.\n"
+            "- Never address the student by their stated role/field (e.g. do NOT say 'as someone in education', 'since you study/work in…', 'for your line of work').\n"
+            "- Use it ONLY to silently steer example topics and difficulty toward what is relevant to this person.\n"
+            "- Do not say you are personalising or tailoring anything. The reply must look generic."
         )
 
     slang_rule = (
