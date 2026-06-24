@@ -567,6 +567,51 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .exam-actions{display:flex;gap:7px;flex-wrap:wrap}
 .exam-btn{border:1px solid rgba(var(--ar),.22);background:rgba(var(--ar),.08);color:var(--a);border-radius:10px;padding:9px 11px;font-size:12px;font-weight:850;font-family:var(--f);cursor:pointer}
 .exam-area{width:100%;min-height:86px;resize:vertical;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:13px;padding:10px;outline:none}
+
+/* ── ExamSimulator: full-screen timed exam mode (TASK_KIND.exam) ──────
+   Timer with auto-submit, no Back navigation, no ALEX help, optional
+   background-noise realism. Built as its own overlay so the course
+   wizard is untouched. */
+.examsim-cta{margin-top:4px;border:1px solid rgba(var(--exam-r),.28);background:linear-gradient(135deg,rgba(var(--exam-r),.10),var(--e2));border-radius:12px;padding:12px}
+.examsim-cta-h{font-size:13px;font-weight:900;color:var(--exam);display:flex;align-items:center;gap:7px}
+.examsim-cta-h svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.examsim-cta-sub{font-size:11px;color:var(--t3);margin:5px 0 9px;line-height:1.45}
+.examsim-cta-row{display:flex;gap:8px}
+.examsim-cta-row button{flex:1;border:1px solid rgba(var(--exam-r),.3);background:rgba(var(--exam-r),.08);color:var(--t1);border-radius:10px;padding:9px 8px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer;transition:.15s}
+.examsim-cta-row button:active{transform:scale(.97);border-color:var(--exam)}
+.examsim{position:fixed;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column;animation:fadeIn .2s ease}
+.examsim-top{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--b1)}
+.examsim-x{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);font-size:16px;line-height:1;cursor:pointer}
+.examsim-x:active{transform:scale(.94)}
+.examsim-kicker{flex:1;min-width:0;font-size:12px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;color:var(--exam);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.examsim-timer{flex:none;font-variant-numeric:tabular-nums;font-size:15px;font-weight:900;color:var(--t1);background:rgba(var(--exam-r),.12);border:1px solid rgba(var(--exam-r),.24);border-radius:9px;padding:5px 10px}
+.examsim-timer.warn{color:var(--rd);background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.32);animation:pulseWarn 1s ease infinite}
+@keyframes pulseWarn{0%,100%{opacity:1}50%{opacity:.55}}
+.examsim-noise{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--t3);font-size:15px;line-height:1;cursor:pointer}
+.examsim-noise.on{color:var(--exam);border-color:rgba(var(--exam-r),.4);background:rgba(var(--exam-r),.12)}
+.examsim-noise:active{transform:scale(.94)}
+.examsim-rail{height:3px;background:rgba(255,255,255,.07)}
+.examsim-railfill{height:100%;width:0%;background:linear-gradient(90deg,var(--exam),var(--a));transition:width .35s cubic-bezier(.4,1,.4,1)}
+.examsim-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;flex-direction:column;gap:12px}
+.examsim-count{font-size:11px;font-weight:850;letter-spacing:.4px;color:var(--t3);text-transform:uppercase}
+.examsim-passage{font-size:13px;line-height:1.6;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:12px}
+.examsim-listen{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.examsim-hint{font-size:11px;color:var(--t3);line-height:1.4}
+.examsim-q{font-size:15px;font-weight:800;color:var(--t1);line-height:1.45}
+.examsim-opts{display:flex;flex-direction:column;gap:8px}
+.examsim-opt{text-align:left;padding:12px 13px;background:var(--e2);border:1.5px solid var(--b2);border-radius:12px;font-family:var(--f);font-size:13.5px;color:var(--t1);cursor:pointer;transition:.18s;line-height:1.4}
+.examsim-opt:active{transform:scale(.985)}
+.examsim-correct{border-color:var(--a2)!important;background:rgba(0,212,170,.13)!important;color:var(--a2)!important;font-weight:700}
+.examsim-wrong{border-color:var(--rd)!important;background:rgba(255,107,107,.11)!important;color:var(--rd)!important}
+.examsim-result{text-align:center;padding:24px 8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.examsim-score{font-size:46px;font-weight:950;line-height:1;color:var(--exam);animation:congratPop .5s cubic-bezier(.22,1.4,.5,1)}
+.examsim-score-sub{font-size:14px;font-weight:800;color:var(--t1)}
+.examsim-score-note{font-size:12.5px;color:var(--t2);line-height:1.5;max-width:300px}
+.examsim-result-btns{display:flex;gap:9px;margin-top:14px;width:100%;max-width:320px}
+.examsim-result-btns button{flex:1;padding:12px;border-radius:12px;font-family:var(--f);font-size:13px;font-weight:850;cursor:pointer}
+.examsim-result-btns .primary{border:none;color:#fff;background:linear-gradient(135deg,var(--exam),var(--a))}
+.examsim-result-btns .ghost{border:1px solid var(--b2);background:transparent;color:var(--t2)}
+.examsim-result-btns button:active{transform:scale(.97)}
 /* Roadmap test button */
 .rm-test-btn{display:flex;align-items:center;gap:10px;padding:14px;background:linear-gradient(135deg,rgba(var(--ar),.08),rgba(0,212,170,.04));border:1.5px dashed rgba(var(--ar),.3);border-radius:var(--r2);margin:4px 0 10px;cursor:pointer;transition:.2s}
 .rm-test-btn:active{transform:scale(.97)}
@@ -2967,6 +3012,18 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="congrat-msg" id="cefr-msg"></div>
     <button class="congrat-ok" onclick="closeMod('cefrm')" id="cefr-ok">Got it</button>
   </div>
+</div>
+
+<!-- EXAM SIMULATOR (full-screen timed exam mode) -->
+<div class="examsim" id="examsim" role="dialog" aria-modal="true">
+  <div class="examsim-top">
+    <button class="examsim-x" id="examsim-x" onclick="examSimExit()" aria-label="Exit">&#10005;</button>
+    <div class="examsim-kicker" id="examsim-kicker">Exam</div>
+    <div class="examsim-timer" id="examsim-timer">00:00</div>
+    <button class="examsim-noise" id="examsim-noise" onclick="examSimNoise()" aria-pressed="false" aria-label="Background noise">&#128263;</button>
+  </div>
+  <div class="examsim-rail"><div class="examsim-railfill" id="examsim-railfill"></div></div>
+  <div class="examsim-body" id="examsim-body"></div>
 </div>
 
 <!-- TERMS AND RULES MODAL -->
@@ -8027,6 +8084,14 @@ function openExamPrep(){
       <button class="exam-card" onclick="runExamTask('toefl','speaking')"><strong>TOEFL Speaking</strong><span>answer aloud</span></button>
       <button class="exam-card" onclick="runExamTask('ielts','writing')"><strong>IELTS Writing</strong><span>plan + response</span></button>
     </div>
+    <div class="examsim-cta">
+      <div class="examsim-cta-h"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M12 1h0M9 1h6"/></svg>${({ru:'Экзамен-симуляция',en:'Exam simulation',es:'Simulación de examen',pt:'Simulação de exame',de:'Prüfungssimulation',fr:'Simulation d’examen',uk:'Екзамен-симуляція',tr:'Sınav simülasyonu',zh:'考试模拟',ar:'محاكاة الامتحان'}[lang]||'Exam simulation')}</div>
+      <div class="examsim-cta-sub">${({ru:'Таймер, без кнопки «Назад», без ALEX — как на реальном экзамене. Можно включить фоновый шум.',en:'Timer, no Back button, no ALEX — just like the real exam. Background noise optional.',es:'Cronómetro, sin botón Atrás, sin ALEX, como en el examen real. Ruido de fondo opcional.',pt:'Cronômetro, sem botão Voltar, sem ALEX — como no exame real. Ruído de fundo opcional.',de:'Timer, kein Zurück-Button, kein ALEX – wie in der echten Prüfung. Hintergrundgeräusch optional.',fr:'Minuteur, sans bouton Retour, sans ALEX — comme au vrai examen. Bruit de fond en option.',uk:'Таймер, без кнопки «Назад», без ALEX — як на справжньому іспиті. Фоновий шум за бажанням.',tr:'Zamanlayıcı, Geri düğmesi yok, ALEX yok — gerçek sınav gibi. Arka plan gürültüsü isteğe bağlı.',zh:'计时、无返回按钮、无 ALEX——如真实考试。可选背景噪音。',ar:'مؤقّت، بدون زر رجوع، بدون ALEX — مثل الامتحان الحقيقي. ضوضاء خلفية اختيارية.'}[lang]||'Timer, no Back button, no ALEX — just like the real exam. Background noise optional.')}</div>
+      <div class="examsim-cta-row">
+        <button onclick="startExamSim('toefl')">TOEFL iBT</button>
+        <button onclick="startExamSim('ielts')">IELTS</button>
+      </div>
+    </div>
   </div>`);
 }
 function runExamTask(exam,section){
@@ -8103,6 +8168,208 @@ function askExamAI(id){
   const txt=(document.getElementById(id+'-txt')?.value||'').trim();
   const prompt=`${examTitle(st.exam)} · ${st.section}.\nTask: ${st.task.prompt||st.task.q}\nMy answer: ${txt||'(I have not answered yet — I need guidance on how to approach this)'}\nGive a score-style review, point out exactly what to fix, then show one stronger sample answer and the one rule I should remember.`;
   sendChip(prompt,'lesson_help');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ExamSimulator — full-screen timed exam mode driven by TASK_KIND.exam.
+   Contract: allowBack:false (no Back, ✕ aborts), timed:true (countdown
+   auto-submits), helpEnabled:false (no ALEX anywhere), noiseSim:true
+   (optional background-noise realism). Self-contained: it does NOT
+   touch the course wizard or runExamTask, and uses only the local
+   EXAM_BANK (no AI / no cost). MCQ-only (reading + listening) so every
+   answer auto-scores.
+   ════════════════════════════════════════════════════════════════ */
+const EXAM_SIM_CFG={qn:6,secs:6*60};
+let examSim=null;          // active session state
+let _examNoise=null;       // WebAudio ambient-noise nodes
+
+function startExamSim(exam){
+  exam=(exam==='ielts')?'ielts':'toefl';
+  const kind=(typeof TASK_KIND!=='undefined'&&TASK_KIND.exam)||{timed:true,allowBack:false,helpEnabled:false,noiseSim:true};
+  const pool=[];
+  ['reading','listening'].forEach(sec=>{
+    ((EXAM_BANK[exam]&&EXAM_BANK[exam][sec])||[]).forEach(t=>{
+      if(Array.isArray(t.o)&&typeof t.a==='number')pool.push(Object.assign({_sec:sec},t));
+    });
+  });
+  if(!pool.length){toast(({ru:'Задания недоступны',en:'No tasks available',es:'No hay tareas',pt:'Sem tarefas',de:'Keine Aufgaben',fr:'Aucune tâche',uk:'Немає завдань',tr:'Görev yok',zh:'暂无题目',ar:'لا مهام'}[lang]||'No tasks available'),'⚠️');return;}
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  const qn=Math.min(EXAM_SIM_CFG.qn,pool.length);
+  const stamp=Date.now();
+  const tasks=pool.slice(0,qn).map((t,k)=>shuffleMCQ(t,'sim'+exam+k+stamp));
+  examSim={exam,kind,tasks,idx:0,correct:0,locked:false,noise:false,deadline:stamp+EXAM_SIM_CFG.secs*1000,timerId:null};
+  const ov=document.getElementById('examsim');if(!ov)return;
+  ov.style.display='flex';
+  const kick=document.getElementById('examsim-kicker');
+  if(kick)kick.textContent=examTitle(exam)+' · '+({ru:'Симуляция',en:'Simulation',es:'Simulación',pt:'Simulação',de:'Simulation',fr:'Simulation',uk:'Симуляція',tr:'Simülasyon',zh:'模拟',ar:'محاكاة'}[lang]||'Simulation');
+  const nb=document.getElementById('examsim-noise');
+  if(nb){nb.style.display=kind.noiseSim?'':'none';nb.classList.remove('on');nb.setAttribute('aria-pressed','false');}
+  _examSimRenderQ();_examSimUpdateRail();_examSimTick();
+  examSim.timerId=setInterval(_examSimTick,500);
+  try{trackM('drill');}catch(_){}
+}
+
+function _examSimRenderQ(){
+  const body=document.getElementById('examsim-body');if(!body||!examSim)return;
+  const t=examSim.tasks[examSim.idx];if(!t){examSimFinish('done');return;}
+  const n=examSim.idx+1,total=examSim.tasks.length;
+  const secLbl=(t._sec==='listening')
+    ?({ru:'АУДИРОВАНИЕ',en:'LISTENING',es:'ESCUCHA',pt:'ESCUTA',de:'HÖREN',fr:'ÉCOUTE',uk:'АУДІЮВАННЯ',tr:'DİNLEME',zh:'听力',ar:'استماع'}[lang]||'LISTENING')
+    :({ru:'ЧТЕНИЕ',en:'READING',es:'LECTURA',pt:'LEITURA',de:'LESEN',fr:'LECTURE',uk:'ЧИТАННЯ',tr:'OKUMA',zh:'阅读',ar:'قراءة'}[lang]||'READING');
+  let media='';
+  if(t._sec==='listening'){
+    const listenLbl=({ru:'Слушать',en:'Listen',es:'Escuchar',pt:'Ouvir',de:'Anhören',fr:'Écouter',uk:'Слухати',tr:'Dinle',zh:'收听',ar:'استمع'}[lang]||'Listen');
+    const hint=({ru:'Текста нет — слушай и отвечай, как на реальном экзамене.',en:'No transcript — listen and answer, just like the real exam.',es:'Sin texto: escucha y responde, como en el examen real.',pt:'Sem texto — ouça e responda, como no exame real.',de:'Kein Text — hören und antworten, wie in der echten Prüfung.',fr:'Pas de texte — écoute et réponds, comme au vrai examen.',uk:'Тексту немає — слухай і відповідай, як на справжньому іспиті.',tr:'Metin yok — gerçek sınavdaki gibi dinle ve yanıtla.',zh:'无文本——听音频作答，如真实考试。',ar:'لا نص — استمع وأجب كما في الامتحان الحقيقي.'}[lang]||'No transcript — listen and answer, just like the real exam.');
+    media=`<div class="examsim-listen"><button class="exam-btn" onclick="examSimSpeakCur()">🔊 ${listenLbl}</button><div class="examsim-hint">${hint}</div></div>`;
+  }else{
+    media=`<div class="examsim-passage">${safeHTML(t.passage||'')}</div>`;
+  }
+  const opts=t.o.map((o,i)=>`<button class="examsim-opt" id="examsim-opt-${i}" onclick="examSimAnswer(${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</button>`).join('');
+  body.innerHTML=`<div class="examsim-count">${n} / ${total} · ${secLbl}</div>${media}<div class="examsim-q">${safeHTML(t.q||'')}</div><div class="examsim-opts">${opts}</div>`;
+  body.scrollTop=0;
+}
+
+function _examSimUpdateRail(){
+  const f=document.getElementById('examsim-railfill');
+  if(f&&examSim)f.style.width=Math.round(examSim.idx/examSim.tasks.length*100)+'%';
+}
+
+function examSimSpeakCur(){
+  const t=examSim&&examSim.tasks[examSim.idx];if(!t)return;
+  try{playListenTTS(t.transcript||t.passage||'',()=>{});}catch(_){}
+}
+
+function examSimAnswer(i){
+  if(!examSim||examSim.locked)return;
+  examSim.locked=true;
+  const t=examSim.tasks[examSim.idx];
+  const correct=t.a;const ok=(i===correct);
+  if(ok)examSim.correct++;
+  for(let k=0;k<t.o.length;k++){
+    const el=document.getElementById('examsim-opt-'+k);if(!el)continue;
+    el.style.pointerEvents='none';
+    if(k===correct)el.classList.add('examsim-correct');
+    else if(k===i)el.classList.add('examsim-wrong');
+  }
+  try{sfx.tap();}catch(_){}
+  setTimeout(examSimNext,1000);
+}
+
+function examSimNext(){
+  if(!examSim)return;
+  examSim.locked=false;
+  examSim.idx++;
+  if(examSim.idx>=examSim.tasks.length){examSimFinish('done');return;}
+  _examSimRenderQ();_examSimUpdateRail();
+}
+
+function _examSimTick(){
+  if(!examSim)return;
+  const left=Math.max(0,Math.round((examSim.deadline-Date.now())/1000));
+  const el=document.getElementById('examsim-timer');
+  if(el){
+    const m=Math.floor(left/60),s=left%60;
+    el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    el.classList.toggle('warn',left<=30);
+  }
+  if(left<=0)examSimFinish('time');
+}
+
+function examSimFinish(reason){
+  if(!examSim)return;
+  if(examSim.timerId){clearInterval(examSim.timerId);examSim.timerId=null;}
+  _examStopNoise();
+  const total=examSim.tasks.length;
+  const got=examSim.correct;
+  const pct=total?Math.round(got/total*100):0;
+  examSim.idx=total;_examSimUpdateRail();
+  const xp=got*5;if(xp>0){try{addLocalXP(xp);}catch(_){}}
+  try{bumpStat('tests');}catch(_){}
+  const head=(reason==='time')
+    ?({ru:'Время вышло',en:'Time is up',es:'Se acabó el tiempo',pt:'Tempo esgotado',de:'Zeit abgelaufen',fr:'Temps écoulé',uk:'Час вийшов',tr:'Süre doldu',zh:'时间到',ar:'انتهى الوقت'}[lang]||'Time is up')
+    :({ru:'Симуляция завершена',en:'Simulation complete',es:'Simulación completada',pt:'Simulação concluída',de:'Simulation abgeschlossen',fr:'Simulation terminée',uk:'Симуляцію завершено',tr:'Simülasyon tamamlandı',zh:'模拟完成',ar:'اكتملت المحاكاة'}[lang]||'Simulation complete');
+  const note=(pct>=80?({ru:'Отличный экзаменационный темп — ты готов.',en:'Great exam pace — you are ready.',es:'Buen ritmo de examen: estás listo.',pt:'Ótimo ritmo de exame — você está pronto.',de:'Starkes Prüfungstempo – du bist bereit.',fr:'Excellent rythme d’examen — tu es prêt.',uk:'Чудовий екзаменаційний темп — ти готовий.',tr:'Harika sınav temposu — hazırsın.',zh:'考试节奏很棒——你准备好了。',ar:'وتيرة امتحان ممتازة — أنت جاهز.'}[lang]||'Great exam pace — you are ready.')
+    :pct>=50?({ru:'Неплохо. Повтори слабые темы и пройди ещё раз.',en:'Not bad. Review the weak topics and try again.',es:'Nada mal. Repasa los temas débiles e inténtalo de nuevo.',pt:'Nada mal. Revise os temas fracos e tente novamente.',de:'Nicht schlecht. Wiederhole die schwachen Themen und versuch es erneut.',fr:'Pas mal. Revois les points faibles et réessaie.',uk:'Непогано. Повтори слабкі теми і спробуй ще раз.',tr:'Fena değil. Zayıf konuları tekrar et ve yeniden dene.',zh:'还不错。复习薄弱环节再试一次。',ar:'لا بأس. راجع المواضيع الضعيفة وحاول مجددًا.'}[lang]||'Not bad. Review the weak topics and try again.')
+    :({ru:'Нужна тренировка. Начни с отдельных заданий, потом вернись к симуляции.',en:'Needs practice. Start with single tasks, then return to the simulation.',es:'Necesita práctica. Empieza con tareas sueltas y vuelve a la simulación.',pt:'Precisa de prática. Comece com tarefas avulsas e volte à simulação.',de:'Mehr Übung nötig. Beginne mit Einzelaufgaben und kehre dann zur Simulation zurück.',fr:'À travailler. Commence par des tâches isolées, puis reviens à la simulation.',uk:'Потрібна практика. Почни з окремих завдань, потім повернись до симуляції.',tr:'Pratik gerek. Tek görevlerle başla, sonra simülasyona dön.',zh:'需要练习。先做单项题目，再回到模拟。',ar:'يحتاج تدريبًا. ابدأ بمهام مفردة ثم عُد إلى المحاكاة.'}[lang]||'Needs practice. Start with single tasks, then return to the simulation.'));
+  const correctLbl=({ru:'верных ответов',en:'correct',es:'correctas',pt:'corretas',de:'richtig',fr:'correctes',uk:'правильних',tr:'doğru',zh:'正确',ar:'صحيحة'}[lang]||'correct');
+  const againLbl=({ru:'Ещё раз',en:'Again',es:'Otra vez',pt:'De novo',de:'Nochmal',fr:'Recommencer',uk:'Ще раз',tr:'Tekrar',zh:'再来',ar:'مرة أخرى'}[lang]||'Again');
+  const doneLbl=({ru:'Готово',en:'Done',es:'Listo',pt:'Concluir',de:'Fertig',fr:'Terminé',uk:'Готово',tr:'Bitti',zh:'完成',ar:'تم'}[lang]||'Done');
+  const xpLine=xp>0?` · +${xp} XP`:'';
+  const exam=examSim.exam;
+  const body=document.getElementById('examsim-body');
+  if(body)body.innerHTML=`<div class="examsim-result">
+    <div class="examsim-score">${pct}%</div>
+    <div class="examsim-score-sub">${head} — ${got} / ${total} ${correctLbl}${xpLine}</div>
+    <div class="examsim-score-note">${note}</div>
+    <div class="examsim-result-btns">
+      <button class="ghost" onclick="closeExamSim()">${doneLbl}</button>
+      <button class="primary" onclick="startExamSim('${exam}')">${againLbl}</button>
+    </div>
+  </div>`;
+  try{sfx.done();}catch(_){}
+}
+
+function closeExamSim(){
+  if(examSim&&examSim.timerId){clearInterval(examSim.timerId);examSim.timerId=null;}
+  _examStopNoise();
+  examSim=null;
+  const ov=document.getElementById('examsim');if(ov)ov.style.display='none';
+}
+
+function examSimExit(){
+  if(!examSim){closeExamSim();return;}
+  /* No Back navigation: leaving mid-exam abandons the attempt. On the
+     results screen (idx past the last question) just close. */
+  if(examSim.idx>=examSim.tasks.length){closeExamSim();return;}
+  const msg=({ru:'Выйти из симуляции? Прогресс не сохранится.',en:'Exit the simulation? Your progress will be lost.',es:'¿Salir de la simulación? Se perderá tu progreso.',pt:'Sair da simulação? Seu progresso será perdido.',de:'Simulation verlassen? Dein Fortschritt geht verloren.',fr:'Quitter la simulation ? Ta progression sera perdue.',uk:'Вийти із симуляції? Прогрес не збережеться.',tr:'Simülasyondan çık? İlerlemen kaybolacak.',zh:'退出模拟？进度将丢失。',ar:'الخروج من المحاكاة؟ سيُفقد تقدمك.'}[lang]||'Exit the simulation? Your progress will be lost.');
+  try{
+    if(window.Telegram&&Telegram.WebApp&&typeof Telegram.WebApp.showConfirm==='function'){
+      Telegram.WebApp.showConfirm(msg,(ok)=>{if(ok)closeExamSim();});
+      return;
+    }
+  }catch(_){}
+  if(confirm(msg))closeExamSim();
+}
+
+function examSimNoise(){
+  if(!examSim)return;
+  const btn=document.getElementById('examsim-noise');
+  if(examSim.noise){
+    _examStopNoise();examSim.noise=false;
+    if(btn){btn.classList.remove('on');btn.setAttribute('aria-pressed','false');}
+  }else{
+    const ok=_examStartNoise();
+    examSim.noise=ok;
+    if(btn){btn.classList.toggle('on',ok);btn.setAttribute('aria-pressed',ok?'true':'false');}
+    if(!ok)toast(({ru:'Звук недоступен',en:'Audio unavailable',es:'Audio no disponible',pt:'Áudio indisponível',de:'Audio nicht verfügbar',fr:'Audio indisponible',uk:'Звук недоступний',tr:'Ses kullanılamıyor',zh:'音频不可用',ar:'الصوت غير متاح'}[lang]||'Audio unavailable'),'⚠️');
+  }
+}
+
+/* Brown-noise generator through a low-pass filter — sounds like distant
+   room/ventilation rumble, simulating a noisy test centre. */
+function _examStartNoise(){
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return false;
+    const ctx=new Ctx();
+    const len=2*ctx.sampleRate;
+    const buf=ctx.createBuffer(1,len,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    let last=0;
+    for(let i=0;i<len;i++){const white=Math.random()*2-1;last=(last+0.02*white)/1.02;data[i]=last*3.2;}
+    const src=ctx.createBufferSource();src.buffer=buf;src.loop=true;
+    const filt=ctx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=900;
+    const gain=ctx.createGain();gain.gain.value=0.06;
+    src.connect(filt);filt.connect(gain);gain.connect(ctx.destination);
+    src.start(0);
+    _examNoise={ctx,src,gain};
+    return true;
+  }catch(e){console.warn('exam noise start failed',e);return false;}
+}
+function _examStopNoise(){
+  if(!_examNoise)return;
+  try{_examNoise.src.stop();}catch(e){console.warn('exam noise stop',e);}
+  try{_examNoise.ctx.close();}catch(e){console.warn('exam noise close',e);}
+  _examNoise=null;
 }
 
 function renderAudio(data){
