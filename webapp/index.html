@@ -1695,6 +1695,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-card-counter{margin-left:auto;font-size:11px;color:var(--t3);font-weight:700}
 .course-choice.hinted{opacity:.32;filter:grayscale(.6);text-decoration:line-through}
 .course-vocab-card.hard-mode{border-color:rgba(255,165,0,.32);background:linear-gradient(135deg,rgba(255,149,0,.08),var(--e2))}
+.course-vocab-card.ease-mode{border-color:rgba(var(--green-r),.32);background:linear-gradient(135deg,rgba(var(--green-r),.08),var(--e2))}
+.course-vocab-card.ease-mode .course-vocab-sub{color:var(--green)}
 .course-vocab-card.hard-mode .course-vocab-sub{color:#ffa500;font-weight:700}
 .course-input-hard{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--b2);background:var(--e1);color:var(--t1);font-size:15px;font-weight:600;margin:8px 0 6px;outline:none;transition:border-color .15s}
 .course-input-hard:focus{border-color:rgba(var(--ar),.55);background:var(--e2)}
@@ -9781,6 +9783,27 @@ function renderCourse(){
      "lesson opens then list snaps back" bug regardless of who is calling
      renderCourse out of band. */
   if(_inCourseLesson)return;
+  /* Session-state persistence: if a lesson was open when the user left the
+     Course tab (or reloaded), reopen it instead of snapping to the list. The
+     active id is stored by openCourseLesson and cleared by leaveCourseLesson.
+     Skipped during the Exam Hub flow (_examLessonReturn opens its own lesson
+     via setTimeout) and guarded against re-entrancy with _courseRestoring. */
+  if(!_courseRestoring && !_examLessonReturn){
+    let _active='';
+    try{_active=LS.get('course_active_lesson')||'';}catch(_){_active='';}
+    if(_active){
+      let _ok=false;
+      try{_ok=isCourseUnlocked(_active);}catch(_){_ok=false;}
+      if(_ok && GALAXY_COURSE.find(x=>x.id===_active)){
+        _courseRestoring=true;
+        try{openCourseLesson(_active);}catch(_){}
+        _courseRestoring=false;
+        if(_inCourseLesson)return;
+      } else {
+        try{LS.set('course_active_lesson','');}catch(_){}
+      }
+    }
+  }
   const wrap=document.getElementById('course-wrap');if(!wrap)return;
   const done=LS.getJ('course_done')||{};
   const doneCount=Object.keys(done).length;
@@ -10121,6 +10144,28 @@ function _adaptiveStreakKey(id,part){return 'course_streak_'+id+'_'+part;}
 function getAdaptiveStreak(id,part){return parseInt(LS.get(_adaptiveStreakKey(id,part))||'0',10)||0;}
 function setAdaptiveStreak(id,part,v){LS.set(_adaptiveStreakKey(id,part),String(Math.max(0,v|0)));}
 function _shouldUseHardMode(id,part){return getAdaptiveStreak(id,part)>=3;}
+/* Adaptive easing (brief: "упрощение заданий при накопленных ошибках").
+   Mirror of the hard-mode streak above, but the other way: count CONSECUTIVE
+   WRONG answers inside a stage. Once they accumulate, the next multiple-choice
+   card drops distractors (4→2 options) so the learner can rebuild confidence.
+   A correct answer resets it. Gated on TASK_KIND.course.adaptive so it honours
+   the task-contract layer (and can be turned off for non-adaptive task kinds). */
+function _courseAdaptiveOn(){try{return !!(typeof TASK_KIND!=='undefined'&&currentTaskKind&&currentTaskKind().adaptive);}catch(_){return true;}}
+function _adaptiveErrKey(id,part){return 'course_errstreak_'+id+'_'+part;}
+function getAdaptiveErr(id,part){return parseInt(LS.get(_adaptiveErrKey(id,part))||'0',10)||0;}
+function setAdaptiveErr(id,part,v){LS.set(_adaptiveErrKey(id,part),String(Math.max(0,v|0)));}
+function _shouldUseEaseMode(id,part){return _courseAdaptiveOn()&&getAdaptiveErr(id,part)>=2;}
+/* Reduce an options object {opts,answer} to a 2-choice subset (correct + one
+   deterministic distractor), remapping the answer index. */
+function _easeOptions(data,seedStr){
+  if(!data||!Array.isArray(data.opts)||data.opts.length<=2)return data;
+  const ans=data.answer;
+  let h=0;const s='ease_'+(seedStr||'');for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}
+  const others=data.opts.map((_,i)=>i).filter(i=>i!==ans);
+  const distractor=others[h%others.length];
+  const keep=[ans,distractor].sort((a,b)=>a-b);
+  return {opts:keep.map(i=>data.opts[i]),answer:keep.indexOf(ans)};
+}
 function normalizeInput(s){return String(s||'').trim().toLowerCase().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ');}
 /* Hint: grey out one wrong option. One use per card. Available before any answer. */
 function useCourseHint(id,part,idx,answerIdx){
@@ -10151,12 +10196,17 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
     <div class="course-card-progress">${words.map((_,i)=>`<div class="course-card-dot ${state[i]!==undefined?'done':''} ${i===activeIdx&&state[i]===undefined?'active':''}"></div>`).join('')}<span class="course-card-counter">${Math.min(activeIdx+1,words.length)} / ${words.length}</span></div>
     <div class="course-card-flow">${words.map((w,i)=>{
       const prompt=reverse?courseWordTranslation(w):w;
-      const data=courseWordOptions(w,reverse?'reverse':'native',words);
+      let data=courseWordOptions(w,reverse?'reverse':'native',words);
       const picked=state[i];
       const isActive=i===activeIdx;
       /* Adaptive: when streak >=3 and this is the active card, switch to
          free-input mode (user must type the answer). */
       const hardMode=isActive&&picked===undefined&&_shouldUseHardMode(id,part);
+      /* Adaptive easing: after repeated errors, simplify the active card by
+         dropping distractors so only two choices remain. Mutually exclusive
+         with hard mode (a wrong answer resets the correct-streak). */
+      const easeMode=isActive&&picked===undefined&&!hardMode&&_shouldUseEaseMode(id,part);
+      if(easeMode)data=_easeOptions(data,w+'_'+part+'_'+i);
       const correctText=data.opts[data.answer]||'';
       const ipa=!reverse?vocabPhonetic(w):'';
       if(hardMode){
@@ -10170,9 +10220,9 @@ function renderCourseVocabSection(ls,id,part,index,reverse){
           </div>
         </div>`;
       }
-      return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''}" data-card-idx="${i}" id="course-choice-${part}-${i}">
+      return `<div class="course-vocab-card ${picked!==undefined?'answered':''} ${isActive?'active':''} ${easeMode?'ease-mode':''}" data-card-idx="${i}" id="course-choice-${part}-${i}">
         <div class="course-vocab-word">${safeHTML(prompt)}</div>${ipa?`<div class="course-vocab-ipa">${safeHTML(ipa)}</div>`:''}
-        <div class="course-vocab-sub">${reverse?courseT('chooseWord'):courseT('choose')}</div>
+        <div class="course-vocab-sub">${easeMode?({ru:'Стало проще — выбери из двух.',en:'Made easier — pick from two.',es:'Más fácil: elige entre dos.',pt:'Mais fácil — escolha entre dois.',de:'Leichter — wähle aus zweien.',fr:'Plus simple — choisis parmi deux.',uk:'Стало простіше — обери з двох.',tr:'Kolaylaştı — ikisinden seç.',zh:'已简化——二选一。',ar:'صار أسهل — اختر من اثنين.'}[lang]||'Made easier — pick from two.'):(reverse?courseT('chooseWord'):courseT('choose'))}</div>
         <div class="course-choice-grid">${data.opts.map((o,oi)=>{
           const isAns=oi===data.answer;
           const cls=picked===oi?(isAns?'ok':'bad'):(picked!==undefined&&picked!==data.answer&&isAns?'ok-reveal':'');
@@ -10457,6 +10507,7 @@ function coursePracticeSet(ls){
   return out;
 }
 let _inCourseLesson=false;
+let _courseRestoring=false;
 /* ── Light scenario-learning architecture (non-breaking descriptor layer) ──
    A thin contract layer over the existing lesson wizard. BaseTask holds the
    shared task semantics; CourseTask (current lessons + ALEX roleplay help)
@@ -10488,10 +10539,16 @@ function openCourseLesson(id){
   try{
     _inCourseLesson=true;
     _openCourseLessonInner(id);
+    /* Session-state persistence: remember which lesson is open so switching
+       tabs (or reloading) reopens it instead of dropping to the list. Exam Hub
+       lessons (_examLessonReturn) belong to the roadmap flow, not the course
+       list, so they are not persisted here. */
+    try{if(!_examLessonReturn)LS.set('course_active_lesson',String(id));}catch(_){}
   }
   catch(err){
     console.error('openCourseLesson failed for',id,err);
     _inCourseLesson=false;
+    try{LS.set('course_active_lesson','');}catch(_){}
     const wrap=document.getElementById('course-wrap');
     if(wrap){
       wrap.innerHTML=`<div class="course-lesson">
@@ -10506,6 +10563,8 @@ function openCourseLesson(id){
    events, scroll handlers, etc.) is now ignored while a lesson is open. */
 function leaveCourseLesson(){
   _inCourseLesson=false;
+  /* Explicit exit clears the persisted active lesson so we don't reopen it. */
+  try{LS.set('course_active_lesson','');}catch(_){}
   /* If the lesson came from the Exam Hub, drop back there instead of the
      CEFR course list. */
   if(_examLessonReturn){
@@ -10951,6 +11010,7 @@ function courseRetryStage(id,part){
      re-renders fresh. The user has to redo every question in this stage. */
   courseSaveChoiceState(id,part,{});
   courseMarkStageFailed(id,part,false);
+  setAdaptiveStreak(id,part,0);setAdaptiveErr(id,part,0);
   /* Also wipe the part-done flag if it was somehow set. */
   const parts=courseStoredParts(id);
   if(parts[part]){delete parts[part];LS.setJ(coursePartsKey(id),parts);}
@@ -10979,12 +11039,18 @@ function answerCourseWord(id,part,idx,picked,answer,word){
     else if(!ok&&i===answer)btn.classList.add('ok-reveal');
   });
   if(ok){
+    setAdaptiveErr(id,part,0);
     /* Adaptive: bump streak; when it crosses 3 the next card flips to hard mode. */
     const newStreak=getAdaptiveStreak(id,part)+1;
     setAdaptiveStreak(id,part,newStreak);
     if(newStreak===3){try{toast(({ru:'Включён сложный режим.',en:'Hard mode unlocked.',es:'Modo difícil activado.',pt:'Modo difícil ativado.',de:'Schwerer Modus aktiviert.',fr:'Mode difficile activé.',uk:'Складний режим увімкнено.',tr:'Zor mod açıldı.',zh:'已开启困难模式。',ar:'تم تفعيل الوضع الصعب.'}[lang]||'Hard mode unlocked.'),'💪');}catch(_){}}
   }else{
     setAdaptiveStreak(id,part,0);
+    /* Adaptive easing: accumulate the error streak; once it reaches 2 the next
+       card is simplified to two options. Announce it the moment it triggers. */
+    const errs=getAdaptiveErr(id,part)+1;
+    setAdaptiveErr(id,part,errs);
+    if(errs===2&&_courseAdaptiveOn()){try{toast(({ru:'Упрощаю следующее задание.',en:'Simplifying the next task.',es:'Simplificando la siguiente tarea.',pt:'Simplificando a próxima tarefa.',de:'Nächste Aufgabe wird einfacher.',fr:'Je simplifie la tâche suivante.',uk:'Спрощую наступне завдання.',tr:'Sonraki görevi kolaylaştırıyorum.',zh:'下一题已简化。',ar:'سأبسّط المهمة التالية.'}[lang]||'Simplifying the next task.'),'🌱');}catch(_){}}
     courseMarkStageFailed(id,part,true);
     try{sfx.warn();}catch(e){}
   }
@@ -11008,11 +11074,13 @@ function answerCourseWordInput(id,part,idx,answerIdx,word,correctText){
   state[idx]=ok?answerIdx:-1;
   courseSaveChoiceState(id,part,state);
   if(ok){
+    setAdaptiveErr(id,part,0);
     setAdaptiveStreak(id,part,getAdaptiveStreak(id,part)+1);
     card.classList.add('answered');
     card.innerHTML+=`<div class="course-hint" style="color:var(--a2);font-weight:800">✓ ${safeHTML(correctText)}</div>`;
   }else{
     setAdaptiveStreak(id,part,0);
+    setAdaptiveErr(id,part,getAdaptiveErr(id,part)+1);
     courseMarkStageFailed(id,part,true);
     card.innerHTML+=`<div class="course-hint" style="color:var(--rd)">${({ru:'Не совсем. Правильно:',en:'Not quite. The answer:',es:'No del todo. La respuesta:',pt:'Não exatamente. A resposta:',de:'Nicht ganz. Die Antwort:',fr:'Pas tout à fait. La réponse :',uk:'Не зовсім. Правильно:',tr:'Tam değil. Doğrusu:',zh:'不太对。答案：',ar:'ليس تمامًا. الإجابة:'}[lang]||'Not quite. The answer:')} <b style="color:var(--a2)">${safeHTML(correctText)}</b></div>`;
     try{sfx.warn();}catch(_){}
