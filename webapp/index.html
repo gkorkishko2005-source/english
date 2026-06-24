@@ -3994,8 +3994,16 @@ function heroGreeting(){
   const h=new Date().getHours();
   return (L.greet?L.greet(h):'Hello,');
 }
+function resolveUserName(d){
+  return telegramDisplayName()||cleanDisplayName(d?.name)||'';
+}
+const NONAME_GREET={ru:'Добрый день!',en:'Good afternoon!',es:'¡Buenas tardes!',pt:'Boa tarde!',de:'Guten Tag!',fr:'Bonjour !',uk:'Доброго дня!',tr:'İyi günler!',zh:'下午好！',ar:'مساء الخير!'};
 function refreshSub(){
-  const el=document.getElementById('greet');if(el)el.textContent=heroGreeting();
+  const el=document.getElementById('greet');
+  const nameEl=document.getElementById('hname');
+  const realName=resolveUserName(typeof window!=='undefined'?window._d:null);
+  if(el)el.textContent=realName?heroGreeting():(NONAME_GREET[lang]||'Good afternoon!');
+  if(nameEl){nameEl.textContent=realName;nameEl.style.display=realName?'':'none';}
 }
 
 /* ══ RENDER HOME ══ */
@@ -4023,8 +4031,10 @@ function renderHomeGreeting(d){
   }
 }
 function renderHome(d){
+  try{if(typeof window!=='undefined')window._d=window._d||d;}catch(_){}
   refreshSub();
-  document.getElementById('hname').textContent=displayName(d);
+  // refreshSub now owns both the greeting line and the name line (incl. the
+  // no-name "Добрый день!" fallback), so no separate hname write is needed.
   try{renderHomeGreeting(d);}catch(e){}
   /* Record today as a visit so the growth tree's mood detection
      knows the user opened the app today. */
@@ -4566,9 +4576,12 @@ function drawProgress(){
   if(tl){if(sc.length){tl.className='';tl.innerHTML=sc.map((s,i)=>`<div class="toefl-row" style="animation-delay:${i*.07}s"><span class="toefl-name">${safeHTML(s.section)}</span><div class="toefl-track"><div class="toefl-fill" style="width:${Math.max(0,Math.min(100,s.score/s.max*100))}%"></div></div><span class="toefl-score">${s.score}/${s.max}</span></div>`).join('');}
   else{
     tl.className='';
-    const _cta=({ru:'Начать первую сессию TOEFL',en:'Start your first TOEFL session',es:'Inicia tu primera sesión TOEFL',pt:'Inicie sua primeira sessão TOEFL',de:'Erste TOEFL-Sitzung starten',fr:'Commencer ta première session TOEFL',uk:'Почати першу сесію TOEFL',tr:'İlk TOEFL oturumunu başlat',zh:'开始你的第一次 TOEFL 训练',ar:'ابدأ أول جلسة TOEFL'}[lang]||'Start your first TOEFL session');
-    const _sub=({ru:'Сессий пока нет — пройди тренировку, и баллы появятся здесь.',en:'No sessions yet — take a practice and your scores will appear here.',es:'Aún no hay sesiones — practica y tus puntajes aparecerán aquí.',pt:'Ainda sem sessões — pratique e suas notas aparecerão aqui.',de:'Noch keine Sitzungen — übe und deine Werte erscheinen hier.',fr:'Aucune session — entraîne-toi et tes scores apparaîtront ici.',uk:'Сесій ще немає — пройди тренування, і бали з’являться тут.',tr:'Henüz oturum yok — alıştırma yap, puanların burada görünsün.',zh:'还没有训练记录——做一次练习，分数会显示在这里。',ar:'لا جلسات بعد — تدرّب وستظهر درجاتك هنا.'}[lang]||'No sessions yet — take a practice and your scores will appear here.');
-    tl.innerHTML=`<div class="toefl-empty">${safeHTML(_sub)}</div><button class="toefl-cta-btn" onclick="openExamPrep()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8V4z"/></svg><span>${safeHTML(_cta)}</span></button>`;
+    /* No TOEFL sessions yet → instead of a dead "no sessions" line, offer the
+       transition test to the NEXT CEFR level (A0→A1, never jumping to B2). */
+    const nextLvl=_nextCefrLevel(d);
+    const _cta=({ru:'Начать тест перехода на следующий уровень',en:'Start the next-level transition test',es:'Iniciar la prueba al siguiente nivel',pt:'Iniciar o teste para o próximo nível',de:'Test zum nächsten Niveau starten',fr:'Commencer le test de passage au niveau suivant',uk:'Почати тест переходу на наступний рівень',tr:'Bir sonraki seviye testini başlat',zh:'开始升入下一级别的测试',ar:'ابدأ اختبار الانتقال إلى المستوى التالي'}[lang]||'Start the next-level transition test');
+    const _sub=({ru:`Сдай короткий тест и поднимись на уровень ${nextLvl}.`,en:`Pass a short test and move up to level ${nextLvl}.`,es:`Aprueba un test corto y sube al nivel ${nextLvl}.`,pt:`Faça um teste curto e suba para o nível ${nextLvl}.`,de:`Bestehe einen kurzen Test und steige auf Niveau ${nextLvl} auf.`,fr:`Réussis un court test et passe au niveau ${nextLvl}.`,uk:`Склади короткий тест і піднімись на рівень ${nextLvl}.`,tr:`Kısa bir testi geç ve ${nextLvl} seviyesine yüksel.`,zh:`通过一个简短测试，升到 ${nextLvl} 级别。`,ar:`اجتز اختبارًا قصيرًا وارتقِ إلى المستوى ${nextLvl}.`}[lang]||`Pass a short test and move up to level ${nextLvl}.`);
+    tl.innerHTML=`<div class="toefl-empty">${safeHTML(_sub)}</div><button class="toefl-cta-btn" onclick="startLevelTest('${nextLvl}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8V4z"/></svg><span>${safeHTML(_cta)}</span></button>`;
   }}
   // CEFR ladder + exam prep
   try{renderCefrPath(d);}catch(e){}
@@ -4592,6 +4605,16 @@ function refillProgressBars(){
       fill.style.width=target;
     });
   }
+}
+
+/* Next CEFR level up from the user's current level. Clamps at C2 and never
+   skips ahead (A0→A1, not straight to B2). Used by the Progress level-up CTA. */
+function _nextCefrLevel(d){
+  const ladder=['A0','A1','A2','B1','B2','C1','C2'];
+  const cur=String((d&&d.level)||(typeof window!=='undefined'&&window._d&&window._d.level)||'A0').toUpperCase().replace(/\+/,'').slice(0,2);
+  let idx=ladder.indexOf(cur);
+  if(idx<0)idx=0;
+  return ladder[Math.min(idx+1,ladder.length-1)];
 }
 
 /* rgba() from a #rrggbb hex with explicit alpha. */
