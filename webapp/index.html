@@ -7300,20 +7300,34 @@ function cardSkip(){
   recordCardDaily();
   _advanceCard('left');
 }
-/* Save to Notes: enqueue the word into the personal SM-2 dictionary. */
-function cardSave(){
+/* Save to Notes: enqueue the word into the personal SM-2 dictionary. The
+   server enforces a hard queue cap (free 50 / premium 200), so we AWAIT the
+   save: a full queue blocks the word and surfaces the 'learn old words' toast
+   instead of silently hoarding. Offline (no API) falls back to a local save. */
+async function cardSave(){
   if(cardRateBusy)return;cardRateBusy=true;
   if(!_cardLimitGuard())return;
-  haptic('success');try{sfx.correct();}catch(e){}
   const c=cards[cIdx];
+  if(API&&window._uid){
+    try{
+      const r=await fetch(`${API}/api/save_word`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,word:c.word||'',translation:c.translation||'',example:c.example||'',topic:c.topic||'',init_data:(tg&&tg.initData)||''})});
+      let res=null;try{res=await r.json();}catch(_){}
+      if(r.status===409||(res&&res.error==='vocab_full')){
+        try{haptic('warning');}catch(_){}try{sfx.warn();}catch(_){}
+        toast(({ru:'Твой словарь заполнен. Выучи старые слова, чтобы освободить место!',en:'Your dictionary is full. Learn your old words to free up space!',es:'Tu diccionario está lleno. ¡Aprende tus palabras antiguas para liberar espacio!',pt:'Seu dicionário está cheio. Aprenda as palavras antigas para liberar espaço!',de:'Dein Wörterbuch ist voll. Lerne deine alten Wörter, um Platz zu schaffen!',fr:'Ton dictionnaire est plein. Apprends tes anciens mots pour libérer de la place !',uk:'Твій словник заповнений. Вивчи старі слова, щоб звільнити місце!',tr:'Sözlüğün dolu. Yer açmak için eski kelimelerini öğren!',zh:'你的词典已满。先学会旧单词来腾出空间！',ar:'قاموسك ممتلئ. تعلّم كلماتك القديمة لتوفير مساحة!'}[lang]||'Your dictionary is full. Learn your old words to free up space!'),'🔒');
+        cardRateBusy=false;
+        return; /* do NOT save or advance — let the user Skip or learn old words */
+      }
+    }catch(e){appWarn('save_word failed',e);}
+  }
+  haptic('success');try{sfx.correct();}catch(e){}
   /* Tell the user exactly WHERE the word now lives. */
   toast(({ru:'Слово сохранено в твой Словарь (Progress → Рекомендации ALEX)',en:'Word saved to your Dictionary (Progress → ALEX recommendations)',es:'Palabra guardada en tu Diccionario (Progreso → recomendaciones de ALEX)',pt:'Palavra salva no seu Dicionário (Progresso → recomendações do ALEX)',de:'Wort in deinem Wörterbuch gespeichert (Fortschritt → ALEX-Empfehlungen)',fr:'Mot enregistré dans ton Dictionnaire (Progrès → recommandations ALEX)',uk:'Слово збережено у твій Словник (Progress → рекомендації ALEX)',tr:'Kelime Sözlüğüne kaydedildi (İlerleme → ALEX önerileri)',zh:'单词已保存到你的词典（Progress → ALEX 建议）',ar:'تم حفظ الكلمة في قاموسك (التقدّم ← توصيات ALEX)'}[lang]||'Word saved to your Dictionary (Progress → ALEX recommendations)'),'📝');
   trackM('words');trackM('dwords');bumpStat('words');recordCardDaily();
   /* quality 3 = "good": schedules the first spaced-repetition review */
   try{sm2Review(c.id,3);}catch(e){}
-  /* Persist display metadata so Progress → My Saved Words can list the word. */
+  /* Mirror display metadata locally (offline fallback for the dictionary list). */
   try{addSavedWord(c);}catch(e){}
-  if(API&&window._uid)try{fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:3,uid:window._uid})}).catch(()=>{});}catch(e){appWarn('rate_card sync failed',e);}
   _advanceCard('right');
 }
 /* ── Saved-words store (display metadata for Progress → My Saved Words) ── */
@@ -12840,18 +12854,83 @@ function renderErrorDiary(){
 
 /* Progress → My Saved Words: list words the user saved from flashcards, with
    their translation and a one-tap remove. Hidden entirely when empty. */
-function renderSavedWords(){
+/* ── Saved-words dictionary (server-paginated + infinite scroll) ──────
+   The server returns strictly VOCAB_PAGE_SIZE (15) rows per call with a
+   has_more flag and the next offset; we lazily pull the next page only when
+   the sentinel scrolls into view. Falls back to the local LS mirror offline. */
+let _savedPager={offset:0,has_more:true,loading:false,total:0,io:null};
+function _savedDictLabel(){return({ru:'Мой словарь',en:'My Saved Words',es:'Mi diccionario',pt:'Meu dicionário',de:'Meine gespeicherten Wörter',fr:'Mon dictionnaire',uk:'Мій словник',tr:'Kayıtlı kelimelerim',zh:'我的生词本',ar:'كلماتي المحفوظة'}[lang]||'My Saved Words');}
+function _savedObserver(){
+  if(_savedPager.io)return _savedPager.io;
+  try{
+    _savedPager.io=new IntersectionObserver((ents)=>{
+      for(const e of ents){if(e.isIntersecting){loadSavedWordsPage(false);break;}}
+    },{rootMargin:'140px'});
+  }catch(e){_savedPager.io=null;}
+  return _savedPager.io;
+}
+function _swRow(w){
+  const row=document.createElement('div');row.className='sw-row';
+  const topic=(w.topic&&w.topic!=='general')?w.topic:'';
+  const tag=topic?`<span class="sw-lv" style="color:var(--a);border-color:${(typeof hexA==='function')?hexA('#14b8a6',.4):'var(--a)'}">${safeHTML(topic)}</span>`:'';
+  row.innerHTML=`<div class="sw-main"><div class="sw-word">${safeHTML(w.word||'')}${tag}</div>${w.translation?`<div class="sw-tr">${safeHTML(w.translation)}</div>`:''}</div><button class="sw-del" type="button" aria-label="Remove">×</button>`;
+  row.querySelector('.sw-del').onclick=(ev)=>{ev.stopPropagation();try{haptic('light');}catch(_){}deleteSavedWordServer(w.id,row);};
+  return row;
+}
+async function loadSavedWordsPage(reset){
   const sec=document.getElementById('saved-words-sec');
   const wrap=document.getElementById('saved-words-wrap');
-  const lbl=document.getElementById('saved-words-lbl');
   const cnt=document.getElementById('saved-words-cnt');
   if(!wrap||!sec)return;
-  if(lbl)lbl.textContent=({ru:'Мой словарь',en:'My Saved Words',es:'Mi diccionario',pt:'Meu dicionário',de:'Meine gespeicherten Wörter',fr:'Mon dictionnaire',uk:'Мій словник',tr:'Kayıtlı kelimelerim',zh:'我的生词本',ar:'كلماتي المحفوظة'}[lang]||'My Saved Words');
+  if(reset){
+    if(_savedPager.io){try{_savedPager.io.disconnect();}catch(_){}}
+    _savedPager={offset:0,has_more:true,loading:false,total:0,io:_savedPager.io};
+    wrap.innerHTML='';
+  }
+  if(_savedPager.loading||!_savedPager.has_more)return;
+  _savedPager.loading=true;
+  let data=null;
+  try{
+    const r=await fetch(`${API}/api/vocab/${window._uid}?offset=${_savedPager.offset}`,{headers:{'X-Telegram-Init-Data':(tg&&tg.initData)||''},signal:AbortSignal.timeout(8000)});
+    data=await r.json();
+  }catch(e){_savedPager.loading=false;return;}
+  const words=(data&&data.words)||[];
+  _savedPager.has_more=!!(data&&data.has_more);
+  _savedPager.offset=(data&&typeof data.offset==='number')?data.offset:(_savedPager.offset+words.length);
+  if(data&&typeof data.total==='number')_savedPager.total=data.total;
+  /* Drop the previous sentinel before appending the new page. */
+  const oldSent=wrap.querySelector('.sw-sentinel');if(oldSent)oldSent.remove();
+  if(reset&&!words.length){sec.style.display='none';_savedPager.loading=false;return;}
+  sec.style.display='';
+  if(cnt)cnt.textContent=String(_savedPager.total);
+  words.forEach(w=>wrap.appendChild(_swRow(w)));
+  if(_savedPager.has_more){
+    const sent=document.createElement('div');sent.className='sw-sentinel';sent.style.height='1px';
+    wrap.appendChild(sent);
+    const io=_savedObserver();if(io)try{io.observe(sent);}catch(_){}
+  }
+  _savedPager.loading=false;
+}
+async function deleteSavedWordServer(id,rowEl){
+  if(!API||!window._uid||id==null)return;
+  try{await fetch(`${API}/api/vocab/${window._uid}/${id}`,{method:'DELETE',headers:{'X-Telegram-Init-Data':(tg&&tg.initData)||''}});}
+  catch(e){appWarn('vocab delete failed',e);}
+  try{if(rowEl)rowEl.remove();}catch(_){}
+  _savedPager.total=Math.max(0,_savedPager.total-1);
+  const cnt=document.getElementById('saved-words-cnt');if(cnt)cnt.textContent=String(_savedPager.total);
+  const sec=document.getElementById('saved-words-sec');const wrap=document.getElementById('saved-words-wrap');
+  if(wrap&&sec&&!wrap.querySelector('.sw-row'))sec.style.display='none';
+}
+/* Offline / no-API fallback: render the local LS mirror in one shot. */
+function renderSavedWordsLocal(){
+  const sec=document.getElementById('saved-words-sec');
+  const wrap=document.getElementById('saved-words-wrap');
+  const cnt=document.getElementById('saved-words-cnt');
+  if(!wrap||!sec)return;
   const list=savedWordsList();
   if(!list.length){sec.style.display='none';wrap.innerHTML='';return;}
   sec.style.display='';
   if(cnt)cnt.textContent=String(list.length);
-  const useLbl={ru:'Повторять',en:'Review',es:'Repasar',pt:'Revisar',de:'Wiederholen',fr:'Réviser',uk:'Повторити',tr:'Tekrarla',zh:'复习',ar:'مراجعة'}[lang]||'Review';
   wrap.innerHTML='';
   list.forEach(w=>{
     const lc=(typeof levelColor==='function'&&w.level)?levelColor(w.level):'var(--a)';
@@ -12860,6 +12939,15 @@ function renderSavedWords(){
     row.querySelector('.sw-del').onclick=(ev)=>{ev.stopPropagation();try{haptic('light');}catch(_){}removeSavedWord(w.id);};
     wrap.appendChild(row);
   });
+}
+function renderSavedWords(){
+  const sec=document.getElementById('saved-words-sec');
+  const wrap=document.getElementById('saved-words-wrap');
+  const lbl=document.getElementById('saved-words-lbl');
+  if(!wrap||!sec)return;
+  if(lbl)lbl.textContent=_savedDictLabel();
+  if(API&&window._uid){loadSavedWordsPage(true);return;}
+  renderSavedWordsLocal();
 }
 function errorDiaryCategories(errors){
   const counts={};

@@ -1289,6 +1289,126 @@ async def handle_mistakes_post(request):
         logger.error(f"mistakes post error: {e}")
         return web.json_response({"error":str(e)[:160]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
+# ── SAVED-WORDS DICTIONARY (capped queue + pagination) ──────────────────────────
+async def _vocab_caps(uid: int):
+    """Return (cap, is_premium, page_size) for this user from live config.
+    Premium = active Platform sub OR grandfathered OR active legacy premium."""
+    from billing_config import load_config
+    cfg = await load_config()
+    try:
+        from database import check_platform
+        is_prem = bool(await check_platform(uid))
+    except Exception:
+        is_prem = False
+    cap = int(cfg.get("VOCAB_QUEUE_PREMIUM", 200) if is_prem else cfg.get("VOCAB_QUEUE_FREE", 50))
+    page = int(cfg.get("VOCAB_PAGE_SIZE", 15))
+    return cap, is_prem, page
+
+def _vocab_row(row):
+    d = dict(row)
+    for key in ("next_review", "created_at"):
+        if d.get(key) is not None and hasattr(d[key], "isoformat"):
+            d[key] = d[key].isoformat()
+    return {
+        "id": d.get("id"),
+        "word": d.get("word") or "",
+        "translation": d.get("translation") or "",
+        "example": d.get("example") or "",
+        "topic": d.get("topic") or "general",
+        "next_review": str(d.get("next_review") or "")[:10],
+        "reviews": int(d.get("reviews") or 0),
+    }
+
+async def handle_save_word(request):
+    """Save one word into the personal dictionary, enforcing the per-tier queue
+    cap. 409 {error:'vocab_full'} when the queue is full so the client can show
+    the 'learn old words to free space' toast."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid", 0))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    word = str(body.get("word") or "").strip()[:120]
+    translation = str(body.get("translation") or "").strip()[:300]
+    example = str(body.get("example") or "").strip()[:500]
+    topic = (str(body.get("topic") or "general").strip()[:40] or "general")
+    if not uid or not word:
+        return web.json_response({"error":"empty word"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import add_word_capped, get_word_count, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        cap, is_prem, _ = await _vocab_caps(uid)
+        status = await add_word_capped(uid, word, translation, example, topic, cap)
+        count = await get_word_count(uid)
+        if status == "full":
+            return web.json_response({"error":"vocab_full","limit":cap,"count":count,"premium":is_prem},
+                                     status=409, headers={"Access-Control-Allow-Origin":"*"})
+        return web.json_response({"ok":True,"status":status,"count":count,"limit":cap,"premium":is_prem},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"save_word error: {e}")
+        return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_vocab_list(request):
+    """Paginated saved-words list (newest first). Never returns the whole table:
+    strictly VOCAB_PAGE_SIZE rows per call + has_more/next offset for infinite
+    scroll on the client."""
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+        offset = max(0, int(request.query.get("offset", "0")))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import get_vocab_page, get_word_count
+        cap, is_prem, page = await _vocab_caps(uid)
+        rows, has_more = await get_vocab_page(uid, offset=offset, limit=page)
+        total = await get_word_count(uid)
+        return web.json_response({
+            "words": [_vocab_row(r) for r in rows],
+            "has_more": has_more,
+            "offset": offset + len(rows),
+            "total": total,
+            "limit": cap,
+            "premium": is_prem,
+        }, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"vocab_list error: {e}")
+        return web.json_response({"words":[],"has_more":False,"offset":offset,"total":0},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_vocab_delete(request):
+    """Remove one word (frees a queue slot). Scoped by the authenticated uid."""
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+        word_id = int(request.match_info.get("word_id", "0"))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    if not uid or not word_id:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import delete_word, get_word_count
+        await delete_word(uid, word_id)
+        count = await get_word_count(uid)
+        return web.json_response({"ok":True,"count":count}, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"vocab_delete error: {e}")
+        return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -1438,6 +1558,9 @@ def create_app():
     app.router.add_post("/api/lesson",require_premium("lesson")(handle_lesson))
     app.router.add_post("/api/test",require_premium("test")(handle_test))
     app.router.add_post("/api/rate_card",handle_rate)
+    app.router.add_post("/api/save_word",handle_save_word)
+    app.router.add_get("/api/vocab/{uid}",handle_vocab_list)
+    app.router.add_delete("/api/vocab/{uid}/{word_id}",handle_vocab_delete)
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)

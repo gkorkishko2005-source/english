@@ -251,6 +251,8 @@ CREATE TABLE IF NOT EXISTS ai_usage_log (
 
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_state  ON vocabulary(uid, state);
+-- Pagination of the saved-words dictionary (newest first, keyset/offset).
+CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS idx_sessions_uid ON sessions(uid);
 CREATE INDEX IF NOT EXISTS idx_mistakes_uid ON mistakes(uid);
 CREATE INDEX IF NOT EXISTS idx_frl_uid_time ON fsrs_review_log(uid, review_dt DESC);
@@ -343,6 +345,7 @@ CREATE TABLE IF NOT EXISTS ai_usage_log (
     cost_usd REAL DEFAULT 0, credits_charged INTEGER DEFAULT 0,
     ts TEXT DEFAULT (datetime('now'))
 );
+CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
 """
 
 
@@ -1257,6 +1260,56 @@ async def update_word_review(word_id: int, quality: int):
 async def get_word_count(uid: int) -> int:
     row = await db("SELECT COUNT(*) as c FROM vocabulary WHERE uid=?", uid, fetch="one")
     return row["c"] if row else 0
+
+
+# ── Capped dictionary (anti-hoarding queue cap + pagination) ───────
+async def add_word_capped(uid: int, word: str, translation: str, example: str,
+                          topic: str, max_words: int) -> str:
+    """Insert one saved word, enforcing a hard ceiling on the active review
+    queue. Returns one of:
+        'ok'   — inserted (XP granted)
+        'dup'  — already in the dictionary (no-op, not an error)
+        'full' — queue at/over max_words; caller should surface the limit toast
+    The cap is checked just before insert. This is a learning queue, not money,
+    so a check-then-insert (not a hard atomic guard) is acceptable; the worst
+    case under a race is one extra word, which the next save will reject."""
+    word = (word or "").strip()
+    if not word:
+        return "dup"
+    exists = await db("SELECT id FROM vocabulary WHERE uid=? AND LOWER(word)=LOWER(?)",
+                      uid, word, fetch="one")
+    if exists:
+        return "dup"
+    if await get_word_count(uid) >= int(max_words):
+        return "full"
+    await db(
+        "INSERT INTO vocabulary (uid,word,translation,example,topic,next_review) VALUES (?,?,?,?,?,?)",
+        uid, word, translation, example, topic, _days_later(1)
+    )
+    await add_xp(uid, 5)
+    return "ok"
+
+
+async def get_vocab_page(uid: int, offset: int = 0, limit: int = 15):
+    """Paginated saved-words list, newest first. Fetches one extra row to tell
+    the caller whether more pages exist without a second COUNT round-trip."""
+    limit = max(1, min(50, int(limit)))
+    offset = max(0, int(offset))
+    rows = await db(
+        "SELECT id, word, translation, example, topic, next_review, reviews, created_at "
+        "FROM vocabulary WHERE uid=? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
+        uid, limit + 1, offset, fetch="all"
+    )
+    rows = list(rows or [])
+    has_more = len(rows) > limit
+    return rows[:limit], has_more
+
+
+async def delete_word(uid: int, word_id: int) -> bool:
+    """Remove one word from the user's dictionary (frees a queue slot).
+    Scoped by uid so a user can only delete their own rows."""
+    await db("DELETE FROM vocabulary WHERE id=? AND uid=?", int(word_id), uid)
+    return True
 
 
 # ── FSRS audit & state writeback ───────────────────────────────────

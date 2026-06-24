@@ -82,6 +82,13 @@ _DEFAULTS = {
     "VOICE_SURCHARGE_CREDITS": 5,      # flat add for voice (STT+TTS) requests
     "DAILY_TOKENS_PER_USER": 120000,   # anti-abuse / runaway bot guard
     "GLOBAL_DAILY_BUDGET_USD": 25.0,   # kill-switch across ALL users per day
+    # ── Saved-words dictionary caps (anti-hoarding / DB-load guard) ─────
+    # Hard ceiling on how many words a user may hold in the active SRS review
+    # queue at once. Forces learning old words instead of endlessly piling new
+    # ones (and bounds per-user rows / list payloads). Tunable live, no deploy.
+    "VOCAB_QUEUE_FREE": 50,            # max saved words for free users
+    "VOCAB_QUEUE_PREMIUM": 200,        # max saved words for Premium users
+    "VOCAB_PAGE_SIZE": 15,             # rows the dictionary list returns per page
     # Subscription
     # The Platform subscription does NOT include any "unlimited" or monthly AI
     # pool — its ALEX value is the flat starter-credits grant handled at purchase
@@ -110,6 +117,9 @@ _ENV_SCALARS = {
     "BILLING_GLOBAL_DAILY_BUDGET_USD": ("GLOBAL_DAILY_BUDGET_USD", float),
     "BILLING_SUBSCRIPTION_ALLOWANCE": ("SUBSCRIPTION_ALLOWANCE", int),
     "BILLING_ALLOWANCE_DAYS": ("ALLOWANCE_DAYS", int),
+    "BILLING_VOCAB_QUEUE_FREE": ("VOCAB_QUEUE_FREE", int),
+    "BILLING_VOCAB_QUEUE_PREMIUM": ("VOCAB_QUEUE_PREMIUM", int),
+    "BILLING_VOCAB_PAGE_SIZE": ("VOCAB_PAGE_SIZE", int),
 }
 _ENV_JSON = {
     "BILLING_MODELS": "MODELS",
