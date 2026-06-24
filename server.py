@@ -132,6 +132,77 @@ def _verify_telegram_init_data(init_data: str, expected_uid: int | None = None, 
     except Exception as e:
         return False, str(e), None
 
+# ── PREMIUM ACCESS GUARD (Middleware) ─────────────────────────────────────────
+# Endpoints listed in GATED_PREMIUM_ROUTES require an active subscription
+# (or admin). Everyone else gets a paywall card with a ⭐️ CTA — the upstream
+# (Anthropic) call never fires. The set is env-driven so the wall can be turned
+# on/off per route WITHOUT a code edit. Default gates the two unbilled
+# AI-generation endpoints (/api/lesson, /api/test), which have no client caller
+# and would otherwise be an uncharged, unauthenticated LLM hole.
+import functools
+GATED_PREMIUM_ROUTES = set(
+    r for r in (os.getenv("GATED_PREMIUM_ROUTES", "lesson,test").replace(" ", "").split(",")) if r
+)
+
+def _paywall_json(lang: str = "ru") -> dict:
+    ru = (lang == "ru")
+    card = (
+        '<div class="limit-card">'
+        '<div class="limit-kicker">PolyGlotty ⭐️</div>'
+        f'<div class="limit-title">{"Нужна подписка" if ru else "Subscription required"}</div>'
+        f'<div class="limit-text">{"Эта функция доступна по подписке PolyGlotty. Оформи подписку, чтобы открыть доступ." if ru else "This feature is available with a PolyGlotty subscription. Subscribe to unlock it."}</div>'
+        f'<button class="chip" onclick="openPremium()">{"Оформить" if ru else "Subscribe"}</button>'
+        '</div>'
+    )
+    return {"reply": card, "premium_required": True}
+
+async def _guard_identity(request):
+    """Pull a verified uid (+ lang) from a request body/headers without
+    consuming it for the wrapped handler (aiohttp caches the read body)."""
+    uid = 0
+    lang = "ru"
+    init_data = ""
+    try:
+        if request.method == "POST" and request.can_read_body:
+            body = await request.json()
+            uid = int(body.get("uid", 0) or 0)
+            lang = str(body.get("lang", "ru") or "ru")
+            init_data = str(body.get("init_data") or "")
+    except Exception:
+        pass
+    init_data = init_data or str(request.headers.get("X-Telegram-Init-Data") or "")
+    if REQUIRE_TG_INIT_DATA and BOT_TOKEN and not _is_local_request(request):
+        ok, _reason, signed_uid = _verify_telegram_init_data(init_data, uid)
+        if not ok:
+            return 0, lang  # unsigned → no premium → paywall
+        if signed_uid and not uid:
+            uid = signed_uid
+    return uid, lang
+
+def require_premium(name: str):
+    """Decorator factory. Wrap a handler so non-subscribers hit a paywall.
+    Routes absent from GATED_PREMIUM_ROUTES pass straight through (gate off)."""
+    def deco(handler):
+        @functools.wraps(handler)
+        async def wrapped(request):
+            if name not in GATED_PREMIUM_ROUTES:
+                return await handler(request)
+            uid, lang = await _guard_identity(request)
+            if uid in ADMIN_IDS:
+                return await handler(request)
+            try:
+                from database import check_premium
+                if uid and await check_premium(uid):
+                    return await handler(request)
+            except Exception as e:
+                logger.warning("require_premium check failed route=%s uid=%s: %s", name, uid, e)
+            return web.json_response(
+                _paywall_json(lang), status=402,
+                headers={"Access-Control-Allow-Origin": "*"},
+            )
+        return wrapped
+    return deco
+
 def _estimate_ai_cost(model_key: str, usage: dict) -> float:
     cfg = MODEL_ECONOMY.get(model_key, MODEL_ECONOMY["haiku"])
     input_tokens = int(usage.get("input_tokens") or 0)
@@ -1291,8 +1362,8 @@ def create_app():
     app.router.add_get("/api/user/{uid}",handle_user)
     app.router.add_post("/api/chat",handle_chat)
     app.router.add_delete("/api/chat/{uid}",handle_chat_reset)
-    app.router.add_post("/api/lesson",handle_lesson)
-    app.router.add_post("/api/test",handle_test)
+    app.router.add_post("/api/lesson",require_premium("lesson")(handle_lesson))
+    app.router.add_post("/api/test",require_premium("test")(handle_test))
     app.router.add_post("/api/rate_card",handle_rate)
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)

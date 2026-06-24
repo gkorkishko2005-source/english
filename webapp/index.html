@@ -2282,6 +2282,15 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:li
   border:none;border-radius:12px;background:var(--a);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
 .congrat-ok:active{transform:scale(.97)}
 
+/* CEFR mini-help modal. */
+.cefr-badge{cursor:pointer}
+.cefr-emoji{display:inline-flex;align-items:center;justify-content:center;min-width:58px;height:42px;
+  padding:0 14px;margin:12px auto 4px;border-radius:13px;font-size:20px;font-weight:800;letter-spacing:.5px;
+  border:1.5px solid var(--b1);background:var(--e2);color:var(--a);
+  animation:congratPop .4s cubic-bezier(.22,1.4,.5,1)}
+.cefr-can{margin:12px 0 2px;padding-top:10px;border-top:1px solid var(--b1);font-size:13px;color:var(--t2);line-height:1.5}
+.cefr-can span{display:block;margin-bottom:3px;font-weight:700;color:var(--t1);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+
 /* Progress history log rows. */
 .phist-row{display:flex;align-items:center;gap:12px;padding:11px 2px}
 .phist-row+.phist-row{border-top:1px solid var(--b1)}
@@ -2947,6 +2956,16 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="mtit" id="congrat-tit" style="text-align:center">Congratulations!</div>
     <div class="congrat-msg" id="congrat-msg"></div>
     <button class="congrat-ok" onclick="closeMod('congrat')" id="congrat-ok">OK</button>
+  </div>
+</div>
+
+<!-- CEFR LEVEL MINI-HELP MODAL -->
+<div class="mov" id="cefrm" style="display:none" onclick="closeMod('cefrm')">
+  <div class="msh" onclick="event.stopPropagation()" style="text-align:center"><div class="mhnd"></div>
+    <div class="cefr-emoji" id="cefr-emoji">A1</div>
+    <div class="mtit" id="cefr-tit" style="text-align:center">CEFR</div>
+    <div class="congrat-msg" id="cefr-msg"></div>
+    <button class="congrat-ok" onclick="closeMod('cefrm')" id="cefr-ok">Got it</button>
   </div>
 </div>
 
@@ -4506,10 +4525,38 @@ function renderCefrPath(d){
   const checkSvg='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
   grid.innerHTML=ladder.map((lv,i)=>{
     const c=(typeof levelColor==='function'?levelColor(lv):'var(--a)');
-    if(i<ci)return `<div class="cefr-badge passed" style="background:${hexA(c,.16)};border-color:${hexA(c,.42)};color:${c}"><span class="cefr-lvl">${lv}</span><span class="cefr-ico">${checkSvg}</span></div>`;
-    if(i===ci)return `<div class="cefr-badge current" style="background:${hexA(c,.30)};border-color:${c};color:#fff;box-shadow:0 0 0 1px ${c},0 8px 18px ${hexA(c,.34)}"><span class="cefr-lvl">${lv}</span><span class="cefr-now">●</span></div>`;
-    return `<div class="cefr-badge future"><span class="cefr-lvl">${lv}</span><span class="cefr-lock">${lockSvg}</span></div>`;
+    const tap=`onclick="openCefrInfo('${lv}')" role="button" tabindex="0"`;
+    if(i<ci)return `<div class="cefr-badge passed" ${tap} style="background:${hexA(c,.16)};border-color:${hexA(c,.42)};color:${c}"><span class="cefr-lvl">${lv}</span><span class="cefr-ico">${checkSvg}</span></div>`;
+    if(i===ci)return `<div class="cefr-badge current" ${tap} style="background:${hexA(c,.30)};border-color:${c};color:#fff;box-shadow:0 0 0 1px ${c},0 8px 18px ${hexA(c,.34)}"><span class="cefr-lvl">${lv}</span><span class="cefr-now">●</span></div>`;
+    return `<div class="cefr-badge future" ${tap}><span class="cefr-lvl">${lv}</span><span class="cefr-lock">${lockSvg}</span></div>`;
   }).join('');
+}
+/* CEFR mini-help: tapping a level badge opens a short description of what that
+   level means + a one-line "what you can do" cue. Reuses the .mov modal infra. */
+const CEFR_INFO={
+  A0:{t:{ru:'A0 · Старт',en:'A0 · Starter'},d:{ru:'Самое начало: алфавит, первые слова и простейшие фразы для знакомства.',en:'The very beginning: the alphabet, first words and the simplest phrases to introduce yourself.'},can:{ru:'Поздороваться и назвать себя.',en:'Greet someone and say who you are.'}},
+  A1:{t:{ru:'A1 · Начальный',en:'A1 · Beginner'},d:{ru:'Понимаешь и используешь знакомые повседневные выражения и базовые фразы.',en:'You understand and use familiar everyday expressions and basic phrases.'},can:{ru:'Заказать кофе, заполнить простую анкету.',en:'Order a coffee, fill in a simple form.'}},
+  A2:{t:{ru:'A2 · Элементарный',en:'A2 · Elementary'},d:{ru:'Общаешься в простых бытовых ситуациях на знакомые темы.',en:'You communicate in simple, routine situations on familiar topics.'},can:{ru:'Рассказать о себе, семье, покупках.',en:'Talk about yourself, family and shopping.'}},
+  B1:{t:{ru:'B1 · Средний',en:'B1 · Intermediate'},d:{ru:'Справляешься в большинстве ситуаций в поездке, описываешь события и планы.',en:'You handle most travel situations and can describe events and plans.'},can:{ru:'Объясниться в путешествии, описать опыт.',en:'Get by while travelling, describe experiences.'}},
+  B2:{t:{ru:'B2 · Выше среднего',en:'B2 · Upper-Intermediate'},d:{ru:'Свободно общаешься с носителями, понимаешь сложные тексты на знакомые темы.',en:'You interact fluently with native speakers and grasp complex texts on familiar topics.'},can:{ru:'Вести рабочую переписку, спорить и аргументировать.',en:'Handle work emails, argue and justify a point.'}},
+  C1:{t:{ru:'C1 · Продвинутый',en:'C1 · Advanced'},d:{ru:'Гибко и эффективно используешь язык в социальных, учебных и рабочих целях.',en:'You use the language flexibly and effectively for social, academic and work purposes.'},can:{ru:'Готовить презентации, понимать подтекст.',en:'Give presentations, catch implied meaning.'}},
+  C2:{t:{ru:'C2 · Владение',en:'C2 · Proficiency'},d:{ru:'Понимаешь практически всё, выражаешься точно и тонко в любой ситуации.',en:'You understand virtually everything and express yourself precisely in any situation.'},can:{ru:'Свободно работать и учиться на английском.',en:'Work and study in English with ease.'}}
+};
+function openCefrInfo(lv){
+  const info=CEFR_INFO[lv]||CEFR_INFO.A1;
+  const pick=o=>(o&&(o[lang]||o.en))||'';
+  const c=(typeof levelColor==='function'?levelColor(lv):'var(--a)');
+  const el=document.getElementById('cefr-emoji'),t=document.getElementById('cefr-tit'),
+        m=document.getElementById('cefr-msg'),ok=document.getElementById('cefr-ok');
+  if(el){el.textContent=lv;el.style.background=(typeof hexA==='function'?hexA(c,.16):'transparent');el.style.color=c;el.style.borderColor=(typeof hexA==='function'?hexA(c,.42):c);}
+  if(t)t.textContent=pick(info.t);
+  if(m){
+    const canLbl=({ru:'Что уже можешь',en:'What you can do',es:'Lo que puedes hacer',pt:'O que você consegue',de:'Was du kannst',fr:'Ce que tu sais faire',uk:'Що вже вмієш',tr:'Neler yapabilirsin',zh:'你能做到',ar:'ما يمكنك فعله'}[lang]||'What you can do');
+    m.innerHTML=`${safeHTML(pick(info.d))}<div class="cefr-can"><span>${canLbl}:</span> ${safeHTML(pick(info.can))}</div>`;
+  }
+  if(ok)ok.textContent=({ru:'Понятно',en:'Got it',es:'Entendido',pt:'Entendi',de:'Verstanden',fr:'Compris',uk:'Зрозуміло',tr:'Anladım',zh:'明白了',ar:'فهمت'}[lang]||'Got it');
+  try{if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback)Telegram.WebApp.HapticFeedback.impactOccurred('light');}catch(_){}
+  openMod('cefrm');
 }
 
 /* Per-exam course completion (done/total → pct) from local course state. */
@@ -10143,6 +10190,30 @@ function coursePracticeSet(ls){
   return out;
 }
 let _inCourseLesson=false;
+/* ── Light scenario-learning architecture (non-breaking descriptor layer) ──
+   A thin contract layer over the existing lesson wizard. BaseTask holds the
+   shared task semantics; CourseTask (current lessons + ALEX roleplay help)
+   and ExamTask (the future ExamSimulator: countdown timer, no Back button,
+   ALEX help disabled, background-noise listening sim) specialise it.
+   The wizard keeps its exact current behaviour — this only DECLARES the
+   contract so new task kinds slot in without a rewrite. Course flags below
+   are all "permissive", so wiring them changes nothing today. */
+function makeBaseTask(o){
+  return Object.assign({
+    kind:'base',
+    allowBack:true,    // can the learner step backward through stages?
+    timed:false,       // hard countdown that auto-submits?
+    helpEnabled:true,  // ALEX explanation / roleplay available?
+    adaptive:true,     // simplify puzzles after repeated errors?
+    noiseSim:false     // background-noise listening simulation (exam realism)?
+  },o||{});
+}
+function makeCourseTask(o){return makeBaseTask(Object.assign({kind:'course',allowBack:true,timed:false,helpEnabled:true,adaptive:true},o||{}));}
+function makeExamTask(o){return makeBaseTask(Object.assign({kind:'exam',allowBack:false,timed:true,helpEnabled:false,adaptive:false,noiseSim:true},o||{}));}
+const TASK_KIND={course:makeCourseTask(),exam:makeExamTask()};
+/* Active task descriptor for the lesson wizard. Today everything inside the
+   course wizard is a CourseTask; ExamSimulator will set this to TASK_KIND.exam. */
+function currentTaskKind(){return TASK_KIND.course;}
 function openCourseLesson(id){
   let unlocked=false;
   try{unlocked=isCourseUnlocked(id);}catch(_){return;}
@@ -10277,7 +10348,7 @@ function _openCourseLessonInner(id){
       <div class="course-track" id="course-track-${id}">${trackHtml}</div>
     </div>
     <div class="course-rule-compact"><b>${({ru:'Правило',en:'Rule',es:'Regla',pt:'Regra',de:'Regel',fr:'Règle',uk:'Правило',tr:'Kural',zh:'规则',ar:'القاعدة'}[lang]||'Rule')}</b><span>${safeHTML(ruleText)}</span></div>
-    <button class="course-ask" type="button" onclick="askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>
+    ${currentTaskKind().helpEnabled?`<button class="course-ask" type="button" onclick="askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>`:''}
     <div class="course-hint" style="margin-top:7px">${({ru:'Совет: выдели любое слово или фразу в уроке — появится кнопка «Спросить ALEX».',en:'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.',es:'Consejo: selecciona cualquier palabra o frase de la lección y aparecerá un botón “Preguntar a ALEX”.',pt:'Dica: selecione qualquer palavra ou frase da lição — aparecerá um botão “Perguntar ao ALEX”.',de:'Tipp: Markiere ein Wort oder einen Satz in der Lektion — ein „ALEX fragen“-Button erscheint.',fr:'Astuce : sélectionne un mot ou une phrase de la leçon — un bouton « Demander à ALEX » apparaît.',uk:'Порада: виділи будь-яке слово чи фразу в уроці — з’явиться кнопка «Запитати ALEX».',tr:'İpucu: derste herhangi bir kelime veya cümleyi seç — “ALEX’e sor” düğmesi belirir.',zh:'提示：在课程中选中任意单词或短语，会弹出“问问 ALEX”按钮。',ar:'نصيحة: حدّد أي كلمة أو عبارة في الدرس — سيظهر زر «اسأل ALEX».'}[lang]||'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.')}</div>
     <div class="course-insight">
       <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${_courseInsightText(insight.pattern[lang]||insight.pattern.en)}</div></div>
