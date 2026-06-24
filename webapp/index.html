@@ -1067,6 +1067,45 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .rbi{font-size:17px}
 .rb1{border-color:rgba(255,107,107,.3);color:var(--rd)}.rb2{border-color:rgba(255,149,0,.3);color:var(--or)}.rb3{border-color:rgba(var(--ar),.3);color:var(--a)}.rb4{border-color:rgba(0,212,170,.3);color:var(--a2)}
 
+/* ── Card action row: Skip · Save · Ask ALEX ── */
+.card-acts{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:9px;margin-bottom:11px}
+.ca-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;border-radius:var(--r2);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;-webkit-tap-highlight-color:transparent}
+.ca-btn svg{width:18px;height:18px;flex-shrink:0}
+.ca-btn:active{transform:scale(.95)}
+/* Secondary actions stay monochrome (outline) per the dark palette */
+.ca-skip{background:var(--e2);border:1px solid var(--b2);color:var(--t2)}
+.ca-skip:active{background:var(--e3)}
+.ca-save{background:var(--e2);border:1px solid var(--b2);color:var(--t1)}
+.ca-save svg{stroke:var(--a)}
+.ca-save:active{background:var(--e3)}
+/* Ask ALEX = the single premium teal CTA */
+.ca-ask{background:var(--gb);border:1px solid transparent;color:#04221c;box-shadow:0 6px 18px rgba(var(--ar),.28)}
+.ca-ask svg{stroke:#04221c}
+.ca-ask:disabled{opacity:.55;cursor:default;box-shadow:none}
+
+/* ── Swipe-out animations (left = Skip, right = Save) ── */
+@keyframes cardSwipeL{to{opacity:0;transform:translateX(-72%) rotate(-7deg)}}
+@keyframes cardSwipeR{to{opacity:0;transform:translateX(72%) rotate(7deg)}}
+.fcs.swipe-left .fci{animation:cardSwipeL .3s cubic-bezier(.4,0,1,1) forwards}
+.fcs.swipe-right .fci{animation:cardSwipeR .3s cubic-bezier(.4,0,1,1) forwards}
+
+/* ── In-card Ask ALEX overlay (skeleton + result) ── */
+.fc-ai{position:absolute;inset:0;z-index:6;border-radius:var(--r);padding:15px 15px 13px;background:linear-gradient(145deg,var(--e1),var(--e2));border:1px solid var(--b2);box-shadow:0 10px 30px rgba(0,0,0,.34);display:flex;flex-direction:column;overflow-y:auto;cursor:default;animation:fcAiIn .26s cubic-bezier(.22,1,.36,1)}
+.fc-ai.hid{display:none}
+@keyframes fcAiIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+.fc-ai-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+.fc-ai-ttl{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:850;letter-spacing:.4px;text-transform:uppercase;color:var(--a)}
+.fc-ai-ttl svg{width:14px;height:14px;stroke:var(--a);fill:none;stroke-width:2}
+.fc-ai-x{width:26px;height:26px;border-radius:50%;border:1px solid var(--b1);background:var(--e2);color:var(--t2);font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fc-ai-block{margin-bottom:10px}
+.fc-ai-lbl{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.fc-ai-txt{font-size:13px;line-height:1.5;color:var(--t1);white-space:pre-wrap}
+.fc-ai-err{font-size:13px;color:var(--t2);line-height:1.5}
+.fc-ai-retry{margin-top:9px;align-self:flex-start;padding:8px 13px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--a);font-family:var(--f);font-size:12px;font-weight:800;cursor:pointer}
+/* Skeleton shimmer lines */
+.sk-line{height:11px;border-radius:6px;margin-bottom:9px;background:linear-gradient(90deg,var(--e2) 25%,var(--e3) 37%,var(--e2) 63%);background-size:400% 100%;animation:skShim 1.25s ease-in-out infinite}
+@keyframes skShim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
 .emst{text-align:center;padding:36px 16px}
 .emico{font-size:46px;margin-bottom:11px;display:block;animation:float 3s ease-in-out infinite}
 .emtit{font-size:17px;font-weight:700;margin-bottom:6px}
@@ -2756,12 +2795,23 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
           <div class="fcf fcfr"><span class="fc-sheen" aria-hidden="true"></span><div class="fcmeta"><span id="fclevel">B1</span><span id="fctopic">Core</span></div><div class="fcbg">ENGLISH</div><div class="fcw" id="fcword">—</div><div class="fcp" id="fcph"></div><div class="fch" id="fchint" aria-label="Flip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div></div>
           <div class="fcf fcbk"><div class="fcbg" id="fcbg2"></div><div class="fctr" id="fctr2">—</div><div class="fcex" id="fcex"></div><div class="fcuse" id="fcuse"></div></div>
         </div>
+        <!-- Ask ALEX result/skeleton renders INSIDE the card as an overlay -->
+        <div class="fc-ai hid" id="fc-ai" onclick="event.stopPropagation()"></div>
       </div>
-      <div class="rrow hid" id="rrow">
-        <div class="rb rb1" onclick="rate(1)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb1l"></span></div>
-        <div class="rb rb2" onclick="rate(2)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb2l"></span></div>
-        <div class="rb rb3" onclick="rate(3)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb3l"></span></div>
-        <div class="rb rb4" onclick="rate(4)"><div class="rbi"><svg viewBox="0 0 24 24" fill="none" stroke="var(--a2)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div><span id="rb4l"></span></div>
+      <!-- Card action row: Skip · Save to Notes · Ask ALEX -->
+      <div class="card-acts" id="card-acts">
+        <button class="ca-btn ca-skip" type="button" onclick="cardSkip()" aria-label="Skip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l10 8-10 8z"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          <span id="ca-skip-l">Skip</span>
+        </button>
+        <button class="ca-btn ca-save" type="button" onclick="cardSave()" aria-label="Save to Notes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
+          <span id="ca-save-l">Save</span>
+        </button>
+        <button class="ca-btn ca-ask" type="button" onclick="cardAskAlex()" aria-label="Ask ALEX">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.2 5.2 5.6.5-4.3 3.7 1.3 5.5L12 19.5 7.2 22.4l1.3-5.5L4.2 13.2l5.6-.5z"/></svg>
+          <span id="ca-ask-l">Ask ALEX</span>
+        </button>
       </div>
     </div>
     <div class="emst" id="lempty" style="display:none">
@@ -3600,8 +3650,7 @@ function applyLang(){
   document.getElementById('rev-lbl').textContent=L.rev;
   var _fh=document.getElementById('fchint');if(_fh)_fh.setAttribute('aria-label',L.tap_flip);
   document.getElementById('fcbg2').textContent=L.translation;
-  document.getElementById('rb1l').textContent=L.again;document.getElementById('rb2l').textContent=L.hard;
-  document.getElementById('rb3l').textContent=L.good;document.getElementById('rb4l').textContent=L.easy;
+  try{setCardActionLabels();}catch(_){}
   document.getElementById('em-t').textContent=L.all_done;document.getElementById('em-s').textContent=L.all_done_s;
   document.getElementById('em-b1').textContent=L.lnw;document.getElementById('em-b2').textContent=L.ffact;
   // Progress
@@ -7060,7 +7109,8 @@ function initLearn(){
   cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
-  document.getElementById('rrow').classList.add('hid');
+  document.getElementById('fc-ai')?.classList.add('hid');
+  setCardActionLabels();
   const cl=document.getElementById('fc-cnt-lbl');
   const info=cardWindowInfo(),used=info.used,limit=info.limit,left=info.remaining;
   if(cl){
@@ -7140,10 +7190,16 @@ function showCard(i){
   const fcs=document.getElementById('fcs');if(fcs){fcs.classList.remove('fc-shine');void fcs.offsetWidth;fcs.classList.add('fc-shine');}
   const use=document.getElementById('fcuse');if(use)use.textContent=(({ru:'Используй в контексте: ',en:'Use in context: ',es:'Úsalo en contexto: ',pt:'Use no contexto: ',de:'Im Kontext verwenden: ',fr:'Utilise en contexte : ',uk:'Вживай у контексті: ',tr:'Bağlamda kullan: ',zh:'在语境中使用：',ar:'استخدمها في سياق: '}[lang]||'Use in context: '))+(c.word||'');
   document.getElementById('fctr').textContent=`${i+1} / ${cards.length}`;
+  /* Progress reflects cards already completed (Skip or Save) toward the session. */
   document.getElementById('pfill').style.width=(i/cards.length*100)+'%';
-  document.getElementById('rrow').classList.add('hid');
+  document.getElementById('fc-ai')?.classList.add('hid');
+  document.getElementById('fcs')?.classList.remove('swipe-left','swipe-right');
 }
-function flipCard(){flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);if(flipped)document.getElementById('rrow').classList.remove('hid');try{sfx.flip();}catch(e){}}
+function flipCard(){
+  /* Don't flip while the in-card ALEX overlay is open. */
+  const ai=document.getElementById('fc-ai');if(ai&&!ai.classList.contains('hid'))return;
+  flipped=!flipped;document.getElementById('fci').classList.toggle('flip',flipped);try{sfx.flip();}catch(e){}
+}
 function cardHelpExamples(c){
   const w=c.word||'word';
   const ex=(c.example||'').trim();
@@ -7193,34 +7249,121 @@ function askAlexCardHelp(){
   const req=({ru:`Объясни простыми словами английское слово «${w}»: значение, когда использовать, 3 разных примера, частые ошибки и короткое упражнение.`,en:`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`,es:`Explica de forma sencilla la palabra inglesa "${w}": significado, cuándo usarla, 3 ejemplos variados, errores frecuentes y un ejercicio corto.`,pt:`Explique de forma simples a palavra inglesa "${w}": significado, quando usar, 3 exemplos variados, erros comuns e um exercício curto.`,de:`Erkläre das englische Wort „${w}“ einfach: Bedeutung, Verwendung, 3 verschiedene Beispiele, häufige Fehler und eine kurze Übung.`,fr:`Explique simplement le mot anglais « ${w} » : sens, quand l’utiliser, 3 exemples variés, erreurs fréquentes et un court exercice.`,uk:`Поясни простими словами англійське слово «${w}»: значення, коли вживати, 3 різні приклади, типові помилки й коротку вправу.`,tr:`"${w}" İngilizce kelimesini sade biçimde açıkla: anlamı, ne zaman kullanılır, 3 farklı örnek, sık yapılan hatalar ve kısa bir alıştırma.`,zh:`用简单的话解释英文单词 "${w}"：含义、使用场景、3 个不同例句、常见错误以及一个简短练习。`,ar:`اشرح الكلمة الإنجليزية "${w}" ببساطة: المعنى، ومتى تُستخدم، و3 أمثلة متنوعة، والأخطاء الشائعة، وتمرين قصير.`}[lang]||`Explain the English word "${w}" simply: meaning, when to use it, 3 varied examples, common mistakes and one short exercise.`);
   sendChip(req);
 }
-async function rate(q){
-  if(cardRateBusy)return;
-  cardRateBusy=true;
-  if(cardDailyRemaining()<=0){toast(({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached'),'🔒');initLearn();return;}
-  haptic(q>=3?'success':'light');
-  try{q>=3?sfx.correct():sfx.wrong();}catch(e){}
-  const c=cards[cIdx];
-  toast([null,L.again+' 😕',L.hard+' 🤔',L.good+' 😊',L.easy+' ✅'][q],'🃏');
-  trackM('words');trackM('dwords');
-  bumpStat('words');
-  recordCardDaily();
-  let nextInfo=null;
-  try{nextInfo=sm2Review(c.id,Math.max(0,q-1));}catch(e){}
-  if(nextInfo&&q>=3){
-    /* Show the SRS interval so the user sees the algorithm working. */
-    const days=Math.max(1,Math.round(nextInfo.interval));
-    const txt=days===1
-      ?({ru:'Следующий показ — завтра.',en:'Next review tomorrow.',es:'Próximo repaso mañana.',pt:'Próxima revisão amanhã.',de:'Nächste Wiederholung morgen.',fr:'Prochaine révision demain.',uk:'Наступний показ завтра.',tr:'Sonraki tekrar yarın.',zh:'下次复习在明天。',ar:'المراجعة التالية غدًا.'}[lang]||'Next review tomorrow.')
-      :({ru:`Следующий показ через ${days} дн.`,en:`Next review in ${days} days.`,es:`Próximo repaso en ${days} días.`,pt:`Próxima revisão em ${days} dias.`,de:`Nächste Wiederholung in ${days} Tagen.`,fr:`Prochaine révision dans ${days} jours.`,uk:`Наступний показ через ${days} дн.`,tr:`Sonraki tekrar ${days} gün sonra.`,zh:`下次复习在 ${days} 天后。`,ar:`المراجعة التالية بعد ${days} أيام.`}[lang]||`Next review in ${days} days.`);
-    setTimeout(()=>{try{toast(txt,'📅');}catch(_){}},900);
-  }
-  if(API&&window._uid)try{await fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:q,uid:window._uid})});}catch(e){appWarn('rate_card sync failed',e);}
+/* ══ CARD ACTIONS: Skip · Save to Notes · Ask ALEX ══ */
+const ALEX_CARD_COST=6;  /* mirrors billing_config ALEX_MESSAGE_COST (server is source of truth) */
+let cardAlexBusy=false;
+function setCardActionLabels(){
+  const sk=document.getElementById('ca-skip-l'),sv=document.getElementById('ca-save-l'),as=document.getElementById('ca-ask-l');
+  if(sk)sk.textContent=({ru:'Пропустить',en:'Skip',es:'Saltar',pt:'Pular',de:'Überspringen',fr:'Passer',uk:'Пропустити',tr:'Atla',zh:'跳过',ar:'تخطٍّ'}[lang]||'Skip');
+  if(sv)sv.textContent=({ru:'Сохранить',en:'Save',es:'Guardar',pt:'Salvar',de:'Speichern',fr:'Garder',uk:'Зберегти',tr:'Kaydet',zh:'保存',ar:'حفظ'}[lang]||'Save');
+  if(as)as.textContent=({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX');
+}
+function _cardLimitGuard(){
+  if(cardDailyRemaining()<=0){toast(({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached'),'🔒');initLearn();return false;}
+  return true;
+}
+/* Swipe the current card out (left=Skip, right=Save), advance the progress bar
+   and load the next card. Both directions move the session forward. */
+function _advanceCard(dir){
+  const fcs=document.getElementById('fcs');
+  document.getElementById('fc-ai')?.classList.add('hid');
+  if(fcs){fcs.classList.remove('swipe-left','swipe-right');void fcs.offsetWidth;fcs.classList.add(dir==='left'?'swipe-left':'swipe-right');}
   cIdx++;
-  if(q<3){
-    showCardHelp(c,q);
-    return;
+  setTimeout(()=>{if(fcs)fcs.classList.remove('swipe-left','swipe-right');showCard(cIdx);},300);
+}
+/* Skip: word just disappears, next card loads — NOT added to the SRS deck. */
+function cardSkip(){
+  if(cardRateBusy)return;cardRateBusy=true;
+  if(!_cardLimitGuard())return;
+  haptic('light');try{sfx.flip();}catch(e){}
+  recordCardDaily();
+  _advanceCard('left');
+}
+/* Save to Notes: enqueue the word into the personal SM-2 dictionary. */
+function cardSave(){
+  if(cardRateBusy)return;cardRateBusy=true;
+  if(!_cardLimitGuard())return;
+  haptic('success');try{sfx.correct();}catch(e){}
+  const c=cards[cIdx];
+  toast(({ru:'Сохранено в словарь 📝',en:'Saved to notes 📝',es:'Guardado en notas 📝',pt:'Salvo nas notas 📝',de:'In Notizen gespeichert 📝',fr:'Enregistré dans les notes 📝',uk:'Збережено у словник 📝',tr:'Notlara kaydedildi 📝',zh:'已保存到笔记 📝',ar:'تم الحفظ في الدفتر 📝'}[lang]||'Saved to notes 📝'),'📝');
+  trackM('words');trackM('dwords');bumpStat('words');recordCardDaily();
+  /* quality 3 = "good": schedules the first spaced-repetition review */
+  try{sm2Review(c.id,3);}catch(e){}
+  if(API&&window._uid)try{fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:3,uid:window._uid})}).catch(()=>{});}catch(e){appWarn('rate_card sync failed',e);}
+  _advanceCard('right');
+}
+/* ── In-card ALEX overlay renderers ── */
+function _cardAiHead(){
+  const t=({ru:'ALEX подсказывает',en:'ALEX explains',es:'ALEX explica',pt:'ALEX explica',de:'ALEX erklärt',fr:'ALEX explique',uk:'ALEX підказує',tr:'ALEX açıklıyor',zh:'ALEX 讲解',ar:'يشرح ALEX'}[lang]||'ALEX explains');
+  return `<div class="fc-ai-hd"><span class="fc-ai-ttl"><svg viewBox="0 0 24 24"><path d="M12 2l2.2 5.2 5.6.5-4.3 3.7 1.3 5.5L12 19.5 7.2 22.4l1.3-5.5L4.2 13.2l5.6-.5z"/></svg>${t}</span><button class="fc-ai-x" type="button" onclick="closeCardAi()" aria-label="Close">×</button></div>`;
+}
+function _showCardAiSkeleton(){
+  const box=document.getElementById('fc-ai');if(!box)return;
+  box.innerHTML=_cardAiHead()+'<div class="sk-line" style="width:88%"></div><div class="sk-line" style="width:72%"></div><div class="sk-line" style="width:94%;margin-top:16px"></div><div class="sk-line" style="width:64%"></div>';
+  box.classList.remove('hid');
+}
+function _renderCardAiResult(word,reply){
+  const box=document.getElementById('fc-ai');if(!box)return;
+  box.innerHTML=_cardAiHead()+`<div class="fc-ai-block"><div class="fc-ai-txt">${safeHTML((reply||'').trim())}</div></div>`;
+  box.classList.remove('hid');
+}
+function _renderCardAiError(canRetry){
+  const box=document.getElementById('fc-ai');if(!box)return;
+  const msg=({ru:'Не удалось получить ответ. Попробуй ещё раз.',en:'Could not get a reply. Please try again.',es:'No se pudo obtener respuesta. Inténtalo de nuevo.',pt:'Não foi possível obter resposta. Tente novamente.',de:'Keine Antwort erhalten. Versuche es erneut.',fr:'Réponse impossible. Réessaie.',uk:'Не вдалося отримати відповідь. Спробуй ще раз.',tr:'Yanıt alınamadı. Tekrar dene.',zh:'未能获取回复，请重试。',ar:'تعذّر الحصول على رد. حاول مجددًا.'}[lang]||'Could not get a reply. Please try again.');
+  const retry=({ru:'Повторить',en:'Retry',es:'Reintentar',pt:'Repetir',de:'Erneut',fr:'Réessayer',uk:'Повторити',tr:'Tekrar',zh:'重试',ar:'إعادة'}[lang]||'Retry');
+  box.innerHTML=_cardAiHead()+`<div class="fc-ai-err">${safeHTML(msg)}</div>`+(canRetry?`<button class="fc-ai-retry" type="button" onclick="cardAskAlex()">${retry}</button>`:'');
+  box.classList.remove('hid');
+}
+function closeCardAi(){document.getElementById('fc-ai')?.classList.add('hid');}
+/* Ask ALEX: 1 simple contextual example + 1 short mnemonic, billed 6 credits on
+   the server via the reserve→reconcile /api/chat path (mode=lesson_help → Sonnet). */
+async function cardAskAlex(){
+  const c=cards[cIdx];if(!c)return;
+  const subscriber=!!(grandfatheredTier||isPremium);
+  /* Pre-flight credit gate (server still enforces): block when balance < cost. */
+  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
+  if(!hasChatAccess()){try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
+  if(cardAlexBusy)return;cardAlexBusy=true;
+  const askBtn=document.querySelector('.ca-ask');if(askBtn)askBtn.disabled=true;
+  haptic('light');
+  _showCardAiSkeleton();
+  const w=c.word||'';
+  const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.'}[botLang]||'Respond in English.';
+  const req=({
+    ru:`Английское слово «${w}». Дай РОВНО два коротких блока без вступления: «Пример:» — один супер-простой пример использования в контексте (короткое английское предложение + перевод); «Ассоциация:» — одна короткая мнемоническая ассоциация на английском, чтобы запомнить слово. Будь предельно лаконичным.`,
+    en:`English word "${w}". Give EXACTLY two short blocks, no intro: "Example:" — one super-simple usage example in context (a short English sentence); "Mnemonic:" — one short English mnemonic association to remember it. Be very concise.`,
+    es:`Palabra inglesa "${w}". Da EXACTAMENTE dos bloques cortos, sin introducción: "Ejemplo:" — un ejemplo de uso supersimple en contexto (frase corta en inglés); "Asociación:" — una breve asociación mnemotécnica en inglés. Sé muy conciso.`,
+    pt:`Palavra inglesa "${w}". Dê EXATAMENTE dois blocos curtos, sem introdução: "Exemplo:" — um exemplo de uso supersimples em contexto (frase curta em inglês); "Associação:" — uma breve associação mnemônica em inglês. Seja muito conciso.`,
+    de:`Englisches Wort „${w}“. Gib GENAU zwei kurze Blöcke ohne Einleitung: „Beispiel:“ — ein supereinfaches Anwendungsbeispiel im Kontext (kurzer englischer Satz); „Eselsbrücke:“ — eine kurze englische Merkhilfe. Sei sehr knapp.`,
+    fr:`Mot anglais « ${w} ». Donne EXACTEMENT deux blocs courts, sans intro : « Exemple : » — un exemple d’usage très simple en contexte (courte phrase anglaise) ; « Mnémonique : » — une courte association mnémotechnique en anglais. Sois très concis.`,
+    uk:`Англійське слово «${w}». Дай РІВНО два короткі блоки без вступу: «Приклад:» — один супер-простий приклад використання в контексті (коротке англійське речення); «Асоціація:» — одна коротка мнемонічна асоціація англійською. Будь дуже лаконічним.`,
+    tr:`İngilizce kelime "${w}". Girişsiz TAM iki kısa blok ver: "Örnek:" — bağlamda çok basit bir kullanım örneği (kısa İngilizce cümle); "Hafıza:" — kelimeyi hatırlatan kısa bir İngilizce çağrışım. Çok kısa ol.`,
+    zh:`英文单词 "${w}"。给出恰好两个简短部分，无引言："Example:" — 一个语境中超简单的使用例句（短英文句子）；"Mnemonic:" — 一个帮助记忆的简短英文联想。非常简洁。`,
+    ar:`الكلمة الإنجليزية "${w}". أعطِ بالضبط كتلتين قصيرتين بلا مقدمة: "Example:" — مثال استخدام بسيط جدًا في سياق (جملة إنجليزية قصيرة)؛ "Mnemonic:" — رابطة تذكّر قصيرة بالإنجليزية. كن موجزًا جدًا.`
+  }[lang]||`English word "${w}". Give EXACTLY two short blocks, no intro: "Example:" — one super-simple usage example; "Mnemonic:" — one short English mnemonic. Be very concise.`);
+  try{
+    const r=await fetch(`${API}/api/chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({uid:window._uid||0,message:req,bot_lang:bl,answer_lang:botLang,chosen_model:'sonnet',mode:'lesson_help',init_data:tg?.initData||''}),
+      signal:AbortSignal.timeout(45000)
+    });
+    if(!r.ok){
+      const e=await r.json().catch(()=>({}));
+      if(e&&(e.credits_required||e.premium_required)){closeCardAi();try{sfx.warn();}catch(_){}openPremium(null,e.credits_required?'credits':'platform');}
+      else{_renderCardAiError(true);}
+      return;
+    }
+    const data=await r.json();
+    if(typeof data.chat_credits==='number'){chatCredits=data.chat_credits;try{updateCreditChip();}catch(_){}}
+    if(data.premium_required){closeCardAi();try{sfx.warn();}catch(_){}openPremium(null,data.credits_required?'credits':'platform');return;}
+    _renderCardAiResult(w,data.reply||'');
+    try{sfx.correct();}catch(e){}
+  }catch(e){
+    appWarn('cardAskAlex failed',e);_renderCardAiError(true);
+  }finally{
+    cardAlexBusy=false;const b=document.querySelector('.ca-ask');if(b)b.disabled=false;
   }
-  showCard(cIdx);
 }
 
 /* ══ EXAM PREP: TOEFL / IELTS, offline-first ══ */
