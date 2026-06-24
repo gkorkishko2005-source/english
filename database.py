@@ -86,6 +86,8 @@ CREATE TABLE IF NOT EXISTS users (
     profession      TEXT DEFAULT '',
     streak          INTEGER DEFAULT 0,
     last_active     DATE,
+    plant_tonus     INTEGER DEFAULT 100,
+    last_xp_date    DATE,
     xp              INTEGER DEFAULT 0,
     remind_time     TEXT,
     complex_streak  INTEGER DEFAULT 0,
@@ -261,7 +263,7 @@ SCHEMA_SQLITE = """
 CREATE TABLE IF NOT EXISTS users (
     uid INTEGER PRIMARY KEY, name TEXT, lang TEXT DEFAULT 'ru',
     level TEXT DEFAULT 'B1', interests TEXT DEFAULT '', profession TEXT DEFAULT '',
-    streak INTEGER DEFAULT 0, last_active TEXT, xp INTEGER DEFAULT 0,
+    streak INTEGER DEFAULT 0, last_active TEXT, plant_tonus INTEGER DEFAULT 100, last_xp_date TEXT, xp INTEGER DEFAULT 0,
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
     premium_until TEXT, premium_tier TEXT DEFAULT '',
@@ -356,6 +358,8 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_by BIGINT" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ref_by INTEGER",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN referrals INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_premium_days INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ref_premium_days INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS plant_tonus INTEGER DEFAULT 100" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN plant_tonus INTEGER DEFAULT 100",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_xp_date DATE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN last_xp_date TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN is_premium INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_until TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_tier TEXT DEFAULT ''",
@@ -1045,9 +1049,66 @@ async def config_set(key: str, value: str):
 
 async def add_xp(uid: int, amount: int):
     await db("UPDATE users SET xp=xp+? WHERE uid=?", amount, uid)
+    # Any XP gain refills the plant tonus to 100 and stamps today's activity.
+    if int(amount or 0) > 0:
+        await register_activity(uid)
 
 async def get_xp(uid: int) -> int:
     u = await get_user(uid); return (u.get("xp") or 0) if u else 0
+
+
+# ── PLANT TONUS (regularity meter, server-clock only) ──────────────────────────
+# Replaces the streak as the at-a-glance "are you keeping it up" signal. Stored
+# as plant_tonus (0..100). Every XP-earning action refills it to 100; a daily
+# UTC-00:00 cron drains 20 for each day with zero XP. ALL date math uses the
+# SERVER clock (UTC) — the client never supplies a date, so the meter can't be
+# farmed by spoofing the device clock/timezone.
+def _utc_today():
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).date()
+
+
+async def register_activity(uid: int):
+    """Mark XP-earning activity for today (UTC) and refill tonus to 100."""
+    today = _utc_today()
+    store = today if USE_POSTGRES else today.isoformat()
+    await db("UPDATE users SET plant_tonus=100, last_xp_date=? WHERE uid=?", store, uid)
+
+
+async def get_plant_tonus(uid: int) -> int:
+    u = await get_user(uid)
+    if not u:
+        return 100
+    try:
+        return max(0, min(100, int(u.get("plant_tonus") if u.get("plant_tonus") is not None else 100)))
+    except Exception:
+        return 100
+
+
+async def decay_plant_tonus() -> int:
+    """Daily UTC-00:00 job: drain 20 tonus from every user who earned NO XP
+    yesterday (floor 0). Active users were already refilled to 100 at earn time,
+    so only the inactive decay. Returns the number of rows touched.
+
+    Pure server time: the boundary is yesterday's UTC date; a user whose
+    last_xp_date is yesterday (or today, for a midnight edge) is spared. Anyone
+    else — including never-active accounts (NULL) — loses 20."""
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    yest = (now - timedelta(days=1)).date()
+    today = now.date()
+    if USE_POSTGRES:
+        y_val, t_val = yest, today
+    else:
+        y_val, t_val = yest.isoformat(), today.isoformat()
+    # GREATEST(0, plant_tonus-20) without relying on GREATEST availability.
+    await db(
+        "UPDATE users SET plant_tonus = CASE WHEN COALESCE(plant_tonus,100)-20 < 0 THEN 0 "
+        "ELSE COALESCE(plant_tonus,100)-20 END "
+        "WHERE (last_xp_date IS NULL OR (last_xp_date <> ? AND last_xp_date <> ?))",
+        y_val, t_val,
+    )
+    return 0
 
 async def update_streak(uid: int):
     user = await get_user(uid)

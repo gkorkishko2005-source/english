@@ -362,7 +362,7 @@ async def handle_user(request):
             # Fallback - return minimal data
             return web.json_response({
                 "uid": uid, "name": "Student", "level": "B1", "xp": 0,
-                "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
+                "streak": 0, "plant_tonus": 100, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
                 "lang": "ru", "profession": "", "remind_time": "",
                 "referrals": 0,
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
@@ -381,6 +381,10 @@ async def handle_user(request):
         profession = await get_profession(uid) or ""
         lang_db    = await get_lang(uid) or "ru"
         is_prem    = await check_premium(uid)
+        try:
+            plant_tonus = max(0, min(100, int(user.get("plant_tonus") if (isinstance(user, dict) and user.get("plant_tonus") is not None) else 100)))
+        except Exception:
+            plant_tonus = 100
         weekly = [0]*7
         return web.json_response({
             "uid": uid,
@@ -388,6 +392,7 @@ async def handle_user(request):
             "level": level,
             "xp": xp,
             "streak": streak,
+            "plant_tonus": plant_tonus,
             "sessions": sessions,
             "words": words,
             "tests": tests,
@@ -408,7 +413,7 @@ async def handle_user(request):
         # Return minimal working data instead of 500
         return web.json_response({
             "uid": uid, "name": "Student", "level": "B1", "xp": 0,
-            "streak": 0, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
+            "streak": 0, "plant_tonus": 100, "sessions": 0, "words": 0, "tests": 0, "errors": 0,
             "lang": "ru", "profession": "", "remind_time": "",
             "referrals": 0,
             "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
@@ -1312,10 +1317,25 @@ async def handle_sync_stats(request):
         # server-authoritative /api/complete_day endpoint. Letting the client
         # push a streak (or stamp last_active=today on every sync) is exactly
         # what allowed the reminder/clock streak-inflation exploit.
+        # Detect a genuine XP increase BEFORE the GREATEST clamp so we only
+        # refill the plant tonus on real progress (not on idle re-syncs).
+        prior_xp = 0
+        try:
+            from database import get_user
+            pu = await get_user(uid)
+            prior_xp = int((pu or {}).get("xp") or 0)
+        except Exception:
+            prior_xp = 0
         try:
             await db("UPDATE users SET xp=GREATEST(COALESCE(xp,0),?), sessions=GREATEST(COALESCE(sessions,0),?), words=GREATEST(COALESCE(words,0),?), tests=GREATEST(COALESCE(tests,0),?), mistakes=GREATEST(COALESCE(mistakes,0),?), level=? WHERE uid=?", xp, sessions, words, tests, errors, level, uid)
         except Exception as e:
             logger.debug(f"sync update: {e}")
+        if xp > prior_xp:
+            try:
+                from database import register_activity
+                await register_activity(uid)
+            except Exception as e:
+                logger.debug(f"tonus refresh on sync: {e}")
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
         logger.error(f"sync_stats error: {e}")

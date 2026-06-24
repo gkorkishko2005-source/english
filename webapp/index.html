@@ -832,8 +832,15 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .ach-home-cnt{margin-left:auto;font-size:12px;color:var(--a);font-weight:700}
 
 /* ══ ACHIEVEMENTS ══ */
-.ach-card{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;transition:.2s;opacity:.6}
+.ach-card{display:flex;flex-direction:column;gap:10px;padding:12px 14px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:6px;transition:.2s;opacity:.6}
 .ach-card.done{opacity:1;border-color:rgba(var(--ar),.2);background:linear-gradient(135deg,rgba(var(--ar),.04),transparent)}
+.ach-main{display:flex;align-items:center;gap:12px}
+.ach-equip{display:inline-flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:7px 10px;border-radius:9px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer;transition:.18s}
+.ach-equip:active{transform:scale(.97)}
+.ach-equip svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ach-equip.on{background:rgba(0,212,170,.14);border-color:rgba(0,212,170,.34);color:var(--a2)}
+.ach-equip.on svg{fill:currentColor;stroke:currentColor}
+.ach-equip.dim{opacity:.45}
 /* Unified achievement icons — one outline-SVG style in a tinted tile,
    coloured by tier (no mixed flat-emoji / 3D-sticker glyphs). */
 .ach-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--e2);border:1px solid var(--b1)}
@@ -2369,6 +2376,13 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:li
 .growth-hero[data-mood="windy"] .growth-svg{animation:growWind 3s ease-in-out infinite;filter:saturate(.85)}
 .growth-hero[data-mood="rainy"] .growth-svg{animation:growSag 4s ease-in-out infinite;filter:saturate(.7) brightness(.92);opacity:.92}
 .growth-hero[data-mood="rainy"] .growth-stage{background:linear-gradient(180deg,rgba(120,140,170,.06),transparent 70%)}
+/* Plant tonus < 50% → "the plant wants a drink": desaturate the whole stage.
+   Placed after the mood rules so it wins on equal specificity. The tonus value
+   is server-authoritative (UTC), so this state can't be spoofed via device time. */
+.growth-hero[data-thirsty="1"] .growth-svg,
+.growth-hero[data-thirsty="1"] .growth-stage{filter:saturate(.5)!important}
+.growth-thirst{display:none;margin-top:5px;font-size:11px;font-weight:700;color:#4f8aff;align-items:center;justify-content:center;gap:4px}
+.growth-hero[data-thirsty="1"] .growth-thirst{display:flex}
 @media(prefers-reduced-motion:reduce){
   .growth-hero[data-mood] .growth-svg,
   .growth-hero[data-mood] .growth-stage{animation:none!important;transition:none}
@@ -2762,6 +2776,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="growth-meta">
       <div class="growth-title" id="growth-title">—</div>
       <div class="growth-sub" id="growth-sub">—</div>
+      <div class="growth-thirst" id="growth-thirst"><span>💧</span><span id="growth-thirst-t"></span></div>
     </div>
     <div class="growth-progress"><div class="growth-fill" id="growth-fill" style="width:0%"></div></div>
     <div class="growth-foot">
@@ -4392,6 +4407,14 @@ function renderGrowth(d){
   /* The mood drives the weather overlay + plant animation class. */
   const mood=_getGrowthMood();
   host.setAttribute('data-mood',mood);
+  /* Plant tonus (regularity meter) — server-authoritative, never device clock.
+     Below 50% the plant "wants a drink": desaturate it + show a hint. */
+  let tonus=100;
+  try{const tv=(d&&d.plant_tonus);tonus=(tv===undefined||tv===null)?100:Math.max(0,Math.min(100,parseInt(tv,10)||0));}catch(_){tonus=100;}
+  const thirsty=tonus<50;
+  host.setAttribute('data-thirsty',thirsty?'1':'0');
+  const thirstT=document.getElementById('growth-thirst-t');
+  if(thirstT)thirstT.textContent=({ru:'Растение хочет пить — позанимайся сегодня',en:'Your plant is thirsty — practice today',es:'Tu planta tiene sed — practica hoy',pt:'Sua planta está com sede — pratique hoje',de:'Deine Pflanze hat Durst — übe heute',fr:'Ta plante a soif — entraîne-toi aujourd’hui',uk:'Рослина хоче пити — позаймайся сьогодні',tr:'Bitkin susadı — bugün çalış',zh:'你的植物渴了——今天练习一下',ar:'نبتتك عطشى — تدرّب اليوم'}[lang]||'Your plant is thirsty — practice today');
   /* Time-of-day backdrop. */
   try{host.setAttribute('data-tod',_timeOfDay());}catch(_){}
   /* Weeds reflect the open error-diary count. */
@@ -14092,34 +14115,79 @@ function getProfileBadges(){
   return ACHIEVEMENTS.filter(a=>a.badge&&unlocked[a.id]);
 }
 
+/* ── Equipped achievements (is_equipped) — client-side cosmetic preference.
+   Stored as an ordered array of unlocked achievement ids, max 3. No time
+   dependency whatsoever (anti-exploit: device clock never matters here). */
+const MAX_EQUIPPED=3;
+function getEquipped(){
+  const unlocked=LS.getJ('achievements_unlocked')||{};
+  let arr=LS.getJ('achievements_equipped');
+  if(!Array.isArray(arr))arr=[];
+  // keep only still-unlocked ids that map to a real achievement, dedupe, cap
+  const valid=[];const seen={};
+  arr.forEach(id=>{
+    if(seen[id])return;
+    if(!unlocked[id])return;
+    if(!ACHIEVEMENTS.some(a=>a.id===id))return;
+    seen[id]=1;valid.push(id);
+  });
+  const capped=valid.slice(0,MAX_EQUIPPED);
+  if(capped.length!==arr.length)LS.setJ('achievements_equipped',capped);
+  return capped;
+}
+function isEquipped(id){return getEquipped().indexOf(id)>=0;}
+function toggleEquip(id){
+  const unlocked=LS.getJ('achievements_unlocked')||{};
+  if(!unlocked[id]){haptic('error');return false;}
+  let arr=getEquipped();
+  const i=arr.indexOf(id);
+  if(i>=0){arr.splice(i,1);haptic('light');}
+  else{
+    if(arr.length>=MAX_EQUIPPED){
+      haptic('error');
+      toast(({ru:'Можно показывать максимум 3 достижения',en:'You can show up to 3 achievements',es:'Puedes mostrar hasta 3 logros',pt:'Você pode exibir até 3 conquistas',de:'Du kannst bis zu 3 Erfolge zeigen',fr:'Vous pouvez afficher jusqu’à 3 succès',uk:'Можна показувати максимум 3 досягнення',tr:'En fazla 3 başarı gösterebilirsin',zh:'最多展示 3 个成就',ar:'يمكنك عرض ٣ إنجازات كحد أقصى'}[lang]||'You can show up to 3 achievements'),'⚠️');
+      return false;
+    }
+    arr.push(id);haptic('success');
+  }
+  LS.setJ('achievements_equipped',arr);
+  try{renderBadges();}catch(e){}
+  try{renderAchievements();}catch(e){}
+  return true;
+}
+
 function renderBadges(){
   const el=document.getElementById('profile-badges');
   if(!el)return;
-  const badges=getProfileBadges();
-  const prem=LS.get('is_premium')==='true';
+  const equippedIds=getEquipped();
+  const lvlColor=levelColor(window._d?.level);
   let html='';
-  if(prem)html+='<span class="pbadge pbadge-prem" data-cg="prem" style="cursor:pointer">👑 Premium</span>';
-  if((window._d?.streak||0)>=7)html+='<span class="pbadge pbadge-streak" data-cg="streak" style="cursor:pointer">🔥 '+window._d.streak+'</span>';
-  badges.slice(0,3).forEach((b,i)=>{
-    const title=(b.title&&(b.title[lang]||b.title.en))||'';
-    html+='<span class="pbadge pbadge-master" data-cg="ach" data-i="'+i+'" style="cursor:pointer">'+b.badge+' '+safeHTML(title)+'</span>';
+  /* Dynamic equipped achievements replace the old static plashki. Coloured
+     strictly by the user's current level color map (levelColor). */
+  equippedIds.forEach((id,i)=>{
+    const a=ACHIEVEMENTS.find(x=>x.id===id);
+    if(!a)return;
+    const title=(a.title&&(a.title[lang]||a.title.en))||'';
+    const bg='color-mix(in srgb,'+lvlColor+' 16%,transparent)';
+    html+='<span class="pbadge" data-cg="ach" data-id="'+a.id+'" '
+      +'style="cursor:pointer;color:'+lvlColor+';background:'+bg+';border:1px solid '+lvlColor+'33">'
+      +(a.badge||'🏅')+' '+safeHTML(title)+'</span>';
   });
-  if(badges.length>3){
-    const more={ru:'ещё',en:'more',es:'más',pt:'mais',de:'mehr',fr:'plus',uk:'ще',tr:'daha',zh:'更多',ar:'المزيد'}[lang]||'more';
-    html+='<span class="pbadge pbadge-master" data-cg="all" style="cursor:pointer">+'+(badges.length-3)+' '+more+'</span>';
+  if(!equippedIds.length){
+    // discoverability: nothing equipped yet → gentle hint chip opening modal
+    const hint={ru:'＋ Выбрать бейджи',en:'＋ Choose badges',es:'＋ Elegir insignias',pt:'＋ Escolher emblemas',de:'＋ Abzeichen wählen',fr:'＋ Choisir des badges',uk:'＋ Обрати бейджі',tr:'＋ Rozet seç',zh:'＋ 选择徽章',ar:'＋ اختر الشارات'}[lang]||'＋ Choose badges';
+    html+='<span class="pbadge pbadge-master" data-cg="all" style="cursor:pointer;opacity:.85">'+hint+'</span>';
   }
   el.innerHTML=html;
-  /* Each badge opens a short congratulation; the "+N more" chip opens
-     the full achievements modal. */
+  /* Tapping an equipped badge opens its congratulation; the hint chip opens
+     the full achievements modal where the user equips/unequips. */
   el.querySelectorAll('.pbadge').forEach(node=>{
     node.onclick=(ev)=>{
       ev.stopPropagation();
       const kind=node.getAttribute('data-cg');
       try{
         if(kind==='all'){openAchModal();return;}
-        if(kind==='prem'){openCongrat('👑','Premium',({ru:'Спасибо за поддержку PolyGlotty!',en:'Thanks for supporting PolyGlotty!',es:'¡Gracias por apoyar a PolyGlotty!',pt:'Obrigado por apoiar o PolyGlotty!',de:'Danke, dass du PolyGlotty unterstützt!',fr:'Merci de soutenir PolyGlotty !',uk:'Дякуємо за підтримку PolyGlotty!',tr:'PolyGlotty’yi desteklediğin için teşekkürler!',zh:'感谢支持 PolyGlotty！',ar:'شكرًا لدعمك PolyGlotty!'}[lang]||'Thanks for supporting PolyGlotty!'));return;}
-        if(kind==='streak'){const s=window._d?.streak||0;openCongrat('🔥',s+' '+({ru:'дней подряд',en:'day streak',es:'días seguidos',pt:'dias seguidos',de:'Tage in Folge',fr:'jours d’affilée',uk:'днів поспіль',tr:'gün üst üste',zh:'天连续',ar:'يومًا متتاليًا'}[lang]||'day streak'),({ru:'Так держать — не разрывай серию!',en:'Keep it up — don’t break the streak!',es:'¡Sigue así, no rompas la racha!',pt:'Continue assim — não quebre a sequência!',de:'Weiter so — halte die Serie!',fr:'Continue — ne casse pas la série !',uk:'Так тримати — не переривай серію!',tr:'Böyle devam — seriyi bozma!',zh:'继续保持，别中断连续！',ar:'واصل — لا تكسر السلسلة!'}[lang]||'Keep it up — don’t break the streak!'));return;}
-        const idx=+node.getAttribute('data-i')||0;const b=badges[idx];
+        const id=node.getAttribute('data-id');const b=ACHIEVEMENTS.find(x=>x.id===id);
         if(b){const t=(b.title&&(b.title[lang]||b.title.en))||'';const ds=(b.desc&&(b.desc[lang]||b.desc.en))||'';openCongrat(b.badge||'🏅',t,ds);}
       }catch(e){try{openAchModal();}catch(_){}}
     };
@@ -14154,19 +14222,35 @@ function renderAchievements(){
     html+='<div style="margin-top:12px;margin-bottom:6px;font-size:12px;font-weight:700;color:var(--t2);display:flex;align-items:center;justify-content:space-between">'
       +'<span>'+(tierNames[tier]?.[lang]||tierNames[tier]?.en||tier)+'</span>'
       +'<span style="font-size:10px;color:var(--t3)">'+tierDone+'/'+items.length+'</span></div>';
+    const eqCount=getEquipped().length;
     items.forEach(a=>{
       const done=!!unlocked[a.id];
       const t=a.title[lang]||a.title.en;
       const d=a.desc[lang]||a.desc.en;
       const icoSvg=ACH_ICONS[_achCat(a.id)]||ACH_ICONS.session;
       html+='<div class="ach-card'+(done?' done':'')+'">'
+        +'<div class="ach-main">'
         +'<div class="ach-icon t-'+a.tier+'">'+icoSvg+'</div>'
         +'<div class="ach-info"><div class="ach-title">'+t+'</div><div class="ach-desc">'+d+'</div></div>'
         +(done?'<div class="ach-check"><svg viewBox="0 0 14 14"><polyline points="2 7 5.5 10.5 12 3.5"/></svg></div>':'<div class="ach-lock">'+ACH_LOCK_SVG+'</div>')
         +'</div>';
+      if(done){
+        const on=isEquipped(a.id);
+        const atCap=!on&&eqCount>=MAX_EQUIPPED;
+        const lblOn={ru:'В профиле',en:'In profile',es:'En perfil',pt:'No perfil',de:'Im Profil',fr:'Au profil',uk:'У профілі',tr:'Profilde',zh:'已展示',ar:'في الملف'}[lang]||'In profile';
+        const lblOff={ru:'Показывать в профиле',en:'Show in profile',es:'Mostrar en perfil',pt:'Mostrar no perfil',de:'Im Profil zeigen',fr:'Afficher au profil',uk:'Показувати у профілі',tr:'Profilde göster',zh:'在主页展示',ar:'إظهار في الملف'}[lang]||'Show in profile';
+        const icoOn='<svg viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg>';
+        const icoOff='<svg viewBox="0 0 24 24"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg>';
+        html+='<button class="ach-equip'+(on?' on':'')+(atCap?' dim':'')+'" data-eq="'+a.id+'">'
+          +(on?icoOn:icoOff)+'<span>'+(on?lblOn:lblOff)+'</span></button>';
+      }
+      html+='</div>';
     });
   });
   wrap.innerHTML=html;
+  wrap.querySelectorAll('.ach-equip').forEach(btn=>{
+    btn.onclick=(ev)=>{ev.stopPropagation();const id=btn.getAttribute('data-eq');toggleEquip(id);};
+  });
   const cnt=document.getElementById('ach-cnt');
   if(cnt)cnt.textContent=doneCount+'/'+list.length;
   const lbl=document.getElementById('ach-btn-lbl');

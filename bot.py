@@ -935,6 +935,19 @@ async def notify_expiring_subs():
         except Exception as e:
             logger.warning(f"notify_expiring_subs uid={r.get('uid')}: {e}")
 
+# ── Plant tonus daily decay (strictly UTC) ───────────────────────────
+async def run_plant_decay():
+    """Daily UTC-00:00 job: drain 20 plant tonus from every user with zero XP
+    yesterday. Activity refills to 100 at earn-time, so only the inactive lose
+    points. The date boundary lives in the DB layer and is computed from UTC,
+    never from any device clock."""
+    try:
+        from database import decay_plant_tonus
+        await decay_plant_tonus()
+        logger.info("plant tonus daily decay applied")
+    except Exception as e:
+        logger.warning(f"plant tonus decay failed: {e}")
+
 async def schedule_all():
     # One consolidated daily push per user, fired at the time they chose
     # in reminders. The content depends on the weekday (see
@@ -968,6 +981,15 @@ async def schedule_all():
             logger.info(f"schedule_all: subscription-expiry scan at {SUB_EXPIRY_CHECK_TIME} MSK")
         except Exception as e:
             logger.warning(f"schedule_all: bad SUB_EXPIRY_CHECK_TIME '{SUB_EXPIRY_CHECK_TIME}': {e}")
+    # Single global job: drain plant tonus once a day, strictly at UTC 00:00.
+    # timezone is pinned to UTC (not the scheduler's MSK default) so the meter
+    # is device-clock-independent and the same boundary applies to all users.
+    try:
+        scheduler.add_job(run_plant_decay, "cron", hour=0, minute=0, timezone="UTC",
+                          id="plant_decay", replace_existing=True)
+        logger.info("schedule_all: plant tonus decay at 00:00 UTC")
+    except Exception as e:
+        logger.warning(f"schedule_all: plant decay schedule failed: {e}")
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
