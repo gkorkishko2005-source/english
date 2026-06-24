@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS users (
     sub_exp_notified    TEXT DEFAULT '',
     ref_by          BIGINT,
     referrals       INTEGER DEFAULT 0,
+    ref_premium_days INTEGER DEFAULT 0,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -267,7 +268,7 @@ CREATE TABLE IF NOT EXISTS users (
     platform_until TEXT, platform_lifetime INTEGER DEFAULT 0,
     chat_credits INTEGER DEFAULT 0, grandfathered_tier TEXT DEFAULT '',
     sub_exp_notified TEXT DEFAULT '',
-    ref_by INTEGER, referrals INTEGER DEFAULT 0,
+    ref_by INTEGER, referrals INTEGER DEFAULT 0, ref_premium_days INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS sessions (
@@ -354,6 +355,7 @@ async def db_init():
     migrations = [
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_by BIGINT" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ref_by INTEGER",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS referrals INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN referrals INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS ref_premium_days INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ref_premium_days INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_premium BOOLEAN DEFAULT FALSE" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN is_premium INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_until TIMESTAMPTZ" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_until TEXT",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_tier TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_tier TEXT DEFAULT ''",
@@ -439,41 +441,82 @@ async def update_user(uid: int, **kwargs):
 # Env-overridable so the owner can retune without a deploy; mirrors
 # billing_config REFERRAL_REWARD_CREDITS.
 REFERRAL_REWARD_CREDITS = int(os.getenv("BILLING_REFERRAL_REWARD_CREDITS", os.getenv("REFERRAL_REWARD_CREDITS", "3")) or "3")
+# Premium granted to the inviter per VALID new referral. The reward is now real
+# subscription time (Platform) instead of credits — but capped lifetime so free
+# value can't snowball: once REFERRAL_PREMIUM_CAP_DAYS of referral-granted Premium
+# have been handed out, further referrals fall back to REFERRAL_REWARD_CREDITS
+# ALEX credits only (no more free subscription days). Env-overridable.
+REFERRAL_PREMIUM_DAYS = int(os.getenv("BILLING_REFERRAL_PREMIUM_DAYS", os.getenv("REFERRAL_PREMIUM_DAYS", "3")) or "3")
+REFERRAL_PREMIUM_CAP_DAYS = int(os.getenv("BILLING_REFERRAL_PREMIUM_CAP_DAYS", os.getenv("REFERRAL_PREMIUM_CAP_DAYS", "14")) or "14")
 
 
-async def apply_referral(new_uid: int, ref_uid: int) -> bool:
+async def apply_referral(new_uid: int, ref_uid: int) -> dict:
     """Attach a valid first referral once and reward the inviter.
 
     Anti-abuse: a Telegram ID can be referred at most once (ref_by is set under a
     guarded UPDATE and never overwritten), self-referral is rejected, and the
     caller (cmd_start) only invokes this for brand-new users so existing accounts
-    can't be farmed. Reward = +REFERRAL_REWARD_CREDITS ALEX credits to the inviter
-    plus the existing XP bonuses."""
+    can't be farmed.
+
+    Reward (Unit 3 — limit free value):
+      * The inviter gets REFERRAL_PREMIUM_DAYS days of Platform access, but only
+        up to a lifetime cap of REFERRAL_PREMIUM_CAP_DAYS days (tracked in
+        users.ref_premium_days). Beyond the cap the inviter instead receives
+        REFERRAL_REWARD_CREDITS ALEX credits — never more free subscription days.
+      * XP bonuses are unchanged (+150 inviter, +50 new user).
+
+    Returns a result dict for the caller's user-facing message:
+      {"ok": bool, "premium_days": int, "credits": int, "capped": bool}
+    """
+    fail = {"ok": False, "premium_days": 0, "credits": 0, "capped": False}
     if not new_uid or not ref_uid or new_uid == ref_uid:
-        return False
+        return fail
     await upsert_user(ref_uid, "Student")
     await upsert_user(new_uid, "Student")
     user = await get_user(new_uid)
     if not user or user.get("ref_by"):
-        return False
+        return fail
     # Guarded write: only attaches when ref_by is still empty. If a concurrent
     # call won the race, rowcount semantics differ per backend, so we re-read to
     # confirm WE are the one that attached this inviter before paying out.
     await db("UPDATE users SET ref_by=? WHERE uid=? AND (ref_by IS NULL OR ref_by=0)", ref_uid, new_uid)
     confirm = await get_user(new_uid)
     if not confirm or int(confirm.get("ref_by") or 0) != int(ref_uid):
-        return False
+        return fail
     await db("UPDATE users SET referrals=COALESCE(referrals,0)+1, xp=COALESCE(xp,0)+150 WHERE uid=?", ref_uid)
     await db("UPDATE users SET xp=COALESCE(xp,0)+50 WHERE uid=?", new_uid)
-    # Reward the inviter with ALEX credits + a ledger trail.
-    reward = REFERRAL_REWARD_CREDITS
-    if reward > 0:
+    # Decide the inviter's reward: Premium days while under the lifetime cap,
+    # otherwise ALEX credits. The cap counter (ref_premium_days) is the source of
+    # truth so the cap holds even across many invites.
+    inviter = await get_user(ref_uid) or {}
+    granted_days = int(inviter.get("ref_premium_days") or 0)
+    cap = max(0, REFERRAL_PREMIUM_CAP_DAYS)
+    want = max(0, REFERRAL_PREMIUM_DAYS)
+    days_to_grant = max(0, min(want, cap - granted_days)) if cap > 0 else want
+    result = {"ok": True, "premium_days": 0, "credits": 0, "capped": False}
+    if days_to_grant > 0:
         try:
-            await add_credits(ref_uid, reward)
-            await ledger_add(ref_uid, "referral", reward, meta=f"ref new_uid={new_uid}")
+            await grant_platform_days(ref_uid, days_to_grant)
+            await db("UPDATE users SET ref_premium_days=COALESCE(ref_premium_days,0)+? WHERE uid=?",
+                     days_to_grant, ref_uid)
+            await ledger_add(ref_uid, "referral", 0,
+                             meta=f"ref new_uid={new_uid} premium_days={days_to_grant}")
+            result["premium_days"] = days_to_grant
         except Exception as e:
-            logger.warning("referral credit reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
-    return True
+            logger.warning("referral premium reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
+    else:
+        # Cap reached — fall back to credits so the invite is still rewarded.
+        result["capped"] = True
+        reward = REFERRAL_REWARD_CREDITS
+        if reward > 0:
+            try:
+                await add_credits(ref_uid, reward)
+                await ledger_add(ref_uid, "referral", reward,
+                                 meta=f"ref new_uid={new_uid} (cap reached, credits)")
+                result["credits"] = reward
+            except Exception as e:
+                logger.warning("referral credit reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
+    return result
 
 async def get_referral_count(uid: int) -> int:
     user = await get_user(uid)
@@ -625,6 +668,38 @@ async def grant_platform(uid: int, period: str = "1m"):
         return
     days = PLATFORM_PERIOD_DAYS.get(period, 30)
     user = await get_user(uid) or {}
+    now = datetime.now(timezone.utc)
+    current_until = None
+    raw = user.get("platform_until")
+    if raw:
+        try:
+            current_until = raw if isinstance(raw, datetime) else datetime.fromisoformat(str(raw))
+            if current_until.tzinfo is None:
+                current_until = current_until.replace(tzinfo=timezone.utc)
+        except Exception as e:
+            logger.warning("platform_until parse failed uid=%s value=%r: %s", uid, raw, e)
+    base = current_until if (current_until and current_until > now) else now
+    until = base + timedelta(days=days)
+    until_value = until if USE_POSTGRES else until.isoformat()
+    await db("UPDATE users SET platform_until=? WHERE uid=?", until_value, uid)
+
+
+async def grant_platform_days(uid: int, days: int):
+    """Extend Platform access by an arbitrary number of days (day-granular).
+
+    Used by the referral reward, which grants short Premium windows (e.g. 3 days)
+    rather than the fixed 1m/6m purchase periods. Stacks on top of any existing
+    platform_until exactly like grant_platform — the new window starts from the
+    later of (current_until, now) so days never overlap or get lost. A lifetime
+    holder is left untouched (they already have everything)."""
+    from datetime import datetime, timedelta, timezone
+    days = int(days)
+    if days <= 0:
+        return
+    await upsert_user(uid, "")
+    user = await get_user(uid) or {}
+    if bool(user.get("platform_lifetime")):
+        return  # lifetime already covers it; nothing to extend
     now = datetime.now(timezone.utc)
     current_until = None
     raw = user.get("platform_until")

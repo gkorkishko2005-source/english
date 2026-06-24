@@ -1178,7 +1178,7 @@ async def cmd_start(message: Message):
             await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
                                   else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
-    ref_applied = False
+    ref_result = {"ok": False, "premium_days": 0, "credits": 0, "capped": False}
     # Anti-abuse: only a BRAND-NEW account can trigger a referral reward. An
     # existing user who later opens a ref link is ignored, so invites can't be
     # farmed by recycling known IDs. apply_referral additionally enforces
@@ -1186,9 +1186,10 @@ async def cmd_start(message: Message):
     if args.startswith("ref_") and is_new_user:
         try:
             ref_uid = int(args.replace("ref_",""))
-            ref_applied = await apply_referral(uid, ref_uid)
+            ref_result = await apply_referral(uid, ref_uid) or ref_result
         except Exception as e:
             logger.warning(f"referral failed uid={uid} args={args}: {e}")
+    ref_applied = bool(ref_result.get("ok"))
 
     lang = "ru"
     try:
@@ -1237,9 +1238,22 @@ async def cmd_start(message: Message):
     tier_label = {"basic": "Basic", "pro": "Pro", "ultimate": "Ultimate"}.get(tier, "Premium")
     greet = _greeting_by_time(ru)
 
-    ref_line = "\n\nБонус за приглашение: другу +150 XP и +3 кредита ALEX, тебе +50 XP." if (ru and ref_applied) else (
-        "\n\nReferral bonus: your friend gets +150 XP and +3 ALEX credits, you get +50 XP." if ref_applied else ""
-    )
+    # The referral reward now grants the inviter real Premium days (capped
+    # lifetime), or ALEX credits once the cap is reached. Surface whichever the
+    # friend actually received so the new user knows the invite "landed".
+    ref_line = ""
+    if ref_applied:
+        _days = int(ref_result.get("premium_days") or 0)
+        _cred = int(ref_result.get("credits") or 0)
+        if _days > 0:
+            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и {_days} дн. Premium, тебе +50 XP." if ru
+                        else f"\n\nReferral bonus: your friend gets +150 XP and {_days} days of Premium, you get +50 XP.")
+        elif _cred > 0:
+            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и +{_cred} кредита ALEX, тебе +50 XP." if ru
+                        else f"\n\nReferral bonus: your friend gets +150 XP and +{_cred} ALEX credits, you get +50 XP.")
+        else:
+            ref_line = ("\n\nБонус за приглашение: другу +150 XP, тебе +50 XP." if ru
+                        else "\n\nReferral bonus: your friend gets +150 XP, you get +50 XP.")
     name_html = html.escape(name, quote=False)
     channel_link = html_link(channel_url(), "канал со словами дня", bold=True) if ru else html_link(channel_url(), "daily words channel", bold=True)
     # Subscribers get a warm "welcome back" that names their plan; free users

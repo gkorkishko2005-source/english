@@ -419,11 +419,15 @@ async def handle_user(request):
 async def handle_referral(request):
     """Generate the user's referral deep link + current stats.
 
-    GET /api/referral/{uid} → {link, count, reward}
-        link   : t.me/<bot>?start=ref_<uid>  (share this; the inviter is rewarded
-                 when a BRAND-NEW user opens the bot through it)
-        count  : how many valid referrals this user already has
-        reward : ALEX credits the inviter gets per valid referral
+    GET /api/referral/{uid} → {link, count, reward, premium_days, premium_cap_days, premium_left_days, capped}
+        link             : t.me/<bot>?start=ref_<uid>  (share this; the inviter is
+                           rewarded when a BRAND-NEW user opens the bot through it)
+        count            : how many valid referrals this user already has
+        reward           : ALEX credits the inviter gets once the Premium cap is hit
+        premium_days     : Premium days granted per valid referral (while under cap)
+        premium_cap_days : lifetime cap on referral-granted Premium days
+        premium_left_days: Premium days still available under the cap for this user
+        capped           : True once the lifetime Premium cap is exhausted
     """
     try:
         uid = int(request.match_info["uid"])
@@ -432,19 +436,29 @@ async def handle_referral(request):
                                  headers={"Access-Control-Allow-Origin": "*"})
     link = f"https://t.me/{BOT_NAME.lstrip('@')}?start=ref_{uid}"
     count = 0
+    used_days = 0
     try:
-        from database import get_referral_count
+        from database import get_referral_count, get_user
         count = await get_referral_count(uid)
+        u = await get_user(uid) or {}
+        used_days = int(u.get("ref_premium_days") or 0)
     except Exception as e:
-        logger.warning("referral count read failed uid=%s: %s", uid, e)
+        logger.warning("referral stats read failed uid=%s: %s", uid, e)
     reward = 3
+    from database import REFERRAL_PREMIUM_DAYS, REFERRAL_PREMIUM_CAP_DAYS
+    premium_days = REFERRAL_PREMIUM_DAYS
+    cap_days = REFERRAL_PREMIUM_CAP_DAYS
     try:
         from billing_config import load_config
         reward = int((await load_config()).get("REFERRAL_REWARD_CREDITS", 3))
     except Exception:
         pass
-    return web.json_response({"link": link, "count": int(count), "reward": reward},
-                             headers={"Access-Control-Allow-Origin": "*"})
+    left_days = max(0, cap_days - used_days)
+    return web.json_response({
+        "link": link, "count": int(count), "reward": reward,
+        "premium_days": premium_days, "premium_cap_days": cap_days,
+        "premium_left_days": left_days, "capped": left_days <= 0,
+    }, headers={"Access-Control-Allow-Origin": "*"})
 
 # ── CHAT ─────────────────────────────────────────────────────────────────────
 async def handle_chat(request):

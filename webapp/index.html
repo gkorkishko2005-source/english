@@ -1441,6 +1441,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .prem-proof{margin:8px 18px 0;padding:10px 12px;border-radius:10px;background:var(--e2);border:1px solid var(--b1);font-size:11.5px;line-height:1.5;color:var(--t2)}
 .prem-proof b{color:var(--t1);font-weight:700}
 .prem-info{padding:16px 18px 4px}
+.prem-info-accent{font-size:12.5px;line-height:1.55;color:var(--t1);font-weight:500;background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.22);border-left:3px solid var(--a);border-radius:10px;padding:11px 13px;margin-bottom:14px}
 .prem-info-section{margin-bottom:14px}
 .prem-info-section:last-child{margin-bottom:6px}
 .prem-info-h{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);margin-bottom:8px}
@@ -2724,6 +2725,12 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
       <div class="emico-wrap"><svg viewBox="0 0 40 40" fill="none" stroke-linecap="round"><path d="M20 4l4.5 9.5 10 1.5-7.5 7 1.5 10.5L20 28l-8.5 4.5 1.5-10.5L5.5 15l10-1.5z" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.12)"/></svg></div>
       <div class="emtit" id="em-t"></div><div class="emsub" id="em-s"></div>
       <div class="embtns"><button class="btn bp" onclick="openChat('words_new')"><span id="em-b1"></span></button><button class="btn bg" onclick="openChat('fun_fact')"><span id="em-b2"></span></button></div>
+    </div>
+    <!-- FROZEN DICTIONARY paywall (Premium expired, personal SM-2 deck locked) -->
+    <div class="emst" id="lfreeze" style="display:none">
+      <div class="emico-wrap"><svg viewBox="0 0 40 40" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="17" width="22" height="16" rx="3" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.10)"/><path d="M14 17v-3a6 6 0 0 1 12 0v3" stroke="var(--a)" stroke-width="1.6"/><path d="M20 23v4" stroke="var(--a)" stroke-width="1.6"/></svg></div>
+      <div class="emtit" id="lfreeze-t"></div><div class="emsub" id="lfreeze-s"></div>
+      <div class="embtns"><button class="btn bp" id="lfreeze-b1" onclick="openPremium(({ru:'Продли подписку, чтобы разморозить словарь',en:'Renew to unfreeze your dictionary'}[lang]||'Renew to unfreeze your dictionary'),'platform')"></button></div>
     </div>
   </div>
   <!-- ROADMAP panel -->
@@ -6901,7 +6908,26 @@ function recordCardDaily(){
   LS.setJ(info.key,{start:info.start,used:next});
   return next;
 }
+/* Size of the user's PERSONAL dictionary — words they have actually started
+   learning (have SM-2 state for) plus any server-side saved words. This is what
+   gets "frozen" when Premium lapses; the built-in taster deck is separate. */
+function personalDictCount(){
+  try{
+    var d=window._d||{};
+    var sm=Object.keys(getSM2Data()||{}).length;
+    var dw=Array.isArray(d.due_words)?d.due_words.length:0;
+    var w=parseInt(d.words||0,10)||0;
+    return Math.max(sm,dw,w);
+  }catch(e){return 0;}
+}
+/* Retention gate: once a user loses Premium, their accumulated personal
+   dictionary is frozen — spaced repetition is paused until they renew. New
+   users with no dictionary yet are NOT frozen (nothing to protect). */
+function _vocabFrozen(){
+  try{return !hasPlatform() && personalDictCount()>0;}catch(e){return false;}
+}
 function buildDeckCards(){
+  if(_vocabFrozen())return [];
   var lim=cardDailyRemaining();
   if(lim<=0)return [];
   // Server-provided due words win if present (back-compat)
@@ -6936,6 +6962,10 @@ function initLearn(){
   if(_learnTabLocked(learnTab)){try{switchLearnTab('cards');}catch(_){learnTab='cards';}}
   if(learnTab==='course')renderCourse();
   renderWordPrefs();
+  /* Frozen dictionary (Premium lapsed): show the paywall stub instead of the
+     review and bail before building/showing any card. */
+  if(_vocabFrozen()){renderVocabFreeze();return;}
+  const _fr=document.getElementById('lfreeze');if(_fr)_fr.style.display='none';
   cards=buildDeckCards();cIdx=0;flipped=false;
   const inn=document.getElementById('fci');
   inn.style.transition='none';inn.classList.remove('flip');inn.offsetHeight;inn.style.transition='';
@@ -6971,6 +7001,32 @@ function initLearn(){
     }
   }
   else{document.getElementById('lmain').style.display='block';document.getElementById('lempty').style.display='none';showCard(0);}
+}
+/* Render the frozen-dictionary paywall: hide the deck + empty states, show the
+   lock card with "Твой словарь из X слов заморожен …" and a renew CTA. */
+function renderVocabFreeze(){
+  const X=personalDictCount();
+  const lm=document.getElementById('lmain'),le=document.getElementById('lempty'),lf=document.getElementById('lfreeze');
+  if(lm)lm.style.display='none';
+  if(le)le.style.display='none';
+  if(lf)lf.style.display='block';
+  const cl=document.getElementById('fc-cnt-lbl');
+  if(cl){cl.textContent='🔒';cl.title=({ru:'Словарь заморожен',en:'Dictionary frozen'}[lang]||'Dictionary frozen');}
+  const t=document.getElementById('lfreeze-t'),s=document.getElementById('lfreeze-s'),b1=document.getElementById('lfreeze-b1');
+  if(t)t.textContent=({ru:'Словарь заморожен',en:'Dictionary frozen',es:'Diccionario congelado',pt:'Dicionário congelado',de:'Wörterbuch eingefroren',fr:'Dictionnaire gelé',uk:'Словник заморожено',tr:'Sözlük donduruldu',zh:'词库已冻结',ar:'القاموس مجمّد'}[lang]||'Dictionary frozen');
+  if(s)s.textContent=({
+    ru:`Твой словарь из ${X} слов заморожен. Продли подписку, чтобы продолжить интервальное повторение.`,
+    en:`Your dictionary of ${X} words is frozen. Renew your subscription to keep spaced repetition going.`,
+    es:`Tu diccionario de ${X} palabras está congelado. Renueva la suscripción para continuar la repetición espaciada.`,
+    pt:`Seu dicionário de ${X} palavras está congelado. Renove a assinatura para continuar a repetição espaçada.`,
+    de:`Dein Wörterbuch mit ${X} Wörtern ist eingefroren. Verlängere das Abo, um die Wiederholung fortzusetzen.`,
+    fr:`Ton dictionnaire de ${X} mots est gelé. Renouvelle ton abonnement pour poursuivre la répétition espacée.`,
+    uk:`Твій словник із ${X} слів заморожено. Продовж підписку, щоб продовжити інтервальне повторення.`,
+    tr:`${X} kelimelik sözlüğün donduruldu. Aralıklı tekrara devam etmek için aboneliğini yenile.`,
+    zh:`你的 ${X} 个单词的词库已冻结。续订订阅以继续间隔重复。`,
+    ar:`قاموسك المكوّن من ${X} كلمة مجمّد. جدّد اشتراكك لمواصلة التكرار المتباعد.`
+  }[lang]||`Your dictionary of ${X} words is frozen. Renew your subscription to keep spaced repetition going.`);
+  if(b1)b1.textContent=({ru:'Продлить подписку',en:'Renew subscription',es:'Renovar suscripción',pt:'Renovar assinatura',de:'Abo verlängern',fr:'Renouveler l’abonnement',uk:'Продовжити підписку',tr:'Aboneliği yenile',zh:'续订订阅',ar:'تجديد الاشتراك'}[lang]||'Renew subscription');
 }
 function showCard(i){
   document.getElementById('fc-help-box')?.remove();
@@ -12949,6 +13005,20 @@ function _platCopy(){
   return {
     title:{ru:'Платформа',en:'Platform',es:'Plataforma',de:'Plattform',fr:'Plateforme',pt:'Plataforma',uk:'Платформа',tr:'Platform',zh:'平台',ar:'المنصة'}[lang]||'Platform',
     sub:{ru:'Весь контент. Чат ALEX покупается отдельно — кредитами.',en:'All content. ALEX chat is sold separately as credits.'}[lang]||'All content. ALEX chat sold separately.',
+    /* Retention accent — frames Premium as ongoing upkeep of the user's level,
+       not a one-off course purchase. Shown prominently above the feature table. */
+    accent:{
+      ru:'Premium — это не только курсы. Это безлимитное поддержание твоего уровня английского, доступ к еженедельным Mock-тестам TOEFL/IELTS и сохранение твоей личной языковой базы.',
+      en:'Premium is more than courses. It is unlimited upkeep of your English level, access to weekly TOEFL/IELTS mock tests and preservation of your personal language base.',
+      es:'Premium es más que cursos. Es el mantenimiento ilimitado de tu nivel de inglés, acceso a simulacros semanales de TOEFL/IELTS y la conservación de tu base lingüística personal.',
+      pt:'Premium é mais do que cursos. É a manutenção ilimitada do seu nível de inglês, acesso a simulados semanais de TOEFL/IELTS e a preservação da sua base linguística pessoal.',
+      de:'Premium ist mehr als Kurse. Es ist die unbegrenzte Pflege deines Englischniveaus, Zugang zu wöchentlichen TOEFL/IELTS-Mock-Tests und der Erhalt deiner persönlichen Sprachbasis.',
+      fr:'Premium, ce n’est pas que des cours. C’est l’entretien illimité de ton niveau d’anglais, l’accès à des tests blancs hebdomadaires TOEFL/IELTS et la préservation de ta base linguistique personnelle.',
+      uk:'Premium — це не лише курси. Це безлімітна підтримка твого рівня англійської, доступ до щотижневих Mock-тестів TOEFL/IELTS і збереження твоєї особистої мовної бази.',
+      tr:'Premium yalnızca kurslardan ibaret değil. İngilizce seviyenin sınırsız korunması, haftalık TOEFL/IELTS deneme sınavlarına erişim ve kişisel dil tabanının saklanmasıdır.',
+      zh:'Premium 不只是课程。它是对你英语水平的无限维护、每周 TOEFL/IELTS 模拟测试的访问权限，以及对你个人语言库的保存。',
+      ar:'Premium ليس مجرد دورات. إنه صيانة غير محدودة لمستواك في الإنجليزية، والوصول إلى اختبارات TOEFL/IELTS التجريبية الأسبوعية، والحفاظ على قاعدتك اللغوية الشخصية.'
+    }[lang]||'Premium is more than courses. It is unlimited upkeep of your English level, access to weekly TOEFL/IELTS mock tests and preservation of your personal language base.',
     /* "What\'s included" table — feature → value pairs */
     rows:{
       ru:[
@@ -13135,7 +13205,9 @@ function openPremium(highlightFeature, initialTab){
       const rowsHTML=copy.rows.map(r=>`<div class="row"><span>${safeHTML(r[0])}</span><span>${safeHTML(r[1])}</span></div>`).join('');
       const econLabel={ru:'Экономика',en:'Economics'}[lang]||'Economics';
       const splitFoot=`${copy.foot}<br>${({ru:'Lifetime окупает себя примерно за 17 месяцев подписки.',en:'Lifetime pays off after about 17 months of monthly billing.'}[lang]||'')}`;
+      const accentHTML=copy.accent?`<div class="prem-info-accent">${safeHTML(copy.accent)}</div>`:'';
       infoHost.innerHTML=`
+        ${accentHTML}
         <div class="prem-info-section">
           <div class="prem-info-h">${hLabel}</div>
           <div class="prem-info-list">${rowsHTML}</div>
