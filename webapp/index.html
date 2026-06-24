@@ -12,7 +12,7 @@
    a single teal accent (used only for primary CTAs + active tabs), pure-white
    headings and muted-grey secondary text. Status hues (--or/--rd/--exam/level
    colours) are kept for semantic meaning but no longer paint full backgrounds. */
-:root{--e0:#0B0F17;--e1:#161A22;--e2:#1E232D;--e3:#272D38;--a:#00d4aa;--a2:#00d4aa;--ar:0,212,170;--g:linear-gradient(135deg,#1A1F2B,#11151C);--gb:linear-gradient(90deg,#00d4aa,#00c29a);--t1:#FFFFFF;--t2:#9CA3AF;--t3:#6B7280;--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.05);--sh:0 6px 18px rgba(0,0,0,.40)}
+:root{--e0:#0B0F17;--e1:#161A22;--e2:#1E232D;--e3:#272D38;--a:#14b8a6;--a2:#0d9488;--ar:20,184,166;--g:linear-gradient(135deg,#1A1F2B,#11151C);--gb:linear-gradient(135deg,#14b8a6,#0d9488);--t1:#FFFFFF;--t2:#9CA3AF;--t3:#6B7280;--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.05);--sh:0 6px 18px rgba(0,0,0,.40)}
 
 /* ══ LIGHT MODE ══ */
 [data-mode=light]{
@@ -319,6 +319,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
    viewport without padding-widgets between them. */
 .hero{padding:18px 0 26px;position:relative}
 .hero-text{min-width:0}
+.hero-mark{width:36px;height:36px;margin-bottom:11px;filter:drop-shadow(0 2px 8px rgba(var(--ar),.22))}
+.hero-mark svg{width:100%;height:100%;display:block}
 .htm{font-size:12px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;line-height:1.2}
 .hnm{font-size:clamp(21px,5vw,27px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word;letter-spacing:-.3px}
 .hsb{display:none;font-size:12.5px;line-height:1.4;margin-top:5px;color:var(--t2);font-weight:550}
@@ -1078,9 +1080,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .ca-save{background:var(--e2);border:1px solid var(--b2);color:var(--t1)}
 .ca-save svg{stroke:var(--a)}
 .ca-save:active{background:var(--e3)}
-/* Ask ALEX = the single premium teal CTA */
-.ca-ask{background:var(--gb);border:1px solid transparent;color:#04221c;box-shadow:0 6px 18px rgba(var(--ar),.28)}
-.ca-ask svg{stroke:#04221c}
+/* Ask ALEX = the single premium teal CTA — deep teal with a soft, muted glow
+   (no acid neon). The screen's focus stays on the white English word. */
+.ca-ask{background:linear-gradient(135deg,rgba(20,184,166,.92),rgba(13,148,136,.94));border:1px solid rgba(var(--ar),.45);color:#031f1a;box-shadow:0 2px 14px rgba(var(--ar),.18)}
+.ca-ask svg{stroke:#031f1a}
 .ca-ask:disabled{opacity:.55;cursor:default;box-shadow:none}
 
 /* ── Swipe-out animations (left = Skip, right = Save) ── */
@@ -1105,6 +1108,16 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 /* Skeleton shimmer lines */
 .sk-line{height:11px;border-radius:6px;margin-bottom:9px;background:linear-gradient(90deg,var(--e2) 25%,var(--e3) 37%,var(--e2) 63%);background-size:400% 100%;animation:skShim 1.25s ease-in-out infinite}
 @keyframes skShim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+/* ── Progress → My Saved Words ── */
+#saved-words-wrap{display:grid;gap:7px}
+.sw-row{display:flex;align-items:center;gap:10px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r3);padding:11px 12px}
+.sw-main{flex:1;min-width:0}
+.sw-word{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--t1);line-height:1.2}
+.sw-lv{font-size:9px;font-weight:850;letter-spacing:.4px;text-transform:uppercase;border:1px solid;border-radius:100px;padding:2px 6px;background:transparent}
+.sw-tr{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw-del{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid var(--b2);background:var(--e2);color:var(--t3);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.sw-del:active{transform:scale(.9);color:var(--rd)}
 
 .emst{text-align:center;padding:36px 16px}
 .emico{font-size:46px;margin-bottom:11px;display:block;animation:float 3s ease-in-out infinite}
@@ -2690,6 +2703,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 <div class="screen active" id="s-home">
   <div class="hero">
     <div class="hero-text">
+      <div class="hero-mark" aria-label="PolyGlotty"><svg viewBox="0 0 40 40" fill="none"><path d="M20 4 Q22.4 17.6 36 20 Q22.4 22.4 20 36 Q17.6 22.4 4 20 Q17.6 17.6 20 4 Z" fill="rgba(20,184,166,.12)" stroke="#14b8a6" stroke-width="2.3" stroke-linejoin="round"/></svg></div>
       <div class="htm" id="greet"></div>
       <div class="hnm" id="hname">—</div>
       <div class="hsb" id="hsub"></div>
@@ -2903,6 +2917,9 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
+  <!-- My Saved Words — personal dictionary saved from flashcards -->
+  <div class="sec" id="saved-words-sec" style="display:none"><span id="saved-words-lbl">My Saved Words</span><span class="seca" id="saved-words-cnt"></span></div>
+  <div id="saved-words-wrap"></div>
   <!-- Achievements (moved here from Home) -->
   <button class="ach-home-btn" style="margin-top:6px" onclick="openAchModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -3004,7 +3021,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 
 <!-- NOTIFICATION -->
 <div class="notif" id="notif" onclick="notifTap()" style="display:none">
-  <div class="navic" id="navic" onclick="notifAvTap(event)"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M8 2H32A6 6 0 0 1 38 8V25A6 6 0 0 1 32 31H17L8 39V31A6 6 0 0 1 2 25V8A6 6 0 0 1 8 2Z" fill="none" stroke="#9aebbc" stroke-width="3" stroke-linejoin="round"/><g transform="translate(20 17)"><ellipse rx="8.5" ry="5.2" transform="rotate(35)" fill="none" stroke="#9aebbc" stroke-width="3"/><ellipse rx="8.5" ry="5.2" transform="rotate(-35)" fill="none" stroke="#4f8aff" stroke-width="3"/></g></svg></div>
+  <div class="navic" id="navic" onclick="notifAvTap(event)"><svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M20 5 Q22.2 17.8 35 20 Q22.2 22.2 20 35 Q17.8 22.2 5 20 Q17.8 17.8 20 5 Z" fill="rgba(20,184,166,.14)" stroke="#2dd4bf" stroke-width="2.4" stroke-linejoin="round"/></svg></div>
   <div style="flex:1;min-width:0"><div class="nnm">ALEX <span class="ndot"></span></div><div class="ntxt" id="ntxt"></div><div class="ncta" id="ncta"></div></div>
   <button class="nx" onclick="dismissNotif(event)" aria-label="Close">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="14" height="14"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
@@ -3837,7 +3854,11 @@ function applySfxToggleUI(){
   var ic=document.getElementById('sfx-icon');if(ic)ic.classList.toggle('muted',m);
 }
 
-const ALEX_SVG='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M8 2H32A6 6 0 0 1 38 8V25A6 6 0 0 1 32 31H17L8 39V31A6 6 0 0 1 2 25V8A6 6 0 0 1 8 2Z" fill="none" stroke="#9aebbc" stroke-width="3" stroke-linejoin="round"/><g transform="translate(20 17)"><ellipse rx="8.5" ry="5.2" transform="rotate(35)" fill="none" stroke="#9aebbc" stroke-width="3"/><ellipse rx="8.5" ry="5.2" transform="rotate(-35)" fill="none" stroke="#4f8aff" stroke-width="3"/></g></svg>';
+/* PolyGlotty brand mark — an elegant four-pointed contour star (premium AI
+   spark). Reused as the ALEX chat avatar, header mark and home logo. */
+const ALEX_SVG='<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block;background:#0e1626"><rect x="-1" y="-1" width="42" height="42" fill="#0e1626"/><path d="M20 5 Q22.2 17.8 35 20 Q22.2 22.2 20 35 Q17.8 22.2 5 20 Q17.8 17.8 20 5 Z" fill="rgba(20,184,166,.14)" stroke="#2dd4bf" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+/* Standalone contour star (transparent bg) for light surfaces / home hero. */
+const BRAND_STAR='<svg viewBox="0 0 40 40" fill="none"><path d="M20 4 Q22.4 17.6 36 20 Q22.4 22.4 20 36 Q17.6 22.4 4 20 Q17.6 17.6 20 4 Z" fill="rgba(20,184,166,.12)" stroke="#14b8a6" stroke-width="2.3" stroke-linejoin="round"/></svg>';
 const CHIP_SVGS=[
   `<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, // correct
   `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`, // grammar
@@ -3985,7 +4006,7 @@ function goTab(n,allowPractice){
   document.getElementById('s-'+n).classList.add('active');
   document.getElementById('nav-'+n).classList.add('on');
   tab=n;
-  if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
+  if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}try{renderSavedWords();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='settings'){try{updatePremiumUI();}catch(e){}}
   if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
@@ -7285,13 +7306,31 @@ function cardSave(){
   if(!_cardLimitGuard())return;
   haptic('success');try{sfx.correct();}catch(e){}
   const c=cards[cIdx];
-  toast(({ru:'Сохранено в словарь 📝',en:'Saved to notes 📝',es:'Guardado en notas 📝',pt:'Salvo nas notas 📝',de:'In Notizen gespeichert 📝',fr:'Enregistré dans les notes 📝',uk:'Збережено у словник 📝',tr:'Notlara kaydedildi 📝',zh:'已保存到笔记 📝',ar:'تم الحفظ في الدفتر 📝'}[lang]||'Saved to notes 📝'),'📝');
+  /* Tell the user exactly WHERE the word now lives. */
+  toast(({ru:'Слово сохранено в твой Словарь (Progress → Рекомендации ALEX)',en:'Word saved to your Dictionary (Progress → ALEX recommendations)',es:'Palabra guardada en tu Diccionario (Progreso → recomendaciones de ALEX)',pt:'Palavra salva no seu Dicionário (Progresso → recomendações do ALEX)',de:'Wort in deinem Wörterbuch gespeichert (Fortschritt → ALEX-Empfehlungen)',fr:'Mot enregistré dans ton Dictionnaire (Progrès → recommandations ALEX)',uk:'Слово збережено у твій Словник (Progress → рекомендації ALEX)',tr:'Kelime Sözlüğüne kaydedildi (İlerleme → ALEX önerileri)',zh:'单词已保存到你的词典（Progress → ALEX 建议）',ar:'تم حفظ الكلمة في قاموسك (التقدّم ← توصيات ALEX)'}[lang]||'Word saved to your Dictionary (Progress → ALEX recommendations)'),'📝');
   trackM('words');trackM('dwords');bumpStat('words');recordCardDaily();
   /* quality 3 = "good": schedules the first spaced-repetition review */
   try{sm2Review(c.id,3);}catch(e){}
+  /* Persist display metadata so Progress → My Saved Words can list the word. */
+  try{addSavedWord(c);}catch(e){}
   if(API&&window._uid)try{fetch(`${API}/api/rate_card`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({word_id:c.id,quality:3,uid:window._uid})}).catch(()=>{});}catch(e){appWarn('rate_card sync failed',e);}
   _advanceCard('right');
 }
+/* ── Saved-words store (display metadata for Progress → My Saved Words) ── */
+function getSavedWords(){try{return LS.getJ('saved_words')||{};}catch(e){return {};}}
+function addSavedWord(c){
+  if(!c||!c.id)return;
+  const d=getSavedWords();
+  d[c.id]={id:c.id,word:c.word||'',tr:c.translation||'',ph:c.phonetic||'',topic:c.topic||'',level:c.level||'',ts:Date.now()};
+  try{LS.setJ('saved_words',d);}catch(e){}
+}
+function removeSavedWord(id){
+  const d=getSavedWords();if(d[id]){delete d[id];try{LS.setJ('saved_words',d);}catch(e){}}
+  /* Also drop it from the SM-2 review deck so it stops resurfacing. */
+  try{const sm=getSM2Data();if(sm[id]){delete sm[id];saveSM2Data(sm);}}catch(e){}
+  try{renderSavedWords();}catch(e){}
+}
+function savedWordsList(){return Object.values(getSavedWords()).sort((a,b)=>(b.ts||0)-(a.ts||0));}
 /* ── In-card ALEX overlay renderers ── */
 function _cardAiHead(){
   const t=({ru:'ALEX подсказывает',en:'ALEX explains',es:'ALEX explica',pt:'ALEX explica',de:'ALEX erklärt',fr:'ALEX explique',uk:'ALEX підказує',tr:'ALEX açıklıyor',zh:'ALEX 讲解',ar:'يشرح ALEX'}[lang]||'ALEX explains');
@@ -12799,6 +12838,29 @@ function renderErrorDiary(){
   refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});
 }
 
+/* Progress → My Saved Words: list words the user saved from flashcards, with
+   their translation and a one-tap remove. Hidden entirely when empty. */
+function renderSavedWords(){
+  const sec=document.getElementById('saved-words-sec');
+  const wrap=document.getElementById('saved-words-wrap');
+  const lbl=document.getElementById('saved-words-lbl');
+  const cnt=document.getElementById('saved-words-cnt');
+  if(!wrap||!sec)return;
+  if(lbl)lbl.textContent=({ru:'Мой словарь',en:'My Saved Words',es:'Mi diccionario',pt:'Meu dicionário',de:'Meine gespeicherten Wörter',fr:'Mon dictionnaire',uk:'Мій словник',tr:'Kayıtlı kelimelerim',zh:'我的生词本',ar:'كلماتي المحفوظة'}[lang]||'My Saved Words');
+  const list=savedWordsList();
+  if(!list.length){sec.style.display='none';wrap.innerHTML='';return;}
+  sec.style.display='';
+  if(cnt)cnt.textContent=String(list.length);
+  const useLbl={ru:'Повторять',en:'Review',es:'Repasar',pt:'Revisar',de:'Wiederholen',fr:'Réviser',uk:'Повторити',tr:'Tekrarla',zh:'复习',ar:'مراجعة'}[lang]||'Review';
+  wrap.innerHTML='';
+  list.forEach(w=>{
+    const lc=(typeof levelColor==='function'&&w.level)?levelColor(w.level):'var(--a)';
+    const row=document.createElement('div');row.className='sw-row';
+    row.innerHTML=`<div class="sw-main"><div class="sw-word">${safeHTML(w.word||'')}${w.level?`<span class="sw-lv" style="color:${lc};border-color:${(typeof hexA==='function')?hexA(lc,.4):lc}">${safeHTML(w.level)}</span>`:''}</div>${w.tr?`<div class="sw-tr">${safeHTML(w.tr)}</div>`:''}</div><button class="sw-del" type="button" aria-label="Remove">×</button>`;
+    row.querySelector('.sw-del').onclick=(ev)=>{ev.stopPropagation();try{haptic('light');}catch(_){}removeSavedWord(w.id);};
+    wrap.appendChild(row);
+  });
+}
 function errorDiaryCategories(errors){
   const counts={};
   errors.forEach(e=>{const k=(e.category||'grammar').toLowerCase();counts[k]=(counts[k]||0)+1;});
