@@ -2055,6 +2055,20 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .srs{font-size:11.5px;color:var(--t3);margin-top:2px}
 .slist{background:transparent;border:1px solid var(--b1);border-radius:12px;overflow:hidden}
 
+/* ── Settings · premium breathing room ─────────────────────────────
+   After hiding Interests + emptying the profile field the screen felt
+   sparse, so we widen the rhythm: ~24px between major sections and
+   +15–20% inner padding in each container for "air" in the dark theme. */
+#s-settings .sec{margin:28px 2px 14px}
+#s-settings .set-grid-2{margin-bottom:18px}
+#s-settings .slist,#s-settings .set-acc{margin-bottom:18px}
+#s-settings .set-grid-2 .dl-toggle,#s-settings .set-grid-2 .lang-picker-btn{padding:15px 16px;min-height:60px}
+#s-settings .lang-picker-btn{padding:15px 16px}
+#s-settings .srow{padding:17px 16px}
+#s-settings .set-acc>summary,#s-settings .set-acc summary{padding:16px 16px}
+#s-settings .set-acc-bd{padding:2px 16px 17px}
+#s-settings #premium-settings-banner{margin-bottom:20px}
+
 /* ── Home · big 4-quad cards (kill the gradient bar on top) ────── */
 .s4c{background:var(--e1);border:1px solid var(--b1);box-shadow:inset 0 1px 0 var(--edge),var(--sh);border-radius:12px;padding:13px}
 .s4c::before{display:none}
@@ -2259,6 +2273,11 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
 #s-progress .cefr-badge.future{color:var(--t3);opacity:.55}
 #s-progress .cefr-badge.future .cefr-lock svg{opacity:.8}
 #s-progress .cefr-badge.current{transform:translateY(-1px)}
+/* Level-up transition test CTA — sits directly under the badge grid,
+   separated by a hairline so it reads as a course action, not an exam. */
+#s-progress #cefr-cta:not(:empty){margin-top:13px;padding-top:13px;border-top:1px solid var(--b1)}
+#s-progress .cefr-cta-sub{font-size:12px;color:var(--t2);text-align:center;line-height:1.4}
+#s-progress .cefr-cta-btn{margin-top:10px}
 
 /* ── Exam prep rows ───────────────────────────────────────────────── */
 #s-progress .exam-prep-card{padding:6px 14px}
@@ -2410,6 +2429,10 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:li
 #s-progress .toefl-card{background:var(--e1)!important;border:1px solid var(--b1)!important;
   box-shadow:inset 0 1px 0 var(--edge),var(--sh)!important;padding:14px 16px;border-radius:12px}
 #s-progress .toefl-empty{font-size:12px;color:var(--t3);text-align:center;padding:4px 0}
+/* Neutral premium CTA shown when the learner has no exam sessions yet. */
+#s-progress .toefl-promo{text-align:center;padding:6px 2px 2px}
+#s-progress .toefl-promo-h{font-size:14.5px;font-weight:800;color:var(--t1);letter-spacing:.2px}
+#s-progress .toefl-promo-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-top:6px}
 .toefl-cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;
   padding:12px 16px;border:none;border-radius:var(--r2);background:var(--gb);color:#fff;
   font-family:var(--f);font-size:13.5px;font-weight:800;letter-spacing:.2px;cursor:pointer;
@@ -2815,7 +2838,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <!-- CEFR path: the full ladder A0→C2; passed levels in their colour,
        current level bright, future levels greyed with a lock. -->
   <div class="sec"><span id="cefr-path-lbl"></span></div>
-  <div class="card cefr-card"><div class="cefr-grid" id="cefr-grid"></div></div>
+  <div class="card cefr-card"><div class="cefr-grid" id="cefr-grid"></div><div id="cefr-cta"></div></div>
   <!-- Exam prep: only shown when the learner has touched an exam course. -->
   <div class="sec" id="exam-prep-sec" style="display:none"><span id="exam-prep-lbl"></span></div>
   <div class="card exam-prep-card" id="exam-prep-card" style="display:none"><div id="exam-prep-list"></div></div>
@@ -4576,12 +4599,13 @@ function drawProgress(){
   if(tl){if(sc.length){tl.className='';tl.innerHTML=sc.map((s,i)=>`<div class="toefl-row" style="animation-delay:${i*.07}s"><span class="toefl-name">${safeHTML(s.section)}</span><div class="toefl-track"><div class="toefl-fill" style="width:${Math.max(0,Math.min(100,s.score/s.max*100))}%"></div></div><span class="toefl-score">${s.score}/${s.max}</span></div>`).join('');}
   else{
     tl.className='';
-    /* No TOEFL sessions yet → instead of a dead "no sessions" line, offer the
-       transition test to the NEXT CEFR level (A0→A1, never jumping to B2). */
-    const nextLvl=_nextCefrLevel(d);
-    const _cta=({ru:'Начать тест перехода на следующий уровень',en:'Start the next-level transition test',es:'Iniciar la prueba al siguiente nivel',pt:'Iniciar o teste para o próximo nível',de:'Test zum nächsten Niveau starten',fr:'Commencer le test de passage au niveau suivant',uk:'Почати тест переходу на наступний рівень',tr:'Bir sonraki seviye testini başlat',zh:'开始升入下一级别的测试',ar:'ابدأ اختبار الانتقال إلى المستوى التالي'}[lang]||'Start the next-level transition test');
-    const _sub=({ru:`Сдай короткий тест и поднимись на уровень ${nextLvl}.`,en:`Pass a short test and move up to level ${nextLvl}.`,es:`Aprueba un test corto y sube al nivel ${nextLvl}.`,pt:`Faça um teste curto e suba para o nível ${nextLvl}.`,de:`Bestehe einen kurzen Test und steige auf Niveau ${nextLvl} auf.`,fr:`Réussis un court test et passe au niveau ${nextLvl}.`,uk:`Склади короткий тест і піднімись на рівень ${nextLvl}.`,tr:`Kısa bir testi geç ve ${nextLvl} seviyesine yüksel.`,zh:`通过一个简短测试，升到 ${nextLvl} 级别。`,ar:`اجتز اختبارًا قصيرًا وارتقِ إلى المستوى ${nextLvl}.`}[lang]||`Pass a short test and move up to level ${nextLvl}.`);
-    tl.innerHTML=`<div class="toefl-empty">${safeHTML(_sub)}</div><button class="toefl-cta-btn" onclick="startLevelTest('${nextLvl}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8V4z"/></svg><span>${safeHTML(_cta)}</span></button>`;
+    /* No exam sessions yet → neutral premium CTA for the international-exam
+       simulator. The CEFR level-up test lives in the "Your path" block above
+       (renderCefrPath), kept separate from international exams. */
+    const _h=({ru:'Подготовка к TOEFL / IELTS',en:'TOEFL / IELTS preparation',es:'Preparación TOEFL / IELTS',pt:'Preparação TOEFL / IELTS',de:'TOEFL / IELTS Vorbereitung',fr:'Préparation TOEFL / IELTS',uk:'Підготовка до TOEFL / IELTS',tr:'TOEFL / IELTS hazırlığı',zh:'TOEFL / IELTS 备考',ar:'التحضير لـ TOEFL / IELTS'}[lang]||'TOEFL / IELTS preparation');
+    const _cta=({ru:'Открыть симулятор',en:'Open the simulator',es:'Abrir el simulador',pt:'Abrir o simulador',de:'Simulator öffnen',fr:'Ouvrir le simulateur',uk:'Відкрити симулятор',tr:'Simülatörü aç',zh:'打开模拟器',ar:'افتح المحاكي'}[lang]||'Open the simulator');
+    const _sub=({ru:'Оцени свой реальный балл в симуляторе экзамена.',en:'Estimate your real score in the exam simulator.',es:'Estima tu puntuación real en el simulador de examen.',pt:'Estime sua pontuação real no simulador de exame.',de:'Schätze deine echte Punktzahl im Prüfungssimulator.',fr:'Estime ton score réel dans le simulateur d’examen.',uk:'Оціни свій реальний бал у симуляторі іспиту.',tr:'Sınav simülatöründe gerçek puanını ölç.',zh:'在考试模拟器中评估你的真实分数。',ar:'قدّر درجتك الحقيقية في محاكي الامتحان.'}[lang]||'Estimate your real score in the exam simulator.');
+    tl.innerHTML=`<div class="toefl-promo"><div class="toefl-promo-h">${safeHTML(_h)}</div><div class="toefl-promo-sub">${safeHTML(_sub)}</div><button class="toefl-cta-btn" onclick="openExamPrep()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 1h6"/></svg><span>${safeHTML(_cta)}</span></button></div>`;
   }}
   // CEFR ladder + exam prep
   try{renderCefrPath(d);}catch(e){}
@@ -4642,6 +4666,19 @@ function renderCefrPath(d){
     if(i===ci)return `<div class="cefr-badge current" ${tap} style="background:${hexA(c,.30)};border-color:${c};color:#fff;box-shadow:0 0 0 1px ${c},0 8px 18px ${hexA(c,.34)}"><span class="cefr-lvl">${lv}</span><span class="cefr-now">●</span></div>`;
     return `<div class="cefr-badge future" ${tap}><span class="cefr-lvl">${lv}</span><span class="cefr-lock">${lockSvg}</span></div>`;
   }).join('');
+  /* Level-up transition test — internal course test, NOT an international exam.
+     Lives directly under the badge grid; targets the NEXT CEFR level only
+     (B1 → B2, never skipping ahead). Hidden once the learner is at C2. */
+  const cta=document.getElementById('cefr-cta');
+  if(cta){
+    const nextLvl=_nextCefrLevel(d);
+    if(ci>=ladder.length-1){cta.innerHTML='';}
+    else{
+      const _ctaTxt=({ru:'Начать тест перехода на следующий уровень',en:'Start the next-level transition test',es:'Iniciar la prueba al siguiente nivel',pt:'Iniciar o teste para o próximo nível',de:'Test zum nächsten Niveau starten',fr:'Commencer le test de passage au niveau suivant',uk:'Почати тест переходу на наступний рівень',tr:'Bir sonraki seviye testini başlat',zh:'开始升入下一级别的测试',ar:'ابدأ اختبار الانتقال إلى المستوى التالي'}[lang]||'Start the next-level transition test');
+      const _ctaSub=({ru:`Сдай короткий тест и поднимись на уровень ${nextLvl}.`,en:`Pass a short test and move up to level ${nextLvl}.`,es:`Aprueba un test corto y sube al nivel ${nextLvl}.`,pt:`Faça um teste curto e suba para o nível ${nextLvl}.`,de:`Bestehe einen kurzen Test und steige auf Niveau ${nextLvl} auf.`,fr:`Réussis un court test et passe au niveau ${nextLvl}.`,uk:`Склади короткий тест і піднімись на рівень ${nextLvl}.`,tr:`Kısa bir testi geç ve ${nextLvl} seviyesine yüksel.`,zh:`通过一个简短测试，升到 ${nextLvl} 级别。`,ar:`اجتز اختبارًا قصيرًا وارتقِ إلى المستوى ${nextLvl}.`}[lang]||`Pass a short test and move up to level ${nextLvl}.`);
+      cta.innerHTML=`<div class="cefr-cta-sub">${safeHTML(_ctaSub)}</div><button class="toefl-cta-btn cefr-cta-btn" onclick="startLevelTest('${nextLvl}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l14 8-14 8V4z"/></svg><span>${safeHTML(_ctaTxt)}</span></button>`;
+    }
+  }
 }
 /* CEFR mini-help: tapping a level badge opens a short description of what that
    level means + a one-line "what you can do" cue. Reuses the .mov modal infra. */
