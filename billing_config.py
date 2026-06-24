@@ -59,8 +59,21 @@ _DEFAULTS = {
         "toefl":       "sonnet",
         "tone_editor": "sonnet",
     },
+    # ── Flat per-message price (budget guard) ──────────────────────────
+    # ALEX is sold at a STRICT flat price per reply: every message costs exactly
+    # ALEX_MESSAGE_COST credits, drawn from allowance first then prepaid credits.
+    # When BILLING_FLAT_COST is True the reserve/reconcile path holds and charges
+    # this flat amount (no token-based refund) so the cost is 100% predictable
+    # for both the user and the owner. Set False to fall back to token-metered
+    # billing (reserve sized on tokens, refund the unused part).
+    "BILLING_FLAT_COST": True,
+    "ALEX_MESSAGE_COST": 6,            # credits per ALEX reply (flat)
+    # Referral reward — credits granted to the inviter per VALID new referral
+    # (0.5× the price of one message). Anti-abuse gates live in apply_referral /
+    # cmd_start (one ref per Telegram ID, brand-new users only).
+    "REFERRAL_REWARD_CREDITS": 3,
     # Hard limits — the owner can never go negative.
-    "MAX_TOKENS_PER_REPLY": 1000,      # caps Anthropic max_tokens (OUTPUT only)
+    "MAX_TOKENS_PER_REPLY": 250,       # caps Anthropic max_tokens (OUTPUT only)
     # Upper bound on INPUT tokens (system prompt + cached context + history) used
     # ONLY to size the up-front reserve so it covers the worst case. The reserve
     # is refunded down to the real total afterwards, so over-estimating here is
@@ -70,7 +83,11 @@ _DEFAULTS = {
     "DAILY_TOKENS_PER_USER": 120000,   # anti-abuse / runaway bot guard
     "GLOBAL_DAILY_BUDGET_USD": 25.0,   # kill-switch across ALL users per day
     # Subscription
-    "SUBSCRIPTION_ALLOWANCE": 1500,    # credits granted each period
+    # The Platform subscription does NOT include any "unlimited" or monthly AI
+    # pool — its ALEX value is the flat starter-credits grant handled at purchase
+    # time (PLATFORM_PLANS[...].starter_credits in bot.py). Keep this at 0 so the
+    # monthly allowance refill never tops a subscriber up for free.
+    "SUBSCRIPTION_ALLOWANCE": 0,       # credits granted each period (0 = none)
     "ALLOWANCE_DAYS": 30,
     # Master switch for the v2 reserve→reconcile path. If False, chat falls
     # back to the legacy per-message spend_credits behaviour.
@@ -86,6 +103,8 @@ _ENV_SCALARS = {
     "BILLING_SELL_STARS_PER_CREDIT": ("SELL_STARS_PER_CREDIT", float),
     "BILLING_MAX_TOKENS_PER_REPLY": ("MAX_TOKENS_PER_REPLY", int),
     "BILLING_MAX_INPUT_TOKENS": ("MAX_INPUT_TOKENS", int),
+    "BILLING_ALEX_MESSAGE_COST": ("ALEX_MESSAGE_COST", int),
+    "BILLING_REFERRAL_REWARD_CREDITS": ("REFERRAL_REWARD_CREDITS", int),
     "BILLING_VOICE_SURCHARGE_CREDITS": ("VOICE_SURCHARGE_CREDITS", int),
     "BILLING_DAILY_TOKENS_PER_USER": ("DAILY_TOKENS_PER_USER", int),
     "BILLING_GLOBAL_DAILY_BUDGET_USD": ("GLOBAL_DAILY_BUDGET_USD", float),
@@ -119,6 +138,8 @@ def _apply_env(cfg: dict):
             pass
     if os.getenv("BILLING_V2_ENABLED") is not None:
         cfg["BILLING_V2_ENABLED"] = _coerce_bool(os.getenv("BILLING_V2_ENABLED"))
+    if os.getenv("BILLING_FLAT_COST") is not None:
+        cfg["BILLING_FLAT_COST"] = _coerce_bool(os.getenv("BILLING_FLAT_COST"))
     for env_name, key in _ENV_JSON.items():
         raw = os.getenv(env_name)
         if not raw:

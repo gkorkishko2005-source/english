@@ -41,11 +41,23 @@ def credits_for_tokens(cfg: dict, tokens: int) -> int:
     return max(1, math.ceil(max(0, int(tokens)) / tpc))
 
 
+def flat_cost_enabled(cfg: dict) -> bool:
+    """True when ALEX is billed at a strict flat price per reply."""
+    return bool(cfg.get("BILLING_FLAT_COST"))
+
+
 def reserve_amount(cfg: dict, voice: bool = False) -> int:
-    """Worst-case credits for one reply = max INPUT (system+cache+history) + max
-    OUTPUT tokens, converted to credits. This must be an upper bound on the real
-    total so reconcile only ever refunds (never under-charges). Voice adds a flat
-    surcharge so STT/TTS cost is covered too."""
+    """Credits to hold for one reply.
+
+    FLAT mode (BILLING_FLAT_COST): exactly ALEX_MESSAGE_COST credits — the price
+    is fixed regardless of token usage or voice, so the hold equals the charge
+    and nothing is refunded on reconcile.
+
+    METERED mode: worst-case credits = max INPUT (system+cache+history) + max
+    OUTPUT tokens. This must be an upper bound on the real total so reconcile
+    only ever refunds (never under-charges). Voice adds a flat surcharge."""
+    if flat_cost_enabled(cfg):
+        return max(1, int(cfg.get("ALEX_MESSAGE_COST", 6)))
     worst_tokens = int(cfg.get("MAX_INPUT_TOKENS", 8000)) + int(cfg.get("MAX_TOKENS_PER_REPLY", 1000))
     base = credits_for_tokens(cfg, worst_tokens)
     if voice:
@@ -90,8 +102,17 @@ async def reconcile(uid: int, cfg: dict, model: str, reservation: dict,
     from database import refund_funds, ledger_add, usage_log_add
     in_tok = int((usage or {}).get("input_tokens") or 0)
     out_tok = int((usage or {}).get("output_tokens") or 0)
-    real = credits_for_tokens(cfg, in_tok + out_tok)
     reserved = int(reservation.get("reserved") or 0)
+    # FLAT mode: the reply costs exactly the reserved amount — no token-metered
+    # refund. We still log real token usage for analytics / the global budget.
+    if flat_cost_enabled(cfg):
+        try:
+            await usage_log_add(uid, model, in_tok, out_tok, float(cost_usd or 0.0), reserved)
+        except Exception as e:
+            logger.warning("usage_log write failed uid=%s: %s", uid, e)
+        return {"real_credits": reserved, "refunded": 0,
+                "input_tokens": in_tok, "output_tokens": out_tok}
+    real = credits_for_tokens(cfg, in_tok + out_tok)
     if real > reserved:
         # Reserve was under-sized — raise MAX_INPUT_TOKENS. We still cap at the
         # reserved hold (never bill more than we reserved) but flag it loudly so

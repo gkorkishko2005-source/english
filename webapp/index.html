@@ -6931,6 +6931,9 @@ function cardQueueTotal(){
   }catch(e){return 0;}
 }
 function initLearn(){
+  /* Course + Exams are subscription-gated. If a non-subscriber lands on a
+     locked tab (default is Course), drop them to free Flashcards. */
+  if(_learnTabLocked(learnTab)){try{switchLearnTab('cards');}catch(_){learnTab='cards';}}
   if(learnTab==='course')renderCourse();
   renderWordPrefs();
   cards=buildDeckCards();cIdx=0;flipped=false;
@@ -11745,7 +11748,19 @@ function updateLearnHeader(){
     }
   }catch(e){}
 }
+/* Course + Exams require an active subscription (Platform / grandfathered /
+   legacy bundle). Flashcards stay free. Non-subscribers are bounced to the
+   Flashcards tab and shown the paywall instead. */
+function _learnTabLocked(tab){return (tab==='course'||tab==='road')&&!hasPlatform();}
 function switchLearnTab(tab){
+  if(_learnTabLocked(tab)){
+    try{sfx.warn();}catch(_){}
+    const feat=(tab==='road')
+      ?({ru:'Экзамены',en:'Exams',es:'Exámenes',pt:'Exames',de:'Prüfungen',fr:'Examens',uk:'Іспити',tr:'Sınavlar',zh:'考试',ar:'الامتحانات'}[lang]||'Exams')
+      :({ru:'Курс',en:'Course',es:'Curso',pt:'Curso',de:'Kurs',fr:'Cours',uk:'Курс',tr:'Kurs',zh:'课程',ar:'الدورة'}[lang]||'Course');
+    try{showTierPaywall('basic',feat);}catch(_){}
+    tab='cards';
+  }
   learnTab=tab;
   document.getElementById('learn-course-panel').style.display=tab==='course'?'':'none';
   document.getElementById('learn-cards-panel').style.display=tab==='cards'?'':'none';

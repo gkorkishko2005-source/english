@@ -11,6 +11,10 @@ logger      = logging.getLogger(__name__)
 WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
+# Hard ceiling on ALEX OUTPUT tokens per reply — applied to EVERY chat path
+# (credit, legacy and grandfathered) so a single reply can never blow the
+# budget. Owner-tunable via env without a deploy.
+MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "250") or "250")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
@@ -411,6 +415,37 @@ async def handle_user(request):
             "is_premium": False,
         }, headers={"Access-Control-Allow-Origin": "*"})
 
+# ── REFERRAL LINK ──────────────────────────────────────────────────────────────
+async def handle_referral(request):
+    """Generate the user's referral deep link + current stats.
+
+    GET /api/referral/{uid} → {link, count, reward}
+        link   : t.me/<bot>?start=ref_<uid>  (share this; the inviter is rewarded
+                 when a BRAND-NEW user opens the bot through it)
+        count  : how many valid referrals this user already has
+        reward : ALEX credits the inviter gets per valid referral
+    """
+    try:
+        uid = int(request.match_info["uid"])
+    except Exception:
+        return web.json_response({"error": "invalid uid"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    link = f"https://t.me/{BOT_NAME.lstrip('@')}?start=ref_{uid}"
+    count = 0
+    try:
+        from database import get_referral_count
+        count = await get_referral_count(uid)
+    except Exception as e:
+        logger.warning("referral count read failed uid=%s: %s", uid, e)
+    reward = 3
+    try:
+        from billing_config import load_config
+        reward = int((await load_config()).get("REFERRAL_REWARD_CREDITS", 3))
+    except Exception:
+        pass
+    return web.json_response({"link": link, "count": int(count), "reward": reward},
+                             headers={"Access-Control-Allow-Origin": "*"})
+
 # ── CHAT ─────────────────────────────────────────────────────────────────────
 async def handle_chat(request):
     try:
@@ -604,6 +639,9 @@ async def handle_chat(request):
     # reserve (sized on that cap) always covers the real reply.
     if billing_v2 and bcfg:
         max_tokens = min(max_tokens, int(bcfg.get("MAX_TOKENS_PER_REPLY", 1000)))
+    # Hard ceiling for EVERY path (incl. legacy/grandfathered) — a reply can
+    # never exceed this regardless of tier, so output cost stays bounded.
+    max_tokens = min(int(max_tokens), MAX_REPLY_TOKENS_HARD)
     weight = int(model_cfg["weight"])
     msg_limit = int(tier_cfg["quota"])
 
@@ -1360,6 +1398,7 @@ def create_app():
     app=web.Application(middlewares=[cache_static_mw])
     app.router.add_get("/",handle_index)
     app.router.add_get("/api/user/{uid}",handle_user)
+    app.router.add_get("/api/referral/{uid}",handle_referral)
     app.router.add_post("/api/chat",handle_chat)
     app.router.add_delete("/api/chat/{uid}",handle_chat_reset)
     app.router.add_post("/api/lesson",require_premium("lesson")(handle_lesson))

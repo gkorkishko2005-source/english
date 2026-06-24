@@ -1179,7 +1179,11 @@ async def cmd_start(message: Message):
                                   else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
     ref_applied = False
-    if args.startswith("ref_"):
+    # Anti-abuse: only a BRAND-NEW account can trigger a referral reward. An
+    # existing user who later opens a ref link is ignored, so invites can't be
+    # farmed by recycling known IDs. apply_referral additionally enforces
+    # one-ref-per-ID and rejects self-referral.
+    if args.startswith("ref_") and is_new_user:
         try:
             ref_uid = int(args.replace("ref_",""))
             ref_applied = await apply_referral(uid, ref_uid)
@@ -1233,8 +1237,8 @@ async def cmd_start(message: Message):
     tier_label = {"basic": "Basic", "pro": "Pro", "ultimate": "Ultimate"}.get(tier, "Premium")
     greet = _greeting_by_time(ru)
 
-    ref_line = "\n\nБонус за приглашение начислен: +50 XP тебе, +150 XP другу." if (ru and ref_applied) else (
-        "\n\nReferral bonus applied: +50 XP for you, +150 XP for your friend." if ref_applied else ""
+    ref_line = "\n\nБонус за приглашение: другу +150 XP и +3 кредита ALEX, тебе +50 XP." if (ru and ref_applied) else (
+        "\n\nReferral bonus: your friend gets +150 XP and +3 ALEX credits, you get +50 XP." if ref_applied else ""
     )
     name_html = html.escape(name, quote=False)
     channel_link = html_link(channel_url(), "канал со словами дня", bold=True) if ru else html_link(channel_url(), "daily words channel", bold=True)

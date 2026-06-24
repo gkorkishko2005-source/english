@@ -435,8 +435,20 @@ async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
 
+# Credits granted to the inviter per VALID new referral (0.5× a message price).
+# Env-overridable so the owner can retune without a deploy; mirrors
+# billing_config REFERRAL_REWARD_CREDITS.
+REFERRAL_REWARD_CREDITS = int(os.getenv("BILLING_REFERRAL_REWARD_CREDITS", os.getenv("REFERRAL_REWARD_CREDITS", "3")) or "3")
+
+
 async def apply_referral(new_uid: int, ref_uid: int) -> bool:
-    """Attach a valid first referral once and reward the inviter."""
+    """Attach a valid first referral once and reward the inviter.
+
+    Anti-abuse: a Telegram ID can be referred at most once (ref_by is set under a
+    guarded UPDATE and never overwritten), self-referral is rejected, and the
+    caller (cmd_start) only invokes this for brand-new users so existing accounts
+    can't be farmed. Reward = +REFERRAL_REWARD_CREDITS ALEX credits to the inviter
+    plus the existing XP bonuses."""
     if not new_uid or not ref_uid or new_uid == ref_uid:
         return False
     await upsert_user(ref_uid, "Student")
@@ -444,9 +456,23 @@ async def apply_referral(new_uid: int, ref_uid: int) -> bool:
     user = await get_user(new_uid)
     if not user or user.get("ref_by"):
         return False
+    # Guarded write: only attaches when ref_by is still empty. If a concurrent
+    # call won the race, rowcount semantics differ per backend, so we re-read to
+    # confirm WE are the one that attached this inviter before paying out.
     await db("UPDATE users SET ref_by=? WHERE uid=? AND (ref_by IS NULL OR ref_by=0)", ref_uid, new_uid)
+    confirm = await get_user(new_uid)
+    if not confirm or int(confirm.get("ref_by") or 0) != int(ref_uid):
+        return False
     await db("UPDATE users SET referrals=COALESCE(referrals,0)+1, xp=COALESCE(xp,0)+150 WHERE uid=?", ref_uid)
     await db("UPDATE users SET xp=COALESCE(xp,0)+50 WHERE uid=?", new_uid)
+    # Reward the inviter with ALEX credits + a ledger trail.
+    reward = REFERRAL_REWARD_CREDITS
+    if reward > 0:
+        try:
+            await add_credits(ref_uid, reward)
+            await ledger_add(ref_uid, "referral", reward, meta=f"ref new_uid={new_uid}")
+        except Exception as e:
+            logger.warning("referral credit reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
     return True
 
 async def get_referral_count(uid: int) -> int:
