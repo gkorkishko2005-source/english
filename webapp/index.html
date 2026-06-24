@@ -1600,6 +1600,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-stage-go svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .course-section{display:none}
 .course-section.active{display:block;animation:stageIn .22s ease-out}
+/* Active step is the focal block: lighter surface + accent contour/glow. */
+.course-section.active{background:var(--e2);border-color:rgba(var(--ar),.34);box-shadow:0 0 0 1px rgba(var(--ar),.14),0 12px 32px rgba(var(--ar),.10)}
+.course-section.active.done{border-color:rgba(0,212,170,.40);box-shadow:0 0 0 1px rgba(0,212,170,.16),0 12px 32px rgba(0,212,170,.10)}
+.course-section.active::before{opacity:1;width:4px}
 @keyframes stageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* Wizard step-bar: sticky lesson name + "Шаг X из N" + overall progress. */
 .course-stepbar{position:sticky;top:0;z-index:20;margin:0 -12px 10px;padding:9px 12px 8px;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--b1)}
@@ -1610,8 +1614,9 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-stepbar-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .4s cubic-bezier(.4,1,.4,1)}
 /* Explicit step navigation (Назад / Дальше). */
 .course-stepnav{display:flex;gap:8px;margin-top:12px}
-.course-stepnav button{flex:1;padding:12px;border-radius:13px;font-size:13px;font-weight:900;cursor:pointer;border:1px solid var(--b2);background:var(--e2);color:var(--t1);transition:transform .15s,opacity .15s,box-shadow .2s}
-.course-stepnav button.primary{flex:2;border:none;color:#fff;background:linear-gradient(135deg,var(--lesson-color,var(--a)),var(--a2));box-shadow:0 8px 20px rgba(var(--ar),.30)}
+.course-stepnav button{flex:1;padding:12px 16px;border-radius:13px;font-size:13px;font-weight:900;cursor:pointer;border:1px solid var(--b2);background:transparent;color:var(--t2);transition:transform .15s,opacity .15s,box-shadow .2s,color .15s,border-color .15s}
+.course-stepnav button:not(.primary):hover{color:var(--t1);border-color:rgba(var(--ar),.32)}
+.course-stepnav button.primary{flex:2;padding:12px 16px;border:none;color:#fff;background:linear-gradient(135deg,var(--lesson-color,var(--a)),var(--a2));box-shadow:0 8px 20px rgba(var(--ar),.30)}
 .course-stepnav button:active{transform:scale(.97)}
 .course-stepnav button:disabled{opacity:.35;pointer-events:none}
 /* Lesson vocabulary as a collapsible "Словарь урока". */
@@ -1629,7 +1634,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-section-title{font-size:12px;font-weight:950;color:var(--t1);line-height:1.2}
 .course-section-sub{font-size:10.5px;color:var(--t2);line-height:1.35;margin-top:2px}
 .course-section-sub::before{content:"→ ";color:var(--lesson-color,var(--a));font-weight:900}
-.course-step-counter{display:inline-flex;align-items:center;font-size:11px;font-weight:800;color:var(--lesson-color,var(--a));background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.18);padding:2px 8px;border-radius:999px;margin-bottom:8px}
+.course-step-counter{display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:950;letter-spacing:.02em;color:var(--lesson-color,var(--a));background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.22);padding:5px 12px;border-radius:999px;margin-bottom:10px}
 .course-section-done{margin-left:auto;font-size:9px;font-weight:900;color:var(--a2);background:rgba(0,212,170,.10);border:1px solid rgba(0,212,170,.20);padding:3px 7px;border-radius:999px;white-space:nowrap}
 .course-vocab-grid{display:grid;gap:7px}
 .course-vocab-card{background:var(--e2);border:1px solid var(--b1);border-radius:14px;padding:14px 12px}
@@ -1675,6 +1680,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-insight-card{background:var(--e1);border:1px solid var(--b1);border-radius:12px;padding:9px 10px}
 .course-insight-label{font-size:9px;font-weight:900;letter-spacing:.55px;text-transform:uppercase;color:var(--t3);margin-bottom:5px}
 .course-insight-text{font-size:11.5px;color:var(--t1);line-height:1.35}
+.course-insight-more{display:inline;background:none;border:none;color:var(--a);font-size:11px;font-weight:850;font-family:var(--f);cursor:pointer;padding:0 0 0 4px}
+.course-insight-more:active{opacity:.6}
 .course-focus-row{display:grid;grid-template-columns:1fr;gap:6px;margin:8px 0}
 .course-focus-chip{font-size:11px;line-height:1.35;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:9px;padding:7px 9px}
 .course-ex{display:grid;gap:6px;margin:12px 0}
@@ -1715,8 +1722,12 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-slots,.course-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:38px}
 .course-pool{min-height:30px}
 .course-slots{background:var(--e1);border:1px dashed var(--b2);border-radius:10px;padding:6px 8px;margin-bottom:8px;min-height:28px;align-content:center;transition:min-height .15s}
-.course-word{border:1px solid var(--b1);background:var(--e3);color:var(--t1);border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700;cursor:pointer}
+.course-word{border:1px solid var(--b1);background:var(--e3);color:var(--t1);border-radius:9px;padding:7px 9px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .18s,transform .12s}
 .course-word.used{opacity:.35;pointer-events:none}
+/* Magnetic snap when a word locks into the answer slots. */
+@keyframes wordSnap{0%{transform:scale(.74) translateY(-3px);opacity:.35}55%{transform:scale(1.14)}100%{transform:scale(1) translateY(0);opacity:1}}
+.course-word.snap{animation:wordSnap .26s cubic-bezier(.34,1.56,.64,1)}
+.course-slots.snap-pulse{border-color:rgba(var(--ar),.55);box-shadow:0 0 0 2px rgba(var(--ar),.18) inset}
 .course-mini-actions{display:flex;gap:7px;margin-top:8px}
 .course-mini-btn{flex:1;border:1px solid rgba(var(--ar),.20);background:rgba(var(--ar),.08);color:var(--a);border-radius:9px;padding:8px;font-size:12px;font-weight:800;font-family:var(--f);cursor:pointer}
 .course-build-actions .course-mini-check{display:flex;align-items:center;justify-content:center;gap:6px}
@@ -9586,6 +9597,24 @@ const COURSE_SYNONYMS={
   proposal:{ok:'suggestion',others:['order','demand','refusal']}
 };
 function courseSynonymKeys(){return Object.keys(COURSE_SYNONYMS);}
+/* Паттерн / Не попадайся: show the first sentence, tuck the rest behind a
+   "Читать далее" toggle so the focal task block stays the visual priority. */
+function _courseInsightText(txt){
+  txt=String(txt||'').trim();
+  if(!txt)return '';
+  const parts=txt.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g)||[txt];
+  if(parts.length<=1||txt.length<=88)return safeHTML(txt);
+  const head=parts[0].trim();
+  const rest=parts.slice(1).join('').trim();
+  if(!rest)return safeHTML(txt);
+  const more=({ru:'Читать далее',en:'Read more',es:'Leer más',pt:'Ler mais',de:'Mehr lesen',fr:'Lire plus',uk:'Читати далі',tr:'Devamı',zh:'阅读更多',ar:'اقرأ المزيد'}[lang]||'Read more');
+  return safeHTML(head)+' <span class="course-insight-rest" hidden> '+safeHTML(rest)+'</span><button type="button" class="course-insight-more" onclick="courseInsightMore(this)">'+more+'</button>';
+}
+function courseInsightMore(btn){
+  const span=btn.parentNode&&btn.parentNode.querySelector('.course-insight-rest');
+  if(span)span.hidden=false;
+  btn.remove();
+}
 function courseT(key){
   const m={
     vocab:{ru:'Слова урока',en:'Lesson words',es:'Palabras',pt:'Palavras',de:'Lektionswörter',fr:'Mots de la leçon',uk:'Слова уроку',tr:'Ders kelimeleri',zh:'课程单词',ar:'كلمات الدرس'},
@@ -10251,8 +10280,8 @@ function _openCourseLessonInner(id){
     <button class="course-ask" type="button" onclick="askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>
     <div class="course-hint" style="margin-top:7px">${({ru:'Совет: выдели любое слово или фразу в уроке — появится кнопка «Спросить ALEX».',en:'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.',es:'Consejo: selecciona cualquier palabra o frase de la lección y aparecerá un botón “Preguntar a ALEX”.',pt:'Dica: selecione qualquer palavra ou frase da lição — aparecerá um botão “Perguntar ao ALEX”.',de:'Tipp: Markiere ein Wort oder einen Satz in der Lektion — ein „ALEX fragen“-Button erscheint.',fr:'Astuce : sélectionne un mot ou une phrase de la leçon — un bouton « Demander à ALEX » apparaît.',uk:'Порада: виділи будь-яке слово чи фразу в уроці — з’явиться кнопка «Запитати ALEX».',tr:'İpucu: derste herhangi bir kelime veya cümleyi seç — “ALEX’e sor” düğmesi belirir.',zh:'提示：在课程中选中任意单词或短语，会弹出“问问 ALEX”按钮。',ar:'نصيحة: حدّد أي كلمة أو عبارة في الدرس — سيظهر زر «اسأل ALEX».'}[lang]||'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.')}</div>
     <div class="course-insight">
-      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${safeHTML(insight.pattern[lang]||insight.pattern.en)}</div></div>
-      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Не попадайся',en:'Watch out',es:'Cuidado',pt:'Atenção',de:'Achtung',fr:'Attention',uk:'Не попадайся',tr:'Dikkat',zh:'注意',ar:'انتبه'}[lang]||'Watch out')}</div><div class="course-insight-text">${safeHTML(insight.mistake[lang]||insight.mistake.en)}</div></div>
+      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${_courseInsightText(insight.pattern[lang]||insight.pattern.en)}</div></div>
+      <div class="course-insight-card"><div class="course-insight-label">${({ru:'Не попадайся',en:'Watch out',es:'Cuidado',pt:'Atenção',de:'Achtung',fr:'Attention',uk:'Не попадайся',tr:'Dikkat',zh:'注意',ar:'انتبه'}[lang]||'Watch out')}</div><div class="course-insight-text">${_courseInsightText(insight.mistake[lang]||insight.mistake.en)}</div></div>
     </div>
     <div class="course-focus-row">
       ${(lang==='ru'&&Array.isArray(ls.focus_ru)?ls.focus_ru:focus).slice(0,2).map((x,i)=>`<div class="course-focus-chip">${i+1}. ${safeHTML(x)}</div>`).join('')}
@@ -10265,7 +10294,6 @@ function _openCourseLessonInner(id){
     <div class="course-section ${grammarDone?'done':''}" data-course-stage="grammar" id="course-section-grammar">
       <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${({ru:'5 коротких заданий: форма, слово, естественная фраза.',en:'5 short tasks: form, word, natural sentence.',es:'5 tareas breves: forma, palabra, frase natural.',pt:'5 tarefas breves: forma, palavra, frase natural.',de:'5 kurze Aufgaben: Form, Wort, natürlicher Satz.',fr:'5 tâches courtes : forme, mot, phrase naturelle.',uk:'5 коротких завдань: форма, слово, природне речення.',tr:'5 kısa görev: biçim, kelime, doğal cümle.',zh:'5 个简短任务：形式、词语、自然句子。',ar:'5 مهام قصيرة: الصيغة، الكلمة، الجملة الطبيعية.'}[lang]||'5 short tasks: form, word, natural sentence.')}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
-        <div class="course-practice-head"><div class="course-practice-title">${({ru:'Практика урока',en:'Lesson practice',es:'Práctica de la lección',pt:'Prática da lição',de:'Lektionsübung',fr:'Pratique de la leçon',uk:'Практика уроку',tr:'Ders pratiği',zh:'课程练习',ar:'تمرين الدرس'}[lang]||'Lesson practice')}</div><div class="course-practice-sub">5 tasks</div></div>
         ${(function(){
           const pState=LS.getJ('course_practice_state_'+id)||{};
           return practice.map((q,qi)=>{
@@ -10732,8 +10760,11 @@ function coursePickWord(id,suffix,btn){
   const slots=document.getElementById('cb-slots-'+id+suffix);if(!slots||!btn)return;
   btn.classList.add('used');
   const w=document.createElement('button');
-  w.className='course-word';w.textContent=btn.dataset.word||btn.textContent;w.onclick=function(){btn.classList.remove('used');w.remove();};
+  w.className='course-word snap';w.textContent=btn.dataset.word||btn.textContent;w.onclick=function(){btn.classList.remove('used');w.remove();};
   slots.appendChild(w);
+  slots.classList.add('snap-pulse');
+  setTimeout(function(){w.classList.remove('snap');slots.classList.remove('snap-pulse');},280);
+  try{sfx&&sfx.tap&&sfx.tap();}catch(e){}
 }
 function resetCourseBuilder(id,suffix){
   suffix=suffix?'-'+suffix:'';
