@@ -91,6 +91,8 @@ CREATE TABLE IF NOT EXISTS users (
     xp              INTEGER DEFAULT 0,
     hearts          INTEGER DEFAULT 5,
     hearts_updated_at BIGINT DEFAULT 0,
+    lessons_done_today INTEGER DEFAULT 0,
+    lessons_done_date  TEXT DEFAULT '',
     remind_time     TEXT,
     complex_streak  INTEGER DEFAULT 0,
     simple_streak   INTEGER DEFAULT 0,
@@ -269,6 +271,7 @@ CREATE TABLE IF NOT EXISTS users (
     level TEXT DEFAULT 'B1', interests TEXT DEFAULT '', profession TEXT DEFAULT '',
     streak INTEGER DEFAULT 0, last_active TEXT, plant_tonus INTEGER DEFAULT 100, last_xp_date TEXT, xp INTEGER DEFAULT 0,
     hearts INTEGER DEFAULT 5, hearts_updated_at INTEGER DEFAULT 0,
+    lessons_done_today INTEGER DEFAULT 0, lessons_done_date TEXT DEFAULT '',
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
     premium_until TEXT, premium_tier TEXT DEFAULT '',
@@ -394,6 +397,8 @@ async def db_init():
         # the timestamp from which the next +1 heart is counted.
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts INTEGER DEFAULT 5" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts INTEGER DEFAULT 5",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts_updated_at BIGINT DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts_updated_at INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_today INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_date TEXT DEFAULT ''",
     ]
     for stmt in migrations:
         try:
@@ -1232,6 +1237,70 @@ async def refill_hearts(uid: int, amount: int = 0) -> dict:
     full = new >= mx
     next_in = 0 if full else max(0, regen - 0)
     return {"hearts": new, "max": mx, "next_in": int(next_in), "full": full, "unlimited": False}
+
+
+# ── DAILY LESSON LIMIT (free-tier economy guard) ──────────────────────────────
+# A free user may successfully COMPLETE up to LESSONS_FREE_DAILY lessons per UTC
+# day; the (N+1)-th start is blocked by a compact paywall in the WebApp. The day
+# boundary is the SERVER clock (UTC 00:00) — never the device clock — so it can't
+# be farmed. The per-day counter is settled lazily: when the stored date is not
+# today, it is treated as 0 and reset on the next write. Premium = unlimited.
+async def _lessons_daily_cap() -> int:
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        return max(0, int(cfg.get("LESSONS_FREE_DAILY", 5) or 5))
+    except Exception:
+        return 5
+
+
+def _utc_day_str() -> str:
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%Y%m%d")
+
+
+def _secs_to_utc_midnight() -> int:
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    nxt = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    return max(0, int((nxt - now).total_seconds()))
+
+
+async def get_daily_lessons_state(uid: int, is_premium: bool = False) -> dict:
+    """Read-only daily-lesson budget. Returns
+    {used, limit, remaining, unlimited, reset_in}. Premium → unlimited."""
+    cap = await _lessons_daily_cap()
+    reset_in = _secs_to_utc_midnight()
+    if is_premium:
+        return {"used": 0, "limit": cap, "remaining": cap, "unlimited": True, "reset_in": reset_in}
+    u = await get_user(uid)
+    today = _utc_day_str()
+    used = 0
+    if u and str(u.get("lessons_done_date") or "") == today:
+        used = max(0, int(u.get("lessons_done_today") or 0))
+    remaining = max(0, cap - used)
+    return {"used": used, "limit": cap, "remaining": remaining, "unlimited": False, "reset_in": reset_in}
+
+
+async def record_lesson_done(uid: int, is_premium: bool = False) -> dict:
+    """Increment the per-UTC-day completed-lesson counter for a free user and
+    return the fresh state. Resets the counter when the stored date is not today.
+    Premium is never metered. Idempotency for re-completing the SAME lesson is
+    the caller's responsibility (the client reports only genuinely-new
+    completions)."""
+    cap = await _lessons_daily_cap()
+    reset_in = _secs_to_utc_midnight()
+    if is_premium:
+        return {"used": 0, "limit": cap, "remaining": cap, "unlimited": True, "reset_in": reset_in}
+    u = await get_user(uid)
+    today = _utc_day_str()
+    cur = 0
+    if u and str(u.get("lessons_done_date") or "") == today:
+        cur = max(0, int(u.get("lessons_done_today") or 0))
+    new = cur + 1
+    await db("UPDATE users SET lessons_done_today=?, lessons_done_date=? WHERE uid=?", new, today, uid)
+    remaining = max(0, cap - new)
+    return {"used": new, "limit": cap, "remaining": remaining, "unlimited": False, "reset_in": reset_in}
 
 
 async def update_streak(uid: int):

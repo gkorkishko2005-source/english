@@ -97,6 +97,12 @@ _DEFAULTS = {
     "HEARTS_MAX": 5,                   # max lives for a free user
     "HEARTS_REGEN_HOURS": 2,           # hours to regenerate 1 heart
     "HEARTS_REFILL_STARS": 30,         # ⭐ to instantly refill to full
+    # ── Daily lesson limit (free-tier) ─────────────────────────────────
+    # Free users may successfully COMPLETE this many lessons per UTC day;
+    # starting the next one is blocked by a compact paywall. The day boundary
+    # is the SERVER clock (UTC 00:00) so it can't be farmed by the device clock.
+    # Premium = unlimited. Tunable live (BILLING_LESSONS_FREE_DAILY), no deploy.
+    "LESSONS_FREE_DAILY": 5,           # lessons/day a free user can complete
     # Subscription
     # The Platform subscription does NOT include any "unlimited" or monthly AI
     # pool — its ALEX value is the flat starter-credits grant handled at purchase
@@ -131,6 +137,7 @@ _ENV_SCALARS = {
     "BILLING_HEARTS_MAX": ("HEARTS_MAX", int),
     "BILLING_HEARTS_REGEN_HOURS": ("HEARTS_REGEN_HOURS", int),
     "BILLING_HEARTS_REFILL_STARS": ("HEARTS_REFILL_STARS", int),
+    "BILLING_LESSONS_FREE_DAILY": ("LESSONS_FREE_DAILY", int),
 }
 _ENV_JSON = {
     "BILLING_MODELS": "MODELS",

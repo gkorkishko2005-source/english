@@ -1605,14 +1605,16 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 
 /* ══ GRAMMAR ROADMAP ══ */
 /* ── Hearts bar (free-tier lesson lives) ── */
-.hearts-bar{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:0 0 12px;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1);cursor:pointer;transition:.2s;user-select:none}
-.hearts-bar:active{transform:scale(.99)}
-.hearts-bar .hb-pips{display:flex;gap:4px;align-items:center}
-.hearts-bar .hb-pip{width:18px;height:18px;line-height:1;font-size:16px;filter:saturate(1.1)}
-.hearts-bar .hb-pip.empty{opacity:.28;filter:grayscale(1)}
-.hearts-bar .hb-txt{font-size:12px;color:var(--t3);font-weight:600;margin-left:auto}
-.hearts-bar .hb-refill{font-size:12px;font-weight:700;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.22);border-radius:999px;padding:4px 10px;white-space:nowrap}
-.hearts-bar.unlimited .hb-txt{color:var(--a2)}
+/* Compact hearts chip — lives in the top-right corner of the Learn header
+   (icon + remaining count) so it never steals vertical space from the lessons. */
+.lhdr-right{display:flex;align-items:center;gap:8px}
+.hearts-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:var(--e2);border:1px solid var(--b1);cursor:pointer;transition:.15s;user-select:none;line-height:1;white-space:nowrap;font-size:13px;font-weight:800;color:var(--t2)}
+.hearts-chip:active{transform:scale(.95)}
+.hearts-chip .hc-ico{font-size:14px;line-height:1}
+.hearts-chip .hc-num{font-variant-numeric:tabular-nums}
+.hearts-chip.low{color:#ff6b6b;border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.1)}
+.hearts-chip.empty{color:#ff6b6b;border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.14)}
+.hearts-chip.unlimited{color:var(--a2);border-color:rgba(var(--ar),.25)}
 /* Out-of-hearts modal body */
 .oh-wrap{text-align:center;padding:6px 2px 2px}
 .oh-emoji{font-size:42px;line-height:1;margin:2px 0 10px}
@@ -2801,7 +2803,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 
 <!-- LEARN -->
 <div class="screen" id="s-learn">
-  <div class="lhdr"><div class="ltit" id="ltit-lbl"></div><div class="lctr" id="fctr"></div></div>
+  <div class="lhdr"><div class="ltit" id="ltit-lbl"></div><div class="lhdr-right"><div class="hearts-chip" id="hearts-bar" style="display:none" onclick="onHeartsBarTap()"></div><div class="lctr" id="fctr"></div></div></div>
   <div id="learn-sub" style="font-size:11px;color:var(--t3);margin:-6px 0 8px;padding:0 2px"></div>
   <!-- Tabs -->
   <div class="learn-tabs">
@@ -2809,8 +2811,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
     <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Exams</span></div>
   </div>
-  <!-- Hearts bar (free-tier lesson lives; hidden for Premium = unlimited) -->
-  <div class="hearts-bar" id="hearts-bar" style="display:none" onclick="onHeartsBarTap()"></div>
   <!-- COURSE panel -->
   <div id="learn-course-panel">
     <div class="course-grid" id="course-wrap"></div>
@@ -3359,6 +3359,22 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         <div class="oh-btn" onclick="watchAdForHeart()" id="oh-ad" style="display:none"></div>
         <div class="oh-btn" onclick="closeMod('heartsm');openPremium(undefined,'platform')" id="oh-prem"></div>
         <div class="oh-btn" onclick="closeMod('heartsm')" id="oh-close"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily lesson-limit paywall (free-tier; compact) -->
+<div class="mov" id="dlimitm" style="display:none" onclick="closeMod('dlimitm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="oh-wrap">
+      <div class="oh-emoji">🎯</div>
+      <div class="oh-title" id="dl-title">Daily limit reached</div>
+      <div class="oh-sub" id="dl-sub"></div>
+      <div class="oh-timer" id="dl-timer">—</div>
+      <div class="oh-actions">
+        <div class="oh-btn primary" onclick="closeMod('dlimitm');openPremium(undefined,'platform')" id="dl-prem"></div>
+        <div class="oh-btn" onclick="closeMod('dlimitm')" id="dl-close"></div>
       </div>
     </div>
   </div>
@@ -10217,12 +10233,6 @@ function renderCourse(){
       <div class="course-system-sub">${({ru:'Полный путь A0-C2: правило, словарь, синонимы, пазл, диктовка и грамматическая практика на каждом уроке.',en:'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.',es:'Ruta completa A0-C2: regla, vocabulario, sinónimos, puzzle, dictado y práctica de gramática en cada lección.',pt:'Trajeto completo A0-C2: regra, vocabulário, sinônimos, puzzle, ditado e prática de gramática em cada lição.',de:'Kompletter Weg A0-C2: Regel, Wortschatz, Synonyme, Satzpuzzle, Diktat und Grammatikübung in jeder Lektion.',fr:'Parcours complet A0-C2 : règle, vocabulaire, synonymes, puzzle, dictée et grammaire à chaque leçon.',uk:'Повний шлях A0-C2: правило, словник, синоніми, пазл, диктант і граматична практика в кожному уроці.',tr:'Tam yol A0-C2: her derste kural, kelime, eş anlamlılar, cümle yapbozu, dikte ve dilbilgisi pratiği.',zh:'完整 A0-C2 路径：每节课包含规则、词汇、近义词、拼句、听写和语法练习。',ar:'مسار كامل A0-C2: قاعدة ومفردات ومرادفات ولغز جمل وإملاء وتمرين قواعد في كل درس.'}[lang]||'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.')}</div></div>
       <div class="course-system-pill">${doneCount}/${GALAXY_COURSE.length}</div>
     </div>
-    <div class="course-system-grid">
-      <div class="course-step"><strong>${({ru:'Теория',en:'Theory',es:'Teoría',pt:'Teoria',de:'Theorie',fr:'Théorie',uk:'Теорія',tr:'Teori',zh:'理论',ar:'النظرية'}[lang]||'Theory')}</strong><span>${({ru:'коротко',en:'short',es:'breve',pt:'breve',de:'kurz',fr:'bref',uk:'коротко',tr:'kısa',zh:'简短',ar:'مختصر'}[lang]||'short')}</span></div>
-      <div class="course-step"><strong>${({ru:'Практика',en:'Practice',es:'Práctica',pt:'Prática',de:'Übung',fr:'Pratique',uk:'Практика',tr:'Pratik',zh:'练习',ar:'تطبيق'}[lang]||'Practice')}</strong><span>${({ru:'задания',en:'tasks',es:'ejercicios',pt:'exercícios',de:'Aufgaben',fr:'exercices',uk:'завдання',tr:'görevler',zh:'练习题',ar:'مهام'}[lang]||'tasks')}</span></div>
-      <div class="course-step"><strong>${({ru:'Слух',en:'Listen',es:'Escucha',pt:'Escuta',de:'Hören',fr:'Écoute',uk:'Слух',tr:'Dinleme',zh:'听力',ar:'استماع'}[lang]||'Listen')}</strong><span>${({ru:'диктовка',en:'dictation',es:'dictado',pt:'ditado',de:'Diktat',fr:'dictée',uk:'диктант',tr:'dikte',zh:'听写',ar:'إملاء'}[lang]||'dictation')}</span></div>
-      <div class="course-step"><strong>${({ru:'Экзамен',en:'Exam',es:'Examen',pt:'Exame',de:'Prüfung',fr:'Examen',uk:'Екзамен',tr:'Sınav',zh:'考试',ar:'امتحان'}[lang]||'Exam')}</strong><span>80%</span></div>
-    </div>
     <button class="course-levels-toggle" type="button" id="lvl-toggle-btn" onclick="toggleLevelPicker()">${({ru:'Показать уровни',en:'Show levels',es:'Mostrar niveles',pt:'Mostrar níveis',de:'Level anzeigen',fr:'Afficher les niveaux',uk:'Показати рівні',tr:'Seviyeleri göster',zh:'显示级别',ar:'إظهار المستويات'}[lang]||'Show levels')} <span class="lvl-arr">▾</span></button>
     <div id="level-pick-wrap" style="display:none">
       <div class="course-system-sub" style="margin-top:10px">${({ru:'Выбери уровень. Он подтвердится только после теста.',en:'Choose your level. It is confirmed only after a test.',es:'Elige tu nivel. Se confirma solo tras un examen.',pt:'Escolha seu nível. Ele é confirmado só após um teste.',de:'Wähle dein Level. Es wird erst nach einem Test bestätigt.',fr:'Choisis ton niveau. Il n’est confirmé qu’après un test.',uk:'Обери свій рівень. Він підтверджується лише після тесту.',tr:'Seviyeni seç. Yalnızca testten sonra onaylanır.',zh:'选择你的级别。仅在通过测试后确认。',ar:'اختر مستواك. يُؤكَّد فقط بعد اختبار.'}[lang]||'Choose your level. It is confirmed only after a test.')}</div>
@@ -10933,6 +10943,10 @@ function openCourseLesson(id){
   /* Free-tier lives: block starting a NEW lesson when out of hearts (Premium =
      unlimited, always passes). A lesson already in progress is unaffected. */
   try{if(!heartsGuard())return;}catch(_){}
+  /* Free-tier daily lesson cap: block starting a NEW course lesson once the
+     UTC-day budget is spent (Premium = unlimited; reviewing a completed lesson
+     always passes). Exam Hub lessons are a separate paid flow and not metered. */
+  try{if(!_examLessonReturn && !dailyLessonGuard(id))return;}catch(_){}
   try{
     _inCourseLesson=true;
     _openCourseLessonInner(id);
@@ -11355,6 +11369,9 @@ function maybeCompleteCourse(id){
   done[id]=Date.now();
   LS.setJ('course_done',done);
   _ccLessonId={t:0,id:null};
+  /* Count this genuinely-new completion against the free-tier daily budget.
+     Exam Hub lessons (a separate paid flow) are not metered. */
+  try{if(!_examLessonReturn)recordLessonDone();}catch(_){}
   addLocalXP(10);
   bumpStat('tests');
   try{trackM('lesson');}catch(e){}
@@ -13203,6 +13220,10 @@ let accessKind = 'none';   /* 'platform' | 'grandfathered' | 'none' */
 let heartsState = {hearts:5,max:5,next_in:0,full:true,unlimited:false};
 let _heartsTickT = null;        /* countdown interval for the out-of-hearts modal */
 let _heartsRegenT = null;       /* foreground regen poll while the bar is visible */
+/* Free-tier daily lesson budget (server-authoritative; mirrored here for an
+   instant gate). Reset by the SERVER at UTC 00:00. Premium = unlimited. */
+let lessonLimitState = {used:0,limit:5,remaining:5,unlimited:false,reset_in:0};
+let _dlimitTickT = null;        /* countdown interval for the daily-limit modal */
 
 /* Tiny chip in the chat header that shows the credit balance. Hidden
    for grandfathered bundle holders (they don't run on credits) and for
@@ -13242,6 +13263,7 @@ async function checkPremiumStatus(uid){
       grandfatheredTier=d.grandfathered_tier||'';
       accessKind=d.access_kind||'none';
       if(d.hearts&&typeof d.hearts==='object'){heartsState=Object.assign({hearts:5,max:5,next_in:0,full:true,unlimited:false},d.hearts);}
+      if(d.lessons&&typeof d.lessons==='object'){lessonLimitState=Object.assign({used:0,limit:5,remaining:5,unlimited:false,reset_in:0},d.lessons);}
       setPremium(d.is_premium===true,d.source||'database');
       try{updateCreditChip();}catch(_){}
       try{renderHeartsBar();}catch(_){}
@@ -13340,40 +13362,31 @@ function _fmtCountdown(sec){
 function renderHeartsBar(){
   const bar=document.getElementById('hearts-bar');
   if(!bar)return;
+  bar.classList.remove('low','empty','unlimited');
   if(heartsUnlimited()){
     bar.classList.add('unlimited');
-    bar.innerHTML=`<div class="hb-pips"><span class="hb-pip">❤️</span></div><div class="hb-txt">${({ru:'Безлимит жизней',en:'Unlimited hearts',es:'Vidas ilimitadas',pt:'Vidas ilimitadas',de:'Unbegrenzte Leben',fr:'Vies illimitées',uk:'Безліміт життів',tr:'Sınırsız can',zh:'无限爱心',ar:'قلوب غير محدودة'}[lang]||'Unlimited hearts')}</div>`;
-    bar.style.display='flex';
+    bar.innerHTML=`<span class="hc-ico">❤️</span><span class="hc-num">∞</span>`;
+    bar.style.display='inline-flex';
     return;
   }
-  bar.classList.remove('unlimited');
-  const max=Math.max(1,parseInt(heartsState.max||5,10)||5);
   const cur=heartsLeft();
-  let pips='';
-  for(let i=0;i<max;i++)pips+=`<span class="hb-pip${i<cur?'':' empty'}">${i<cur?'❤️':'🤍'}</span>`;
-  let right;
-  if(cur>=max){
-    right=`<div class="hb-txt">${({ru:'Все жизни на месте',en:'Full hearts',es:'Vidas completas',pt:'Vidas cheias',de:'Volle Leben',fr:'Vies pleines',uk:'Усі життя на місці',tr:'Tüm canlar dolu',zh:'爱心已满',ar:'القلوب ممتلئة'}[lang]||'Full hearts')}</div>`;
-  } else if(cur<=0){
-    right=`<div class="hb-refill">${({ru:'Пополнить',en:'Refill',es:'Rellenar',pt:'Recarregar',de:'Auffüllen',fr:'Recharger',uk:'Поповнити',tr:'Doldur',zh:'补充',ar:'إعادة تعبئة'}[lang]||'Refill')}</div>`;
-  } else {
-    right=`<div class="hb-txt">+1 ${({ru:'через',en:'in',es:'en',pt:'em',de:'in',fr:'dans',uk:'через',tr:'içinde',zh:'后',ar:'خلال'}[lang]||'in')} ${_fmtCountdown(heartsState.next_in)}</div>`;
-  }
-  bar.innerHTML=`<div class="hb-pips">${pips}</div>${right}`;
-  bar.style.display='flex';
+  if(cur<=0)bar.classList.add('empty');
+  else if(cur<=1)bar.classList.add('low');
+  bar.innerHTML=`<span class="hc-ico">${cur>0?'❤️':'🤍'}</span><span class="hc-num">${cur}</span>`;
+  bar.style.display='inline-flex';
   _scheduleHeartsTick();
 }
-/* While the bar shows a "+1 in mm:ss" countdown, tick it down locally; when it
-   hits zero, re-sync from the server (a heart has regenerated). */
+/* Count the regen timer down locally; when it hits zero, re-sync from the server
+   (a heart has regenerated) so the chip's number refreshes. The chip itself shows
+   no countdown — the full timer lives in the out-of-hearts modal. */
 function _scheduleHeartsTick(){
   if(_heartsRegenT){clearInterval(_heartsRegenT);_heartsRegenT=null;}
   if(heartsUnlimited()||heartsLeft()>=(heartsState.max||5)||heartsLeft()<=0)return;
   _heartsRegenT=setInterval(()=>{
-    heartsState.next_in=Math.max(0,(parseInt(heartsState.next_in||0,10)||0)-1);
     const bar=document.getElementById('hearts-bar');
     if(!bar||bar.style.display==='none'){clearInterval(_heartsRegenT);_heartsRegenT=null;return;}
-    if(heartsState.next_in<=0){clearInterval(_heartsRegenT);_heartsRegenT=null;refreshHearts();return;}
-    try{renderHeartsBar();}catch(_){}
+    heartsState.next_in=Math.max(0,(parseInt(heartsState.next_in||0,10)||0)-1);
+    if(heartsState.next_in<=0){clearInterval(_heartsRegenT);_heartsRegenT=null;refreshHearts();}
   },1000);
 }
 async function refreshHearts(){
@@ -13477,6 +13490,75 @@ function openLegal(doc){
   const url=base?`${base}/${file}`:file;
   try{if(tg&&tg.openLink){tg.openLink(url);return;}}catch(_){}
   window.open(url,'_blank');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DAILY LESSON LIMIT — free-tier economy guard
+   A free user may COMPLETE up to lessonLimitState.limit lessons per UTC
+   day; starting the next NEW lesson is blocked by a compact paywall.
+   The day resets on the SERVER at UTC 00:00 (anti clock-spoof). Premium =
+   unlimited. State is server-authoritative; mirrored here for an instant gate.
+   ══════════════════════════════════════════════════════════════════ */
+function dailyLessonsUnlimited(){return !!lessonLimitState.unlimited||hasPlatform();}
+function dailyLessonsRemaining(){
+  if(dailyLessonsUnlimited())return 99;
+  return Math.max(0,parseInt(lessonLimitState.remaining,10)||0);
+}
+async function refreshDailyLessons(){
+  if(!API||!window._uid)return;
+  try{
+    const r=await fetch(`${API}/api/lessons/limit/${window._uid}`,{headers:{'X-Telegram-Init-Data':(tg&&tg.initData)||''},signal:AbortSignal.timeout(5000)});
+    if(r.ok){const d=await r.json();if(d&&typeof d.remaining==='number')lessonLimitState=Object.assign({unlimited:false},d);}
+  }catch(_){}
+}
+/* Gate at lesson START. Returns true if the user may open the lesson.
+   Re-opening an ALREADY-completed lesson (review) is always allowed and never
+   counts against the budget — only a genuinely NEW lesson is metered. */
+function dailyLessonGuard(id){
+  if(dailyLessonsUnlimited())return true;
+  let already=false;
+  try{already=!!(LS.getJ('course_done')||{})[id];}catch(_){already=false;}
+  if(already)return true;
+  if(dailyLessonsRemaining()>0)return true;
+  openDailyLimit();
+  return false;
+}
+/* Record a genuinely-new completion against the daily budget (free users only).
+   The server is the source of truth; we mirror its reply. */
+function recordLessonDone(){
+  if(dailyLessonsUnlimited())return;
+  /* Optimistically decrement the mirror so a fast 6th-lesson tap is gated even
+     before the server replies; the server's response then reconciles it. */
+  lessonLimitState.used=(parseInt(lessonLimitState.used,10)||0)+1;
+  lessonLimitState.remaining=Math.max(0,(parseInt(lessonLimitState.limit,10)||5)-lessonLimitState.used);
+  if(API&&window._uid){
+    fetch(`${API}/api/lessons/done`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
+      .then(r=>r.json()).then(d=>{if(d&&typeof d.remaining==='number')lessonLimitState=Object.assign({unlimited:false},d);}).catch(()=>{});
+  }
+}
+function openDailyLimit(){
+  const cap=parseInt(lessonLimitState.limit,10)||5;
+  const t=document.getElementById('dl-title'),s=document.getElementById('dl-sub'),
+        prem=document.getElementById('dl-prem'),close=document.getElementById('dl-close');
+  if(t)t.textContent=({ru:'Дневной лимит достигнут',en:'Daily limit reached',es:'Límite diario alcanzado',pt:'Limite diário atingido',de:'Tageslimit erreicht',fr:'Limite quotidienne atteinte',uk:'Денний ліміт досягнуто',tr:'Günlük limite ulaşıldı',zh:'已达每日上限',ar:'تم بلوغ الحد اليومي'}[lang]||'Daily limit reached');
+  if(s)s.textContent=({ru:`Сегодня ты прошёл ${cap} уроков — отличный темп! Хочешь учиться без ограничений? Попробуй Premium или вернись завтра.`,en:`You've completed ${cap} lessons today — great pace! Want to learn without limits? Try Premium, or come back tomorrow.`,es:`Hoy completaste ${cap} lecciones, ¡buen ritmo! ¿Quieres aprender sin límites? Prueba Premium o vuelve mañana.`,pt:`Você concluiu ${cap} lições hoje — ótimo ritmo! Quer aprender sem limites? Experimente o Premium ou volte amanhã.`,de:`Du hast heute ${cap} Lektionen geschafft — super Tempo! Ohne Limits lernen? Probier Premium oder komm morgen wieder.`,fr:`Tu as terminé ${cap} leçons aujourd'hui — beau rythme ! Apprendre sans limites ? Essaie Premium ou reviens demain.`,uk:`Сьогодні ти пройшов ${cap} уроків — чудовий темп! Хочеш навчатися без обмежень? Спробуй Premium або повертайся завтра.`,tr:`Bugün ${cap} ders tamamladın — harika tempo! Sınırsız öğrenmek ister misin? Premium'u dene ya da yarın dön.`,zh:`你今天完成了 ${cap} 节课，节奏很棒！想无限制学习吗？试试 Premium，或明天再来。`,ar:`أكملت ${cap} دروس اليوم — وتيرة رائعة! تريد التعلّم بلا حدود؟ جرّب Premium أو عُد غدًا.`}[lang]||`You've completed ${cap} lessons today — great pace! Want to learn without limits? Try Premium, or come back tomorrow.`);
+  if(prem)prem.innerHTML=`<span>⭐</span><span>${({ru:'Premium — без лимитов',en:'Premium — no limits',es:'Premium — sin límites',pt:'Premium — sem limites',de:'Premium — keine Limits',fr:'Premium — sans limites',uk:'Premium — без лімітів',tr:'Premium — limitsiz',zh:'Premium — 无限制',ar:'Premium — بلا حدود'}[lang]||'Premium — no limits')}</span>`;
+  if(close)close.textContent=({ru:'Вернусь завтра',en:'Back tomorrow',es:'Vuelvo mañana',pt:'Volto amanhã',de:'Morgen wieder',fr:'À demain',uk:'Повернусь завтра',tr:'Yarın görüşürüz',zh:'明天再来',ar:'أعود غدًا'}[lang]||'Back tomorrow');
+  openMod('dlimitm');
+  _startDailyLimitCountdown();
+}
+function _startDailyLimitCountdown(){
+  const el=document.getElementById('dl-timer');
+  if(_dlimitTickT){clearInterval(_dlimitTickT);_dlimitTickT=null;}
+  const tick=()=>{
+    const mod=document.getElementById('dlimitm');
+    if(!el||!mod||mod.style.display==='none'){if(_dlimitTickT){clearInterval(_dlimitTickT);_dlimitTickT=null;}return;}
+    lessonLimitState.reset_in=Math.max(0,(parseInt(lessonLimitState.reset_in,10)||0)-1);
+    el.textContent=({ru:'Сброс через',en:'Resets in',es:'Se reinicia en',pt:'Reinicia em',de:'Reset in',fr:'Réinit. dans',uk:'Скидання через',tr:'Sıfırlanma',zh:'重置倒计时',ar:'يُعاد خلال'}[lang]||'Resets in')+' '+_fmtCountdown(lessonLimitState.reset_in);
+    if(lessonLimitState.reset_in<=0){clearInterval(_dlimitTickT);_dlimitTickT=null;refreshDailyLessons();}
+  };
+  tick();
+  _dlimitTickT=setInterval(tick,1000);
 }
 
 function showTierPaywall(minTier, feature){
