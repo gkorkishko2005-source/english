@@ -1048,6 +1048,12 @@ async def handle_check_premium(request):
             lessons = await get_daily_lessons_state(uid, kind != "none")
         except Exception:
             lessons = {"used":0,"limit":5,"remaining":5,"unlimited":(kind!="none"),"reset_in":0}
+        # Daily-flashcard budget piggy-backs too (metered for both tiers).
+        try:
+            from database import get_daily_cards_state
+            cards = await get_daily_cards_state(uid, kind != "none")
+        except Exception:
+            cards = {"used":0,"limit":(60 if kind!="none" else 15),"remaining":(60 if kind!="none" else 15),"reset_in":0,"is_premium":(kind!="none")}
         info = {
             **legacy,
             "platform_active": platform.get("active", False),
@@ -1058,6 +1064,7 @@ async def handle_check_premium(request):
             "access_kind": kind,
             "hearts": hearts,
             "lessons": lessons,
+            "cards": cards,
             "source": "database",
         }
         return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
@@ -1555,6 +1562,55 @@ async def handle_lessons_done(request):
         logger.error(f"lessons_done error: {e}")
         return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
+async def handle_cards_limit_get(request):
+    """Current daily-flashcard budget {used,limit,remaining,reset_in,is_premium}.
+    Both tiers are metered (Premium just has a larger cap). Read-only."""
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import get_daily_cards_state
+        prem = await _is_premium_uid(uid)
+        st = await get_daily_cards_state(uid, prem)
+        return web.json_response(st, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"cards_limit_get error: {e}")
+        return web.json_response({"used":0,"limit":15,"remaining":15,"reset_in":0,"is_premium":False},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_cards_done(request):
+    """Record one finished flashcard against the per-UTC-day counter (both tiers)
+    and return the fresh budget. The client calls this once per card finished
+    (Skip or Save)."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid", 0))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    if not uid:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import record_card_done, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        prem = await _is_premium_uid(uid)
+        st = await record_card_done(uid, prem)
+        return web.json_response(st, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"cards_done error: {e}")
+        return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -1712,6 +1768,8 @@ def create_app():
     app.router.add_post("/api/hearts/refill",handle_hearts_refill)
     app.router.add_get("/api/lessons/limit/{uid}",handle_lessons_limit_get)
     app.router.add_post("/api/lessons/done",handle_lessons_done)
+    app.router.add_get("/api/cards/limit/{uid}",handle_cards_limit_get)
+    app.router.add_post("/api/cards/done",handle_cards_done)
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)

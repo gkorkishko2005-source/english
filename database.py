@@ -93,6 +93,8 @@ CREATE TABLE IF NOT EXISTS users (
     hearts_updated_at BIGINT DEFAULT 0,
     lessons_done_today INTEGER DEFAULT 0,
     lessons_done_date  TEXT DEFAULT '',
+    cards_done_today   INTEGER DEFAULT 0,
+    cards_done_date    TEXT DEFAULT '',
     remind_time     TEXT,
     complex_streak  INTEGER DEFAULT 0,
     simple_streak   INTEGER DEFAULT 0,
@@ -272,6 +274,7 @@ CREATE TABLE IF NOT EXISTS users (
     streak INTEGER DEFAULT 0, last_active TEXT, plant_tonus INTEGER DEFAULT 100, last_xp_date TEXT, xp INTEGER DEFAULT 0,
     hearts INTEGER DEFAULT 5, hearts_updated_at INTEGER DEFAULT 0,
     lessons_done_today INTEGER DEFAULT 0, lessons_done_date TEXT DEFAULT '',
+    cards_done_today INTEGER DEFAULT 0, cards_done_date TEXT DEFAULT '',
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
     premium_until TEXT, premium_tier TEXT DEFAULT '',
@@ -399,6 +402,8 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts_updated_at BIGINT DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts_updated_at INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_date TEXT DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_today INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_date TEXT DEFAULT ''",
     ]
     for stmt in migrations:
         try:
@@ -1301,6 +1306,58 @@ async def record_lesson_done(uid: int, is_premium: bool = False) -> dict:
     await db("UPDATE users SET lessons_done_today=?, lessons_done_date=? WHERE uid=?", new, today, uid)
     remaining = max(0, cap - new)
     return {"used": new, "limit": cap, "remaining": remaining, "unlimited": False, "reset_in": reset_in}
+
+
+# ── DAILY FLASHCARD LIMIT (economy guard, BOTH tiers) ─────────────────────────
+# Every card a user finishes (Skip or Save) counts toward a per-UTC-day budget.
+# Free users get CARDS_FREE_DAILY (hard wall → paywall); Premium users get the
+# larger CARDS_PREMIUM_DAILY (soft wall → "rest now" retention message). Unlike
+# lessons, Premium is STILL metered here — it is an anti-abuse / pacing cap, not
+# a paid feature. The day boundary is the SERVER clock (UTC 00:00), settled
+# lazily: a stored date that is not today is treated as 0 and reset on the next
+# write, so a single per-user row holds the whole day's count.
+async def _cards_daily_cap(is_premium: bool = False) -> int:
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        if is_premium:
+            return max(0, int(cfg.get("CARDS_PREMIUM_DAILY", 60) or 60))
+        return max(0, int(cfg.get("CARDS_FREE_DAILY", 15) or 15))
+    except Exception:
+        return 60 if is_premium else 15
+
+
+async def get_daily_cards_state(uid: int, is_premium: bool = False) -> dict:
+    """Read-only daily-flashcard budget. Returns
+    {used, limit, remaining, reset_in, is_premium}. Both tiers are metered."""
+    cap = await _cards_daily_cap(is_premium)
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    today = _utc_day_str()
+    used = 0
+    if u and str(u.get("cards_done_date") or "") == today:
+        used = max(0, int(u.get("cards_done_today") or 0))
+    remaining = max(0, cap - used)
+    return {"used": used, "limit": cap, "remaining": remaining,
+            "reset_in": reset_in, "is_premium": bool(is_premium)}
+
+
+async def record_card_done(uid: int, is_premium: bool = False) -> dict:
+    """Increment the per-UTC-day finished-flashcard counter and return the fresh
+    state. Resets the counter when the stored date is not today. Applies to both
+    tiers (Premium just has a higher cap)."""
+    cap = await _cards_daily_cap(is_premium)
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    today = _utc_day_str()
+    cur = 0
+    if u and str(u.get("cards_done_date") or "") == today:
+        cur = max(0, int(u.get("cards_done_today") or 0))
+    new = cur + 1
+    await db("UPDATE users SET cards_done_today=?, cards_done_date=? WHERE uid=?", new, today, uid)
+    remaining = max(0, cap - new)
+    return {"used": new, "limit": cap, "remaining": remaining,
+            "reset_in": reset_in, "is_premium": bool(is_premium)}
 
 
 async def update_streak(uid: int):

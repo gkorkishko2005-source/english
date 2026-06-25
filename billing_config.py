@@ -103,6 +103,14 @@ _DEFAULTS = {
     # is the SERVER clock (UTC 00:00) so it can't be farmed by the device clock.
     # Premium = unlimited. Tunable live (BILLING_LESSONS_FREE_DAILY), no deploy.
     "LESSONS_FREE_DAILY": 5,           # lessons/day a free user can complete
+    # ── Daily flashcard limit (economy guard, both tiers) ──────────────
+    # Number of flashcards a user may COMPLETE (Skip or Save) per UTC day.
+    # Free users hit a hard wall → paywall. Premium users hit a softer cap
+    # and get a "great work, rest now" message (retention, not monetization).
+    # Day boundary = SERVER clock (UTC 00:00) so it can't be device-farmed.
+    # Tunable live (BILLING_CARDS_FREE_DAILY / BILLING_CARDS_PREMIUM_DAILY).
+    "CARDS_FREE_DAILY": 15,            # cards/day for a free user (then paywall)
+    "CARDS_PREMIUM_DAILY": 60,         # cards/day for Premium (then rest message)
     # Subscription
     # The Platform subscription does NOT include any "unlimited" or monthly AI
     # pool — its ALEX value is the flat starter-credits grant handled at purchase
@@ -138,6 +146,8 @@ _ENV_SCALARS = {
     "BILLING_HEARTS_REGEN_HOURS": ("HEARTS_REGEN_HOURS", int),
     "BILLING_HEARTS_REFILL_STARS": ("HEARTS_REFILL_STARS", int),
     "BILLING_LESSONS_FREE_DAILY": ("LESSONS_FREE_DAILY", int),
+    "BILLING_CARDS_FREE_DAILY": ("CARDS_FREE_DAILY", int),
+    "BILLING_CARDS_PREMIUM_DAILY": ("CARDS_PREMIUM_DAILY", int),
 }
 _ENV_JSON = {
     "BILLING_MODELS": "MODELS",

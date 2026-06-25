@@ -1118,6 +1118,37 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .sw-tr{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sw-del{flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1px solid var(--b2);background:var(--e2);color:var(--t3);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
 .sw-del:active{transform:scale(.9);color:var(--rd)}
+/* Saved-word rows are tappable (open the AI breakdown) — give a clear affordance. */
+.sw-row.tappable{cursor:pointer}
+.sw-row.tappable:active{background:var(--e2)}
+/* Dictionary launcher button at the bottom of the Cards screen */
+.dict-launch{display:flex;align-items:center;gap:9px;width:100%;padding:12px 14px;margin-bottom:11px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--e1);color:var(--t1);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,background .2s ease}
+.dict-launch:active{transform:scale(.985);background:var(--e2)}
+.dict-launch svg{width:18px;height:18px;flex-shrink:0;stroke:var(--a)}
+.dict-launch-cnt{margin-left:auto;min-width:22px;text-align:center;font-size:11px;font-weight:850;color:var(--a);background:rgba(var(--ar),.14);border-radius:100px;padding:2px 8px}
+/* Dictionary modal body */
+.dict-wrap{padding:4px 16px 6px}
+.dict-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 12px}
+.dict-title{font-size:17px;font-weight:850;color:var(--t1)}
+.dict-cnt{font-size:11px;font-weight:850;color:var(--a);background:rgba(var(--ar),.14);border-radius:100px;padding:3px 9px}
+.dict-empty{text-align:center;padding:26px 10px 16px;color:var(--t2)}
+.dict-empty-ico{width:46px;height:46px;margin:0 auto 12px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--e2);border:1px solid var(--b1)}
+.dict-empty-ico svg{width:24px;height:24px;stroke:var(--a)}
+.dict-empty-t{font-size:14px;font-weight:800;color:var(--t1);margin-bottom:5px}
+.dict-empty-s{font-size:12px;line-height:1.45}
+/* Word-breakdown (AI) modal */
+.wbrk-wrap{padding:4px 16px 6px}
+.wbrk-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:2px 0 2px}
+.wbrk-word{font-size:21px;font-weight:850;color:var(--t1)}
+.wbrk-tr{font-size:13px;color:var(--t2);font-weight:700}
+.wbrk-sub{font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--a);margin:8px 0 12px}
+.wbrk-ex{display:flex;gap:10px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r3);padding:11px 12px;margin-bottom:8px}
+.wbrk-ex-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:850;color:#031f1a;background:linear-gradient(135deg,rgba(20,184,166,.95),rgba(13,148,136,.95))}
+.wbrk-ex-main{flex:1;min-width:0}
+.wbrk-ex-en{font-size:14px;font-weight:700;color:var(--t1);line-height:1.4}
+.wbrk-ex-tr{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.4}
+.wbrk-err{text-align:center;color:var(--t2);font-size:13px;padding:18px 8px}
+.wbrk-retry{margin:10px auto 4px;display:block;padding:9px 16px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--e2);color:var(--t1);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer}
 
 .emst{text-align:center;padding:36px 16px}
 .emico{font-size:46px;margin-bottom:11px;display:block;animation:float 3s ease-in-out infinite}
@@ -2851,6 +2882,12 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         </button>
       </div>
     </div>
+    <!-- Personal dictionary launcher — always visible at the bottom of Cards -->
+    <button class="dict-launch" id="card-dict-btn" type="button" onclick="openDict()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2z"/><path d="M4 19a2 2 0 0 1 2-2h14"/><path d="M9 7h7"/></svg>
+      <span id="card-dict-lbl">My Dictionary</span>
+      <span class="dict-launch-cnt" id="card-dict-cnt" style="display:none">0</span>
+    </button>
     <div class="emst" id="lempty" style="display:none">
       <div class="emico-wrap"><svg viewBox="0 0 40 40" fill="none" stroke-linecap="round"><path d="M20 4l4.5 9.5 10 1.5-7.5 7 1.5 10.5L20 28l-8.5 4.5 1.5-10.5L5.5 15l10-1.5z" stroke="var(--a)" stroke-width="1.6" fill="rgba(var(--ar),.12)"/></svg></div>
       <div class="emtit" id="em-t"></div><div class="emsub" id="em-s"></div>
@@ -2940,9 +2977,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
-  <!-- My Saved Words — personal dictionary saved from flashcards -->
-  <div class="sec" id="saved-words-sec" style="display:none"><span id="saved-words-lbl">My Saved Words</span><span class="seca" id="saved-words-cnt"></span></div>
-  <div id="saved-words-wrap"></div>
+  <!-- My Saved Words — personal dictionary now lives INSIDE the Flashcards
+       screen (opened via the dictionary button); markup moved to #dictm modal. -->
   <!-- Achievements (moved here from Home) -->
   <button class="ach-home-btn" style="margin-top:6px" onclick="openAchModal()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -3376,6 +3412,40 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         <div class="oh-btn primary" onclick="closeMod('dlimitm');openPremium(undefined,'platform')" id="dl-prem"></div>
         <div class="oh-btn" onclick="closeMod('dlimitm')" id="dl-close"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Personal dictionary (opened from the Flashcards screen) -->
+<div class="mov" id="dictm" style="display:none" onclick="closeMod('dictm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="dict-wrap">
+      <div class="dict-head">
+        <span class="dict-title" id="saved-words-lbl">My Saved Words</span>
+        <span class="dict-cnt" id="saved-words-cnt">0</span>
+      </div>
+      <!-- vestigial toggle target kept for the saved-words renderers (hidden) -->
+      <div id="saved-words-sec" style="display:none"></div>
+      <div id="saved-words-wrap"></div>
+      <div class="dict-empty" id="dict-empty" style="display:none">
+        <div class="dict-empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2z"/><path d="M4 19a2 2 0 0 1 2-2h14"/></svg></div>
+        <div class="dict-empty-t" id="dict-empty-t">Your dictionary is empty</div>
+        <div class="dict-empty-s" id="dict-empty-s">Save words from flashcards to study them here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Word breakdown (AI): 3 simple contextual usage examples -->
+<div class="mov" id="wordbrkm" style="display:none" onclick="closeMod('wordbrkm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="wbrk-wrap">
+      <div class="wbrk-head">
+        <div class="wbrk-word" id="wbrk-word">—</div>
+        <div class="wbrk-tr" id="wbrk-tr"></div>
+      </div>
+      <div class="wbrk-sub" id="wbrk-sub">3 examples in context</div>
+      <div id="wbrk-body"></div>
     </div>
   </div>
 </div>
@@ -4064,7 +4134,7 @@ function goTab(n,allowPractice){
   document.getElementById('s-'+n).classList.add('active');
   document.getElementById('nav-'+n).classList.add('on');
   tab=n;
-  if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}try{renderSavedWords();}catch(e){}}
+  if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='settings'){try{updatePremiumUI();}catch(e){}}
   if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
@@ -7045,72 +7115,36 @@ function arrangeCardsByPrefs(out){
   }
   return mixed;
 }
+/* ── Daily flashcard budget (SERVER-authoritative, both tiers) ─────────────
+   A user may FINISH (Skip or Save) up to a per-UTC-day cap of cards: FREE =
+   CARDS_FREE_DAILY (hard wall → paywall), PREMIUM = CARDS_PREMIUM_DAILY (soft
+   wall → "rest now" retention message). The source of truth is the server
+   (piggybacked on /api/premium and refreshed via /api/cards/limit/{uid}); the
+   client keeps an optimistic mirror so a card finished offline still counts.
+   The day boundary is the server clock (UTC 00:00) so it cannot be device-farmed.
+   `cardLimitState` is declared once near the other limit-state globals. */
 function cardDailyLimit(){
-  return cardLimitConfig().limit;
+  return Math.max(0,parseInt(cardLimitState.limit,10)||15);
 }
 function cardLimitConfig(){
-  /* Paywall refactor: basic flashcard study is FREE. The free window is now
-     generous (a soft anti-runaway batch, not a monetization gate) and the
-     limit-reached state no longer opens the subscription modal — monetization
-     moved to hearts (lessons), Ask ALEX and the exam simulators. Subscribers
-     still get larger batches / faster resets. */
-  if(hasTier('ultimate'))return {limit:200,hours:4};
-  if(hasTier('pro'))return {limit:100,hours:4};
-  if(hasTier('basic'))return {limit:60,hours:4};
-  return {limit:40,hours:5};
-}
-function cardWindowKey(){
-  /* Tier is loaded asynchronously (and reset to '' on any network error),
-     so it must NOT be part of the storage key — otherwise the daily count
-     "moved" to a new bucket and looked reset every time the tier flipped or
-     the user navigated away and back before the tier re-resolved. The key
-     is now stable per user for the whole day's rolling window. */
-  const uid=window._uid||'local';
-  return `cards_window_${uid}`;
-}
-/* One-time carry-over from the old tier-scoped keys (cards_window_<uid>_<tier>)
-   so an in-progress window isn't lost on upgrade to this build. Picks the
-   highest still-valid `used` among any legacy buckets for this user. */
-function _migrateLegacyCardWindow(now,ms){
-  try{
-    const uid=window._uid||'local';
-    const prefix=`cards_window_${uid}_`;
-    const keys=[];
-    try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf(prefix)===0)keys.push(k);}}catch(_){}
-    try{Object.keys(_LS_MEM||{}).forEach(k=>{if(k.indexOf(prefix)===0&&keys.indexOf(k)<0)keys.push(k);});}catch(_){}
-    let best=null;
-    keys.forEach(k=>{
-      const v=LS.getJ(k);
-      if(v&&v.start&&now<Number(v.start)+ms){
-        if(!best||Number(v.used||0)>Number(best.used||0))best={start:Number(v.start),used:Number(v.used||0)};
-      }
-      LS.del(k);
-    });
-    return best;
-  }catch(e){return null;}
+  /* Back-compat shim: a few callers still read cardLimitConfig().limit. */
+  return {limit:cardDailyLimit(),hours:0};
 }
 function cardWindowInfo(){
-  const cfg=cardLimitConfig();
-  const ms=cfg.hours*60*60*1000;
-  const now=Date.now();
-  const key=cardWindowKey();
-  let state=LS.getJ(key);
-  if(!state||!state.start)state=_migrateLegacyCardWindow(now,ms);
-  if(!state||!state.start||now>=Number(state.start)+ms){
-    state={start:now,used:0};
-    LS.setJ(key,state);
-  }else{
-    // Persist any value adopted from migration under the stable key.
-    LS.setJ(key,{start:Number(state.start),used:Number(state.used||0)});
-  }
-  const used=Math.max(0,Math.min(cfg.limit,parseInt(state.used||0,10)||0));
-  return {key,start:Number(state.start),used,limit:cfg.limit,hours:cfg.hours,resetAt:Number(state.start)+ms,remaining:Math.max(0,cfg.limit-used)};
+  const limit=cardDailyLimit();
+  const used=Math.max(0,Math.min(limit,parseInt(cardLimitState.used,10)||0));
+  const remaining=Math.max(0,(typeof cardLimitState.remaining==='number')?cardLimitState.remaining:(limit-used));
+  const resetAt=Date.now()+(Math.max(0,parseInt(cardLimitState.reset_in,10)||0)*1000);
+  return {key:'cards_daily',start:0,used,limit,hours:0,resetAt,remaining};
 }
 function cardDailyUsed(){
   return cardWindowInfo().used;
 }
 function cardDailyRemaining(){
   return cardWindowInfo().remaining;
+}
+function cardIsPremiumLimit(){
+  try{return !!cardLimitState.is_premium||hasPlatform();}catch(e){return false;}
 }
 function cardResetText(){
   const ms=Math.max(0,cardWindowInfo().resetAt-Date.now());
@@ -7123,11 +7157,23 @@ function cardResetText(){
   if(h>0)return `${h}${hu}`;
   return `${totalMin}${mu}`;
 }
+/* Optimistic mirror increment + fire-and-forget server record. */
 function recordCardDaily(){
-  const info=cardWindowInfo();
-  const next=Math.min(info.limit,info.used+1);
-  LS.setJ(info.key,{start:info.start,used:next});
-  return next;
+  const limit=cardDailyLimit();
+  cardLimitState.used=Math.min(limit,(parseInt(cardLimitState.used,10)||0)+1);
+  cardLimitState.remaining=Math.max(0,limit-cardLimitState.used);
+  if(API&&window._uid){
+    fetch(`${API}/api/cards/done`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
+      .then(r=>r.json()).then(d=>{if(d&&typeof d.remaining==='number')cardLimitState=Object.assign({is_premium:cardLimitState.is_premium},d);}).catch(()=>{});
+  }
+  return cardLimitState.used;
+}
+async function refreshDailyCards(){
+  if(!API||!window._uid)return;
+  try{
+    const r=await fetch(`${API}/api/cards/limit/${window._uid}`,{headers:{'X-Telegram-Init-Data':(tg&&tg.initData)||''},signal:AbortSignal.timeout(8000)});
+    if(r.ok){const d=await r.json();if(d&&typeof d.remaining==='number')cardLimitState=Object.assign({is_premium:false},d);}
+  }catch(e){}
 }
 /* Size of the user's PERSONAL dictionary — words they have actually started
    learning (have SM-2 state for) plus any server-side saved words. This is what
@@ -7182,6 +7228,16 @@ function initLearn(){
      locked tab (default is Course), drop them to free Flashcards. */
   if(_learnTabLocked(learnTab)){try{switchLearnTab('cards');}catch(_){learnTab='cards';}}
   if(learnTab==='course')renderCourse();
+  /* Pull the freshest daily-card budget from the server when entering Flashcards,
+     then repaint once if the remaining count actually changed (e.g. UTC reset or
+     a card finished on another device). Guarded against re-entry. */
+  if(learnTab==='cards'&&API&&window._uid&&!_cardBudgetSyncing){
+    _cardBudgetSyncing=true;
+    const _before=cardDailyRemaining();
+    refreshDailyCards().then(()=>{_cardBudgetSyncing=false;if(learnTab==='cards'&&cardDailyRemaining()!==_before)initLearn();}).catch(()=>{_cardBudgetSyncing=false;});
+  }
+  /* Seed the dictionary launcher badge from whatever count we already know. */
+  if(learnTab==='cards'){try{_dictSyncChrome(Math.max(parseInt(_savedPager.total,10)||0,savedWordsList().length));}catch(_){}}
   renderWordPrefs();
   /* Frozen dictionary (Premium lapsed): show the paywall stub instead of the
      review and bail before building/showing any card. */
@@ -7207,14 +7263,24 @@ function initLearn(){
     document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';
     const et=document.getElementById('em-t'),es=document.getElementById('em-s'),b1=document.getElementById('em-b1'),b2=document.getElementById('em-b2');
     if(left<=0){
-      /* Paywall refactor: no subscription modal here — just tell the user when
-         the next free batch unlocks and offer something useful meanwhile. */
-      if(et)et.textContent=({ru:'Хорошая работа!',en:'Nice work!',es:'¡Buen trabajo!',pt:'Bom trabalho!',de:'Gut gemacht!',fr:'Beau travail !',uk:'Гарна робота!',tr:'Aferin!',zh:'做得好！',ar:'عمل رائع!'}[lang]||'Nice work!');
-      if(es)es.textContent=({ru:`Ты прошёл порцию карточек. Новые будут через ${cardResetText()}. А пока — продолжи урок или попроси новые слова у ALEX.`,en:`You finished this batch of cards. New ones in ${cardResetText()}. Meanwhile, continue a lesson or ask ALEX for new words.`,es:`Terminaste esta tanda de tarjetas. Habrá más en ${cardResetText()}. Mientras tanto, continúa una lección o pide palabras nuevas a ALEX.`,pt:`Você concluiu esta leva de cartões. Novos em ${cardResetText()}. Enquanto isso, continue uma lição ou peça palavras novas ao ALEX.`,de:`Du hast diese Kartenrunde geschafft. Neue in ${cardResetText()}. Mach in der Zwischenzeit eine Lektion weiter oder frag ALEX nach neuen Wörtern.`,fr:`Tu as terminé cette série de cartes. De nouvelles dans ${cardResetText()}. En attendant, continue une leçon ou demande de nouveaux mots à ALEX.`,uk:`Ти пройшов порцію карток. Нові будуть через ${cardResetText()}. А поки — продовж урок або попроси нові слова в ALEX.`,tr:`Bu kart turunu bitirdin. Yenileri ${cardResetText()} sonra. Bu arada bir derse devam et veya ALEX'ten yeni kelimeler iste.`,zh:`你已完成本轮卡片。${cardResetText()} 后会有新卡片。同时可以继续课程或向 ALEX 索取新单词。`,ar:`أنهيت هذه الدفعة من البطاقات. ستتوفر بطاقات جديدة خلال ${cardResetText()}. في غضون ذلك تابع درسًا أو اطلب كلمات جديدة من ALEX.`}[lang]||`You finished this batch of cards. New ones in ${cardResetText()}. Meanwhile, continue a lesson or ask ALEX for new words.`);
-      if(b1)b1.textContent=({ru:'К урокам',en:'Go to lessons',es:'Ir a las lecciones',pt:'Ir às lições',de:'Zu den Lektionen',fr:'Aux leçons',uk:'До уроків',tr:'Derslere git',zh:'去上课',ar:'إلى الدروس'}[lang]||'Go to lessons');
-      if(b2)b2.textContent=L.ffact||'English fun fact';
-      if(b1?.closest('button'))b1.closest('button').onclick=()=>{try{switchLearnTab('course');}catch(_){}};
-      if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
+      const prem=cardIsPremiumLimit();
+      if(prem){
+        /* PREMIUM soft cap: encouraging "rest now" retention message — no paywall. */
+        if(et)et.textContent=({ru:'Отличная работа на сегодня!',en:'Great work today!',es:'¡Excelente trabajo hoy!',pt:'Ótimo trabalho hoje!',de:'Tolle Arbeit heute!',fr:'Excellent travail aujourd’hui !',uk:'Чудова робота сьогодні!',tr:'Bugün harika iş çıkardın!',zh:'今天表现很棒！',ar:'عمل رائع اليوم!'}[lang]||'Great work today!');
+        if(es)es.textContent=({ru:`Отдохни, чтобы лучше усвоить материал. Новые карточки через ${cardResetText()}.`,en:`Rest so the material sinks in better. New cards in ${cardResetText()}.`,es:`Descansa para asimilar mejor el material. Nuevas tarjetas en ${cardResetText()}.`,pt:`Descanse para fixar melhor o conteúdo. Novos cartões em ${cardResetText()}.`,de:`Ruh dich aus, damit der Stoff besser sitzt. Neue Karten in ${cardResetText()}.`,fr:`Repose-toi pour mieux assimiler. De nouvelles cartes dans ${cardResetText()}.`,uk:`Відпочинь, щоб краще засвоїти матеріал. Нові картки через ${cardResetText()}.`,tr:`Daha iyi pekişmesi için dinlen. Yeni kartlar ${cardResetText()} sonra.`,zh:`休息一下，更好地巩固所学。${cardResetText()} 后会有新卡片。`,ar:`استرح حتى ترسخ المادة. بطاقات جديدة خلال ${cardResetText()}.`}[lang]||`Rest so the material sinks in better. New cards in ${cardResetText()}.`);
+        if(b1)b1.textContent=({ru:'К урокам',en:'Go to lessons',es:'Ir a las lecciones',pt:'Ir às lições',de:'Zu den Lektionen',fr:'Aux leçons',uk:'До уроків',tr:'Derslere git',zh:'去上课',ar:'إلى الدروس'}[lang]||'Go to lessons');
+        if(b2)b2.textContent=L.ffact||'English fun fact';
+        if(b1?.closest('button'))b1.closest('button').onclick=()=>{try{switchLearnTab('course');}catch(_){}};
+        if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
+      }else{
+        /* FREE hard wall: this is a monetization gate → offer Premium. */
+        if(et)et.textContent=({ru:'Дневной лимит карточек',en:'Daily card limit reached',es:'Límite diario de tarjetas',pt:'Limite diário de cartões',de:'Tageslimit für Karten',fr:'Limite quotidienne de cartes',uk:'Денний ліміт карток',tr:'Günlük kart limiti',zh:'已达每日卡片上限',ar:'حد البطاقات اليومي'}[lang]||'Daily card limit reached');
+        if(es)es.textContent=({ru:`Ты прошёл ${cardDailyLimit()} карточек сегодня. Хочешь учиться без ограничений? Попробуй Premium — или вернись через ${cardResetText()}.`,en:`You finished ${cardDailyLimit()} cards today. Want to learn without limits? Try Premium — or come back in ${cardResetText()}.`,es:`Hoy completaste ${cardDailyLimit()} tarjetas. ¿Quieres aprender sin límites? Prueba Premium — o vuelve en ${cardResetText()}.`,pt:`Você concluiu ${cardDailyLimit()} cartões hoje. Quer aprender sem limites? Experimente o Premium — ou volte em ${cardResetText()}.`,de:`Du hast heute ${cardDailyLimit()} Karten geschafft. Ohne Limits lernen? Teste Premium — oder komm in ${cardResetText()} wieder.`,fr:`Tu as terminé ${cardDailyLimit()} cartes aujourd’hui. Apprendre sans limites ? Essaie Premium — ou reviens dans ${cardResetText()}.`,uk:`Ти пройшов ${cardDailyLimit()} карток сьогодні. Хочеш вчитися без обмежень? Спробуй Premium — або повернись через ${cardResetText()}.`,tr:`Bugün ${cardDailyLimit()} kart bitirdin. Sınırsız öğrenmek ister misin? Premium’u dene — ya da ${cardResetText()} sonra dön.`,zh:`你今天完成了 ${cardDailyLimit()} 张卡片。想无限制学习吗？试试 Premium——或 ${cardResetText()} 后再来。`,ar:`أنهيت ${cardDailyLimit()} بطاقة اليوم. تريد التعلّم بلا حدود؟ جرّب Premium — أو عُد خلال ${cardResetText()}.`}[lang]||`You finished ${cardDailyLimit()} cards today. Want to learn without limits? Try Premium — or come back in ${cardResetText()}.`);
+        if(b1)b1.textContent=({ru:'Попробовать Premium',en:'Try Premium',es:'Probar Premium',pt:'Experimentar Premium',de:'Premium testen',fr:'Essayer Premium',uk:'Спробувати Premium',tr:'Premium’u dene',zh:'试用 Premium',ar:'جرّب Premium'}[lang]||'Try Premium');
+        if(b2)b2.textContent=({ru:'К урокам',en:'Go to lessons',es:'Ir a las lecciones',pt:'Ir às lições',de:'Zu den Lektionen',fr:'Aux leçons',uk:'До уроків',tr:'Derslere git',zh:'去上课',ar:'إلى الدروس'}[lang]||'Go to lessons');
+        if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(({ru:'Учись без ограничений',en:'Learn without limits'}[lang]||'Learn without limits'),'platform');
+        if(b2?.closest('button'))b2.closest('button').onclick=()=>{try{switchLearnTab('course');}catch(_){}};
+      }
     }else{
       if(et)et.textContent=L.all_done;
       if(es)es.textContent=L.all_done_s;
@@ -7340,10 +7406,21 @@ function setCardActionLabels(){
   if(sk)sk.textContent=({ru:'Пропустить',en:'Skip',es:'Saltar',pt:'Pular',de:'Überspringen',fr:'Passer',uk:'Пропустити',tr:'Atla',zh:'跳过',ar:'تخطٍّ'}[lang]||'Skip');
   if(sv)sv.textContent=({ru:'Сохранить',en:'Save',es:'Guardar',pt:'Salvar',de:'Speichern',fr:'Garder',uk:'Зберегти',tr:'Kaydet',zh:'保存',ar:'حفظ'}[lang]||'Save');
   if(as)as.textContent=({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX');
+  const dl=document.getElementById('card-dict-lbl');
+  if(dl)dl.textContent=_savedDictLabel();
 }
 function _cardLimitGuard(){
-  if(cardDailyRemaining()<=0){toast(({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached'),'🔒');initLearn();return false;}
-  return true;
+  if(cardDailyRemaining()>0)return true;
+  /* Daily card budget exhausted. FREE → monetization paywall; PREMIUM → soft
+     "great work, rest now" retention message. initLearn() repaints the deck into
+     the matching limit-reached empty state. */
+  if(cardIsPremiumLimit()){
+    toast(({ru:'Отличная работа на сегодня! Отдохни, чтобы лучше усвоить материал',en:'Great work today! Rest so the material sinks in better',es:'¡Buen trabajo hoy! Descansa para asimilar mejor el material',pt:'Ótimo trabalho hoje! Descanse para fixar melhor o conteúdo',de:'Tolle Arbeit heute! Ruh dich aus, damit der Stoff besser sitzt',fr:'Excellent travail aujourd’hui ! Repose-toi pour mieux assimiler',uk:'Чудова робота сьогодні! Відпочинь, щоб краще засвоїти матеріал',tr:'Bugün harika iş çıkardın! Daha iyi pekişmesi için dinlen',zh:'今天表现很棒！休息一下，更好地巩固所学',ar:'عمل رائع اليوم! استرح حتى ترسخ المادة بشكل أفضل'}[lang]||'Great work today! Rest so the material sinks in better'),'☕');
+  }else{
+    try{sfx.warn();}catch(_){}
+    openPremium(({ru:'Дневной лимит карточек исчерпан',en:'Daily card limit reached'}[lang]||'Daily card limit reached'),'platform');
+  }
+  initLearn();return false;
 }
 /* Swipe the current card out (left=Skip, right=Save), advance the progress bar
    and load the next card. Both directions move the session forward. */
@@ -7383,8 +7460,9 @@ async function cardSave(){
     }catch(e){appWarn('save_word failed',e);}
   }
   haptic('success');try{sfx.correct();}catch(e){}
-  /* Tell the user exactly WHERE the word now lives. */
-  toast(({ru:'Слово сохранено в твой Словарь (Progress → Рекомендации ALEX)',en:'Word saved to your Dictionary (Progress → ALEX recommendations)',es:'Palabra guardada en tu Diccionario (Progreso → recomendaciones de ALEX)',pt:'Palavra salva no seu Dicionário (Progresso → recomendações do ALEX)',de:'Wort in deinem Wörterbuch gespeichert (Fortschritt → ALEX-Empfehlungen)',fr:'Mot enregistré dans ton Dictionnaire (Progrès → recommandations ALEX)',uk:'Слово збережено у твій Словник (Progress → рекомендації ALEX)',tr:'Kelime Sözlüğüne kaydedildi (İlerleme → ALEX önerileri)',zh:'单词已保存到你的词典（Progress → ALEX 建议）',ar:'تم حفظ الكلمة في قاموسك (التقدّم ← توصيات ALEX)'}[lang]||'Word saved to your Dictionary (Progress → ALEX recommendations)'),'📝');
+  /* The dictionary button is always visible at the bottom of Cards now, so the
+     toast no longer needs to explain WHERE the word lives. */
+  toast(({ru:'Слово сохранено в словарь',en:'Word saved to your dictionary',es:'Palabra guardada en el diccionario',pt:'Palavra salva no dicionário',de:'Wort im Wörterbuch gespeichert',fr:'Mot enregistré dans le dictionnaire',uk:'Слово збережено у словник',tr:'Kelime sözlüğe kaydedildi',zh:'单词已保存到词典',ar:'تم حفظ الكلمة في القاموس'}[lang]||'Word saved to your dictionary'),'📝');
   trackM('words');trackM('dwords');bumpStat('words');recordCardDaily();
   /* quality 3 = "good": schedules the first spaced-repetition review */
   try{sm2Review(c.id,3);}catch(e){}
@@ -11951,6 +12029,10 @@ function toggleLevelPicker(){
 function startLevelTest(targetLevel){
   const test=LEVEL_TESTS[targetLevel];
   if(!test){toast('Test not available','⚠️');return;}
+  /* The graded level-transition TEST is a Premium feature. Free users still
+     advance levels for free via the "Открыть без теста" (skip) path — only the
+     official assessment is gated. */
+  if(!hasPlatform()){try{sfx.warn();}catch(_){}openPremium(({ru:'Тест на уровень',en:'Level test',es:'Examen de nivel',pt:'Teste de nível',de:'Level-Test',fr:'Test de niveau',uk:'Тест на рівень',tr:'Seviye testi',zh:'等级测试',ar:'اختبار المستوى'}[lang]||'Level test'),'platform');return;}
   const locked=levelTestLockLeft(targetLevel);
   if(locked>0){
     const mins=Math.ceil(locked/60000);
@@ -12164,10 +12246,11 @@ function updateLearnHeader(){
     }
   }catch(e){}
 }
-/* Course + Exams require an active subscription (Platform / grandfathered /
-   legacy bundle). Flashcards stay free. Non-subscribers are bounced to the
-   Flashcards tab and shown the paywall instead. */
-function _learnTabLocked(tab){return (tab==='course'||tab==='road')&&!hasPlatform();}
+/* Monetization model: the grammar COURSE (all levels A0–C2, every lesson) and
+   Flashcards are now FULLY FREE for everyone. Only the international Exams hub
+   (TOEFL/IELTS, level simulators) stays behind an active Premium subscription;
+   non-subscribers tapping it are bounced to Flashcards and shown the paywall. */
+function _learnTabLocked(tab){return tab==='road'&&!hasPlatform();}
 function switchLearnTab(tab){
   if(_learnTabLocked(tab)){
     try{sfx.warn();}catch(_){}
@@ -12942,11 +13025,12 @@ function _savedObserver(){
   return _savedPager.io;
 }
 function _swRow(w){
-  const row=document.createElement('div');row.className='sw-row';
+  const row=document.createElement('div');row.className='sw-row tappable';
   const topic=(w.topic&&w.topic!=='general')?w.topic:'';
   const tag=topic?`<span class="sw-lv" style="color:var(--a);border-color:${(typeof hexA==='function')?hexA('#14b8a6',.4):'var(--a)'}">${safeHTML(topic)}</span>`:'';
   row.innerHTML=`<div class="sw-main"><div class="sw-word">${safeHTML(w.word||'')}${tag}</div>${w.translation?`<div class="sw-tr">${safeHTML(w.translation)}</div>`:''}</div><button class="sw-del" type="button" aria-label="Remove">×</button>`;
   row.querySelector('.sw-del').onclick=(ev)=>{ev.stopPropagation();try{haptic('light');}catch(_){}deleteSavedWordServer(w.id,row);};
+  row.onclick=()=>{try{haptic('light');}catch(_){}openWordBreakdown(w.word||'',w.translation||'');};
   return row;
 }
 async function loadSavedWordsPage(reset){
@@ -12972,9 +13056,10 @@ async function loadSavedWordsPage(reset){
   if(data&&typeof data.total==='number')_savedPager.total=data.total;
   /* Drop the previous sentinel before appending the new page. */
   const oldSent=wrap.querySelector('.sw-sentinel');if(oldSent)oldSent.remove();
-  if(reset&&!words.length){sec.style.display='none';_savedPager.loading=false;return;}
+  if(reset&&!words.length){sec.style.display='none';_dictSyncChrome(0);_savedPager.loading=false;return;}
   sec.style.display='';
   if(cnt)cnt.textContent=String(_savedPager.total);
+  _dictSyncChrome(_savedPager.total);
   words.forEach(w=>wrap.appendChild(_swRow(w)));
   if(_savedPager.has_more){
     const sent=document.createElement('div');sent.className='sw-sentinel';sent.style.height='1px';
@@ -12992,6 +13077,19 @@ async function deleteSavedWordServer(id,rowEl){
   const cnt=document.getElementById('saved-words-cnt');if(cnt)cnt.textContent=String(_savedPager.total);
   const sec=document.getElementById('saved-words-sec');const wrap=document.getElementById('saved-words-wrap');
   if(wrap&&sec&&!wrap.querySelector('.sw-row'))sec.style.display='none';
+  _dictSyncChrome(_savedPager.total);
+}
+/* Keep the dictionary modal's empty-state and the Cards launcher badge in sync
+   with the current word count. Called by every render/delete path. */
+function _dictSyncChrome(total){
+  const n=Math.max(0,parseInt(total,10)||0);
+  const empty=document.getElementById('dict-empty');
+  if(empty)empty.style.display=n>0?'none':'';
+  const et=document.getElementById('dict-empty-t'),es=document.getElementById('dict-empty-s');
+  if(et)et.textContent=({ru:'Словарь пуст',en:'Your dictionary is empty',es:'Tu diccionario está vacío',pt:'Seu dicionário está vazio',de:'Dein Wörterbuch ist leer',fr:'Ton dictionnaire est vide',uk:'Словник порожній',tr:'Sözlüğün boş',zh:'你的词典是空的',ar:'قاموسك فارغ'}[lang]||'Your dictionary is empty');
+  if(es)es.textContent=({ru:'Сохраняй слова с карточек, чтобы изучать их здесь.',en:'Save words from flashcards to study them here.',es:'Guarda palabras de las tarjetas para estudiarlas aquí.',pt:'Salve palavras dos cartões para estudá-las aqui.',de:'Speichere Wörter aus den Karten, um sie hier zu lernen.',fr:'Enregistre des mots depuis les cartes pour les étudier ici.',uk:'Зберігай слова з карток, щоб вивчати їх тут.',tr:'Burada çalışmak için kartlardan kelime kaydet.',zh:'从卡片保存单词，在这里学习。',ar:'احفظ الكلمات من البطاقات لدراستها هنا.'}[lang]||'Save words from flashcards to study them here.');
+  const badge=document.getElementById('card-dict-cnt');
+  if(badge){badge.textContent=String(n);badge.style.display=n>0?'':'none';}
 }
 /* Offline / no-API fallback: render the local LS mirror in one shot. */
 function renderSavedWordsLocal(){
@@ -13000,15 +13098,17 @@ function renderSavedWordsLocal(){
   const cnt=document.getElementById('saved-words-cnt');
   if(!wrap||!sec)return;
   const list=savedWordsList();
-  if(!list.length){sec.style.display='none';wrap.innerHTML='';return;}
+  if(!list.length){sec.style.display='none';wrap.innerHTML='';_dictSyncChrome(0);return;}
   sec.style.display='';
   if(cnt)cnt.textContent=String(list.length);
+  _dictSyncChrome(list.length);
   wrap.innerHTML='';
   list.forEach(w=>{
     const lc=(typeof levelColor==='function'&&w.level)?levelColor(w.level):'var(--a)';
-    const row=document.createElement('div');row.className='sw-row';
+    const row=document.createElement('div');row.className='sw-row tappable';
     row.innerHTML=`<div class="sw-main"><div class="sw-word">${safeHTML(w.word||'')}${w.level?`<span class="sw-lv" style="color:${lc};border-color:${(typeof hexA==='function')?hexA(lc,.4):lc}">${safeHTML(w.level)}</span>`:''}</div>${w.tr?`<div class="sw-tr">${safeHTML(w.tr)}</div>`:''}</div><button class="sw-del" type="button" aria-label="Remove">×</button>`;
     row.querySelector('.sw-del').onclick=(ev)=>{ev.stopPropagation();try{haptic('light');}catch(_){}removeSavedWord(w.id);};
+    row.onclick=()=>{try{haptic('light');}catch(_){}openWordBreakdown(w.word||'',w.tr||'');};
     wrap.appendChild(row);
   });
 }
@@ -13020,6 +13120,83 @@ function renderSavedWords(){
   if(lbl)lbl.textContent=_savedDictLabel();
   if(API&&window._uid){loadSavedWordsPage(true);return;}
   renderSavedWordsLocal();
+}
+/* Open the personal dictionary modal from the Flashcards screen. */
+function openDict(){
+  try{haptic('light');}catch(_){}
+  try{openMod('dictm');}catch(_){return;}
+  try{renderSavedWords();}catch(e){}
+}
+/* ── Word breakdown (AI) ─────────────────────────────────────────────
+   Tapping a saved word opens a Sonnet-generated breakdown with EXACTLY three
+   short, simple, contextual usage examples. Billed via the same reserve→
+   reconcile /api/chat path as Ask ALEX (mode=lesson_help → Sonnet). */
+let _wbrkBusy=false;
+let _wbrkLast={w:'',tr:''};
+function _wbrkRender(html){const b=document.getElementById('wbrk-body');if(b)b.innerHTML=html;}
+function _wbrkSkeleton(){_wbrkRender('<div class="wbrk-ex"><div class="wbrk-ex-n">1</div><div class="wbrk-ex-main"><div class="sk-line" style="width:90%"></div><div class="sk-line" style="width:60%;margin-top:6px"></div></div></div><div class="wbrk-ex"><div class="wbrk-ex-n">2</div><div class="wbrk-ex-main"><div class="sk-line" style="width:84%"></div><div class="sk-line" style="width:56%;margin-top:6px"></div></div></div><div class="wbrk-ex"><div class="wbrk-ex-n">3</div><div class="wbrk-ex-main"><div class="sk-line" style="width:88%"></div><div class="sk-line" style="width:52%;margin-top:6px"></div></div></div>');}
+function _wbrkError(){
+  const msg=({ru:'Не удалось получить разбор. Попробуй ещё раз.',en:'Could not load the breakdown. Please try again.',es:'No se pudo cargar el análisis. Inténtalo de nuevo.',pt:'Não foi possível carregar a análise. Tente novamente.',de:'Analyse konnte nicht geladen werden. Versuche es erneut.',fr:'Impossible de charger l’analyse. Réessaie.',uk:'Не вдалося завантажити розбір. Спробуй ще раз.',tr:'Analiz yüklenemedi. Tekrar dene.',zh:'无法加载解析，请重试。',ar:'تعذّر تحميل التحليل. حاول مجددًا.'}[lang]||'Could not load the breakdown. Please try again.');
+  const retry=({ru:'Повторить',en:'Retry',es:'Reintentar',pt:'Repetir',de:'Erneut',fr:'Réessayer',uk:'Повторити',tr:'Tekrar',zh:'重试',ar:'إعادة'}[lang]||'Retry');
+  _wbrkRender(`<div class="wbrk-err">${safeHTML(msg)}</div><button class="wbrk-retry" type="button" onclick="_wbrkRetry()">${safeHTML(retry)}</button>`);
+}
+function _wbrkRetry(){if(_wbrkLast.w)openWordBreakdown(_wbrkLast.w,_wbrkLast.tr);}
+/* Parse the model reply into up to 3 {en,tr} example pairs. Expected line format
+   is "English sentence | translation"; falls back to splitting on — or just the
+   raw line if no separator is present. */
+function _wbrkParse(text){
+  const out=[];
+  (text||'').split(/\n+/).forEach(raw=>{
+    let s=raw.trim();if(!s)return;
+    s=s.replace(/^\s*(?:\d+[\.\)]|[-*•])\s*/,'').trim();
+    if(!s)return;
+    let en=s,tr='';
+    const sep=s.indexOf('|')>=0?'|':(s.indexOf('—')>=0?'—':'');
+    if(sep){const i=s.indexOf(sep);en=s.slice(0,i).trim();tr=s.slice(i+1).trim();}
+    if(en)out.push({en,tr});
+  });
+  return out.slice(0,3);
+}
+async function openWordBreakdown(word,translation){
+  word=(word||'').trim();if(!word)return;
+  _wbrkLast={w:word,tr:translation||''};
+  const subscriber=!!(grandfatheredTier||isPremium);
+  /* Same billing preflight as Ask ALEX. */
+  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
+  if(!hasChatAccess()){try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
+  const we=document.getElementById('wbrk-word'),tre=document.getElementById('wbrk-tr'),sub=document.getElementById('wbrk-sub');
+  if(we)we.textContent=word;
+  if(tre)tre.textContent=translation||'';
+  if(sub)sub.textContent=({ru:'3 примера в контексте',en:'3 examples in context',es:'3 ejemplos en contexto',pt:'3 exemplos em contexto',de:'3 Beispiele im Kontext',fr:'3 exemples en contexte',uk:'3 приклади в контексті',tr:'Bağlamda 3 örnek',zh:'3 个语境例句',ar:'٣ أمثلة في سياق'}[lang]||'3 examples in context');
+  try{openMod('wordbrkm');}catch(_){}
+  if(_wbrkBusy)return;_wbrkBusy=true;
+  _wbrkSkeleton();
+  const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.'}[botLang]||'Respond in English.';
+  /* STRICT prompt: exactly 3 short, simple, clear contextual examples; one per
+     line as "English sentence | translation"; no intro, no numbering, no notes. */
+  const req=`English word "${word}". Output EXACTLY 3 lines, nothing else. Each line is one short, very simple, clear example sentence USING the word in everyday context, followed by " | " and its translation. Format strictly: English sentence | translation. No numbering, no headers, no extra commentary.`;
+  try{
+    const r=await fetch(`${API}/api/chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({uid:window._uid||0,message:req,bot_lang:bl,answer_lang:botLang,chosen_model:'sonnet',mode:'lesson_help',init_data:tg?.initData||''}),
+      signal:AbortSignal.timeout(45000)
+    });
+    if(!r.ok){
+      const e=await r.json().catch(()=>({}));
+      if(e&&(e.credits_required||e.premium_required)){try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(_){}openPremium(null,e.credits_required?'credits':'platform');}
+      else{_wbrkError();}
+      return;
+    }
+    const data=await r.json();
+    if(typeof data.chat_credits==='number'){chatCredits=data.chat_credits;try{updateCreditChip();}catch(_){}}
+    if(data.premium_required){try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(_){}openPremium(null,data.credits_required?'credits':'platform');return;}
+    const reply=(data.reply||data.message||data.text||'').trim();
+    const ex=_wbrkParse(reply);
+    if(!ex.length){_wbrkError();return;}
+    _wbrkRender(ex.map((e,i)=>`<div class="wbrk-ex"><div class="wbrk-ex-n">${i+1}</div><div class="wbrk-ex-main"><div class="wbrk-ex-en">${safeHTML(e.en)}</div>${e.tr?`<div class="wbrk-ex-tr">${safeHTML(e.tr)}</div>`:''}</div></div>`).join(''));
+  }catch(e){_wbrkError();}
+  finally{_wbrkBusy=false;}
 }
 function errorDiaryCategories(errors){
   const counts={};
@@ -13224,6 +13401,9 @@ let _heartsRegenT = null;       /* foreground regen poll while the bar is visibl
    instant gate). Reset by the SERVER at UTC 00:00. Premium = unlimited. */
 let lessonLimitState = {used:0,limit:5,remaining:5,unlimited:false,reset_in:0};
 let _dlimitTickT = null;        /* countdown interval for the daily-limit modal */
+/* Daily flashcard budget mirror (server-authoritative; both tiers metered). */
+let cardLimitState = {used:0,limit:15,remaining:15,reset_in:0,is_premium:false};
+let _cardBudgetSyncing = false;  /* re-entry guard for initLearn → refreshDailyCards */
 
 /* Tiny chip in the chat header that shows the credit balance. Hidden
    for grandfathered bundle holders (they don't run on credits) and for
@@ -13264,6 +13444,7 @@ async function checkPremiumStatus(uid){
       accessKind=d.access_kind||'none';
       if(d.hearts&&typeof d.hearts==='object'){heartsState=Object.assign({hearts:5,max:5,next_in:0,full:true,unlimited:false},d.hearts);}
       if(d.lessons&&typeof d.lessons==='object'){lessonLimitState=Object.assign({used:0,limit:5,remaining:5,unlimited:false,reset_in:0},d.lessons);}
+      if(d.cards&&typeof d.cards==='object'){cardLimitState=Object.assign({used:0,limit:15,remaining:15,reset_in:0,is_premium:false},d.cards);}
       setPremium(d.is_premium===true,d.source||'database');
       try{updateCreditChip();}catch(_){}
       try{renderHeartsBar();}catch(_){}
