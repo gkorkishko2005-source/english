@@ -1471,6 +1471,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .credit-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 /* Plan list — elevated cards with depth */
 .prem-plans{display:flex;flex-direction:column;gap:10px;padding:4px 18px 8px}
+.prem-legal{padding:12px 18px 4px;font-size:11px;line-height:1.55;color:var(--t3);text-align:center}
+.prem-legal a{color:var(--a);text-decoration:underline;cursor:pointer}
 .prem-plan{position:relative;background:var(--e1);border:1px solid var(--b1);border-top:1px solid var(--edge,rgba(255,255,255,.08));border-radius:14px;padding:14px 15px;box-shadow:var(--sh,0 1px 3px rgba(0,0,0,.18));transition:transform .15s,box-shadow .15s}
 .prem-plan:active{transform:scale(.99)}
 /* Recommended pack — bigger, accent gradient outline, lifted */
@@ -1602,6 +1604,25 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .rp-end{font-size:11px;font-weight:600;color:var(--rd);cursor:pointer;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,107,107,.25);background:rgba(255,107,107,.08)}
 
 /* ══ GRAMMAR ROADMAP ══ */
+/* ── Hearts bar (free-tier lesson lives) ── */
+.hearts-bar{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:0 0 12px;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1);cursor:pointer;transition:.2s;user-select:none}
+.hearts-bar:active{transform:scale(.99)}
+.hearts-bar .hb-pips{display:flex;gap:4px;align-items:center}
+.hearts-bar .hb-pip{width:18px;height:18px;line-height:1;font-size:16px;filter:saturate(1.1)}
+.hearts-bar .hb-pip.empty{opacity:.28;filter:grayscale(1)}
+.hearts-bar .hb-txt{font-size:12px;color:var(--t3);font-weight:600;margin-left:auto}
+.hearts-bar .hb-refill{font-size:12px;font-weight:700;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.22);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.hearts-bar.unlimited .hb-txt{color:var(--a2)}
+/* Out-of-hearts modal body */
+.oh-wrap{text-align:center;padding:6px 2px 2px}
+.oh-emoji{font-size:42px;line-height:1;margin:2px 0 10px}
+.oh-title{font-size:18px;font-weight:800;margin-bottom:6px}
+.oh-sub{font-size:13px;color:var(--t3);line-height:1.5;margin-bottom:14px}
+.oh-timer{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--a);margin:2px 0 16px}
+.oh-actions{display:flex;flex-direction:column;gap:10px}
+.oh-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--b1);background:var(--e1);color:var(--tx)}
+.oh-btn.primary{background:rgba(var(--ar),.14);border-color:rgba(var(--ar),.3);color:var(--a)}
+.oh-btn:active{transform:scale(.98)}
 .learn-tabs{display:flex;gap:4px;padding:0 0 14px;background:transparent}
 .learn-tab{flex:1;padding:9px 8px;font-size:13px;font-weight:600;color:var(--t3);cursor:pointer;transition:.22s;text-align:center;border-radius:var(--r2);background:var(--e2);border:1px solid var(--b1)}
 .learn-tab:active{transform:scale(.96)}
@@ -2788,6 +2809,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="learn-tab" id="lt-cards" onclick="switchLearnTab('cards')"><span id="lt-cards-lbl">Flashcards</span></div>
     <div class="learn-tab" id="lt-road" onclick="switchLearnTab('road')"><span id="lt-road-lbl">Exams</span></div>
   </div>
+  <!-- Hearts bar (free-tier lesson lives; hidden for Premium = unlimited) -->
+  <div class="hearts-bar" id="hearts-bar" style="display:none" onclick="onHeartsBarTap()"></div>
   <!-- COURSE panel -->
   <div id="learn-course-panel">
     <div class="course-grid" id="course-wrap"></div>
@@ -3318,7 +3341,26 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
     <div class="prem-switch" id="prem-switch"></div>
     <div class="prem-proof" id="prem-proof"></div>
     <div class="prem-info" id="prem-info"></div>
+    <div class="prem-legal" id="prem-legal"></div>
     <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Close</div>
+  </div>
+</div>
+
+<!-- OUT OF HEARTS -->
+<div class="mov" id="heartsm" style="display:none" onclick="closeMod('heartsm')">
+  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
+    <div class="oh-wrap">
+      <div class="oh-emoji">💔</div>
+      <div class="oh-title" id="oh-title">Out of hearts</div>
+      <div class="oh-sub" id="oh-sub"></div>
+      <div class="oh-timer" id="oh-timer">—</div>
+      <div class="oh-actions">
+        <div class="oh-btn primary" onclick="buyHeartsRefill()" id="oh-stars"></div>
+        <div class="oh-btn" onclick="watchAdForHeart()" id="oh-ad" style="display:none"></div>
+        <div class="oh-btn" onclick="closeMod('heartsm');openPremium(undefined,'platform')" id="oh-prem"></div>
+        <div class="oh-btn" onclick="closeMod('heartsm')" id="oh-close"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -6991,13 +7033,15 @@ function cardDailyLimit(){
   return cardLimitConfig().limit;
 }
 function cardLimitConfig(){
-  /* Tightened Free tier per pricing review: 5 cards / 5h gives users a real
-     reason to upgrade to Basic (30 cards) while still letting them taste
-     the flashcard flow. */
+  /* Paywall refactor: basic flashcard study is FREE. The free window is now
+     generous (a soft anti-runaway batch, not a monetization gate) and the
+     limit-reached state no longer opens the subscription modal — monetization
+     moved to hearts (lessons), Ask ALEX and the exam simulators. Subscribers
+     still get larger batches / faster resets. */
   if(hasTier('ultimate'))return {limit:200,hours:4};
   if(hasTier('pro'))return {limit:100,hours:4};
-  if(hasTier('basic'))return {limit:30,hours:5};
-  return {limit:5,hours:5};
+  if(hasTier('basic'))return {limit:60,hours:4};
+  return {limit:40,hours:5};
 }
 function cardWindowKey(){
   /* Tier is loaded asynchronously (and reset to '' on any network error),
@@ -7147,11 +7191,13 @@ function initLearn(){
     document.getElementById('lmain').style.display='none';document.getElementById('lempty').style.display='block';
     const et=document.getElementById('em-t'),es=document.getElementById('em-s'),b1=document.getElementById('em-b1'),b2=document.getElementById('em-b2');
     if(left<=0){
-      if(et)et.textContent=({ru:'Лимит карточек',en:'Card limit reached',es:'Límite de tarjetas',pt:'Limite de cartões',de:'Kartenlimit erreicht',fr:'Limite de cartes atteinte',uk:'Ліміт карток',tr:'Kart limiti doldu',zh:'已达卡片上限',ar:'تم بلوغ حد البطاقات'}[lang]||'Card limit reached');
-      if(es)es.textContent=({ru:`Ты закрыл норму. Сброс через ${cardResetText()}. Подписка даст больше карточек и более частые сбросы.`,en:`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`,es:`Has completado esta tanda. Se reinicia en ${cardResetText()}. Una suscripción da más tarjetas y reinicios más rápidos.`,pt:`Você concluiu esta leva. Reinicia em ${cardResetText()}. Uma assinatura dá mais cartões e reinícios mais rápidos.`,de:`Du hast diese Runde geschafft. Reset in ${cardResetText()}. Ein Abo bietet mehr Karten und schnellere Resets.`,fr:`Tu as terminé cette série. Réinitialisation dans ${cardResetText()}. Un abonnement offre plus de cartes et des réinitialisations plus rapides.`,uk:`Ти закрив цю порцію. Скидання через ${cardResetText()}. Підписка дає більше карток і частіші скидання.`,tr:`Bu turu bitirdin. ${cardResetText()} sonra sıfırlanır. Abonelik daha çok kart ve daha sık sıfırlama verir.`,zh:`你已完成本轮卡片。${cardResetText()} 后重置。订阅可获得更多卡片和更频繁的重置。`,ar:`أنهيت هذه الدفعة. تُعاد التهيئة خلال ${cardResetText()}. الاشتراك يمنح بطاقات أكثر وإعادة تهيئة أسرع.`}[lang]||`You finished this card window. Reset in ${cardResetText()}. A subscription gives more cards and faster resets.`);
-      if(b1)b1.textContent=({ru:'Выбрать подписку',en:'Choose plan',es:'Elegir suscripción',pt:'Escolher assinatura',de:'Abo wählen',fr:'Choisir un abonnement',uk:'Обрати підписку',tr:'Abonelik seç',zh:'选择订阅',ar:'اختر الاشتراك'}[lang]||'Choose plan');
+      /* Paywall refactor: no subscription modal here — just tell the user when
+         the next free batch unlocks and offer something useful meanwhile. */
+      if(et)et.textContent=({ru:'Хорошая работа!',en:'Nice work!',es:'¡Buen trabajo!',pt:'Bom trabalho!',de:'Gut gemacht!',fr:'Beau travail !',uk:'Гарна робота!',tr:'Aferin!',zh:'做得好！',ar:'عمل رائع!'}[lang]||'Nice work!');
+      if(es)es.textContent=({ru:`Ты прошёл порцию карточек. Новые будут через ${cardResetText()}. А пока — продолжи урок или попроси новые слова у ALEX.`,en:`You finished this batch of cards. New ones in ${cardResetText()}. Meanwhile, continue a lesson or ask ALEX for new words.`,es:`Terminaste esta tanda de tarjetas. Habrá más en ${cardResetText()}. Mientras tanto, continúa una lección o pide palabras nuevas a ALEX.`,pt:`Você concluiu esta leva de cartões. Novos em ${cardResetText()}. Enquanto isso, continue uma lição ou peça palavras novas ao ALEX.`,de:`Du hast diese Kartenrunde geschafft. Neue in ${cardResetText()}. Mach in der Zwischenzeit eine Lektion weiter oder frag ALEX nach neuen Wörtern.`,fr:`Tu as terminé cette série de cartes. De nouvelles dans ${cardResetText()}. En attendant, continue une leçon ou demande de nouveaux mots à ALEX.`,uk:`Ти пройшов порцію карток. Нові будуть через ${cardResetText()}. А поки — продовж урок або попроси нові слова в ALEX.`,tr:`Bu kart turunu bitirdin. Yenileri ${cardResetText()} sonra. Bu arada bir derse devam et veya ALEX'ten yeni kelimeler iste.`,zh:`你已完成本轮卡片。${cardResetText()} 后会有新卡片。同时可以继续课程或向 ALEX 索取新单词。`,ar:`أنهيت هذه الدفعة من البطاقات. ستتوفر بطاقات جديدة خلال ${cardResetText()}. في غضون ذلك تابع درسًا أو اطلب كلمات جديدة من ALEX.`}[lang]||`You finished this batch of cards. New ones in ${cardResetText()}. Meanwhile, continue a lesson or ask ALEX for new words.`);
+      if(b1)b1.textContent=({ru:'К урокам',en:'Go to lessons',es:'Ir a las lecciones',pt:'Ir às lições',de:'Zu den Lektionen',fr:'Aux leçons',uk:'До уроків',tr:'Derslere git',zh:'去上课',ar:'إلى الدروس'}[lang]||'Go to lessons');
       if(b2)b2.textContent=L.ffact||'English fun fact';
-      if(b1?.closest('button'))b1.closest('button').onclick=()=>openPremium(({ru:'Подписка даст больше карточек в день',en:'A subscription gives more cards per day',es:'Una suscripción da más tarjetas al día',pt:'Uma assinatura dá mais cartões por dia',de:'Ein Abo gibt mehr Karten pro Tag',fr:'Un abonnement offre plus de cartes par jour',uk:'Підписка дає більше карток на день',tr:'Abonelik günde daha çok kart verir',zh:'订阅可获得每天更多卡片',ar:'الاشتراك يمنح بطاقات أكثر يوميًا'}[lang]||'A subscription gives more cards per day'));
+      if(b1?.closest('button'))b1.closest('button').onclick=()=>{try{switchLearnTab('course');}catch(_){}};
       if(b2?.closest('button'))b2.closest('button').onclick=()=>openChat('fun_fact');
     }else{
       if(et)et.textContent=L.all_done;
@@ -10884,6 +10930,9 @@ function openCourseLesson(id){
   let unlocked=false;
   try{unlocked=isCourseUnlocked(id);}catch(_){return;}
   if(!unlocked){handleLockedCourseTap(id);return;}
+  /* Free-tier lives: block starting a NEW lesson when out of hearts (Premium =
+     unlimited, always passes). A lesson already in progress is unaffected. */
+  try{if(!heartsGuard())return;}catch(_){}
   try{
     _inCourseLesson=true;
     _openCourseLessonInner(id);
@@ -11401,6 +11450,7 @@ function answerCourseWord(id,part,idx,picked,answer,word){
     if(errs===2&&_courseAdaptiveOn()){try{toast(({ru:'Упрощаю следующее задание.',en:'Simplifying the next task.',es:'Simplificando la siguiente tarea.',pt:'Simplificando a próxima tarefa.',de:'Nächste Aufgabe wird einfacher.',fr:'Je simplifie la tâche suivante.',uk:'Спрощую наступне завдання.',tr:'Sonraki görevi kolaylaştırıyorum.',zh:'下一题已简化。',ar:'سأبسّط المهمة التالية.'}[lang]||'Simplifying the next task.'),'🌱');}catch(_){}}
     courseMarkStageFailed(id,part,true);
     try{sfx.warn();}catch(e){}
+    try{loseHeart();}catch(_){}
   }
   const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
   setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?700:1400);
@@ -11432,6 +11482,7 @@ function answerCourseWordInput(id,part,idx,answerIdx,word,correctText){
     courseMarkStageFailed(id,part,true);
     card.innerHTML+=`<div class="course-hint" style="color:var(--rd)">${({ru:'Не совсем. Правильно:',en:'Not quite. The answer:',es:'No del todo. La respuesta:',pt:'Não exatamente. A resposta:',de:'Nicht ganz. Die Antwort:',fr:'Pas tout à fait. La réponse :',uk:'Не зовсім. Правильно:',tr:'Tam değil. Doğrusu:',zh:'不太对。答案：',ar:'ليس تمامًا. الإجابة:'}[lang]||'Not quite. The answer:')} <b style="color:var(--a2)">${safeHTML(correctText)}</b></div>`;
     try{sfx.warn();}catch(_){}
+    try{loseHeart();}catch(_){}
   }
   const total=courseVocabWords(GALAXY_COURSE.find(x=>x.id===id)||{}).length;
   setTimeout(()=>_advanceCourseCard(id,part,idx,total),ok?900:1700);
@@ -11481,6 +11532,7 @@ function answerCourseSynonym(id,idx,picked,answer,word){
     courseAddMistake(word);
     courseMarkStageFailed(id,part,true);
     try{sfx.warn();}catch(_){}
+    try{loseHeart();}catch(_){}
   }
   const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
   const total=courseSynonymItems(ls).length;
@@ -11504,6 +11556,8 @@ function answerCourseError(id,idx,type,picked,chosen){
   });
   if(!ok){
     courseMarkStageFailed(id,part,true);
+    try{sfx.warn();}catch(_){}
+    try{loseHeart();}catch(_){}
   }
   const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
   const total=courseErrorSet(ls).length;
@@ -12116,6 +12170,7 @@ function switchLearnTab(tab){
   if(tab==='course')renderCourse();
   if(tab==='road')renderRoadmap();
   updateCourseTopBtn();
+  try{renderHeartsBar();}catch(_){}
 }
 
 function rmStatusIcon(type){
@@ -13144,6 +13199,10 @@ let platformLifetime = false;
 let chatCredits = 0;
 let grandfatheredTier = '';
 let accessKind = 'none';   /* 'platform' | 'grandfathered' | 'none' */
+/* Hearts (free-tier lesson lives). Mirrors /api/premium hearts{} + /api/hearts. */
+let heartsState = {hearts:5,max:5,next_in:0,full:true,unlimited:false};
+let _heartsTickT = null;        /* countdown interval for the out-of-hearts modal */
+let _heartsRegenT = null;       /* foreground regen poll while the bar is visible */
 
 /* Tiny chip in the chat header that shows the credit balance. Hidden
    for grandfathered bundle holders (they don't run on credits) and for
@@ -13182,8 +13241,10 @@ async function checkPremiumStatus(uid){
       chatCredits=typeof d.chat_credits==='number'?d.chat_credits:0;
       grandfatheredTier=d.grandfathered_tier||'';
       accessKind=d.access_kind||'none';
+      if(d.hearts&&typeof d.hearts==='object'){heartsState=Object.assign({hearts:5,max:5,next_in:0,full:true,unlimited:false},d.hearts);}
       setPremium(d.is_premium===true,d.source||'database');
       try{updateCreditChip();}catch(_){}
+      try{renderHeartsBar();}catch(_){}
     }
   }catch(e){
     premiumTier='';premiumUntil=null;premiumLifetime=false;
@@ -13258,6 +13319,166 @@ function hasTier(minTier){
   if(isPremium&&premiumTier)return tierLevel(premiumTier)>=need;
   return false;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   HEARTS — free-tier lesson lives
+   A wrong answer in a lesson costs 1 heart. Hearts regenerate on the
+   SERVER clock (1 / HEARTS_REGEN_HOURS) or refill instantly via Stars.
+   Premium = unlimited (never decremented). The server is authoritative;
+   the client mirrors heartsState for an instant UI and re-syncs on every
+   loss / refill / status fetch.
+   ══════════════════════════════════════════════════════════════════ */
+function heartsUnlimited(){return !!heartsState.unlimited||hasPlatform();}
+function heartsLeft(){return heartsUnlimited()?99:Math.max(0,parseInt(heartsState.hearts||0,10)||0);}
+function _fmtCountdown(sec){
+  sec=Math.max(0,parseInt(sec||0,10)||0);
+  const m=Math.floor(sec/60),s=sec%60;
+  const h=Math.floor(m/60),mm=m%60;
+  if(h>0)return `${h}:${String(mm).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${mm}:${String(s).padStart(2,'0')}`;
+}
+function renderHeartsBar(){
+  const bar=document.getElementById('hearts-bar');
+  if(!bar)return;
+  if(heartsUnlimited()){
+    bar.classList.add('unlimited');
+    bar.innerHTML=`<div class="hb-pips"><span class="hb-pip">❤️</span></div><div class="hb-txt">${({ru:'Безлимит жизней',en:'Unlimited hearts',es:'Vidas ilimitadas',pt:'Vidas ilimitadas',de:'Unbegrenzte Leben',fr:'Vies illimitées',uk:'Безліміт життів',tr:'Sınırsız can',zh:'无限爱心',ar:'قلوب غير محدودة'}[lang]||'Unlimited hearts')}</div>`;
+    bar.style.display='flex';
+    return;
+  }
+  bar.classList.remove('unlimited');
+  const max=Math.max(1,parseInt(heartsState.max||5,10)||5);
+  const cur=heartsLeft();
+  let pips='';
+  for(let i=0;i<max;i++)pips+=`<span class="hb-pip${i<cur?'':' empty'}">${i<cur?'❤️':'🤍'}</span>`;
+  let right;
+  if(cur>=max){
+    right=`<div class="hb-txt">${({ru:'Все жизни на месте',en:'Full hearts',es:'Vidas completas',pt:'Vidas cheias',de:'Volle Leben',fr:'Vies pleines',uk:'Усі життя на місці',tr:'Tüm canlar dolu',zh:'爱心已满',ar:'القلوب ممتلئة'}[lang]||'Full hearts')}</div>`;
+  } else if(cur<=0){
+    right=`<div class="hb-refill">${({ru:'Пополнить',en:'Refill',es:'Rellenar',pt:'Recarregar',de:'Auffüllen',fr:'Recharger',uk:'Поповнити',tr:'Doldur',zh:'补充',ar:'إعادة تعبئة'}[lang]||'Refill')}</div>`;
+  } else {
+    right=`<div class="hb-txt">+1 ${({ru:'через',en:'in',es:'en',pt:'em',de:'in',fr:'dans',uk:'через',tr:'içinde',zh:'后',ar:'خلال'}[lang]||'in')} ${_fmtCountdown(heartsState.next_in)}</div>`;
+  }
+  bar.innerHTML=`<div class="hb-pips">${pips}</div>${right}`;
+  bar.style.display='flex';
+  _scheduleHeartsTick();
+}
+/* While the bar shows a "+1 in mm:ss" countdown, tick it down locally; when it
+   hits zero, re-sync from the server (a heart has regenerated). */
+function _scheduleHeartsTick(){
+  if(_heartsRegenT){clearInterval(_heartsRegenT);_heartsRegenT=null;}
+  if(heartsUnlimited()||heartsLeft()>=(heartsState.max||5)||heartsLeft()<=0)return;
+  _heartsRegenT=setInterval(()=>{
+    heartsState.next_in=Math.max(0,(parseInt(heartsState.next_in||0,10)||0)-1);
+    const bar=document.getElementById('hearts-bar');
+    if(!bar||bar.style.display==='none'){clearInterval(_heartsRegenT);_heartsRegenT=null;return;}
+    if(heartsState.next_in<=0){clearInterval(_heartsRegenT);_heartsRegenT=null;refreshHearts();return;}
+    try{renderHeartsBar();}catch(_){}
+  },1000);
+}
+async function refreshHearts(){
+  if(!API||!window._uid){renderHeartsBar();return;}
+  try{
+    const r=await fetch(`${API}/api/hearts/${window._uid}`,{headers:{'X-Telegram-Init-Data':(tg&&tg.initData)||''},signal:AbortSignal.timeout(5000)});
+    if(r.ok){const d=await r.json();if(d&&typeof d.hearts==='number')heartsState=Object.assign({unlimited:false},d);}
+  }catch(_){}
+  try{renderHeartsBar();}catch(_){}
+}
+/* Lesson mistake → lose one heart (optimistic UI, server reconciles). Premium
+   users are never affected. When the pool empties, show the refill modal. */
+function loseHeart(){
+  if(heartsUnlimited())return;
+  if(heartsLeft()>0){heartsState.hearts=heartsLeft()-1;if(heartsState.hearts<(heartsState.max||5)&&!(heartsState.next_in>0))heartsState.next_in=0;}
+  try{renderHeartsBar();}catch(_){}
+  if(API&&window._uid){
+    fetch(`${API}/api/hearts/lose`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
+      .then(r=>r.json()).then(d=>{if(d&&typeof d.hearts==='number'){heartsState=Object.assign({unlimited:false},d);try{renderHeartsBar();}catch(_){}if(heartsLeft()<=0)openOutOfHearts();}}).catch(()=>{});
+  }
+  if(heartsLeft()<=0)openOutOfHearts();
+}
+/* Gate at lesson start: block opening a NEW lesson when out of hearts. Returns
+   true if the user may proceed. */
+function heartsGuard(){
+  if(heartsUnlimited())return true;
+  if(heartsLeft()>0)return true;
+  openOutOfHearts();
+  return false;
+}
+function onHeartsBarTap(){
+  if(heartsUnlimited())return;
+  if(heartsLeft()<=0){openOutOfHearts();return;}
+  refreshHearts();
+}
+function openOutOfHearts(){
+  const t=document.getElementById('oh-title'),s=document.getElementById('oh-sub'),
+        stars=document.getElementById('oh-stars'),ad=document.getElementById('oh-ad'),
+        prem=document.getElementById('oh-prem'),close=document.getElementById('oh-close');
+  if(t)t.textContent=({ru:'Жизни закончились',en:'Out of hearts',es:'Sin vidas',pt:'Sem vidas',de:'Keine Leben mehr',fr:'Plus de vies',uk:'Життя закінчились',tr:'Can bitti',zh:'爱心用完了',ar:'نفدت القلوب'}[lang]||'Out of hearts');
+  if(s)s.textContent=({ru:'Жизни восстанавливаются со временем. Подожди, пополни мгновенно или оформи Premium для безлимита.',en:'Hearts regenerate over time. Wait, refill instantly, or go Premium for unlimited.',es:'Las vidas se recuperan con el tiempo. Espera, recarga al instante o hazte Premium para tenerlas ilimitadas.',pt:'As vidas se recuperam com o tempo. Espere, recarregue na hora ou seja Premium para vidas ilimitadas.',de:'Leben regenerieren mit der Zeit. Warte, fülle sofort auf oder hol dir Premium für unbegrenzt.',fr:'Les vies se régénèrent avec le temps. Attends, recharge instantanément ou passe en Premium pour l’illimité.',uk:'Життя відновлюються з часом. Зачекай, поповни миттєво або оформи Premium для безлімітів.',tr:'Canlar zamanla yenilenir. Bekle, anında doldur ya da sınırsız için Premium ol.',zh:'爱心会随时间恢复。等待、立即补充，或开通 Premium 享受无限。',ar:'تتجدد القلوب بمرور الوقت. انتظر أو أعد التعبئة فورًا أو اشترك في Premium للحصول على عدد غير محدود.'}[lang]||'Hearts regenerate over time. Wait, refill instantly, or go Premium for unlimited.');
+  if(stars)stars.innerHTML=`<span>❤️</span><span>${({ru:'Восстановить за Stars',en:'Refill with Stars',es:'Rellenar con Stars',pt:'Recarregar com Stars',de:'Mit Stars auffüllen',fr:'Recharger avec Stars',uk:'Поповнити за Stars',tr:'Stars ile doldur',zh:'用 Stars 补充',ar:'إعادة التعبئة بـ Stars'}[lang]||'Refill with Stars')}</span>`;
+  if(prem)prem.innerHTML=`<span>⭐</span><span>${({ru:'Premium — безлимит жизней',en:'Premium — unlimited hearts',es:'Premium — vidas ilimitadas',pt:'Premium — vidas ilimitadas',de:'Premium — unbegrenzte Leben',fr:'Premium — vies illimitées',uk:'Premium — безліміт життів',tr:'Premium — sınırsız can',zh:'Premium — 无限爱心',ar:'Premium — قلوب غير محدودة'}[lang]||'Premium — unlimited hearts')}</span>`;
+  if(close)close.textContent=({ru:'Подожду',en:"I'll wait",es:'Esperaré',pt:'Vou esperar',de:'Ich warte',fr:'J’attends',uk:'Зачекаю',tr:'Beklerim',zh:'我等等',ar:'سأنتظر'}[lang]||"I'll wait");
+  /* Ad button is a stub hook for the future (no ad SDK yet) — hidden unless a
+     global flag turns it on. */
+  if(ad){
+    if(window.ADS_ENABLED){ad.style.display='flex';ad.innerHTML=`<span>🎬</span><span>${({ru:'Смотреть рекламу (+1)',en:'Watch ad (+1)',es:'Ver anuncio (+1)',pt:'Ver anúncio (+1)',de:'Werbung ansehen (+1)',fr:'Voir une pub (+1)',uk:'Дивитися рекламу (+1)',tr:'Reklam izle (+1)',zh:'观看广告 (+1)',ar:'شاهد إعلانًا (+1)'}[lang]||'Watch ad (+1)')}</span>`;}
+    else ad.style.display='none';
+  }
+  openMod('heartsm');
+  _startHeartsCountdown();
+}
+function _startHeartsCountdown(){
+  const el=document.getElementById('oh-timer');
+  if(_heartsTickT){clearInterval(_heartsTickT);_heartsTickT=null;}
+  const tick=()=>{
+    if(!el)return;
+    if(heartsLeft()>0){el.textContent=({ru:'Готово!',en:'Ready!',es:'¡Listo!',pt:'Pronto!',de:'Bereit!',fr:'Prêt !',uk:'Готово!',tr:'Hazır!',zh:'就绪！',ar:'جاهز!'}[lang]||'Ready!');return;}
+    heartsState.next_in=Math.max(0,(parseInt(heartsState.next_in||0,10)||0)-1);
+    el.textContent=_fmtCountdown(heartsState.next_in);
+    if(heartsState.next_in<=0){clearInterval(_heartsTickT);_heartsTickT=null;refreshHearts();}
+  };
+  tick();
+  _heartsTickT=setInterval(tick,1000);
+}
+function buyHeartsRefill(){
+  haptic('medium');
+  const botName=window.BOT_NAME||'PolyGlotty_bot';
+  const url=`https://t.me/${botName}?start=hearts`;
+  if(tg?.openTelegramLink){tg.openTelegramLink(url);}else{window.open(url);}
+  closeMod('heartsm');
+  toast({ru:'Открываю Telegram для оплаты...',en:'Opening Telegram for payment...'}[lang]||'Opening Telegram for payment...','💳');
+  let polls=0;
+  const poll=setInterval(async()=>{
+    polls++;
+    if(polls>12){clearInterval(poll);return;}
+    await refreshHearts();
+    if(heartsLeft()>0){clearInterval(poll);toast(({ru:'Жизни восстановлены! ❤️',en:'Hearts refilled! ❤️'}[lang]||'Hearts refilled! ❤️'),'❤️');}
+  },5000);
+}
+/* Ad reward stub: when an ad SDK is wired up, call grantAdHeart() on completion.
+   For now the button is hidden (ADS_ENABLED is unset). */
+function watchAdForHeart(){
+  if(!window.ADS_ENABLED)return;
+  grantAdHeart();
+}
+async function grantAdHeart(){
+  if(!API||!window._uid)return;
+  try{
+    const r=await fetch(`${API}/api/hearts/refill`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})});
+    if(r.ok){const d=await r.json();if(d&&typeof d.hearts==='number')heartsState=Object.assign({unlimited:false},d);}
+  }catch(_){}
+  try{renderHeartsBar();}catch(_){}
+  if(heartsLeft()>0){closeMod('heartsm');toast(({ru:'+1 жизнь ❤️',en:'+1 heart ❤️'}[lang]||'+1 heart ❤️'),'❤️');}
+}
+/* Open the in-app webview for the legal docs (Terms / Privacy). */
+function openLegal(doc){
+  const base=(API||'').replace(/\/$/,'');
+  const file=doc==='privacy'?'privacy.html':'terms.html';
+  const url=base?`${base}/${file}`:file;
+  try{if(tg&&tg.openLink){tg.openLink(url);return;}}catch(_){}
+  window.open(url,'_blank');
+}
+
 function showTierPaywall(minTier, feature){
   /* One subscription unlocks everything — never name legacy tiers. */
   const title={
@@ -13613,6 +13834,27 @@ function openPremium(highlightFeature, initialTab){
   }
 
   renderPremPlans();
+  /* Compliance block under the tariff buttons (auto-renew disclosure + links to
+     the in-app Terms of Use / Privacy Policy webview). */
+  const legal=document.getElementById('prem-legal');
+  if(legal){
+    const tou=({ru:'Условиями использования',en:'Terms of Use',es:'Términos de uso',pt:'Termos de uso',de:'Nutzungsbedingungen',fr:'Conditions d’utilisation',uk:'Умовами використання',tr:'Kullanım Şartları',zh:'使用条款',ar:'شروط الاستخدام'}[lang]||'Terms of Use');
+    const pp=({ru:'Политикой конфиденциальности',en:'Privacy Policy',es:'Política de privacidad',pt:'Política de privacidade',de:'Datenschutzrichtlinie',fr:'Politique de confidentialité',uk:'Політикою конфіденційності',tr:'Gizlilik Politikası',zh:'隐私政策',ar:'سياسة الخصوصية'}[lang]||'Privacy Policy');
+    const touLink=`<a onclick="openLegal('terms')">${tou}</a>`;
+    const ppLink=`<a onclick="openLegal('privacy')">${pp}</a>`;
+    legal.innerHTML=({
+      ru:`Нажимая «Продолжить», ты соглашаешься с нашими ${touLink} и ${ppLink}. Подписка продлевается автоматически, пока не отменена.`,
+      en:`By tapping Continue, you agree to our ${touLink} and ${ppLink}. Subscriptions automatically renew unless canceled.`,
+      es:`Al tocar Continuar, aceptas nuestros ${touLink} y nuestra ${ppLink}. Las suscripciones se renuevan automáticamente a menos que se cancelen.`,
+      pt:`Ao tocar em Continuar, você concorda com nossos ${touLink} e ${ppLink}. As assinaturas são renovadas automaticamente, a menos que canceladas.`,
+      de:`Mit Tippen auf „Weiter“ stimmst du unseren ${touLink} und der ${ppLink} zu. Abos verlängern sich automatisch, sofern nicht gekündigt.`,
+      fr:`En appuyant sur Continuer, tu acceptes nos ${touLink} et notre ${ppLink}. Les abonnements se renouvellent automatiquement sauf annulation.`,
+      uk:`Натискаючи «Продовжити», ти погоджуєшся з нашими ${touLink} та ${ppLink}. Підписка поновлюється автоматично, доки не скасована.`,
+      tr:`Devam'a dokunarak ${touLink} ve ${ppLink}'mızı kabul edersin. Abonelikler iptal edilmedikçe otomatik yenilenir.`,
+      zh:`点击“继续”即表示你同意我们的${touLink}和${ppLink}。除非取消，订阅将自动续期。`,
+      ar:`بالضغط على متابعة، فإنك توافق على ${touLink} و${ppLink} الخاصة بنا. تتجدد الاشتراكات تلقائيًا ما لم يتم إلغاؤها.`
+    }[lang]||`By tapping Continue, you agree to our ${touLink} and ${ppLink}. Subscriptions automatically renew unless canceled.`);
+  }
   openMod('premiumm');
 }
 

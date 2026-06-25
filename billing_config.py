@@ -89,6 +89,14 @@ _DEFAULTS = {
     "VOCAB_QUEUE_FREE": 50,            # max saved words for free users
     "VOCAB_QUEUE_PREMIUM": 200,        # max saved words for Premium users
     "VOCAB_PAGE_SIZE": 15,             # rows the dictionary list returns per page
+    # ── Hearts (free-tier lesson lives) ────────────────────────────────
+    # Free users get a small pool of "lives": a wrong answer in a lesson costs
+    # 1 heart. Hearts regenerate on the SERVER clock (1 per HEARTS_REGEN_HOURS)
+    # or can be refilled instantly via Telegram Stars. Premium = unlimited
+    # (never decremented). All values tunable live, no deploy.
+    "HEARTS_MAX": 5,                   # max lives for a free user
+    "HEARTS_REGEN_HOURS": 2,           # hours to regenerate 1 heart
+    "HEARTS_REFILL_STARS": 30,         # ⭐ to instantly refill to full
     # Subscription
     # The Platform subscription does NOT include any "unlimited" or monthly AI
     # pool — its ALEX value is the flat starter-credits grant handled at purchase
@@ -120,6 +128,9 @@ _ENV_SCALARS = {
     "BILLING_VOCAB_QUEUE_FREE": ("VOCAB_QUEUE_FREE", int),
     "BILLING_VOCAB_QUEUE_PREMIUM": ("VOCAB_QUEUE_PREMIUM", int),
     "BILLING_VOCAB_PAGE_SIZE": ("VOCAB_PAGE_SIZE", int),
+    "BILLING_HEARTS_MAX": ("HEARTS_MAX", int),
+    "BILLING_HEARTS_REGEN_HOURS": ("HEARTS_REGEN_HOURS", int),
+    "BILLING_HEARTS_REFILL_STARS": ("HEARTS_REFILL_STARS", int),
 }
 _ENV_JSON = {
     "BILLING_MODELS": "MODELS",

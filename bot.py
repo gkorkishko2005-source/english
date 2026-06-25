@@ -1200,6 +1200,13 @@ async def cmd_start(message: Message):
             await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
                                   else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
+    if args == "hearts":
+        user_lang = await get_lang(uid) or "ru"
+        ok = await _send_hearts_invoice(uid, user_lang == "ru")
+        if not ok:
+            await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
+                                  else f"{ICON['warn']} Could not create invoice. Try /premium")
+        return
     ref_result = {"ok": False, "premium_days": 0, "credits": 0, "capped": False}
     # Anti-abuse: only a BRAND-NEW account can trigger a referral reward. An
     # existing user who later opens a ref link is ignored, so invites can't be
@@ -2666,6 +2673,50 @@ async def _send_credits_invoice(uid: int, pack_id: str, ru: bool) -> bool:
         logger.error(f"send_invoice credits error: {e}")
         return False
 
+async def _hearts_refill_stars() -> int:
+    """Stars price for an instant full heart refill (live-configurable)."""
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        return max(1, int(cfg.get("HEARTS_REFILL_STARS", 30) or 30))
+    except Exception:
+        return 30
+
+async def _send_hearts_invoice(uid: int, ru: bool) -> bool:
+    """Invoice for an instant full refill of the free-tier heart pool (Stars)."""
+    from aiogram.types import LabeledPrice
+    stars = await _hearts_refill_stars()
+    label = "Полное восстановление жизней" if ru else "Full hearts refill"
+    desc = ("Мгновенно восстанавливает все жизни для уроков. Жизни также сами "
+            "восстанавливаются со временем — это для тех, кто не хочет ждать."
+            if ru else
+            "Instantly refills all your lesson hearts. Hearts also regenerate "
+            "over time on their own — this is for when you don't want to wait.")
+    try:
+        await bot.send_invoice(
+            chat_id=uid,
+            title="PolyGlotty ❤️",
+            description=desc,
+            payload=f"hearts:full:{uid}",
+            currency="XTR",
+            prices=[LabeledPrice(label=label, amount=stars)],
+            protect_content=False,
+        )
+        return True
+    except Exception as e:
+        logger.error(f"send_invoice hearts error: {e}")
+        return False
+
+# ══ HEARTS REFILL BUY (Stars) ════════════════════════════════════════════
+@dp.callback_query(F.data == "hearts_buy")
+async def cb_hearts_buy(cb: CallbackQuery):
+    uid = cb.from_user.id
+    ru = (await get_lang(uid) or "ru") == "ru"
+    await cb.answer()
+    ok = await _send_hearts_invoice(uid, ru)
+    if not ok:
+        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+
 # ══ PLATFORM SUBSCRIPTION BUY (Stars) ════════════════════════════════════
 @dp.callback_query(F.data.startswith("plat_buy:"))
 async def cb_plat_buy(cb: CallbackQuery):
@@ -2724,6 +2775,25 @@ async def on_payment_success(msg: Message):
     #   platform:<period>:<uid>      (1m / 6m / lifetime)
     #   credits:<n>:<uid>            (ALEX credit pack)
     head = payload.split(":", 1)[0] if payload else ""
+    if head == "hearts":
+        try:
+            from database import refill_hearts
+            st = await refill_hearts(uid, 0)  # full refill
+            mx = int(st.get("max", 5)) if isinstance(st, dict) else 5
+            text = (
+                f"❤️ <b>Жизни восстановлены</b>\n\n"
+                f"У тебя снова <b>{mx}</b> жизней — продолжай уроки!"
+                if ru else
+                f"❤️ <b>Hearts refilled</b>\n\n"
+                f"You're back to <b>{mx}</b> hearts — keep going with your lessons!"
+            )
+            await send_celebration(msg, text)
+            logger.info("Hearts refilled uid=%s", uid)
+        except Exception as e:
+            logger.error(f"hearts payment handler error: {e}")
+            await msg.answer("✓ Платёж принят." if ru else "✓ Payment received.")
+        return
+
     if head == "platform":
         try:
             parts = payload.split(":")

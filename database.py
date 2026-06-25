@@ -89,6 +89,8 @@ CREATE TABLE IF NOT EXISTS users (
     plant_tonus     INTEGER DEFAULT 100,
     last_xp_date    DATE,
     xp              INTEGER DEFAULT 0,
+    hearts          INTEGER DEFAULT 5,
+    hearts_updated_at BIGINT DEFAULT 0,
     remind_time     TEXT,
     complex_streak  INTEGER DEFAULT 0,
     simple_streak   INTEGER DEFAULT 0,
@@ -266,6 +268,7 @@ CREATE TABLE IF NOT EXISTS users (
     uid INTEGER PRIMARY KEY, name TEXT, lang TEXT DEFAULT 'ru',
     level TEXT DEFAULT 'B1', interests TEXT DEFAULT '', profession TEXT DEFAULT '',
     streak INTEGER DEFAULT 0, last_active TEXT, plant_tonus INTEGER DEFAULT 100, last_xp_date TEXT, xp INTEGER DEFAULT 0,
+    hearts INTEGER DEFAULT 5, hearts_updated_at INTEGER DEFAULT 0,
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
     premium_until TEXT, premium_tier TEXT DEFAULT '',
@@ -386,6 +389,11 @@ async def db_init():
         # sent ("<until-date>:<days-left>"), so we never re-send the same
         # 3/2/1-day notice and reset automatically when the sub is extended.
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_exp_notified TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN sub_exp_notified TEXT DEFAULT ''",
+        # ── Hearts (free-tier lesson lives): pool + server-clock regen anchor
+        # (epoch seconds). Premium users are never decremented; the anchor is
+        # the timestamp from which the next +1 heart is counted.
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts INTEGER DEFAULT 5" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts INTEGER DEFAULT 5",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts_updated_at BIGINT DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts_updated_at INTEGER DEFAULT 0",
     ]
     for stmt in migrations:
         try:
@@ -1112,6 +1120,119 @@ async def decay_plant_tonus() -> int:
         y_val, t_val,
     )
     return 0
+
+# ── HEARTS (free-tier lesson lives, server-clock regen) ───────────────────────
+# Free users have a small pool of lives: a wrong answer in a lesson costs 1
+# heart. Hearts regenerate on the SERVER clock (1 every HEARTS_REGEN_HOURS) or
+# can be refilled instantly via Telegram Stars / an ad. Premium users have
+# unlimited hearts (never decremented). The regen anchor (hearts_updated_at) is
+# stored as epoch seconds, so all math is timezone-free and cannot be farmed by
+# spoofing the device clock — the client never supplies a timestamp.
+async def _hearts_cfg():
+    """Return (max_hearts, regen_seconds). Reads the live billing config with a
+    safe fallback so a config/DB hiccup never breaks the lesson flow."""
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        mx = int(cfg.get("HEARTS_MAX", 5) or 5)
+        hrs = float(cfg.get("HEARTS_REGEN_HOURS", 2) or 2)
+    except Exception:
+        mx, hrs = 5, 2.0
+    mx = max(1, mx)
+    regen = max(60, int(hrs * 3600))
+    return mx, regen
+
+
+def _now_epoch() -> int:
+    from datetime import datetime, timezone
+    return int(datetime.now(timezone.utc).timestamp())
+
+
+async def _hearts_settle(uid: int):
+    """Apply pending regeneration and persist. Returns a state dict
+    {hearts, max, next_in, full}. Never decrements — read-only settle."""
+    mx, regen = await _hearts_cfg()
+    u = await get_user(uid)
+    if not u:
+        return {"hearts": mx, "max": mx, "next_in": 0, "full": True}
+    now = _now_epoch()
+    cur = u.get("hearts")
+    cur = mx if cur is None else int(cur)
+    cur = max(0, min(mx, cur))
+    anchor = int(u.get("hearts_updated_at") or 0)
+    if cur >= mx:
+        # Already full — keep the anchor parked at now so a later loss starts a
+        # fresh full-length timer.
+        if anchor != now:
+            await db("UPDATE users SET hearts_updated_at=? WHERE uid=?", now, uid)
+        return {"hearts": mx, "max": mx, "next_in": 0, "full": True}
+    if anchor <= 0:
+        anchor = now
+        await db("UPDATE users SET hearts_updated_at=? WHERE uid=?", anchor, uid)
+    elapsed = max(0, now - anchor)
+    gained = elapsed // regen
+    if gained > 0:
+        new = min(mx, cur + int(gained))
+        new_anchor = now if new >= mx else anchor + int(gained) * regen
+        await db("UPDATE users SET hearts=?, hearts_updated_at=? WHERE uid=?", new, new_anchor, uid)
+        cur, anchor = new, new_anchor
+    full = cur >= mx
+    next_in = 0 if full else max(0, regen - (now - anchor))
+    return {"hearts": cur, "max": mx, "next_in": int(next_in), "full": full}
+
+
+async def get_hearts_state(uid: int, is_premium: bool = False) -> dict:
+    """Public read of the heart pool. Premium → unlimited (capped display)."""
+    if is_premium:
+        mx, _ = await _hearts_cfg()
+        return {"hearts": mx, "max": mx, "next_in": 0, "full": True, "unlimited": True}
+    st = await _hearts_settle(uid)
+    st["unlimited"] = False
+    return st
+
+
+async def lose_heart(uid: int, is_premium: bool = False) -> dict:
+    """Deduct one heart for a lesson mistake. Premium is never decremented.
+    Settles regen first, then removes one (flooring at 0). When dropping from a
+    full pool, the regen timer is (re)anchored to now."""
+    if is_premium:
+        return await get_hearts_state(uid, True)
+    mx, regen = await _hearts_cfg()
+    st = await _hearts_settle(uid)
+    cur = st["hearts"]
+    if cur <= 0:
+        st["unlimited"] = False
+        return st
+    was_full = cur >= mx
+    new = cur - 1
+    now = _now_epoch()
+    if was_full:
+        await db("UPDATE users SET hearts=?, hearts_updated_at=? WHERE uid=?", new, now, uid)
+        anchor = now
+    else:
+        await db("UPDATE users SET hearts=? WHERE uid=?", new, uid)
+        u = await get_user(uid)
+        anchor = int((u or {}).get("hearts_updated_at") or now)
+    full = new >= mx
+    next_in = 0 if full else max(0, regen - (now - anchor))
+    return {"hearts": new, "max": mx, "next_in": int(next_in), "full": full, "unlimited": False}
+
+
+async def refill_hearts(uid: int, amount: int = 0) -> dict:
+    """Add hearts: amount<=0 refills to full (Stars purchase); amount>0 adds
+    that many (ad reward), capped at max. Resets the regen anchor to now when
+    the pool reaches full."""
+    mx, regen = await _hearts_cfg()
+    await _hearts_settle(uid)
+    u = await get_user(uid)
+    cur = int((u or {}).get("hearts") or 0)
+    new = mx if amount <= 0 else min(mx, cur + int(amount))
+    now = _now_epoch()
+    await db("UPDATE users SET hearts=?, hearts_updated_at=? WHERE uid=?", new, now, uid)
+    full = new >= mx
+    next_in = 0 if full else max(0, regen - 0)
+    return {"hearts": new, "max": mx, "next_in": int(next_in), "full": full, "unlimited": False}
+
 
 async def update_streak(uid: int):
     user = await get_user(uid)

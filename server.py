@@ -882,7 +882,7 @@ async def handle_rate(request):
         try:
             from database import update_word_review, upsert_user
             await upsert_user(uid, "Student")
-            await update_word_review(uid,word_id,quality)
+            await update_word_review(word_id,quality)
         except Exception as e:
             logger.warning(f"rate_card failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
@@ -1034,6 +1034,14 @@ async def handle_check_premium(request):
             kind = "grandfathered"
         else:
             kind = "none"
+        # Hearts piggy-back on this call (the WebApp already fetches it on load)
+        # so the heart-bar renders without an extra round-trip. Premium →
+        # unlimited; free → live pool with regen applied.
+        try:
+            from database import get_hearts_state
+            hearts = await get_hearts_state(uid, kind != "none")
+        except Exception:
+            hearts = {"hearts":5,"max":5,"next_in":0,"full":True,"unlimited":(kind!="none")}
         info = {
             **legacy,
             "platform_active": platform.get("active", False),
@@ -1042,6 +1050,7 @@ async def handle_check_premium(request):
             "chat_credits": credits,
             "grandfathered_tier": gf,
             "access_kind": kind,
+            "hearts": hearts,
             "source": "database",
         }
         return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})
@@ -1409,6 +1418,86 @@ async def handle_vocab_delete(request):
         logger.error(f"vocab_delete error: {e}")
         return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
+# ── HEARTS (free-tier lesson lives) ─────────────────────────────────────────────
+async def _is_premium_uid(uid: int) -> bool:
+    try:
+        from database import check_platform
+        return bool(await check_platform(uid))
+    except Exception:
+        return False
+
+async def handle_hearts_get(request):
+    """Current heart pool (with regen applied). Premium → unlimited."""
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import get_hearts_state
+        prem = await _is_premium_uid(uid)
+        st = await get_hearts_state(uid, prem)
+        return web.json_response(st, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"hearts_get error: {e}")
+        return web.json_response({"hearts":5,"max":5,"next_in":0,"full":True,"unlimited":False},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_hearts_lose(request):
+    """Deduct one heart for a lesson mistake (server-authoritative). Premium is
+    never decremented; returns the live pool so the client can sync the UI."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid", 0))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    if not uid:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import lose_heart, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        prem = await _is_premium_uid(uid)
+        st = await lose_heart(uid, prem)
+        return web.json_response(st, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"hearts_lose error: {e}")
+        return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_hearts_refill(request):
+    """Reward-based top-up. Body {amount}: amount<=0 → full refill (reserved for
+    server-verified Stars purchases done in bot.py); amount>0 → add N hearts.
+    This endpoint only grants the bounded ad-reward (+1) so it can't be abused to
+    self-grant a full pool; the full refill path lives behind the Stars payment."""
+    try:
+        body = await request.json()
+        uid = int(body.get("uid", 0))
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."}, status=403, headers={"Access-Control-Allow-Origin":"*"})
+    if not uid:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import refill_hearts
+        # Client-triggered refills are bounded to a single heart (ad reward).
+        st = await refill_hearts(uid, amount=1)
+        return web.json_response(st, headers={"Access-Control-Allow-Origin":"*"})
+    except Exception as e:
+        logger.error(f"hearts_refill error: {e}")
+        return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -1561,6 +1650,9 @@ def create_app():
     app.router.add_post("/api/save_word",handle_save_word)
     app.router.add_get("/api/vocab/{uid}",handle_vocab_list)
     app.router.add_delete("/api/vocab/{uid}/{word_id}",handle_vocab_delete)
+    app.router.add_get("/api/hearts/{uid}",handle_hearts_get)
+    app.router.add_post("/api/hearts/lose",handle_hearts_lose)
+    app.router.add_post("/api/hearts/refill",handle_hearts_refill)
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)
