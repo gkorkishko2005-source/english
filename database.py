@@ -163,6 +163,33 @@ CREATE TABLE IF NOT EXISTS toefl_scores (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Premium exam simulator (full TOEFL/IELTS mock + certificate).
+CREATE TABLE IF NOT EXISTS exam_sessions (
+    id              SERIAL PRIMARY KEY,
+    uid             BIGINT,
+    exam_type       TEXT DEFAULT 'toefl',      -- 'toefl' | 'ielts'
+    status          TEXT DEFAULT 'in_progress',-- in_progress | completed | abandoned
+    reading_score   REAL,
+    listening_score REAL,
+    writing_score   REAL,
+    speaking_score  REAL,
+    total_score     REAL,
+    scale_max       REAL,
+    cert_code       TEXT,
+    started_at      TIMESTAMPTZ DEFAULT NOW(),
+    completed_at    TIMESTAMPTZ
+);
+CREATE TABLE IF NOT EXISTS exam_section_results (
+    id          SERIAL PRIMARY KEY,
+    session_id  BIGINT,
+    uid         BIGINT,
+    section     TEXT,                          -- reading|listening|writing|speaking
+    raw_score   REAL,
+    max_score   REAL,
+    payload     TEXT,                          -- JSON: answers / essay+audit / transcript+audit
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS interests_log (
     id         SERIAL PRIMARY KEY,
     uid        BIGINT,
@@ -306,6 +333,18 @@ CREATE TABLE IF NOT EXISTS mistakes (
 CREATE TABLE IF NOT EXISTS toefl_scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, section TEXT,
     score INTEGER, max_score INTEGER, date TEXT
+);
+CREATE TABLE IF NOT EXISTS exam_sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER,
+    exam_type TEXT DEFAULT 'toefl', status TEXT DEFAULT 'in_progress',
+    reading_score REAL, listening_score REAL, writing_score REAL, speaking_score REAL,
+    total_score REAL, scale_max REAL, cert_code TEXT,
+    started_at TEXT DEFAULT (datetime('now')), completed_at TEXT
+);
+CREATE TABLE IF NOT EXISTS exam_section_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER, uid INTEGER,
+    section TEXT, raw_score REAL, max_score REAL, payload TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
 );
 CREATE TABLE IF NOT EXISTS interests_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, interest TEXT,
@@ -1671,6 +1710,108 @@ async def get_toefl_scores(uid: int):
         "SELECT section, AVG(score) as avg_s, MAX(score) as best, COUNT(*) as cnt "
         "FROM toefl_scores WHERE uid=? GROUP BY section", uid, fetch="all"
     )
+
+
+# ── EXAM SIMULATOR (premium TOEFL/IELTS full mock + certificate) ───
+# A session holds the four academic sections. Reading/Listening are objective
+# (raw correct-count → per-section scale); Writing/Speaking are AI-graded by
+# exam_grader.py. finalize_exam_session() scales the four section scores onto
+# the official total (TOEFL 0-120 sum / IELTS 0-9 mean→nearest .5) and mints a
+# shareable certificate code. Both tiers metered? No — these routes are
+# subscription-gated at the server layer; the DB layer just stores results.
+import json as _exam_json
+import secrets as _exam_secrets
+
+_EXAM_SCALE_MAX = {"toefl": 120.0, "ielts": 9.0}
+_EXAM_SECTION_MAX = {"toefl": 30, "ielts": 9}
+_EXAM_SECTION_COL = {
+    "reading": "reading_score", "listening": "listening_score",
+    "writing": "writing_score", "speaking": "speaking_score",
+}
+
+def _exam_norm_type(exam_type: str) -> str:
+    return "ielts" if str(exam_type or "").lower() == "ielts" else "toefl"
+
+async def create_exam_session(uid: int, exam_type: str = "toefl") -> int:
+    exam_type = _exam_norm_type(exam_type)
+    await db("INSERT INTO exam_sessions (uid, exam_type, status, scale_max) VALUES (?,?,?,?)",
+             uid, exam_type, "in_progress", _EXAM_SCALE_MAX[exam_type])
+    row = await db("SELECT id FROM exam_sessions WHERE uid=? ORDER BY id DESC LIMIT 1",
+                   uid, fetch="one")
+    return int(row["id"]) if row else 0
+
+async def get_exam_session(session_id: int, uid: int = None):
+    if uid is not None:
+        return await db("SELECT * FROM exam_sessions WHERE id=? AND uid=?",
+                        session_id, uid, fetch="one")
+    return await db("SELECT * FROM exam_sessions WHERE id=?", session_id, fetch="one")
+
+async def save_section_result(session_id: int, uid: int, section: str,
+                              raw_score: float, max_score: float,
+                              payload: dict = None) -> bool:
+    section = str(section or "").lower()
+    if section not in _EXAM_SECTION_COL:
+        return False
+    # Re-submitting a section overwrites the previous attempt.
+    await db("DELETE FROM exam_section_results WHERE session_id=? AND section=?",
+             session_id, section)
+    await db("INSERT INTO exam_section_results "
+             "(session_id, uid, section, raw_score, max_score, payload) VALUES (?,?,?,?,?,?)",
+             session_id, uid, section, float(raw_score), float(max_score),
+             _exam_json.dumps(payload or {}, ensure_ascii=False)[:8000])
+    col = _EXAM_SECTION_COL[section]
+    await db(f"UPDATE exam_sessions SET {col}=? WHERE id=? AND uid=?",
+             float(raw_score), session_id, uid)
+    return True
+
+async def get_section_results(session_id: int):
+    return await db("SELECT * FROM exam_section_results WHERE session_id=? ORDER BY id",
+                    session_id, fetch="all")
+
+def _exam_scale_total(exam_type: str, sections: dict) -> float:
+    """sections values are already on the official per-section scale
+    (TOEFL 0-30 each → sum 0-120; IELTS band 0-9 each → mean → nearest 0.5)."""
+    exam_type = _exam_norm_type(exam_type)
+    vals = [float(sections[k]) for k in _EXAM_SECTION_COL
+            if sections.get(k) is not None]
+    if not vals:
+        return 0.0
+    if exam_type == "ielts":
+        return round((sum(vals) / len(vals)) * 2) / 2.0
+    return float(round(sum(vals)))
+
+async def finalize_exam_session(session_id: int, uid: int) -> dict:
+    s = await get_exam_session(session_id, uid)
+    if not s:
+        return {}
+    exam_type = _exam_norm_type(s["exam_type"])
+    sections = {k: s[v] for k, v in _EXAM_SECTION_COL.items()}
+    total = _exam_scale_total(exam_type, sections)
+    scale_max = _EXAM_SCALE_MAX[exam_type]
+    cert_code = s["cert_code"] or ("PG-" + _exam_secrets.token_hex(4).upper())
+    await db("UPDATE exam_sessions SET status=?, total_score=?, scale_max=?, "
+             "cert_code=?, completed_at=? WHERE id=? AND uid=?",
+             "completed", total, scale_max, cert_code, _today(), session_id, uid)
+    # Mirror per-section scores into the legacy toefl_scores history for stats.
+    try:
+        per_max = _EXAM_SECTION_MAX[exam_type]
+        for sec, val in sections.items():
+            if val is not None:
+                await log_toefl(uid, f"{exam_type}_{sec}", int(round(float(val))), per_max)
+    except Exception as e:
+        logger.debug(f"exam history log skipped: {e}")
+    return {"session_id": session_id, "exam_type": exam_type, "total": total,
+            "scale_max": scale_max, "cert_code": cert_code, "sections": sections}
+
+async def get_exam_by_cert(cert_code: str):
+    return await db("SELECT * FROM exam_sessions WHERE cert_code=? AND status=?",
+                    cert_code, "completed", fetch="one")
+
+async def get_exam_history(uid: int, limit: int = 20):
+    limit = max(1, min(50, int(limit)))
+    return await db("SELECT id, exam_type, status, total_score, scale_max, completed_at "
+                    f"FROM exam_sessions WHERE uid=? AND status='completed' "
+                    f"ORDER BY id DESC LIMIT {limit}", uid, fetch="all")
 
 
 # ── Story ─────────────────────────────────────────────────────────

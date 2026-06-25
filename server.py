@@ -1611,6 +1611,314 @@ async def handle_cards_done(request):
         logger.error(f"cards_done error: {e}")
         return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
+# ── EXAM SIMULATOR (premium TOEFL/IELTS mock + AI grading + certificate) ──────
+async def _exam_auth(request):
+    """Authenticate + enforce an ACTIVE subscription for every exam route.
+    Returns (uid, lang, body, None) on success, or (uid, lang, body, response)
+    where `response` is a ready 402/403/400 to return immediately."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    uid = int(body.get("uid", 0) or 0)
+    lang = str(body.get("lang", "ru") or "ru")
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return 0, lang, body, web.json_response(
+            {"error": "Telegram session check failed. Reopen the bot app and try again."},
+            status=403, headers={"Access-Control-Allow-Origin": "*"})
+    if not uid:
+        return 0, lang, body, web.json_response(
+            {"error": "bad request"}, status=400, headers={"Access-Control-Allow-Origin": "*"})
+    if uid not in ADMIN_IDS and not await _is_premium_uid(uid):
+        return uid, lang, body, web.json_response(
+            _paywall_json(lang), status=402, headers={"Access-Control-Allow-Origin": "*"})
+    return uid, lang, body, None
+
+async def _exam_log_ai_cost(uid: int, usage: dict):
+    """Best-effort: charge AI-grading cost to the daily quota ledger (Sonnet)."""
+    if not usage or uid in ADMIN_IDS:
+        return
+    try:
+        from database import add_quota_usage
+        await add_quota_usage(uid, points=0, ai_cost=_estimate_ai_cost("sonnet", usage))
+    except Exception as e:
+        logger.warning("exam ai-cost log failed uid=%s: %s", uid, e)
+
+async def handle_exam_start(request):
+    """Open a new exam session. body: {uid, exam_type:'toefl'|'ielts'}."""
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    exam_type = str(body.get("exam_type") or "toefl").lower()
+    try:
+        from database import create_exam_session, upsert_user
+        try:
+            await upsert_user(uid, "Student")
+        except Exception:
+            pass
+        sid = await create_exam_session(uid, exam_type)
+        scale = 9.0 if exam_type == "ielts" else 120.0
+        return web.json_response(
+            {"session_id": sid, "exam_type": ("ielts" if exam_type == "ielts" else "toefl"),
+             "scale_max": scale, "section_max": (9 if exam_type == "ielts" else 30)},
+            headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_start error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+async def handle_exam_section(request):
+    """Record an OBJECTIVE section (reading|listening) scored client-side from the
+    answer key. body: {uid, session_id, section, raw_score, max_score, answers?}."""
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    section = str(body.get("section") or "").lower()
+    if section not in ("reading", "listening"):
+        return web.json_response({"error": "bad section"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        sid = int(body.get("session_id") or 0)
+        max_score = max(0.0, float(body.get("max_score") or 0))
+        raw = max(0.0, min(float(body.get("raw_score") or 0), max_score or 1e9))
+    except Exception:
+        return web.json_response({"error": "bad request"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        from database import get_exam_session, save_section_result
+        s = await get_exam_session(sid, uid)
+        if not s:
+            return web.json_response({"error": "no session"}, status=404,
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        exam_type = "ielts" if str(s["exam_type"]).lower() == "ielts" else "toefl"
+        # Map objective correct-ratio onto the official per-section scale.
+        smax = 9 if exam_type == "ielts" else 30
+        ratio = (raw / max_score) if max_score else 0.0
+        section_score = round(ratio * smax * 2) / 2.0 if exam_type == "ielts" else int(round(ratio * smax))
+        await save_section_result(sid, uid, section, section_score, smax,
+                                  {"correct": raw, "total": max_score,
+                                   "answers": (body.get("answers") or [])[:60]})
+        return web.json_response({"ok": True, "section": section,
+                                  "score": section_score, "max_score": smax},
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_section error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+async def handle_exam_writing(request):
+    """AI-graded Writing section. body: {uid, session_id, prompt, essay}."""
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    prompt = str(body.get("prompt") or "").strip()[:2000]
+    essay = str(body.get("essay") or "").strip()[:6000]
+    if len(essay.split()) < 20:
+        return web.json_response({"error": "too_short",
+                                  "message": ("Эссе слишком короткое для проверки." if lang == "ru"
+                                              else "The essay is too short to grade.")},
+                                 status=400, headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        from database import get_exam_session, save_section_result
+        from exam_grader import grade_writing
+        sid = int(body.get("session_id") or 0)
+        s = await get_exam_session(sid, uid)
+        if not s:
+            return web.json_response({"error": "no session"}, status=404,
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        exam_type = "ielts" if str(s["exam_type"]).lower() == "ielts" else "toefl"
+        audit = await grade_writing(exam_type, prompt, essay)
+        await _exam_log_ai_cost(uid, audit.get("usage") or {})
+        await save_section_result(sid, uid, "writing", audit["score"], audit["max_score"],
+                                  {"prompt": prompt, "essay": essay,
+                                   "feedback": audit["feedback"], "errors": audit["errors"],
+                                   "model_answer": audit["model_answer"],
+                                   "word_count": audit["word_count"]})
+        audit.pop("usage", None)
+        return web.json_response(audit, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_writing error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+async def handle_exam_speaking(request):
+    """AI-graded Speaking section on an STT transcript.
+    body: {uid, session_id, question, transcript}. (Audio → text via /api/transcribe.)"""
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    question = str(body.get("question") or "").strip()[:1000]
+    transcript = str(body.get("transcript") or "").strip()[:4000]
+    if len(transcript.split()) < 3:
+        return web.json_response({"error": "too_short",
+                                  "message": ("Ответ слишком короткий для оценки." if lang == "ru"
+                                              else "The answer is too short to grade.")},
+                                 status=400, headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        from database import get_exam_session, save_section_result
+        from exam_grader import grade_speaking
+        sid = int(body.get("session_id") or 0)
+        s = await get_exam_session(sid, uid)
+        if not s:
+            return web.json_response({"error": "no session"}, status=404,
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        exam_type = "ielts" if str(s["exam_type"]).lower() == "ielts" else "toefl"
+        audit = await grade_speaking(exam_type, question, transcript)
+        await _exam_log_ai_cost(uid, audit.get("usage") or {})
+        await save_section_result(sid, uid, "speaking", audit["score"], audit["max_score"],
+                                  {"question": question, "transcript": transcript,
+                                   "feedback": audit["feedback"], "fluency": audit["fluency"],
+                                   "pronunciation": audit["pronunciation"],
+                                   "grammar": audit["grammar"]})
+        audit.pop("usage", None)
+        return web.json_response(audit, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_speaking error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+async def handle_exam_finish(request):
+    """Finalise a session: scale the four sections → total + mint certificate.
+    body: {uid, session_id}."""
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    try:
+        from database import finalize_exam_session
+        sid = int(body.get("session_id") or 0)
+        result = await finalize_exam_session(sid, uid)
+        if not result:
+            return web.json_response({"error": "no session"}, status=404,
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        result["certificate_url"] = f"/api/exam/certificate/{result['cert_code']}"
+        return web.json_response(result, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_finish error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+async def handle_exam_history(request):
+    """GET /api/exam/history/{uid} — completed sessions for the Progress screen."""
+    try:
+        uid = int(request.match_info.get("uid", "0"))
+    except Exception:
+        return web.json_response({"error": "bad request"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error": "Telegram session check failed."}, status=403,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        from database import get_exam_history
+        rows = await get_exam_history(uid, 20)
+        out = []
+        for r in (rows or []):
+            d = dict(r)
+            ca = d.get("completed_at")
+            out.append({"id": d.get("id"), "exam_type": d.get("exam_type"),
+                        "total_score": d.get("total_score"), "scale_max": d.get("scale_max"),
+                        "completed_at": (ca.isoformat() if hasattr(ca, "isoformat") else str(ca or ""))})
+        return web.json_response({"history": out}, headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_history error: {e}")
+        return web.json_response({"history": []}, headers={"Access-Control-Allow-Origin": "*"})
+
+def _exam_cert_html(s: dict, name: str = "") -> str:
+    """Self-contained, printable/shareable certificate page (no PDF dependency:
+    the user can 'Save as PDF' from the browser/Telegram share sheet)."""
+    import html as _html
+    exam_type = "ielts" if str(s.get("exam_type")).lower() == "ielts" else "toefl"
+    is_ielts = exam_type == "ielts"
+    total = s.get("total_score") or 0
+    scale = s.get("scale_max") or (9 if is_ielts else 120)
+    total_str = (f"{float(total):.1f}" if is_ielts else str(int(round(float(total)))))
+    scale_str = (f"{float(scale):.0f}" if not is_ielts else f"{float(scale):.0f}")
+    title = "IELTS Academic" if is_ielts else "TOEFL iBT"
+    code = _html.escape(str(s.get("cert_code") or ""))
+    nm = _html.escape(name or "PolyGlotty Learner")
+    ca = s.get("completed_at")
+    date = (ca.isoformat()[:10] if hasattr(ca, "isoformat") else str(ca or "")[:10])
+    rows = ""
+    labels = {"reading": "Reading", "listening": "Listening",
+              "writing": "Writing", "speaking": "Speaking"}
+    for key, lbl in labels.items():
+        v = s.get(f"{key}_score")
+        if v is None:
+            continue
+        vv = (f"{float(v):.1f}" if is_ielts else str(int(round(float(v)))))
+        rows += f'<div class="sec"><span>{lbl}</span><b>{vv}</b></div>'
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PolyGlotty Certificate · {code}</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0f1115;color:#e7ebf2;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}}
+.cert{{width:100%;max-width:560px;background:linear-gradient(160deg,#171a21,#11131a);
+border:1px solid #2a3140;border-radius:24px;padding:34px 30px;
+box-shadow:0 24px 80px rgba(0,0,0,.5);position:relative;overflow:hidden}}
+.cert:before{{content:"";position:absolute;inset:0;background:
+radial-gradient(120% 60% at 50% -10%,rgba(110,168,254,.18),transparent 60%);pointer-events:none}}
+.brand{{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#6ea8fe;font-weight:700}}
+.kick{{color:#9aa3b2;font-size:13px;margin-top:18px}}
+.name{{font-size:26px;font-weight:800;margin:4px 0 2px}}
+.exam{{color:#9aa3b2;font-size:15px;margin-bottom:22px}}
+.scorebox{{text-align:center;padding:18px 0 6px}}
+.score{{font-size:64px;font-weight:900;line-height:1;color:#fff}}
+.score span{{font-size:24px;color:#9aa3b2;font-weight:700}}
+.scorelbl{{color:#6ea8fe;font-size:13px;letter-spacing:.16em;text-transform:uppercase;margin-top:8px;font-weight:700}}
+.secs{{margin:22px 0 6px;border-top:1px solid #232838;padding-top:16px}}
+.sec{{display:flex;justify-content:space-between;font-size:15px;padding:7px 0;color:#cdd4e0}}
+.sec b{{color:#fff}}
+.foot{{display:flex;justify-content:space-between;color:#7e8798;font-size:12px;margin-top:22px;
+border-top:1px solid #232838;padding-top:14px}}
+.btn{{display:block;width:100%;margin-top:22px;padding:13px;border-radius:14px;border:0;
+background:#6ea8fe;color:#0b0d12;font-weight:700;font-size:15px;cursor:pointer}}
+@media print{{body{{background:#fff}}.btn{{display:none}}.cert{{box-shadow:none;border-color:#ccc}}}}
+</style></head><body>
+<div class="cert">
+  <div class="brand">✦ PolyGlotty</div>
+  <div class="kick">This certifies that</div>
+  <div class="name">{nm}</div>
+  <div class="exam">completed a full {title} simulation</div>
+  <div class="scorebox">
+    <div class="score">{total_str}<span>/{scale_str}</span></div>
+    <div class="scorelbl">{'Overall band' if is_ielts else 'Total score'}</div>
+  </div>
+  <div class="secs">{rows}</div>
+  <div class="foot"><span>Certificate {code}</span><span>{date}</span></div>
+  <button class="btn" onclick="window.print()">Download / Print PDF</button>
+</div></body></html>"""
+
+async def handle_exam_certificate(request):
+    """GET /api/exam/certificate/{code} — public shareable certificate page."""
+    code = str(request.match_info.get("code", "")).strip()[:32]
+    if not code:
+        return web.Response(text="Not found", status=404)
+    try:
+        from database import get_exam_by_cert
+        s = await get_exam_by_cert(code)
+        if not s:
+            return web.Response(text="Certificate not found", status=404,
+                                content_type="text/plain")
+        s = dict(s)
+        name = ""
+        try:
+            from database import get_user
+            u = await get_user(int(s.get("uid") or 0))
+            if u:
+                name = str(dict(u).get("first_name") or dict(u).get("name") or "")
+        except Exception:
+            pass
+        return web.Response(text=_exam_cert_html(s, name), content_type="text/html",
+                            headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_certificate error: {e}")
+        return web.Response(text="Error", status=500, content_type="text/plain")
+
 # ── SYNC STATS ────────────────────────────────────────────────────────────────
 async def handle_sync_stats(request):
     """Sync local stats from webapp to server."""
@@ -1770,6 +2078,14 @@ def create_app():
     app.router.add_post("/api/lessons/done",handle_lessons_done)
     app.router.add_get("/api/cards/limit/{uid}",handle_cards_limit_get)
     app.router.add_post("/api/cards/done",handle_cards_done)
+    # Premium exam simulator (subscription-gated inside each handler).
+    app.router.add_post("/api/exam/start",handle_exam_start)
+    app.router.add_post("/api/exam/section",handle_exam_section)
+    app.router.add_post("/api/exam/writing",handle_exam_writing)
+    app.router.add_post("/api/exam/speaking",handle_exam_speaking)
+    app.router.add_post("/api/exam/finish",handle_exam_finish)
+    app.router.add_get("/api/exam/history/{uid}",handle_exam_history)
+    app.router.add_get("/api/exam/certificate/{code}",handle_exam_certificate)
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)
