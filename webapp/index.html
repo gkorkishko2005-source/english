@@ -8767,27 +8767,88 @@ const EXAM_SIM_CFG={qn:6,secs:6*60};
 let examSim=null;          // active session state
 let _examNoise=null;       // WebAudio ambient-noise nodes
 
-function startExamSim(exam){
-  exam=(exam==='ielts')?'ielts':'toefl';
-  const kind=(typeof TASK_KIND!=='undefined'&&TASK_KIND.exam)||{timed:true,allowBack:false,helpEnabled:false,noiseSim:true};
+/* Build the offline task pool from the static EXAM_BANK (no AI, no cost).
+   This is the guaranteed fallback when the academic generator is unreachable. */
+function _examBankTasks(exam){
   const pool=[];
   ['reading','listening'].forEach(sec=>{
     ((EXAM_BANK[exam]&&EXAM_BANK[exam][sec])||[]).forEach(t=>{
       if(Array.isArray(t.o)&&typeof t.a==='number')pool.push(Object.assign({_sec:sec},t));
     });
   });
-  if(!pool.length){toast(({ru:'Задания недоступны',en:'No tasks available',es:'No hay tareas',pt:'Sem tarefas',de:'Keine Aufgaben',fr:'Aucune tâche',uk:'Немає завдань',tr:'Görev yok',zh:'暂无题目',ar:'لا مهام'}[lang]||'No tasks available'),'⚠️');return;}
+  if(!pool.length)return [];
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
   const qn=Math.min(EXAM_SIM_CFG.qn,pool.length);
   const stamp=Date.now();
-  const tasks=pool.slice(0,qn).map((t,k)=>shuffleMCQ(t,'sim'+exam+k+stamp));
-  examSim={exam,kind,tasks,idx:0,correct:0,locked:false,noise:false,deadline:stamp+EXAM_SIM_CFG.secs*1000,timerId:null};
+  return pool.slice(0,qn).map((t,k)=>shuffleMCQ(t,'sim'+exam+k+stamp));
+}
+
+/* Flatten ONE /api/exam/generate item (1 passage|transcript + N questions)
+   into per-question simulator tasks. Each task carries the shared media so the
+   reading/listening renderers keep working unchanged. */
+function _examFlattenItem(item,sec){
+  if(!item||typeof item!=='object')return [];
+  const qs=Array.isArray(item.questions)?item.questions:[];
+  const media=(sec==='listening')?(item.transcript||''):(item.passage||'');
+  const out=[];
+  qs.forEach(q=>{
+    if(!q||!Array.isArray(q.o)||typeof q.a!=='number')return;
+    out.push({
+      _sec:sec,
+      passage:(sec==='reading')?media:'',
+      transcript:(sec==='listening')?media:'',
+      topic:item.topic||'',
+      q:q.q||'',
+      o:q.o.slice(),
+      a:q.a
+    });
+  });
+  return out;
+}
+
+/* AI-first task source: pull a fresh academic Reading + Listening item from the
+   server, flatten + shuffle into the simulator format. Returns null on ANY
+   failure (no uid/API, network error, timeout, too few tasks) so the caller
+   falls back to the offline EXAM_BANK. */
+async function _examFetchAItasks(exam){
+  if(!(window._uid||0)||typeof API==='undefined'||!API)return null;
+  try{
+    const fetchSec=(section)=>fetch(API+'/api/exam/generate',{
+      method:'POST',headers:_feHeaders(),
+      body:_feBody({exam_type:exam,section}),
+      signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(14000):undefined
+    }).then(r=>r.ok?r.json():null).catch(()=>null);
+    const [rd,ls]=await Promise.all([fetchSec('reading'),fetchSec('listening')]);
+    let pool=[];
+    if(rd&&!rd.error)pool=pool.concat(_examFlattenItem(rd,'reading'));
+    if(ls&&!ls.error)pool=pool.concat(_examFlattenItem(ls,'listening'));
+    if(pool.length<2)return null;
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    const qn=Math.min(EXAM_SIM_CFG.qn,pool.length);
+    const stamp=Date.now();
+    return pool.slice(0,qn).map((t,k)=>shuffleMCQ(t,'ai'+exam+k+stamp));
+  }catch(_){return null;}
+}
+
+async function startExamSim(exam){
+  exam=(exam==='ielts')?'ielts':'toefl';
+  const kind=(typeof TASK_KIND!=='undefined'&&TASK_KIND.exam)||{timed:true,allowBack:false,helpEnabled:false,noiseSim:true};
   const ov=document.getElementById('examsim');if(!ov)return;
   ov.style.display='flex';
   const kick=document.getElementById('examsim-kicker');
-  if(kick)kick.textContent=examTitle(exam)+' · '+({ru:'Симуляция',en:'Simulation',es:'Simulación',pt:'Simulação',de:'Simulation',fr:'Simulation',uk:'Симуляція',tr:'Simülasyon',zh:'模拟',ar:'محاكاة'}[lang]||'Simulation');
+  if(kick)kick.textContent=examTitle(exam)+' · '+({ru:'Симуляция',en:'Simulation',es:'Simulación',pt:'Simulação',de:'Simulation',fr:'Simulation',uk:'Симуляція',tr:'Simülasyon',zh:'模拟',ar:'محаكаة'}[lang]||'Simulation');
   const nb=document.getElementById('examsim-noise');
   if(nb){nb.style.display=kind.noiseSim?'':'none';nb.classList.remove('on');nb.setAttribute('aria-pressed','false');}
+  // Loading state while the academic generator prepares fresh tasks.
+  const loadBody=document.getElementById('examsim-body');
+  if(loadBody)loadBody.innerHTML='<div class="examsim-loading">'+({ru:'Готовим академические задания…',en:'Preparing academic tasks…',es:'Preparando tareas académicas…',pt:'Preparando tarefas acadêmicas…',de:'Akademische Aufgaben werden vorbereitet…',fr:'Préparation des tâches académiques…',uk:'Готуємо академічні завдання…',tr:'Akademik görevler hazırlanıyor…',zh:'正在准备学术题目…',ar:'جارٍ تحضير المهام الأكاديمية…'}[lang]||'Preparing academic tasks…')+'</div>';
+  // AI-first, EXAM_BANK as offline fallback.
+  let tasks=await _examFetchAItasks(exam);
+  let src='ai';
+  if(!tasks||tasks.length<2){tasks=_examBankTasks(exam);src='bank';}
+  if(!tasks||!tasks.length){toast(({ru:'Задания недоступны',en:'No tasks available',es:'No hay tareas',pt:'Sem tarefas',de:'Keine Aufgaben',fr:'Aucune tâche',uk:'Немає завдань',tr:'Görev yok',zh:'暂无题目',ar:'لا مهام'}[lang]||'No tasks available'),'⚠️');ov.style.display='none';return;}
+  const stamp=Date.now();
+  examSim={exam,kind,tasks,idx:0,correct:0,locked:false,noise:false,src,deadline:stamp+EXAM_SIM_CFG.secs*1000,timerId:null};
   _examSimRenderQ();_examSimUpdateRail();_examSimTick();
   examSim.timerId=setInterval(_examSimTick,500);
   try{trackM('drill');}catch(_){}
