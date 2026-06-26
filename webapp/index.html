@@ -608,7 +608,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .examsim-cta-row{display:flex;gap:8px}
 .examsim-cta-row button{flex:1;border:1px solid rgba(var(--exam-r),.3);background:rgba(var(--exam-r),.08);color:var(--t1);border-radius:10px;padding:9px 8px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer;transition:.15s}
 .examsim-cta-row button:active{transform:scale(.97);border-color:var(--exam)}
-.examsim{position:fixed;inset:0;z-index:1200;background:var(--bg);display:none;flex-direction:column;animation:fadeIn .2s ease}
+.examsim{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000;background:#121214;background-color:#121214;isolation:isolate;overscroll-behavior:contain;display:none;flex-direction:column;animation:fadeIn .2s ease;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.examsim.on,.examsim[style*="flex"]{display:flex}
 .examsim-top{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--b1)}
 .examsim-x{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);font-size:16px;line-height:1;cursor:pointer}
 .examsim-x:active{transform:scale(.94)}
@@ -621,7 +622,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .examsim-noise:active{transform:scale(.94)}
 .examsim-rail{height:3px;background:rgba(255,255,255,.07)}
 .examsim-railfill{height:100%;width:0%;background:linear-gradient(90deg,var(--exam),var(--a));transition:width .35s cubic-bezier(.4,1,.4,1)}
-.examsim-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:flex;flex-direction:column;gap:12px}
+.examsim-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translate3d(0,0,0);will-change:scroll-position;padding:16px;display:flex;flex-direction:column;gap:12px}
+.examsim-opt{touch-action:manipulation}
 .examsim-count{font-size:11px;font-weight:850;letter-spacing:.4px;color:var(--t3);text-transform:uppercase}
 .examsim-passage{font-size:13px;line-height:1.6;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:12px}
 .examsim-listen{display:flex;flex-direction:column;gap:8px;align-items:flex-start}

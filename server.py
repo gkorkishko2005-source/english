@@ -340,6 +340,32 @@ async def cache_static_mw(request, handler):
         logger.warning(f"cache_static_mw: {e}")
     return resp
 
+# Content types worth gzipping (text-like, highly compressible). Binary assets
+# (images, fonts, audio) are already compressed — skip them.
+_COMPRESSIBLE_CT = ("text/", "application/json", "application/javascript",
+                    "application/xml", "image/svg", "application/manifest")
+
+@web.middleware
+async def gzip_mw(request, handler):
+    """Transparent gzip/deflate for text responses. Cuts the ~1MB index.html
+    and large JSON payloads (lessons, vocab) by 70-85% over the wire — the
+    single biggest win for cold-start load time and battery on mobile."""
+    resp = await handler(request)
+    try:
+        ae = (request.headers.get("Accept-Encoding") or "").lower()
+        ct = (resp.headers.get("Content-Type") or "").lower()
+        # Only compress when the client supports it, the body is text-like,
+        # it is not already encoded, and it is a buffered (non-streaming) body.
+        if ("gzip" in ae
+                and any(ct.startswith(p) or p in ct for p in _COMPRESSIBLE_CT)
+                and "Content-Encoding" not in resp.headers
+                and getattr(resp, "body", None) is not None
+                and len(resp.body) >= 600):
+            resp.enable_compression()
+    except Exception as e:
+        logger.warning(f"gzip_mw: {e}")
+    return resp
+
 # ── USER DATA ────────────────────────────────────────────────────────────────
 async def handle_user(request):
     try:
@@ -2288,7 +2314,7 @@ async def handle_options(request):
 
 # ── APP ───────────────────────────────────────────────────────────────────────
 def create_app():
-    app=web.Application(middlewares=[cache_static_mw])
+    app=web.Application(middlewares=[gzip_mw, cache_static_mw])
     app.router.add_get("/",handle_index)
     app.router.add_get("/api/user/{uid}",handle_user)
     app.router.add_get("/api/referral/{uid}",handle_referral)

@@ -507,20 +507,21 @@ async def finish_toefl_listening(uid: int, message: Message):
 # ══════════════════════════════════════════════════════════════════
 
 def main_kb(lang: str) -> ReplyKeyboardMarkup:
-    ru = [["📚 Урок грамматики","📝 Словарь"],["🎭 Ролевой диалог","🎮 Квест-история"],
-          ["✅ Тест","🎓 TOEFL"],["✍️ Проверить текст","🎨 Тон фразы"],
-          ["💬 Разговор","⚔️ Дебаты"],["🗣 Идиомы","❌ Мои ошибки"],["📊 Прогресс",""]]
-    en = [["📚 Grammar Lesson","📝 Vocabulary"],["🎭 Roleplay","🎮 Story Quest"],
-          ["✅ Test","🎓 TOEFL"],["✍️ Check Writing","🎨 Tone Editor"],
-          ["💬 Speaking","⚔️ Debate"],["🗣 Idioms","❌ My Mistakes"],["📊 Progress",""]]
-    rows_data = ru if lang=="ru" else en
-    rows = []
-    for row in rows_data:
-        btns = [KeyboardButton(text=t) for t in row if t]
-        if btns: rows.append(btns)
+    """Single persistent button that opens the full Mini App. All former
+    keyboard entries (lessons, vocab, exams, tools…) now live INSIDE the app,
+    so the chat stays clean and is reserved strictly for free ALEX questions.
+    Falls back to a plain text button if the WebApp URL is unavailable (local)."""
+    label = "🤖 Открыть PolyGlotty" if lang == "ru" else "🤖 Open PolyGlotty"
+    placeholder = ("Спроси ALEX о слове, теме или правиле…" if lang == "ru"
+                   else "Ask ALEX about a word, topic or rule…")
+    url = webapp_url()
+    if url:
+        btn = KeyboardButton(text=label, web_app=WebAppInfo(url=url))
+    else:
+        btn = KeyboardButton(text=label)
     return ReplyKeyboardMarkup(
-        keyboard=rows, resize_keyboard=True,
-        input_field_placeholder="Пиши по-английски — ALEX проверит..." if lang=="ru" else "Write in English — ALEX will check...",
+        keyboard=[[btn]], resize_keyboard=True, is_persistent=True,
+        input_field_placeholder=placeholder,
     )
 
 def lang_kb():
@@ -1121,7 +1122,7 @@ async def setup_bot_profile():
         await bot.set_my_commands(commands_en)
         await bot.set_my_commands(commands_ru, language_code="ru")
         if app_url:
-            await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="Open App", web_app=WebAppInfo(url=app_url)))
+            await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="🤖 PolyGlotty", web_app=WebAppInfo(url=app_url)))
         logger.info("Bot profile metadata updated")
     except Exception as e:
         logger.warning(f"setup_bot_profile failed: {e}")
