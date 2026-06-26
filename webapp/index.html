@@ -14094,6 +14094,11 @@ function setPremium(active, source){
       badge.style.marginLeft='8px';
       shdr.appendChild(badge);
     }
+  } else if(!active){
+    // Demotion: strip every lingering green premium element so an expired
+    // subscriber instantly drops to the plain free interface. The header ★
+    // was previously never removed, leaving a stale "premium" marker.
+    document.querySelectorAll('.shdr .stit .premium-badge').forEach(b=>b.remove());
   }
 }
 
@@ -16760,8 +16765,12 @@ async function init(){
         if(!srv)return;
         const merged={...d,...srv,name:telegramDisplayName()||cleanDisplayName(srv.name)||cleanDisplayName(d.name),xp:Math.max(srv.xp||0,localXP)};
         window._d=merged;
-        // Apply server premium status
-        if(srv.is_premium)setPremium(true,'server');
+        // Apply server premium status — TWO-WAY. Previously this only ever
+        // promoted (if(srv.is_premium)setPremium(true)), so a lapsed sub could
+        // never be demoted from a stale local state and kept rendering "Active".
+        // /api/user now runs the backend subscription guard (enforce_subscription
+        // + check_platform), so its boolean is authoritative for both directions.
+        setPremium(srv.is_premium===true,'server');
         try{renderHome(merged);}catch{}
         try{renderProgress(merged);}catch{}
       }).catch(()=>{});
@@ -16787,7 +16796,14 @@ async function init(){
         fetch(`${API}/api/sync_stats`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid,stats:s})}).catch(()=>{});
       };
       setInterval(syncStats,60000);
-      document.addEventListener('visibilitychange',()=>{if(document.hidden)syncStats();});
+      document.addEventListener('visibilitychange',()=>{
+        if(document.hidden){syncStats();}
+        // Returning to foreground = re-validate the subscription. Catches the
+        // case where the app sat backgrounded across the expiry timestamp
+        // (e.g. UTC-midnight lapse) — pulls fresh /api/premium and demotes the
+        // UI to free + Paywall the instant the user reopens, no reload needed.
+        else if(window._uid&&API){try{checkPremiumStatus(window._uid);}catch(_){}}
+      });
       if(tg)try{tg.onEvent('viewportChanged',(e)=>{if(!e.isStateStable)syncStats();});}catch(e){}
     }
 
