@@ -35,6 +35,11 @@ GEMINI_MODEL     = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 # Master switch. Defaults ON when a key is present so the free tier is offloaded
 # automatically; set GEMINI_FREE_ENABLED=0 to fall back to the old credit path.
 GEMINI_FREE_ENABLED = os.getenv("GEMINI_FREE_ENABLED", "1") != "0"
+# TEMP TEST OVERRIDE. When ON, EVERY user (including Premium / Platform) is routed
+# to Gemini and Anthropic is bypassed entirely — used to verify the Gemini path on
+# prod. Default OFF. Flip GEMINI_FORCE_ALL=1 in Railway to enable; delete the var
+# to instantly restore Claude for paying users (no code change / redeploy needed).
+GEMINI_FORCE_ALL = os.getenv("GEMINI_FORCE_ALL", "0") == "1"
 GEMINI_MAX_TOKENS = int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600")
 GEMINI_TIMEOUT    = float(os.getenv("GEMINI_TIMEOUT", "45") or "45")
 GEMINI_BASE_URL   = os.getenv(
@@ -45,6 +50,9 @@ if GEMINI_FREE_ENABLED and not GEMINI_API_KEY:
     logger.warning("⚠️ GEMINI_FREE_ENABLED but GEMINI_API_KEY is empty — free users will fall back to the credit path.")
 elif GEMINI_API_KEY:
     logger.info(f"✅ GEMINI_API_KEY loaded (model={GEMINI_MODEL}, starts with {GEMINI_API_KEY[:6]}...)")
+
+if GEMINI_FORCE_ALL:
+    logger.warning("🟡 GEMINI_FORCE_ALL=1 — ALL users (incl. Premium) routed to Gemini; Anthropic Claude is BYPASSED. Temporary test mode.")
 
 
 # ── Typed errors ──────────────────────────────────────────────────────────────
@@ -62,8 +70,15 @@ def gemini_available() -> bool:
 
 
 def should_use_gemini(is_paid: bool) -> bool:
-    """Route FREE (non-paying) users to Gemini; paid users to Anthropic."""
-    return (not is_paid) and gemini_available()
+    """Route FREE (non-paying) users to Gemini; paid users to Anthropic.
+
+    GEMINI_FORCE_ALL overrides the paid check and sends everyone to Gemini
+    (temporary test switch to disable Claude on prod)."""
+    if not gemini_available():
+        return False
+    if GEMINI_FORCE_ALL:
+        return True
+    return not is_paid
 
 
 # ── History adapter ───────────────────────────────────────────────────────────
