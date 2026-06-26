@@ -4,6 +4,7 @@ PolyGlotty DB v4
 from __future__ import annotations
 
 import os
+import json
 import logging
 from datetime import datetime, timedelta
 
@@ -190,6 +191,17 @@ CREATE TABLE IF NOT EXISTS exam_section_results (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Cache of AI-generated dictionary word breakdowns (3 contextual examples).
+-- Keyed by (word, lang) so repeat taps reuse the cached result instead of
+-- paying for a fresh Anthropic call. `examples` is a JSON array of {en,tr}.
+CREATE TABLE IF NOT EXISTS word_examples_cache (
+    word       TEXT,
+    lang       TEXT,
+    examples   TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (word, lang)
+);
+
 CREATE TABLE IF NOT EXISTS interests_log (
     id         SERIAL PRIMARY KEY,
     uid        BIGINT,
@@ -345,6 +357,11 @@ CREATE TABLE IF NOT EXISTS exam_section_results (
     id INTEGER PRIMARY KEY AUTOINCREMENT, session_id INTEGER, uid INTEGER,
     section TEXT, raw_score REAL, max_score REAL, payload TEXT,
     created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS word_examples_cache (
+    word TEXT, lang TEXT, examples TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (word, lang)
 );
 CREATE TABLE IF NOT EXISTS interests_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, interest TEXT,
@@ -1812,6 +1829,51 @@ async def get_exam_history(uid: int, limit: int = 20):
     return await db("SELECT id, exam_type, status, total_score, scale_max, completed_at "
                     f"FROM exam_sessions WHERE uid=? AND status='completed' "
                     f"ORDER BY id DESC LIMIT {limit}", uid, fetch="all")
+
+
+# ── Dictionary word-breakdown cache ───────────────────────────────
+# The dictionary "3 examples in context" feature asks Claude Sonnet for three
+# contextual example sentences. The result is deterministic enough to cache:
+# the same word in the same UI language always yields equivalent examples, so we
+# store them once and serve cached copies on every repeat tap — avoiding a paid
+# Anthropic call each time the user reopens a saved word.
+
+def _norm_word_key(word: str) -> str:
+    return (word or "").strip().lower()[:120]
+
+
+async def get_word_examples(word: str, lang: str):
+    """Return the cached [{en,tr},...] list for (word, lang), or None on miss."""
+    key = _norm_word_key(word)
+    if not key:
+        return None
+    lang = (lang or "en")[:8]
+    row = await db("SELECT examples FROM word_examples_cache WHERE word=? AND lang=?",
+                   key, lang, fetch="one")
+    if not row:
+        return None
+    raw = row["examples"] if isinstance(row, dict) else row[0]
+    try:
+        data = json.loads(raw or "[]")
+        return data if isinstance(data, list) and data else None
+    except Exception:
+        return None
+
+
+async def save_word_examples(word: str, lang: str, examples: list):
+    """Upsert the AI-generated examples for (word, lang). No-op on empty input."""
+    key = _norm_word_key(word)
+    if not key or not isinstance(examples, list) or not examples:
+        return
+    lang = (lang or "en")[:8]
+    payload = json.dumps(examples[:3], ensure_ascii=False)
+    if USE_POSTGRES:
+        await db("INSERT INTO word_examples_cache (word, lang, examples) VALUES (?,?,?) "
+                 "ON CONFLICT (word, lang) DO UPDATE SET examples=EXCLUDED.examples, "
+                 "created_at=NOW()", key, lang, payload)
+    else:
+        await db("INSERT OR REPLACE INTO word_examples_cache (word, lang, examples) "
+                 "VALUES (?,?,?)", key, lang, payload)
 
 
 # ── Story ─────────────────────────────────────────────────────────

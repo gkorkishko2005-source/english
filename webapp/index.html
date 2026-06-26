@@ -561,6 +561,27 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .lt-result{text-align:center;padding:20px 0}
 .lt-pass{background:rgba(0,212,170,.05);border-radius:var(--r);padding:24px 16px}
 .lt-fail{background:rgba(255,149,0,.05);border-radius:var(--r);padding:24px 16px}
+/* ── Exams tab: full-simulator preview cards (single entry point) ───────── */
+.exsim-hero{padding:2px 2px 14px}
+.exsim-hero-title{font-size:20px;font-weight:900;color:var(--t1);letter-spacing:-.3px}
+.exsim-hero-sub{font-size:12.5px;line-height:1.5;color:var(--t2);margin-top:6px}
+.exsim-card{position:relative;overflow:hidden;border-radius:18px;padding:16px;margin-bottom:14px;background:linear-gradient(150deg,var(--exsim-c1),var(--e2) 70%);border:1px solid var(--exsim-bd);box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.exsim-card::after{content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:var(--exsim-glow);filter:blur(8px);opacity:.5;pointer-events:none}
+.exsim-card-top{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.exsim-logo{flex-shrink:0;width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;background:var(--exsim-accent);box-shadow:0 4px 12px var(--exsim-glow)}
+.exsim-card-name{font-size:17px;font-weight:900;color:var(--t1)}
+.exsim-card-tag{font-size:11.5px;font-weight:700;color:var(--t2);margin-top:2px}
+.exsim-prem-pill{margin-left:auto;font-size:10px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;color:#ffcf5c;background:rgba(255,191,71,.14);border:1px solid rgba(255,191,71,.3);border-radius:999px;padding:4px 9px;display:flex;align-items:center;gap:4px}
+.exsim-prem-pill svg{width:11px;height:11px;stroke:#ffcf5c;fill:none;stroke-width:2}
+.exsim-stats{display:flex;gap:10px;margin:14px 0 12px;position:relative;z-index:1}
+.exsim-stat{flex:1;background:var(--e1);border:1px solid var(--b1);border-radius:12px;padding:9px 10px}
+.exsim-stat-v{font-size:18px;font-weight:900;color:var(--t1);line-height:1}
+.exsim-stat-l{font-size:10.5px;font-weight:700;color:var(--t2);margin-top:4px}
+.exsim-secs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;position:relative;z-index:1}
+.exsim-sec{font-size:11.5px;font-weight:800;color:var(--t1);background:var(--e1);border:1px solid var(--b1);border-radius:999px;padding:5px 10px;display:flex;align-items:center;gap:5px}
+.exsim-launch{width:100%;border:none;border-radius:13px;padding:13px;font-family:var(--f);font-size:14.5px;font-weight:900;color:#fff;background:var(--exsim-accent);cursor:pointer;transition:.16s;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:8px}
+.exsim-launch svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.exsim-launch:active{transform:scale(.975);filter:brightness(1.08)}
 .exam-hub{background:var(--e1);border:1px solid var(--b1);border-radius:var(--r2);padding:12px;display:grid;gap:10px}
 .exam-title{font-size:15px;font-weight:900;color:var(--t1)}
 .exam-sub{font-size:12px;line-height:1.45;color:var(--t2)}
@@ -12742,8 +12763,19 @@ function updateLearnHeader(){
     const lsub=document.getElementById('learn-sub');
     if(lsub){
       if(learnTab==='cards'){
-        const rc=getReviewCount();
-        lsub.textContent=rc>0?({ru:rc+' карточек на повторение',en:rc+' cards due for review'}[lang]||rc+' cards due'):({ru:'Нет карточек на повторение',en:'No cards due for review',es:'Sin tarjetas para repasar',pt:'Sem cartões para revisar',de:'Keine Karten fällig',fr:'Aucune carte à réviser',uk:'Немає карток на повторення',tr:'Tekrar edilecek kart yok',zh:'暂无待复习卡片',ar:'لا توجد بطاقات للمراجعة'}[lang]||'');
+        /* Session-progress counter (NOT the full review pool). A user may have
+           122 cards queued but a 15/60-per-day cap; showing the whole pool is
+           overwhelming and misleading. Instead show "Текущая сессия: X из 15". */
+        const _wi=cardWindowInfo();
+        const _used=Math.max(0,Math.min(_wi.limit,_wi.used)),_limit=_wi.limit;
+        const _sessLbl=({ru:'Текущая сессия',en:'Current session',es:'Sesión actual',pt:'Sessão atual',de:'Aktuelle Sitzung',fr:'Session actuelle',uk:'Поточна сесія',tr:'Geçerli oturum',zh:'本次学习',ar:'الجلسة الحالية'}[lang]||'Current session');
+        if(_limit>0 && _used>=_limit){
+          /* Day's quota done — short "completed" line instead of progress. */
+          lsub.textContent=({ru:`Сессия завершена · ${_used} из ${_limit}`,en:`Session done · ${_used} of ${_limit}`,es:`Sesión completa · ${_used} de ${_limit}`,pt:`Sessão concluída · ${_used} de ${_limit}`,de:`Sitzung fertig · ${_used} von ${_limit}`,fr:`Session terminée · ${_used} sur ${_limit}`,uk:`Сесію завершено · ${_used} з ${_limit}`,tr:`Oturum bitti · ${_used}/${_limit}`,zh:`本次完成 · ${_used}/${_limit}`,ar:`انتهت الجلسة · ${_used} من ${_limit}`}[lang]||`Session done · ${_used} of ${_limit}`);
+        } else {
+          const _ofw=({ru:'из',en:'of',es:'de',pt:'de',de:'von',fr:'sur',uk:'з',tr:'/',zh:'/',ar:'من'}[lang]||'of');
+          lsub.textContent=`${_sessLbl}: ${_used} ${_ofw} ${_limit}`;
+        }
         lsub.style.display='';
       } else {
         lsub.textContent='';
@@ -13025,56 +13057,54 @@ function completeRoadmapMission(lessonId){
    prep lessons with a one-tap entry into the same lesson UI as the main
    course. This replaces the old grammar roadmap, which duplicated the CEFR
    course content. */
+/* ── Exams tab = single entry point for the full AI-graded mock simulator ──
+   The old per-section practice lessons and standalone Reading passages were
+   removed from this tab; it now shows two premium simulator preview cards
+   (TOEFL / IELTS). Tapping "Запустить полный симулятор" launches the 4-section
+   mock via startFullExam(), which gates non-subscribers to the paywall. */
 function renderRoadmap(){
   const wrap=document.getElementById('roadmap-wrap');
   if(!wrap)return;
   /* If a reading passage is currently open, do not redraw the hub on top. */
   if(_inReadingPassage)return;
-  const sorted=sortedGalaxyCourse();
-  const examUnlocked=hasTier('basic');
-  const exams=[
-    {level:'TOEFL',color:'#9c27b0',name:{ru:'TOEFL ITP',en:'TOEFL ITP'},desc:{ru:'Listening · Structure · Reading',en:'Listening · Structure · Reading'}},
-    {level:'IELTS',color:'#e74c3c',name:{ru:'IELTS Academic / General',en:'IELTS Academic / General'},desc:{ru:'Listening · Reading · Writing',en:'Listening · Reading · Writing'}},
-    {level:'CAE',color:'#16a085',name:{ru:'Cambridge CAE / CPE',en:'Cambridge CAE / CPE'},desc:{ru:'Use of English · Reading · Speaking',en:'Use of English · Reading · Speaking'}}
+  const unlocked=hasPlatform();
+  const heroTitle='International Exams Simulator';
+  const heroSub=({ru:'Полноценный пробный экзамен: 4 секции, таймер, проверка письма и речи ИИ, итоговый балл и сертификат — как на реальном экзамене.',en:'A full mock exam: 4 sections, a timer, AI-graded writing & speaking, a final score and a certificate — just like the real test.',es:'Un examen simulado completo: 4 secciones, cronómetro, escritura y expresión oral evaluadas por IA, puntuación final y certificado, como en la prueba real.',pt:'Um simulado completo: 4 seções, cronômetro, redação e fala avaliadas por IA, pontuação final e certificado — como na prova real.',de:'Eine vollständige Prüfungssimulation: 4 Abschnitte, Timer, KI-Bewertung von Schreiben & Sprechen, Endpunktzahl und Zertifikat – wie in der echten Prüfung.',fr:'Un examen blanc complet : 4 sections, un minuteur, écriture et expression orale notées par IA, score final et certificat — comme au vrai examen.',uk:'Повноцінний пробний іспит: 4 секції, таймер, перевірка письма й мовлення ШІ, підсумковий бал і сертифікат — як на справжньому іспиті.',tr:'Tam bir deneme sınavı: 4 bölüm, zamanlayıcı, yapay zekâ ile yazma ve konuşma değerlendirmesi, nihai puan ve sertifika — gerçek sınav gibi.',zh:'完整的模拟考试：4 个部分、计时、AI 评判写作与口语、最终分数和证书——如真实考试。',ar:'امتحان تجريبي كامل: 4 أقسام، مؤقّت، تقييم الكتابة والتحدث بالذكاء الاصطناعي، درجة نهائية وشهادة — مثل الامتحان الحقيقي.'}[lang]||'A full mock exam: 4 sections, a timer, AI-graded writing & speaking, a final score and a certificate — just like the real test.');
+  const launchLbl=({ru:'Запустить полный симулятор',en:'Launch full simulator',es:'Iniciar simulador completo',pt:'Iniciar simulador completo',de:'Vollsimulator starten',fr:'Lancer le simulateur complet',uk:'Запустити повний симулятор',tr:'Tam simülatörü başlat',zh:'启动完整模拟器',ar:'تشغيل المحاكي الكامل'}[lang]||'Launch full simulator');
+  const secLbl=({ru:'секции',en:'sections',es:'secciones',pt:'seções',de:'Abschnitte',fr:'sections',uk:'секції',tr:'bölüm',zh:'部分',ar:'أقسام'}[lang]||'sections');
+  const minLbl=({ru:'минут',en:'minutes',es:'minutos',pt:'minutos',de:'Minuten',fr:'minutes',uk:'хвилин',tr:'dakika',zh:'分钟',ar:'دقيقة'}[lang]||'minutes');
+  const premLbl=({ru:'Premium',en:'Premium',es:'Premium',pt:'Premium',de:'Premium',fr:'Premium',uk:'Premium',tr:'Premium',zh:'Premium',ar:'Premium'}[lang]||'Premium');
+  const secNames=[
+    {k:'reading',ico:'📖',t:({ru:'Reading',en:'Reading'}).en},
+    {k:'listening',ico:'🎧',t:'Listening'},
+    {k:'writing',ico:'✍️',t:'Writing'},
+    {k:'speaking',ico:'🎙️',t:'Speaking'}
   ];
-  const done=LS.getJ('course_done')||{};
-  const headSub=examUnlocked
-    ?({ru:'Полные уроки в формате реального экзамена: задания, словарь, стратегия.',en:'Full lessons in real-exam format: tasks, vocabulary, strategy.',es:'Lecciones completas en formato de examen real: tareas, vocabulario, estrategia.',pt:'Aulas completas no formato de exame real: tarefas, vocabulário, estratégia.',de:'Vollständige Lektionen im echten Prüfungsformat: Aufgaben, Wortschatz, Strategie.',fr:'Leçons complètes au format d’examen réel : tâches, vocabulaire, stratégie.',uk:'Повні уроки у форматі справжнього іспиту: завдання, словник, стратегія.',tr:'Gerçek sınav formatında tam dersler: görevler, kelime, strateji.',zh:'真实考试形式的完整课程：题目、词汇、策略。',ar:'دروس كاملة بصيغة الامتحان الحقيقي: مهام ومفردات واستراتيجية.'}[lang]||'Full lessons in real-exam format: tasks, vocabulary, strategy.')
-    :({ru:'Доступно с подпиской. Стратегия, словарь и задания в формате реального экзамена.',en:'Available with a subscription. Strategy, vocabulary and tasks in real-exam format.',es:'Disponible con la suscripción. Estrategia, vocabulario y tareas en formato de examen real.',pt:'Disponível com a assinatura. Estratégia, vocabulário e tarefas no formato de exame real.',de:'Mit Abo verfügbar. Strategie, Wortschatz und Aufgaben im echten Prüfungsformat.',fr:'Disponible avec l’abonnement. Stratégie, vocabulaire et tâches au format d’examen réel.',uk:'Доступно з підпискою. Стратегія, словник і завдання у форматі справжнього іспиту.',tr:'Abonelikle kullanılabilir. Gerçek sınav formatında strateji, kelime ve görevler.',zh:'需订阅。真实考试形式的策略、词汇与题目。',ar:'متاح مع الاشتراك. استراتيجية ومفردات ومهام بصيغة الامتحان الحقيقي.'}[lang]||'Available with a subscription. Strategy, vocabulary and tasks in real-exam format.');
-  const head=`<div class="course-system">
-    <div class="course-system-top">
-      <div><div class="course-system-title">${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')} ${examUnlocked?'':'<span class="course-system-pill" style="background:rgba(255,165,0,.16);color:#ffa500;border-color:rgba(255,165,0,.32)">★</span>'}</div>
-      <div class="course-system-sub">${headSub}</div></div>
-    </div>
-    ${examUnlocked?'':`<button class="course-exam-btn" onclick="showTierPaywall('basic','${({ru:'Подготовка к экзаменам',en:'Exam preparation',es:'Preparación de exámenes',pt:'Preparação para exames',de:'Prüfungsvorbereitung',fr:'Préparation aux examens',uk:'Підготовка до екзаменів',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحانات'}[lang]||'Exam preparation')}')">${({ru:'Открыть с подпиской',en:'Unlock with subscription',es:'Desbloquear con suscripción',pt:'Desbloquear com assinatura',de:'Mit Abo freischalten',fr:'Débloquer avec l’abonnement',uk:'Відкрити з підпискою',tr:'Abonelikle aç',zh:'用订阅解锁',ar:'افتحه مع الاشتراك'}[lang]||'Unlock with subscription')}</button>`}
-  </div>`;
-  const groups=exams.map(ex=>{
-    const items=sorted.filter(l=>l.level===ex.level);
-    if(!items.length)return '';
-    const doneCount=items.filter(l=>done[l.id]).length;
-    const cards=items.map(ls=>`<div class="course-card" style="--lesson-color:${ex.color}" onclick="openExamLessonFromHub('${ls.id}')">
-      <div class="course-ico" style="color:${ex.color}">${lessonThemeIcon(ls)}</div>
-      <div class="course-info">
-        <div class="course-title">${safeHTML(ls.title[lang]||ls.title.en)}</div>
-        <div class="course-sub">${safeHTML(ls.sub[lang]||ls.sub.en)}</div>
-        <div class="course-meta">${done[ls.id]?`<span class="course-done-pill">${({ru:'Пройдено',en:'Done',es:'Hecho',pt:'Concluído',de:'Erledigt',fr:'Terminé',uk:'Пройдено',tr:'Tamamlandı',zh:'已完成',ar:'تم'}[lang]||'Done')}</span>`:`<span class="course-pill">${({ru:'Теория',en:'Theory',es:'Teoría',pt:'Teoria',de:'Theorie',fr:'Théorie',uk:'Теорія',tr:'Teori',zh:'理论',ar:'النظرية'}[lang]||'Theory')}</span><span class="course-pill">${({ru:'Практика',en:'Practice',es:'Práctica',pt:'Prática',de:'Übung',fr:'Pratique',uk:'Практика',tr:'Pratik',zh:'练习',ar:'تطبيق'}[lang]||'Practice')}</span>`}</div>
+  const lockSvg='<svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  const playSvg='<svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+  function simCard(exam,name,tag,c1,glow,bd,accent,logo){
+    const secChips=secNames.map(s=>`<span class="exsim-sec">${s.ico} ${s.t}</span>`).join('');
+    return `<div class="exsim-card" style="--exsim-c1:${c1};--exsim-glow:${glow};--exsim-bd:${bd};--exsim-accent:${accent}">
+      <div class="exsim-card-top">
+        <div class="exsim-logo">${logo}</div>
+        <div style="min-width:0">
+          <div class="exsim-card-name">${safeHTML(name)}</div>
+          <div class="exsim-card-tag">${safeHTML(tag)}</div>
+        </div>
+        ${unlocked?'':`<div class="exsim-prem-pill">${lockSvg}${premLbl}</div>`}
       </div>
-      <div class="course-status"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div>`).join('');
-    return `<div class="course-level-head"><div class="course-level-name" style="color:${ex.color}">${safeHTML(ex.name[lang]||ex.name.en)}</div><div class="course-level-desc">${safeHTML(ex.desc[lang]||ex.desc.en)} · ${doneCount}/${items.length}</div></div>${cards}`;
-  }).join('');
-  /* Reading-passage block (full ETS-format texts with 10 questions each). */
-  const readingHead=`<div class="course-level-head"><div class="course-level-name" style="color:#4f8aff">${({ru:'TOEFL Reading · академические тексты',en:'TOEFL Reading · academic passages',es:'TOEFL Reading · textos académicos',pt:'TOEFL Reading · textos acadêmicos',de:'TOEFL Reading · akademische Texte',fr:'TOEFL Reading · textes académiques',uk:'TOEFL Reading · академічні тексти',tr:'TOEFL Reading · akademik metinler',zh:'TOEFL Reading · 学术文章',ar:'TOEFL Reading · نصوص أكاديمية'}[lang]||'TOEFL Reading · academic passages')}</div><div class="course-level-desc">${({ru:'700 слов · 10 вопросов на текст · стиль ETS',en:'700 words · 10 questions per passage · ETS style',es:'700 palabras · 10 preguntas por texto · estilo ETS',pt:'700 palavras · 10 perguntas por texto · estilo ETS',de:'700 Wörter · 10 Fragen pro Text · ETS-Stil',fr:'700 mots · 10 questions par texte · style ETS',uk:'700 слів · 10 запитань на текст · стиль ETS',tr:'700 kelime · metin başına 10 soru · ETS tarzı',zh:'700 词 · 每篇 10 题 · ETS 风格',ar:'700 كلمة · 10 أسئلة لكل نص · بأسلوب ETS'}[lang]||'700 words · 10 questions per passage · ETS style')}</div></div>`;
-  const readingCards=TOEFL_READING_PASSAGES.map(p=>`<div class="course-card" style="--lesson-color:#4f8aff" onclick="openReadingPassageFromHub('${p.id}')">
-    <div class="course-ico" style="color:#4f8aff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12"/><path d="M9 8h7M9 11h5"/></svg></div>
-    <div class="course-info">
-      <div class="course-title">${safeHTML(p.title[lang]||p.title.en)}</div>
-      <div class="course-sub">${safeHTML(p.sub[lang]||p.sub.en)}</div>
-      <div class="course-meta"><span class="course-pill">~700 ${({ru:'слов',en:'words',es:'palabras',pt:'palavras',de:'Wörter',fr:'mots',uk:'слів',tr:'kelime',zh:'词',ar:'كلمة'}[lang]||'words')}</span><span class="course-pill">10 ${({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'запитань',tr:'soru',zh:'题',ar:'أسئلة'}[lang]||'questions')}</span></div>
-    </div>
-    <div class="course-status"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-  </div>`).join('');
-  wrap.innerHTML=head+groups+readingHead+readingCards;
+      <div class="exsim-stats">
+        <div class="exsim-stat"><div class="exsim-stat-v">4</div><div class="exsim-stat-l">${secLbl}</div></div>
+        <div class="exsim-stat"><div class="exsim-stat-v">~60</div><div class="exsim-stat-l">${minLbl}</div></div>
+      </div>
+      <div class="exsim-secs">${secChips}</div>
+      <button class="exsim-launch" type="button" onclick="startFullExam('${exam}')">${unlocked?playSvg:lockSvg}${launchLbl}</button>
+    </div>`;
+  }
+  const hero=`<div class="exsim-hero"><div class="exsim-hero-title">${safeHTML(heroTitle)}</div><div class="exsim-hero-sub">${heroSub}</div></div>`;
+  const toefl=simCard('toefl','TOEFL iBT',({ru:'Academic · Reading · Listening · Writing · Speaking',en:'Academic · Reading · Listening · Writing · Speaking'}).en,'rgba(79,138,255,.16)','rgba(79,138,255,.45)','rgba(79,138,255,.3)','linear-gradient(135deg,#4f8aff,#3a6fd8)','TOEFL');
+  const ielts=simCard('ielts','IELTS',({ru:'Academic / General · 4 modules',en:'Academic / General · 4 modules'}).en,'rgba(231,76,60,.15)','rgba(231,76,60,.42)','rgba(231,76,60,.3)','linear-gradient(135deg,#e74c3c,#c0392b)','IELTS');
+  wrap.innerHTML=hero+toefl+ielts;
 }
 /* ── Reading passage viewer ────────────────────────────────────────── */
 let _inReadingPassage=false;
@@ -13663,13 +13693,36 @@ function _wbrkParse(text){
   });
   return out.slice(0,3);
 }
+/* Render up to 3 parsed {en,tr} example pairs into the breakdown body. */
+function _wbrkRenderExamples(ex){
+  _wbrkRender(ex.slice(0,3).map((e,i)=>`<div class="wbrk-ex"><div class="wbrk-ex-n">${i+1}</div><div class="wbrk-ex-main"><div class="wbrk-ex-en">${safeHTML(e.en)}</div>${e.tr?`<div class="wbrk-ex-tr">${safeHTML(e.tr)}</div>`:''}</div></div>`).join(''));
+}
+/* DB cache lookup for the 3 contextual examples. Resolves to a {en,tr} array on
+   a cache HIT, or null on miss/error. A hit means we skip the paid /api/chat
+   call entirely. Keyed server-side by (word, UI language). */
+async function _wbrkCacheGet(word){
+  if(!API||!word)return null;
+  try{
+    const r=await fetch(`${API}/api/word_examples?word=${encodeURIComponent(word)}&lang=${encodeURIComponent(lang)}`,{
+      headers:{'X-Telegram-Init-Data':tg?.initData||''},signal:AbortSignal.timeout(8000)});
+    if(!r.ok)return null;
+    const d=await r.json();
+    if(d&&d.hit&&Array.isArray(d.examples)&&d.examples.length)return d.examples;
+  }catch(_){}
+  return null;
+}
+/* Fire-and-forget: persist freshly generated examples so the next tap is free. */
+function _wbrkCacheSave(word,examples){
+  if(!API||!word||!Array.isArray(examples)||!examples.length)return;
+  try{
+    fetch(`${API}/api/word_examples`,{method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
+      body:JSON.stringify({word,lang,examples:examples.slice(0,3)})}).catch(()=>{});
+  }catch(_){}
+}
 async function openWordBreakdown(word,translation){
   word=(word||'').trim();if(!word)return;
   _wbrkLast={w:word,tr:translation||''};
-  const subscriber=!!(grandfatheredTier||isPremium);
-  /* Same billing preflight as Ask ALEX. */
-  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
-  if(!hasChatAccess()){try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
   const we=document.getElementById('wbrk-word'),tre=document.getElementById('wbrk-tr'),sub=document.getElementById('wbrk-sub');
   if(we)we.textContent=word;
   if(tre)tre.textContent=translation||'';
@@ -13677,6 +13730,16 @@ async function openWordBreakdown(word,translation){
   try{openMod('wordbrkm');}catch(_){}
   if(_wbrkBusy)return;_wbrkBusy=true;
   _wbrkSkeleton();
+  /* 1) Cache-first: a repeat tap on a saved word costs nothing and is instant. */
+  try{
+    const cached=await _wbrkCacheGet(word);
+    if(cached&&cached.length){_wbrkRenderExamples(cached);_wbrkBusy=false;return;}
+  }catch(_){}
+  /* 2) Cache MISS → this is a paid generation. Apply the billing preflight now
+        (we deliberately do NOT gate cached hits behind credits/Premium). */
+  const subscriber=!!(grandfatheredTier||isPremium);
+  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){_wbrkBusy=false;try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
+  if(!hasChatAccess()){_wbrkBusy=false;try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
   const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.'}[botLang]||'Respond in English.';
   /* STRICT prompt: exactly 3 short, simple, clear contextual examples; one per
      line as "English sentence | translation"; no intro, no numbering, no notes. */
@@ -13700,7 +13763,9 @@ async function openWordBreakdown(word,translation){
     const reply=(data.reply||data.message||data.text||'').trim();
     const ex=_wbrkParse(reply);
     if(!ex.length){_wbrkError();return;}
-    _wbrkRender(ex.map((e,i)=>`<div class="wbrk-ex"><div class="wbrk-ex-n">${i+1}</div><div class="wbrk-ex-main"><div class="wbrk-ex-en">${safeHTML(e.en)}</div>${e.tr?`<div class="wbrk-ex-tr">${safeHTML(e.tr)}</div>`:''}</div></div>`).join(''));
+    _wbrkRenderExamples(ex);
+    /* Persist so the next tap on this word serves from cache (no paid call). */
+    _wbrkCacheSave(word,ex);
   }catch(e){_wbrkError();}
   finally{_wbrkBusy=false;}
 }

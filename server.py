@@ -579,6 +579,84 @@ async def handle_chat(request):
         except Exception:
             pass
 
+    # ── AI PROVIDER ROUTER ────────────────────────────────────────────────────
+    # Paid users (premium / active Platform sub / grandfathered bundle) keep
+    # using Anthropic Claude (the full path below). FREE users are routed to
+    # Google Gemini 1.5 Flash to offload the Anthropic balance. Decision is
+    # server-side only — the client cannot influence which provider is used.
+    is_paid = bool(user_premium) or bool(grandfathered)
+    if uid and not is_paid:
+        try:
+            is_paid = await _is_premium_uid(uid)   # active Platform subscription counts as paid
+        except Exception:
+            is_paid = False
+    try:
+        from ai_router import should_use_gemini
+        route_gemini = should_use_gemini(is_paid)
+    except Exception as e:
+        logger.warning("ai_router import failed: %s", e)
+        route_gemini = False
+
+    if route_gemini:
+        # Free users on Gemini are NOT charged credits and do NOT touch the
+        # Anthropic billing/quota machinery; Google's daily free quota is the
+        # only limit (surfaced via the 429 guard below).
+        if uid and uid not in ADMIN_IDS:
+            import time as _time
+            now_ts = _time.time()
+            gap = float(TIER_ECONOMY["free"]["burst_gap"])
+            last = _last_msg_ts.get(uid, 0.0)
+            if now_ts - last < gap:
+                wait = max(1, int(gap - (now_ts - last)))
+                slow_map = {
+                    "ru": f"⏳ Подожди {wait} с — слишком быстро.",
+                    "es": f"⏳ Espera {wait} s — demasiado rápido.",
+                    "pt": f"⏳ Espere {wait} s — rápido demais.",
+                }
+                return web.json_response({"reply": slow_map.get(lang, f"⏳ Slow down — wait {wait} s.")},
+                                         headers={"Access-Control-Allow-Origin":"*"})
+            _last_msg_ts[uid] = now_ts
+        # History (same depth as the Anthropic free tier).
+        h = _histories.setdefault(uid, [])
+        h.append({"role": "user", "content": message})
+        free_hist = int(TIER_ECONOMY["free"]["history"])
+        if len(h) > free_hist:
+            _histories[uid] = h[-free_hist:]
+        g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
+        try:
+            from ai_router import gemini_generate, gemini_free_limit_message, GeminiRateLimit
+            result = await gemini_generate(system, _histories[uid], g_max)
+            reply = (result.get("text") or "").strip()
+            reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
+            if not reply:
+                try: _histories[uid].pop()
+                except Exception: pass
+                return web.json_response({"error": "Empty AI reply"}, status=502,
+                                         headers={"Access-Control-Allow-Origin":"*"})
+            _histories[uid].append({"role": "assistant", "content": reply})
+            if uid:
+                try:
+                    from database import log_session
+                    await log_session(uid, "webapp_chat")
+                except Exception:
+                    pass
+            return web.json_response({"reply": reply, "provider": "gemini"},
+                                     headers={"Access-Control-Allow-Origin":"*"})
+        except GeminiRateLimit:
+            # Google free quota hit → friendly card, NOT a crash. Drop the user
+            # turn we just appended so the conversation history stays clean.
+            try: _histories[uid].pop()
+            except Exception: pass
+            return web.json_response(
+                {"reply": gemini_free_limit_message(lang), "limit": True, "free_ai_limit": True},
+                headers={"Access-Control-Allow-Origin":"*"})
+        except Exception as e:
+            logger.warning("gemini generate failed uid=%s: %s", uid, e)
+            try: _histories[uid].pop()
+            except Exception: pass
+            return web.json_response({"error": "AI temporarily unavailable. Please try again."},
+                                     status=503, headers={"Access-Control-Allow-Origin":"*"})
+
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
     tier_key = user_tier if user_tier in TIER_ECONOMY else "free"
@@ -1379,6 +1457,55 @@ async def handle_save_word(request):
         logger.error(f"save_word error: {e}")
         return web.json_response({"error":str(e)[:160]}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
+# ── DICTIONARY WORD-BREAKDOWN CACHE ───────────────────────────────────────────
+# The webapp "3 examples in context" feature normally pays Claude Sonnet for
+# three contextual sentences per word. These two endpoints add a DB cache:
+#   GET  /api/word_examples?word=X&lang=Y  → cached [{en,tr}] or {hit:false}
+#   POST /api/word_examples                → store examples the client just got
+# On a cache HIT the client renders instantly and skips the paid /api/chat call.
+async def handle_word_examples_get(request):
+    word = str(request.query.get("word") or "").strip()
+    lang = str(request.query.get("lang") or "en").strip()[:8]
+    if not word:
+        return web.json_response({"hit": False}, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import get_word_examples
+        examples = await get_word_examples(word, lang)
+    except Exception as e:
+        logger.warning(f"word_examples get failed: {e}")
+        examples = None
+    if examples:
+        return web.json_response({"hit": True, "examples": examples},
+                                 headers={"Access-Control-Allow-Origin":"*"})
+    return web.json_response({"hit": False}, headers={"Access-Control-Allow-Origin":"*"})
+
+async def handle_word_examples_save(request):
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error":"bad request"}, status=400, headers={"Access-Control-Allow-Origin":"*"})
+    word = str(body.get("word") or "").strip()
+    lang = str(body.get("lang") or "en").strip()[:8]
+    raw = body.get("examples")
+    # Normalise to a clean list of {en,tr} dicts, max 3.
+    examples = []
+    if isinstance(raw, list):
+        for it in raw[:3]:
+            if isinstance(it, dict):
+                en = str(it.get("en") or "").strip()[:300]
+                tr = str(it.get("tr") or "").strip()[:300]
+                if en:
+                    examples.append({"en": en, "tr": tr})
+    if not word or not examples:
+        return web.json_response({"ok": False}, headers={"Access-Control-Allow-Origin":"*"})
+    try:
+        from database import save_word_examples
+        await save_word_examples(word, lang, examples)
+    except Exception as e:
+        logger.warning(f"word_examples save failed: {e}")
+        return web.json_response({"ok": False}, headers={"Access-Control-Allow-Origin":"*"})
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin":"*"})
+
 async def handle_vocab_list(request):
     """Paginated saved-words list (newest first). Never returns the whole table:
     strictly VOCAB_PAGE_SIZE rows per call + has_more/next offset for infinite
@@ -2069,6 +2196,8 @@ def create_app():
     app.router.add_post("/api/test",require_premium("test")(handle_test))
     app.router.add_post("/api/rate_card",handle_rate)
     app.router.add_post("/api/save_word",handle_save_word)
+    app.router.add_get("/api/word_examples",handle_word_examples_get)
+    app.router.add_post("/api/word_examples",handle_word_examples_save)
     app.router.add_get("/api/vocab/{uid}",handle_vocab_list)
     app.router.add_delete("/api/vocab/{uid}/{word_id}",handle_vocab_delete)
     app.router.add_get("/api/hearts/{uid}",handle_hearts_get)

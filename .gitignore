@@ -1,0 +1,23 @@
+# ── Secrets / local env ──────────────────────────────────────────────
+# Real secrets live in Railway → Variables, never in git. Keep .env local.
+.env
+.env.*
+!.env.example
+
+# ── Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ── Local DB / logs ──────────────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# ── Tooling (not part of the app) ────────────────────────────────────
+.claude/
+webapp/_preview_server.js
+.DS_Store
