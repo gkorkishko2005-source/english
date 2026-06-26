@@ -640,7 +640,8 @@ async def handle_chat(request):
                     await log_session(uid, "webapp_chat")
                 except Exception:
                     pass
-            return web.json_response({"reply": reply, "provider": "gemini"},
+            return web.json_response({"reply": reply, "provider": "gemini",
+                                      "ai_provider": "Powered by Gemini"},
                                      headers={"Access-Control-Allow-Origin":"*"})
         except GeminiRateLimit:
             # Google free quota hit → friendly card, NOT a crash. Drop the user
@@ -886,7 +887,8 @@ async def handle_chat(request):
         except Exception as e:
             logger.warning("credit deduction failed uid=%s: %s", uid, e)
 
-    resp = {"reply": reply}
+    # Debug marker: this branch always answered via Anthropic Claude (paid users).
+    resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by Claude"}
     if new_balance is not None:
         resp["chat_credits"] = new_balance
     return web.json_response(resp, headers={"Access-Control-Allow-Origin": "*"})

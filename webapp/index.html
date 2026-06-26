@@ -1144,6 +1144,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 
 /* ── Card action row: Skip · Save · Ask ALEX ── */
 .card-acts{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:9px;margin-bottom:11px}
+.card-acts.card-acts-2{grid-template-columns:1fr 1fr}
 .ca-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;border-radius:var(--r2);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;-webkit-tap-highlight-color:transparent}
 .ca-btn svg{width:18px;height:18px;flex-shrink:0}
 .ca-btn:active{transform:scale(.95)}
@@ -2939,8 +2940,10 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         <!-- Ask ALEX result/skeleton renders INSIDE the card as an overlay -->
         <div class="fc-ai hid" id="fc-ai" onclick="event.stopPropagation()"></div>
       </div>
-      <!-- Card action row: Skip · Save to Notes · Ask ALEX -->
-      <div class="card-acts" id="card-acts">
+      <!-- Card action row: Skip · Save to Notes.
+           "Ask ALEX" (contextual AI) was removed from the swipe screen — it now
+           lives inside the personal dictionary word-breakdown modal (Premium). -->
+      <div class="card-acts card-acts-2" id="card-acts">
         <button class="ca-btn ca-skip" type="button" onclick="cardSkip()" aria-label="Skip">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4l10 8-10 8z"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           <span id="ca-skip-l">Skip</span>
@@ -2948,10 +2951,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
         <button class="ca-btn ca-save" type="button" onclick="cardSave()" aria-label="Save to Notes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>
           <span id="ca-save-l">Save</span>
-        </button>
-        <button class="ca-btn ca-ask" type="button" onclick="cardAskAlex()" aria-label="Ask ALEX">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.2 5.2 5.6.5-4.3 3.7 1.3 5.5L12 19.5 7.2 22.4l1.3-5.5L4.2 13.2l5.6-.5z"/></svg>
-          <span id="ca-ask-l">Ask ALEX</span>
         </button>
       </div>
     </div>
@@ -3145,7 +3144,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 <!-- NAV -->
 <nav>
   <div class="ni on" id="nav-home"     onclick="goTab('home')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="nlb" id="nb1"></div></div>
-  <div class="ni locked" id="nav-chat"     onclick="goTab('chat')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="nlb" id="nb2"></div></div>
+  <div class="ni" id="nav-chat"     onclick="goTab('chat')">    <div class="nic"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="nlb" id="nb2"></div></div>
   <div class="ni"    id="nav-learn"    onclick="goTab('learn')">   <div class="nic"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg></div><div class="nlb" id="nb3"></div></div>
   <div class="ni"    id="nav-progress" onclick="goTab('progress')"><div class="nic"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="nlb" id="nb4"></div></div>
   <div class="ni"    id="nav-settings" onclick="goTab('settings')"><div class="nic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div><div class="nlb" id="nb5"></div></div>
@@ -5672,6 +5671,11 @@ async function doChat(text,mode){
     rmTyping();
     if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
     const data=await r.json();
+    /* Debug marker: which model answered (Gemini for free, Claude for premium). */
+    if(data.ai_provider){
+      try{console.log('%c'+data.ai_provider,'color:'+(/gemini/i.test(data.provider||data.ai_provider)?'#8ab4f8':'#5eead4')+';font-weight:700');}catch(_){}
+      try{_showProviderBadge(data.ai_provider,data.provider);}catch(_){}
+    }
     addMsg('bot',data.reply||'...');
     /* Server tells us the new balance after spending credits — sync UI. */
     if(typeof data.chat_credits==='number'){
@@ -5714,6 +5718,25 @@ async function doChat(text,mode){
   finally{busy=false;try{document.getElementById('sndb').disabled=false;}catch(e){}try{resetChipCooldown();}catch(e){}}
 }
 
+/* Small, unobtrusive test badge showing which AI model answered the last chat
+   message: "Powered by Gemini" (free) or "Powered by Claude" (premium). Auto-
+   fades after a few seconds. Purely a debug/QA aid. */
+function _showProviderBadge(txt,provider){
+  if(!txt)return;
+  const gem=/gemini/i.test(String(provider||txt));
+  let b=document.getElementById('ai-prov-badge');
+  if(!b){
+    b=document.createElement('div');b.id='ai-prov-badge';
+    b.style.cssText='position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:10000;font:700 11px/1 var(--f,system-ui);padding:6px 11px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25)';
+    document.body.appendChild(b);
+  }
+  b.textContent=txt;
+  b.style.background=gem?'rgba(66,133,244,.16)':'rgba(20,184,166,.16)';
+  b.style.color=gem?'#8ab4f8':'#5eead4';
+  b.style.border='1px solid '+(gem?'rgba(66,133,244,.45)':'rgba(20,184,166,.45)');
+  b.style.opacity='1';
+  clearTimeout(b._t);b._t=setTimeout(()=>{try{b.style.opacity='0';}catch(_){}} ,4000);
+}
 function confirmClear(){openMod('cfmm');}
 function doClear(){closeCfm();clearSilent();toast(L.clrd,'🔄');setTimeout(()=>addMsg('bot',L.welcome),80);}
 function clearSilent(){
@@ -7458,7 +7481,7 @@ function showCardHelp(c,q){
     <ul class="fc-help-list">${examples.map(ex=>`<li>${safeHTML(ex)}</li>`).join('')}</ul>
     <div class="fc-help-tip">${safeHTML(t.tip)}</div>
     <div class="fc-help-actions">
-      ${hasChatAccess()?`<button class="fc-help-btn" onclick="askAlexCardHelp()">${({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX')}</button>`:`<button class="fc-help-btn" onclick="showTierPaywall('basic','${({ru:'объяснение ALEX',en:'ALEX explanation',es:'explicación de ALEX',pt:'explicação do ALEX',de:'ALEX-Erklärung',fr:'explication d’ALEX',uk:'пояснення ALEX',tr:'ALEX açıklaması',zh:'ALEX 讲解',ar:'شرح ALEX'}[lang]||'ALEX explanation')}')">${({ru:'Объяснение ALEX по подписке',en:'ALEX explanation with subscription',es:'Explicación de ALEX con suscripción',pt:'Explicação do ALEX com assinatura',de:'ALEX-Erklärung mit Abo',fr:'Explication d’ALEX avec abonnement',uk:'Пояснення ALEX із підпискою',tr:'Abonelikle ALEX açıklaması',zh:'订阅后获得 ALEX 讲解',ar:'شرح ALEX مع الاشتراك'}[lang]||'ALEX explanation with subscription')}</button>`}
+      ${hasContextAI()?`<button class="fc-help-btn" onclick="askAlexCardHelp()">${({ru:'Спросить ALEX',en:'Ask ALEX',es:'Preguntar a ALEX',pt:'Perguntar ao ALEX',de:'ALEX fragen',fr:'Demander à ALEX',uk:'Запитати ALEX',tr:'ALEX’e sor',zh:'问问 ALEX',ar:'اسأل ALEX'}[lang]||'Ask ALEX')}</button>`:`<button class="fc-help-btn" onclick="showTierPaywall('basic','${({ru:'объяснение ALEX',en:'ALEX explanation',es:'explicación de ALEX',pt:'explicação do ALEX',de:'ALEX-Erklärung',fr:'explication d’ALEX',uk:'пояснення ALEX',tr:'ALEX açıklaması',zh:'ALEX 讲解',ar:'شرح ALEX'}[lang]||'ALEX explanation')}')">${({ru:'Объяснение ALEX по подписке',en:'ALEX explanation with subscription',es:'Explicación de ALEX con suscripción',pt:'Explicação do ALEX com assinatura',de:'ALEX-Erklärung mit Abo',fr:'Explication d’ALEX avec abonnement',uk:'Пояснення ALEX із підпискою',tr:'Abonelikle ALEX açıklaması',zh:'订阅后获得 ALEX 讲解',ar:'شرح ALEX مع الاشتراك'}[lang]||'ALEX explanation with subscription')}</button>`}
       <button class="fc-help-btn secondary" onclick="continueAfterCardHelp()">${({ru:'Продолжить',en:'Continue',es:'Continuar',pt:'Continuar',de:'Weiter',fr:'Continuer',uk:'Продовжити',tr:'Devam',zh:'继续',ar:'متابعة'}[lang]||'Continue')}</button>
     </div>`;
   main.insertBefore(box,main.firstChild);
@@ -7585,10 +7608,8 @@ function closeCardAi(){document.getElementById('fc-ai')?.classList.add('hid');}
    the server via the reserve→reconcile /api/chat path (mode=lesson_help → Sonnet). */
 async function cardAskAlex(){
   const c=cards[cIdx];if(!c)return;
-  const subscriber=!!(grandfatheredTier||isPremium);
-  /* Pre-flight credit gate (server still enforces): block when balance < cost. */
-  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
-  if(!hasChatAccess()){try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
+  /* Contextual AI is Premium-only (runs on Anthropic Claude). Free → paywall. */
+  if(!hasContextAI()){try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
   if(cardAlexBusy)return;cardAlexBusy=true;
   const askBtn=document.querySelector('.ca-ask');if(askBtn)askBtn.disabled=true;
   haptic('light');
@@ -12328,7 +12349,8 @@ function _askAlexContext(node){
 }
 /* Send a selected fragment to ALEX. */
 function askAlexAboutText(sel,node){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  /* In-lesson contextual breakdown = Premium-only (Anthropic Claude). */
+  if(!hasContextAI()){try{sfx.warn();}catch(e){}openPremium(({ru:'Разбор в уроке с ALEX',en:'In-lesson ALEX breakdown'}[lang]||'In-lesson ALEX breakdown'),'platform');return;}
   const ctx=_askAlexContext(node);
   const clean=String(sel||'').replace(/\s+/g,' ').trim().slice(0,400);
   const ask=({ru:'Объясни простыми словами: что это значит, почему так и какое тут правило. Дай один похожий пример.',en:'Explain in simple terms: what it means, why it is like this, and the rule behind it. Give one similar example.',es:'Explícalo de forma sencilla: qué significa, por qué es así y la regla. Da un ejemplo similar.',pt:'Explique de forma simples: o que significa, por que é assim e a regra. Dê um exemplo parecido.',de:'Erkläre es einfach: Bedeutung, warum es so ist und die Regel. Gib ein ähnliches Beispiel.',fr:'Explique simplement : sens, pourquoi c’est ainsi et la règle. Donne un exemple similaire.',uk:'Поясни простими словами: що це означає, чому так і яке тут правило. Дай один схожий приклад.',tr:'Basitçe açıkla: ne anlama geliyor, neden böyle ve kuralı ne. Benzer bir örnek ver.',zh:'用简单的话解释：这是什么意思、为什么这样、背后的规则，并给一个类似的例子。',ar:'اشرح ببساطة: ماذا يعني، ولماذا هكذا، والقاعدة. وأعطِ مثالًا مشابهًا.'}[lang]||'Explain in simple terms: what it means, why it is like this, and the rule behind it. Give one similar example.');
@@ -12337,7 +12359,8 @@ function askAlexAboutText(sel,node){
 }
 /* Explicit button: explain the whole lesson topic. */
 function askCourseAI(id){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  /* In-lesson grammar-topic breakdown = Premium-only (Anthropic Claude). */
+  if(!hasContextAI()){try{sfx.warn();}catch(e){}openPremium(({ru:'Разбор темы с ALEX',en:'ALEX topic breakdown'}[lang]||'ALEX topic breakdown'),'platform');return;}
   const ls=(typeof GALAXY_COURSE!=='undefined')&&GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
   const title=ls.title&&(ls.title[lang]||ls.title.en)||'';
   const rule=(typeof courseShortRule==='function')?courseShortRule(ls):'';
@@ -13676,7 +13699,7 @@ function _wbrkError(){
   const retry=({ru:'Повторить',en:'Retry',es:'Reintentar',pt:'Repetir',de:'Erneut',fr:'Réessayer',uk:'Повторити',tr:'Tekrar',zh:'重试',ar:'إعادة'}[lang]||'Retry');
   _wbrkRender(`<div class="wbrk-err">${safeHTML(msg)}</div><button class="wbrk-retry" type="button" onclick="_wbrkRetry()">${safeHTML(retry)}</button>`);
 }
-function _wbrkRetry(){if(_wbrkLast.w)openWordBreakdown(_wbrkLast.w,_wbrkLast.tr);}
+function _wbrkRetry(){if(_wbrkLast.w)_wbrkGenerate();}
 /* Parse the model reply into up to 3 {en,tr} example pairs. Expected line format
    is "English sentence | translation"; falls back to splitting on — or just the
    raw line if no separator is present. */
@@ -13728,18 +13751,36 @@ async function openWordBreakdown(word,translation){
   if(tre)tre.textContent=translation||'';
   if(sub)sub.textContent=({ru:'3 примера в контексте',en:'3 examples in context',es:'3 ejemplos en contexto',pt:'3 exemplos em contexto',de:'3 Beispiele im Kontext',fr:'3 exemples en contexte',uk:'3 приклади в контексті',tr:'Bağlamda 3 örnek',zh:'3 个语境例句',ar:'٣ أمثلة في سياق'}[lang]||'3 examples in context');
   try{openMod('wordbrkm');}catch(_){}
+  /* Contextual word breakdown = PREMIUM-ONLY, runs on Anthropic Claude Sonnet.
+     Free users see a paywall CTA inside the modal instead of generating. */
+  if(!hasContextAI()){_wbrkPaywallCard();return;}
+  /* Premium: render the "Ask ALEX" button. Tapping it sends the request to
+     Anthropic (Claude Sonnet) to generate exactly 3 contextual examples. */
+  _wbrkAskCard();
+}
+/* Premium paywall card shown inside the dictionary modal for free users. */
+function _wbrkPaywallCard(){
+  const ttl=({ru:'Разбор слова с ALEX — для Premium',en:'ALEX word breakdown — Premium',es:'Análisis con ALEX — Premium',pt:'Análise com ALEX — Premium',de:'ALEX-Wortanalyse — Premium',fr:'Analyse ALEX — Premium',uk:'Розбір слова з ALEX — Premium',tr:'ALEX kelime analizi — Premium',zh:'ALEX 单词解析 — Premium',ar:'تحليل ALEX — Premium'}[lang]||'ALEX word breakdown — Premium');
+  const sub=({ru:'ALEX (Claude) сгенерирует 3 примера использования этого слова в контексте. Доступно с подпиской Premium.',en:'ALEX (Claude) will generate 3 contextual examples for this word. Available with Premium.',es:'ALEX (Claude) generará 3 ejemplos en contexto. Disponible con Premium.',pt:'ALEX (Claude) gerará 3 exemplos em contexto. Disponível com Premium.',de:'ALEX (Claude) erstellt 3 Beispiele im Kontext. Mit Premium verfügbar.',fr:'ALEX (Claude) générera 3 exemples en contexte. Disponible avec Premium.',uk:'ALEX (Claude) згенерує 3 приклади в контексті. Доступно з Premium.',tr:'ALEX (Claude) bağlamda 3 örnek üretir. Premium ile kullanılabilir.',zh:'ALEX（Claude）将生成 3 个语境例句。需 Premium。',ar:'سيُنشئ ALEX (Claude) ٣ أمثلة سياقية. متاح مع Premium.'}[lang]||'ALEX (Claude) will generate 3 contextual examples for this word. Available with Premium.');
+  const cta=({ru:'Перейти на Premium',en:'Go Premium',es:'Pasar a Premium',pt:'Assinar Premium',de:'Premium holen',fr:'Passer à Premium',uk:'Перейти на Premium',tr:'Premium’a geç',zh:'升级 Premium',ar:'الانتقال إلى Premium'}[lang]||'Go Premium');
+  _wbrkRender(`<div class="wbrk-err" style="text-align:center"><div style="font-weight:850;color:var(--t1);font-size:14px;margin-bottom:6px">${safeHTML(ttl)}</div><div style="font-size:12.5px;line-height:1.5">${safeHTML(sub)}</div></div><button class="wbrk-retry" type="button" onclick="try{closeMod('wordbrkm')}catch(e){};openPremium(null,'platform')">${safeHTML(cta)}</button>`);
+}
+/* Premium "Ask ALEX" button inside the dictionary modal. */
+function _wbrkAskCard(){
+  const cta=({ru:'Спросить ALEX · 3 примера',en:'Ask ALEX · 3 examples',es:'Preguntar a ALEX · 3 ejemplos',pt:'Perguntar ao ALEX · 3 exemplos',de:'ALEX fragen · 3 Beispiele',fr:'Demander à ALEX · 3 exemples',uk:'Запитати ALEX · 3 приклади',tr:'ALEX’e sor · 3 örnek',zh:'问问 ALEX · 3 个例句',ar:'اسأل ALEX · ٣ أمثلة'}[lang]||'Ask ALEX · 3 examples');
+  _wbrkRender(`<button class="wbrk-retry" type="button" style="margin-top:2px" onclick="_wbrkGenerate()">${safeHTML(cta)}</button>`);
+}
+/* Generate the 3 contextual examples via Anthropic Claude Sonnet (Premium only).
+   Cache-first: a repeat on a saved word serves instantly from the DB cache. */
+async function _wbrkGenerate(){
+  const word=_wbrkLast.w;if(!word)return;
   if(_wbrkBusy)return;_wbrkBusy=true;
   _wbrkSkeleton();
-  /* 1) Cache-first: a repeat tap on a saved word costs nothing and is instant. */
+  /* 1) Cache-first — no paid call when we already have examples for this word. */
   try{
     const cached=await _wbrkCacheGet(word);
     if(cached&&cached.length){_wbrkRenderExamples(cached);_wbrkBusy=false;return;}
   }catch(_){}
-  /* 2) Cache MISS → this is a paid generation. Apply the billing preflight now
-        (we deliberately do NOT gate cached hits behind credits/Premium). */
-  const subscriber=!!(grandfatheredTier||isPremium);
-  if(!subscriber && (chatCredits||0)<ALEX_CARD_COST){_wbrkBusy=false;try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(e){}openPremium(null,'credits');return;}
-  if(!hasChatAccess()){_wbrkBusy=false;try{closeMod('wordbrkm');}catch(_){}try{sfx.warn();}catch(e){}openPremium(null,'platform');return;}
   const bl={ru:'Respond in Russian.',en:'Respond in English.',es:'Respond in Spanish.',de:'Respond in German.',fr:'Respond in French.',pt:'Respond in Portuguese.',uk:'Respond in Ukrainian.',tr:'Respond in Turkish.',zh:'Respond in Chinese.',ar:'Respond in Arabic.'}[botLang]||'Respond in English.';
   /* STRICT prompt: exactly 3 short, simple, clear contextual examples; one per
      line as "English sentence | translation"; no intro, no numbering, no notes. */
@@ -13817,7 +13858,8 @@ async function openErrorDiaryChat(showUser=false){
   }
 }
 async function askAlexFromDiary(){
-  if(!hasChatAccess()){showChatPaywall();return;}
+  /* Diary pattern analysis = contextual AI → Premium-only (Anthropic Claude). */
+  if(!hasContextAI()){try{sfx.warn();}catch(e){}openPremium(({ru:'Разбор ошибок с ALEX',en:'ALEX error review'}[lang]||'ALEX error review'),'platform');return;}
   const errors=(await refreshErrorDiaryFromServer(false)).map(normalizeMistake).slice(0,10);
   if(!errors.length){toast(({ru:'Сначала накопи пару исправлений',en:'Collect a few corrections first'}[lang]||'Collect a few corrections first'),'');return;}
   const list=errors.map((e,i)=>`${i+1}. Wrong: ${e.wrong}\nCorrect: ${e.right}\nNote: ${e.explanation||e.category}`).join('\n\n');
@@ -14037,9 +14079,10 @@ function setPremium(active, source){
   try{if(window._d){updateProfileUI(window._d);renderInterests(window._d.interests||[]);}}catch(e){}
   try{renderErrorDiary();}catch(e){}
   try{drawProgress();}catch(e){}
+  /* Chat is open to everyone now (free → Gemini), so the chat tab is never
+     locked/greyed and the user is never kicked out of it when premium lapses. */
   const navChat=document.getElementById('nav-chat');
-  if(navChat)navChat.classList.toggle('locked',!active);
-  if(!active&&tab==='chat')goTab('home');
+  if(navChat)navChat.classList.remove('locked');
   try{if(window._d)renderHome(window._d);}catch(e){}
   if(active&&source!=='cache'){
     const shdr=document.querySelector('.shdr .stit');
@@ -14078,11 +14121,14 @@ function hasPlatform(){
   if(isPremium)return true;  /* legacy bundle still active but not yet grandfathered */
   return false;
 }
-function hasChatAccess(){
-  if(grandfatheredTier)return true;
-  if(isPremium)return true;
-  return chatCredits>0;
-}
+/* Standard text chat with ALEX is now OPEN TO EVERYONE: free users are served
+   by Google Gemini 1.5 Flash (server-side routing), premium users by Anthropic
+   Claude. So the chat tab is never locked/greyed and never paywalled. */
+function hasChatAccess(){return true;}
+/* Contextual AI (card "Ask ALEX", in-lesson grammar breakdown, dictionary word
+   breakdown) is PREMIUM-ONLY and always runs on Anthropic Claude. Free users hit
+   the paywall. */
+function hasContextAI(){return hasPlatform();}
 function hasTier(minTier){
   const need=tierLevel(minTier);
   /* Single subscription: an active Platform plan unlocks every feature
