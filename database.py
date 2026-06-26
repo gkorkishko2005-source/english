@@ -704,6 +704,51 @@ async def get_premium_info(uid: int) -> dict:
         "lifetime": lifetime,
     }
 
+async def enforce_subscription(uid: int) -> dict:
+    """Subscription guard (self-healing). Run before serving premium status.
+
+    BUG FIX: previously the stored `users.is_premium` flag stayed TRUE forever
+    after a purchase — only the *computed* status (until > now) flipped, so any
+    consumer that trusted the raw column saw a stale `is_premium=true` after the
+    subscription had already lapsed.
+
+    This guard does a STRICT UTC comparison of the current server time against
+    `premium_until` and, if the legacy flag is set but the date has passed,
+    immediately writes `is_premium=FALSE` / `premium_tier=''` to the DB so the
+    stored state can never lag behind real time again.
+
+    Lifetime / Platform / grandfathered access is NOT affected here: Platform
+    expiry is evaluated live in get_platform_info() (no boolean to reset), and
+    the legacy is_premium column reflects ONLY the legacy bundle. Returns the
+    effective premium info (post-reset) plus a `reset` flag.
+    """
+    from datetime import datetime, timezone
+    user = await get_user(uid)
+    if not user:
+        return {"is_premium": False, "tier": "", "until": None, "lifetime": False, "reset": False}
+    raw_flag = bool(user.get("is_premium"))
+    until_raw = user.get("premium_until")
+    until = None
+    if until_raw:
+        try:
+            until = until_raw if isinstance(until_raw, datetime) else datetime.fromisoformat(str(until_raw))
+            if until.tzinfo is None:
+                until = until.replace(tzinfo=timezone.utc)
+        except Exception as e:
+            logger.warning("enforce_subscription parse failed uid=%s value=%r: %s", uid, until_raw, e)
+            until = None
+    # Strict UTC comparison — Date.now() > expires_at → expired.
+    now = datetime.now(timezone.utc)
+    expired = raw_flag and (until is not None) and (now > until)
+    if expired:
+        await db("UPDATE users SET is_premium=FALSE, premium_tier='' WHERE uid=?", uid)
+        logger.info("subscription expired → is_premium reset FALSE uid=%s (until=%s, now=%s)",
+                    uid, until.isoformat(), now.isoformat())
+    info = await get_premium_info(uid)
+    info["reset"] = bool(expired)
+    return info
+
+
 async def check_premium(uid: int) -> bool:
     """Returns True if user has active premium."""
     from datetime import datetime, timezone

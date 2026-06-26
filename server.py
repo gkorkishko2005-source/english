@@ -351,7 +351,8 @@ async def handle_user(request):
             get_user, get_level, get_xp, get_streak_count,
             get_word_count, get_session_count, get_test_count,
             get_mistake_count, get_all_interests, get_due_words,
-            get_profession, get_lang, upsert_user, check_premium
+            get_profession, get_lang, upsert_user, check_platform,
+            enforce_subscription
         )
         user = await get_user(uid)
         if not user:
@@ -380,7 +381,12 @@ async def handle_user(request):
         due_words  = await get_due_words(uid, 10) or []
         profession = await get_profession(uid) or ""
         lang_db    = await get_lang(uid) or "ru"
-        is_prem    = await check_premium(uid)
+        # Subscription guard runs first: self-heals a stale is_premium flag in the
+        # DB (strict UTC expiry check) before we report status to the WebApp.
+        await enforce_subscription(uid)
+        # Use check_platform (covers Platform sub + grandfathered + legacy) instead
+        # of legacy-only check_premium, so the profile payload matches /api/premium.
+        is_prem    = await check_platform(uid)
         try:
             plant_tonus = max(0, min(100, int(user.get("plant_tonus") if (isinstance(user, dict) and user.get("plant_tonus") is not None) else 100)))
         except Exception:
@@ -1097,8 +1103,12 @@ async def handle_check_premium(request):
         return web.json_response({"error":"invalid uid"},status=400)
 
     try:
-        from database import get_premium_info, get_platform_info, get_credits, grandfather_legacy_tier
-        legacy = await get_premium_info(uid)
+        from database import enforce_subscription, get_platform_info, get_credits, grandfather_legacy_tier
+        # Subscription guard (self-healing): strict UTC comparison; if the legacy
+        # premium flag is set but premium_until has passed, this writes
+        # is_premium=FALSE to the DB *before* we build the status payload, so the
+        # response the WebApp trusts can never report a stale-active subscription.
+        legacy = await enforce_subscription(uid)
         # Snapshot grandfathered tier the first time we see an active legacy
         # bundle alongside empty grandfathered_tier — idempotent.
         try:
