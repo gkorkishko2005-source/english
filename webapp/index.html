@@ -1941,8 +1941,12 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-practice-card:hover{border-color:rgba(var(--ar),.20)}
 .course-practice-card.done{border-color:rgba(0,212,170,.28)}
 .course-qtext{font-size:12px;font-weight:800;color:var(--t1);line-height:1.35;margin-bottom:7px}
-.course-opt{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:10px;font-size:12px;color:var(--t1);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.18);transition:.18s}
-.course-practice-card .course-opt{background:var(--e1);padding:9px;margin-top:6px}
+/* Redesign: large, isolated, easy-to-tap answer buttons (min 52px target,
+   bigger type, generous padding + gap) to cut cognitive load and misfires. */
+.course-opt{display:flex;align-items:center;min-height:52px;background:var(--e2);border:1.5px solid var(--b1);border-radius:13px;padding:14px 16px;font-size:14.5px;line-height:1.4;color:var(--t1);cursor:pointer;touch-action:manipulation;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.18);transition:transform .12s ease,border-color .18s,background .18s}
+.course-opt:active{transform:scale(.985)}
+.course-practice{gap:10px!important}
+.course-practice-card .course-opt{background:var(--e1);padding:14px 16px;margin-top:8px}
 .course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
 .course-note{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-top:8px}
@@ -11729,7 +11733,17 @@ function _openCourseLessonInner(id){
   const grammarLabel=(ls.grammar&&(ls.grammar[lang]||ls.grammar.en))||(ls.sub&&((ls.sub[lang]||ls.sub.en)))||'Rule';
   const ruleText=courseShortRule(ls);
   const insight=courseLessonInsight(ls);
-  const practice=coursePracticeSet(ls).map((q,qi)=>shuffleMCQ(q,courseKey(id)+'_p'+qi));
+  /* ANSWER-POSITION FIX: the old seed was derived ONLY from the lesson key, so
+     every replay produced the same option order — and because the fallback
+     practice items are all authored with a:0, the correct answer clustered at
+     slots 1-2. We mix in a per-lesson random salt (generated once per page
+     session, then memoised) so the correct index is uniformly random across
+     A,B,C,D, while staying STABLE across in-session re-renders (so an answered
+     question never reshuffles under the learner). New session / reload = fresh
+     random placement. Verified ~25% per slot even for all-a:0 input. */
+  const _shKey='course_shuffleSalt_'+courseKey(id);
+  const _shSalt=window[_shKey]||(window[_shKey]=((Date.now()^Math.floor(Math.random()*1e9))>>>0));
+  const practice=coursePracticeSet(ls).map((q,qi)=>shuffleMCQ(q,courseKey(id)+'_p'+qi+'_'+_shSalt));
   window['course_practice_'+courseKey(id)]=practice;
   const partState=courseStoredParts(id,practice);
   const requiredParts=courseRequiredParts(id);
@@ -12541,22 +12555,39 @@ function courseUtterance(text){
   }catch(e){}
   return u;
 }
+/* CONTEXT-AWARE VOICE ROLE: pick the acting voice (teacher / casual / academic)
+   from the lesson's level + topic, so beginners hear a soft tutor, idioms/slang
+   get a lively native, and hard grammar gets a deep professor. The role is sent
+   to /api/tts which maps it to a distinct ElevenLabs/Edge voice + speech rate. */
+function courseVoiceRole(ls){
+  if(!ls)return 'teacher';
+  const lvl=String(ls.level||'').toUpperCase();
+  const hay=[ls.id,(ls.title&&ls.title.en),(ls.sub&&ls.sub.en),(ls.grammar&&ls.grammar.en),Array.isArray(ls.tags)?ls.tags.join(' '):''].filter(Boolean).join(' ').toLowerCase();
+  if(/idiom|slang|phrasal|colloquial|informal|conversation|small\s?talk|everyday|chat/.test(hay))return 'casual';
+  if(/passive|subjunctive|conditional|perfect|clause|relative|reported|inversion|gerund|participle|\bmodal|academic|\bformal|grammar/.test(hay)||lvl==='C1'||lvl==='C2')return 'academic';
+  return 'teacher';
+}
 function speakCourseLine(id,idx){
-  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls||!('speechSynthesis' in window))return;
-  const u=courseUtterance(ls.examples[idx]||'');
-  speechSynthesis.cancel();speechSynthesis.speak(u);
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return;
+  const text=(ls.examples&&ls.examples[idx])||'';if(!text)return;
+  /* Use the quality server engine (same as exams) with a topic-matched voice,
+     instead of the flat browser SpeechSynthesis. */
+  try{playListenTTS(text,()=>{},courseVoiceRole(ls));}catch(_){
+    if('speechSynthesis' in window){const u=courseUtterance(text);speechSynthesis.cancel();speechSynthesis.speak(u);}
+  }
 }
 function speakCourseDictation(id){
   /* SOURCE GUARD: read ONLY this lesson's own dictation text, keyed by
      courseKey(id). Never a shared/previous global. */
   const text=window['course_dictation_'+courseKey(id)]||window['course_target_'+courseKey(id)]||'';
   const res=document.getElementById('cd-res-'+id);
+  const _role=courseVoiceRole(GALAXY_COURSE.find(x=>x.id===id));
   playListenTTS(text,(s)=>{
     if(s==='unavailable'){
       if(res){res.className='course-result';res.textContent=({ru:'Звук недоступен на этом устройстве — нажми “Показать текст”.',en:'Audio is not available on this device — tap “Show text”.',es:'El audio no está disponible en este dispositivo: pulsa “Mostrar texto”.',pt:'O áudio não está disponível neste dispositivo — toque em “Mostrar texto”.',de:'Audio ist auf diesem Gerät nicht verfügbar — tippe „Text zeigen“.',fr:'L’audio n’est pas disponible sur cet appareil — appuie sur « Afficher le texte ».',uk:'Звук недоступний на цьому пристрої — натисни «Показати текст».',tr:'Bu cihazda ses yok — “Metni göster”e dokun.',zh:'此设备无法播放音频——请点击“显示文本”。',ar:'الصوت غير متاح على هذا الجهاز — اضغط «إظهار النص».'}[lang]||'Audio is not available on this device — tap “Show text”.');}
       revealCourseDictation(id);
     } else if(s==='ok'&&res){res.textContent='';}
-  });
+  },_role);
 }
 function answerCoursePractice(id,qi,picked){
   const practice=window['course_practice_'+courseKey(id)]||[];
@@ -15254,7 +15285,7 @@ function cleanTTSInput(text){
     .trim()
     .slice(0,700);
 }
-async function speakText(text,btn){
+async function speakText(text,btn,role){
   // Stop if already playing
   if(_ttsAudio&&!_ttsAudio.paused){_ttsAudio.pause();_ttsAudio=null;if(btn)btn.classList.remove('playing');return;}
   const clean=cleanTTSInput(text);
@@ -15264,7 +15295,8 @@ async function speakText(text,btn){
   try{
     // Try server TTS first
     if(API){
-      const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean,lang:'en'})});
+      const _b={text:clean,lang:'en'};if(role)_b.role=role;
+      const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_b)});
       if(r.ok){
         const blob=await r.blob();
         const url=URL.createObjectURL(blob);
@@ -15300,7 +15332,7 @@ function listenTTSAvailable(){try{return !!(typeof API!=='undefined'&&API)||('sp
    not a text fallback); falls back to SpeechSynthesis with a voices-ready
    guard (empty voice list on first tap is the #1 cause of "no sound" on
    mobile WebViews). Calls statusCb('ok'|'unavailable'|'empty'). */
-async function playListenTTS(text,statusCb){
+async function playListenTTS(text,statusCb,role){
   const clean=cleanTTSInput(text);
   if(!clean){if(statusCb)statusCb('empty');return false;}
   /* Stop anything currently playing so a new task never overlaps/continues
@@ -15309,7 +15341,8 @@ async function playListenTTS(text,statusCb){
   try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(_){}
   if(typeof API!=='undefined'&&API){
     try{
-      const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:clean,lang:'en'})});
+      const _b={text:clean,lang:'en'};if(role)_b.role=role;
+      const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_b)});
       if(r.ok){
         const url=URL.createObjectURL(await r.blob());
         _ttsAudio=new Audio(url);

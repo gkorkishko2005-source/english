@@ -1292,6 +1292,10 @@ async def handle_tts(request):
         body = await request.json()
         text = str(body.get("text","")).strip()[:500]  # limit 500 chars
         tts_lang = str(body.get("lang","en"))[:5]
+        # Context-aware actor: teacher | casual | academic | default.
+        tts_role = str(body.get("role","") or "default")[:16].lower()
+        if tts_role not in ("teacher","casual","academic","default"):
+            tts_role = "default"
         if not text:
             return web.json_response({"error":"empty text"},status=400)
     except Exception:
@@ -1299,7 +1303,7 @@ async def handle_tts(request):
 
     try:
         from tts import text_to_speech
-        audio = await text_to_speech(text, lang=tts_lang)
+        audio = await text_to_speech(text, lang=tts_lang, role=tts_role)
         if audio:
             return web.Response(
                 body=audio,

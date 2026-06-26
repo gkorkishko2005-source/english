@@ -23,21 +23,60 @@ TTS_RATE       = os.getenv("TTS_RATE", "-12%")
 
 
 # ══════════════════════════════════════════════════════════════════
+#  Context-aware voice roles (актёры озвучки)
+#  Каждая роль = свой голос для ElevenLabs И для Edge, плюс темп речи.
+#  Маппинг роли подбирает фронтенд по уровню/теме урока:
+#    teacher  — A0-A1, базовые диалоги: мягкий, понятный голос Учителя
+#    casual   — сленг, идиомы, разговор: живой, быстрый голос Носителя
+#    academic — сложная грамматика, правила: строгий, глубокий Профессор
+#  Любой голос переопределяется ENV-переменными без правки кода.
+# ══════════════════════════════════════════════════════════════════
+TTS_ROLE_VOICES = {
+    "teacher": {
+        "eleven": os.getenv("TTS_ELEVEN_TEACHER",  "21m00Tcm4TlvDq8ikWAM"),  # Rachel — тёплая
+        "edge_en": os.getenv("TTS_EDGE_TEACHER",   "en-GB-SoniaNeural"),
+        "rate":    os.getenv("TTS_RATE_TEACHER",   "-14%"),   # медленнее, для новичков
+    },
+    "casual": {
+        "eleven": os.getenv("TTS_ELEVEN_CASUAL",   "TxGEqnHWrfWFTfGW9XjX"),  # Josh — молодой
+        "edge_en": os.getenv("TTS_EDGE_CASUAL",    "en-US-AriaNeural"),
+        "rate":    os.getenv("TTS_RATE_CASUAL",    "+6%"),    # живее и быстрее
+    },
+    "academic": {
+        "eleven": os.getenv("TTS_ELEVEN_ACADEMIC", "pNInz6obpgDQGcFmaJgB"),  # Adam — лекторский
+        "edge_en": os.getenv("TTS_EDGE_ACADEMIC",  "en-GB-RyanNeural"),
+        "rate":    os.getenv("TTS_RATE_ACADEMIC",  "-8%"),    # размеренно, авторитетно
+    },
+}
+# "default" = текущее поведение (обратная совместимость).
+TTS_ROLE_VOICES["default"] = {
+    "eleven": os.getenv("ELEVENLABS_VOICE_ID", "pNInz6obpgDQGcFmaJgB"),
+    "edge_en": None,        # None → _edge_voice() выбирает по языку как раньше
+    "rate": TTS_RATE,
+}
+
+
+def _role_cfg(role: str | None) -> dict:
+    return TTS_ROLE_VOICES.get((role or "default").lower(), TTS_ROLE_VOICES["default"])
+
+
+# ══════════════════════════════════════════════════════════════════
 #  TTS — Text to Speech
 # ══════════════════════════════════════════════════════════════════
 
-async def text_to_speech(text: str, lang: str = "en") -> bytes | None:
-    """Конвертирует текст в аудио. ElevenLabs → Edge neural voice → gTTS."""
+async def text_to_speech(text: str, lang: str = "en", role: str | None = None) -> bytes | None:
+    """Конвертирует текст в аудио. ElevenLabs → Edge neural voice → gTTS.
+    `role` выбирает актёра озвучки (teacher / casual / academic / default)."""
     clean = _prepare_tts_text(text)
     if not clean:
         return None
 
     if ELEVENLABS_KEY and TTS_PROVIDER in ("auto", "elevenlabs"):
-        result = await _elevenlabs_tts(clean, lang)
+        result = await _elevenlabs_tts(clean, lang, role)
         if result: return result
 
     if TTS_PROVIDER in ("auto", "edge"):
-        result = await _edge_tts(clean, lang)
+        result = await _edge_tts(clean, lang, role)
         if result: return result
 
     return await _gtts(clean, lang)
@@ -94,15 +133,20 @@ def _edge_voice(lang: str = "en") -> str:
     }.get(base, "en-GB-SoniaNeural")
 
 
-async def _edge_tts(text: str, lang: str = "en") -> bytes | None:
+async def _edge_tts(text: str, lang: str = "en", role: str | None = None) -> bytes | None:
     """Microsoft neural voices. Free fallback that is much more natural than gTTS."""
     try:
         import edge_tts
 
+        cfg = _role_cfg(role)
+        base = (lang or "en").split("-")[0].lower()
+        # Role voices are English-only; for other languages keep the per-lang voice.
+        voice = cfg["edge_en"] if (cfg.get("edge_en") and base == "en") else _edge_voice(lang)
+        rate = cfg.get("rate") or TTS_RATE
         communicate = edge_tts.Communicate(
             text=text,
-            voice=_edge_voice(lang),
-            rate=TTS_RATE,
+            voice=voice,
+            rate=rate,
             volume="+0%",
         )
         audio = bytearray()
@@ -118,13 +162,9 @@ async def _edge_tts(text: str, lang: str = "en") -> bytes | None:
         return None
 
 
-async def _elevenlabs_tts(text: str, lang: str = "en") -> bytes | None:
-    voices = {
-        "lecture": "pNInz6obpgDQGcFmaJgB",   # Adam — академический
-        "dialogue_male": "TxGEqnHWrfWFTfGW9XjX",  # Josh
-        "dialogue_female": "21m00Tcm4TlvDq8ikWAM",  # Rachel
-    }
-    voice_id = os.getenv("ELEVENLABS_VOICE_ID") or voices["lecture"]
+async def _elevenlabs_tts(text: str, lang: str = "en", role: str | None = None) -> bytes | None:
+    # Role-aware voice. ELEVENLABS_VOICE_ID (если задан) форсит один голос на всё.
+    voice_id = os.getenv("ELEVENLABS_VOICE_ID") or _role_cfg(role)["eleven"]
     try:
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(
