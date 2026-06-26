@@ -1801,7 +1801,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-pill{font-size:10px;font-weight:750;color:var(--t2);background:var(--e2);border:1px solid var(--b1);padding:4px 7px;border-radius:999px}
 .course-go{width:26px;height:26px;border-radius:9px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center}
 .course-go svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.course-lesson{background:linear-gradient(180deg,rgba(var(--ar),.07),transparent 260px),var(--bg);border:1px solid rgba(var(--ar),.13);border-radius:var(--r2);padding:12px;margin-bottom:10px}
+.course-lesson{background:linear-gradient(180deg,rgba(var(--ar),.07),transparent 260px),var(--bg);border:1px solid rgba(var(--ar),.13);border-radius:var(--r2);padding:12px;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:calc(20px + env(safe-area-inset-bottom));margin-bottom:10px}
 .course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
 .course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
 .course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 22%,transparent),rgba(0,212,170,.06));border:1px solid color-mix(in srgb,var(--lesson-color,var(--a)) 32%,transparent);border-radius:18px;padding:16px 14px;margin-bottom:10px;isolation:isolate}
@@ -1940,13 +1940,13 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-practice-card{background:var(--e1);border:1px solid var(--b1);border-radius:12px;padding:9px;margin-top:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.20);transition:border-color .18s,transform .18s,background .18s}
 .course-practice-card:hover{border-color:rgba(var(--ar),.20)}
 .course-practice-card.done{border-color:rgba(0,212,170,.28)}
-.course-qtext{font-size:12px;font-weight:800;color:var(--t1);line-height:1.35;margin-bottom:7px}
+.course-qtext{font-size:12px;font-weight:800;color:var(--t1);line-height:1.4;margin-bottom:14px}
 /* Redesign: large, isolated, easy-to-tap answer buttons (min 52px target,
    bigger type, generous padding + gap) to cut cognitive load and misfires. */
-.course-opt{display:flex;align-items:center;min-height:52px;background:var(--e2);border:1.5px solid var(--b1);border-radius:13px;padding:14px 16px;font-size:14.5px;line-height:1.4;color:var(--t1);cursor:pointer;touch-action:manipulation;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.18);transition:transform .12s ease,border-color .18s,background .18s}
+.course-opt{display:flex;align-items:center;min-height:54px;background:var(--e2);border:1.5px solid var(--b1);border-radius:13px;padding:16px;font-size:14.5px;line-height:1.4;color:var(--t1);cursor:pointer;touch-action:manipulation;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px rgba(0,0,0,.18);transition:transform .12s ease,border-color .18s,background .18s}
 .course-opt:active{transform:scale(.985)}
-.course-practice{gap:10px!important}
-.course-practice-card .course-opt{background:var(--e1);padding:14px 16px;margin-top:8px}
+.course-opts,.course-practice{display:flex;flex-direction:column;gap:12px!important}
+.course-practice-card .course-opt{background:var(--e1);padding:16px;margin-top:12px}
 .course-opt.ok{border-color:rgba(0,212,170,.55);background:rgba(0,212,170,.1)}
 .course-opt.bad{border-color:rgba(255,107,107,.55);background:rgba(255,107,107,.1)}
 .course-note{font-size:11px;line-height:1.4;color:var(--t2);background:rgba(var(--ar),.055);border:1px solid rgba(var(--ar),.12);border-radius:10px;padding:8px 9px;margin-top:8px}
@@ -10571,6 +10571,42 @@ GALAXY_COURSE.push(
   ]}
 );
 
+/* ===== Everyday Situations =====
+   Real-life conversational modules. Forced 'casual'/native voice (never the
+   strict professor tone). category:'everyday' tags them as a practical set;
+   they live at A2 so they integrate into the normal course map and obey the
+   same sequential lock + answer-shuffle (per-session salt) as every lesson. */
+GALAXY_COURSE.push(
+  {id:'ev-directions',level:'A2',color:'#9b59b6',voice:'casual',category:'everyday',tags:['everyday','conversation','travel','directions'],title:{ru:'Спросить дорогу',en:'Asking for Directions'},sub:{ru:'на улице, у прохожего',en:'on the street, to a stranger'},rule:{ru:'В живой ситуации начинай вежливо: "Excuse me, could you tell me how to get to…?" Слушай ключевые слова: turn left/right, go straight, take the second turning, it is on your right. Переспроси спокойно: "Sorry, did you say left or right?"',en:'In a real situation start politely: "Excuse me, could you tell me how to get to…?" Listen for the key words: turn left/right, go straight, take the second turning, it is on your right. Check calmly: "Sorry, did you say left or right?"'},examples:['Excuse me, could you tell me how to get to the station?','Sure — go straight and take the second turning on your left.','It is just around the corner, next to the pharmacy.','Sorry, did you say the first or the second street?','Is it far from here, or can I walk?','It is about a five-minute walk, you can not miss it.','Thanks a lot, that is really helpful!'],words:['excuse me','turning','straight','around the corner','crossroads','traffic lights','can not miss it','far','walk','thanks a lot'],q:'Choose the polite opener: "___ , how do I get to the bank?"',o:['Hey you','Excuse me','Tell now','Give me'],a:1,build:'Excuse me, could you tell me how to get to the station?',dictation:'Excuse me, could you tell me how to get to the museum? Sure, go straight to the traffic lights and turn right. It is around the corner, you can not miss it.',focus:['Open softly: "Excuse me, could you tell me…" is friendlier than "Where is…?"','Re-check without stress: "Sorry, was that left or right?"','"You can not miss it" = it is very easy to find.'],focus_ru:['Начинай мягко: "Excuse me, could you tell me…" звучит дружелюбнее, чем "Where is…?"','Переспрашивай спокойно: "Sorry, was that left or right?"','"You can not miss it" = это очень легко найти.'],practice:[
+    {q:'Pick the natural way to ask a stranger.',o:['Excuse me, how do I get to the park?','Where park you?','Park where is going?','Tell me park now.'],a:0},
+    {q:'Choose: Go straight and take the second ___ on your right.',o:['corner','turning','window','floor'],a:1},
+    {q:'"It is around the corner" means it is ___.',o:['very far away','very close','closed today','underground'],a:1},
+    {q:'Polite way to check what you heard:',o:['Say it again now.','Sorry, did you say left or right?','What you mean?','Repeat please fast.'],a:1},
+    {q:'Choose: Is it far, or can I ___ there?',o:['walk','walking','walked','to walk'],a:0}
+  ]},
+  {id:'ev-airport',level:'A2',color:'#9b59b6',voice:'casual',category:'everyday',tags:['everyday','conversation','travel','airport','hotel'],title:{ru:'Аэропорт и заселение',en:'At the Airport & Hotel Check-in'},sub:{ru:'паспорт, багаж, ресепшн',en:'passport control, baggage, reception'},rule:{ru:'Стандартные фразы поездки: "I would like to check in", "Here is my passport", "I have one suitcase to check". На паспортном контроле: "What is the purpose of your trip?" — "Tourism / Business". В отеле: "I have a reservation under the name…", "Is breakfast included?"',en:'Standard travel phrases: "I would like to check in", "Here is my passport", "I have one suitcase to check". At passport control: "What is the purpose of your trip?" — "Tourism / Business". At the hotel: "I have a reservation under the name…", "Is breakfast included?"'},examples:['Good morning, I would like to check in for the flight to Rome.','Here is my passport and my boarding pass.','I have one suitcase to check and a small bag with me.','What is the purpose of your visit? — Tourism, for one week.','Hi, I have a reservation under the name Brown.','Could I have a room on a higher floor, please?','Is breakfast included in the price?'],words:['check in','passport','boarding pass','suitcase','reservation','purpose','luggage','reception','included','delayed'],q:'Choose: I have a reservation ___ the name Brown.',o:['under','on','at','for'],a:0,build:'Here is my passport and my boarding pass.',dictation:'Good morning, I would like to check in. Here is my passport. I have one suitcase to check. The flight is not delayed, is it? No, it is on time. Enjoy your trip.',focus:['"Check in" is two words for the action; "check-in" with a hyphen is the place.','At passport control answer short: "Tourism, for ten days."','Useful complaint: "My luggage did not arrive."'],focus_ru:['"Check in" (два слова) — действие; "check-in" (через дефис) — стойка/место.','На паспортном контроле отвечай коротко: "Tourism, for ten days."','Полезная жалоба: "My luggage did not arrive." — Мой багаж не прибыл.'],practice:[
+    {q:'At the desk you say:',o:['I want fly now.','I would like to check in, please.','Give plane ticket.','Me passport here go.'],a:1},
+    {q:'Officer: "What is the purpose of your trip?" Best answer:',o:['Tourism, for one week.','I am purpose.','Trip is good thank.','Yes please airport.'],a:0},
+    {q:'Choose: I have a reservation ___ the name Smith.',o:['for','under','in','to'],a:1},
+    {q:'Your bag is lost. You say:',o:['My luggage did not arrive.','Luggage is happy.','I no have bag forever.','Bag where my now?'],a:0},
+    {q:'Polite hotel request:',o:['Room give high.','Could I have a room on a higher floor, please?','High floor want fast.','Floor high me now.'],a:1}
+  ]},
+  {id:'ev-food',level:'A2',color:'#9b59b6',voice:'casual',category:'everyday',tags:['everyday','conversation','restaurant','food','ordering'],title:{ru:'Заказ еды',en:'Ordering Food'},sub:{ru:'кафе, официант, счёт',en:'cafe, waiter, the bill'},rule:{ru:'В кафе и ресторане: "Could I see the menu, please?", "I will have the…", "For me, the soup and a coffee." Вежливо просим счёт: "Could we have the bill, please?" Спросить про блюдо: "What do you recommend?", "Does it contain nuts?"',en:'In a cafe or restaurant: "Could I see the menu, please?", "I will have the…", "For me, the soup and a coffee." Ask politely for the bill: "Could we have the bill, please?" Ask about a dish: "What do you recommend?", "Does it contain nuts?"'},examples:['Could I see the menu, please?','I will have the chicken salad and a sparkling water.','What do you recommend for someone who likes fish?','For me, the tomato soup to start, please.','Does this dish contain any nuts?','Could we have the bill, please?','Can I pay by card? — Of course, no problem.'],words:['menu','order','recommend','starter','main course','dessert','bill','tip','by card','still water'],q:'Choose: I ___ have the soup, please.',o:['will','am','do','have to'],a:0,build:'Could we have the bill, please?',dictation:'Could I see the menu, please? Yes, here you are. I will have the chicken salad and a still water. Anything else? No, that is all. Could we have the bill, please?',focus:['"I will have…" is the natural way to order, not "I want…".','"Still" water = no gas; "sparkling" = with gas.','Ask for the cheque politely: "Could we have the bill, please?"'],focus_ru:['"I will have…" — естественный способ заказать, а не "I want…".','"Still" water = без газа; "sparkling" = с газом.','Вежливо проси счёт: "Could we have the bill, please?"'],practice:[
+    {q:'Natural way to order:',o:['I want eat soup.','I will have the soup, please.','Soup give to me.','Bring soup fast you.'],a:1},
+    {q:'You ask the waiter for advice:',o:['What do you recommend?','What food good is?','Tell me eat what.','Recommend food now go.'],a:0},
+    {q:'Choose: Could we have the ___ , please?',o:['ticket','bill','passport','menu key'],a:1},
+    {q:'"Still water" means water ___.',o:['with gas','without gas','that is hot','from the sea'],a:1},
+    {q:'Pick the natural sentence.',o:['Can I pay by card?','Can I pay with the card money?','I card pay can now?','Pay card is me?'],a:0}
+  ]},
+  {id:'ev-shopping',level:'A2',color:'#9b59b6',voice:'casual',category:'everyday',tags:['everyday','conversation','shopping','taxi','transport'],title:{ru:'Магазин и такси',en:'Shopping & Taxi'},sub:{ru:'покупки, маршрут, оплата',en:'shopping, the route, paying'},rule:{ru:'В магазине: "Do you have this in a larger size?", "How much is it?", "Can I try it on?" С таксистом: "Could you take me to the airport, please?", "How long will it take?", "Keep the change." Уточни маршрут: "Can we go via the centre?"',en:'In a shop: "Do you have this in a larger size?", "How much is it?", "Can I try it on?" With a taxi driver: "Could you take me to the airport, please?", "How long will it take?", "Keep the change." Check the route: "Can we go via the centre?"'},examples:['Excuse me, do you have this T-shirt in a larger size?','How much is it? — It is fifteen euros.','Can I try it on? The fitting rooms are over there.','Could you take me to the central station, please?','How long will it take to get there?','Can we go via the city centre, please?','Keep the change, thank you.'],words:['size','try on','fitting room','receipt','how much','take me to','via','fare','change','traffic'],q:'Choose: ___ you take me to the airport, please?',o:['Could','Are','Do have','Will be'],a:0,build:'Could you take me to the central station, please?',dictation:'Do you have this in a larger size? Let me check. How much is it? It is twenty euros. Can I try it on? Yes, the fitting room is over there.',focus:['Ask price simply: "How much is it?"','Taxi route check: "Can we go via the centre?" via = through.','"Keep the change" = let the driver keep the extra money as a tip.'],focus_ru:['Спрашивай цену просто: "How much is it?"','Уточни маршрут такси: "Can we go via the centre?" via = через.','"Keep the change" = оставь сдачу себе (как чаевые).'],practice:[
+    {q:'Choose: Do you have this in a larger ___ ?',o:['size','tall','big','number'],a:0},
+    {q:'Polite taxi request:',o:['Go airport drive me.','Could you take me to the airport, please?','Airport you now fast.','Take airport go car.'],a:1},
+    {q:'You want to fit the jacket. You say:',o:['Can I try it on?','I try wear now?','Jacket me put on?','Wear can I this?'],a:0},
+    {q:'"Keep the change" means ___.',o:['give me my money back','the driver keeps the extra as a tip','stop the car','change the route'],a:1},
+    {q:'Choose: Can we go ___ the city centre, please?',o:['via','from of','to in','by on'],a:0}
+  ]}
+);
+
 
 (function normalizeCourseLessons(){
   function lessonSentence(ls,idx){
@@ -12561,6 +12597,12 @@ function courseUtterance(text){
    to /api/tts which maps it to a distinct ElevenLabs/Edge voice + speech rate. */
 function courseVoiceRole(ls){
   if(!ls)return 'teacher';
+  /* Explicit per-lesson override wins (e.g. Everyday Situations force 'casual'
+     so the strict professor tone is never used for real-life dialogues). */
+  const v=String(ls.voice||'').toLowerCase();
+  if(/^(teacher|casual|academic)$/.test(v))return v;
+  if(v==='native'||v==='tutor')return 'casual';
+  if(v==='professor')return 'academic';
   const lvl=String(ls.level||'').toUpperCase();
   const hay=[ls.id,(ls.title&&ls.title.en),(ls.sub&&ls.sub.en),(ls.grammar&&ls.grammar.en),Array.isArray(ls.tags)?ls.tags.join(' '):''].filter(Boolean).join(' ').toLowerCase();
   if(/idiom|slang|phrasal|colloquial|informal|conversation|small\s?talk|everyday|chat/.test(hay))return 'casual';
