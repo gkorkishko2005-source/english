@@ -1059,9 +1059,25 @@ async def handle_audio_task(request):
     except Exception:
         return web.json_response({"error":"bad"},status=400)
     ru=lang=="ru"
+    # Strictly-academic listening task. Pull a random academic topic from the
+    # shared exam pool so the content is never everyday/conversational and never
+    # repeats the same lecture. Falls back to a generic academic instruction if
+    # the pool module is unavailable.
+    try:
+        from exam_content import pick_topics, DOMAIN_LABEL, ACADEMIC_RULES
+        _t = pick_topics(1)[0]
+        _topic_line = (f'Topic: "{_t["title"]}" — focus on: {_t.get("angle","")}. '
+                       f'Domain: {DOMAIN_LABEL.get(_t["domain"],"academic")}.\n')
+        _rules = ACADEMIC_RULES + "\n"
+    except Exception:
+        _topic_line = "Topic: a random academic subject (science, history, or economics).\n"
+        _rules = ("STRICTLY ACADEMIC content only — university-lecture register. "
+                  "NEVER everyday/conversational material.\n")
     system=(
-        "Generate a TOEFL listening task. Return ONLY valid JSON (no markdown):\n"
-        '{"topic":"...", "transcript":"3-4 sentence academic paragraph in English", '
+        _rules + _topic_line +
+        "Generate a TOEFL/IELTS academic listening task. Return ONLY valid JSON (no markdown):\n"
+        '{"topic":"...", "transcript":"4-6 sentence academic lecture excerpt in English, '
+        'C1-C2, with passive voice and discipline terminology", '
         '"questions":[{"q":"...","options":["A","B","C","D"],"correct":0},'
         '{"q":"...","options":["A","B","C","D"],"correct":1},'
         '{"q":"...","options":["A","B","C","D"],"correct":2}]}\n'
@@ -1071,7 +1087,7 @@ async def handle_audio_task(request):
         async with httpx.AsyncClient(timeout=45) as client:
             r=await client.post("https://api.anthropic.com/v1/messages",
                 headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate"}]})
+                json={"model":SONNET_MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate"}]})
             data=r.json(); raw=data["content"][0]["text"].strip()
         raw=raw.replace("```json","").replace("```","").strip()
         task=json.loads(raw)
@@ -1847,6 +1863,80 @@ async def handle_exam_section(request):
         return web.json_response({"error": str(e)[:160]}, status=500,
                                  headers={"Access-Control-Allow-Origin": "*"})
 
+async def handle_exam_generate(request):
+    """Serve ONE strictly-academic exam item (Reading or Listening) for the
+    simulator. Cache-first: returns a random cached variant the learner has not
+    seen; otherwise generates a fresh one with Claude Sonnet from the academic
+    topic pool, caches it (reused across users) and marks it seen.
+
+    body: {uid, exam_type:'toefl'|'ielts', section:'reading'|'listening',
+           level?:'C1'|'C2'}
+    """
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    exam_type = "ielts" if str(body.get("exam_type") or "toefl").lower() == "ielts" else "toefl"
+    section = str(body.get("section") or "reading").lower()
+    if section not in ("reading", "listening"):
+        return web.json_response({"error": "bad section"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    level = str(body.get("level") or "C1").upper()
+    try:
+        from database import (get_unseen_exam_template, seen_topic_ids,
+                              save_exam_template, mark_exam_template_seen)
+        # 1) Cache-first: hand back an unseen, already-generated variant.
+        cached = await get_unseen_exam_template(uid, exam_type, section)
+        if cached:
+            try:
+                item = json.loads(cached["payload"])
+            except Exception:
+                item = None
+            if item:
+                await mark_exam_template_seen(uid, int(cached["id"]))
+                return web.json_response(
+                    {"template_id": int(cached["id"]), "exam_type": exam_type,
+                     "section": section, "cached": True, **item},
+                    headers={"Access-Control-Allow-Origin": "*"})
+
+        # 2) Generate a fresh academic variant on a topic this user hasn't seen.
+        from exam_content import pick_topics, build_exam_system_prompt
+        seen = await seen_topic_ids(uid)
+        topic = pick_topics(1, exclude_ids=seen, exam_type=exam_type)[0]
+        system = build_exam_system_prompt(exam_type, section, level, topic, lang)
+        async with httpx.AsyncClient(timeout=60) as client:
+            r = await client.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={"x-api-key": ANT_KEY, "anthropic-version": "2023-06-01",
+                         "content-type": "application/json"},
+                json={"model": SONNET_MODEL, "max_tokens": 1400, "system": system,
+                      "messages": [{"role": "user",
+                                    "content": f"Generate one {section} item now."}]})
+            data = r.json()
+        if "error" in data:
+            logger.error("exam_generate AI error: %s", data["error"])
+            return web.json_response({"error": "generation_failed"}, status=502,
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        raw = (data.get("content") or [{}])[0].get("text", "").strip()
+        raw = raw.replace("```json", "").replace("```", "").strip()
+        item = json.loads(raw)
+        # Stamp provenance so the client can show the academic topic title.
+        item.setdefault("topic", topic["title"])
+        item["topic_id"] = topic["id"]
+        item["domain"] = topic["domain"]
+        await _exam_log_ai_cost(uid, (data.get("usage") or {}))
+        tid = await save_exam_template(exam_type, section, topic["id"], level, item)
+        if tid:
+            await mark_exam_template_seen(uid, tid)
+        return web.json_response(
+            {"template_id": tid, "exam_type": exam_type, "section": section,
+             "cached": False, **item},
+            headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error("exam_generate error: %s", e)
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+
 async def handle_exam_writing(request):
     """AI-graded Writing section. body: {uid, session_id, prompt, essay}."""
     uid, lang, body, err = await _exam_auth(request)
@@ -2222,6 +2312,7 @@ def create_app():
     # Premium exam simulator (subscription-gated inside each handler).
     app.router.add_post("/api/exam/start",handle_exam_start)
     app.router.add_post("/api/exam/section",handle_exam_section)
+    app.router.add_post("/api/exam/generate",handle_exam_generate)
     app.router.add_post("/api/exam/writing",handle_exam_writing)
     app.router.add_post("/api/exam/speaking",handle_exam_speaking)
     app.router.add_post("/api/exam/finish",handle_exam_finish)

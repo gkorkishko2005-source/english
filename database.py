@@ -191,6 +191,39 @@ CREATE TABLE IF NOT EXISTS exam_section_results (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Academic topic pool for the exam simulator (seeded from exam_content.py).
+-- Drives strictly-academic Reading/Listening generation; topics are shared by
+-- TOEFL and IELTS (same academic register).
+CREATE TABLE IF NOT EXISTS exam_topics (
+    id        TEXT PRIMARY KEY,                -- stable slug, e.g. 'ns_plate_tectonics'
+    domain    TEXT,                            -- natural_science|history_anthropology|economics_sociology
+    title     TEXT,
+    angle     TEXT,
+    active     INTEGER DEFAULT 1,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- Cache of AI-generated exam variants. One row = one ready Reading/Listening
+-- item. Reused across users (cost amortised); per-user dedup via exam_seen.
+CREATE TABLE IF NOT EXISTS exam_templates (
+    id         SERIAL PRIMARY KEY,
+    exam_type  TEXT,                           -- 'toefl' | 'ielts'
+    section    TEXT,                           -- 'reading' | 'listening'
+    topic_id   TEXT,                           -- FK-ish → exam_topics.id
+    level      TEXT,                           -- 'C1' | 'C2'
+    payload    TEXT,                           -- JSON: full generated item
+    source     TEXT DEFAULT 'sonnet',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_exam_templates_pick ON exam_templates(exam_type, section);
+-- Per-user record of which variants have been served, so a learner never
+-- repeats the same passage.
+CREATE TABLE IF NOT EXISTS exam_seen (
+    uid         BIGINT,
+    template_id BIGINT,
+    seen_at     TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (uid, template_id)
+);
+
 -- Cache of AI-generated dictionary word breakdowns (3 contextual examples).
 -- Keyed by (word, lang) so repeat taps reuse the cached result instead of
 -- paying for a fresh Anthropic call. `examples` is a JSON array of {en,tr}.
@@ -358,6 +391,20 @@ CREATE TABLE IF NOT EXISTS exam_section_results (
     section TEXT, raw_score REAL, max_score REAL, payload TEXT,
     created_at TEXT DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS exam_topics (
+    id TEXT PRIMARY KEY, domain TEXT, title TEXT, angle TEXT,
+    active INTEGER DEFAULT 1, created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS exam_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, exam_type TEXT, section TEXT,
+    topic_id TEXT, level TEXT, payload TEXT, source TEXT DEFAULT 'sonnet',
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_exam_templates_pick ON exam_templates(exam_type, section);
+CREATE TABLE IF NOT EXISTS exam_seen (
+    uid INTEGER, template_id INTEGER, seen_at TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (uid, template_id)
+);
 CREATE TABLE IF NOT EXISTS word_examples_cache (
     word TEXT, lang TEXT, examples TEXT,
     created_at TEXT DEFAULT (datetime('now')),
@@ -466,6 +513,11 @@ async def db_init():
             await db(stmt)
         except Exception as e:
             logger.debug(f"Schema migration skipped: {e}")
+    # Seed the academic exam-topic pool (idempotent; powers the exam simulator).
+    try:
+        await seed_exam_topics()
+    except Exception as e:
+        logger.warning(f"exam topic seed skipped: {e}")
     logger.info(f"DB initialized ({'PostgreSQL' if USE_POSTGRES else 'SQLite'})")
 
 
@@ -1829,6 +1881,88 @@ async def save_section_result(session_id: int, uid: int, section: str,
 async def get_section_results(session_id: int):
     return await db("SELECT * FROM exam_section_results WHERE session_id=? ORDER BY id",
                     session_id, fetch="all")
+
+
+# ── EXAM CONTENT POOL ─────────────────────────────────────────────────────────
+# Academic topic pool + cache of AI-generated Reading/Listening variants. The
+# pool feeds strictly-academic generation; cached variants are reused across
+# users (AI cost amortised) while `exam_seen` guarantees no learner repeats one.
+async def seed_exam_topics() -> int:
+    """Upsert the curated academic topic pool from exam_content.py into the
+    `exam_topics` table. Idempotent — safe to run on every boot."""
+    try:
+        from exam_content import EXAM_TOPIC_POOL
+    except Exception as e:
+        logger.warning("seed_exam_topics: cannot import pool: %s", e)
+        return 0
+    n = 0
+    for t in EXAM_TOPIC_POOL:
+        try:
+            if USE_POSTGRES:
+                await db("INSERT INTO exam_topics (id, domain, title, angle, active) "
+                         "VALUES (?,?,?,?,1) ON CONFLICT (id) DO UPDATE SET "
+                         "domain=EXCLUDED.domain, title=EXCLUDED.title, angle=EXCLUDED.angle, active=1",
+                         t["id"], t["domain"], t["title"], t.get("angle", ""))
+            else:
+                await db("INSERT OR REPLACE INTO exam_topics (id, domain, title, angle, active) "
+                         "VALUES (?,?,?,?,1)",
+                         t["id"], t["domain"], t["title"], t.get("angle", ""))
+            n += 1
+        except Exception as e:
+            logger.debug("seed_exam_topics row skipped %s: %s", t.get("id"), e)
+    logger.info("exam_topics seeded: %d", n)
+    return n
+
+
+async def save_exam_template(exam_type: str, section: str, topic_id: str,
+                             level: str, payload: dict, source: str = "sonnet") -> int:
+    """Persist one AI-generated exam variant; return its new id."""
+    await db("INSERT INTO exam_templates (exam_type, section, topic_id, level, payload, source) "
+             "VALUES (?,?,?,?,?,?)",
+             exam_type, section, topic_id, level,
+             _exam_json.dumps(payload or {}, ensure_ascii=False)[:12000], source)
+    row = await db("SELECT id FROM exam_templates WHERE exam_type=? AND section=? "
+                   "ORDER BY id DESC LIMIT 1", exam_type, section, fetch="one")
+    return int(row["id"]) if row else 0
+
+
+async def get_unseen_exam_template(uid: int, exam_type: str, section: str):
+    """Return a random cached variant this user has NOT been served yet, or None
+    if their cache is exhausted (caller then generates a fresh variant)."""
+    return await db(
+        "SELECT id, topic_id, level, payload FROM exam_templates "
+        "WHERE exam_type=? AND section=? AND id NOT IN "
+        "(SELECT template_id FROM exam_seen WHERE uid=?) "
+        "ORDER BY RANDOM() LIMIT 1",
+        exam_type, section, uid, fetch="one")
+
+
+async def seen_topic_ids(uid: int) -> list:
+    """Topic ids already served to this user — used to bias fresh generation
+    toward unseen subjects."""
+    rows = await db(
+        "SELECT DISTINCT t.topic_id FROM exam_templates t "
+        "JOIN exam_seen s ON s.template_id=t.id WHERE s.uid=?",
+        uid, fetch="all") or []
+    return [r["topic_id"] for r in rows if r.get("topic_id")]
+
+
+async def mark_exam_template_seen(uid: int, template_id: int) -> None:
+    try:
+        if USE_POSTGRES:
+            await db("INSERT INTO exam_seen (uid, template_id) VALUES (?,?) "
+                     "ON CONFLICT (uid, template_id) DO NOTHING", uid, template_id)
+        else:
+            await db("INSERT OR IGNORE INTO exam_seen (uid, template_id) VALUES (?,?)",
+                     uid, template_id)
+    except Exception as e:
+        logger.debug("mark_exam_template_seen skipped uid=%s tid=%s: %s", uid, template_id, e)
+
+
+async def count_exam_templates(exam_type: str, section: str) -> int:
+    row = await db("SELECT COUNT(*) AS n FROM exam_templates WHERE exam_type=? AND section=?",
+                   exam_type, section, fetch="one")
+    return int(row["n"]) if row and row.get("n") is not None else 0
 
 def _exam_scale_total(exam_type: str, sections: dict) -> float:
     """sections values are already on the official per-section scale
