@@ -195,8 +195,12 @@ def require_premium(name: str):
             if uid in ADMIN_IDS:
                 return await handler(request)
             try:
-                from database import check_premium
-                if uid and await check_premium(uid):
+                # check_platform covers ALL paid paths (active Platform sub,
+                # grandfathered bundle AND active legacy premium). Using the
+                # legacy-only check_premium here wrongly paywalled Platform-only
+                # subscribers on gated routes (lesson/test).
+                from database import check_platform
+                if uid and await check_platform(uid):
                     return await handler(request)
             except Exception as e:
                 logger.warning("require_premium check failed route=%s uid=%s: %s", name, uid, e)

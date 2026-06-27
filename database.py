@@ -796,6 +796,25 @@ async def enforce_subscription(uid: int) -> dict:
         await db("UPDATE users SET is_premium=FALSE, premium_tier='' WHERE uid=?", uid)
         logger.info("subscription expired → is_premium reset FALSE uid=%s (until=%s, now=%s)",
                     uid, until.isoformat(), now.isoformat())
+    # Self-heal the Platform side too: a past `platform_until` is already treated
+    # as inactive by get_platform_info(), but leaving the stale date in the row
+    # makes the DB look "still subscribed" when debugging. Null it ONCE here so
+    # stored state can never lag behind real time. Lifetime / grandfathered are
+    # NOT touched — those are date-independent and must persist.
+    pf_raw = user.get("platform_until")
+    if pf_raw and not user.get("platform_lifetime"):
+        pf_until = None
+        try:
+            pf_until = pf_raw if isinstance(pf_raw, datetime) else datetime.fromisoformat(str(pf_raw))
+            if pf_until.tzinfo is None:
+                pf_until = pf_until.replace(tzinfo=timezone.utc)
+        except Exception as e:
+            logger.warning("enforce_subscription platform parse failed uid=%s value=%r: %s", uid, pf_raw, e)
+            pf_until = None
+        if pf_until is not None and now > pf_until:
+            await db("UPDATE users SET platform_until=NULL WHERE uid=?", uid)
+            logger.info("platform sub expired → platform_until cleared uid=%s (until=%s, now=%s)",
+                        uid, pf_until.isoformat(), now.isoformat())
     info = await get_premium_info(uid)
     info["reset"] = bool(expired)
     return info
@@ -816,6 +835,37 @@ async def check_premium(uid: int) -> bool:
         return until_dt > datetime.now(timezone.utc)
     except Exception:
         return False
+
+
+async def revoke_subscription(uid: int) -> dict:
+    """Canonical FULL revoke: clear EVERY source of premium access in ONE atomic
+    write — legacy bundle (is_premium / premium_until / premium_tier), Platform
+    (platform_until / platform_lifetime) and the grandfathered flag.
+
+    check_platform() grants access if ANY of those is set, so removing a
+    subscription piecemeal is how stale access leaks ("won't expire"). This is
+    the single source of truth for "take the subscription away". ALEX credits
+    (chat_credits) are a SEPARATE wallet and are intentionally left untouched.
+
+    Returns a snapshot of what was set before the wipe so callers/admins can see
+    exactly what was cleared."""
+    user = await get_user(uid)
+    before = {
+        "is_premium":         bool(user.get("is_premium")) if user else False,
+        "premium_tier":       (user.get("premium_tier") or "") if user else "",
+        "premium_until":      (str(user.get("premium_until")) if user and user.get("premium_until") else None),
+        "platform_until":     (str(user.get("platform_until")) if user and user.get("platform_until") else None),
+        "platform_lifetime":  bool(user.get("platform_lifetime")) if user else False,
+        "grandfathered_tier": (user.get("grandfathered_tier") or "") if user else "",
+    }
+    lifetime_off = False if USE_POSTGRES else 0
+    await db(
+        "UPDATE users SET is_premium=FALSE, premium_until=NULL, premium_tier='', "
+        "platform_until=NULL, platform_lifetime=?, grandfathered_tier='' WHERE uid=?",
+        lifetime_off, uid,
+    )
+    logger.info("subscription fully revoked uid=%s (was=%s)", uid, before)
+    return {"ok": True, "uid": uid, "cleared": before}
 
 
 # ══════════════════════════════════════════════════════════════════

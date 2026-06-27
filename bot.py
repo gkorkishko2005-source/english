@@ -2937,6 +2937,62 @@ async def cmd_admin_grant(msg: Message):
     except Exception as e:
         await msg.answer(f"{ICON['warn']} Error: {e}")
 
+@dp.message(Command("admin_revoke"))
+async def cmd_admin_revoke(msg: Message):
+    """Admin-only: FULLY remove a subscription (legacy + Platform + grandfathered)
+    in one atomic write. ALEX credits are NOT touched."""
+    if msg.from_user.id not in ADMIN_IDS:
+        return  # Silently ignore
+    parts = msg.text.split()
+    if len(parts) < 2:
+        await msg.answer("Usage: /admin_revoke <uid>\nExample: /admin_revoke 123456789")
+        return
+    try:
+        target_uid = int(parts[1])
+        from database import revoke_subscription
+        res = await revoke_subscription(target_uid)
+        was = res.get("cleared", {})
+        await msg.answer(
+            f"✓ Subscription fully revoked for uid {target_uid}\n"
+            f"Was: premium={was.get('is_premium')} tier={was.get('premium_tier') or '—'} "
+            f"until={was.get('premium_until') or '—'}\n"
+            f"platform_until={was.get('platform_until') or '—'} "
+            f"lifetime={was.get('platform_lifetime')} grandfathered={was.get('grandfathered_tier') or '—'}\n"
+            f"(ALEX credits left untouched.)"
+        )
+    except Exception as e:
+        await msg.answer(f"{ICON['warn']} Error: {e}")
+
+@dp.message(Command("admin_sub"))
+async def cmd_admin_sub(msg: Message):
+    """Admin-only: inspect every subscription source for a uid (diagnostics)."""
+    if msg.from_user.id not in ADMIN_IDS:
+        return  # Silently ignore
+    parts = msg.text.split()
+    if len(parts) < 2:
+        await msg.answer("Usage: /admin_sub <uid>\nExample: /admin_sub 123456789")
+        return
+    try:
+        target_uid = int(parts[1])
+        from database import enforce_subscription, get_platform_info, check_platform, get_credits
+        legacy = await enforce_subscription(target_uid)
+        platform = await get_platform_info(target_uid)
+        access = await check_platform(target_uid)
+        credits = await get_credits(target_uid)
+        await msg.answer(
+            f"📋 Subscription for uid {target_uid}\n"
+            f"Effective access (check_platform): {'✅ ACTIVE' if access else '❌ none'}\n"
+            f"— legacy: premium={legacy.get('is_premium')} tier={legacy.get('tier') or '—'} "
+            f"until={legacy.get('until') or '—'}\n"
+            f"— platform: active={platform.get('active')} until={platform.get('until') or '—'} "
+            f"lifetime={platform.get('lifetime')}\n"
+            f"— grandfathered: {platform.get('grandfathered_tier') or '—'}\n"
+            f"— ALEX credits: {credits}\n"
+            f"{'⚠️ uid is in ADMIN_IDS → bypasses all gates regardless of subscription.' if target_uid in ADMIN_IDS else ''}"
+        )
+    except Exception as e:
+        await msg.answer(f"{ICON['warn']} Error: {e}")
+
 @dp.message(Command("admin_wotd"))
 async def cmd_admin_wotd(msg: Message):
     """Admin-only: post the word of the day to the channel right now (test)."""
