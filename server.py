@@ -1179,7 +1179,7 @@ async def handle_check_premium(request):
             from database import get_daily_lessons_state
             lessons = await get_daily_lessons_state(uid, kind != "none")
         except Exception:
-            lessons = {"used":0,"limit":5,"remaining":5,"unlimited":(kind!="none"),"reset_in":0}
+            lessons = {"used":0,"limit":3,"remaining":3,"unlimited":(kind!="none"),"reset_in":0}
         # Daily-flashcard budget piggy-backs too (metered for both tiers).
         try:
             from database import get_daily_cards_state

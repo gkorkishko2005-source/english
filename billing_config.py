@@ -102,7 +102,7 @@ _DEFAULTS = {
     # starting the next one is blocked by a compact paywall. The day boundary
     # is the SERVER clock (UTC 00:00) so it can't be farmed by the device clock.
     # Premium = unlimited. Tunable live (BILLING_LESSONS_FREE_DAILY), no deploy.
-    "LESSONS_FREE_DAILY": 5,           # lessons/day a free user can complete
+    "LESSONS_FREE_DAILY": 3,           # lessons/day a free user can complete
     # ── Daily flashcard limit (economy guard, both tiers) ──────────────
     # Number of flashcards a user may COMPLETE (Skip or Save) per UTC day.
     # Free users hit a hard wall → paywall. Premium users hit a softer cap

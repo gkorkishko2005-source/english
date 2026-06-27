@@ -1985,6 +1985,29 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-inp{width:100%;box-sizing:border-box;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:11px 12px;color:var(--t1);font-family:var(--f);font-size:13px;outline:none}
 .course-result{font-size:12px;font-weight:750;margin-top:8px;color:var(--t2)}
 .course-result.ok{color:var(--a2)}.course-result.bad{color:var(--rd)}
+/* ── Listening section: generous breathing room so the audio player and the
+      task text never crowd each other. ── */
+.course-section[data-course-stage="listen"] .course-build{padding:16px;margin-top:14px}
+.course-section[data-course-stage="listen"] .course-lab{margin:4px 0 11px}
+.course-section[data-course-stage="listen"] .course-rule{margin:6px 0 14px;line-height:1.75}
+.course-section[data-course-stage="listen"] .course-note{margin-top:12px;padding:11px 13px;line-height:1.55}
+.course-section[data-course-stage="listen"] .course-mini-actions{gap:11px;margin:16px 0 8px}
+.course-section[data-course-stage="listen"] .course-mini-btn{padding:13px;min-height:48px;font-size:13px}
+.course-section[data-course-stage="listen"] .course-opt{margin-top:12px}
+.course-section[data-course-stage="listen"] .course-result{margin-top:12px}
+/* ── Matte premium surfaces: cut accent glow ~70%. Keep a light, tasteful neon
+      ONLY on the progress bar (track-rail / stepbar fill) and the selected /
+      correct answer button (.course-opt.ok / .ok-reveal, .course-choice.ok-reveal,
+      defined elsewhere). All other plates are flat. ── */
+.course-section.active{box-shadow:0 0 0 1px rgba(var(--ar),.12)}
+.course-section.active.done{box-shadow:0 0 0 1px rgba(0,212,170,.14)}
+.course-hero-ico{box-shadow:0 4px 12px color-mix(in srgb,var(--lesson-color,var(--a)) 12%,transparent),inset 0 0 0 1px rgba(255,255,255,.06)}
+.course-stepnav button.primary{box-shadow:0 4px 12px rgba(var(--ar),.14)}
+.course-card-dot.active{box-shadow:none}
+.course-card-dot.done{box-shadow:none}
+.learn-tab.on{box-shadow:none}
+.course-stage-card.locked{opacity:.45;pointer-events:none;filter:saturate(.45)}
+.course-stage-card.locked .course-stage-go svg{opacity:.5}
 .course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:linear-gradient(135deg,rgba(0,212,170,.10),rgba(var(--ar),.08));border-radius:14px;padding:14px;color:var(--t1)}
 .rp-passage{background:var(--e1);border:1px solid var(--b1);border-radius:14px;padding:14px;margin-top:8px;line-height:1.55;font-size:14px;color:var(--t1)}
 .rp-para{margin:0 0 12px}
@@ -11189,7 +11212,7 @@ function courseStageMeta(id,ls,practice,parts){
   ];
   if(hasSynonym)stages.push({key:'synonym',title:courseT('synonym'),sub:courseT('synonymSub'),pct:done('synonym')?100:0});
   stages.push(
-    {key:'grammar',title:courseT('grammar'),sub:({ru:'5 заданий на правило и естественную фразу',en:'5 tasks for rule and natural phrasing',es:'5 tareas de regla y frase natural',pt:'5 tarefas de regra e frase natural',de:'5 Aufgaben zu Regel und natürlicher Formulierung',fr:'5 tâches sur la règle et la formulation naturelle',uk:'5 завдань на правило та природну фразу',tr:'Kural ve doğal ifade için 5 görev',zh:'5 个关于规则和自然表达的任务',ar:'5 مهام للقاعدة والصياغة الطبيعية'}[lang]||'5 tasks for rule and natural phrasing'),pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
+    {key:'grammar',title:courseT('grammar'),sub:({ru:'Задания на правило и естественную фразу',en:'Tasks for rule and natural phrasing',es:'Tareas de regla y frase natural',pt:'Tarefas de regra e frase natural',de:'Aufgaben zu Regel und natürlicher Formulierung',fr:'Tâches sur la règle et la formulation naturelle',uk:'Завдання на правило та природну фразу',tr:'Kural ve doğal ifade görevleri',zh:'关于规则和自然表达的任务',ar:'مهام للقاعدة والصياغة الطبيعية'}[lang]||'Tasks for rule and natural phrasing'),pct:Math.round(practiceDone/Math.max(1,practice.length)*100)},
     {key:'builder',title:courseT('puzzle'),sub:({ru:'Собери фразу из английских слов',en:'Build the phrase from English tiles',es:'Forma la frase con fichas en inglés',pt:'Monte a frase com peças em inglês',de:'Bilde den Satz aus englischen Bausteinen',fr:'Compose la phrase avec des tuiles anglaises',uk:'Склади фразу з англійських слів',tr:'İngilizce parçalardan cümleyi kur',zh:'用英文词块拼出句子',ar:'كوّن الجملة من قطع إنجليزية'}[lang]||'Build the phrase from English tiles'),pct:done('builder')?100:0},
     {key:'builder_native',title:courseT('nativePuzzle'),sub:({ru:'Собери английский по переводу',en:'Build English from translation',es:'Forma el inglés a partir de la traducción',pt:'Monte o inglês a partir da tradução',de:'Bilde Englisch aus der Übersetzung',fr:'Compose l’anglais à partir de la traduction',uk:'Склади англійську з перекладу',tr:'Çeviriden İngilizceyi kur',zh:'根据翻译拼出英语',ar:'كوّن الإنجليزية من الترجمة'}[lang]||'Build English from translation'),pct:done('builder_native')?100:0},
     {key:'errors',title:courseT('errors'),sub:({ru:'Найди тип ошибки в предложении',en:'Find the mistake type in a sentence',es:'Encuentra el tipo de error en la frase',pt:'Encontre o tipo de erro na frase',de:'Finde die Fehlerart im Satz',fr:'Trouve le type d’erreur dans la phrase',uk:'Знайди тип помилки в реченні',tr:'Cümledeki hata türünü bul',zh:'找出句中的错误类型',ar:'اعثر على نوع الخطأ في الجملة'}[lang]||'Find the mistake type in a sentence'),pct:done('errors')?100:0},
@@ -11197,16 +11220,44 @@ function courseStageMeta(id,ls,practice,parts){
   );
   return stages.map((s,i)=>Object.assign({n:i+1},s));
 }
+/* ── Strict in-lesson sequencing ───────────────────────────────────────────
+   The learner must clear each stage before the next unlocks. A stage is
+   UNLOCKED iff every earlier stage is 100% done; the single first-incomplete
+   stage is the only open frontier. Everything after it is locked. This is the
+   single source of truth for the stage cards, the "Next" button and
+   openCourseStage(). */
+function _courseLiveStageMeta(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id);if(!ls)return [];
+  const practice=window['course_practice_'+courseKey(id)]||coursePracticeSet(ls);
+  try{return courseStageMeta(id,ls,practice,courseStoredParts(id,practice));}catch(_){return [];}
+}
+function _courseUnlockedStages(id){
+  const meta=_courseLiveStageMeta(id);const set=new Set();
+  for(const s of meta){set.add(s.key);if(s.pct<100)break;} // stop AFTER first incomplete
+  return set;
+}
+function _courseStageLockMsg(){
+  return ({ru:'Сначала закончи текущий шаг',en:'Finish the current step first',es:'Termina primero el paso actual',pt:'Conclua primeiro a etapa atual',de:'Beende zuerst den aktuellen Schritt',fr:'Termine d’abord l’étape en cours',uk:'Спершу заверши поточний крок',tr:'Önce mevcut adımı bitir',zh:'请先完成当前步骤',ar:'أنهِ الخطوة الحالية أولًا'}[lang]||'Finish the current step first');
+}
 function renderCourseStageList(id,ls,practice,parts){
+  const meta=courseStageMeta(id,ls,practice,parts);
+  let seenIncomplete=false;
   return `<div class="course-stage-list" id="course-stage-list-${id}">
-    ${courseStageMeta(id,ls,practice,parts).map(s=>`<div class="course-stage-card ${s.pct>=100?'done':''}" data-stage="${s.key}" onclick="openCourseStage('${id}','${s.key}')">
-      <div class="course-stage-ring" style="--pct:${s.pct}%"><div class="course-stage-ring-in">${s.pct>=100?'✓':s.n}</div></div>
+    ${meta.map(s=>{
+      const locked=seenIncomplete;
+      if(!seenIncomplete&&s.pct<100)seenIncomplete=true;
+      return `<div class="course-stage-card ${s.pct>=100?'done':''} ${locked?'locked':''}" data-stage="${s.key}" ${locked?'':`onclick="openCourseStage('${id}','${s.key}')"`}>
+      <div class="course-stage-ring" style="--pct:${s.pct}%"><div class="course-stage-ring-in">${s.pct>=100?'✓':(locked?'🔒':s.n)}</div></div>
       <div class="course-stage-info"><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
       <div class="course-stage-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div>`).join('')}
+    </div>`;}).join('')}
   </div>`;
 }
 function openCourseStage(id,stage){
+  /* Strict linear sequencing: refuse to open a stage that is still locked
+     (its predecessor isn't finished). Covers both the stage-list cards and the
+     hero stepper nodes — both routes funnel through this one function. */
+  try{const un=_courseUnlockedStages(id);if(un.size&&!un.has(stage)){try{toast(_courseStageLockMsg(),'🔒');}catch(_){}return;}}catch(_){}
   document.querySelectorAll('#course-wrap [data-course-stage]').forEach(el=>el.classList.toggle('active',el.dataset.courseStage===stage));
   document.querySelectorAll('#course-stage-list-'+id+' .course-stage-card').forEach(el=>el.classList.toggle('active',el.dataset.stage===stage));
   /* Keep the hero stepper node in sync with the active step (done nodes keep
@@ -11239,7 +11290,11 @@ function _courseUpdateStepbar(id){
      and keep it enabled so it scrolls the learner to the summary card. */
   if(next){
     const last=(i>=total-1);
-    next.disabled=false;
+    /* Lock "Дальше" until the current stage is fully solved (strict linear
+       logic). On the last stage it stays enabled to scroll to the summary. */
+    let curPct=100;
+    try{const key=stages[i]&&stages[i].dataset.courseStage;const m=_courseLiveStageMeta(id).find(x=>x.key===key);if(m)curPct=m.pct;}catch(_){}
+    next.disabled=(!last&&curPct<100);
     const lbl=next.querySelector('span')||next;
     lbl.textContent=last
       ?({ru:'Завершить',en:'Finish',es:'Finalizar',pt:'Concluir',de:'Abschließen',fr:'Terminer',uk:'Завершити',tr:'Bitir',zh:'完成',ar:'إنهاء'}[lang]||'Finish')
@@ -11249,6 +11304,11 @@ function _courseUpdateStepbar(id){
 function courseStepNav(id,dir){
   const stages=_courseStageEls();if(!stages.length)return;
   let i=stages.findIndex(el=>el.classList.contains('active'));if(i<0)i=0;
+  /* Forward move is blocked while the current stage is unsolved (strict linear
+     logic). The button is also disabled in the UI, this is the belt-and-braces. */
+  if(dir>0&&i<stages.length-1){
+    try{const key=stages[i]&&stages[i].dataset.courseStage;const m=_courseLiveStageMeta(id).find(x=>x.key===key);if(m&&m.pct<100){try{toast(_courseStageLockMsg(),'🔒');}catch(_){}return;}}catch(_){}
+  }
   const ni=Math.min(stages.length-1,Math.max(0,i+dir));
   if(ni===i){
     /* Already on the last step: "Завершить" scrolls to the summary card. */
@@ -11614,30 +11674,65 @@ function renderCourseSynonymSection(ls,id,index){
   </div>`;
 }
 function coursePracticeSet(ls){
-  const base=Array.isArray(ls.practice)?ls.practice:[];
-  const out=base.filter(q=>q&&Array.isArray(q.o)&&typeof q.a==='number').slice(0,5);
-  if(!out.length&&ls.q)out.push({q:ls.q,o:ls.o,a:ls.a});
-  const examples=(ls.examples||[]).filter(Boolean);
-  const words=(ls.words||[]).filter(Boolean);
-  const title=(ls.title&&(ls.title.en||ls.title.ru))||'English';
-  const target=ls.build||examples[0]||'I use English every day.';
-  const clozeBank=['am','is','are','do','does','did','will','can','should','have','has','had','a','an','the','in','on','at','for','to'];
-  const clozeMatch=target.match(new RegExp('\\b('+clozeBank.join('|')+')\\b','i'));
-  const clozeAnswer=(clozeMatch&&clozeMatch[0].toLowerCase())||'in';
-  const clozeOptions=[clozeAnswer,...clozeBank.filter(x=>x!==clozeAnswer)].slice(0,4);
-  const clozeSentence=clozeMatch?target.replace(new RegExp('\\b'+clozeAnswer+'\\b','i'),'___'):`${target} ___`;
-  const fallback=[
-    {q:`Choose the correct word: ${clozeSentence}`,o:clozeOptions,a:0},
-    {q:`Choose the natural sentence for ${title}.`,o:[examples[0]||target,'I using this rule.','This rule use me.','I am use this.'],a:0},
-    {q:`Fill the gap: ${words[0]||'English'} is useful ___ daily practice.`,o:['for','to','at','by'],a:0},
-    {q:`Pick the best study habit.`,o:['Read the example, answer, then check.','Look at the answer first.','Skip the form.','Guess every time.'],a:0},
-    {q:`Choose the clear sentence.`,o:[examples[1]||target,'The words is wrong order.','I no understand this.','This are example.'],a:0}
-  ];
-  for(const q of fallback){
-    if(out.length>=5)break;
-    if(q&&Array.isArray(q.o))out.push(q);
+  /* Longer practice pool (target ~12) for deeper reinforcement. Built from:
+     (1) EVERY authored ls.practice item (no longer sliced to 5);
+     (2) valid gap-fill questions synthesized from the lesson's OWN authored
+         example sentences — always grammatically correct English, with
+         distractors drawn from the SAME word-class so they read naturally;
+     (3) a small generic top-up only for data-poor lessons.
+     Per-session Fisher–Yates shuffle is applied later by shuffleMCQ, so an
+     authored a:0 is never a position bias. */
+  const TARGET=12;
+  const out=[];
+  const seen=new Set();
+  const pushQ=(q)=>{
+    if(!q||!Array.isArray(q.o)||q.o.length<2||typeof q.a!=='number')return;
+    if(q.a<0||q.a>=q.o.length)return;
+    const key=String(q.q||'').trim().toLowerCase();
+    if(!key||seen.has(key))return;
+    seen.add(key);out.push(q);
+  };
+  (Array.isArray(ls.practice)?ls.practice:[]).forEach(pushQ);
+  if(!out.length&&ls.q&&Array.isArray(ls.o)&&typeof ls.a==='number')pushQ({q:ls.q,o:ls.o,a:ls.a});
+  const examples=(ls.examples||[]).filter(s=>typeof s==='string'&&s.trim().length>6);
+  /* Word-class groups, least-ambiguous first (BE forms and articles are far
+     less ambiguous to mask than modals/prepositions). */
+  const BE=['am','is','are','was','were'];
+  const ART=['a','an','the'];
+  const PREP=['in','on','at','for','to','of','with','by','from'];
+  const AUXM=['do','does','did','will','would','can','could','should','have','has','had'];
+  const GROUPS=[BE,ART,PREP,AUXM];
+  const groupFor=(w)=>{w=w.toLowerCase();return GROUPS.find(g=>g.includes(w))||null;};
+  const findMaskable=(s)=>{
+    for(const grp of GROUPS){for(const w of grp){if(new RegExp('\\b'+w+'\\b','i').test(s))return w;}}
+    return null;
+  };
+  for(const ex of examples){
+    if(out.length>=TARGET)break;
+    const ans=findMaskable(ex);if(!ans)continue;
+    const grp=groupFor(ans)||BE;
+    const lc=ans.toLowerCase();
+    const sentence=ex.replace(new RegExp('\\b'+ans+'\\b','i'),'___'); // first occurrence only
+    const distractors=grp.filter(w=>w.toLowerCase()!==lc);
+    let h=0;for(let i=0;i<ex.length;i++)h=(h*31+ex.charCodeAt(i))>>>0;
+    const picks=[];
+    for(let k=0;k<distractors.length&&picks.length<3;k++)picks.push(distractors[(h+k)%distractors.length]);
+    const opts=[ans,...[...new Set(picks)].slice(0,3)];
+    if(opts.length<3)continue;
+    pushQ({q:`Fill the gap: ${sentence}`,o:opts,a:0});
   }
-  return out;
+  if(out.length<5){
+    const words=(ls.words||[]).filter(Boolean);
+    const title=(ls.title&&(ls.title.en||ls.title.ru))||'English';
+    const target=ls.build||examples[0]||'I use English every day.';
+    [
+      {q:`Choose the natural sentence for ${title}.`,o:[examples[0]||target,'I using this rule.','This rule use me.','I am use this.'],a:0},
+      {q:`Fill the gap: ${words[0]||'English'} is useful ___ daily practice.`,o:['for','to','at','by'],a:0},
+      {q:`Choose the clear sentence.`,o:[examples[1]||target,'The words is wrong order.','I no understand this.','This are example.'],a:0},
+      {q:`Pick the best study habit.`,o:['Read the example, answer, then check.','Look at the answer first.','Skip the form.','Guess every time.'],a:0}
+    ].forEach(g=>{if(out.length<TARGET)pushQ(g);});
+  }
+  return out.slice(0,TARGET);
 }
 let _inCourseLesson=false;
 let _courseRestoring=false;
@@ -11839,7 +11934,7 @@ function _openCourseLessonInner(id){
     ${renderCourseVocabSection(ls,id,'vocab_reverse',2,true)}
     ${synonymHtml}
     <div class="course-section ${grammarDone?'done':''}" data-course-stage="grammar" id="course-section-grammar">
-      <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${({ru:'5 коротких заданий: форма, слово, естественная фраза.',en:'5 short tasks: form, word, natural sentence.',es:'5 tareas breves: forma, palabra, frase natural.',pt:'5 tarefas breves: forma, palavra, frase natural.',de:'5 kurze Aufgaben: Form, Wort, natürlicher Satz.',fr:'5 tâches courtes : forme, mot, phrase naturelle.',uk:'5 коротких завдань: форма, слово, природне речення.',tr:'5 kısa görev: biçim, kelime, doğal cümle.',zh:'5 个简短任务：形式、词语、自然句子。',ar:'5 مهام قصيرة: الصيغة، الكلمة، الجملة الطبيعية.'}[lang]||'5 short tasks: form, word, natural sentence.')}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
+      <div class="course-section-head"><div class="course-section-index">${grammarIdx}</div><div><div class="course-section-title">${courseT('grammar')}</div><div class="course-section-sub">${({ru:'Короткие задания: форма, слово, естественная фраза.',en:'Short tasks: form, word, natural sentence.',es:'Tareas breves: forma, palabra, frase natural.',pt:'Tarefas breves: forma, palavra, frase natural.',de:'Kurze Aufgaben: Form, Wort, natürlicher Satz.',fr:'Tâches courtes : forme, mot, phrase naturelle.',uk:'Короткі завдання: форма, слово, природне речення.',tr:'Kısa görevler: biçim, kelime, doğal cümle.',zh:'简短任务：形式、词语、自然句子。',ar:'مهام قصيرة: الصيغة، الكلمة، الجملة الطبيعية.'}[lang]||'Short tasks: form, word, natural sentence.')}</div></div>${grammarDone?`<div class="course-section-done">${courseT('done')}</div>`:''}</div>
       <div class="course-practice" id="course-q-${id}">
         ${(function(){
           const pState=LS.getJ('course_practice_state_'+id)||{};
@@ -12031,6 +12126,9 @@ function updateCourseTrack(id){
     if(tip){tip.textContent=meta.title;}
   });
   refreshCourseStageList(id);
+  /* Re-evaluate the "Дальше" lock after progress changes (a stage may have just
+     reached 100%, which unlocks forward navigation). */
+  try{_courseUpdateStepbar(id);}catch(_){}
 }
 function courseStageScore(id,part){
   const state=courseChoiceState(id,part);
@@ -14148,7 +14246,7 @@ let _heartsTickT = null;        /* countdown interval for the out-of-hearts moda
 let _heartsRegenT = null;       /* foreground regen poll while the bar is visible */
 /* Free-tier daily lesson budget (server-authoritative; mirrored here for an
    instant gate). Reset by the SERVER at UTC 00:00. Premium = unlimited. */
-let lessonLimitState = {used:0,limit:5,remaining:5,unlimited:false,reset_in:0};
+let lessonLimitState = {used:0,limit:3,remaining:3,unlimited:false,reset_in:0};
 let _dlimitTickT = null;        /* countdown interval for the daily-limit modal */
 /* Daily flashcard budget mirror (server-authoritative; both tiers metered). */
 let cardLimitState = {used:0,limit:15,remaining:15,reset_in:0,is_premium:false};
@@ -14192,7 +14290,7 @@ async function checkPremiumStatus(uid){
       grandfatheredTier=d.grandfathered_tier||'';
       accessKind=d.access_kind||'none';
       if(d.hearts&&typeof d.hearts==='object'){heartsState=Object.assign({hearts:5,max:5,next_in:0,full:true,unlimited:false},d.hearts);}
-      if(d.lessons&&typeof d.lessons==='object'){lessonLimitState=Object.assign({used:0,limit:5,remaining:5,unlimited:false,reset_in:0},d.lessons);}
+      if(d.lessons&&typeof d.lessons==='object'){lessonLimitState=Object.assign({used:0,limit:3,remaining:3,unlimited:false,reset_in:0},d.lessons);}
       if(d.cards&&typeof d.cards==='object'){cardLimitState=Object.assign({used:0,limit:15,remaining:15,reset_in:0,is_premium:false},d.cards);}
       setPremium(d.is_premium===true,d.source||'database');
       try{updateCreditChip();}catch(_){}
@@ -14469,14 +14567,14 @@ function recordLessonDone(){
   /* Optimistically decrement the mirror so a fast 6th-lesson tap is gated even
      before the server replies; the server's response then reconciles it. */
   lessonLimitState.used=(parseInt(lessonLimitState.used,10)||0)+1;
-  lessonLimitState.remaining=Math.max(0,(parseInt(lessonLimitState.limit,10)||5)-lessonLimitState.used);
+  lessonLimitState.remaining=Math.max(0,(parseInt(lessonLimitState.limit,10)||3)-lessonLimitState.used);
   if(API&&window._uid){
     fetch(`${API}/api/lessons/done`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
       .then(r=>r.json()).then(d=>{if(d&&typeof d.remaining==='number')lessonLimitState=Object.assign({unlimited:false},d);}).catch(()=>{});
   }
 }
 function openDailyLimit(){
-  const cap=parseInt(lessonLimitState.limit,10)||5;
+  const cap=parseInt(lessonLimitState.limit,10)||3;
   const t=document.getElementById('dl-title'),s=document.getElementById('dl-sub'),
         prem=document.getElementById('dl-prem'),close=document.getElementById('dl-close');
   if(t)t.textContent=({ru:'Дневной лимит достигнут',en:'Daily limit reached',es:'Límite diario alcanzado',pt:'Limite diário atingido',de:'Tageslimit erreicht',fr:'Limite quotidienne atteinte',uk:'Денний ліміт досягнуто',tr:'Günlük limite ulaşıldı',zh:'已达每日上限',ar:'تم بلوغ الحد اليومي'}[lang]||'Daily limit reached');

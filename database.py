@@ -1407,9 +1407,9 @@ async def _lessons_daily_cap() -> int:
     try:
         from billing_config import load_config
         cfg = await load_config()
-        return max(0, int(cfg.get("LESSONS_FREE_DAILY", 5) or 5))
+        return max(0, int(cfg.get("LESSONS_FREE_DAILY", 3) or 3))
     except Exception:
-        return 5
+        return 3
 
 
 def _utc_day_str() -> str:
