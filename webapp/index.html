@@ -317,13 +317,21 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
    Greeting line ("Доброе утро,") + name. The four blocks (hero,
    continue, today, exam) are intentionally sized to fill the
    viewport without padding-widgets between them. */
-.hero{padding:18px 0 26px;position:relative}
-.hero-text{min-width:0}
-.hero-mark{width:36px;height:36px;margin-bottom:11px;filter:drop-shadow(0 2px 8px rgba(var(--ar),.22))}
-.hero-mark svg{width:100%;height:100%;display:block}
-.htm{font-size:12px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;line-height:1.2}
-.hnm{font-size:clamp(21px,5vw,27px);font-weight:800;line-height:1.15;color:var(--t1);word-break:break-word;letter-spacing:-.3px}
-.hsb{display:none;font-size:12.5px;line-height:1.4;margin-top:5px;color:var(--t2);font-weight:550}
+.hero{padding:16px 0 22px;position:relative}
+/* Profile row: round Telegram avatar (left) + greeting/name stack (right). */
+.hero-id{display:flex;align-items:center;gap:12px;min-width:0}
+.hero-av{width:44px;height:44px;flex:0 0 44px;border-radius:50%;overflow:hidden;
+  border:1px solid rgba(var(--ar),.25);background:#0e1626;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:#fff;letter-spacing:.5px;
+  box-shadow:0 2px 10px rgba(0,0,0,.28)}
+.hero-av img{width:100%;height:100%;object-fit:cover;display:block}
+/* Initials fallback when photo_url is missing / hidden / fails to load. */
+.hero-av.fallback{background:linear-gradient(135deg,#8b5cf6,#14b8a6)}
+.hero-text{min-width:0;display:flex;flex-direction:column;gap:2px}
+.htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;line-height:1.2;margin:0}
+.hnm{font-size:20px;font-weight:700;line-height:1.2;color:var(--t1);word-break:break-word;letter-spacing:-.2px;margin:0}
+.hsb{display:none;font-size:12.5px;line-height:1.4;margin-top:8px;color:var(--t2);font-weight:550}
 .hsb.show{display:block}
 .hsb .hsb-prem{color:#f5c451;font-weight:700}
 
@@ -2859,12 +2867,14 @@ html:not([data-mode=light]) .lp-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255
 <!-- HOME -->
 <div class="screen active" id="s-home">
   <div class="hero">
-    <div class="hero-text">
-      <div class="hero-mark" aria-label="PolyGlotty"><svg viewBox="0 0 40 40" fill="none"><path d="M20 4 Q22.4 17.6 36 20 Q22.4 22.4 20 36 Q17.6 22.4 4 20 Q17.6 17.6 20 4 Z" fill="rgba(20,184,166,.12)" stroke="#14b8a6" stroke-width="2.3" stroke-linejoin="round"/></svg></div>
-      <div class="htm" id="greet"></div>
-      <div class="hnm" id="hname">—</div>
-      <div class="hsb" id="hsub"></div>
+    <div class="hero-id">
+      <div class="hero-av fallback" id="hero-av">PR</div>
+      <div class="hero-text">
+        <div class="htm" id="greet"></div>
+        <div class="hnm" id="hname">—</div>
+      </div>
     </div>
+    <div class="hsb" id="hsub"></div>
     <div class="profile-badges" id="profile-badges"></div>
   </div>
   <!-- Path banner removed: the active Learning Path is already
@@ -4326,12 +4336,46 @@ function resolveUserName(d){
   return telegramDisplayName()||cleanDisplayName(d?.name)||'';
 }
 const NONAME_GREET={ru:'Добрый день!',en:'Good afternoon!',es:'¡Buenas tardes!',pt:'Boa tarde!',de:'Guten Tag!',fr:'Bonjour !',uk:'Доброго дня!',tr:'İyi günler!',zh:'下午好！',ar:'مساء الخير!'};
+const NAME_FALLBACK='Practicer';
+function _heroInitials(name){
+  const parts=String(name||'').trim().split(/\s+/).filter(Boolean);
+  let s='';
+  if(parts.length>=2)s=parts[0].charAt(0)+parts[1].charAt(0);
+  else if(parts.length===1)s=parts[0].slice(0,2);
+  else s='PR';
+  return s.toUpperCase();
+}
+/* Round Telegram avatar from initDataUnsafe.user.photo_url. Telegram photo
+   URLs can be absent (privacy) or 403 after a while — both gracefully fall
+   back to two-letter initials on the purple→teal gradient. */
+function renderHeroAvatar(name){
+  const el=document.getElementById('hero-av');
+  if(!el)return;
+  const u=(typeof tg!=='undefined'&&tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||{};
+  const photo=u.photo_url||'';
+  if(photo){
+    el.innerHTML='';
+    const img=new Image();
+    img.alt='';img.referrerPolicy='no-referrer';
+    img.onload=function(){el.classList.remove('fallback');};
+    img.onerror=function(){el.classList.add('fallback');el.textContent=_heroInitials(name);};
+    img.src=photo;
+    el.appendChild(img);
+  }else{
+    el.classList.add('fallback');
+    el.textContent=_heroInitials(name);
+  }
+}
 function refreshSub(){
   const el=document.getElementById('greet');
   const nameEl=document.getElementById('hname');
   const realName=resolveUserName(typeof window!=='undefined'?window._d:null);
-  if(el)el.textContent=realName?heroGreeting():(NONAME_GREET[lang]||'Good afternoon!');
-  if(nameEl){nameEl.textContent=realName;nameEl.style.display=realName?'':'none';}
+  // Greeting (День/Утро/Вечер,) is ALWAYS shown now; the name line falls back
+  // to "Practicer" instead of hiding, so the avatar row never looks empty.
+  const shownName=realName||NAME_FALLBACK;
+  if(el)el.textContent=heroGreeting();
+  if(nameEl){nameEl.textContent=shownName;nameEl.style.display='';}
+  try{renderHeroAvatar(shownName);}catch(_){}
 }
 
 /* ══ RENDER HOME ══ */
