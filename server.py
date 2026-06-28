@@ -627,18 +627,22 @@ async def handle_chat(request):
         except Exception:
             is_paid = False
     try:
-        from ai_router import should_use_gemini, should_use_deepseek
-        # DeepSeek takes precedence for FREE users when configured; Gemini is the
-        # fallback free provider. Premium users match neither → they go to Claude.
-        route_deepseek = should_use_deepseek(is_paid)
-        route_gemini = (not route_deepseek) and should_use_gemini(is_paid)
+        from ai_router import should_use_gemini, should_use_deepseek, should_use_openrouter
+        # Free-provider priority for NON-paying users: OpenRouter → DeepSeek →
+        # Gemini. First one configured wins. Premium users match none of these →
+        # they go to Claude (the full path below).
+        route_openrouter = should_use_openrouter(is_paid)
+        route_deepseek = (not route_openrouter) and should_use_deepseek(is_paid)
+        route_gemini = (not route_openrouter) and (not route_deepseek) and should_use_gemini(is_paid)
     except Exception as e:
         logger.warning("ai_router import failed: %s", e)
+        route_openrouter = False
         route_deepseek = False
         route_gemini = False
 
-    if route_deepseek or route_gemini:
-        free_provider = "deepseek" if route_deepseek else "gemini"
+    if route_openrouter or route_deepseek or route_gemini:
+        free_provider = ("openrouter" if route_openrouter
+                         else "deepseek" if route_deepseek else "gemini")
         # Free users are NOT charged credits and do NOT touch the Anthropic
         # billing machinery. They are bounded by: (a) a burst gap, (b) a per-user
         # daily cap (anti-drain on the shared AI key) and (c) the upstream
@@ -682,8 +686,12 @@ async def handle_chat(request):
         g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
         try:
             from ai_router import (gemini_generate, gemini_free_limit_message,
-                                    GeminiRateLimit, deepseek_generate)
-            if route_deepseek:
+                                    GeminiRateLimit, deepseek_generate,
+                                    openrouter_generate)
+            if route_openrouter:
+                result = await openrouter_generate(system, _histories[uid], g_max)
+                prov_tag, prov_label = "openrouter", "Powered by OpenRouter"
+            elif route_deepseek:
                 result = await deepseek_generate(system, _histories[uid], g_max)
                 prov_tag, prov_label = "deepseek", "Powered by DeepSeek"
             else:

@@ -282,6 +282,115 @@ async def deepseek_generate(system: str, messages: list[dict],
     return {"text": text, "usage": usage}
 
 
+# ── OpenRouter (PRIMARY free-tier provider) ───────────────────────────────────
+#  OpenRouter is an OpenAI-compatible gateway; a single key fronts many models.
+#  FREE (non-paying) users are routed here in preference to DeepSeek/Gemini.
+#  Premium users keep Claude. Model is env-driven so swapping a ":free" model
+#  never needs a code change.
+OPENROUTER_API_KEY      = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL     = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_MODEL        = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash:free")
+OPENROUTER_FREE_ENABLED = os.getenv("OPENROUTER_FREE_ENABLED", "1") != "0"
+OPENROUTER_MAX_TOKENS   = int(os.getenv("OPENROUTER_MAX_TOKENS", "600") or "600")
+OPENROUTER_TIMEOUT      = float(os.getenv("OPENROUTER_TIMEOUT", "45") or "45")
+# Optional ranking headers OpenRouter recommends (harmless if unset).
+OPENROUTER_REFERER      = os.getenv("OPENROUTER_REFERER", "https://t.me/PolyGlotty_bot")
+OPENROUTER_TITLE        = os.getenv("OPENROUTER_TITLE", "PolyGlotty")
+
+if OPENROUTER_API_KEY:
+    logger.info(f"✅ OPENROUTER_API_KEY loaded (model={OPENROUTER_MODEL}, base={OPENROUTER_BASE_URL}, starts with {OPENROUTER_API_KEY[:12]}...)")
+
+
+class OpenRouterError(GeminiError):
+    """Any non-recoverable OpenRouter failure (bad request, 5xx, network)."""
+
+
+class OpenRouterRateLimit(GeminiRateLimit):
+    """OpenRouter quota / rate-limit hit (HTTP 429)."""
+
+
+def openrouter_available() -> bool:
+    return bool(OPENROUTER_FREE_ENABLED and OPENROUTER_API_KEY)
+
+
+def should_use_openrouter(is_paid: bool) -> bool:
+    """Route FREE users to OpenRouter when configured. Premium users are NEVER
+    sent here (they stay on Claude)."""
+    if not openrouter_available():
+        return False
+    return not is_paid
+
+
+async def openrouter_generate(system: str, messages: list[dict],
+                              max_tokens: int | None = None,
+                              timeout: float | None = None) -> dict:
+    """Call OpenRouter (OpenAI-compatible /chat/completions) and return
+    {"text": str, "usage": {...}}. Raises OpenRouterRateLimit on 429,
+    OpenRouterError otherwise. Never returns an empty success silently."""
+    if not openrouter_available():
+        raise OpenRouterError("OpenRouter not configured")
+
+    url = f"{OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
+    payload = {
+        "model": OPENROUTER_MODEL,
+        "messages": _to_openai_messages(system, messages),
+        "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
+        "temperature": 0.7,
+        "stream": False,
+    }
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    if OPENROUTER_REFERER:
+        headers["HTTP-Referer"] = OPENROUTER_REFERER
+    if OPENROUTER_TITLE:
+        headers["X-Title"] = OPENROUTER_TITLE
+    try:
+        async with httpx.AsyncClient(timeout=timeout or OPENROUTER_TIMEOUT) as client:
+            r = await client.post(url, json=payload, headers=headers)
+    except httpx.HTTPError as e:
+        raise OpenRouterError(f"network: {e}") from e
+
+    if r.status_code == 429:
+        raise OpenRouterRateLimit("OpenRouter quota / rate limit (HTTP 429)")
+    if r.status_code >= 400:
+        raise OpenRouterError(f"HTTP {r.status_code}: {r.text[:200]}")
+
+    try:
+        data = r.json()
+    except Exception as e:
+        raise OpenRouterError(f"bad json (status {r.status_code})") from e
+
+    # OpenRouter can return an error object WITH HTTP 200 (e.g. upstream model
+    # outage / no free capacity). Treat it as a hard error, not an empty reply.
+    if isinstance(data, dict) and data.get("error"):
+        err = data.get("error") or {}
+        code = err.get("code") if isinstance(err, dict) else None
+        msg = err.get("message") if isinstance(err, dict) else str(err)
+        if code == 429:
+            raise OpenRouterRateLimit(f"OpenRouter: {msg}")
+        raise OpenRouterError(f"OpenRouter error: {msg}")
+
+    try:
+        choices = data.get("choices") or []
+        msg = (choices[0].get("message") or {}) if choices else {}
+        text = str(msg.get("content") or "").strip()
+    except Exception as e:
+        raise OpenRouterError(f"parse: {e}") from e
+
+    if not text:
+        raise OpenRouterError("empty completion")
+
+    u = data.get("usage") or {}
+    usage = {
+        "input_tokens": int(u.get("prompt_tokens") or 0),
+        "output_tokens": int(u.get("completion_tokens") or 0),
+        "total_tokens": int(u.get("total_tokens") or 0),
+    }
+    return {"text": text, "usage": usage}
+
+
 # ── Friendly rate-limit message (i18n) ────────────────────────────────────────
 # Rendered as an HTML limit-card inside the chat reply (same classes the other
 # limit messages use), so it shows up styled rather than as raw text.
@@ -329,7 +438,7 @@ def gemini_free_limit_message(lang: str = "ru") -> str:
 # Shown when a FREE user spends their AI_FREE_DAILY messages for the UTC day —
 # distinct from the upstream provider-quota card above (which is global).
 _DAILY_TXT = {
-    "ru": "Вы исчерпали свои 4 бесплатных запроса к ALEX на сегодня. Возвращайтесь завтра или переходите на Premium для безлимитного общения!",
+    "ru": "Вы исчерпали 4 бесплатных запроса на сегодня. Переходи на Premium!",
     "en": "Your daily free ALEX AI limit is used up. Come back tomorrow, or go Premium!",
     "es": "Has agotado tu límite diario gratuito de ALEX. ¡Vuelve mañana o pásate a Premium!",
     "pt": "Seu limite diário gratuito do ALEX acabou. Volte amanhã ou assine o Premium!",
