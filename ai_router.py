@@ -167,6 +167,121 @@ async def gemini_generate(system: str, messages: list[dict],
     return {"text": text, "usage": usage}
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+#  DeepSeek provider (OpenAI-compatible REST) — free-tier ALEX
+# ══════════════════════════════════════════════════════════════════════════════
+#  Provider-agnostic by design: base URL, key, model and token budget are all
+#  env-driven, so the SAME code talks to DeepSeek-direct (api.deepseek.com) OR an
+#  OpenAI-compatible gateway (e.g. NVIDIA NIM integrate.api.nvidia.com) just by
+#  flipping env vars — no redeploy. We call it over raw httpx like every other
+#  provider here (no openai SDK dependency). When configured, free users are
+#  routed here in preference to Gemini; premium users keep using Claude.
+DEEPSEEK_API_KEY      = os.getenv("DEEPSEEK_API_KEY", "")
+DEEPSEEK_BASE_URL     = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+# NOTE: "deepseek-v4-flash" is NOT a confirmed public model name. DeepSeek-direct
+# exposes "deepseek-chat" (V3) and "deepseek-reasoner" (R1). Keep the model in env
+# so a wrong/renamed model never requires a code change. Default = deepseek-chat.
+DEEPSEEK_MODEL        = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+DEEPSEEK_FREE_ENABLED = os.getenv("DEEPSEEK_FREE_ENABLED", "1") != "0"
+DEEPSEEK_MAX_TOKENS   = int(os.getenv("DEEPSEEK_MAX_TOKENS", "600") or "600")
+DEEPSEEK_TIMEOUT      = float(os.getenv("DEEPSEEK_TIMEOUT", "45") or "45")
+
+if DEEPSEEK_API_KEY:
+    logger.info(f"✅ DEEPSEEK_API_KEY loaded (model={DEEPSEEK_MODEL}, base={DEEPSEEK_BASE_URL}, starts with {DEEPSEEK_API_KEY[:6]}...)")
+
+
+class DeepSeekError(GeminiError):
+    """Any non-recoverable DeepSeek failure (bad request, 5xx, network)."""
+
+
+class DeepSeekRateLimit(GeminiRateLimit):
+    """DeepSeek quota / rate-limit hit (HTTP 429)."""
+
+
+def deepseek_available() -> bool:
+    return bool(DEEPSEEK_FREE_ENABLED and DEEPSEEK_API_KEY)
+
+
+def should_use_deepseek(is_paid: bool) -> bool:
+    """Route FREE (non-paying) users to DeepSeek when it is configured. Premium
+    users are NEVER sent here (they stay on Claude)."""
+    if not deepseek_available():
+        return False
+    return not is_paid
+
+
+def _to_openai_messages(system: str, messages: list[dict]) -> list[dict]:
+    """Convert the internal [{role:'user'|'assistant', content:str}] history into
+    the OpenAI chat format, prepending the system prompt as a system message."""
+    out: list[dict] = []
+    if system:
+        out.append({"role": "system", "content": system})
+    for m in messages or []:
+        role = "assistant" if m.get("role") == "assistant" else "user"
+        text = str(m.get("content") or "")
+        if not text:
+            continue
+        out.append({"role": role, "content": text})
+    return out
+
+
+async def deepseek_generate(system: str, messages: list[dict],
+                            max_tokens: int | None = None,
+                            timeout: float | None = None) -> dict:
+    """Call DeepSeek (OpenAI-compatible /chat/completions) and return
+    {"text": str, "usage": {...}}. Free tier → no reasoning params (fast, cheap).
+    Raises DeepSeekRateLimit on 429, DeepSeekError otherwise. Never returns an
+    empty success silently."""
+    if not deepseek_available():
+        raise DeepSeekError("DeepSeek not configured")
+
+    url = f"{DEEPSEEK_BASE_URL.rstrip('/')}/chat/completions"
+    payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": _to_openai_messages(system, messages),
+        "max_tokens": int(max_tokens or DEEPSEEK_MAX_TOKENS),
+        "temperature": 0.7,
+        "stream": False,
+    }
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=timeout or DEEPSEEK_TIMEOUT) as client:
+            r = await client.post(url, json=payload, headers=headers)
+    except httpx.HTTPError as e:
+        raise DeepSeekError(f"network: {e}") from e
+
+    if r.status_code == 429:
+        raise DeepSeekRateLimit("DeepSeek quota / rate limit (HTTP 429)")
+    if r.status_code >= 400:
+        raise DeepSeekError(f"HTTP {r.status_code}: {r.text[:200]}")
+
+    try:
+        data = r.json()
+    except Exception as e:
+        raise DeepSeekError(f"bad json (status {r.status_code})") from e
+
+    try:
+        choices = data.get("choices") or []
+        msg = (choices[0].get("message") or {}) if choices else {}
+        text = str(msg.get("content") or "").strip()
+    except Exception as e:
+        raise DeepSeekError(f"parse: {e}") from e
+
+    if not text:
+        raise DeepSeekError("empty completion")
+
+    u = data.get("usage") or {}
+    usage = {
+        "input_tokens": int(u.get("prompt_tokens") or 0),
+        "output_tokens": int(u.get("completion_tokens") or 0),
+        "total_tokens": int(u.get("total_tokens") or 0),
+    }
+    return {"text": text, "usage": usage}
+
+
 # ── Friendly rate-limit message (i18n) ────────────────────────────────────────
 # Rendered as an HTML limit-card inside the chat reply (same classes the other
 # limit messages use), so it shows up styled rather than as raw text.
@@ -198,6 +313,38 @@ _LIMIT_CTA = {
 def gemini_free_limit_message(lang: str = "ru") -> str:
     """HTML limit-card shown when the free Gemini quota is exhausted."""
     txt = _LIMIT_TXT.get(lang, _LIMIT_TXT["en"])
+    kicker = _LIMIT_KICKER.get(lang, _LIMIT_KICKER["en"])
+    cta = _LIMIT_CTA.get(lang, _LIMIT_CTA["en"])
+    return (
+        '<div class="limit-card">'
+        f'<div class="limit-kicker">{kicker}</div>'
+        f'<div class="limit-title">ALEX</div>'
+        f'<div class="limit-text">{txt}</div>'
+        f'<button class="chip" onclick="openPremium()">{cta}</button>'
+        '</div>'
+    )
+
+
+# ── Per-user daily-cap message (i18n) ─────────────────────────────────────────
+# Shown when a FREE user spends their AI_FREE_DAILY messages for the UTC day —
+# distinct from the upstream provider-quota card above (which is global).
+_DAILY_TXT = {
+    "ru": "Вы исчерпали свои 4 бесплатных запроса к ALEX на сегодня. Возвращайтесь завтра или переходите на Premium для безлимитного общения!",
+    "en": "Your daily free ALEX AI limit is used up. Come back tomorrow, or go Premium!",
+    "es": "Has agotado tu límite diario gratuito de ALEX. ¡Vuelve mañana o pásate a Premium!",
+    "pt": "Seu limite diário gratuito do ALEX acabou. Volte amanhã ou assine o Premium!",
+    "de": "Dein kostenloses ALEX-Tageslimit ist aufgebraucht. Komm morgen wieder oder hol dir Premium!",
+    "fr": "Ta limite quotidienne gratuite d’ALEX est atteinte. Reviens demain ou passe à Premium !",
+    "uk": "Денний безкоштовний ліміт ALEX вичерпано. Повертайся завтра або переходь на Premium!",
+    "tr": "Günlük ücretsiz ALEX limitin doldu. Yarın tekrar gel veya Premium’a geç!",
+    "zh": "今日免费 ALEX 额度已用完。明天再来，或升级 Premium！",
+    "ar": "انتهى حدّك اليومي المجاني من ALEX. عُد غدًا أو اشترك في Premium!",
+}
+
+
+def ai_daily_limit_message(lang: str = "ru") -> str:
+    """HTML limit-card shown when a free user hits the per-user daily AI cap."""
+    txt = _DAILY_TXT.get(lang, _DAILY_TXT["en"])
     kicker = _LIMIT_KICKER.get(lang, _LIMIT_KICKER["en"])
     cta = _LIMIT_CTA.get(lang, _LIMIT_CTA["en"])
     return (

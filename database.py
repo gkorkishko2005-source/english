@@ -94,6 +94,8 @@ CREATE TABLE IF NOT EXISTS users (
     hearts_updated_at BIGINT DEFAULT 0,
     lessons_done_today INTEGER DEFAULT 0,
     lessons_done_date  TEXT DEFAULT '',
+    ai_req_today    INTEGER DEFAULT 0,
+    ai_req_date     TEXT DEFAULT '',
     cards_done_today   INTEGER DEFAULT 0,
     cards_done_date    TEXT DEFAULT '',
     remind_time     TEXT,
@@ -346,6 +348,7 @@ CREATE TABLE IF NOT EXISTS users (
     streak INTEGER DEFAULT 0, last_active TEXT, plant_tonus INTEGER DEFAULT 100, last_xp_date TEXT, xp INTEGER DEFAULT 0,
     hearts INTEGER DEFAULT 5, hearts_updated_at INTEGER DEFAULT 0,
     lessons_done_today INTEGER DEFAULT 0, lessons_done_date TEXT DEFAULT '',
+    ai_req_today INTEGER DEFAULT 0, ai_req_date TEXT DEFAULT '',
     cards_done_today INTEGER DEFAULT 0, cards_done_date TEXT DEFAULT '',
     remind_time TEXT, complex_streak INTEGER DEFAULT 0, simple_streak INTEGER DEFAULT 0,
     auto_level INTEGER DEFAULT 1, is_premium INTEGER DEFAULT 0,
@@ -505,6 +508,10 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS hearts_updated_at BIGINT DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN hearts_updated_at INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS lessons_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN lessons_done_date TEXT DEFAULT ''",
+        # Free-tier ALEX daily request counter (per-user, lazy UTC-day reset) —
+        # protects the shared AI key from being drained by free users.
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_req_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ai_req_today INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_req_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ai_req_date TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_date TEXT DEFAULT ''",
     ]
@@ -1509,6 +1516,51 @@ async def record_lesson_done(uid: int, is_premium: bool = False) -> dict:
     await db("UPDATE users SET lessons_done_today=?, lessons_done_date=? WHERE uid=?", new, today, uid)
     remaining = max(0, cap - new)
     return {"used": new, "limit": cap, "remaining": remaining, "unlimited": False, "reset_in": reset_in}
+
+
+# ── DAILY FREE-AI LIMIT (ALEX anti-drain guard) ───────────────────────────────
+# Free users share ONE project AI key. To stop a single spammer (or 1000 free
+# users) from draining the balance, every free ALEX message is metered against a
+# per-UTC-day cap (AI_FREE_DAILY). Same lazy-reset idiom as lessons/cards: a
+# stored date that is not today is treated as 0, so one per-user row holds the
+# whole day's count — no nightly cron mass-UPDATE needed. Premium users never hit
+# this path (they go to Claude) and admins are exempt at the call site.
+async def _ai_daily_cap() -> int:
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        return max(0, int(cfg.get("AI_FREE_DAILY", 20) or 20))
+    except Exception:
+        return 20
+
+
+async def get_daily_ai_state(uid: int) -> dict:
+    """Read-only free-AI budget for ALEX. {used, limit, remaining, reset_in}."""
+    cap = await _ai_daily_cap()
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    today = _utc_day_str()
+    used = 0
+    if u and str(u.get("ai_req_date") or "") == today:
+        used = max(0, int(u.get("ai_req_today") or 0))
+    remaining = max(0, cap - used)
+    return {"used": used, "limit": cap, "remaining": remaining, "reset_in": reset_in}
+
+
+async def bump_daily_ai(uid: int) -> dict:
+    """Increment the per-UTC-day free-AI counter (lazy reset) and return state.
+    Call ONLY after a successful AI reply so failed/blocked requests are free."""
+    cap = await _ai_daily_cap()
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    today = _utc_day_str()
+    cur = 0
+    if u and str(u.get("ai_req_date") or "") == today:
+        cur = max(0, int(u.get("ai_req_today") or 0))
+    new = cur + 1
+    await db("UPDATE users SET ai_req_today=?, ai_req_date=? WHERE uid=?", new, today, uid)
+    remaining = max(0, cap - new)
+    return {"used": new, "limit": cap, "remaining": remaining, "reset_in": reset_in}
 
 
 # ── DAILY FLASHCARD LIMIT (economy guard, BOTH tiers) ─────────────────────────

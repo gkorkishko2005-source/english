@@ -103,6 +103,12 @@ _DEFAULTS = {
     # is the SERVER clock (UTC 00:00) so it can't be farmed by the device clock.
     # Premium = unlimited. Tunable live (BILLING_LESSONS_FREE_DAILY), no deploy.
     "LESSONS_FREE_DAILY": 3,           # lessons/day a free user can complete
+    # ── Daily free-AI limit (ALEX anti-drain) ──────────────────────────
+    # Free users share ONE project AI key (DeepSeek/Gemini). A free user may send
+    # this many ALEX messages per UTC day; the (N+1)-th is blocked with a 429 →
+    # "come back tomorrow / go Premium" card. Premium users go to Claude and are
+    # NOT metered here. Tunable live (BILLING_AI_FREE_DAILY), no deploy.
+    "AI_FREE_DAILY": 4,                # free ALEX messages/day before paywall
     # ── Daily flashcard limit (economy guard, both tiers) ──────────────
     # Number of flashcards a user may COMPLETE (Skip or Save) per UTC day.
     # Free users hit a hard wall → paywall. Premium users hit a softer cap
@@ -146,6 +152,7 @@ _ENV_SCALARS = {
     "BILLING_HEARTS_REGEN_HOURS": ("HEARTS_REGEN_HOURS", int),
     "BILLING_HEARTS_REFILL_STARS": ("HEARTS_REFILL_STARS", int),
     "BILLING_LESSONS_FREE_DAILY": ("LESSONS_FREE_DAILY", int),
+    "BILLING_AI_FREE_DAILY": ("AI_FREE_DAILY", int),
     "BILLING_CARDS_FREE_DAILY": ("CARDS_FREE_DAILY", int),
     "BILLING_CARDS_PREMIUM_DAILY": ("CARDS_PREMIUM_DAILY", int),
 }

@@ -5698,7 +5698,16 @@ async function doChat(text,mode){
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
-    if(!r.ok){const e=await r.json();addMsg('bot','⚠️ '+((e&&e.error)||r.status));return;}
+    if(!r.ok){let e={};try{e=await r.json();}catch(_){}
+      /* Daily free-AI limit (429) ships a paywall card in e.reply — render it
+         instead of a bare "⚠️ 429" so the user sees the upgrade CTA. */
+      if(e&&(e.free_ai_limit||e.daily_ai_limit||e.limit)&&e.reply){
+        addMsg('bot',e.reply);
+        try{if(!isPremium)sfx.warn();}catch(_){}
+      }else{
+        addMsg('bot','⚠️ '+((e&&e.error)||r.status));
+      }
+      return;}
     const data=await r.json();
     /* Debug marker: which model answered (Gemini for free, Claude for premium). */
     if(data.ai_provider){

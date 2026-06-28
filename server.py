@@ -627,16 +627,22 @@ async def handle_chat(request):
         except Exception:
             is_paid = False
     try:
-        from ai_router import should_use_gemini
-        route_gemini = should_use_gemini(is_paid)
+        from ai_router import should_use_gemini, should_use_deepseek
+        # DeepSeek takes precedence for FREE users when configured; Gemini is the
+        # fallback free provider. Premium users match neither → they go to Claude.
+        route_deepseek = should_use_deepseek(is_paid)
+        route_gemini = (not route_deepseek) and should_use_gemini(is_paid)
     except Exception as e:
         logger.warning("ai_router import failed: %s", e)
+        route_deepseek = False
         route_gemini = False
 
-    if route_gemini:
-        # Free users on Gemini are NOT charged credits and do NOT touch the
-        # Anthropic billing/quota machinery; Google's daily free quota is the
-        # only limit (surfaced via the 429 guard below).
+    if route_deepseek or route_gemini:
+        free_provider = "deepseek" if route_deepseek else "gemini"
+        # Free users are NOT charged credits and do NOT touch the Anthropic
+        # billing machinery. They are bounded by: (a) a burst gap, (b) a per-user
+        # daily cap (anti-drain on the shared AI key) and (c) the upstream
+        # provider quota (surfaced via the rate-limit guard below).
         if uid and uid not in ADMIN_IDS:
             import time as _time
             now_ts = _time.time()
@@ -652,6 +658,21 @@ async def handle_chat(request):
                 return web.json_response({"reply": slow_map.get(lang, f"⏳ Slow down — wait {wait} s.")},
                                          headers={"Access-Control-Allow-Origin":"*"})
             _last_msg_ts[uid] = now_ts
+            # Per-user daily free-AI cap (UTC-day, lazy reset). Block the (N+1)-th
+            # message with HTTP 429 + a paywall card BEFORE spending any AI quota.
+            try:
+                from database import get_daily_ai_state
+                ai_state = await get_daily_ai_state(uid)
+                if ai_state.get("remaining", 0) <= 0:
+                    from ai_router import ai_daily_limit_message
+                    return web.json_response(
+                        {"reply": ai_daily_limit_message(lang), "limit": True,
+                         "free_ai_limit": True, "daily_ai_limit": True,
+                         "used": ai_state.get("used"), "ai_limit": ai_state.get("limit"),
+                         "remaining_requests": 0, "reset_in": ai_state.get("reset_in")},
+                        status=429, headers={"Access-Control-Allow-Origin":"*"})
+            except Exception as e:
+                logger.warning("daily AI limit check failed uid=%s: %s", uid, e)
         # History (same depth as the Anthropic free tier).
         h = _histories.setdefault(uid, [])
         h.append({"role": "user", "content": message})
@@ -660,8 +681,14 @@ async def handle_chat(request):
             _histories[uid] = h[-free_hist:]
         g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
         try:
-            from ai_router import gemini_generate, gemini_free_limit_message, GeminiRateLimit
-            result = await gemini_generate(system, _histories[uid], g_max)
+            from ai_router import (gemini_generate, gemini_free_limit_message,
+                                    GeminiRateLimit, deepseek_generate)
+            if route_deepseek:
+                result = await deepseek_generate(system, _histories[uid], g_max)
+                prov_tag, prov_label = "deepseek", "Powered by DeepSeek"
+            else:
+                result = await gemini_generate(system, _histories[uid], g_max)
+                prov_tag, prov_label = "gemini", "Powered by Gemini"
             reply = (result.get("text") or "").strip()
             reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
             if not reply:
@@ -670,25 +697,45 @@ async def handle_chat(request):
                 return web.json_response({"error": "Empty AI reply"}, status=502,
                                          headers={"Access-Control-Allow-Origin":"*"})
             _histories[uid].append({"role": "assistant", "content": reply})
+            # Count this successful free message against the daily cap (failed or
+            # blocked requests stay free — bump only happens on a real reply). The
+            # bump returns the fresh server-side state so we can echo the live
+            # remaining count back to the Mini App (no client clock involved).
+            ai_remaining = None
+            ai_used = None
+            ai_cap = None
+            if uid and uid not in ADMIN_IDS:
+                try:
+                    from database import bump_daily_ai
+                    st = await bump_daily_ai(uid)
+                    ai_remaining = st.get("remaining")
+                    ai_used = st.get("used")
+                    ai_cap = st.get("limit")
+                except Exception as e:
+                    logger.warning("bump_daily_ai failed uid=%s: %s", uid, e)
             if uid:
                 try:
                     from database import log_session
                     await log_session(uid, "webapp_chat")
                 except Exception:
                     pass
-            return web.json_response({"reply": reply, "provider": "gemini",
-                                      "ai_provider": "Powered by Gemini"},
-                                     headers={"Access-Control-Allow-Origin":"*"})
+            resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label}
+            if ai_remaining is not None:
+                resp["remaining_requests"] = ai_remaining
+                resp["used"] = ai_used
+                resp["ai_limit"] = ai_cap
+            return web.json_response(resp, headers={"Access-Control-Allow-Origin":"*"})
         except GeminiRateLimit:
-            # Google free quota hit → friendly card, NOT a crash. Drop the user
-            # turn we just appended so the conversation history stays clean.
+            # Upstream provider quota hit (Gemini OR DeepSeek — DeepSeekRateLimit
+            # subclasses GeminiRateLimit). Friendly card, NOT a crash. Drop the
+            # user turn we just appended so the conversation history stays clean.
             try: _histories[uid].pop()
             except Exception: pass
             return web.json_response(
                 {"reply": gemini_free_limit_message(lang), "limit": True, "free_ai_limit": True},
                 headers={"Access-Control-Allow-Origin":"*"})
         except Exception as e:
-            logger.warning("gemini generate failed uid=%s: %s", uid, e)
+            logger.warning("%s generate failed uid=%s: %s", free_provider, uid, e)
             try: _histories[uid].pop()
             except Exception: pass
             return web.json_response({"error": "AI temporarily unavailable. Please try again."},
