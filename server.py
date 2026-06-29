@@ -18,6 +18,14 @@ MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "250") or 
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
+# ── Mandatory channel-subscription gate ────────────────────────────────
+# The user must be a member of TG_CHANNEL before the bot/Mini App unlocks.
+# Verified server-side via Telegram getChatMember (bot must be channel admin).
+TG_CHANNEL_USERNAME = os.getenv("TG_CHANNEL_USERNAME", "@polyglotty_daily").strip()
+TG_CHANNEL_ID       = os.getenv("TG_CHANNEL_ID", "-1003987215459").strip()
+TG_CHANNEL_URL      = os.getenv("OFFICIAL_CHANNEL_URL",
+                                "https://t.me/" + TG_CHANNEL_USERNAME.lstrip("@")).strip()
+REQUIRE_CHANNEL_SUB = os.getenv("REQUIRE_CHANNEL_SUB", "1") != "0"
 MODEL       = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 SONNET_MODEL = os.getenv("CLAUDE_BASIC_SONNET_MODEL", "claude-sonnet-4-20250514")
 SONNET_PLUS_MODEL = os.getenv("CLAUDE_PRO_SONNET_MODEL", "claude-sonnet-4-6")
@@ -382,7 +390,7 @@ async def handle_user(request):
             get_word_count, get_session_count, get_test_count,
             get_mistake_count, get_all_interests, get_due_words,
             get_profession, get_lang, upsert_user, check_platform,
-            enforce_subscription
+            enforce_subscription, get_weekly_xp
         )
         user = await get_user(uid)
         if not user:
@@ -421,7 +429,13 @@ async def handle_user(request):
             plant_tonus = max(0, min(100, int(user.get("plant_tonus") if (isinstance(user, dict) and user.get("plant_tonus") is not None) else 100)))
         except Exception:
             plant_tonus = 100
-        weekly = [0]*7
+        # Real per-day XP for the CURRENT week (Mon..Sun), server-clock based —
+        # no client cache, no stale mock. Falls back to zeros only on error.
+        try:
+            weekly = await get_weekly_xp(uid)
+        except Exception as _we:
+            logger.warning(f"weekly xp failed for {uid}: {_we}")
+            weekly = [0]*7
         return web.json_response({
             "uid": uid,
             "name": user.get("name", "Student") if isinstance(user, dict) else "Student",
@@ -2375,6 +2389,48 @@ async def handle_admin_stats(request):
 async def handle_options(request):
     return web.Response(headers={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Methods":"GET,POST,DELETE,OPTIONS","Access-Control-Allow-Headers":"Content-Type,X-Telegram-Init-Data,X-UID"})
 
+# ── MANDATORY CHANNEL-SUBSCRIPTION GATE ────────────────────────────────────────
+async def handle_check_subscription(request):
+    """Tell the Mini App whether the (verified) user is subscribed to our
+    Telegram channel. Membership is read straight from Telegram via
+    getChatMember — the client can't spoof it. Subscribed statuses:
+    creator / administrator / member. Anything else (left/kicked/restricted)
+    → subscribed:false and the WebApp shows a blocking join modal.
+
+    Fail-open philosophy: if the gate is disabled, the channel isn't configured,
+    the caller is an admin, or Telegram errors transiently, we DON'T lock the
+    user out — a channel-check outage must never brick the whole product."""
+    cors = {"Access-Control-Allow-Origin": "*"}
+    payload = {
+        "channel_url": TG_CHANNEL_URL,
+        "channel_username": TG_CHANNEL_USERNAME,
+    }
+    # Gate switched off, or channel not configured → everybody passes.
+    if not REQUIRE_CHANNEL_SUB or not (BOT_TOKEN and TG_CHANNEL_ID):
+        return web.json_response({**payload, "subscribed": True, "status": "disabled"}, headers=cors)
+    uid, _lang = await _guard_identity(request)
+    if uid in ADMIN_IDS:
+        return web.json_response({**payload, "subscribed": True, "status": "administrator"}, headers=cors)
+    if not uid:
+        # Unverified caller (no/invalid initData) → cannot confirm → block.
+        return web.json_response({**payload, "subscribed": False, "status": "unverified"}, headers=cors)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/getChatMember",
+                params={"chat_id": TG_CHANNEL_ID, "user_id": uid},
+            )
+        data = r.json() if r is not None else {}
+        status = ""
+        if isinstance(data, dict) and data.get("ok"):
+            status = str(((data.get("result") or {}).get("status")) or "")
+        subscribed = status in ("creator", "administrator", "member")
+        return web.json_response({**payload, "subscribed": subscribed, "status": status}, headers=cors)
+    except Exception as e:
+        logger.warning("check-subscription failed uid=%s: %s", uid, e)
+        # Transient Telegram/network error → fail open so we never hard-lock users.
+        return web.json_response({**payload, "subscribed": True, "status": "error"}, headers=cors)
+
 # ── APP ───────────────────────────────────────────────────────────────────────
 def create_app():
     app=web.Application(middlewares=[gzip_mw, cache_static_mw])
@@ -2422,6 +2478,8 @@ def create_app():
     app.router.add_get("/api/mistakes/{uid}",handle_mistakes_get)
     app.router.add_post("/api/mistakes",handle_mistakes_post)
     app.router.add_post("/api/sync_stats",handle_sync_stats)
+    app.router.add_post("/api/check-subscription",handle_check_subscription)
+    app.router.add_get("/api/check-subscription",handle_check_subscription)
     app.router.add_get("/health",handle_health)
     app.router.add_get("/api/admin/stats",handle_admin_stats)
     app.router.add_route("OPTIONS","/{tail:.*}",handle_options)

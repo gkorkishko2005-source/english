@@ -2169,6 +2169,35 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .ed-rec-cnt{font-size:11px;font-weight:800;color:var(--a);background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.22);border-radius:100px;padding:2px 9px;font-variant-numeric:tabular-nums}
 .ed-rec-act{font-size:11.5px;font-weight:700;color:var(--a2);margin-top:5px}
 .ed-rec-sub{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);margin:14px 4px 6px}
+/* "Show all mistakes" text button + mistake detail breakdown modal */
+.mist-all-btn{display:block;width:100%;text-align:center;margin-top:10px;padding:11px;background:transparent;border:none;color:var(--a2);font-size:12.5px;font-weight:700;cursor:pointer}
+.mist-all-btn:active{opacity:.6}
+.md-sec{margin-top:16px}
+.md-sec:first-child{margin-top:4px}
+.md-sec-lbl{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.md-phrase-row{display:flex;flex-direction:column;gap:8px}
+.md-phrase{padding:11px 13px;border-radius:12px;font-size:14px;font-weight:720;line-height:1.4}
+.md-phrase.wrong{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);color:#ff8b8b}
+.md-phrase.right{background:rgba(var(--ar),.08);border:1px solid rgba(var(--ar),.28);color:var(--a2)}
+.md-phrase-tag{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;opacity:.7;display:block;margin-bottom:3px}
+.md-why{font-size:13px;line-height:1.5;color:var(--t2);background:var(--bg-card);border:1px solid var(--border-ui);border-radius:12px;padding:12px 14px}
+.md-reinforce{margin-top:18px;width:100%;padding:13px;border-radius:var(--r2);background:var(--color-primary);border:1px solid var(--color-primary);color:#fff;font-weight:800;font-size:14px;cursor:pointer;transition:transform .15s}
+.md-reinforce:active{transform:scale(.98)}
+/* Mandatory channel-subscription gate — frosted full-screen blocker */
+#subgate{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(10,12,16,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#subgate.on{display:flex}
+.subgate-card{width:100%;max-width:380px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:18px;padding:26px 22px 22px;text-align:center}
+.subgate-ico{width:60px;height:60px;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.22)}
+.subgate-ico svg{width:30px;height:30px;stroke:var(--color-primary);fill:none;stroke-width:1.8}
+.subgate-tit{font-size:19px;font-weight:850;color:var(--t1);margin-bottom:10px;letter-spacing:-.2px}
+.subgate-txt{font-size:13.5px;line-height:1.55;color:var(--t2);margin-bottom:22px}
+.subgate-btn{display:block;width:100%;padding:14px;border-radius:var(--r2);font-size:14.5px;font-weight:800;cursor:pointer;border:1px solid var(--color-primary);transition:transform .15s,opacity .15s}
+.subgate-btn:active{transform:scale(.98)}
+.subgate-btn[disabled]{opacity:.6;cursor:default}
+.subgate-btn.primary{background:var(--color-primary);color:#fff;margin-bottom:10px}
+.subgate-btn.outline{background:transparent;color:var(--color-primary)}
+.subgate-btn.outline:active{background:rgba(var(--ar),.10)}
+.subgate-err{font-size:12px;color:#ff8b8b;margin-top:12px;min-height:14px;line-height:1.4}
 .ed-chat-card{display:grid;gap:12px;min-width:230px;max-width:100%;background:var(--bg-card);border:1px solid rgba(var(--ar),.13);border-radius:16px;padding:14px}
 .ed-chat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .ed-chat-kicker{font-size:10px;font-weight:900;letter-spacing:.65px;text-transform:uppercase;color:var(--a);margin-bottom:3px}
@@ -3107,15 +3136,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
     <div class="chart" id="chart"></div>
     <div class="chartdays" id="chartdays"></div>
   </div>
-  <!-- CEFR path: the full ladder A0→C2; passed levels in their colour,
-       current level bright, future levels greyed with a lock. -->
-  <div class="sec"><span id="cefr-path-lbl"></span></div>
-  <div class="card cefr-card"><div class="cefr-grid" id="cefr-grid"></div><div id="cefr-cta"></div></div>
-  <!-- Exam prep: only shown when the learner has touched an exam course. -->
-  <div class="sec" id="exam-prep-sec" style="display:none"><span id="exam-prep-lbl"></span></div>
-  <div class="card exam-prep-card" id="exam-prep-card" style="display:none"><div id="exam-prep-list"></div></div>
-  <div class="sec"><span>TOEFL</span></div>
-  <div class="card toefl-card"><div id="toefll" class="toefl-empty"></div></div>
+  <!-- CEFR ladder, Exam-prep and TOEFL blocks moved to the "Учёба" (Courses)
+       tab to declutter Progress. They live there exclusively now. -->
   <!-- Error Diary -->
   <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
   <div id="errdiary-wrap"></div>
@@ -3304,6 +3326,34 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
     <div class="mtit" id="ach-mtit">🏅 Achievements</div>
     <div style="padding:4px 16px 20px" id="achievements-wrap"></div>
+  </div>
+</div>
+
+<!-- MISTAKES DIARY (full list, fullscreen) -->
+<div class="mov" id="mistm" style="display:none" onclick="closeMod('mistm')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit" id="mistm-tit">Дневник ошибок</div>
+    <div style="padding:4px 16px 24px" id="mistm-list"></div>
+  </div>
+</div>
+
+<!-- MISTAKE DETAIL (AI breakdown: phrase vs correct / why / reinforce) -->
+<div class="mov" id="mistdet" style="display:none" onclick="closeMod('mistdet')">
+  <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
+    <div class="mtit" id="mistdet-tit">Разбор ошибки</div>
+    <div style="padding:4px 16px 24px" id="mistdet-body"></div>
+  </div>
+</div>
+
+<!-- MANDATORY CHANNEL SUBSCRIPTION GATE (blocks the whole app until joined) -->
+<div id="subgate" role="dialog" aria-modal="true">
+  <div class="subgate-card">
+    <div class="subgate-ico"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7-7 18-2.5-7.5L3 11z"/></svg></div>
+    <div class="subgate-tit" id="subgate-tit">Остался один шаг 🚀</div>
+    <div class="subgate-txt" id="subgate-txt">Чтобы активировать ИИ-ассистента ALEX и открыть доступ к курсам, подпишись на наш официальный Telegram-канал. Там мы публикуем полезные разборы и лайфхаки для учебы!</div>
+    <button class="subgate-btn primary" id="subgate-join" type="button" onclick="subgateJoin()">👉 Подписаться на канал</button>
+    <button class="subgate-btn outline" id="subgate-recheck" type="button" onclick="subgateRecheck(this)">🔄 Проверить подписку</button>
+    <div class="subgate-err" id="subgate-err"></div>
   </div>
 </div>
 
@@ -4972,10 +5022,14 @@ function drawProgress(){
   // Weekly chart
   const days={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],uk:['Пн','Вт','Ср','Чт','Пт','Сб','Нд'],en:['Mo','Tu','We','Th','Fr','Sa','Su'],es:['Lu','Ma','Mi','Ju','Vi','Sá','Do'],de:['Mo','Di','Mi','Do','Fr','Sa','So'],fr:['Lu','Ma','Me','Je','Ve','Sa','Di'],pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],tr:['Pt','Sa','Ça','Pe','Cu','Ct','Pz'],zh:['一','二','三','四','五','六','日'],ar:['إث','ثل','أر','خم','جم','سب','أح']}[lang]||['Mo','Tu','We','Th','Fr','Sa','Su'];
   const today=((new Date().getDay()||7)-1);
-  const rawW=d.weekly||Array(7).fill(0);
-  // Merge with local daily XP tracking
+  // Server is authoritative: d.weekly is the real Mon..Sun XP for the CURRENT
+  // week (server clock). The legacy local bucket only ever bumps TODAY so a
+  // freshly-earned XP shows instantly before the next /api/me — it must NOT
+  // override past days (that old Math.max merge kept stale weeks alive forever).
+  const rawW=Array.isArray(d.weekly)?d.weekly.slice(0,7):Array(7).fill(0);
+  while(rawW.length<7)rawW.push(0);
   const localW=LS.getJ('weekly_xp')||Array(7).fill(0);
-  const w=rawW.map((v,i)=>Math.max(v,localW[i]||0));
+  const w=rawW.map((v,i)=>i===today?Math.max(v||0,localW[i]||0):(v||0));
   const mx=Math.max(...w,1);
   const cEl=document.getElementById('chart'),dEl=document.getElementById('chartdays');
   if(!cEl||!dEl)return;
@@ -13761,6 +13815,97 @@ async function submitTextCheck(){
    📚  SMART ERROR DIARY
 ══════════════════════════════════════════════════ */
 let _mistakeFetchTs=0;
+let _mistakesCache=[];
+/* Localised name of a mistake category (grammar/vocabulary/…). */
+function mistakeCatName(k){
+  const m={
+    grammar:{ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'},
+    vocabulary:{ru:'Лексика',en:'Vocabulary',es:'Vocabulario',pt:'Vocabulário',de:'Wortschatz',fr:'Vocabulaire',uk:'Лексика',tr:'Kelime',zh:'词汇',ar:'المفردات'},
+    spelling:{ru:'Орфография',en:'Spelling',es:'Ortografía',pt:'Ortografia',de:'Rechtschreibung',fr:'Orthographe',uk:'Орфографія',tr:'Yazım',zh:'拼写',ar:'الإملاء'},
+    punctuation:{ru:'Пунктуация',en:'Punctuation',es:'Puntuación',pt:'Pontuação',de:'Zeichensetzung',fr:'Ponctuation',uk:'Пунктуація',tr:'Noktalama',zh:'标点',ar:'الترقيم'},
+    article:{ru:'Артикли',en:'Articles',es:'Artículos',pt:'Artigos',de:'Artikel',fr:'Articles',uk:'Артиклі',tr:'Artikeller',zh:'冠词',ar:'أدوات التعريف'},
+    preposition:{ru:'Предлоги',en:'Prepositions',es:'Preposiciones',pt:'Preposições',de:'Präpositionen',fr:'Prépositions',uk:'Прийменники',tr:'Edatlar',zh:'介词',ar:'حروف الجر'},
+    tense:{ru:'Времена',en:'Tenses',es:'Tiempos verbales',pt:'Tempos verbais',de:'Zeitformen',fr:'Temps',uk:'Часи',tr:'Zamanlar',zh:'时态',ar:'الأزمنة'},
+    word_order:{ru:'Порядок слов',en:'Word order',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung',fr:'Ordre des mots',uk:'Порядок слів',tr:'Sözcük dizimi',zh:'语序',ar:'ترتيب الكلمات'}
+  };
+  const key=String(k||'grammar');
+  const hit=m[key]||m[key.replace(/s$/,'')]||m[key.replace(/\s+/g,'_')];
+  return (hit&&(hit[lang]||hit.en))||(key.charAt(0).toUpperCase()+key.slice(1));
+}
+/* One tappable correction row → opens the AI breakdown modal for that mistake. */
+function mistakeRow(e,idx){
+  const row=document.createElement('div');row.className='ed-row';
+  row.innerHTML=`<div class="ed-wrong">${safeHTML(e.wrong)}</div><div class="ed-right">${safeHTML(e.right)}</div>${e.explanation?`<div class="ed-exp">${safeHTML(e.explanation)}</div>`:''}`;
+  row.onclick=()=>{try{haptic('light');}catch(_){}openMistakeDetail(idx);};
+  return row;
+}
+/* Fullscreen "Дневник ошибок": the complete, ordered list of corrections. */
+function openMistakesScreen(){
+  const list=document.getElementById('mistm-list');
+  const tit=document.getElementById('mistm-tit');
+  if(tit)tit.textContent={ru:'Дневник ошибок',en:'Mistakes Diary',es:'Diario de errores',pt:'Diário de erros',de:'Fehlertagebuch',fr:'Journal des erreurs',uk:'Щоденник помилок',tr:'Hata Günlüğü',zh:'错误日记',ar:'سجل الأخطاء'}[lang]||'Mistakes Diary';
+  if(!list)return;
+  const errors=(_mistakesCache&&_mistakesCache.length)?_mistakesCache:(LS.getJ('error_diary')||[]).map(normalizeMistake);
+  _mistakesCache=errors;
+  list.innerHTML='';
+  if(!errors.length){
+    list.innerHTML=`<div class="ed-empty">${({ru:'Пока нет ошибок.',en:'No mistakes yet.',es:'Aún no hay errores.',pt:'Ainda sem erros.',de:'Noch keine Fehler.',fr:'Pas encore d’erreurs.',uk:'Поки немає помилок.',tr:'Henüz hata yok.',zh:'暂无错误。',ar:'لا أخطاء بعد.'}[lang]||'No mistakes yet.')}</div>`;
+  }else{
+    errors.forEach((e,i)=>list.appendChild(mistakeRow(e,i)));
+  }
+  openMod('mistm');
+}
+/* AI breakdown modal: phrase (red) vs correct (green) · why · reinforce. */
+function openMistakeDetail(idx){
+  const body=document.getElementById('mistdet-body');
+  const tit=document.getElementById('mistdet-tit');
+  const e=_mistakesCache[idx];
+  if(!body||!e)return;
+  if(tit)tit.textContent={ru:'Разбор ошибки',en:'Mistake breakdown',es:'Análisis del error',pt:'Análise do erro',de:'Fehleranalyse',fr:'Analyse de l’erreur',uk:'Розбір помилки',tr:'Hata çözümlemesi',zh:'错误解析',ar:'تحليل الخطأ'}[lang]||'Mistake breakdown';
+  const yoursLbl={ru:'Твоя фраза',en:'Your phrase',es:'Tu frase',pt:'Sua frase',de:'Dein Satz',fr:'Ta phrase',uk:'Твоя фраза',tr:'Senin cümlen',zh:'你的表达',ar:'عبارتك'}[lang]||'Your phrase';
+  const correctLbl={ru:'Правильный вариант',en:'Correct version',es:'Versión correcta',pt:'Versão correta',de:'Korrekte Version',fr:'Version correcte',uk:'Правильний варіант',tr:'Doğru hâli',zh:'正确说法',ar:'الصيغة الصحيحة'}[lang]||'Correct version';
+  const whyLbl={ru:'Почему это ошибка?',en:'Why is it a mistake?',es:'¿Por qué es un error?',pt:'Por que é um erro?',de:'Warum ist das falsch?',fr:'Pourquoi est-ce une erreur ?',uk:'Чому це помилка?',tr:'Neden hata?',zh:'为什么这是错误？',ar:'لماذا هذا خطأ؟'}[lang]||'Why is it a mistake?';
+  const reinforceLbl={ru:'Закрепить тему',en:'Reinforce this topic',es:'Reforzar el tema',pt:'Reforçar o tema',de:'Thema festigen',fr:'Renforcer ce point',uk:'Закріпити тему',tr:'Konuyu pekiştir',zh:'巩固这个知识点',ar:'ثبّت هذه القاعدة'}[lang]||'Reinforce this topic';
+  const why=e.explanation||({ru:'ALEX подскажет правило, если нажмёшь «Закрепить тему» — он разберёт ошибку и даст короткую тренировку.',en:'ALEX will explain the rule when you tap “Reinforce this topic” — it breaks down the mistake and gives a short drill.',es:'ALEX explicará la regla al pulsar “Reforzar el tema”.',pt:'O ALEX explicará a regra ao tocar em “Reforçar o tema”.',de:'ALEX erklärt die Regel, wenn du auf „Thema festigen“ tippst.',fr:'ALEX expliquera la règle quand tu appuieras sur « Renforcer ce point ».',uk:'ALEX пояснить правило, коли натиснеш «Закріпити тему».',tr:'“Konuyu pekiştir”e dokununca ALEX kuralı açıklar.',zh:'点击“巩固这个知识点”后，ALEX 会讲解规则。',ar:'سيشرح ALEX القاعدة عند الضغط على «ثبّت هذه القاعدة».'}[lang]||'ALEX will explain the rule when you reinforce this topic.');
+  body.innerHTML=`
+    <div class="md-sec">
+      <div class="md-sec-lbl">${yoursLbl} · ${correctLbl}</div>
+      <div class="md-phrase-row">
+        <div class="md-phrase wrong"><span class="md-phrase-tag">${yoursLbl}</span>${safeHTML(e.wrong)}</div>
+        <div class="md-phrase right"><span class="md-phrase-tag">${correctLbl}</span>${safeHTML(e.right)}</div>
+      </div>
+    </div>
+    <div class="md-sec">
+      <div class="md-sec-lbl">${whyLbl}</div>
+      <div class="md-why">${safeHTML(why)}</div>
+    </div>
+    <button class="md-reinforce" type="button" id="md-reinforce-btn">${reinforceLbl}</button>
+  `;
+  const btn=body.querySelector('#md-reinforce-btn');
+  if(btn)btn.onclick=()=>reinforceMistake(idx);
+  openMod('mistdet');
+}
+/* "Закрепить тему": close the modals and ask ALEX for a 3-question mini-test
+   built around exactly this correction and its grammar topic. */
+function reinforceMistake(idx){
+  const e=_mistakesCache[idx];if(!e)return;
+  if(!hasChatAccess()){showChatPaywall();return;}
+  closeMod('mistdet');closeMod('mistm');
+  const topic=mistakeCatName(e.category||'grammar');
+  const prompt={
+    ru:`Проведи короткий мини-тест из 3 вопросов, чтобы закрепить правило на основе моей ошибки: «${e.wrong}» → «${e.right}» (тема: ${topic}). Задавай по одному вопросу за раз, жди мой ответ и проверяй его.`,
+    en:`Run a short 3-question mini-test to reinforce the rule behind my mistake: “${e.wrong}” → “${e.right}” (topic: ${topic}). Ask one question at a time, wait for my answer and check it.`,
+    es:`Hazme un mini-test de 3 preguntas para reforzar la regla de mi error: “${e.wrong}” → “${e.right}” (tema: ${topic}). Una pregunta a la vez.`,
+    pt:`Faça um mini-teste de 3 perguntas para reforçar a regra do meu erro: “${e.wrong}” → “${e.right}” (tema: ${topic}). Uma pergunta de cada vez.`,
+    de:`Mach einen kurzen 3-Fragen-Test, um die Regel hinter meinem Fehler zu festigen: „${e.wrong}“ → „${e.right}“ (Thema: ${topic}). Eine Frage nach der anderen.`,
+    fr:`Fais un mini-test de 3 questions pour renforcer la règle de mon erreur : « ${e.wrong} » → « ${e.right} » (sujet : ${topic}). Une question à la fois.`,
+    uk:`Проведи короткий міні-тест із 3 запитань, щоб закріпити правило за моєю помилкою: «${e.wrong}» → «${e.right}» (тема: ${topic}). По одному запитанню за раз.`,
+    tr:`Hatamın kuralını pekiştirmek için 3 soruluk kısa bir mini-test yap: “${e.wrong}” → “${e.right}” (konu: ${topic}). Birer birer sor.`,
+    zh:`针对我的错误做一个3题的小测验来巩固规则：“${e.wrong}” → “${e.right}”（主题：${topic}）。一次问一题。`,
+    ar:`أجرِ اختبارًا قصيرًا من 3 أسئلة لتثبيت القاعدة وراء خطئي: «${e.wrong}» ← «${e.right}» (الموضوع: ${topic}). سؤال واحد في كل مرة.`
+  }[lang];
+  sendChip(prompt||`Run a short 3-question mini-test to reinforce the rule behind my mistake: “${e.wrong}” → “${e.right}” (topic: ${topic}). Ask one question at a time.`);
+}
 function cleanMistakeText(v,limit=220){
   return String(v||'').replace(/\s+/g,' ').replace(/[<>{}]/g,'').trim().slice(0,limit);
 }
@@ -13903,12 +14048,21 @@ function renderErrorDiary(){
   // Compact context: the most recent corrections that feed these recommendations.
   const recentLbl={ru:'Последние исправления',en:'Recent corrections',es:'Correcciones recientes',pt:'Correções recentes',de:'Neueste Korrekturen',fr:'Corrections récentes',uk:'Останні виправлення',tr:'Son düzeltmeler',zh:'最近的纠正',ar:'أحدث التصحيحات'}[lang]||'Recent corrections';
   const recentHead=document.createElement('div');recentHead.className='ed-rec-sub';recentHead.textContent=recentLbl;wrap.appendChild(recentHead);
-  errors.slice(0,3).forEach(e=>{
-    const row=document.createElement('div');row.className='ed-row';
-    row.innerHTML=`<div class="ed-wrong">${safeHTML(e.wrong)}</div><div class="ed-right">${safeHTML(e.right)}</div><div class="ed-exp">${safeHTML(e.explanation||'')}</div>`;
-    row.onclick=()=>sendChip(({ru:`Объясни разницу между "${e.wrong}" и "${e.right}"`,en:`Explain the difference between "${e.wrong}" and "${e.right}"`,es:`Explica la diferencia entre "${e.wrong}" y "${e.right}"`,pt:`Explique a diferença entre "${e.wrong}" e "${e.right}"`,de:`Erkläre den Unterschied zwischen "${e.wrong}" und "${e.right}"`,fr:`Explique la différence entre "${e.wrong}" et "${e.right}"`,uk:`Поясни різницю між "${e.wrong}" і "${e.right}"`,tr:`"${e.wrong}" ile "${e.right}" arasındaki farkı açıkla`,zh:`解释一下 "${e.wrong}" 和 "${e.right}" 的区别`,ar:`اشرح الفرق بين "${e.wrong}" و "${e.right}"`}[lang]||`Explain the difference between "${e.wrong}" and "${e.right}"`));
-    wrap.appendChild(row);
+  // Cache the full, ordered list so the detail/full-screen views index into it.
+  _mistakesCache=errors;
+  // Show STRICTLY the 2 most recent corrections; tapping one opens the AI breakdown.
+  errors.slice(0,2).forEach((e,i)=>{
+    wrap.appendChild(mistakeRow(e,i));
   });
+  // When there are more than 2, offer a tidy text button into the full diary.
+  if(errors.length>2){
+    const more=document.createElement('button');
+    more.type='button';more.className='mist-all-btn';
+    const moreTpl={ru:`Показать все ошибки (${errors.length})`,en:`Show all mistakes (${errors.length})`,es:`Ver todos los errores (${errors.length})`,pt:`Ver todos os erros (${errors.length})`,de:`Alle Fehler anzeigen (${errors.length})`,fr:`Voir toutes les erreurs (${errors.length})`,uk:`Показати всі помилки (${errors.length})`,tr:`Tüm hataları göster (${errors.length})`,zh:`查看全部错误 (${errors.length})`,ar:`عرض كل الأخطاء (${errors.length})`};
+    more.textContent=moreTpl[lang]||moreTpl.en;
+    more.onclick=()=>openMistakesScreen();
+    wrap.appendChild(more);
+  }
   const beforeLen=errors.length;
   refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});
 }
@@ -17044,6 +17198,73 @@ function hideLoader(){
   }catch(e){}
 }
 
+/* ── Mandatory channel-subscription gate ───────────────────────────────
+   On boot we ask the backend (which reads Telegram getChatMember) whether the
+   verified user has joined our channel. If not, a frosted full-screen modal
+   blocks the whole app until they join + pass a re-check. Fail-open: any
+   network error or a disabled gate leaves the app fully usable. */
+let _subChannelUrl='https://t.me/polyglotty_daily';
+const _SUBGATE_I18N={
+  tit:{ru:'Остался один шаг 🚀',en:'One step left 🚀',es:'Queda un paso 🚀',pt:'Falta um passo 🚀',de:'Nur noch ein Schritt 🚀',fr:'Plus qu’une étape 🚀',uk:'Залишився один крок 🚀',tr:'Son bir adım 🚀',zh:'只差一步 🚀',ar:'خطوة واحدة فقط 🚀'},
+  txt:{ru:'Чтобы активировать ИИ-ассистента ALEX и открыть доступ к курсам, подпишись на наш официальный Telegram-канал. Там мы публикуем полезные разборы и лайфхаки для учебы!',en:'To activate the ALEX AI assistant and unlock the courses, subscribe to our official Telegram channel. We post useful breakdowns and study hacks there!',es:'Para activar al asistente de IA ALEX y desbloquear los cursos, suscríbete a nuestro canal oficial de Telegram. ¡Allí publicamos análisis útiles y trucos de estudio!',pt:'Para ativar o assistente de IA ALEX e desbloquear os cursos, inscreva-se no nosso canal oficial do Telegram. Lá publicamos análises úteis e dicas de estudo!',de:'Um den KI-Assistenten ALEX zu aktivieren und die Kurse freizuschalten, abonniere unseren offiziellen Telegram-Kanal. Dort posten wir nützliche Erklärungen und Lern-Tipps!',fr:'Pour activer l’assistant IA ALEX et débloquer les cours, abonne-toi à notre chaîne Telegram officielle. On y publie des analyses utiles et des astuces d’apprentissage !',uk:'Щоб активувати ШІ-асистента ALEX і відкрити доступ до курсів, підпишись на наш офіційний Telegram-канал. Там ми публікуємо корисні розбори та лайфхаки для навчання!',tr:'ALEX yapay zeka asistanını etkinleştirmek ve kurslara erişmek için resmi Telegram kanalımıza abone ol. Orada faydalı analizler ve çalışma ipuçları paylaşıyoruz!',zh:'订阅我们的官方 Telegram 频道即可激活 ALEX AI 助手并解锁课程。我们会在那里发布实用的讲解和学习技巧！',ar:'لتفعيل مساعد الذكاء الاصطناعي ALEX وفتح الدورات، اشترك في قناتنا الرسمية على تيليجرام. ننشر هناك شروحات مفيدة وحيلًا للدراسة!'},
+  join:{ru:'👉 Подписаться на канал',en:'👉 Join the channel',es:'👉 Unirme al canal',pt:'👉 Entrar no canal',de:'👉 Kanal abonnieren',fr:'👉 Rejoindre la chaîne',uk:'👉 Підписатися на канал',tr:'👉 Kanala katıl',zh:'👉 订阅频道',ar:'👉 اشترك في القناة'},
+  recheck:{ru:'🔄 Проверить подписку',en:'🔄 Check subscription',es:'🔄 Comprobar suscripción',pt:'🔄 Verificar inscrição',de:'🔄 Abo prüfen',fr:'🔄 Vérifier l’abonnement',uk:'🔄 Перевірити підписку',tr:'🔄 Aboneliği kontrol et',zh:'🔄 检查订阅',ar:'🔄 تحقق من الاشتراك'},
+  checking:{ru:'Проверяем…',en:'Checking…',es:'Comprobando…',pt:'Verificando…',de:'Wird geprüft…',fr:'Vérification…',uk:'Перевіряємо…',tr:'Kontrol ediliyor…',zh:'正在检查…',ar:'جارٍ التحقق…'},
+  still:{ru:'Подписка не найдена. Подпишись и попробуй ещё раз через пару секунд.',en:'Subscription not found. Join and try again in a couple of seconds.',es:'No se encontró la suscripción. Únete e inténtalo de nuevo en unos segundos.',pt:'Inscrição não encontrada. Entre e tente novamente em alguns segundos.',de:'Abo nicht gefunden. Tritt bei und versuch es in ein paar Sekunden erneut.',fr:'Abonnement introuvable. Rejoins la chaîne et réessaie dans quelques secondes.',uk:'Підписку не знайдено. Підпишись і спробуй ще раз за кілька секунд.',tr:'Abonelik bulunamadı. Katıl ve birkaç saniye sonra tekrar dene.',zh:'未找到订阅。请先加入，几秒后再试。',ar:'لم يتم العثور على الاشتراك. اشترك وحاول مرة أخرى بعد ثوانٍ.'}
+};
+function _subgateTxt(key){const m=_SUBGATE_I18N[key]||{};return m[lang]||m.en||'';}
+function showSubGate(channelUrl){
+  if(channelUrl)_subChannelUrl=channelUrl;
+  const g=document.getElementById('subgate');if(!g)return;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  set('subgate-tit',_subgateTxt('tit'));
+  set('subgate-txt',_subgateTxt('txt'));
+  set('subgate-join',_subgateTxt('join'));
+  set('subgate-recheck',_subgateTxt('recheck'));
+  set('subgate-err','');
+  g.classList.add('on');
+}
+function hideSubGate(){const g=document.getElementById('subgate');if(g)g.classList.remove('on');}
+function subgateJoin(){
+  try{haptic('light');}catch(_){}
+  try{
+    if(tg&&tg.openTelegramLink){tg.openTelegramLink(_subChannelUrl);}
+    else{window.open(_subChannelUrl,'_blank');}
+  }catch(e){try{window.open(_subChannelUrl,'_blank');}catch(_){}}
+}
+async function _fetchSubStatus(){
+  const r=await fetch(`${API}/api/check-subscription`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Telegram-Init-Data':(tg&&tg.initData)||''},
+    body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})
+  });
+  const data=await r.json().catch(()=>({}));
+  if(data&&data.channel_url)_subChannelUrl=data.channel_url;
+  return data||{};
+}
+async function checkChannelSub(){
+  if(!API||!window._uid)return;
+  try{
+    const data=await _fetchSubStatus();
+    if(data.subscribed===false){showSubGate(_subChannelUrl);}
+    else{hideSubGate();}
+  }catch(e){/* network error → fail open, never hard-lock the user */}
+}
+async function subgateRecheck(btn){
+  try{haptic('light');}catch(_){}
+  const err=document.getElementById('subgate-err');
+  if(err)err.textContent='';
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent=_subgateTxt('checking');}
+  let subscribed=true;
+  try{
+    const data=await _fetchSubStatus();
+    subscribed=data.subscribed!==false;
+  }catch(e){subscribed=true;/* fail open on error */}
+  if(btn){btn.disabled=false;btn.textContent=orig||_subgateTxt('recheck');}
+  if(subscribed){hideSubGate();}
+  else if(err){err.textContent=_subgateTxt('still');}
+}
 async function init(){
   hideLoader();
   try{
@@ -17108,6 +17329,9 @@ async function init(){
       try{addMsg('bot',L?.welcome||'Привет! Я ALEX 👋');}catch{}
     }
 
+    // Mandatory channel-subscription gate — runs ASAP once we have a uid.
+    try{checkChannelSub();}catch(e){console.warn('subgate',e);}
+
     // Load server data in background — update UI when ready
     if(uid&&API){
       fetchData(uid).then(srv=>{
@@ -17151,7 +17375,7 @@ async function init(){
         // case where the app sat backgrounded across the expiry timestamp
         // (e.g. UTC-midnight lapse) — pulls fresh /api/premium and demotes the
         // UI to free + Paywall the instant the user reopens, no reload needed.
-        else if(window._uid&&API){try{checkPremiumStatus(window._uid);}catch(_){}}
+        else if(window._uid&&API){try{checkPremiumStatus(window._uid);}catch(_){}try{checkChannelSub();}catch(_){}}
       });
       if(tg)try{tg.onEvent('viewportChanged',(e)=>{if(!e.isStateStable)syncStats();});}catch(e){}
     }

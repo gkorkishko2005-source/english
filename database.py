@@ -126,6 +126,16 @@ CREATE TABLE IF NOT EXISTS sessions (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Per-day XP ledger: one row per (user, UTC day) holding the total XP earned
+-- that day. Powers the "this week" Progress chart with REAL data instead of a
+-- client-side cache. Upserted on every add_xp().
+CREATE TABLE IF NOT EXISTS xp_history (
+    uid BIGINT  NOT NULL,
+    day DATE    NOT NULL,
+    xp  INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (uid, day)
+);
+
 CREATE TABLE IF NOT EXISTS vocabulary (
     id          SERIAL PRIMARY KEY,
     uid         BIGINT,
@@ -363,6 +373,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, type TEXT,
     date TEXT, score INTEGER DEFAULT 0, total INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS xp_history (
+    uid INTEGER NOT NULL, day TEXT NOT NULL, xp INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (uid, day)
 );
 CREATE TABLE IF NOT EXISTS vocabulary (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, word TEXT,
@@ -1283,6 +1297,51 @@ async def add_xp(uid: int, amount: int):
     # Any XP gain refills the plant tonus to 100 and stamps today's activity.
     if int(amount or 0) > 0:
         await register_activity(uid)
+        await _record_xp_day(uid, int(amount))
+
+
+async def _record_xp_day(uid: int, amount: int):
+    """Accumulate today's (UTC) XP into the per-day ledger so the Progress
+    'this week' chart can be built from REAL data. Upsert keyed on (uid, day)."""
+    if amount <= 0:
+        return
+    today = _utc_today()
+    day = today if USE_POSTGRES else today.isoformat()
+    if USE_POSTGRES:
+        await db("INSERT INTO xp_history (uid, day, xp) VALUES (?, ?, ?) "
+                 "ON CONFLICT (uid, day) DO UPDATE SET xp = xp_history.xp + EXCLUDED.xp",
+                 uid, day, amount)
+    else:
+        await db("INSERT INTO xp_history (uid, day, xp) VALUES (?, ?, ?) "
+                 "ON CONFLICT(uid, day) DO UPDATE SET xp = xp_history.xp + excluded.xp",
+                 uid, day, amount)
+
+
+async def get_weekly_xp(uid: int) -> list:
+    """Return XP earned per day for the CURRENT week (Mon..Sun), 7 ints, using
+    the server (UTC) clock — NOT a client cache. Index 0 = Monday."""
+    from datetime import timedelta
+    today = _utc_today()
+    monday = today - timedelta(days=today.weekday())  # Monday of this week
+    sunday = monday + timedelta(days=6)
+    lo = monday if USE_POSTGRES else monday.isoformat()
+    hi = sunday if USE_POSTGRES else sunday.isoformat()
+    rows = await db("SELECT day, xp FROM xp_history WHERE uid=? AND day>=? AND day<=?",
+                    uid, lo, hi, fetch="all") or []
+    week = [0] * 7
+    for r in rows:
+        d = r["day"]
+        if isinstance(d, str):
+            from datetime import date as _date
+            try:
+                d = _date.fromisoformat(d[:10])
+            except Exception:
+                continue
+        idx = (d - monday).days
+        if 0 <= idx < 7:
+            week[idx] = int(r["xp"] or 0)
+    return week
+
 
 async def get_xp(uid: int) -> int:
     u = await get_user(uid); return (u.get("xp") or 0) if u else 0
