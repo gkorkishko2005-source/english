@@ -1248,10 +1248,25 @@ async def cmd_start(message: Message):
                         else "\n\nReferral bonus: your friend gets +150 XP, you get +50 XP.")
     name_html = html.escape(name, quote=False)
     handle = channel_handle() or "@polyglotty_daily"
-    # Short, official onboarding copy. The ONLY control is the native Telegram
-    # Mini App menu button ("Open App") at the bottom — no inline buttons and no
-    # duplicate reply keyboard. ReplyKeyboardRemove clears any stale keyboard
-    # left over from an older session/version.
+    # Inline keyboard under the welcome message: a primary Mini App launcher and
+    # a link to the official channel. The "⌨️ Все функции" button stays removed
+    # (per product decision). web_app= launches the Mini App in-place; if the
+    # WebApp URL is unavailable (local dev) we fall back to a plain bot link.
+    app_url = webapp_url()
+    open_btn = (InlineKeyboardButton(
+                    text="Открыть практику 🚀" if ru else "Open practice 🚀",
+                    web_app=WebAppInfo(url=app_url))
+                if app_url else
+                InlineKeyboardButton(
+                    text="Открыть практику 🚀" if ru else "Open practice 🚀",
+                    url=public_bot_url()))
+    welcome_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [open_btn],
+        [InlineKeyboardButton(
+            text="📢 Канал" if ru else "📢 Channel",
+            url=channel_url())],
+    ])
+    # Short, official onboarding copy.
     if ru:
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
@@ -1273,16 +1288,31 @@ async def cmd_start(message: Message):
             f"Our official channel: {handle}"
             f"{ref_line}"
         )
-    await message.answer(text, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
+    await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+
+def _quick_menu_kb(ru: bool) -> InlineKeyboardMarkup:
+    """The 6-section navigation grid (Урок/Слова/Тест/Подписка/Поддержка/
+    Пригласить). Used by /menu and the inline "Меню" entry. The "Все функции"
+    button is intentionally absent."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
+         InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab")],
+        [InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
+         InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
+        [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
+         InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
+    ])
 
 @dp.message(Command("menu"))
 async def cmd_menu(message: Message):
     lang = await get_lang(message.from_user.id) or "ru"
+    ru = lang == "ru"
     await message.answer(
-        "Меню кнопок включено. Можно не помнить команды — просто нажимай нужный раздел."
-        if lang == "ru" else
-        "Button menu is enabled. You do not need to remember commands — just tap a section.",
-        reply_markup=main_kb(lang),
+        "<b>📋 Меню</b>\nВыберите раздел — или откройте приложение для полного курса."
+        if ru else
+        "<b>📋 Menu</b>\nPick a section — or open the app for the full course.",
+        parse_mode="HTML",
+        reply_markup=_quick_menu_kb(ru),
     )
 
 @dp.callback_query(F.data.startswith("quick_"))
@@ -1300,19 +1330,12 @@ async def cb_quick_menu(cb: CallbackQuery):
         await cb.message.answer(f"{ICON['test']} <b>Тесты</b>" if ru else f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
         await send_support_prompt(cb.message, uid)
-    else:  # "menu" — the collapsed sections from /start
-        menu = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
-             InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab")],
-            [InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
-             InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
-            [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
-             InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
-        ])
+    else:  # "menu" — the 6-section navigation grid
         await cb.message.answer(
-            "<b>📋 Меню</b>\nВыбери раздел — или жми «Открыть приложение» для полного курса."
-            if ru else "<b>📋 Menu</b>\nPick a section — or tap “Open App” for the full course.",
-            reply_markup=menu,
+            "<b>📋 Меню</b>\nВыберите раздел — или откройте приложение для полного курса."
+            if ru else "<b>📋 Menu</b>\nPick a section — or open the app for the full course.",
+            parse_mode="HTML",
+            reply_markup=_quick_menu_kb(ru),
         )
 
 @dp.message(Command("share"))
