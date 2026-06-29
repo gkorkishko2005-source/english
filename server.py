@@ -334,6 +334,22 @@ async def handle_index(request):
                             "Expires": "0",
                         })
 
+async def handle_sw(request):
+    """Serve the Service Worker from the site root so its scope covers the whole
+    app. We send it with no-cache so a new sw.js is always picked up on the next
+    visit (the SW's own activate handler then cleans up stale caches), and with
+    Service-Worker-Allowed:/ so the root scope is permitted."""
+    sw_path = WEBAPP_DIR / "sw.js"
+    if not sw_path.exists():
+        return web.Response(text="// sw missing", content_type="application/javascript",
+                            status=404)
+    js = sw_path.read_text(encoding="utf-8")
+    return web.Response(text=js, content_type="application/javascript", charset="utf-8",
+                        headers={
+                            "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                            "Service-Worker-Allowed": "/",
+                        })
+
 # Долгий кэш для редко меняющейся статики (иконки, аватарка, шрифты).
 # index.html и /api/* не трогаем — они должны быть всегда свежими.
 _STATIC_CACHE_EXT = (".png",".jpg",".jpeg",".webp",".gif",".svg",".ico",
@@ -2435,6 +2451,7 @@ async def handle_check_subscription(request):
 def create_app():
     app=web.Application(middlewares=[gzip_mw, cache_static_mw])
     app.router.add_get("/",handle_index)
+    app.router.add_get("/sw.js",handle_sw)
     app.router.add_get("/api/user/{uid}",handle_user)
     app.router.add_get("/api/referral/{uid}",handle_referral)
     app.router.add_post("/api/chat",handle_chat)

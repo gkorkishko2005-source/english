@@ -1088,6 +1088,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 /* Input row — flat background, hairline top, no blur. Mic and Send
    share the same circular mass as the textarea height. */
 .inrow{padding:8px 12px;padding-bottom:calc(8px + var(--safe));background:var(--bg);border-top:1px solid var(--b1);display:flex;align-items:flex-end;gap:7px;flex-shrink:0}
+.alex-off{display:none;align-items:flex-start;gap:9px;margin:0 12px 8px;padding:11px 13px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r2,14px);color:var(--t2);font-size:12.5px;line-height:1.45}
+.alex-off.on{display:flex}
+.alex-off svg{width:17px;height:17px;flex-shrink:0;margin-top:1px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.inrow.off{opacity:.5;pointer-events:none}
 .cinp{flex:1;background:var(--e2);border:1px solid var(--b1);border-radius:18px;padding:9px 14px;color:var(--t1);font-family:var(--f);font-size:14px;outline:none;resize:none;max-height:96px;min-height:36px;line-height:1.35;transition:border-color .18s}
 .cinp:focus{border-color:rgba(var(--ar),.45)}
 .cinp::placeholder{color:var(--t3)}
@@ -2998,7 +3002,11 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   </div>
   <div class="cmsgs" id="cmsgs"></div>
   <div class="chips" id="chips"></div>
-  <div class="inrow">
+  <div class="alex-off" id="alex-off">
+    <svg viewBox="0 0 24 24"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M5 12.55a10.94 10.94 0 015.17-2.39"/><path d="M10.71 5.05A16 16 0 0122.58 9"/><path d="M1.42 9a15.91 15.91 0 014.7-2.88"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+    <span id="alex-off-txt"></span>
+  </div>
+  <div class="inrow" id="inrow">
     <textarea class="cinp" id="cinp" rows="1" onkeydown="onKey(event)" oninput="grow(this)"></textarea>
     <button class="micb" id="micb" onclick="toggleMic()"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></button>
     <button class="sndb" id="sndb" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -3960,6 +3968,173 @@ function appWarn(scope,err){
   try{console.warn('[PolyGlotty]',scope,err&&err.message?err.message:err);}catch(_){}
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   OFFLINE MODE — Service Worker + IndexedDB sync queue.
+   The course (A0–C2, lessons, tests, vocab) lives as inline constants in
+   this file, so once the SW caches the app shell the "Учёба"/"Прогресс"
+   tabs work fully offline with no extra data download. The only thing that
+   needs the network is writing progress back to the server:
+     • XP / sessions / words / tests reconcile through /api/sync_stats, which
+       is monotonic (server keeps GREATEST(server, client)). Local progress
+       lives in localStorage and is pushed — durably and without double
+       counting — the moment we are back online. So XP is NOT queued here.
+     • Incremental daily counters that sync_stats does NOT cover
+       (/api/lessons/done, /api/cards/done) ARE recorded in a durable
+       IndexedDB queue (offline_sync_queue) and replayed on reconnect.
+   ══════════════════════════════════════════════════════════════════════ */
+(function registerSW(){
+  if(!('serviceWorker' in navigator))return;
+  window.addEventListener('load',function(){
+    try{navigator.serviceWorker.register('/sw.js').catch(function(e){appWarn('sw-register',e);});}
+    catch(e){appWarn('sw-register',e);}
+  });
+})();
+
+/* ---- Minimal promise-based IndexedDB wrapper (no external lib) ---- */
+const _ODB_NAME='polyglotty', _ODB_VER=1, _ODB_STORE='offline_sync_queue';
+let _odbPromise=null;
+function _odb(){
+  if(_odbPromise)return _odbPromise;
+  _odbPromise=new Promise(function(resolve,reject){
+    let req;
+    try{req=indexedDB.open(_ODB_NAME,_ODB_VER);}catch(e){reject(e);return;}
+    req.onupgradeneeded=function(){
+      const db=req.result;
+      if(!db.objectStoreNames.contains(_ODB_STORE))
+        db.createObjectStore(_ODB_STORE,{keyPath:'id',autoIncrement:true});
+    };
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error);};
+  });
+  return _odbPromise;
+}
+function _queueAdd(rec){
+  return _odb().then(function(db){return new Promise(function(res,rej){
+    const tx=db.transaction(_ODB_STORE,'readwrite');
+    tx.objectStore(_ODB_STORE).add(rec);
+    tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);}; tx.onabort=function(){rej(tx.error);};
+  });});
+}
+function _queueAll(){
+  return _odb().then(function(db){return new Promise(function(res,rej){
+    const tx=db.transaction(_ODB_STORE,'readonly');
+    const r=tx.objectStore(_ODB_STORE).getAll();
+    r.onsuccess=function(){res(r.result||[]);}; r.onerror=function(){rej(r.error);};
+  });});
+}
+function _queueDel(id){
+  return _odb().then(function(db){return new Promise(function(res,rej){
+    const tx=db.transaction(_ODB_STORE,'readwrite');
+    tx.objectStore(_ODB_STORE).delete(id);
+    tx.oncomplete=function(){res(true);}; tx.onerror=function(){rej(tx.error);};
+  });});
+}
+
+function _initData(){try{return (typeof tg!=='undefined'&&tg&&tg.initData)||'';}catch(_){return '';}}
+
+/* Best-effort progress POST: try the network now; on ANY failure (offline,
+   network error, 5xx) stash the request in IndexedDB to replay later. Returns
+   {ok,status,data} when it reached the server, or {queued:true} when stored.
+   Mirrors the old fire-and-forget fetch().catch() pattern but is durable across
+   reloads. Use ONLY for idempotent-per-event mutations (each event queued once
+   → replayed once). Do NOT use for additive XP (covered by sync_stats). */
+async function postOrQueue(path,body){
+  const rec={path:path,body:body,ts:Date.now()};
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){
+    try{await _queueAdd(rec);}catch(e){appWarn('queue-add',e);}
+    return {queued:true};
+  }
+  try{
+    const r=await fetch(`${API}${path}`,{method:'POST',
+      headers:{'Content-Type':'application/json','X-Telegram-Init-Data':_initData()},
+      body:JSON.stringify(body)});
+    if(!r.ok&&r.status>=500)throw new Error('http '+r.status);
+    let data=null;try{data=await r.json();}catch(_){}
+    return {ok:r.ok,status:r.status,data:data};
+  }catch(e){
+    try{await _queueAdd(rec);}catch(e2){appWarn('queue-add',e2);}
+    return {queued:true};
+  }
+}
+
+/* Drain the offline queue oldest-first. Stop at the first failure so ordering
+   is preserved and we retry on the next 'online' event / launch. Re-entrancy
+   guarded so overlapping online events don't double-send. */
+let _syncing=false;
+async function syncOfflineData(){
+  if(_syncing)return; _syncing=true;
+  try{
+    const items=await _queueAll();
+    items.sort(function(a,b){return (a.id||0)-(b.id||0);});
+    for(let i=0;i<items.length;i++){
+      const it=items[i];
+      try{
+        const r=await fetch(`${API}${it.path}`,{method:'POST',
+          headers:{'Content-Type':'application/json','X-Telegram-Init-Data':_initData()},
+          body:JSON.stringify(it.body)});
+        if(!r.ok&&r.status>=500)break;   // server down — keep the item, retry later
+        await _queueDel(it.id);
+      }catch(e){break;}                   // still offline — stop, keep the queue intact
+    }
+  }catch(e){appWarn('sync-drain',e);}
+  finally{_syncing=false;}
+}
+
+/* Push the latest local stats snapshot immediately on reconnect. sync_stats is
+   monotonic on the server, so this is the safe, double-count-free way to land
+   offline-earned XP/sessions/words/tests. */
+function _pushStatsNow(){
+  try{
+    if(typeof API==='undefined'||!API||!window._uid)return;
+    const s=(LS.getJ('local_stats'))||{};
+    try{s.xp=loadXP();}catch(_){}
+    fetch(`${API}/api/sync_stats`,{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:window._uid,stats:s})}).catch(function(){});
+  }catch(e){appWarn('push-stats',e);}
+}
+
+window.addEventListener('online',function(){
+  try{syncOfflineData();}catch(_){}
+  try{_pushStatsNow();}catch(_){}
+  try{updateAlexOnlineState();}catch(_){}
+});
+window.addEventListener('offline',function(){
+  try{updateAlexOnlineState();}catch(_){}
+});
+
+/* ---- ALEX chat offline state (block input + show a calm notice) ---- */
+const _ALEX_OFF_I18N={
+  ru:'Ассистент ALEX сейчас оффлайн. Чат активируется, как только появится интернет. Но вы можете продолжать проходить курсы и учить слова!',
+  en:'ALEX is offline right now. The chat reactivates as soon as you are back online. In the meantime you can keep taking lessons and learning words!',
+  es:'ALEX está desconectado ahora. El chat se reactivará en cuanto vuelvas a tener conexión. Mientras tanto, ¡puedes seguir con las lecciones y aprender palabras!',
+  de:'ALEX ist gerade offline. Der Chat wird aktiviert, sobald du wieder online bist. In der Zwischenzeit kannst du weiter Lektionen machen und Wörter lernen!',
+  fr:'ALEX est hors ligne pour le moment. Le chat se réactivera dès votre retour en ligne. En attendant, vous pouvez continuer les leçons et apprendre du vocabulaire !',
+  pt:'O ALEX está offline agora. O chat será reativado assim que você voltar a ficar online. Enquanto isso, continue as lições e aprenda palavras!',
+  uk:'Асистент ALEX зараз офлайн. Чат активується, щойно зʼявиться інтернет. А поки ви можете продовжувати проходити курси та вчити слова!',
+  tr:'ALEX şu anda çevrimdışı. İnternet geri geldiğinde sohbet yeniden etkinleşecek. Bu arada derslere devam edip kelime öğrenebilirsiniz!',
+  zh:'ALEX 目前处于离线状态。一旦恢复联网，聊天将重新启用。在此期间，你可以继续学习课程和单词！',
+  ar:'المساعد ALEX غير متصل الآن. ستُفعَّل الدردشة فور عودة الإنترنت. وفي هذه الأثناء يمكنك متابعة الدروس وتعلّم الكلمات!'
+};
+function _isOffline(){try{return typeof navigator!=='undefined'&&navigator.onLine===false;}catch(_){return false;}}
+function updateAlexOnlineState(){
+  try{
+    const off=_isOffline();
+    const banner=document.getElementById('alex-off');
+    const txt=document.getElementById('alex-off-txt');
+    const row=document.getElementById('inrow');
+    const inp=document.getElementById('cinp');
+    const snd=document.getElementById('sndb');
+    const mic=document.getElementById('micb');
+    if(txt){const lng=(typeof lang!=='undefined'?lang:'ru');txt.textContent=_ALEX_OFF_I18N[lng]||_ALEX_OFF_I18N.en;}
+    if(banner)banner.classList.toggle('on',off);
+    if(row)row.classList.toggle('off',off);
+    if(inp)inp.disabled=off;
+    if(snd)snd.disabled=off;
+    if(mic)mic.disabled=off;
+  }catch(e){appWarn('alex-online',e);}
+}
+
 /* Full set of UI / bot languages. Every code here needs a matching
    entry in LANGS below; anything missing falls back to LANGS.en. */
 const SUPPORTED_LANGS = ['ru','en','es','pt','de','fr','uk','tr','zh','ar'];
@@ -4358,7 +4533,7 @@ function goTab(n,allowPractice){
   if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='settings'){try{updatePremiumUI();}catch(e){}}
-  if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}}
+  if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}try{updateAlexOnlineState();}catch(e){}}
   try{updateCourseTopBtn();}catch(e){}
 }
 /* hasChatAccess() is redefined in the modular-billing helpers further down
@@ -5831,6 +6006,7 @@ function scrollMsgs(){const w=document.getElementById('cmsgs');setTimeout(()=>w.
 
 async function sendMsg(){
   if(busy)return;
+  if(_isOffline()){updateAlexOnlineState();return;}
   if(!hasChatAccess()){showChatPaywall();return;}
   const inp=document.getElementById('cinp');
   const text=inp.value.trim();if(!text)return;
@@ -5841,6 +6017,7 @@ async function sendMsg(){
 async function sendChip(text,mode){if(busy)return;if(!hasChatAccess()){showChatPaywall();return;}addMsg('user',text);goTab('chat');await doChat(text,mode);}
 
 async function doChat(text,mode){
+  if(_isOffline()){updateAlexOnlineState();return;}
   if(!hasChatAccess()){showChatPaywall();return;}
   if(typeof setChipsBusy==='undefined')window.setChipsBusy=function(){};
   busy=true;document.getElementById('sndb').disabled=true;
@@ -7455,8 +7632,8 @@ function recordCardDaily(){
   cardLimitState.used=Math.min(limit,(parseInt(cardLimitState.used,10)||0)+1);
   cardLimitState.remaining=Math.max(0,limit-cardLimitState.used);
   if(API&&window._uid){
-    fetch(`${API}/api/cards/done`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
-      .then(r=>r.json()).then(d=>{if(d&&typeof d.remaining==='number')cardLimitState=Object.assign({is_premium:cardLimitState.is_premium},d);}).catch(()=>{});
+    postOrQueue('/api/cards/done',{uid:window._uid,init_data:(tg&&tg.initData)||''})
+      .then(res=>{const d=res&&res.data;if(d&&typeof d.remaining==='number')cardLimitState=Object.assign({is_premium:cardLimitState.is_premium},d);}).catch(()=>{});
   }
   return cardLimitState.used;
 }
@@ -14836,8 +15013,8 @@ function recordLessonDone(){
   lessonLimitState.used=(parseInt(lessonLimitState.used,10)||0)+1;
   lessonLimitState.remaining=Math.max(0,(parseInt(lessonLimitState.limit,10)||3)-lessonLimitState.used);
   if(API&&window._uid){
-    fetch(`${API}/api/lessons/done`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,init_data:(tg&&tg.initData)||''})})
-      .then(r=>r.json()).then(d=>{if(d&&typeof d.remaining==='number')lessonLimitState=Object.assign({unlimited:false},d);}).catch(()=>{});
+    postOrQueue('/api/lessons/done',{uid:window._uid,init_data:(tg&&tg.initData)||''})
+      .then(res=>{const d=res&&res.data;if(d&&typeof d.remaining==='number')lessonLimitState=Object.assign({unlimited:false},d);}).catch(()=>{});
   }
 }
 function openDailyLimit(){
