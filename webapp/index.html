@@ -1798,7 +1798,9 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-jump-btn:hover{transform:translateY(-1px) scale(1.03)}
 .course-top-btn:active{transform:scale(.94)}
 .course-top-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.course-system{background:linear-gradient(135deg,rgba(var(--ar),.10),rgba(0,212,170,.05));border:1px solid rgba(var(--ar),.18);border-radius:var(--r2);padding:13px 14px;margin-bottom:9px}
+.course-system{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:16px;margin-bottom:16px}
+.course-system-prog{height:6px;border-radius:999px;background:var(--e3);overflow:hidden;margin-top:12px}
+.course-system-prog-fill{height:100%;border-radius:999px;background:var(--color-primary);transition:width .4s ease}
 .course-system-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .course-system-title{font-size:14px;font-weight:850;color:var(--t1)}
 .course-system-sub{font-size:11px;color:var(--t2);line-height:1.35;margin-top:2px}
@@ -4436,7 +4438,7 @@ function renderHome(d){
 /* ══ CONTINUE LESSON CARD ══ */
 function _continueLessonCopy(){
   return {
-    label:{ru:'Продолжить урок',en:'Continue lesson',es:'Continuar lección',de:'Lektion fortsetzen',fr:'Continuer la leçon',pt:'Continuar lição',uk:'Продовжити урок',tr:'Derse devam et',zh:'继续课程',ar:'تابع الدرس'}[lang]||'Continue lesson',
+    label:{ru:'Далее',en:'Up next',es:'A continuación',de:'Als Nächstes',fr:'À suivre',pt:'A seguir',uk:'Далі',tr:'Sırada',zh:'接下来',ar:'التالي'}[lang]||'Up next',
     next:{ru:'Следующий урок',en:'Up next',es:'A continuación',de:'Als Nächstes',fr:'À suivre',pt:'A seguir',uk:'Далі',tr:'Sırada',zh:'接下来',ar:'التالي'}[lang]||'Up next',
     allDone:{ru:'Все уроки пройдены — повтори карточки',en:'All lessons done — review your cards',es:'Lecciones completadas — repasa tarjetas',de:'Alles erledigt — Karten wiederholen',fr:'Tout terminé — révisez vos cartes',pt:'Tudo concluído — revise os cartões',uk:'Усі уроки пройдені — повтори картки',tr:'Hepsi tamam — kartları tekrarla',zh:'全部完成 — 复习卡片',ar:'انتهت الدروس — راجع البطاقات'}[lang]||'All lessons done — review your cards',
     untilUnlock:{ru:'Откроется после соседних уроков',en:'Unlocks after nearby lessons',es:'Se desbloquea tras lecciones cercanas',pt:'Desbloqueia após lições próximas'}[lang]||'Unlocks after nearby lessons'
@@ -5263,23 +5265,23 @@ function todayMissions(){
   try{const cl=(typeof cardLimitConfig==='function')?cardLimitConfig().limit:10;ct=Math.max(1,Math.min(10,cl));}catch(e){}
   return [
     {id:'today_lesson', key:'lesson', target:1,  xp:10, label:{
-      ru:'Пройди 1 урок курса',  en:'Complete 1 course lesson',
-      es:'Completa 1 lección',   pt:'Conclua 1 lição',
-      de:'1 Kurslektion absolvieren', fr:'Termine 1 leçon du cours',
-      uk:'Пройди 1 урок курсу',  tr:'1 ders bitir',
-      zh:'完成 1 节课程',         ar:'أكمل درسًا واحدًا من الدورة'}},
+      ru:'Пройти урок',  en:'Take a lesson',
+      es:'Hacer una lección',   pt:'Fazer uma lição',
+      de:'Lektion machen', fr:'Faire une leçon',
+      uk:'Пройти урок',  tr:'Ders yap',
+      zh:'上一节课',         ar:'خذ درسًا'}},
     {id:'today_cards',  key:'words',  target:ct, xp:9, label:{
-      ru:'Повтори '+ct+' карточек',  en:'Review '+ct+' flashcards',
-      es:'Repasa '+ct+' tarjetas',   pt:'Revise '+ct+' cartões',
-      de:ct+' Karten wiederholen', fr:'Révise '+ct+' cartes',
-      uk:'Повтори '+ct+' карток',    tr:ct+' kartı tekrar et',
-      zh:'复习 '+ct+' 张卡片',        ar:'راجع '+ct+' بطاقات'}},
+      ru:'Повторить слова',  en:'Review words',
+      es:'Repasar palabras',   pt:'Revisar palavras',
+      de:'Wörter wiederholen', fr:'Réviser les mots',
+      uk:'Повторити слова',    tr:'Kelimeleri tekrar et',
+      zh:'复习单词',        ar:'راجع الكلمات'}},
     {id:'today_exam',   key:'listen', target:1,  xp:8, label:{
-      ru:'1 экзамен. задание (TOEFL/IELTS)', en:'1 exam task (TOEFL/IELTS)',
-      es:'1 tarea de examen',    pt:'1 tarefa de exame',
-      de:'1 Prüfungsaufgabe',    fr:'1 tâche d’examen',
-      uk:'1 екзаменаційне завдання', tr:'1 sınav görevi',
-      zh:'1 个考试任务',          ar:'مهمة امتحان واحدة'}}
+      ru:'Экзаменационный тест', en:'Exam task',
+      es:'Tarea de examen',    pt:'Tarefa de exame',
+      de:'Prüfungsaufgabe',    fr:'Tâche d’examen',
+      uk:'Екзаменаційний тест', tr:'Sınav görevi',
+      zh:'考试任务',          ar:'مهمة امتحان'}}
   ];
 }
 function dailyMissionDoneCount(sv){
@@ -11048,16 +11050,16 @@ function renderCourse(){
   const levelPick=levels.map(l=>`<button class="level-pick-btn" type="button" onclick="startLevelTest('${l}')">${l}</button>`).join('');
   const system=`<div class="course-system">
     <div class="course-system-top">
-      <div><div class="course-system-title">${({ru:'Системный курс A0-C2',en:'System course A0-C2',es:'Curso completo A0-C2',pt:'Curso completo A0-C2',de:'Systemkurs A0-C2',fr:'Cours complet A0-C2',uk:'Системний курс A0-C2',tr:'Sistematik kurs A0-C2',zh:'A0-C2 系统课程',ar:'دورة منهجية A0-C2'}[lang]||'System course A0-C2')}</div>
+      <div><div class="course-system-title">${({ru:'Программа обучения',en:'Learning path',es:'Plan de estudios',pt:'Plano de estudo',de:'Lernprogramm',fr:'Programme',uk:'Програма навчання',tr:'Öğrenme yolu',zh:'学习路径',ar:'مسار التعلّم'}[lang]||'Learning path')}</div>
       <div class="course-system-sub">${({ru:'Полный путь A0-C2: правило, словарь, синонимы, пазл, диктовка и грамматическая практика на каждом уроке.',en:'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.',es:'Ruta completa A0-C2: regla, vocabulario, sinónimos, puzzle, dictado y práctica de gramática en cada lección.',pt:'Trajeto completo A0-C2: regra, vocabulário, sinônimos, puzzle, ditado e prática de gramática em cada lição.',de:'Kompletter Weg A0-C2: Regel, Wortschatz, Synonyme, Satzpuzzle, Diktat und Grammatikübung in jeder Lektion.',fr:'Parcours complet A0-C2 : règle, vocabulaire, synonymes, puzzle, dictée et grammaire à chaque leçon.',uk:'Повний шлях A0-C2: правило, словник, синоніми, пазл, диктант і граматична практика в кожному уроці.',tr:'Tam yol A0-C2: her derste kural, kelime, eş anlamlılar, cümle yapbozu, dikte ve dilbilgisi pratiği.',zh:'完整 A0-C2 路径：每节课包含规则、词汇、近义词、拼句、听写和语法练习。',ar:'مسار كامل A0-C2: قاعدة ومفردات ومرادفات ولغز جمل وإملاء وتمرين قواعد في كل درس.'}[lang]||'Full A0-C2 path: rule, vocabulary, synonyms, sentence puzzle, dictation and grammar practice on every lesson.')}</div></div>
-      <div class="course-system-pill">${doneCount}/${GALAXY_COURSE.length}</div>
     </div>
+    <div class="course-system-prog"><div class="course-system-prog-fill" style="width:${Math.round(doneCount/Math.max(1,GALAXY_COURSE.length)*100)}%"></div></div>
     <button class="course-levels-toggle" type="button" id="lvl-toggle-btn" onclick="toggleLevelPicker()">${({ru:'Показать уровни',en:'Show levels',es:'Mostrar niveles',pt:'Mostrar níveis',de:'Level anzeigen',fr:'Afficher les niveaux',uk:'Показати рівні',tr:'Seviyeleri göster',zh:'显示级别',ar:'إظهار المستويات'}[lang]||'Show levels')} <span class="lvl-arr">▾</span></button>
     <div id="level-pick-wrap" style="display:none">
       <div class="course-system-sub" style="margin-top:10px">${({ru:'Выбери уровень. Он подтвердится только после теста.',en:'Choose your level. It is confirmed only after a test.',es:'Elige tu nivel. Se confirma solo tras un examen.',pt:'Escolha seu nível. Ele é confirmado só após um teste.',de:'Wähle dein Level. Es wird erst nach einem Test bestätigt.',fr:'Choisis ton niveau. Il n’est confirmé qu’après un test.',uk:'Обери свій рівень. Він підтверджується лише після тесту.',tr:'Seviyeni seç. Yalnızca testten sonra onaylanır.',zh:'选择你的级别。仅在通过测试后确认。',ar:'اختر مستواك. يُؤكَّد فقط بعد اختبار.'}[lang]||'Choose your level. It is confirmed only after a test.')}</div>
       <div class="level-pick-row">${levelPick}</div>
     </div>
-    <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${({ru:'Сдать тест перехода на',en:'Take level-up test for',es:'Hacer examen de paso a',pt:'Fazer teste de avanço para',de:'Aufstiegstest für',fr:'Passer le test de passage vers',uk:'Скласти тест переходу на',tr:'Şu seviyeye geçiş testi:',zh:'参加升级到',ar:'اجتياز اختبار الانتقال إلى'}[lang]||'Take level-up test for')} ${nextExam}</button>
+    <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${({ru:'Подтвердить уровень',en:'Confirm level',es:'Confirmar nivel',pt:'Confirmar nível',de:'Niveau bestätigen',fr:'Valider le niveau',uk:'Підтвердити рівень',tr:'Seviyeyi onayla',zh:'确认级别',ar:'تأكيد المستوى'}[lang]||'Confirm level')} ${nextExam}</button>
   </div>`;
   let lastLevel='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
