@@ -1762,7 +1762,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .course-level-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 2px 4px}
 .course-level-name{font-size:12px;font-weight:900;color:var(--t1);letter-spacing:.2px}
 .course-level-desc{font-size:10px;color:var(--t3);text-align:right}
-.course-card{background:var(--bg-card);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
+.course-card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
 .course-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lesson-color,var(--a));opacity:.75}
 .course-card::after{content:'';position:absolute;right:-42px;top:-48px;width:112px;height:112px;border-radius:50%;background:transparent;opacity:0;transition:opacity .25s,transform .25s}
 .course-card:hover::after{opacity:1;transform:scale(1.06)}
@@ -1817,7 +1817,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .level-pick-btn:hover{border-color:rgba(var(--ar),.32);color:var(--a);background:rgba(var(--ar),.08)}
 .level-pick-btn:active{transform:scale(.96)}
 .course-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(var(--ar),.11);color:var(--a)}
-.course-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.course-ico svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
 .course-info{min-width:0;flex:1}
 .course-title{font-size:14px;font-weight:850;color:var(--t1)}
 .course-sub{font-size:11px;color:var(--t2);line-height:1.35;margin-top:2px}
@@ -2242,7 +2242,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 
 /* ── Settings · quick toggles (Dark / Sound) ───────────────────── */
 .set-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.dl-toggle{background:transparent;border:1px solid var(--b1);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s;
+.dl-toggle{background:var(--bg-card);border:1px solid var(--border-ui);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s;
            display:flex;align-items:center;gap:10px;min-height:54px;min-width:0;cursor:pointer}
 .dl-toggle:active{background:var(--e2);transform:none}
 .dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1);flex:1;min-width:0;
@@ -2252,7 +2252,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .dl-switch{flex-shrink:0}
 
 /* ── Settings · language pickers ───────────────────────────────── */
-.lang-picker-btn{background:transparent;border:1px solid var(--b1);padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s}
+.lang-picker-btn{background:var(--bg-card);border:1px solid var(--border-ui);padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s}
 .lang-picker-btn:active{background:var(--e2)}
 .lang-picker-name{font-size:13px;font-weight:600;color:var(--t1)}
 .lang-picker-arr{color:var(--t3);font-size:14px;font-weight:300}
@@ -2292,7 +2292,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .sric-rem-dot{fill:var(--a);stroke:none}
 .srt{font-size:13px;font-weight:600;color:var(--t1)}
 .srs{font-size:11.5px;color:var(--t3);margin-top:2px}
-.slist{background:transparent;border:1px solid var(--b1);border-radius:12px;overflow:hidden}
+.slist{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:12px;overflow:hidden}
 
 /* ── Settings · premium breathing room ─────────────────────────────
    After hiding Interests + emptying the profile field the screen felt
@@ -2672,12 +2672,18 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:tr
 #s-progress .toefl-promo{text-align:center;padding:6px 2px 2px}
 #s-progress .toefl-promo-h{font-size:14.5px;font-weight:800;color:var(--t1);letter-spacing:.2px}
 #s-progress .toefl-promo-sub{font-size:12px;color:var(--t2);line-height:1.45;margin-top:6px}
+/* Secondary (outline) button — the default for non-primary actions
+   like "Open simulator". Transparent fill keeps screens uncluttered. */
 .toefl-cta-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;
-  padding:12px 16px;border:none;border-radius:var(--r2);background:var(--gb);color:#fff;
-  font-family:var(--f);font-size:13.5px;font-weight:800;letter-spacing:.2px;cursor:pointer;
-  box-shadow:none;transition:transform .15s,box-shadow .2s}
-.toefl-cta-btn:active{transform:scale(.97)}
+  padding:11px 16px;border:1px solid var(--color-primary);border-radius:var(--r2);background:transparent;color:var(--color-primary);
+  font-family:var(--f);font-size:13.5px;font-weight:700;letter-spacing:.2px;cursor:pointer;
+  box-shadow:none;transition:transform .15s,background .15s}
+.toefl-cta-btn:active{transform:scale(.97);background:rgba(var(--ar),.10)}
 .toefl-cta-btn svg{width:17px;height:17px;flex:none}
+/* Primary (solid) override — reserved for the single key action on the
+   screen: the CEFR level-up transition test. */
+.toefl-cta-btn.cefr-cta-btn{background:var(--color-primary);border-color:var(--color-primary);color:#fff;font-weight:800}
+.toefl-cta-btn.cefr-cta-btn:active{background:var(--color-primary)}
 
 /* Achievements button — flat with hairline border */
 #s-progress .ach-home-btn{background:var(--e1)!important;border:1px solid var(--b1)!important;
@@ -14715,18 +14721,18 @@ function updatePremiumUI(){
     const detailLine=[detailActive,untilText].filter(Boolean).join(' · ');
     const badgeLbl={ru:'АКТИВНА',en:'ACTIVE',es:'ACTIVA',pt:'ATIVA',de:'AKTIV',fr:'ACTIF',uk:'АКТИВНА',tr:'AKTİF',zh:'已激活',ar:'مُفعّل'}[lang]||'ACTIVE';
     banner.innerHTML=`
-      <div style="padding:14px 16px;background:var(--e2);border:1px solid var(--b1);border-radius:var(--r)">
+      <div style="padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r)">
         <div style="display:flex;align-items:center;gap:13px">
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;margin-bottom:2px">${subTitle}</div>
             <div style="font-size:12px;color:var(--t2);line-height:1.35">${detailLine}</div>
           </div>
-          <span class="premium-badge">${badgeLbl}</span>
+          <span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:8px;background:transparent;border:1px solid var(--color-primary);color:var(--color-primary);font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap">${badgeLbl}</span>
         </div>
       </div>`;
   } else {
     banner.innerHTML=`
-      <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--e1);border:1px solid var(--b1);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
           <div style="font-size:12px;color:var(--t2);line-height:1.35">${{ru:'ALEX Chat, модели и AI-разборы открываются после оплаты',en:'ALEX Chat, models and AI explanations unlock after payment',es:'ALEX Chat, modelos y explicaciones AI tras pagar',pt:'ALEX Chat, modelos e explicações AI após pagar'}[lang]||'ALEX Chat unlocks after payment'}</div>
