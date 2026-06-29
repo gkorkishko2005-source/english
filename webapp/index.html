@@ -276,22 +276,31 @@
 }
 /* Unified corner-radius scale — one tight family (16/14/12) so cards, buttons
    and chips share a consistent rounded-xl look across the whole app. */
-:root{--r:14px;--r2:14px;--r3:12px;--nav:64px;--safe:env(safe-area-inset-bottom,0px);--f:'Inter',-apple-system,sans-serif}
+:root{--r:14px;--r2:14px;--r3:12px;--nav:64px;
+  /* Telegram fullscreen safe areas — populated from JS (see syncTgInsets).
+     Defaults keep the layout correct outside Telegram / before init. */
+  --tg-safe-area-inset-top:0px;--tg-safe-area-inset-bottom:0px;
+  --tg-content-safe-area-inset-top:0px;--tg-content-safe-area-inset-bottom:0px;
+  /* Total top clearance: device notch/status bar + Telegram's own top UI. */
+  --safe-top:calc(var(--tg-safe-area-inset-top) + var(--tg-content-safe-area-inset-top));
+  /* Bottom clearance: home indicator (env) OR Telegram bottom UI, whichever is larger. */
+  --safe:max(env(safe-area-inset-bottom,0px), calc(var(--tg-safe-area-inset-bottom) + var(--tg-content-safe-area-inset-bottom)));
+  --f:'Inter',-apple-system,sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--e0);color:var(--t1);font-family:var(--f);font-size:15px;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;min-height:100vh;transition:background .3s,color .3s}
 
 /* ══ SHELL ══ */
-#app{width:100%;max-width:420px;height:100vh;display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--e0)}
+#app{width:100%;max-width:420px;height:var(--tg-viewport-stable-height,100dvh);display:flex;flex-direction:column;position:relative;overflow:hidden;background:var(--e0)}
 .screens{flex:1;overflow:hidden;position:relative}
-.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:20px 16px calc(var(--nav) + var(--safe) + 20px);display:none}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:calc(var(--safe-top) + 20px) 16px calc(var(--nav) + var(--safe) + 20px);display:none}
 .screen.active{display:block;animation:pg .25s ease}
 .screen::-webkit-scrollbar{width:0}
 #s-chat{padding:0}#s-chat.active{display:flex;flex-direction:column}
 @keyframes pg{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 /* ══ NAV ══ */
-nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(--safe) + 2px);background:var(--bg-card);border-top:1px solid var(--b1);display:grid;grid-template-columns:repeat(5,1fr);z-index:100}
+nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:calc(var(--safe) + 8px);background:var(--bg-card);border-top:1px solid var(--b1);display:grid;grid-template-columns:repeat(5,1fr);z-index:100}
 .ni{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:9px 0}
 .nic{width:34px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .2s cubic-bezier(.34,1.56,.64,1);position:relative}
 .nic svg{width:20px;height:20px;stroke:rgba(255,255,255,.65);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
@@ -496,7 +505,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
    tail (one rounded corner cut to 4px) but lose the heavy accent
    fill on user messages — a subtle tint reads as "yours" without
    shouting. */
-.chdr{padding:11px 14px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chdr{padding:calc(var(--safe-top) + 11px) 14px 11px;background:var(--bg);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .chtxt{display:flex;align-items:center;gap:7px;min-height:28px}
 .chnm{font-size:14.5px;font-weight:850;letter-spacing:.1px}
 .odot{width:6px;height:6px;border-radius:50%;background:var(--a2);opacity:.85}
@@ -630,7 +639,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 .examsim-cta-row{display:flex;gap:8px}
 .examsim-cta-row button{flex:1;border:1px solid rgba(var(--exam-r),.3);background:rgba(var(--exam-r),.08);color:var(--t1);border-radius:10px;padding:9px 8px;font-family:var(--f);font-size:12px;font-weight:850;cursor:pointer;transition:.15s}
 .examsim-cta-row button:active{transform:scale(.97);border-color:var(--exam)}
-.examsim{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000;background:#121214;background-color:#121214;isolation:isolate;overscroll-behavior:contain;display:none;flex-direction:column;animation:fadeIn .2s ease;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.examsim{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:2147483000;background:#121214;background-color:#121214;isolation:isolate;overscroll-behavior:contain;display:none;flex-direction:column;animation:fadeIn .2s ease;padding-top:max(env(safe-area-inset-top),var(--safe-top));padding-bottom:max(env(safe-area-inset-bottom),var(--safe))}
 .examsim.on,.examsim[style*="flex"]{display:flex}
 .examsim-top{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--b1)}
 .examsim-x{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--t2);font-size:16px;line-height:1;cursor:pointer}
@@ -1569,7 +1578,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe));padding-bottom:calc(var(
 /* ══ EMPTY STATE — better ══ */
 .emico-wrap{width:80px;height:80px;border-radius:24px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:float 3s ease-in-out infinite}
 .emico-wrap svg{width:40px;height:40px;stroke:var(--a);fill:none;stroke-width:1.5;stroke-linecap:round}
-@media(max-width:420px){body{display:block}#app{max-width:100%;height:100vh;border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
+@media(max-width:420px){body{display:block}#app{max-width:100%;height:var(--tg-viewport-stable-height,100dvh);border-radius:0;box-shadow:none}.notif,.toast{position:fixed}}
 @media(min-width:420px){body{background:#04060d}#app{height:min(820px,94vh);border-radius:20px;box-shadow:0 0 0 1px var(--b1),0 24px 64px rgba(0,0,0,.5)}.notif,.toast{position:absolute}.qb:hover{transform:translateY(-2px)}}
 
 /* ══ PREMIUM ══ */
@@ -3858,7 +3867,36 @@ const LANGS = {
 /* ══ CORE SETUP ══ */
 const tg  = window.Telegram?.WebApp;
 const API = window.API_URL || window.location.origin || 'https://english-production-f7af.up.railway.app';
-if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117'); }
+
+/* Telegram does NOT auto-inject CSS variables for the viewport height or the
+   fullscreen safe areas — we read them from the WebApp object and mirror them
+   onto :root so the layout (--safe-top, --safe, #app height) reacts in real
+   time. Wrapped in try/catch because older Telegram clients lack these fields. */
+function syncTgInsets(){
+  if(!tg) return;
+  const root=document.documentElement;
+  try{
+    const vh=tg.viewportStableHeight||tg.viewportHeight;
+    if(vh)root.style.setProperty('--tg-viewport-stable-height', vh+'px');
+  }catch(_){}
+  try{
+    const sa=tg.safeAreaInset||{};
+    root.style.setProperty('--tg-safe-area-inset-top', (sa.top||0)+'px');
+    root.style.setProperty('--tg-safe-area-inset-bottom', (sa.bottom||0)+'px');
+  }catch(_){}
+  try{
+    const ca=tg.contentSafeAreaInset||{};
+    root.style.setProperty('--tg-content-safe-area-inset-top', (ca.top||0)+'px');
+    root.style.setProperty('--tg-content-safe-area-inset-bottom', (ca.bottom||0)+'px');
+  }catch(_){}
+}
+if(tg){
+  tg.ready(); tg.expand(); tg.setHeaderColor('#0d1117'); tg.setBackgroundColor('#0d1117');
+  syncTgInsets();
+  ['viewportChanged','safeAreaChanged','contentSafeAreaChanged','fullscreenChanged'].forEach(function(ev){
+    try{ tg.onEvent(ev, syncTgInsets); }catch(_){}
+  });
+}
 
 const _LS_MEM = {};
 const LS = {
