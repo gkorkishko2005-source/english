@@ -1228,13 +1228,6 @@ async def cmd_start(message: Message):
         pass
     ru = lang == "ru"
 
-    tier = "free"
-    try:
-        tier = await get_access_tier(uid)
-    except Exception:
-        pass
-    is_prem = tier != "free"
-    tier_label = {"basic": "Basic", "pro": "Pro", "ultimate": "Ultimate"}.get(tier, "Premium")
     greet = _greeting_by_time(ru)
 
     # The referral reward now grants the inviter real Premium days (capped
@@ -1255,38 +1248,29 @@ async def cmd_start(message: Message):
                         else "\n\nReferral bonus: your friend gets +150 XP, you get +50 XP.")
     name_html = html.escape(name, quote=False)
     handle = channel_handle() or "@polyglotty_daily"
-    # Clean, restrained onboarding copy. The ONLY control on screen is the
-    # native Telegram Mini App menu button ("🤖 Открыть PolyGlotty") at the
-    # bottom — no inline buttons, no reply keyboard. ReplyKeyboardRemove clears
-    # any keyboard left over from an older session/version.
+    # Short, official onboarding copy. The ONLY control is the native Telegram
+    # Mini App menu button ("Open App") at the bottom — no inline buttons and no
+    # duplicate reply keyboard. ReplyKeyboardRemove clears any stale keyboard
+    # left over from an older session/version.
     if ru:
-        cta = (f"Ваш план <b>{tier_label}</b> активен. Чтобы продолжить обучение, "
-               f"нажмите кнопку «Открыть PolyGlotty» внизу экрана." if is_prem
-               else "Для активации ассистента и перехода к обучению нажмите "
-                    "кнопку «Открыть PolyGlotty» внизу экрана.")
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
-            f"PolyGlotty — это интерактивная платформа для изучения английского "
-            f"языка. Вам доступны комплексные программы обучения от уровня A0 до C2, "
-            f"персональный ИИ-ассистент ALEX для языковой практики, симуляторы "
-            f"экзаменов TOEFL/IELTS, а также система умных карточек для запоминания слов.\n\n"
-            f"{cta}\n\n"
-            f"Официальный канал проекта: {handle}"
+            f"PolyGlotty — интерактивный AI-репетитор английского языка в Telegram. "
+            f"Вам доступны программы обучения A0–C2, персональный чат с ассистентом "
+            f"ALEX, симуляторы TOEFL/IELTS и умные карточки.\n\n"
+            f"Для начала обучения нажмите кнопку «Open App» (Открыть приложение) "
+            f"на панели управления ниже.\n\n"
+            f"Наш официальный канал: {handle}"
             f"{ref_line}"
         )
     else:
-        cta = (f"Your <b>{tier_label}</b> plan is active. To continue learning, "
-               f"tap the “Open PolyGlotty” button at the bottom of the screen." if is_prem
-               else "To activate the assistant and start learning, tap the "
-                    "“Open PolyGlotty” button at the bottom of the screen.")
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
-            f"PolyGlotty is an interactive platform for learning English. You have "
-            f"access to comprehensive learning programs from A0 to C2, ALEX — your "
-            f"personal AI assistant for language practice, TOEFL/IELTS exam "
-            f"simulators, and a smart flashcard system for memorising vocabulary.\n\n"
-            f"{cta}\n\n"
-            f"Official project channel: {handle}"
+            f"PolyGlotty is an interactive AI English tutor inside Telegram. You have "
+            f"access to A0–C2 learning programs, a personal chat with the ALEX "
+            f"assistant, TOEFL/IELTS simulators and smart flashcards.\n\n"
+            f"To start learning, tap the “Open App” button on the control panel below.\n\n"
+            f"Our official channel: {handle}"
             f"{ref_line}"
         )
     await message.answer(text, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
@@ -1316,11 +1300,6 @@ async def cb_quick_menu(cb: CallbackQuery):
         await cb.message.answer(f"{ICON['test']} <b>Тесты</b>" if ru else f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
         await send_support_prompt(cb.message, uid)
-    elif action == "grid":
-        await cb.message.answer(
-            "Все функции — на клавиатуре ниже." if ru else "All features are on the keyboard below.",
-            reply_markup=main_kb(lang),
-        )
     else:  # "menu" — the collapsed sections from /start
         menu = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
@@ -1329,7 +1308,6 @@ async def cb_quick_menu(cb: CallbackQuery):
              InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
             [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
              InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
-            [InlineKeyboardButton(text="⌨️ Все функции" if ru else "⌨️ All features", callback_data="quick_grid")],
         ])
         await cb.message.answer(
             "<b>📋 Меню</b>\nВыбери раздел — или жми «Открыть приложение» для полного курса."
