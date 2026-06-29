@@ -22,7 +22,7 @@ from aiogram.types import (
     InlineKeyboardButton, InlineKeyboardMarkup,
     InlineQuery, InlineQueryResultArticle, InputTextMessageContent,
     KeyboardButton, MenuButtonWebApp, Message,
-    PhotoSize, ReplyKeyboardMarkup, Voice,
+    PhotoSize, ReplyKeyboardMarkup, ReplyKeyboardRemove, Voice,
     WebAppInfo,
 )
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -1122,7 +1122,7 @@ async def setup_bot_profile():
         await bot.set_my_commands(commands_en)
         await bot.set_my_commands(commands_ru, language_code="ru")
         if app_url:
-            await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="🤖 PolyGlotty", web_app=WebAppInfo(url=app_url)))
+            await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="🤖 Открыть PolyGlotty", web_app=WebAppInfo(url=app_url)))
         logger.info("Bot profile metadata updated")
     except Exception as e:
         logger.warning(f"setup_bot_profile failed: {e}")
@@ -1228,43 +1228,12 @@ async def cmd_start(message: Message):
         pass
     ru = lang == "ru"
 
-    # WebApp button
-    app_url = webapp_url()
-
-    # Newcomers were overwhelmed by ~10 buttons on the very first screen.
-    # The greeting now shows ONE large call-to-action (Open App), with
-    # everything else collapsed behind a single "📋 Меню" button. Channel
-    # and Rules sit at the bottom as low-emphasis secondary links.
-    kb_buttons = []
-    if app_url:
-        kb_buttons.append([InlineKeyboardButton(
-            text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-            web_app=WebAppInfo(url=app_url)
-        )])
-    kb_buttons.append([InlineKeyboardButton(
-        text=f"{ICON['menu']} Меню" if ru else f"{ICON['menu']} Menu",
-        callback_data="quick_menu"
-    )])
-    kb_buttons.append([
-        InlineKeyboardButton(
-            text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
-            url=channel_url()
-        ),
-        InlineKeyboardButton(
-            text="📜 Правила" if ru else "📜 Rules",
-            callback_data="open_terms"
-        ),
-    ])
-
-    welcome_kb = InlineKeyboardMarkup(inline_keyboard=kb_buttons)
-
     tier = "free"
     try:
         tier = await get_access_tier(uid)
     except Exception:
         pass
     is_prem = tier != "free"
-    badge = " ⭐️" if is_prem else ""
     tier_label = {"basic": "Basic", "pro": "Pro", "ultimate": "Ultimate"}.get(tier, "Premium")
     greet = _greeting_by_time(ru)
 
@@ -1276,47 +1245,51 @@ async def cmd_start(message: Message):
         _days = int(ref_result.get("premium_days") or 0)
         _cred = int(ref_result.get("credits") or 0)
         if _days > 0:
-            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и {_days} дн. Premium, тебе +50 XP." if ru
+            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и {_days} дн. Premium, вам +50 XP." if ru
                         else f"\n\nReferral bonus: your friend gets +150 XP and {_days} days of Premium, you get +50 XP.")
         elif _cred > 0:
-            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и +{_cred} кредита ALEX, тебе +50 XP." if ru
+            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и +{_cred} кредита ALEX, вам +50 XP." if ru
                         else f"\n\nReferral bonus: your friend gets +150 XP and +{_cred} ALEX credits, you get +50 XP.")
         else:
-            ref_line = ("\n\nБонус за приглашение: другу +150 XP, тебе +50 XP." if ru
+            ref_line = ("\n\nБонус за приглашение: другу +150 XP, вам +50 XP." if ru
                         else "\n\nReferral bonus: your friend gets +150 XP, you get +50 XP.")
     name_html = html.escape(name, quote=False)
-    channel_link = html_link(channel_url(), "канал со словами дня", bold=True) if ru else html_link(channel_url(), "daily words channel", bold=True)
-    # Subscribers get a warm "welcome back" that names their plan; free users
-    # get the product pitch + channel link. Greeting is time-of-day aware.
-    if is_prem:
+    handle = channel_handle() or "@polyglotty_daily"
+    # Clean, restrained onboarding copy. The ONLY control on screen is the
+    # native Telegram Mini App menu button ("🤖 Открыть PolyGlotty") at the
+    # bottom — no inline buttons, no reply keyboard. ReplyKeyboardRemove clears
+    # any keyboard left over from an older session/version.
+    if ru:
+        cta = (f"Ваш план <b>{tier_label}</b> активен. Чтобы продолжить обучение, "
+               f"нажмите кнопку «Открыть PolyGlotty» внизу экрана." if is_prem
+               else "Для активации ассистента и перехода к обучению нажмите "
+                    "кнопку «Открыть PolyGlotty» внизу экрана.")
         text = (
-            f"<b>{greet}, {name_html}!</b>{badge}\n\n"
-            f"С возвращением. Твой план <b>{tier_label}</b> активен — "
-            f"курс A0–C2, экзамены, расширенные карточки и чат с ALEX без лишних лимитов.\n\n"
-            f"Жми <b>«Открыть приложение»</b> и продолжай с того места, где остановился."
-            f"{ref_line}"
-        ) if ru else (
-            f"<b>{greet}, {name_html}!</b>{badge}\n\n"
-            f"Welcome back. Your <b>{tier_label}</b> plan is active — "
-            f"the full A0–C2 course, exams, expanded cards and ALEX chat without the usual limits.\n\n"
-            f"Tap <b>“Open App”</b> and pick up where you left off."
+            f"<b>{greet}, {name_html}!</b>\n\n"
+            f"PolyGlotty — это интерактивная платформа для изучения английского "
+            f"языка. Вам доступны комплексные программы обучения от уровня A0 до C2, "
+            f"персональный ИИ-ассистент ALEX для языковой практики, симуляторы "
+            f"экзаменов TOEFL/IELTS, а также система умных карточек для запоминания слов.\n\n"
+            f"{cta}\n\n"
+            f"Официальный канал проекта: {handle}"
             f"{ref_line}"
         )
     else:
+        cta = (f"Your <b>{tier_label}</b> plan is active. To continue learning, "
+               f"tap the “Open PolyGlotty” button at the bottom of the screen." if is_prem
+               else "To activate the assistant and start learning, tap the "
+                    "“Open PolyGlotty” button at the bottom of the screen.")
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
-            f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram: курс A0–C2, "
-            f"карточки, экзамены и живой чат с ALEX.\n\n"
-            f"Жми <b>«Открыть приложение»</b> — и за дело. Слова дня — в {channel_link}."
-            f"{ref_line}"
-        ) if ru else (
-            f"<b>{greet}, {name_html}!</b>\n\n"
-            f"<b>PolyGlotty</b> — an AI English tutor in Telegram: A0–C2 course, "
-            f"flashcards, exam prep and a live ALEX chat.\n\n"
-            f"Tap <b>“Open App”</b> to begin. Daily words live in the {channel_link}."
+            f"PolyGlotty is an interactive platform for learning English. You have "
+            f"access to comprehensive learning programs from A0 to C2, ALEX — your "
+            f"personal AI assistant for language practice, TOEFL/IELTS exam "
+            f"simulators, and a smart flashcard system for memorising vocabulary.\n\n"
+            f"{cta}\n\n"
+            f"Official project channel: {handle}"
             f"{ref_line}"
         )
-    await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+    await message.answer(text, parse_mode="HTML", reply_markup=ReplyKeyboardRemove())
 
 @dp.message(Command("menu"))
 async def cmd_menu(message: Message):
