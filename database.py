@@ -108,6 +108,8 @@ CREATE TABLE IF NOT EXISTS users (
     platform_until      TIMESTAMPTZ,
     platform_lifetime   BOOLEAN DEFAULT FALSE,
     chat_credits        INTEGER DEFAULT 0,
+    free_credits        INTEGER DEFAULT 0,
+    free_credits_date   TEXT DEFAULT '',
     grandfathered_tier  TEXT DEFAULT '',
     sub_exp_notified    TEXT DEFAULT '',
     ref_by          BIGINT,
@@ -365,6 +367,7 @@ CREATE TABLE IF NOT EXISTS users (
     premium_until TEXT, premium_tier TEXT DEFAULT '',
     platform_until TEXT, platform_lifetime INTEGER DEFAULT 0,
     chat_credits INTEGER DEFAULT 0, grandfathered_tier TEXT DEFAULT '',
+    free_credits INTEGER DEFAULT 0, free_credits_date TEXT DEFAULT '',
     sub_exp_notified TEXT DEFAULT '',
     ref_by INTEGER, referrals INTEGER DEFAULT 0, ref_premium_days INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
@@ -528,6 +531,12 @@ async def db_init():
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS ai_req_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN ai_req_date TEXT DEFAULT ''",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_today INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_today INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS cards_done_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN cards_done_date TEXT DEFAULT ''",
+        # Free-tier ALEX wallet: a small daily-replenishing credit pool (separate
+        # from the prepaid `chat_credits`). +FREE_CREDITS_DAILY at UTC 00:00,
+        # capped at FREE_CREDITS_CAP, settled lazily (no nightly cron). 1 credit =
+        # 1 free Gemini reply. NEVER mixed with purchased credits.
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS free_credits INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN free_credits INTEGER DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS free_credits_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN free_credits_date TEXT DEFAULT ''",
     ]
     for stmt in migrations:
         try:
@@ -1620,6 +1629,98 @@ async def bump_daily_ai(uid: int) -> dict:
     await db("UPDATE users SET ai_req_today=?, ai_req_date=? WHERE uid=?", new, today, uid)
     remaining = max(0, cap - new)
     return {"used": new, "limit": cap, "remaining": remaining, "reset_in": reset_in}
+
+
+# ── FREE DAILY CREDITS (ALEX free-tier wallet) ────────────────────────────────
+# Free users get a tiny *credit balance* (not a request counter): +FREE_CREDITS_DAILY
+# topped up at UTC 00:00, accumulating up to FREE_CREDITS_CAP. One free Gemini reply
+# costs 1 credit. This is a SEPARATE bucket from the prepaid `chat_credits` wallet —
+# purchased credits never expire and are never capped at 10. Like every other daily
+# limit here, the grant is settled LAZILY on first touch of a new UTC day (no nightly
+# cron mass-UPDATE): a stored date that is not today triggers a top-up of
+# FREE_CREDITS_DAILY per elapsed day, clamped to the cap.
+async def _free_credits_cfg() -> tuple[int, int]:
+    """(daily_grant, cap) for the free ALEX credit wallet — owner-tunable, no deploy."""
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        daily = max(0, int(cfg.get("FREE_CREDITS_DAILY", 2) or 0))
+        cap = max(0, int(cfg.get("FREE_CREDITS_CAP", 10) or 0))
+        return daily, cap
+    except Exception:
+        return 2, 10
+
+
+def _days_between(d1: str, d2: str) -> int:
+    """Whole UTC days from YYYYMMDD `d1` → `d2` (clamped ≥ 0). 0 if d1 is empty
+    or either side is unparseable."""
+    if not d1:
+        return 0
+    from datetime import datetime, timezone
+    try:
+        a = datetime.strptime(d1, "%Y%m%d").replace(tzinfo=timezone.utc)
+        b = datetime.strptime(d2, "%Y%m%d").replace(tzinfo=timezone.utc)
+        return max(0, (b - a).days)
+    except Exception:
+        return 0
+
+
+async def _grant_free_credits(uid: int) -> dict:
+    """Apply any due daily free-credit grant (lazy, UTC-day boundary) and return
+    {balance, cap, daily, reset_in}. On the first touch of a new UTC day the wallet
+    is topped up by `daily` per elapsed day, clamped to `cap`. Brand-new users (no
+    stored date) receive one day's grant. Idempotent within the same UTC day."""
+    daily, cap = await _free_credits_cfg()
+    reset_in = _secs_to_utc_midnight()
+    today = _utc_day_str()
+    u = await get_user(uid)
+    if not u:
+        return {"balance": 0, "cap": cap, "daily": daily, "reset_in": reset_in}
+    bal = max(0, int(u.get("free_credits") or 0))
+    last = str(u.get("free_credits_date") or "")
+    if last == today:
+        return {"balance": min(bal, cap), "cap": cap, "daily": daily, "reset_in": reset_in}
+    days = _days_between(last, today) if last else 1
+    days = max(1, days)
+    new_bal = min(cap, bal + daily * days)
+    await db("UPDATE users SET free_credits=?, free_credits_date=? WHERE uid=?",
+             new_bal, today, uid)
+    return {"balance": new_bal, "cap": cap, "daily": daily, "reset_in": reset_in}
+
+
+async def get_free_credits_state(uid: int) -> dict:
+    """Read the free ALEX wallet, applying any due daily grant first.
+    {balance, cap, daily, reset_in}."""
+    return await _grant_free_credits(uid)
+
+
+async def spend_free_credit(uid: int, amount: int = 1) -> dict:
+    """Apply any due daily grant, then atomically spend `amount` free credits.
+    Returns {ok, balance, cap, reset_in}. ok=False with NO debit if the balance is
+    too low (the `free_credits>=amount` guard makes the balance impossible to drive
+    negative even under concurrent spends)."""
+    st = await _grant_free_credits(uid)
+    reset_in = st["reset_in"]
+    cap = st["cap"]
+    amount = max(1, int(amount))
+    if int(st["balance"]) < amount:
+        return {"ok": False, "balance": int(st["balance"]), "cap": cap, "reset_in": reset_in}
+    if USE_POSTGRES:
+        row = await db(
+            "UPDATE users SET free_credits=free_credits-? "
+            "WHERE uid=? AND free_credits>=? RETURNING free_credits",
+            amount, uid, amount, fetch="one")
+        if not row:
+            return {"ok": False, "balance": int(st["balance"]), "cap": cap, "reset_in": reset_in}
+        bal = max(0, int(row.get("free_credits") or 0))
+    else:
+        await db("UPDATE users SET free_credits=free_credits-? WHERE uid=? AND free_credits>=?",
+                 amount, uid, amount)
+        u2 = await get_user(uid) or {}
+        bal = max(0, int(u2.get("free_credits") or 0))
+        if bal != int(st["balance"]) - amount:
+            return {"ok": False, "balance": bal, "cap": cap, "reset_in": reset_in}
+    return {"ok": True, "balance": bal, "cap": cap, "reset_in": reset_in}
 
 
 # ── DAILY FLASHCARD LIMIT (economy guard, BOTH tiers) ─────────────────────────

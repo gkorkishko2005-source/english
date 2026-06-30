@@ -673,10 +673,12 @@ async def handle_chat(request):
     if route_openrouter or route_deepseek or route_gemini:
         free_provider = ("openrouter" if route_openrouter
                          else "deepseek" if route_deepseek else "gemini")
-        # Free users are NOT charged credits and do NOT touch the Anthropic
-        # billing machinery. They are bounded by: (a) a burst gap, (b) a per-user
-        # daily cap (anti-drain on the shared AI key) and (c) the upstream
-        # provider quota (surfaced via the rate-limit guard below).
+        # FREE TIER — Gemini-only, never Claude. Bounded by: (a) a burst gap,
+        # (b) a daily-replenishing CREDIT wallet (+FREE_CREDITS_DAILY at UTC 00:00,
+        # capped, 1 credit / reply) and (c) a server-side context-size guard. A
+        # transient provider failure is NEVER surfaced as a 503 — we fall back
+        # across any other configured free provider and, only if all fail, return
+        # a calm "try again" card WITHOUT spending a credit.
         if uid and uid not in ADMIN_IDS:
             import time as _time
             now_ts = _time.time()
@@ -692,92 +694,141 @@ async def handle_chat(request):
                 return web.json_response({"reply": slow_map.get(lang, f"⏳ Slow down — wait {wait} s.")},
                                          headers={"Access-Control-Allow-Origin":"*"})
             _last_msg_ts[uid] = now_ts
-            # Per-user daily free-AI cap (UTC-day, lazy reset). Block the (N+1)-th
-            # message with HTTP 429 + a paywall card BEFORE spending any AI quota.
+            # Free-credit balance gate (UTC-day grant applied lazily inside the
+            # read). Block at 0 with a paywall card BEFORE any API call — and
+            # BEFORE charging, so a blocked turn is always free.
             try:
-                from database import get_daily_ai_state
-                ai_state = await get_daily_ai_state(uid)
-                if ai_state.get("remaining", 0) <= 0:
+                from database import get_free_credits_state
+                fc = await get_free_credits_state(uid)
+                if int(fc.get("balance", 0)) <= 0:
                     from ai_router import ai_daily_limit_message
                     return web.json_response(
                         {"reply": ai_daily_limit_message(lang), "limit": True,
                          "free_ai_limit": True, "daily_ai_limit": True,
-                         "used": ai_state.get("used"), "ai_limit": ai_state.get("limit"),
-                         "remaining_requests": 0, "reset_in": ai_state.get("reset_in")},
+                         "free_credits": 0, "free_credits_cap": fc.get("cap"),
+                         "remaining_requests": 0, "reset_in": fc.get("reset_in")},
                         status=429, headers={"Access-Control-Allow-Origin":"*"})
             except Exception as e:
-                logger.warning("daily AI limit check failed uid=%s: %s", uid, e)
+                logger.warning("free-credit gate check failed uid=%s: %s", uid, e)
         # History (same depth as the Anthropic free tier).
         h = _histories.setdefault(uid, [])
         h.append({"role": "user", "content": message})
         free_hist = int(TIER_ECONOMY["free"]["history"])
         if len(h) > free_hist:
             _histories[uid] = h[-free_hist:]
-        g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
+        # ── Server-side context-size validation (anti-drain on the shared key) ──
+        # Trim oldest turns until the whole prompt (system + history) fits the
+        # configured char budget; if a SINGLE message still blows the budget,
+        # refuse politely without spending a credit.
         try:
-            from ai_router import (gemini_generate, gemini_free_limit_message,
-                                    GeminiRateLimit, deepseek_generate,
-                                    openrouter_generate)
-            if route_openrouter:
-                result = await openrouter_generate(system, _histories[uid], g_max)
-                prov_tag, prov_label = "openrouter", "Powered by OpenRouter"
-            elif route_deepseek:
-                result = await deepseek_generate(system, _histories[uid], g_max)
-                prov_tag, prov_label = "deepseek", "Powered by DeepSeek"
-            else:
-                result = await gemini_generate(system, _histories[uid], g_max)
-                prov_tag, prov_label = "gemini", "Powered by Gemini"
-            reply = (result.get("text") or "").strip()
-            reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
-            if not reply:
-                try: _histories[uid].pop()
-                except Exception: pass
-                return web.json_response({"error": "Empty AI reply"}, status=502,
-                                         headers={"Access-Control-Allow-Origin":"*"})
-            _histories[uid].append({"role": "assistant", "content": reply})
-            # Count this successful free message against the daily cap (failed or
-            # blocked requests stay free — bump only happens on a real reply). The
-            # bump returns the fresh server-side state so we can echo the live
-            # remaining count back to the Mini App (no client clock involved).
-            ai_remaining = None
-            ai_used = None
-            ai_cap = None
-            if uid and uid not in ADMIN_IDS:
-                try:
-                    from database import bump_daily_ai
-                    st = await bump_daily_ai(uid)
-                    ai_remaining = st.get("remaining")
-                    ai_used = st.get("used")
-                    ai_cap = st.get("limit")
-                except Exception as e:
-                    logger.warning("bump_daily_ai failed uid=%s: %s", uid, e)
-            if uid:
-                try:
-                    from database import log_session
-                    await log_session(uid, "webapp_chat")
-                except Exception:
-                    pass
-            resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label}
-            if ai_remaining is not None:
-                resp["remaining_requests"] = ai_remaining
-                resp["used"] = ai_used
-                resp["ai_limit"] = ai_cap
-            return web.json_response(resp, headers={"Access-Control-Allow-Origin":"*"})
-        except GeminiRateLimit:
-            # Upstream provider quota hit (Gemini OR DeepSeek — DeepSeekRateLimit
-            # subclasses GeminiRateLimit). Friendly card, NOT a crash. Drop the
-            # user turn we just appended so the conversation history stays clean.
-            try: _histories[uid].pop()
+            from billing_config import load_config as _load_cfg
+            _fcfg = await _load_cfg()
+            max_chars = max(1000, int(_fcfg.get("FREE_AI_MAX_CHARS", 6000) or 6000))
+        except Exception:
+            max_chars = 6000
+        convo = _histories[uid]
+        def _ctx_chars():
+            return len(system) + sum(len(str(m.get("content") or "")) for m in convo)
+        while len(convo) > 1 and _ctx_chars() > max_chars:
+            convo.pop(0)
+        _histories[uid] = convo
+        if _ctx_chars() > max_chars:
+            try: convo.pop()   # drop the oversized user turn; keep history clean
             except Exception: pass
+            big_map = {
+                "ru": "✂️ Сообщение слишком длинное для бесплатного чата. Сократи его или подключи Premium.",
+                "en": "✂️ That message is too long for free chat. Please shorten it, or go Premium.",
+                "es": "✂️ Ese mensaje es demasiado largo para el chat gratis. Acórtalo o pásate a Premium.",
+                "pt": "✂️ Essa mensagem é longa demais para o chat grátis. Encurte-a ou assine o Premium.",
+            }
             return web.json_response(
-                {"reply": gemini_free_limit_message(lang), "limit": True, "free_ai_limit": True},
+                {"reply": big_map.get(lang, big_map["en"]), "context_too_large": True},
                 headers={"Access-Control-Allow-Origin":"*"})
-        except Exception as e:
-            logger.warning("%s generate failed uid=%s: %s", free_provider, uid, e)
+        g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
+        # Build the attempt order: the routed provider first, then any OTHER
+        # configured free provider as a fallback (so a single upstream blip can't
+        # break free chat). Production runs OpenRouter-only → order == [openrouter].
+        from ai_router import (gemini_generate, gemini_free_limit_message,
+                               ai_busy_message, GeminiRateLimit, deepseek_generate,
+                               openrouter_generate, should_use_openrouter,
+                               should_use_deepseek, should_use_gemini)
+        _GEN = {"openrouter": openrouter_generate, "deepseek": deepseek_generate,
+                "gemini": gemini_generate}
+        _LABEL = {"openrouter": ("openrouter", "Powered by OpenRouter"),
+                  "deepseek": ("deepseek", "Powered by DeepSeek"),
+                  "gemini": ("gemini", "Powered by Gemini")}
+        order = [free_provider]
+        for _name, _chk in (("openrouter", should_use_openrouter),
+                            ("deepseek", should_use_deepseek),
+                            ("gemini", should_use_gemini)):
+            try:
+                if _name not in order and _chk(is_paid):
+                    order.append(_name)
+            except Exception:
+                pass
+        reply = ""
+        prov_tag = prov_label = None
+        all_rate_limited = True
+        for _name in order:
+            try:
+                result = await _GEN[_name](system, _histories[uid], g_max)
+                r = (result.get("text") or "").strip()
+                r = re.sub(r"\n[ \t]*\n+", "\n", r)
+                if not r:
+                    all_rate_limited = False
+                    continue
+                reply = r
+                prov_tag, prov_label = _LABEL[_name]
+                break
+            except GeminiRateLimit:
+                # Provider quota hit — try the next configured fallback, if any.
+                continue
+            except Exception as e:
+                all_rate_limited = False
+                logger.warning("%s generate failed uid=%s: %s", _name, uid, e)
+                continue
+        if not reply:
+            # Nothing produced a reply. Drop the user turn (keep history clean) and
+            # DO NOT charge. Rate-limit → upstream-quota card; otherwise a calm
+            # retry card (never a 503).
             try: _histories[uid].pop()
             except Exception: pass
-            return web.json_response({"error": "AI temporarily unavailable. Please try again."},
-                                     status=503, headers={"Access-Control-Allow-Origin":"*"})
+            if all_rate_limited:
+                return web.json_response(
+                    {"reply": gemini_free_limit_message(lang), "limit": True, "free_ai_limit": True},
+                    headers={"Access-Control-Allow-Origin":"*"})
+            return web.json_response({"reply": ai_busy_message(lang)},
+                                     headers={"Access-Control-Allow-Origin":"*"})
+        _histories[uid].append({"role": "assistant", "content": reply})
+        # Charge exactly 1 free credit on a successful reply (failed/blocked turns
+        # stay free). The atomic spend returns the fresh wallet so we can echo the
+        # live balance back to the Mini App (no client clock involved).
+        fc_balance = fc_cap = fc_reset = None
+        if uid and uid not in ADMIN_IDS:
+            try:
+                from database import spend_free_credit
+                sp = await spend_free_credit(uid, 1)
+                fc_balance = sp.get("balance")
+                fc_cap = sp.get("cap")
+                fc_reset = sp.get("reset_in")
+            except Exception as e:
+                logger.warning("spend_free_credit failed uid=%s: %s", uid, e)
+        if uid:
+            try:
+                from database import log_session
+                await log_session(uid, "webapp_chat")
+            except Exception:
+                pass
+        resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label}
+        if fc_balance is not None:
+            resp["free_credits"] = fc_balance
+            resp["free_credits_cap"] = fc_cap
+            resp["remaining_requests"] = fc_balance   # legacy field the client reads
+            if fc_cap is not None:
+                resp["used"] = max(0, int(fc_cap) - int(fc_balance))
+                resp["ai_limit"] = fc_cap
+            resp["reset_in"] = fc_reset
+        return web.json_response(resp, headers={"Access-Control-Allow-Origin":"*"})
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
@@ -1275,6 +1326,14 @@ async def handle_check_premium(request):
             cards = await get_daily_cards_state(uid, kind != "none")
         except Exception:
             cards = {"used":0,"limit":(60 if kind!="none" else 15),"remaining":(60 if kind!="none" else 15),"reset_in":0,"is_premium":(kind!="none")}
+        # Free ALEX credit wallet piggy-backs too (applies the daily UTC grant on
+        # read), so the chat header can show today's remaining free messages
+        # without a separate round-trip. Paid users ignore it.
+        try:
+            from database import get_free_credits_state
+            free_wallet = await get_free_credits_state(uid)
+        except Exception:
+            free_wallet = {"balance":0,"cap":10,"daily":2,"reset_in":0}
         info = {
             **legacy,
             "platform_active": platform.get("active", False),
@@ -1286,6 +1345,7 @@ async def handle_check_premium(request):
             "hearts": hearts,
             "lessons": lessons,
             "cards": cards,
+            "free_credits": free_wallet,
             "source": "database",
         }
         return web.json_response(info, headers={"Access-Control-Allow-Origin":"*"})

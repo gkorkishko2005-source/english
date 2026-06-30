@@ -109,6 +109,16 @@ _DEFAULTS = {
     # "come back tomorrow / go Premium" card. Premium users go to Claude and are
     # NOT metered here. Tunable live (BILLING_AI_FREE_DAILY), no deploy.
     "AI_FREE_DAILY": 4,                # free ALEX messages/day before paywall
+    # ── Free ALEX credit wallet (daily-replenishing, Gemini-only) ───────
+    # Free users get a tiny CREDIT balance instead of a raw request counter:
+    # +FREE_CREDITS_DAILY topped up at UTC 00:00, accumulating up to
+    # FREE_CREDITS_CAP. One free Gemini reply costs 1 credit. Separate bucket
+    # from prepaid `chat_credits` (which never expire / are never capped here).
+    # FREE_AI_MAX_CHARS bounds the prompt (system + trimmed history + message)
+    # a free reply may carry, so a single huge message can't burn the shared key.
+    "FREE_CREDITS_DAILY": 2,           # credits granted each UTC day
+    "FREE_CREDITS_CAP": 10,            # max accumulated free credits
+    "FREE_AI_MAX_CHARS": 6000,         # server-side context-size cap for free chat
     # ── Daily flashcard limit (economy guard, both tiers) ──────────────
     # Number of flashcards a user may COMPLETE (Skip or Save) per UTC day.
     # Free users hit a hard wall → paywall. Premium users hit a softer cap
@@ -153,6 +163,9 @@ _ENV_SCALARS = {
     "BILLING_HEARTS_REFILL_STARS": ("HEARTS_REFILL_STARS", int),
     "BILLING_LESSONS_FREE_DAILY": ("LESSONS_FREE_DAILY", int),
     "BILLING_AI_FREE_DAILY": ("AI_FREE_DAILY", int),
+    "BILLING_FREE_CREDITS_DAILY": ("FREE_CREDITS_DAILY", int),
+    "BILLING_FREE_CREDITS_CAP": ("FREE_CREDITS_CAP", int),
+    "BILLING_FREE_AI_MAX_CHARS": ("FREE_AI_MAX_CHARS", int),
     "BILLING_CARDS_FREE_DAILY": ("CARDS_FREE_DAILY", int),
     "BILLING_CARDS_PREMIUM_DAILY": ("CARDS_PREMIUM_DAILY", int),
 }

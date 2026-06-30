@@ -1669,6 +1669,78 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .prem-info-foot b{color:var(--t2);font-weight:600}
 
 /* ══════════════════════════════════════════════════════════════════
+   NATIVE PREMIUM SCREEN (Telegram Business / Premium style)
+   Round animated icon → title → benefits → radio plan selector →
+   interactive feature list (micro-demo popups) → gradient buy button.
+   ══════════════════════════════════════════════════════════════════ */
+.pn-wrap{padding:6px 18px 4px;text-align:center}
+.pn-icon{width:78px;height:78px;margin:8px auto 14px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#2ea6ff,#7c5cff 70%,#a14bff);
+  box-shadow:0 10px 26px rgba(110,90,255,.42),inset 0 1px 2px rgba(255,255,255,.35);
+  animation:pnFloat 3.4s ease-in-out infinite}
+.pn-icon svg{width:40px;height:40px;fill:#fff;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
+@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pn-h1{font-size:23px;font-weight:950;letter-spacing:-.3px;margin:0 0 6px;color:var(--t1)}
+.pn-h1 b{background:linear-gradient(95deg,#2ea6ff,#a14bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pn-desc{font-size:12.5px;line-height:1.5;color:var(--t2);max-width:300px;margin:0 auto 16px}
+/* ── Radio plan selector ── */
+.pn-plans{display:flex;flex-direction:column;gap:9px;padding:0 18px 4px;text-align:left}
+.pn-plan{position:relative;display:flex;align-items:center;gap:12px;
+  background:var(--e1);border:1.5px solid var(--b1);border-radius:14px;
+  padding:13px 15px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
+.pn-plan:active{transform:scale(.99)}
+.pn-plan.sel{border-color:#2ea6ff;background:rgba(46,166,255,.07)}
+.pn-radio{flex:0 0 auto;width:21px;height:21px;border-radius:50%;
+  border:2px solid var(--t3);position:relative;transition:border-color .15s}
+.pn-plan.sel .pn-radio{border-color:#2ea6ff}
+.pn-plan.sel .pn-radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:#2ea6ff}
+.pn-pinfo{flex:1;min-width:0}
+.pn-pname{font-size:14.5px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:7px}
+.pn-pmeta{font-size:11.5px;color:var(--t3);margin-top:2px;font-variant-numeric:tabular-nums}
+.pn-pprice{text-align:right;white-space:nowrap}
+.pn-pprice b{font-size:15px;font-weight:850;color:var(--t1);font-variant-numeric:tabular-nums}
+.pn-pprice span{display:block;font-size:10.5px;color:var(--t3);margin-top:1px}
+.pn-best{font-size:9.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;
+  color:#fff;background:linear-gradient(95deg,#2ea6ff,#7c5cff);padding:2px 8px;border-radius:100px}
+.pn-save{font-size:10.5px;font-weight:800;color:#2ea6ff}
+/* ── Interactive feature list ── */
+.pn-feats{padding:16px 18px 6px;display:flex;flex-direction:column;gap:2px;text-align:left}
+.pn-feat{display:flex;align-items:center;gap:13px;padding:11px 4px;cursor:pointer;
+  border-bottom:1px solid var(--b1);transition:opacity .12s}
+.pn-feat:last-child{border-bottom:0}
+.pn-feat:active{opacity:.6}
+.pn-feat-ic{flex:0 0 auto;width:38px;height:38px;border-radius:11px;display:flex;
+  align-items:center;justify-content:center;background:rgba(46,166,255,.12)}
+.pn-feat-ic svg{width:20px;height:20px;fill:none;stroke:#2ea6ff;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.pn-feat-tx{flex:1;min-width:0}
+.pn-feat-tt{font-size:13.5px;font-weight:750;color:var(--t1)}
+.pn-feat-sb{font-size:11.5px;color:var(--t3);line-height:1.4;margin-top:1px}
+.pn-feat-cv{flex:0 0 auto;width:16px;height:16px;fill:none;stroke:var(--t3);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+/* ── Gradient buy button ── */
+.pn-buybar{padding:16px 18px 6px}
+.pn-buy{display:block;width:100%;border:0;border-radius:14px;padding:15px 0;
+  font-family:var(--f);font-size:15.5px;font-weight:900;letter-spacing:.1px;color:#fff;cursor:pointer;
+  background:linear-gradient(95deg,#2ea6ff,#7c5cff 60%,#a14bff);
+  box-shadow:0 8px 22px rgba(110,90,255,.4);transition:transform .12s,filter .12s}
+.pn-buy:active{transform:scale(.98);filter:brightness(1.05)}
+.pn-buy.owned{background:var(--e3);color:var(--t3);box-shadow:none;pointer-events:none}
+/* ── Micro-demo popup ── */
+.pn-demo-card{padding:6px 20px 4px;text-align:center}
+.pn-demo-ic{width:58px;height:58px;margin:6px auto 12px;border-radius:16px;display:flex;
+  align-items:center;justify-content:center;background:rgba(46,166,255,.12)}
+.pn-demo-ic svg{width:28px;height:28px;fill:none;stroke:#2ea6ff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pn-demo-tt{font-size:17px;font-weight:900;color:var(--t1);margin-bottom:7px}
+.pn-demo-sb{font-size:12.5px;line-height:1.55;color:var(--t2);margin-bottom:14px}
+.pn-demo-ex{text-align:left;background:var(--e2);border:1px solid var(--b1);border-radius:12px;
+  padding:13px 14px;font-size:12.5px;line-height:1.6;color:var(--t1)}
+.pn-demo-ex .q{color:var(--t3);font-weight:600}
+.pn-demo-ex .a{color:var(--t1);font-weight:500}
+.pn-demo-ex b{color:#2ea6ff}
+
+/* ══════════════════════════════════════════════════════════════════
    PLACEMENT TEST (onboarding)
    8-question CEFR estimator. Minimal flat look — same design grammar
    as the paywall: one accent colour, hairline separators.
@@ -3579,7 +3651,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
 
 <!-- PREMIUM MODAL -->
 <div class="mov" id="premiumm" style="display:none" onclick="closeMod('premiumm')">
-  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:0;max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
+  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:calc(30px + var(--safe));max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch"><div class="mhnd"></div>
     <div class="prem-hero">
       <div class="prem-title" id="prem-title">ALEX Subscriptions</div>
       <div class="prem-sub" id="prem-sub">Plans, limits and models without clutter</div>
@@ -3590,6 +3662,8 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
       <button class="prem-tab on" data-tab="platform" type="button" onclick="switchPremTab('platform')"><span id="prem-tab-platform-lbl">Platform</span></button>
       <button class="prem-tab" data-tab="credits" type="button" onclick="switchPremTab('credits')"><span id="prem-tab-credits-lbl">ALEX credits</span></button>
     </div>
+    <!-- Native Telegram-style subscription view (built by renderPremNative). -->
+    <div class="prem-native" id="prem-native" style="display:none"></div>
     <div class="prem-plans" id="prem-plans"></div>
     <div class="prem-trust" id="prem-trust"></div>
     <div class="prem-switch" id="prem-switch"></div>
@@ -3597,6 +3671,13 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
     <div class="prem-info" id="prem-info"></div>
     <div class="prem-legal" id="prem-legal"></div>
     <div class="prem-free" onclick="closeMod('premiumm')" id="prem-free">Close</div>
+  </div>
+</div>
+
+<!-- Micro-demo popup for a Premium feature (opened from the native feature list) -->
+<div class="mov" id="pndemom" style="display:none" onclick="closeMod('pndemom')">
+  <div class="msh" onclick="event.stopPropagation()" style="padding-bottom:calc(22px + var(--safe))"><div class="mhnd"></div>
+    <div class="pn-demo-card" id="pn-demo-body"></div>
   </div>
 </div>
 
@@ -15642,6 +15723,112 @@ function renderPremPlans(){
   }
 }
 
+/* ── Native Telegram-style subscription view ───────────────────────────────
+   Round icon → title → benefits → radio plan selector → interactive feature
+   list (micro-demo popups) → big gradient buy button. Reuses the real
+   PLATFORM_PLAN_DEFS + selectPlan() so invoices are untouched. */
+let _pnSelPlan = null;
+const PN_STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 7.1-1.01z"/></svg>';
+function _pnT(o){ return (o&&(o[lang]!=null?o[lang]:o.en))||''; }
+function _pnFeatures(){
+  return [
+    {k:'alex',
+     icon:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+     tt:{ru:'Живой чат с ALEX — без лимита',en:'Live ALEX chat — unlimited'},
+     sb:{ru:'Доступ к моделям Claude и Gemini, голос и разбор ошибок',en:'Access to Claude & Gemini models, voice and mistake review'},
+     demo:{ex:{ru:'<div class="q">Ты:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for results you can see now. “I’ve finished” = it’s done ✅</div>',
+               en:'<div class="q">You:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for a result you see now. “I’ve finished” = it’s done ✅</div>'}}},
+    {k:'exam',
+     icon:'<svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>',
+     tt:{ru:'Подготовка к TOEFL · IELTS · CAE',en:'TOEFL · IELTS · CAE prep'},
+     sb:{ru:'Полные mock-экзамены с оценкой Writing и Speaking',en:'Full mock exams with graded Writing & Speaking'},
+     demo:{ex:{ru:'<div class="q">Writing Task 2 · оценка ИИ</div><div class="a">Band <b>6.5</b> → 7.0<br>• усиль тезис в введении<br>• 2 ошибки артиклей исправлены</div>',
+               en:'<div class="q">Writing Task 2 · AI score</div><div class="a">Band <b>6.5</b> → 7.0<br>• strengthen your thesis<br>• 2 article errors fixed</div>'}}},
+    {k:'cards',
+     icon:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="16" rx="2"/><path d="M7 5V3h14v16h-2"/></svg>',
+     tt:{ru:'Умные карточки SM-2 — без лимита',en:'Smart SM-2 cards — unlimited'},
+     sb:{ru:'Интервальное повторение запоминает слова за тебя',en:'Spaced repetition memorises words for you'},
+     demo:{ex:{ru:'<div class="q">resilient</div><div class="a"><b>устойчивый</b>, жизнестойкий<br>Повтор через 4 дня → 9 дней → 21 день</div>',
+               en:'<div class="q">resilient</div><div class="a"><b>able to recover quickly</b><br>Next review in 4d → 9d → 21d</div>'}}},
+    {k:'role',
+     icon:'<svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M12 3v4"/><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/></svg>',
+     tt:{ru:'Ролевые сценарии + аудит грамматики',en:'Roleplay + instant grammar audit'},
+     sb:{ru:'Отрабатывай реальные диалоги с мгновенной проверкой',en:'Practise real dialogues with instant correction'},
+     demo:{ex:{ru:'<div class="q">Сценарий: кофейня ☕</div><div class="a">«I would like a coffee, please»<br><b>✓ Отлично!</b> Естественно и вежливо.</div>',
+               en:'<div class="q">Scenario: coffee shop ☕</div><div class="a">“I would like a coffee, please”<br><b>✓ Perfect!</b> Natural and polite.</div>'}}},
+  ];
+}
+function _pnBuyBtn(owns){
+  if(owns){
+    const t=({ru:'Premium активен',en:'Premium is active',es:'Premium activo',pt:'Premium ativo',de:'Premium aktiv',fr:'Premium actif',uk:'Premium активний',tr:'Premium aktif',zh:'Premium 已激活',ar:'Premium مفعّل'}[lang]||'Premium is active');
+    return `<button class="pn-buy owned" type="button">${t}</button>`;
+  }
+  const p=PLATFORM_PLAN_DEFS.find(x=>x.id===_pnSelPlan)||PLATFORM_PLAN_DEFS[0];
+  const lbl=({ru:'Подключить Premium за',en:'Get Premium for',es:'Obtener Premium por',pt:'Obter Premium por',de:'Premium holen für',fr:'Obtenir Premium pour',uk:'Підключити Premium за',tr:'Premium al',zh:'开通 Premium',ar:'احصل على Premium مقابل'}[lang]||'Get Premium for');
+  return `<button class="pn-buy" type="button" onclick="selectPlan('${p.id}')">${lbl} ${_starsFmt(p.stars)}</button>`;
+}
+function pnSelectPlan(id){
+  if(!PLATFORM_PLAN_DEFS.some(p=>p.id===id)||id===_pnSelPlan)return;
+  _pnSelPlan=id; try{haptic('light');}catch(_){}
+  renderPremNative();
+}
+function pnFeatureDemo(key){
+  const f=_pnFeatures().find(x=>x.k===key); if(!f)return;
+  try{haptic('light');}catch(_){}
+  const d=f.demo||{};
+  const body=document.getElementById('pn-demo-body');
+  if(body){
+    body.innerHTML=`<div class="pn-demo-ic">${f.icon}</div>`+
+      `<div class="pn-demo-tt">${safeHTML(_pnT(f.tt))}</div>`+
+      `<div class="pn-demo-sb">${safeHTML(_pnT(f.sb))}</div>`+
+      `<div class="pn-demo-ex">${_pnT(d.ex)||''}</div>`;
+  }
+  openMod('pndemom');
+}
+function renderPremNative(){
+  const host=document.getElementById('prem-native');
+  if(!host)return;
+  const owns=hasPlatform();
+  if(!_pnSelPlan||!PLATFORM_PLAN_DEFS.some(p=>p.id===_pnSelPlan)){
+    const pop=PLATFORM_PLAN_DEFS.find(p=>p.popular)||PLATFORM_PLAN_DEFS[0];
+    _pnSelPlan=pop.id;
+  }
+  const moLbl=({ru:'/ мес',en:'/ mo',es:'/ mes',pt:'/ mês',de:'/ Mon.',fr:'/ mois',uk:'/ міс',tr:'/ ay',zh:'/ 月',ar:'/ شهر'}[lang]||'/ mo');
+  const bestLbl=({ru:'ВЫГОДНО',en:'BEST VALUE',es:'MEJOR',pt:'MELHOR',de:'TOP-WERT',fr:'MEILLEUR',uk:'ВИГІДНО',tr:'EN İYİ',zh:'超值',ar:'الأفضل'}[lang]||'BEST VALUE');
+  const oneTime=({ru:'разовый платёж',en:'one-time payment',es:'pago único',pt:'pagamento único',de:'einmalig',fr:'paiement unique',uk:'разовий платіж',tr:'tek seferlik',zh:'一次性',ar:'دفعة واحدة'}[lang]||'one-time payment');
+  const dimAttr = owns ? 'style="opacity:.5;pointer-events:none"' : '';
+  const plansHTML=PLATFORM_PLAN_DEFS.map(p=>{
+    const sel=p.id===_pnSelPlan?' sel':'';
+    const best=p.popular?`<span class="pn-best">${bestLbl}</span>`:'';
+    const save=p.save?`<span class="pn-save">−${p.save}%</span>`:'';
+    const meta=p.monthly!=null?`${_starsFmt(p.monthly)} ${moLbl} · ≈ $${_usdFromStars(p.stars)}`:`${oneTime} · ≈ $${_usdFromStars(p.stars)}`;
+    return `<div class="pn-plan${sel}" ${dimAttr} onclick="pnSelectPlan('${p.id}')">
+        <div class="pn-radio"></div>
+        <div class="pn-pinfo">
+          <div class="pn-pname">${safeHTML(_platLabel(p.period))} ${best} ${save}</div>
+          <div class="pn-pmeta">${meta}</div>
+        </div>
+        <div class="pn-pprice"><b>${_starsFmt(p.stars)}</b></div>
+      </div>`;
+  }).join('');
+  const featsHTML=_pnFeatures().map(f=>`<div class="pn-feat" onclick="pnFeatureDemo('${f.k}')">
+      <div class="pn-feat-ic">${f.icon}</div>
+      <div class="pn-feat-tx"><div class="pn-feat-tt">${safeHTML(_pnT(f.tt))}</div><div class="pn-feat-sb">${safeHTML(_pnT(f.sb))}</div></div>
+      <svg class="pn-feat-cv" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </div>`).join('');
+  const titleHTML=({ru:'PolyGlotty <b>Premium</b>',en:'PolyGlotty <b>Premium</b>'}[lang]||'PolyGlotty <b>Premium</b>');
+  const desc=({ru:'Безлимитный английский: живой чат, экзамены, карточки и ролевые сценарии — всё в одной подписке.',en:'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.',es:'Inglés ilimitado: chat en vivo, exámenes, tarjetas y juegos de rol — todo en una suscripción.',pt:'Inglês ilimitado: chat ao vivo, exames, cartões e roleplay — tudo numa assinatura.',de:'Unbegrenztes Englisch: Live-Chat, Prüfungen, Karten und Rollenspiele — alles in einem Abo.',fr:'Anglais illimité : chat en direct, examens, cartes et jeux de rôle — tout en un abonnement.',uk:'Безлімітна англійська: живий чат, іспити, картки та рольові сценарії — усе в одній підписці.',tr:'Sınırsız İngilizce: canlı sohbet, sınavlar, kartlar ve rol yapma — tek abonelikte.',zh:'无限英语：实时聊天、考试、单词卡和角色扮演 — 一个订阅全包。',ar:'إنجليزية بلا حدود: دردشة حية، امتحانات، بطاقات ولعب أدوار — كل ذلك في اشتراك واحد.'}[lang]||'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.');
+  host.innerHTML=`
+    <div class="pn-wrap">
+      <div class="pn-icon">${PN_STAR_SVG}</div>
+      <div class="pn-h1">${titleHTML}</div>
+      <div class="pn-desc">${safeHTML(desc)}</div>
+    </div>
+    <div class="pn-plans">${plansHTML}</div>
+    <div class="pn-feats">${featsHTML}</div>
+    <div class="pn-buybar">${_pnBuyBtn(owns)}</div>`;
+}
+
 function openPremium(highlightFeature, initialTab){
   const title=document.getElementById('prem-title');
   const sub=document.getElementById('prem-sub');
@@ -15755,6 +15942,24 @@ function openPremium(highlightFeature, initialTab){
       zh:`点击“继续”即表示你同意我们的${touLink}和${ppLink}。除非取消，订阅将自动续期。`,
       ar:`بالضغط على متابعة، فإنك توافق على ${touLink} و${ppLink} الخاصة بنا. تتجدد الاشتراكات تلقائيًا ما لم يتم إلغاؤها.`
     }[lang]||`By tapping Continue, you agree to our ${touLink} and ${ppLink}. Subscriptions automatically renew unless canceled.`);
+  }
+
+  /* Subscription tab → native Telegram-style view (round icon, radio plans,
+     interactive feature list, gradient buy button). Credits tab keeps the
+     legacy pack list. We toggle the legacy hosts + the hero accordingly. */
+  const _isPlat=_premTab==='platform';
+  const _nativeHost=document.getElementById('prem-native');
+  const _heroEl=document.querySelector('#premiumm .prem-hero');
+  const _legacyIds=['prem-plans','prem-trust','prem-switch','prem-proof','prem-info'];
+  if(_isPlat){
+    if(_heroEl)_heroEl.style.display='none';
+    _legacyIds.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+    if(_nativeHost)_nativeHost.style.display='block';
+    renderPremNative();
+  } else {
+    if(_nativeHost)_nativeHost.style.display='none';
+    if(_heroEl)_heroEl.style.display='';
+    _legacyIds.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
   }
   openMod('premiumm');
 }

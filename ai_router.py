@@ -438,21 +438,21 @@ def gemini_free_limit_message(lang: str = "ru") -> str:
 # Shown when a FREE user spends their AI_FREE_DAILY messages for the UTC day —
 # distinct from the upstream provider-quota card above (which is global).
 _DAILY_TXT = {
-    "ru": "Вы исчерпали 4 бесплатных запроса на сегодня. Переходи на Premium!",
-    "en": "Your daily free ALEX AI limit is used up. Come back tomorrow, or go Premium!",
-    "es": "Has agotado tu límite diario gratuito de ALEX. ¡Vuelve mañana o pásate a Premium!",
-    "pt": "Seu limite diário gratuito do ALEX acabou. Volte amanhã ou assine o Premium!",
-    "de": "Dein kostenloses ALEX-Tageslimit ist aufgebraucht. Komm morgen wieder oder hol dir Premium!",
-    "fr": "Ta limite quotidienne gratuite d’ALEX est atteinte. Reviens demain ou passe à Premium !",
-    "uk": "Денний безкоштовний ліміт ALEX вичерпано. Повертайся завтра або переходь на Premium!",
-    "tr": "Günlük ücretsiz ALEX limitin doldu. Yarın tekrar gel veya Premium’a geç!",
-    "zh": "今日免费 ALEX 额度已用完。明天再来，或升级 Premium！",
-    "ar": "انتهى حدّك اليومي المجاني من ALEX. عُد غدًا أو اشترك في Premium!",
+    "ru": "Бесплатные кредиты ALEX на сегодня закончились. Новые начислятся в 00:00 UTC — или подключи Premium для безлимита.",
+    "en": "You're out of free ALEX credits for today. More arrive at 00:00 UTC — or go Premium for unlimited chat.",
+    "es": "Te quedaste sin créditos gratis de ALEX por hoy. Llegan más a las 00:00 UTC, o pásate a Premium para chat ilimitado.",
+    "pt": "Seus créditos grátis do ALEX acabaram por hoje. Mais chegam às 00:00 UTC — ou assine o Premium para chat ilimitado.",
+    "de": "Deine kostenlosen ALEX-Credits für heute sind aufgebraucht. Neue gibt es um 00:00 UTC — oder hol dir Premium für unbegrenzten Chat.",
+    "fr": "Tu n'as plus de crédits ALEX gratuits pour aujourd'hui. De nouveaux arrivent à 00:00 UTC — ou passe à Premium pour un chat illimité.",
+    "uk": "Безкоштовні кредити ALEX на сьогодні вичерпано. Нові нараховуються о 00:00 UTC — або підключи Premium для безліміту.",
+    "tr": "Bugünlük ücretsiz ALEX kredilerin bitti. Yenileri 00:00 UTC'de gelir — ya da sınırsız sohbet için Premium'a geç.",
+    "zh": "今日免费 ALEX 额度已用完。新额度将于 UTC 00:00 发放，或升级 Premium 畅聊无限。",
+    "ar": "نفدت أرصدة ALEX المجانية لهذا اليوم. تصل أرصدة جديدة عند 00:00 UTC — أو اشترك في Premium للدردشة بلا حدود.",
 }
 
 
 def ai_daily_limit_message(lang: str = "ru") -> str:
-    """HTML limit-card shown when a free user hits the per-user daily AI cap."""
+    """HTML limit-card shown when a free user runs out of daily free credits."""
     txt = _DAILY_TXT.get(lang, _DAILY_TXT["en"])
     kicker = _LIMIT_KICKER.get(lang, _LIMIT_KICKER["en"])
     cta = _LIMIT_CTA.get(lang, _LIMIT_CTA["en"])
@@ -464,3 +464,25 @@ def ai_daily_limit_message(lang: str = "ru") -> str:
         f'<button class="chip" onclick="openPremium()">{cta}</button>'
         '</div>'
     )
+
+
+# ── Transient "service busy" message (i18n) ───────────────────────────────────
+# Shown when every free provider transiently fails (network blip / upstream 5xx).
+# A calm "try again" card — NEVER a scary 503 — and the user is NOT charged.
+_BUSY_TXT = {
+    "ru": "ALEX сейчас перегружен. Попробуй ещё раз через пару секунд 🙏",
+    "en": "ALEX is a bit busy right now. Please try again in a few seconds 🙏",
+    "es": "ALEX está un poco ocupado ahora. Inténtalo de nuevo en unos segundos 🙏",
+    "pt": "O ALEX está um pouco ocupado agora. Tente novamente em alguns segundos 🙏",
+    "de": "ALEX ist gerade etwas ausgelastet. Bitte versuche es in ein paar Sekunden erneut 🙏",
+    "fr": "ALEX est un peu occupé là. Réessaie dans quelques secondes 🙏",
+    "uk": "ALEX зараз трохи перевантажений. Спробуй ще раз за кілька секунд 🙏",
+    "tr": "ALEX şu an biraz meşgul. Birkaç saniye sonra tekrar dene 🙏",
+    "zh": "ALEX 现在有点忙，请过几秒再试一次 🙏",
+    "ar": "ALEX مشغول قليلاً الآن. حاول مرة أخرى بعد بضع ثوانٍ 🙏",
+}
+
+
+def ai_busy_message(lang: str = "ru") -> str:
+    """Plain-text transient-error reply for free chat (no charge, retry-friendly)."""
+    return _BUSY_TXT.get(lang, _BUSY_TXT["en"])
