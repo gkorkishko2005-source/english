@@ -101,10 +101,17 @@ ADMIN_IDS = {
     1428437531,
 }
 
-if not ANT_KEY:
-    logger.error("❌ ANTHROPIC_API_KEY is not set!")
-else:
-    logger.info(f"✅ ANTHROPIC_API_KEY loaded (starts with {ANT_KEY[:8]}...)")
+# Primary provider is OpenRouter (Gemini Flash for FREE, Gemini Pro for Premium).
+# The app no longer depends on Anthropic — ANTHROPIC_API_KEY is an optional legacy
+# safety-net only, so its absence must NEVER block startup or a chat request.
+try:
+    from ai_router import openrouter_available as _or_ok
+    if _or_ok():
+        logger.info("✅ OpenRouter configured — ALEX runs on Gemini via OpenRouter.")
+    else:
+        logger.error("❌ OPENROUTER_API_KEY is not set! ALEX chat will be unavailable.")
+except Exception as _e:
+    logger.warning("ai_router availability check failed: %s", _e)
 
 _histories: dict = {}
 _msg_counts: dict = {}  # daily quota points per user
@@ -553,9 +560,18 @@ async def handle_chat(request):
         if signed_uid and not uid:
             uid = signed_uid
 
-    if not ANT_KEY:
-        logger.error("ANTHROPIC_API_KEY is not set!")
-        return web.json_response({"error": "API key not configured. Add ANTHROPIC_API_KEY to Railway variables."}, status=500, headers={"Access-Control-Allow-Origin":"*"})
+    # Provider gate: ALEX runs on OpenRouter (Gemini). We only hard-fail when NO
+    # provider at all is configured — OpenRouter OR the legacy Anthropic fallback.
+    # This must check OpenRouter (the primary) so a missing ANTHROPIC_API_KEY can
+    # never block chat.
+    try:
+        from ai_router import openrouter_available as _or_ok
+        _provider_ready = _or_ok() or bool(ANT_KEY)
+    except Exception:
+        _provider_ready = bool(ANT_KEY)
+    if not _provider_ready:
+        logger.error("No AI provider configured (OPENROUTER_API_KEY missing).")
+        return web.json_response({"error": "AI provider not configured. Add OPENROUTER_API_KEY to Railway variables."}, status=500, headers={"Access-Control-Allow-Origin":"*"})
 
     level="B1"; lang="ru"; interests=""; profession=""
     if uid:

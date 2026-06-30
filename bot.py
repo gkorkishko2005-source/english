@@ -270,10 +270,34 @@ ICON = {
 }
 
 # ══════════════════════════════════════════════════════════════════
-#  ANTHROPIC API
+#  ALEX MODEL CALL — OpenRouter (Gemini) primary, Anthropic legacy fallback
 # ══════════════════════════════════════════════════════════════════
 
+def _messages_are_text_only(messages: list) -> bool:
+    """True when every message's content is a plain string (no image/tool blocks).
+    Vision messages carry a list content and can't go through the text gateway."""
+    for m in messages or []:
+        if not isinstance(m.get("content"), str):
+            return False
+    return True
+
+
 async def _call_anthropic(system: str, messages: list, max_tokens: int = 1500) -> str:
+    """Primary path: OpenRouter (Gemini). Anthropic is only a legacy fallback used
+    when OpenRouter is unconfigured AND a text-only request comes in. Name kept for
+    call-site compatibility — the whole ecosystem now runs on Gemini via OpenRouter."""
+    # ── Primary: OpenRouter / Gemini (text-only chat) ──────────────────
+    if _messages_are_text_only(messages):
+        try:
+            from ai_router import openrouter_available, openrouter_generate
+            if openrouter_available():
+                result = await openrouter_generate(system, messages, max_tokens=max_tokens)
+                return (result.get("text") or "").strip()
+        except Exception as e:
+            logger.warning("bot OpenRouter path failed, trying Anthropic fallback: %s", e)
+    # ── Fallback: Anthropic Claude (only if a key is present) ───────────
+    if not ANTHROPIC_KEY:
+        raise Exception("AI provider not configured (set OPENROUTER_API_KEY)")
     async with httpx.AsyncClient(timeout=60) as client:
         r = await client.post(
             "https://api.anthropic.com/v1/messages",
@@ -286,7 +310,6 @@ async def _call_anthropic(system: str, messages: list, max_tokens: int = 1500) -
             json={
                 "model": MODEL,
                 "max_tokens": max_tokens,
-                # Prompt caching: до 90% скидки на input-токены при cache hits
                 "system": [{"type": "text", "text": system,
                             "cache_control": {"type": "ephemeral"}}],
                 "messages": messages,

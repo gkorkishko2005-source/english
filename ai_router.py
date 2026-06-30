@@ -287,6 +287,10 @@ async def deepseek_generate(system: str, messages: list[dict],
 #  FREE (non-paying) users are routed here in preference to DeepSeek/Gemini.
 #  Premium users keep Claude. Model is env-driven so swapping a ":free" model
 #  never needs a code change.
+# The key comes ONLY from the environment — never hardcode a live secret in the
+# repo (GitHub secret-scanning blocks it, and a public repo would leak it). Set
+# OPENROUTER_API_KEY in Railway Variables (and .env locally). If it is somehow
+# missing, the provider gate degrades gracefully instead of crashing the app.
 OPENROUTER_API_KEY      = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL     = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 # FREE tier → ultra-cheap Flash; PREMIUM tier → flagship Pro. Both Gemini,
