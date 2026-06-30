@@ -691,8 +691,16 @@ async def handle_chat(request):
                     "es": f"⏳ Espera {wait} s — demasiado rápido.",
                     "pt": f"⏳ Espere {wait} s — rápido demais.",
                 }
-                return web.json_response({"reply": slow_map.get(lang, f"⏳ Slow down — wait {wait} s.")},
-                                         headers={"Access-Control-Allow-Origin":"*"})
+                # Anti-abuse: a free user must not chat more often than once per
+                # `burst_gap` seconds. Scripted floods get a hard HTTP 429 (with a
+                # Retry-After hint) instead of a friendly 200 — no API call, no
+                # credit spent.
+                return web.json_response(
+                    {"reply": slow_map.get(lang, f"⏳ Slow down — wait {wait} s."),
+                     "rate_limited": True, "retry_after": wait},
+                    status=429,
+                    headers={"Access-Control-Allow-Origin": "*",
+                             "Retry-After": str(wait)})
             _last_msg_ts[uid] = now_ts
             # Free-credit balance gate (UTC-day grant applied lazily inside the
             # read). Block at 0 with a paywall card BEFORE any API call — and
@@ -766,12 +774,29 @@ async def handle_chat(request):
                     order.append(_name)
             except Exception:
                 pass
+        # ── FREE-TIER CONTEXT HARD-CAP (anti-drain) ───────────────────────────
+        # No matter how long the local dialogue grows, only the LAST 4 messages
+        # are ever sent upstream. This caps input tokens on the shared free key
+        # so a user can't "burn" credits/balance with a long conversation.
+        FREE_SEND_TURNS = 4
+        free_send = _histories[uid][-FREE_SEND_TURNS:]
+        # ── ALEX free-tier persona (concise, token-thrifty) ───────────────────
+        # Strict-but-supportive tutor; capped at 3–4 short sentences so the cheap
+        # Flash model stays cheap on both input and output tokens.
+        alex_free = (
+            "\n\nYou are ALEX — a strict but supportive English tutor. "
+            "Be encouraging yet hold the student to a high standard: gently fix "
+            "every real mistake and briefly explain why. Keep EVERY reply short: "
+            "at most 3–4 sentences. No filler, no repeating the question — get "
+            "straight to the correction and one useful tip."
+        )
+        free_system = system + alex_free
         reply = ""
         prov_tag = prov_label = None
         all_rate_limited = True
         for _name in order:
             try:
-                result = await _GEN[_name](system, _histories[uid], g_max)
+                result = await _GEN[_name](free_system, free_send, g_max)
                 r = (result.get("text") or "").strip()
                 r = re.sub(r"\n[ \t]*\n+", "\n", r)
                 if not r:
