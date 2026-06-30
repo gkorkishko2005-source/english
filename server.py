@@ -848,7 +848,7 @@ async def handle_chat(request):
         _du = int(cons.get("daily_used") or 0)
         _avail = 0 if _tot <= 0 else max(0, _dl - _du)
         return web.json_response(
-            {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by Gemini Pro",
+            {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by ALEX Pro",
              "premium_type": cons.get("premium_type"),
              "daily_used": cons.get("daily_used"), "daily_limit": cons.get("daily_limit"),
              "total_remaining": cons.get("total_remaining"),
@@ -948,9 +948,9 @@ async def handle_chat(request):
                                should_use_deepseek, should_use_gemini)
         _GEN = {"openrouter": openrouter_generate, "deepseek": deepseek_generate,
                 "gemini": gemini_generate}
-        _LABEL = {"openrouter": ("openrouter", "Powered by OpenRouter"),
-                  "deepseek": ("deepseek", "Powered by DeepSeek"),
-                  "gemini": ("gemini", "Powered by Gemini")}
+        _LABEL = {"openrouter": ("openrouter", "Powered by ALEX Basic"),
+                  "deepseek": ("deepseek", "Powered by ALEX Basic"),
+                  "gemini": ("gemini", "Powered by ALEX Basic")}
         order = [free_provider]
         for _name, _chk in (("openrouter", should_use_openrouter),
                             ("deepseek", should_use_deepseek),
@@ -1272,7 +1272,7 @@ async def handle_chat(request):
             logger.warning("credit deduction failed uid=%s: %s", uid, e)
 
     # Debug marker: this branch always answered via Anthropic Claude (paid users).
-    resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by Claude"}
+    resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by ALEX Pro"}
     if new_balance is not None:
         resp["chat_credits"] = new_balance
     return web.json_response(resp, headers={"Access-Control-Allow-Origin": "*"})

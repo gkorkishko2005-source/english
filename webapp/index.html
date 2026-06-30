@@ -1682,13 +1682,22 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    interactive feature list (micro-demo popups) → gradient buy button.
    ══════════════════════════════════════════════════════════════════ */
 .pn-wrap{padding:6px 18px 4px;text-align:center}
-.pn-icon{width:78px;height:78px;margin:8px auto 14px;border-radius:50%;
+/* Interactive 3D flip logo — emerald speech-bubble + globe.
+   Outer node owns perspective + the gentle float; inner node is the
+   3D card (preserve-3d) that spins 360° on tap via pnFlipLogo(). */
+.pn-logo3d{width:88px;height:88px;margin:10px auto 16px;perspective:680px;
+  cursor:pointer;animation:pnFloat 3.6s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;filter:drop-shadow(0 16px 24px rgba(0,163,131,.32))}
+.pn-logo3d-inner{width:100%;height:100%;border-radius:26px;
   display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(145deg,#00B594,#00A383 70%,#009478);
-  box-shadow:0 10px 26px rgba(0,163,131,.42),inset 0 1px 2px rgba(255,255,255,.35);
-  animation:pnFloat 3.4s ease-in-out infinite}
-.pn-icon svg{width:40px;height:40px;fill:#fff;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18))}
-@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  background:linear-gradient(150deg,#10D9AE 0%,#00B594 45%,#009E7F 75%,#008268 100%);
+  box-shadow:0 14px 34px rgba(0,158,127,.46),inset 0 1.5px 3px rgba(255,255,255,.45),inset 0 -3px 8px rgba(0,80,64,.35);
+  transform-style:preserve-3d;
+  transition:transform .6s cubic-bezier(0.4,0,0.2,1);
+  will-change:transform}
+.pn-logo3d:active .pn-logo3d-inner{box-shadow:0 8px 18px rgba(0,158,127,.4),inset 0 1.5px 3px rgba(255,255,255,.4)}
+.pn-logo3d-inner svg{width:50px;height:50px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.24));backface-visibility:hidden}
+@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .pn-h1{font-size:23px;font-weight:950;letter-spacing:-.3px;margin:0 0 6px;color:var(--t1)}
 .pn-h1 b{background:linear-gradient(95deg,#00A383,#00B594);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .pn-desc{font-size:12.5px;line-height:1.5;color:var(--t2);max-width:300px;margin:0 auto 16px}
@@ -3120,10 +3129,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
       <button class="req-chip" id="req-chip" onclick="openPremium(null,'platform')" type="button" title="Запросов к ALEX сегодня">
         <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span id="req-chip-n">0</span>
-      </button>
-      <button class="credit-chip" id="credit-chip" style="display:none" onclick="openPremium(null,'credits')" type="button" title="ALEX credits">
-        <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>
-        <span id="credit-chip-n">0</span>
       </button>
       <button class="hbtn" onclick="openSpanel()"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></button>
       <button class="hbtn" onclick="confirmClear()"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
@@ -15796,13 +15801,26 @@ function renderPremPlans(){
    PLATFORM_PLAN_DEFS + selectPlan() so invoices are untouched. */
 let _pnSelPlan = null;
 const PN_STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 7.1-1.01z"/></svg>';
+/* Official PolyGlotty mark: emerald dialog-bubble outline with a globe inside. */
+const PN_LOGO_SVG = '<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6.5C13.8 6.5 5.5 13.4 5.5 21.9c0 4.7 2.6 8.9 6.7 11.7-.4 2.4-1.4 4.7-2.9 6.6 3.4-.4 6.6-1.7 9.3-3.7 1.7.4 3.5.7 5.4.7 10.2 0 18.5-6.9 18.5-15.4S34.2 6.5 24 6.5z"/><circle cx="24" cy="21.5" r="8.6" stroke-width="1.9"/><ellipse cx="24" cy="21.5" rx="3.6" ry="8.6" stroke-width="1.7"/><line x1="15.4" y1="21.5" x2="32.6" y2="21.5" stroke-width="1.7"/></svg>';
+/* Spins the logo a full extra turn on each tap; accumulating degrees keeps
+   the direction consistent and the cubic-bezier gives a springy settle. */
+let _pnFlipDeg = 0;
+function pnFlipLogo(el){
+  try{
+    const inner = el && el.querySelector('.pn-logo3d-inner');
+    if(!inner) return;
+    _pnFlipDeg += 360;
+    inner.style.transform = 'rotateY(' + _pnFlipDeg + 'deg)';
+  }catch(_){}
+}
 function _pnT(o){ return (o&&(o[lang]!=null?o[lang]:o.en))||''; }
 function _pnFeatures(){
   return [
     {k:'alex',
      icon:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-     tt:{ru:'Живой чат с ALEX на Gemini Pro',en:'Live ALEX chat on Gemini Pro'},
-     sb:{ru:'1 500–13 500 запросов на период, глубокий разбор грамматики и ошибок',en:'1,500–13,500 requests per period, deep grammar & mistake analysis'},
+     tt:{ru:'Живой чат с продвинутым интеллектом ALEX Pro',en:'Live chat with advanced ALEX Pro intelligence'},
+     sb:{ru:'Глубокий разбор грамматики и контекстная память, 1 500–13 500 запросов на период',en:'Deep grammar analysis & contextual memory, 1,500–13,500 requests per period'},
      demo:{ex:{ru:'<div class="q">Ты:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for results you can see now. “I’ve finished” = it’s done ✅</div>',
                en:'<div class="q">You:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for a result you see now. “I’ve finished” = it’s done ✅</div>'}}},
     {k:'exam',
@@ -15939,7 +15957,7 @@ function renderPremNative(){
   const desc=({ru:'Безлимитный английский: живой чат, экзамены, карточки и ролевые сценарии — всё в одной подписке.',en:'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.',es:'Inglés ilimitado: chat en vivo, exámenes, tarjetas y juegos de rol — todo en una suscripción.',pt:'Inglês ilimitado: chat ao vivo, exames, cartões e roleplay — tudo numa assinatura.',de:'Unbegrenztes Englisch: Live-Chat, Prüfungen, Karten und Rollenspiele — alles in einem Abo.',fr:'Anglais illimité : chat en direct, examens, cartes et jeux de rôle — tout en un abonnement.',uk:'Безлімітна англійська: живий чат, іспити, картки та рольові сценарії — усе в одній підписці.',tr:'Sınırsız İngilizce: canlı sohbet, sınavlar, kartlar ve rol yapma — tek abonelikte.',zh:'无限英语：实时聊天、考试、单词卡和角色扮演 — 一个订阅全包。',ar:'إنجليزية بلا حدود: دردشة حية، امتحانات، بطاقات ولعب أدوار — كل ذلك في اشتراك واحد.'}[lang]||'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.');
   host.innerHTML=`
     <div class="pn-wrap">
-      <div class="pn-icon">${PN_STAR_SVG}</div>
+      <div class="pn-logo3d" onclick="pnFlipLogo(this)" title="PolyGlotty"><div class="pn-logo3d-inner">${PN_LOGO_SVG}</div></div>
       <div class="pn-h1">${titleHTML}</div>
       <div class="pn-desc">${safeHTML(desc)}</div>
     </div>
