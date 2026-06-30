@@ -1617,6 +1617,14 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .prem-tab:active{opacity:.6}
 .credit-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.25);font-size:11px;font-weight:800;color:var(--a);letter-spacing:.2px;cursor:pointer}
 .credit-chip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* Requests-left chip (top bar). Shows available_daily_requests with a ⚡ icon.
+   Minimal pill matching the Mini App style; turns amber when the user hits 0. */
+.req-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:100px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.25);font-size:11px;font-weight:800;color:var(--a);letter-spacing:.2px;cursor:pointer;transition:transform .12s ease}
+.req-chip svg{width:11px;height:11px;stroke:currentColor;fill:currentColor;stroke-width:1.5;stroke-linejoin:round}
+.req-chip:active{transform:scale(.94)}
+.req-chip.req-low{color:var(--w);background:rgba(255,170,40,.10);border-color:rgba(255,170,40,.30)}
+.req-chip.bump{animation:reqBump .3s ease}
+@keyframes reqBump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
 /* Plan list — elevated cards with depth */
 .prem-plans{display:flex;flex-direction:column;gap:10px;padding:4px 18px 8px}
 .prem-legal{padding:12px 18px 4px;font-size:11px;line-height:1.55;color:var(--t3);text-align:center}
@@ -3109,6 +3117,10 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <div class="chdr">
     <div class="chtxt"><div class="chnm">ALEX</div></div>
     <div class="hbtns">
+      <button class="req-chip" id="req-chip" onclick="openPremium(null,'platform')" type="button" title="Запросов к ALEX сегодня">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span id="req-chip-n">0</span>
+      </button>
       <button class="credit-chip" id="credit-chip" style="display:none" onclick="openPremium(null,'credits')" type="button" title="ALEX credits">
         <svg viewBox="0 0 24 24"><path d="M21 12c0 5-4 9-9 9s-9-4-9-9 4-9 9-9c2.5 0 4.8 1 6.5 2.6"/><polyline points="9 12 11 14 16 9"/></svg>
         <span id="credit-chip-n">0</span>
@@ -6186,6 +6198,15 @@ async function doChat(text,mode){
       chatCredits=data.chat_credits;
       try{updateCreditChip();}catch(_){}
     }
+    /* Header requests counter: prefer the server's authoritative value; otherwise
+       decrement by 1 optimistically so the user sees the drop immediately. */
+    if(typeof data.available_daily_requests==='number'){
+      availableRequests=data.available_daily_requests;
+    }else{
+      availableRequests=Math.max(0,(availableRequests||0)-1);
+    }
+    try{updateReqChip({bump:true});}catch(_){}
+    try{if(window._d)window._d.available_daily_requests=availableRequests;}catch(_){}
     /* Voice-to-voice loop: speak the reply through TTS, then clear
        the one-shot pending flag so the next text-typed message
        doesn't get charged the voice surcharge by accident. */
@@ -15145,6 +15166,25 @@ let _cardBudgetSyncing = false;  /* re-entry guard for initLearn → refreshDail
 /* Tiny chip in the chat header that shows the credit balance. Hidden
    for grandfathered bundle holders (they don't run on credits) and for
    users on legacy active premium. */
+/* Header counter of ALEX requests left for today.
+   - FREE  → remaining free credits (0..cap).
+   - PAID  → max(0, daily_limit − used); 0 once the whole-period pool is spent.
+   Server is the source of truth (available_daily_requests from /api/user and
+   /api/chat); we also decrement optimistically right after each reply so the
+   number drops the instant the user sees ALEX answer. */
+let availableRequests = 0;
+function updateReqChip(opts){
+  const chip=document.getElementById('req-chip');
+  if(!chip)return;
+  const n=document.getElementById('req-chip-n');
+  const v=Math.max(0,parseInt(availableRequests,10)||0);
+  if(n) n.textContent=v.toLocaleString(lang==='ru'?'ru-RU':'en-US');
+  chip.classList.toggle('req-low', v<=0);
+  if(opts&&opts.bump){
+    chip.classList.remove('bump');void chip.offsetWidth;chip.classList.add('bump');
+  }
+}
+
 function updateCreditChip(){
   const chip=document.getElementById('credit-chip');
   if(!chip)return;
@@ -18206,6 +18246,11 @@ async function init(){
         // /api/user now runs the backend subscription guard (enforce_subscription
         // + check_platform), so its boolean is authoritative for both directions.
         setPremium(srv.is_premium===true,'server');
+        // Header requests counter — server is authoritative on load.
+        if(typeof srv.available_daily_requests==='number'){
+          availableRequests=srv.available_daily_requests;
+          try{updateReqChip();}catch(_){}
+        }
         try{renderHome(merged);}catch{}
         try{renderProgress(merged);}catch{}
       }).catch(()=>{});

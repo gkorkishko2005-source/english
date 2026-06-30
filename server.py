@@ -118,6 +118,34 @@ _msg_counts: dict = {}  # daily quota points per user
 _daily_ai_costs: dict = {}  # estimated daily Anthropic cost per user
 _last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
 
+# Anti-deficit input guard. Premium conversations can grow without bound; a long
+# history is billed on EVERY turn (input tokens), so we cap the context we send.
+PREMIUM_HISTORY_TOKEN_BUDGET = int(os.getenv("PREMIUM_HISTORY_TOKEN_BUDGET", "4000") or "4000")
+
+
+def _approx_tokens(text: str) -> int:
+    """Cheap, dependency-free token estimate (~4 chars / token, English-biased)."""
+    return max(1, (len(text or "") + 3) // 4)
+
+
+def _trim_history_by_tokens(messages: list, budget: int = PREMIUM_HISTORY_TOKEN_BUDGET) -> list:
+    """Keep only the most RECENT messages whose combined size fits `budget`
+    tokens. Older turns are dropped (archived out of the live context) so the
+    per-turn input cost stays bounded even for Premium users. The latest message
+    is always kept, even if it alone exceeds the budget."""
+    if not messages:
+        return []
+    kept: list = []
+    used = 0
+    for m in reversed(messages):
+        cost = _approx_tokens(str(m.get("content") or ""))
+        if kept and used + cost > budget:
+            break
+        kept.append(m)
+        used += cost
+    kept.reverse()
+    return kept
+
 def _is_local_request(request) -> bool:
     host = (request.host or "").split(":")[0]
     peer = request.transport.get_extra_info("peername") if request.transport else None
@@ -413,7 +441,7 @@ async def handle_user(request):
             get_word_count, get_session_count, get_test_count,
             get_mistake_count, get_all_interests, get_due_words,
             get_profession, get_lang, upsert_user, check_platform,
-            enforce_subscription, get_weekly_xp
+            enforce_subscription, get_weekly_xp, get_ai_access_state
         )
         user = await get_user(uid)
         if not user:
@@ -430,6 +458,7 @@ async def handle_user(request):
                 "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
                 "is_premium": False,
                 "is_admin": uid in ADMIN_IDS,
+                "available_daily_requests": 0, "premium_type": "FREE",
             }, headers={"Access-Control-Allow-Origin": "*"})
         xp         = await get_xp(uid) or 0
         level      = await get_level(uid) or "B1"
@@ -459,6 +488,22 @@ async def handle_user(request):
         except Exception as _we:
             logger.warning(f"weekly xp failed for {uid}: {_we}")
             weekly = [0]*7
+        # ── Header limits payload ─────────────────────────────────────────
+        # available_daily_requests = what the top bar shows.
+        #   FREE  → free-credit balance (0..cap).
+        #   PAID  → max(0, daily_limit − daily_used); forced to 0 once the
+        #           whole-period pool (total_requests_remaining) is exhausted.
+        ai_state = {}
+        available_daily = 0
+        try:
+            ai_state = await get_ai_access_state(uid) or {}
+            if str(ai_state.get("premium_type") or "FREE") == "FREE":
+                available_daily = int(ai_state.get("free_credits") or 0)
+            else:
+                total_rem = int(ai_state.get("total_remaining") or 0)
+                available_daily = 0 if total_rem <= 0 else int(ai_state.get("daily_remaining") or 0)
+        except Exception as _ae:
+            logger.warning(f"ai access state failed for {uid}: {_ae}")
         return web.json_response({
             "uid": uid,
             "name": user.get("name", "Student") if isinstance(user, dict) else "Student",
@@ -480,6 +525,13 @@ async def handle_user(request):
             "due_words": [],
             "is_premium": is_prem,
             "is_admin": uid in ADMIN_IDS,
+            # Header limits (request-counter model)
+            "available_daily_requests": available_daily,
+            "premium_type": ai_state.get("premium_type", "FREE"),
+            "ai_daily_limit": ai_state.get("daily_limit"),
+            "ai_daily_used": ai_state.get("daily_used"),
+            "ai_total_remaining": ai_state.get("total_remaining"),
+            "ai_reset_in": ai_state.get("reset_in"),
         }, headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
         logger.error(f"handle_user error: {e}")
@@ -755,8 +807,13 @@ async def handle_chat(request):
         h.append({"role": "user", "content": message})
         if len(h) > 40:                       # bound the in-memory store
             _histories[uid] = h[-40:]
-        prem_send = _histories[uid][-prem_hist_n:]
-        prem_max = int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1500") or "1500")
+        # Input guard: take the last N turns, then hard-trim by a token budget so
+        # a very long conversation can never inflate the per-turn input cost. Even
+        # Premium history is archived down to the freshest PREMIUM_HISTORY_TOKEN_BUDGET.
+        prem_send = _trim_history_by_tokens(_histories[uid][-prem_hist_n:])
+        # Output guard: cap a single Gemini Pro reply at 350 tokens so ALEX can't
+        # generate a balance-burning wall of text. Env-overridable but defaults low.
+        prem_max = int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "350") or "350")
         reply = ""
         try:
             result = await openrouter_generate(prem_system, prem_send, prem_max,
@@ -784,12 +841,19 @@ async def handle_chat(request):
                 await log_session(uid, "webapp_chat")
             except Exception:
                 pass
+        # Header counter, authoritative post-charge: 0 once the whole-period pool
+        # is gone, else what's left of today's ceiling.
+        _tot = int(cons.get("total_remaining") or 0)
+        _dl = int(cons.get("daily_limit") or 0)
+        _du = int(cons.get("daily_used") or 0)
+        _avail = 0 if _tot <= 0 else max(0, _dl - _du)
         return web.json_response(
             {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by Gemini Pro",
              "premium_type": cons.get("premium_type"),
              "daily_used": cons.get("daily_used"), "daily_limit": cons.get("daily_limit"),
              "total_remaining": cons.get("total_remaining"),
-             "remaining_requests": cons.get("total_remaining")},
+             "remaining_requests": cons.get("total_remaining"),
+             "available_daily_requests": _avail},
             headers={"Access-Control-Allow-Origin": "*"})
 
     if route_openrouter or route_deepseek or route_gemini:
@@ -971,6 +1035,7 @@ async def handle_chat(request):
             resp["free_credits"] = fc_balance
             resp["free_credits_cap"] = fc_cap
             resp["remaining_requests"] = fc_balance   # legacy field the client reads
+            resp["available_daily_requests"] = max(0, int(fc_balance))  # header counter (FREE)
             if fc_cap is not None:
                 resp["used"] = max(0, int(fc_cap) - int(fc_balance))
                 resp["ai_limit"] = fc_cap
