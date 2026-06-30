@@ -119,6 +119,16 @@ _DEFAULTS = {
     "FREE_CREDITS_DAILY": 2,           # credits granted each UTC day
     "FREE_CREDITS_CAP": 10,            # max accumulated free credits
     "FREE_AI_MAX_CHARS": 6000,         # server-side context-size cap for free chat
+    # ── Subscription request-counter caps (premium_type FREE/MONTH_1/MONTH_6) ──
+    # The new monetization model: a paid plan grants a WHOLE-PERIOD pool of ALEX
+    # requests (SUB_TOTAL_REQUESTS) plus a hard DAILY ceiling (SUB_DAILY_LIMIT).
+    # Both are checked before every premium ALEX call (database.check_ai_access)
+    # and tunable live / via env without a deploy.
+    "SUB_DAILY_LIMIT":    {"MONTH_1": 50,   "MONTH_6": 75},
+    "SUB_TOTAL_REQUESTS": {"MONTH_1": 1500, "MONTH_6": 13500},
+    # Premium chat memory depth: how many recent messages the Pro model sees so
+    # it perfectly remembers a long, complex conversation.
+    "PREMIUM_HISTORY": 18,             # last N messages sent for paid users
     # ── Daily flashcard limit (economy guard, both tiers) ──────────────
     # Number of flashcards a user may COMPLETE (Skip or Save) per UTC day.
     # Free users hit a hard wall → paywall. Premium users hit a softer cap
@@ -168,10 +178,13 @@ _ENV_SCALARS = {
     "BILLING_FREE_AI_MAX_CHARS": ("FREE_AI_MAX_CHARS", int),
     "BILLING_CARDS_FREE_DAILY": ("CARDS_FREE_DAILY", int),
     "BILLING_CARDS_PREMIUM_DAILY": ("CARDS_PREMIUM_DAILY", int),
+    "BILLING_PREMIUM_HISTORY": ("PREMIUM_HISTORY", int),
 }
 _ENV_JSON = {
     "BILLING_MODELS": "MODELS",
     "BILLING_MODEL_BY_MODE": "MODEL_BY_MODE",
+    "BILLING_SUB_DAILY_LIMIT": "SUB_DAILY_LIMIT",
+    "BILLING_SUB_TOTAL_REQUESTS": "SUB_TOTAL_REQUESTS",
 }
 
 _cache = {"data": None, "ts": 0.0}

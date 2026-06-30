@@ -110,6 +110,8 @@ CREATE TABLE IF NOT EXISTS users (
     chat_credits        INTEGER DEFAULT 0,
     free_credits        INTEGER DEFAULT 0,
     free_credits_date   TEXT DEFAULT '',
+    premium_type            TEXT DEFAULT 'FREE',
+    total_requests_remaining INTEGER DEFAULT 0,
     grandfathered_tier  TEXT DEFAULT '',
     sub_exp_notified    TEXT DEFAULT '',
     ref_by          BIGINT,
@@ -368,6 +370,7 @@ CREATE TABLE IF NOT EXISTS users (
     platform_until TEXT, platform_lifetime INTEGER DEFAULT 0,
     chat_credits INTEGER DEFAULT 0, grandfathered_tier TEXT DEFAULT '',
     free_credits INTEGER DEFAULT 0, free_credits_date TEXT DEFAULT '',
+    premium_type TEXT DEFAULT 'FREE', total_requests_remaining INTEGER DEFAULT 0,
     sub_exp_notified TEXT DEFAULT '',
     ref_by INTEGER, referrals INTEGER DEFAULT 0, ref_premium_days INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
@@ -537,6 +540,13 @@ async def db_init():
         # 1 free Gemini reply. NEVER mixed with purchased credits.
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS free_credits INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN free_credits INTEGER DEFAULT 0",
         "ALTER TABLE users ADD COLUMN IF NOT EXISTS free_credits_date TEXT DEFAULT ''" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN free_credits_date TEXT DEFAULT ''",
+        # ── Subscription request-counter model (premium_type + total/daily caps) ──
+        # premium_type ∈ {'FREE','MONTH_1','MONTH_6'}. total_requests_remaining is
+        # the whole-period ALEX allowance set at purchase (1m=1500, 6m=13500) and
+        # decremented per reply. The DAILY counter reuses ai_req_today / ai_req_date
+        # (already present, lazy UTC reset). FREE users keep the free_credits wallet.
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS premium_type TEXT DEFAULT 'FREE'" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN premium_type TEXT DEFAULT 'FREE'",
+        "ALTER TABLE users ADD COLUMN IF NOT EXISTS total_requests_remaining INTEGER DEFAULT 0" if USE_POSTGRES else "ALTER TABLE users ADD COLUMN total_requests_remaining INTEGER DEFAULT 0",
     ]
     for stmt in migrations:
         try:
@@ -1721,6 +1731,184 @@ async def spend_free_credit(uid: int, amount: int = 1) -> dict:
         if bal != int(st["balance"]) - amount:
             return {"ok": False, "balance": bal, "cap": cap, "reset_in": reset_in}
     return {"ok": True, "balance": bal, "cap": cap, "reset_in": reset_in}
+
+
+# ══════════════════════════════════════════════════════════════════
+#  SUBSCRIPTION REQUEST-COUNTER GATE  (premium_type FREE/MONTH_1/MONTH_6)
+# ══════════════════════════════════════════════════════════════════
+#  The monetization model: a paid plan grants a WHOLE-PERIOD pool of ALEX
+#  requests (total_requests_remaining, set at purchase) AND a hard per-UTC-day
+#  ceiling. Two-phase gate before every premium ALEX call:
+#     STEP 1  total_requests_remaining <= 0           → block (period exhausted)
+#     STEP 2  daily_requests_used >= per-plan limit    → block (today exhausted)
+#  FREE users are gated by the daily-replenishing free_credits wallet instead.
+#  The DAILY counter reuses ai_req_today / ai_req_date (lazy UTC reset).
+async def _sub_limits() -> dict:
+    """Owner-tunable per-plan caps → {daily:{MONTH_1,MONTH_6}, total:{...}}."""
+    daily = {"MONTH_1": 50, "MONTH_6": 75}
+    total = {"MONTH_1": 1500, "MONTH_6": 13500}
+    try:
+        from billing_config import load_config
+        cfg = await load_config()
+        d = cfg.get("SUB_DAILY_LIMIT") or {}
+        t = cfg.get("SUB_TOTAL_REQUESTS") or {}
+        for k in ("MONTH_1", "MONTH_6"):
+            if k in d: daily[k] = max(0, int(d[k]))
+            if k in t: total[k] = max(0, int(t[k]))
+    except Exception:
+        pass
+    return {"daily": daily, "total": total}
+
+
+async def _effective_premium_type(uid: int, user: dict | None = None) -> str:
+    """Resolve the user's CURRENT plan honouring expiry → 'FREE'/'MONTH_1'/'MONTH_6'.
+    If the stored type is paid but the Platform sub has lapsed, self-heal the row
+    back to FREE so the cron top-up and reads converge."""
+    u = user if user is not None else await get_user(uid)
+    if not u:
+        return "FREE"
+    pt = str(u.get("premium_type") or "FREE").upper()
+    if pt not in ("MONTH_1", "MONTH_6"):
+        return "FREE"
+    if await check_platform(uid):
+        return pt
+    try:
+        await db("UPDATE users SET premium_type='FREE', total_requests_remaining=0 WHERE uid=?", uid)
+    except Exception as e:
+        logger.warning("premium_type self-heal failed uid=%s: %s", uid, e)
+    return "FREE"
+
+
+async def get_ai_access_state(uid: int) -> dict:
+    """Read-only snapshot for UI / payload. For FREE: {premium_type, free_credits,
+    free_credits_cap, reset_in}. For paid: adds {daily_used, daily_limit,
+    total_remaining}."""
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    pt = await _effective_premium_type(uid, u)
+    if pt == "FREE":
+        st = await get_free_credits_state(uid)
+        return {"premium_type": "FREE", "free_credits": int(st.get("balance", 0)),
+                "free_credits_cap": st.get("cap"), "reset_in": reset_in}
+    lims = await _sub_limits()
+    daily_limit = lims["daily"].get(pt, 50)
+    total_remaining = max(0, int((u or {}).get("total_requests_remaining") or 0))
+    daily_used = 0
+    if u and str(u.get("ai_req_date") or "") == _utc_day_str():
+        daily_used = max(0, int(u.get("ai_req_today") or 0))
+    return {"premium_type": pt, "daily_used": daily_used, "daily_limit": daily_limit,
+            "daily_remaining": max(0, daily_limit - daily_used),
+            "total_remaining": total_remaining, "reset_in": reset_in}
+
+
+async def check_ai_access(uid: int) -> dict:
+    """Two-phase ALEX access gate. Returns the full state plus:
+        allowed : bool
+        reason  : None | 'total' | 'daily' | 'credits'
+    Never raises — on any error it fails OPEN for paid users (so a transient DB
+    blip can't lock out a paying customer) and CLOSED is only returned on a real
+    exhausted-limit verdict."""
+    reset_in = _secs_to_utc_midnight()
+    u = await get_user(uid)
+    pt = await _effective_premium_type(uid, u)
+    if pt == "FREE":
+        st = await get_free_credits_state(uid)
+        bal = int(st.get("balance", 0))
+        return {"allowed": bal > 0, "premium_type": "FREE",
+                "reason": None if bal > 0 else "credits",
+                "free_credits": bal, "free_credits_cap": st.get("cap"),
+                "reset_in": reset_in}
+    lims = await _sub_limits()
+    daily_limit = lims["daily"].get(pt, 50)
+    total_remaining = max(0, int((u or {}).get("total_requests_remaining") or 0))
+    daily_used = 0
+    if u and str(u.get("ai_req_date") or "") == _utc_day_str():
+        daily_used = max(0, int(u.get("ai_req_today") or 0))
+    base = {"premium_type": pt, "daily_used": daily_used, "daily_limit": daily_limit,
+            "total_remaining": total_remaining, "reset_in": reset_in}
+    # STEP 1 — whole-period allowance.
+    if total_remaining <= 0:
+        return {**base, "allowed": False, "reason": "total"}
+    # STEP 2 — daily ceiling.
+    if daily_used >= daily_limit:
+        return {**base, "allowed": False, "reason": "daily"}
+    return {**base, "allowed": True, "reason": None}
+
+
+async def consume_ai_request(uid: int) -> dict:
+    """Charge 1 request against a PAID plan: atomically decrement
+    total_requests_remaining (floored at 0) and bump the per-UTC-day counter.
+    Call ONLY after a successful premium reply (failed/blocked turns stay free).
+    No-op for FREE users (they use spend_free_credit). Returns fresh counters."""
+    reset_in = _secs_to_utc_midnight()
+    today = _utc_day_str()
+    u = await get_user(uid)
+    pt = await _effective_premium_type(uid, u)
+    if pt == "FREE":
+        return {"premium_type": "FREE"}
+    lims = await _sub_limits()
+    daily_limit = lims["daily"].get(pt, 50)
+    cur = 0
+    if u and str(u.get("ai_req_date") or "") == today:
+        cur = max(0, int(u.get("ai_req_today") or 0))
+    new_daily = cur + 1
+    if USE_POSTGRES:
+        row = await db(
+            "UPDATE users SET total_requests_remaining=GREATEST(total_requests_remaining-1,0), "
+            "ai_req_today=?, ai_req_date=? WHERE uid=? RETURNING total_requests_remaining",
+            new_daily, today, uid, fetch="one")
+        rem = max(0, int((row or {}).get("total_requests_remaining") or 0))
+    else:
+        await db(
+            "UPDATE users SET total_requests_remaining=MAX(total_requests_remaining-1,0), "
+            "ai_req_today=?, ai_req_date=? WHERE uid=?", new_daily, today, uid)
+        u2 = await get_user(uid) or {}
+        rem = max(0, int(u2.get("total_requests_remaining") or 0))
+    return {"premium_type": pt, "total_remaining": rem, "daily_used": new_daily,
+            "daily_limit": daily_limit, "reset_in": reset_in}
+
+
+async def set_subscription_plan(uid: int, plan: str) -> dict:
+    """Activate a subscription on a successful Telegram Stars purchase.
+    plan ∈ {'MONTH_1','MONTH_6'}. Sets premium_type, refills the whole-period
+    allowance (total_requests_remaining), extends platform_until by the period
+    (+30 / +180 days, stacking) and resets today's counter so the buyer starts
+    fresh. Returns the new state. NOTE: this is the single source of truth for
+    'turn a subscription on' in the request-counter model."""
+    plan = str(plan).upper()
+    if plan not in ("MONTH_1", "MONTH_6"):
+        return {"ok": False, "error": "bad plan"}
+    lims = await _sub_limits()
+    total = lims["total"].get(plan, 1500)
+    period = "1m" if plan == "MONTH_1" else "6m"
+    await grant_platform(uid, period)          # extend platform_until (+30/+180)
+    today = _utc_day_str()
+    await db("UPDATE users SET premium_type=?, total_requests_remaining=?, "
+             "ai_req_today=0, ai_req_date=? WHERE uid=?",
+             plan, int(total), today, uid)
+    logger.info("subscription activated uid=%s plan=%s total=%s", uid, plan, total)
+    return {"ok": True, "premium_type": plan,
+            "total_requests_remaining": int(total), "period": period}
+
+
+async def reset_daily_counters() -> dict:
+    """Daily 00:00 UTC maintenance (cron): zero EVERY user's daily request
+    counter and top FREE users up by FREE_CREDITS_DAILY (clamped to the cap).
+    Idempotent within a UTC day (the free top-up skips rows already dated today).
+    The per-user lazy grant elsewhere is a safety net; this is the bulk pass."""
+    today = _utc_day_str()
+    daily, cap = await _free_credits_cfg()
+    await db("UPDATE users SET ai_req_today=0, ai_req_date=?", today)
+    if USE_POSTGRES:
+        await db("UPDATE users SET free_credits=LEAST(COALESCE(free_credits,0)+?, ?), free_credits_date=? "
+                 "WHERE (premium_type IS NULL OR premium_type='FREE') AND COALESCE(free_credits_date,'')<>?",
+                 daily, cap, today, today)
+    else:
+        await db("UPDATE users SET free_credits=MIN(COALESCE(free_credits,0)+?, ?), free_credits_date=? "
+                 "WHERE (premium_type IS NULL OR premium_type='FREE') AND COALESCE(free_credits_date,'')<>?",
+                 daily, cap, today, today)
+    logger.info("daily counters reset (day=%s, free +%s cap %s)", today, daily, cap)
+    return {"ok": True, "day": today, "daily_grant": daily, "cap": cap}
 
 
 # ── DAILY FLASHCARD LIMIT (economy guard, BOTH tiers) ─────────────────────────

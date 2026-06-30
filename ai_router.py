@@ -289,7 +289,11 @@ async def deepseek_generate(system: str, messages: list[dict],
 #  never needs a code change.
 OPENROUTER_API_KEY      = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL     = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-OPENROUTER_MODEL        = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+# FREE tier → ultra-cheap Flash; PREMIUM tier → flagship Pro. Both Gemini,
+# both via OpenRouter (the whole PolyGlotty AI ecosystem runs on Gemini now —
+# no Anthropic Claude in the chat path).
+OPENROUTER_MODEL         = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
+OPENROUTER_MODEL_PREMIUM = os.getenv("OPENROUTER_MODEL_PREMIUM", "google/gemini-2.5-pro")
 OPENROUTER_FREE_ENABLED = os.getenv("OPENROUTER_FREE_ENABLED", "1") != "0"
 OPENROUTER_MAX_TOKENS   = int(os.getenv("OPENROUTER_MAX_TOKENS", "600") or "600")
 OPENROUTER_TIMEOUT      = float(os.getenv("OPENROUTER_TIMEOUT", "45") or "45")
@@ -313,26 +317,34 @@ def openrouter_available() -> bool:
     return bool(OPENROUTER_FREE_ENABLED and OPENROUTER_API_KEY)
 
 
-def should_use_openrouter(is_paid: bool) -> bool:
-    """Route FREE users to OpenRouter when configured. Premium users are NEVER
-    sent here (they stay on Claude)."""
-    if not openrouter_available():
-        return False
-    return not is_paid
+def should_use_openrouter(is_paid: bool = False) -> bool:
+    """Route ALL users to OpenRouter when configured. The whole PolyGlotty AI
+    ecosystem runs on Gemini now: FREE users get Flash, PREMIUM users get Pro
+    (the tier→model split is applied in server.handle_chat). `is_paid` is kept
+    for signature compatibility but no longer changes routing."""
+    return openrouter_available()
+
+
+def openrouter_model_for(is_paid: bool) -> str:
+    """Pick the Gemini model for the tier: paid → flagship Pro, free → Flash."""
+    return OPENROUTER_MODEL_PREMIUM if is_paid else OPENROUTER_MODEL
 
 
 async def openrouter_generate(system: str, messages: list[dict],
                               max_tokens: int | None = None,
-                              timeout: float | None = None) -> dict:
+                              timeout: float | None = None,
+                              model: str | None = None) -> dict:
     """Call OpenRouter (OpenAI-compatible /chat/completions) and return
     {"text": str, "usage": {...}}. Raises OpenRouterRateLimit on 429,
-    OpenRouterError otherwise. Never returns an empty success silently."""
+    OpenRouterError otherwise. Never returns an empty success silently.
+    `model` overrides the default (FREE Flash); pass OPENROUTER_MODEL_PREMIUM
+    for paid users on the flagship Pro model."""
     if not openrouter_available():
         raise OpenRouterError("OpenRouter not configured")
 
     url = f"{OPENROUTER_BASE_URL.rstrip('/')}/chat/completions"
     payload = {
-        "model": OPENROUTER_MODEL,
+        "model": model or OPENROUTER_MODEL,
         "messages": _to_openai_messages(system, messages),
         "max_tokens": int(max_tokens or OPENROUTER_MAX_TOKENS),
         "temperature": 0.7,

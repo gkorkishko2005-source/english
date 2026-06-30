@@ -182,16 +182,17 @@ MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 # Platform subscription unlocks course/exams/analytics/UI. Sold flat.
 # ALEX credits are a separate pre-paid pool spent per chat message.
 # Legacy PREMIUM_PLANS above stays alive for grandfathered renewals.
+# Two subscription plans only. Each maps to a request-counter tier:
+#   1m  → premium_type MONTH_1, total_requests_remaining 1500, daily ceiling 50
+#   6m  → premium_type MONTH_6, total_requests_remaining 13500, daily ceiling 75
+# The "lifetime" plan was retired with the monetization rewrite.
 PLATFORM_PLANS = {
-    "plat_1m":  {"stars": 299,  "period": "1m",       "starter_credits": 30,  "label_ru": "Платформа · 1 мес",   "label_en": "Platform · 1 mo"},
-    "plat_6m":  {"stars": 1290, "period": "6m",       "starter_credits": 150, "label_ru": "Платформа · 6 мес",   "label_en": "Platform · 6 mo"},
-    "plat_life":{"stars": 4990, "period": "lifetime", "starter_credits": 500, "label_ru": "Платформа · навсегда","label_en": "Platform · lifetime"},
+    "plat_1m":  {"stars": 299,  "period": "1m", "premium_type": "MONTH_1", "label_ru": "Платформа · 1 мес", "label_en": "Platform · 1 mo"},
+    "plat_6m":  {"stars": 1290, "period": "6m", "premium_type": "MONTH_6", "label_ru": "Платформа · 6 мес", "label_en": "Platform · 6 mo"},
 }
-CREDIT_PACKS = {
-    "credits_100":  {"stars": 149,  "credits": 100,  "label_ru": "100 кредитов ALEX",    "label_en": "100 ALEX credits"},
-    "credits_500":  {"stars": 599,  "credits": 500,  "label_ru": "500 кредитов ALEX",    "label_en": "500 ALEX credits"},
-    "credits_2000": {"stars": 1990, "credits": 2000, "label_ru": "2 000 кредитов ALEX",  "label_en": "2 000 ALEX credits"},
-}
+# Credit packs are no longer sold. The ALEX credit-grant engine
+# (grant_credits_via_server / add_credits) is kept for referrals and the
+# FREE-tier daily top-up, but the purchase storefront has been removed.
 
 def plan_stars_for_user(plan_id: str, uid: int, has_discount: bool = False) -> int:
     plan = PREMIUM_PLANS[plan_id]
@@ -949,6 +950,18 @@ async def run_plant_decay():
     except Exception as e:
         logger.warning(f"plant tonus decay failed: {e}")
 
+# ── Daily AI-request reset (strictly UTC 00:00) ──────────────────────
+async def run_daily_request_reset():
+    """Daily UTC-00:00 job: zero every user's daily AI-request counter and
+    top FREE users up by +FREE_CREDITS_DAILY (clamped to the cap). Premium
+    whole-period allowance (total_requests_remaining) is untouched here."""
+    try:
+        from database import reset_daily_counters
+        res = await reset_daily_counters()
+        logger.info("daily AI-request reset applied: %s", res)
+    except Exception as e:
+        logger.warning(f"daily AI-request reset failed: {e}")
+
 async def schedule_all():
     # One consolidated daily push per user, fired at the time they chose
     # in reminders. The content depends on the weekday (see
@@ -991,6 +1004,16 @@ async def schedule_all():
         logger.info("schedule_all: plant tonus decay at 00:00 UTC")
     except Exception as e:
         logger.warning(f"schedule_all: plant decay schedule failed: {e}")
+    # Single global job: at 00:00 UTC zero every user's daily AI-request
+    # counter and top FREE users up by +FREE_CREDITS_DAILY (capped). This is
+    # the bulk pass; per-user lazy resets in the access layer are the safety
+    # net. UTC-pinned so the boundary is identical for everyone.
+    try:
+        scheduler.add_job(run_daily_request_reset, "cron", hour=0, minute=0, timezone="UTC",
+                          id="daily_request_reset", replace_existing=True)
+        logger.info("schedule_all: daily AI-request reset at 00:00 UTC")
+    except Exception as e:
+        logger.warning(f"schedule_all: daily request reset schedule failed: {e}")
 
 # ══════════════════════════════════════════════════════════════════
 #  INLINE MODE
@@ -1190,13 +1213,6 @@ async def cmd_start(message: Message):
     if args in PLATFORM_PLANS:
         user_lang = await get_lang(uid) or "ru"
         ok = await _send_platform_invoice(uid, args, user_lang == "ru")
-        if not ok:
-            await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
-                                  else f"{ICON['warn']} Could not create invoice. Try /premium")
-        return
-    if args in CREDIT_PACKS:
-        user_lang = await get_lang(uid) or "ru"
-        ok = await _send_credits_invoice(uid, args, user_lang == "ru")
         if not ok:
             await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
                                   else f"{ICON['warn']} Could not create invoice. Try /premium")
@@ -2577,22 +2593,18 @@ async def cb_prem_all(cb: CallbackQuery):
     await cb.answer()
     ru = (await get_lang(cb.from_user.id) or "ru") == "ru"
     rows = [
-        [InlineKeyboardButton(text=("🚀 Платформа · 1 мес — 299 ⭐ + 30 кр" if ru else "🚀 Platform · 1 mo — 299 ⭐ + 30 cr"), callback_data="plat_buy:plat_1m")],
-        [InlineKeyboardButton(text=("🚀 Платформа · 6 мес — 1 290 ⭐ + 150 кр (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ + 150 cr (−28%)"), callback_data="plat_buy:plat_6m")],
-        [InlineKeyboardButton(text=("🚀 Платформа · навсегда — 4 990 ⭐ + 500 кр" if ru else "🚀 Platform · lifetime — 4 990 ⭐ + 500 cr"), callback_data="plat_buy:plat_life")],
-        [InlineKeyboardButton(text=("🪙 100 кредитов ALEX — 149 ⭐" if ru else "🪙 100 ALEX credits — 149 ⭐"), callback_data="credit_buy:credits_100")],
-        [InlineKeyboardButton(text=("🪙 500 кредитов ALEX — 599 ⭐ (−20%)" if ru else "🪙 500 ALEX credits — 599 ⭐ (−20%)"), callback_data="credit_buy:credits_500")],
-        [InlineKeyboardButton(text=("🪙 2 000 кредитов ALEX — 1 990 ⭐ (−33%)" if ru else "🪙 2 000 ALEX credits — 1 990 ⭐ (−33%)"), callback_data="credit_buy:credits_2000")],
+        [InlineKeyboardButton(text=("🚀 Платформа · 1 мес — 299 ⭐" if ru else "🚀 Platform · 1 mo — 299 ⭐"), callback_data="plat_buy:plat_1m")],
+        [InlineKeyboardButton(text=("🚀 Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ (−28%)"), callback_data="plat_buy:plat_6m")],
     ]
     text = (
-        "<b>📋 Все тарифы PolyGlotty</b>\n\n"
-        "<b>🚀 Платформа</b> — курс, экзамены и безлимит карточек.\n"
-        "<b>🪙 Кредиты ALEX</b> — баланс для чата, тратятся за сообщение и не сгорают.\n\n"
+        "<b>📋 Тарифы PolyGlotty</b>\n\n"
+        "<b>🚀 Платформа · 1 месяц</b> — 1 500 запросов к ALEX (до 50 в день), курс, экзамены, безлимит карточек.\n"
+        "<b>🚀 Платформа · 6 месяцев</b> — 13 500 запросов к ALEX (до 75 в день), всё то же и выгоднее.\n\n"
         "<i>Оплата через Telegram Stars.</i>"
     ) if ru else (
-        "<b>📋 All PolyGlotty plans</b>\n\n"
-        "<b>🚀 Platform</b> — course, exams and unlimited cards.\n"
-        "<b>🪙 ALEX credits</b> — chat balance, spent per message, never expire.\n\n"
+        "<b>📋 PolyGlotty plans</b>\n\n"
+        "<b>🚀 Platform · 1 month</b> — 1,500 ALEX requests (up to 50/day), course, exams, unlimited cards.\n"
+        "<b>🚀 Platform · 6 months</b> — 13,500 ALEX requests (up to 75/day), same perks, better value.\n\n"
         "<i>Telegram Stars only.</i>"
     )
     await cb.message.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=rows))
@@ -2621,31 +2633,6 @@ async def _send_platform_invoice(uid: int, plan_id: str, ru: bool) -> bool:
         return True
     except Exception as e:
         logger.error(f"send_invoice platform error: {e}")
-        return False
-
-async def _send_credits_invoice(uid: int, pack_id: str, ru: bool) -> bool:
-    from aiogram.types import LabeledPrice
-    pack = CREDIT_PACKS.get(pack_id)
-    if not pack:
-        return False
-    label = pack["label_ru"] if ru else pack["label_en"]
-    stars = int(pack["stars"])
-    desc = ("Кредиты ALEX. Тратятся за каждое сообщение чату. Не сгорают."
-            if ru else
-            "ALEX credits. Spent per chat message. Never expire.")
-    try:
-        await bot.send_invoice(
-            chat_id=uid,
-            title=f"PolyGlotty {label}",
-            description=desc,
-            payload=f"credits:{pack['credits']}:{uid}",
-            currency="XTR",
-            prices=[LabeledPrice(label=label, amount=stars)],
-            protect_content=False,
-        )
-        return True
-    except Exception as e:
-        logger.error(f"send_invoice credits error: {e}")
         return False
 
 async def _hearts_refill_stars() -> int:
@@ -2707,20 +2694,16 @@ async def cb_plat_buy(cb: CallbackQuery):
     if not ok:
         await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
 
-# ══ ALEX CREDITS BUY (Stars) ═════════════════════════════════════════════
+# ══ ALEX CREDITS BUY (retired) ═══════════════════════════════════════════
+# Credit packs are no longer sold. An old inline "buy credits" button from a
+# user's chat history routes them to the current subscription menu instead.
 @dp.callback_query(F.data.startswith("credit_buy:"))
 async def cb_credit_buy(cb: CallbackQuery):
-    parts = cb.data.split(":")
-    pack_id = parts[1] if len(parts) > 1 else "credits_100"
-    uid = cb.from_user.id
-    user_lang = await get_lang(uid) or "ru"
-    ru = user_lang == "ru"
-    if pack_id not in CREDIT_PACKS:
-        await cb.answer("Invalid pack", show_alert=True); return
-    await cb.answer()
-    ok = await _send_credits_invoice(uid, pack_id, ru)
-    if not ok:
-        await bot.send_message(uid, "Ошибка платежа. Попробуй позже." if ru else "Payment error. Try later.")
+    try:
+        await cb.answer()
+    except Exception:
+        pass
+    await cmd_premium(cb.message)
 
 # ══ CARD PAYMENT MENU ════════════════════════════════════════════════════
 @dp.callback_query(F.data == "prem_card_menu")
@@ -2773,41 +2756,46 @@ async def on_payment_success(msg: Message):
         try:
             parts = payload.split(":")
             period = parts[1] if len(parts) > 1 else "1m"
-            granted = await grant_platform_via_server(uid, period)
-            label = {"1m":"1 месяц" if ru else "1 month",
-                     "6m":"6 месяцев" if ru else "6 months",
-                     "lifetime":"навсегда" if ru else "lifetime"}.get(period, period)
+            # Map the purchased period to its request-counter tier and
+            # provision both the platform window and the AI request pool
+            # atomically (set_subscription_plan calls grant_platform, then
+            # sets premium_type + total_requests_remaining + resets daily).
+            plan_map = {"1m": "MONTH_1", "6m": "MONTH_6"}
+            plan = plan_map.get(period, "MONTH_1")
+            label = {"1m": "1 месяц" if ru else "1 month",
+                     "6m": "6 месяцев" if ru else "6 months"}.get(period, period)
+            granted = False
+            total_quota = 0
+            try:
+                from database import set_subscription_plan
+                state = await set_subscription_plan(uid, plan)
+                total_quota = int((state or {}).get("total_requests_remaining", 0))
+                granted = True
+            except Exception as e:
+                logger.error("set_subscription_plan failed uid=%s plan=%s: %s", uid, plan, e)
+                # Fallback: at least activate the platform window via server.
+                granted = await grant_platform_via_server(uid, period)
             if not granted:
                 await msg.answer(("Оплата прошла, но доступ не активировался. Напиши /paysupport." if ru
                                   else "Payment succeeded but access did not activate. Use /paysupport."),
                                  parse_mode="HTML")
                 return
-            # ── Self-contained value: each Platform purchase ships with
-            #    starter ALEX credits so the user can use the chat right
-            #    away without a second purchase.
-            starter_credits = 0
-            plan_id = next((pid for pid, p in PLATFORM_PLANS.items() if p["period"] == period), None)
-            if plan_id and PLATFORM_PLANS[plan_id].get("starter_credits"):
-                starter_credits = int(PLATFORM_PLANS[plan_id]["starter_credits"])
-                try:
-                    await grant_credits_via_server(uid, starter_credits)
-                except Exception as e:
-                    logger.warning("starter credit grant failed uid=%s credits=%s: %s", uid, starter_credits, e)
-            starter_line_ru = f"\n🪙 +<b>{starter_credits}</b> стартовых кредитов ALEX зачислено." if starter_credits else ""
-            starter_line_en = f"\n🪙 +<b>{starter_credits}</b> starter ALEX credits added." if starter_credits else ""
+            daily_cap = 50 if plan == "MONTH_1" else 75
+            quota_line_ru = f"\n💬 <b>{total_quota:,}</b> запросов к ALEX (до <b>{daily_cap}</b> в день).".replace(",", " ") if total_quota else ""
+            quota_line_en = f"\n💬 <b>{total_quota:,}</b> ALEX requests (up to <b>{daily_cap}</b>/day)." if total_quota else ""
             text = (
                 f"🎉 <b>Оплата прошла</b>\n\n"
                 f"🚀 <b>Платформа PolyGlotty</b> активна: <b>{label}</b>.\n"
-                f"Курс, экзамены, расширенные карточки и аналитика — открыты.{starter_line_ru}\n\n"
-                f"Кредиты ALEX докупаются отдельно в /premium, когда захочешь больше чата."
+                f"Курс, экзамены, расширенные карточки и аналитика — открыты.{quota_line_ru}\n\n"
+                f"Дневной лимит обнуляется в 00:00 UTC. Приятной учёбы!"
                 if ru else
                 f"🎉 <b>Payment successful</b>\n\n"
                 f"🚀 <b>PolyGlotty Platform</b> is active: <b>{label}</b>.\n"
-                f"Course, exams, expanded cards and analytics are unlocked.{starter_line_en}\n\n"
-                f"Top up ALEX credits in /premium when you want more chat."
+                f"Course, exams, expanded cards and analytics are unlocked.{quota_line_en}\n\n"
+                f"Your daily limit resets at 00:00 UTC. Enjoy learning!"
             )
             await send_celebration(msg, text)
-            logger.info("Platform granted uid=%s period=%s starter_credits=%s", uid, period, starter_credits)
+            logger.info("Platform granted uid=%s period=%s plan=%s total=%s", uid, period, plan, total_quota)
         except Exception as e:
             logger.error(f"platform payment handler error: {e}")
             await msg.answer("✓ Платёж принят." if ru else "✓ Payment received.")

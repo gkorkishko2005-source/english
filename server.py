@@ -659,16 +659,120 @@ async def handle_chat(request):
     try:
         from ai_router import should_use_gemini, should_use_deepseek, should_use_openrouter
         # Free-provider priority for NON-paying users: OpenRouter → DeepSeek →
-        # Gemini. First one configured wins. Premium users match none of these →
-        # they go to Claude (the full path below).
-        route_openrouter = should_use_openrouter(is_paid)
-        route_deepseek = (not route_openrouter) and should_use_deepseek(is_paid)
-        route_gemini = (not route_openrouter) and (not route_deepseek) and should_use_gemini(is_paid)
+        # Gemini. First one configured wins. PREMIUM users are handled by the
+        # dedicated Gemini-Pro branch below (request-counter gated), so the free
+        # chain is restricted to non-paying users only.
+        route_openrouter = (not is_paid) and should_use_openrouter()
+        route_deepseek = (not is_paid) and (not route_openrouter) and should_use_deepseek(is_paid)
+        route_gemini = (not is_paid) and (not route_openrouter) and (not route_deepseek) and should_use_gemini(is_paid)
     except Exception as e:
         logger.warning("ai_router import failed: %s", e)
         route_openrouter = False
         route_deepseek = False
         route_gemini = False
+
+    # ── PREMIUM ALEX (Gemini Pro, request-counter gated) ──────────────────────
+    # Paid plans (MONTH_1 / MONTH_6) run on the flagship Gemini Pro model via
+    # OpenRouter — the whole ecosystem is Gemini now, no Claude in the chat path.
+    # A two-phase gate (whole-period pool → daily ceiling) protects the shared key
+    # BEFORE any API call; a successful reply consumes exactly 1 request. If
+    # OpenRouter is somehow unconfigured we fall through to the legacy Claude path
+    # as a safety net (never leave a paying user without ALEX).
+    prem_or = False
+    try:
+        from ai_router import openrouter_available as _or_avail
+        prem_or = bool(is_paid and uid and _or_avail())
+    except Exception:
+        prem_or = False
+    if prem_or:
+        from database import check_ai_access, consume_ai_request
+        from ai_router import (openrouter_generate, OPENROUTER_MODEL_PREMIUM,
+                               GeminiRateLimit, ai_busy_message)
+        access = await check_ai_access(uid)
+        if not access.get("allowed"):
+            reason = access.get("reason")
+            dl = int(access.get("daily_limit") or 0)
+            if reason == "total":
+                msg = {"ru": "🚫 Вы исчерпали общий лимит подписки на этот период.",
+                       "en": "🚫 You've used your subscription's total request limit for this period.",
+                       "es": "🚫 Has agotado el límite total de solicitudes de tu suscripción para este período.",
+                       "pt": "🚫 Você esgotou o limite total de solicitações da sua assinatura neste período."}
+            else:  # 'daily'
+                msg = {"ru": f"⏳ Дневной лимит ({dl} запросов) исчерпан. Обнуление в 00:00 UTC.",
+                       "en": f"⏳ Daily limit ({dl} requests) reached. Resets at 00:00 UTC.",
+                       "es": f"⏳ Límite diario ({dl} solicitudes) alcanzado. Se reinicia a las 00:00 UTC.",
+                       "pt": f"⏳ Limite diário ({dl} solicitações) atingido. Zera às 00:00 UTC."}
+            return web.json_response(
+                {"reply": msg.get(lang, msg["en"]), "limit": True, "sub_limit": True,
+                 "limit_reason": reason, "daily_used": access.get("daily_used"),
+                 "daily_limit": dl, "total_remaining": access.get("total_remaining"),
+                 "reset_in": access.get("reset_in")},
+                status=429, headers={"Access-Control-Allow-Origin": "*"})
+        # Expert premium persona — deep, pedagogical, no brevity cap.
+        prem_directive = (
+            "\n\nYou are ALEX, an elite English tutor powered by an advanced model, "
+            "working with a PREMIUM student. Teach at an expert level:\n"
+            "- Answer complex grammar questions in depth — the rule, its nuances "
+            "and 2–3 natural example sentences.\n"
+            "- For corrections, show the fix AND explain WHY, offer a more "
+            "native-like phrasing, and note register/tone.\n"
+            "- Proactively enrich: suggest idioms, collocations, synonyms and "
+            "better alternatives when relevant.\n"
+            "- Run immersive roleplay/scenarios fully in character when asked, then "
+            "add a short feedback note at the end.\n"
+            "- Use sound pedagogy: scaffold, check understanding, adapt to the "
+            "student's level, and remember earlier turns so a long conversation "
+            "stays coherent.\n"
+            "- Be thorough and well-structured with formatting and examples — you "
+            "are NOT limited to a few sentences."
+        )
+        prem_system = system + prem_directive
+        try:
+            from billing_config import load_config as _lc
+            _pc = await _lc()
+            prem_hist_n = max(6, int(_pc.get("PREMIUM_HISTORY", 18) or 18))
+        except Exception:
+            prem_hist_n = 18
+        h = _histories.setdefault(uid, [])
+        h.append({"role": "user", "content": message})
+        if len(h) > 40:                       # bound the in-memory store
+            _histories[uid] = h[-40:]
+        prem_send = _histories[uid][-prem_hist_n:]
+        prem_max = int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1500") or "1500")
+        reply = ""
+        try:
+            result = await openrouter_generate(prem_system, prem_send, prem_max,
+                                               model=OPENROUTER_MODEL_PREMIUM)
+            reply = re.sub(r"\n[ \t]*\n+", "\n", (result.get("text") or "").strip())
+        except GeminiRateLimit:
+            reply = ""
+        except Exception as e:
+            logger.warning("premium openrouter failed uid=%s: %s", uid, e)
+            reply = ""
+        if not reply:
+            try: _histories[uid].pop()        # keep history clean, do NOT charge
+            except Exception: pass
+            return web.json_response({"reply": ai_busy_message(lang)},
+                                     headers={"Access-Control-Allow-Origin": "*"})
+        _histories[uid].append({"role": "assistant", "content": reply})
+        cons = {}
+        try:
+            cons = await consume_ai_request(uid)     # charge exactly 1 on success
+        except Exception as e:
+            logger.warning("consume_ai_request failed uid=%s: %s", uid, e)
+        if uid:
+            try:
+                from database import log_session
+                await log_session(uid, "webapp_chat")
+            except Exception:
+                pass
+        return web.json_response(
+            {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by Gemini Pro",
+             "premium_type": cons.get("premium_type"),
+             "daily_used": cons.get("daily_used"), "daily_limit": cons.get("daily_limit"),
+             "total_remaining": cons.get("total_remaining"),
+             "remaining_requests": cons.get("total_remaining")},
+            headers={"Access-Control-Allow-Origin": "*"})
 
     if route_openrouter or route_deepseek or route_gemini:
         free_provider = ("openrouter" if route_openrouter
@@ -1099,6 +1203,38 @@ async def handle_chat_reset(request):
         pass
     return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin": "*"})
 
+# ── UNIFIED CONTENT GENERATION (Gemini-first) ────────────────────────────────
+# The whole PolyGlotty ecosystem runs on Gemini now. Content endpoints (lesson,
+# test, listening task, exam generation) route through OpenRouter (Gemini Pro)
+# instead of Anthropic Claude. Claude remains only as a safety-net fallback for
+# the case where OpenRouter is unconfigured, so a missing key never takes the
+# whole content surface offline. Returns (text, usage_dict).
+async def _gen_text(system: str, user_content: str, max_tokens: int = 800,
+                    fallback_model: str | None = None) -> tuple:
+    try:
+        from ai_router import (openrouter_available, openrouter_generate,
+                               OPENROUTER_MODEL_PREMIUM)
+        if openrouter_available():
+            result = await openrouter_generate(
+                system, [{"role": "user", "content": user_content}],
+                max_tokens=max_tokens, model=OPENROUTER_MODEL_PREMIUM)
+            return (result.get("text") or "").strip(), (result.get("usage") or {})
+    except Exception as e:
+        logger.warning("_gen_text Gemini path failed, falling back to Claude: %s", e)
+    # Safety-net fallback: Anthropic Claude (only if OpenRouter is unavailable).
+    async with httpx.AsyncClient(timeout=60) as client:
+        r = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={"x-api-key": ANT_KEY, "anthropic-version": "2023-06-01",
+                     "content-type": "application/json"},
+            json={"model": fallback_model or SONNET_MODEL, "max_tokens": max_tokens,
+                  "system": system, "messages": [{"role": "user", "content": user_content}]})
+        data = r.json()
+    if isinstance(data, dict) and "error" in data:
+        raise RuntimeError(str(data["error"]))
+    text = (data.get("content") or [{}])[0].get("text", "").strip()
+    return text, (data.get("usage") or {})
+
 # ── LESSON ───────────────────────────────────────────────────────────────────
 async def handle_lesson(request):
     try:
@@ -1114,14 +1250,7 @@ async def handle_lesson(request):
         "Format: brief explanation, 3 examples, 2 practice exercises. Use **bold** for key terms."
     )
     try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":f"Teach me about {topic}"}]},
-            )
-            data=r.json()
-            content=data["content"][0]["text"].strip()
+        content, _ = await _gen_text(system, f"Teach me about {topic}", max_tokens=800)
     except Exception as e:
         return web.json_response({"error":str(e)[:150]},status=500)
     return web.json_response({"content":content},headers={"Access-Control-Allow-Origin":"*"})
@@ -1139,11 +1268,7 @@ async def handle_test(request):
         "Format: numbered questions with 4 options A/B/C/D and correct answer. Use clear markdown."
     )
     try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r=await client.post("https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate test"}]})
-            data=r.json(); content=data["content"][0]["text"].strip()
+        content, _ = await _gen_text(system, "Generate test", max_tokens=800)
     except Exception as e:
         return web.json_response({"error":str(e)[:150]},status=500)
     return web.json_response({"content":content},headers={"Access-Control-Allow-Origin":"*"})
@@ -1275,11 +1400,7 @@ async def handle_audio_task(request):
         f'Questions in {"Russian" if ru else "English"}. Transcript always in English.'
     )
     try:
-        async with httpx.AsyncClient(timeout=45) as client:
-            r=await client.post("https://api.anthropic.com/v1/messages",
-                headers={"x-api-key":ANT_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"},
-                json={"model":SONNET_MODEL,"max_tokens":800,"system":system,"messages":[{"role":"user","content":"Generate"}]})
-            data=r.json(); raw=data["content"][0]["text"].strip()
+        raw, _ = await _gen_text(system, "Generate", max_tokens=800)
         raw=raw.replace("```json","").replace("```","").strip()
         task=json.loads(raw)
     except Exception as e:
@@ -2107,27 +2228,20 @@ async def handle_exam_generate(request):
         seen = await seen_topic_ids(uid)
         topic = pick_topics(1, exclude_ids=seen, exam_type=exam_type)[0]
         system = build_exam_system_prompt(exam_type, section, level, topic, lang)
-        async with httpx.AsyncClient(timeout=60) as client:
-            r = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={"x-api-key": ANT_KEY, "anthropic-version": "2023-06-01",
-                         "content-type": "application/json"},
-                json={"model": SONNET_MODEL, "max_tokens": 1400, "system": system,
-                      "messages": [{"role": "user",
-                                    "content": f"Generate one {section} item now."}]})
-            data = r.json()
-        if "error" in data:
-            logger.error("exam_generate AI error: %s", data["error"])
+        try:
+            raw, _usage = await _gen_text(system, f"Generate one {section} item now.",
+                                          max_tokens=1400)
+        except Exception as e:
+            logger.error("exam_generate AI error: %s", e)
             return web.json_response({"error": "generation_failed"}, status=502,
                                      headers={"Access-Control-Allow-Origin": "*"})
-        raw = (data.get("content") or [{}])[0].get("text", "").strip()
         raw = raw.replace("```json", "").replace("```", "").strip()
         item = json.loads(raw)
         # Stamp provenance so the client can show the academic topic title.
         item.setdefault("topic", topic["title"])
         item["topic_id"] = topic["id"]
         item["domain"] = topic["domain"]
-        await _exam_log_ai_cost(uid, (data.get("usage") or {}))
+        await _exam_log_ai_cost(uid, (_usage or {}))
         tid = await save_exam_template(exam_type, section, topic["id"], level, item)
         if tid:
             await mark_exam_template_seen(uid, tid)

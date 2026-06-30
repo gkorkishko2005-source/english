@@ -71,9 +71,27 @@ def _extract_json(text: str) -> dict:
 
 
 async def _complete(system: str, user: str, max_tokens: int = 1100) -> dict:
-    """One Anthropic call → parsed JSON, or {} on any failure (never raises)."""
+    """One model call → parsed JSON, or {} on any failure (never raises).
+
+    Whole ecosystem on Gemini: grading runs on Gemini Pro via OpenRouter.
+    Anthropic Claude remains only as a safety-net fallback for the case where
+    OpenRouter is unconfigured, so grading never goes fully dark."""
+    # ── Primary: Gemini Pro via OpenRouter ────────────────────────────
+    try:
+        from ai_router import (openrouter_available, openrouter_generate,
+                               OPENROUTER_MODEL_PREMIUM)
+        if openrouter_available():
+            result = await openrouter_generate(
+                system, [{"role": "user", "content": user}],
+                max_tokens=max_tokens, model=OPENROUTER_MODEL_PREMIUM)
+            parsed = _extract_json(result.get("text") or "")
+            parsed["_usage"] = result.get("usage") or {}
+            return parsed
+    except Exception as e:
+        logger.warning("exam_grader Gemini path failed, falling back to Claude: %s", e)
+    # ── Fallback: Anthropic Claude (only if OpenRouter unavailable) ────
     if not ANT_KEY:
-        logger.error("exam_grader: ANTHROPIC_API_KEY is not set")
+        logger.error("exam_grader: no OpenRouter and ANTHROPIC_API_KEY is not set")
         return {}
     try:
         async with httpx.AsyncClient(timeout=60) as client:

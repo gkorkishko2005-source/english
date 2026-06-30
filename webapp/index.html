@@ -15590,9 +15590,8 @@ const PREMIUM_FEATURES=[
    ══════════════════════════════════════════════════════════════════ */
 
 const PLATFORM_PLAN_DEFS=[
-  {id:'plat_1m',  stars:299,  period:'1m',       monthly:299, save:0,  starterCredits:30},
-  {id:'plat_6m',  stars:1290, period:'6m',       monthly:215, save:28, starterCredits:150, popular:true},
-  {id:'plat_life',stars:4990, period:'lifetime', monthly:null,save:null, starterCredits:500},
+  {id:'plat_1m', stars:299,  period:'1m', monthly:299, save:0,  reqTotal:1500,  reqDaily:50},
+  {id:'plat_6m', stars:1290, period:'6m', monthly:215, save:28, reqTotal:13500, reqDaily:75, popular:true},
 ];
 /* perCr = stars per CREDIT (stars/credits). This is the honest unit — a credit
    is the billed unit; a chat message costs a variable number of credits by
@@ -15606,7 +15605,7 @@ const CREDIT_PACK_DEFS=[
   {id:'credits_2000', stars:1990, credits:2000, perCr:1.00},
 ];
 
-let _premTab='credits';   // default: fast path to the goal — buy credits
+let _premTab='platform';  // credit packs retired — subscription is the only product
 
 function switchPremTab(tab){
   /* Re-run the full panel render so the cross-link ("→ Подписка" /
@@ -15761,8 +15760,8 @@ function _pnFeatures(){
   return [
     {k:'alex',
      icon:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-     tt:{ru:'Живой чат с ALEX — без лимита',en:'Live ALEX chat — unlimited'},
-     sb:{ru:'Доступ к моделям Claude и Gemini, голос и разбор ошибок',en:'Access to Claude & Gemini models, voice and mistake review'},
+     tt:{ru:'Живой чат с ALEX на Gemini Pro',en:'Live ALEX chat on Gemini Pro'},
+     sb:{ru:'1 500–13 500 запросов на период, глубокий разбор грамматики и ошибок',en:'1,500–13,500 requests per period, deep grammar & mistake analysis'},
      demo:{ex:{ru:'<div class="q">Ты:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for results you can see now. “I’ve finished” = it’s done ✅</div>',
                en:'<div class="q">You:</div><div class="a">Can you explain present perfect simply?</div><br><div class="q">ALEX:</div><div class="a">Use <b>have/has + V3</b> for a result you see now. “I’ve finished” = it’s done ✅</div>'}}},
     {k:'exam',
@@ -15871,16 +15870,21 @@ function renderPremNative(){
   const bestLbl=({ru:'ВЫГОДНО',en:'BEST VALUE',es:'MEJOR',pt:'MELHOR',de:'TOP-WERT',fr:'MEILLEUR',uk:'ВИГІДНО',tr:'EN İYİ',zh:'超值',ar:'الأفضل'}[lang]||'BEST VALUE');
   const oneTime=({ru:'разовый платёж',en:'one-time payment',es:'pago único',pt:'pagamento único',de:'einmalig',fr:'paiement unique',uk:'разовий платіж',tr:'tek seferlik',zh:'一次性',ar:'دفعة واحدة'}[lang]||'one-time payment');
   const dimAttr = owns ? 'style="opacity:.5;pointer-events:none"' : '';
+  const reqWord=({ru:'запросов к ALEX',en:'ALEX requests',es:'solicitudes ALEX',pt:'solicitações ALEX',de:'ALEX-Anfragen',fr:'requêtes ALEX',uk:'запитів до ALEX',tr:'ALEX isteği',zh:'次 ALEX 请求',ar:'طلب ALEX'}[lang]||'ALEX requests');
+  const dayWord=({ru:'в день',en:'/ day',es:'/ día',pt:'/ dia',de:'/ Tag',fr:'/ jour',uk:'на день',tr:'/ gün',zh:'/ 天',ar:'/ يوم'}[lang]||'/ day');
+  const nf=(n)=>n.toLocaleString(lang==='ru'?'ru-RU':'en-US');
   const plansHTML=PLATFORM_PLAN_DEFS.map(p=>{
     const sel=p.id===_pnSelPlan?' sel':'';
     const best=p.popular?`<span class="pn-best">${bestLbl}</span>`:'';
     const save=p.save?`<span class="pn-save">−${p.save}%</span>`:'';
     const meta=p.monthly!=null?`${_starsFmt(p.monthly)} ${moLbl} · ≈ $${_usdFromStars(p.stars)}`:`${oneTime} · ≈ $${_usdFromStars(p.stars)}`;
+    const quota=p.reqTotal?`<div class="pn-pmeta" style="color:var(--a);font-weight:700">${nf(p.reqTotal)} ${reqWord} · ${p.reqDaily} ${dayWord}</div>`:'';
     return `<div class="pn-plan${sel}" ${dimAttr} onclick="pnSelectPlan('${p.id}')">
         <div class="pn-radio"></div>
         <div class="pn-pinfo">
           <div class="pn-pname">${safeHTML(_platLabel(p.period))} ${best} ${save}</div>
           <div class="pn-pmeta">${meta}</div>
+          ${quota}
         </div>
         <div class="pn-pprice"><b>${_starsFmt(p.stars)}</b></div>
       </div>`;
@@ -15908,9 +15912,10 @@ function openPremium(highlightFeature, initialTab){
   const sub=document.getElementById('prem-sub');
   const free=document.getElementById('prem-free');
 
-  if(initialTab && (initialTab==='platform' || initialTab==='credits')) _premTab=initialTab;
-  /* If the user explicitly hit a chat paywall, default to credits tab. */
-  else if(highlightFeature && /alex|chat|кредит|credits|chat/i.test(String(highlightFeature))) _premTab='credits';
+  /* Credit packs are retired: the subscription is the only product, so every
+     entry point (including old initialTab='credits' callers) lands on the
+     native Platform view. */
+  _premTab='platform';
 
   /* Sync tab UI + labels. */
   const platLbl=document.getElementById('prem-tab-platform-lbl');
