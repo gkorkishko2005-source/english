@@ -922,10 +922,10 @@ async def revoke_subscription(uid: int) -> dict:
 #  are seen alongside the new fields being empty).
 # ══════════════════════════════════════════════════════════════════
 
-PLATFORM_PERIOD_DAYS = {"1m": 30, "6m": 180}
+PLATFORM_PERIOD_DAYS = {"1m": 30, "3m": 90, "6m": 180}
 
 async def grant_platform(uid: int, period: str = "1m"):
-    """Grant Platform subscription. period ∈ {'1m','6m','lifetime'}.
+    """Grant Platform subscription. period ∈ {'1m','3m','6m','lifetime'}.
     Stacks on top of existing platform_until (extends from the latest).
     'lifetime' sets platform_lifetime=TRUE permanently."""
     from datetime import datetime, timedelta, timezone
@@ -1744,15 +1744,15 @@ async def spend_free_credit(uid: int, amount: int = 1) -> dict:
 #  FREE users are gated by the daily-replenishing free_credits wallet instead.
 #  The DAILY counter reuses ai_req_today / ai_req_date (lazy UTC reset).
 async def _sub_limits() -> dict:
-    """Owner-tunable per-plan caps → {daily:{MONTH_1,MONTH_6}, total:{...}}."""
-    daily = {"MONTH_1": 50, "MONTH_6": 75}
-    total = {"MONTH_1": 1500, "MONTH_6": 13500}
+    """Owner-tunable per-plan caps → {daily:{MONTH_1,MONTH_3,MONTH_6}, total:{...}}."""
+    daily = {"MONTH_1": 50, "MONTH_3": 60, "MONTH_6": 75}
+    total = {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 13500}
     try:
         from billing_config import load_config
         cfg = await load_config()
         d = cfg.get("SUB_DAILY_LIMIT") or {}
         t = cfg.get("SUB_TOTAL_REQUESTS") or {}
-        for k in ("MONTH_1", "MONTH_6"):
+        for k in ("MONTH_1", "MONTH_3", "MONTH_6"):
             if k in d: daily[k] = max(0, int(d[k]))
             if k in t: total[k] = max(0, int(t[k]))
     except Exception:
@@ -1761,14 +1761,14 @@ async def _sub_limits() -> dict:
 
 
 async def _effective_premium_type(uid: int, user: dict | None = None) -> str:
-    """Resolve the user's CURRENT plan honouring expiry → 'FREE'/'MONTH_1'/'MONTH_6'.
+    """Resolve the user's CURRENT plan honouring expiry → 'FREE'/'MONTH_1'/'MONTH_3'/'MONTH_6'.
     If the stored type is paid but the Platform sub has lapsed, self-heal the row
     back to FREE so the cron top-up and reads converge."""
     u = user if user is not None else await get_user(uid)
     if not u:
         return "FREE"
     pt = str(u.get("premium_type") or "FREE").upper()
-    if pt not in ("MONTH_1", "MONTH_6"):
+    if pt not in ("MONTH_1", "MONTH_3", "MONTH_6"):
         return "FREE"
     if await check_platform(uid):
         return pt
@@ -1870,18 +1870,18 @@ async def consume_ai_request(uid: int) -> dict:
 
 async def set_subscription_plan(uid: int, plan: str) -> dict:
     """Activate a subscription on a successful Telegram Stars purchase.
-    plan ∈ {'MONTH_1','MONTH_6'}. Sets premium_type, refills the whole-period
-    allowance (total_requests_remaining), extends platform_until by the period
-    (+30 / +180 days, stacking) and resets today's counter so the buyer starts
-    fresh. Returns the new state. NOTE: this is the single source of truth for
-    'turn a subscription on' in the request-counter model."""
+    plan ∈ {'MONTH_1','MONTH_3','MONTH_6'}. Sets premium_type, refills the
+    whole-period allowance (total_requests_remaining), extends platform_until by
+    the period (+30 / +90 / +180 days, stacking) and resets today's counter so
+    the buyer starts fresh. Returns the new state. NOTE: this is the single
+    source of truth for 'turn a subscription on' in the request-counter model."""
     plan = str(plan).upper()
-    if plan not in ("MONTH_1", "MONTH_6"):
+    if plan not in ("MONTH_1", "MONTH_3", "MONTH_6"):
         return {"ok": False, "error": "bad plan"}
     lims = await _sub_limits()
     total = lims["total"].get(plan, 1500)
-    period = "1m" if plan == "MONTH_1" else "6m"
-    await grant_platform(uid, period)          # extend platform_until (+30/+180)
+    period = {"MONTH_1": "1m", "MONTH_3": "3m", "MONTH_6": "6m"}.get(plan, "1m")
+    await grant_platform(uid, period)          # extend platform_until (+30/+90/+180)
     today = _utc_day_str()
     await db("UPDATE users SET premium_type=?, total_requests_remaining=?, "
              "ai_req_today=0, ai_req_date=? WHERE uid=?",

@@ -119,13 +119,13 @@ _DEFAULTS = {
     "FREE_CREDITS_DAILY": 2,           # credits granted each UTC day
     "FREE_CREDITS_CAP": 10,            # max accumulated free credits
     "FREE_AI_MAX_CHARS": 6000,         # server-side context-size cap for free chat
-    # ── Subscription request-counter caps (premium_type FREE/MONTH_1/MONTH_6) ──
+    # ── Subscription caps (premium_type FREE/MONTH_1/MONTH_3/MONTH_6) ──────────
     # The new monetization model: a paid plan grants a WHOLE-PERIOD pool of ALEX
     # requests (SUB_TOTAL_REQUESTS) plus a hard DAILY ceiling (SUB_DAILY_LIMIT).
     # Both are checked before every premium ALEX call (database.check_ai_access)
     # and tunable live / via env without a deploy.
-    "SUB_DAILY_LIMIT":    {"MONTH_1": 50,   "MONTH_6": 75},
-    "SUB_TOTAL_REQUESTS": {"MONTH_1": 1500, "MONTH_6": 13500},
+    "SUB_DAILY_LIMIT":    {"MONTH_1": 50,   "MONTH_3": 60,   "MONTH_6": 75},
+    "SUB_TOTAL_REQUESTS": {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 13500},
     # Premium chat memory depth: how many recent messages the Pro model sees so
     # it perfectly remembers a long, complex conversation.
     "PREMIUM_HISTORY": 18,             # last N messages sent for paid users

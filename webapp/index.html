@@ -15591,6 +15591,7 @@ const PREMIUM_FEATURES=[
 
 const PLATFORM_PLAN_DEFS=[
   {id:'plat_1m', stars:299,  period:'1m', monthly:299, save:0,  reqTotal:1500,  reqDaily:50},
+  {id:'plat_3m', stars:699,  period:'3m', monthly:233, save:20, reqTotal:5400,  reqDaily:60},
   {id:'plat_6m', stars:1290, period:'6m', monthly:215, save:28, reqTotal:13500, reqDaily:75, popular:true},
 ];
 /* perCr = stars per CREDIT (stars/credits). This is the honest unit — a credit
@@ -15685,7 +15686,7 @@ function _credCopy(){
 }
 
 function _platLabel(period){
-  const L={ru:{'1m':'1 месяц','6m':'6 месяцев','lifetime':'Навсегда'},en:{'1m':'1 month','6m':'6 months','lifetime':'Lifetime'}};
+  const L={ru:{'1m':'1 месяц','3m':'3 месяца','6m':'6 месяцев','lifetime':'Навсегда'},en:{'1m':'1 month','3m':'3 months','6m':'6 months','lifetime':'Lifetime'}};
   return (L[lang]||L.en)[period]||period;
 }
 function _starsFmt(n){return n.toLocaleString(lang==='ru'?'ru-RU':'en-US')+' ⭐';}

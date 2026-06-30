@@ -657,14 +657,16 @@ async def handle_chat(request):
         except Exception:
             is_paid = False
     try:
-        from ai_router import should_use_gemini, should_use_deepseek, should_use_openrouter
-        # Free-provider priority for NON-paying users: OpenRouter → DeepSeek →
-        # Gemini. First one configured wins. PREMIUM users are handled by the
-        # dedicated Gemini-Pro branch below (request-counter gated), so the free
-        # chain is restricted to non-paying users only.
+        from ai_router import should_use_openrouter
+        # Whole ecosystem is locked to OpenRouter + Google Gemini ONLY. All ALEX
+        # traffic (Free = Gemini Flash, Premium = Gemini Pro) goes strictly through
+        # the single OpenRouter key. Third-party providers (DeepSeek, direct Gemini
+        # API) are fully excluded — they are never routed to.
+        # PREMIUM users are handled by the dedicated Gemini-Pro branch below
+        # (request-counter gated), so the free chain is restricted to non-paying.
         route_openrouter = (not is_paid) and should_use_openrouter()
-        route_deepseek = (not is_paid) and (not route_openrouter) and should_use_deepseek(is_paid)
-        route_gemini = (not is_paid) and (not route_openrouter) and (not route_deepseek) and should_use_gemini(is_paid)
+        route_deepseek = False
+        route_gemini = False
     except Exception as e:
         logger.warning("ai_router import failed: %s", e)
         route_openrouter = False

@@ -182,12 +182,14 @@ MODEL         = os.getenv("CLAUDE_HAIKU_MODEL", "claude-haiku-4-5-20251001")
 # Platform subscription unlocks course/exams/analytics/UI. Sold flat.
 # ALEX credits are a separate pre-paid pool spent per chat message.
 # Legacy PREMIUM_PLANS above stays alive for grandfathered renewals.
-# Two subscription plans only. Each maps to a request-counter tier:
-#   1m  → premium_type MONTH_1, total_requests_remaining 1500, daily ceiling 50
+# Three subscription plans. Each maps to a request-counter tier:
+#   1m  → premium_type MONTH_1, total_requests_remaining 1500,  daily ceiling 50
+#   3m  → premium_type MONTH_3, total_requests_remaining 5400,  daily ceiling 60
 #   6m  → premium_type MONTH_6, total_requests_remaining 13500, daily ceiling 75
 # The "lifetime" plan was retired with the monetization rewrite.
 PLATFORM_PLANS = {
     "plat_1m":  {"stars": 299,  "period": "1m", "premium_type": "MONTH_1", "label_ru": "Платформа · 1 мес", "label_en": "Platform · 1 mo"},
+    "plat_3m":  {"stars": 699,  "period": "3m", "premium_type": "MONTH_3", "label_ru": "Платформа · 3 мес", "label_en": "Platform · 3 mo"},
     "plat_6m":  {"stars": 1290, "period": "6m", "premium_type": "MONTH_6", "label_ru": "Платформа · 6 мес", "label_en": "Platform · 6 mo"},
 }
 # Credit packs are no longer sold. The ALEX credit-grant engine
@@ -2541,6 +2543,10 @@ async def cmd_premium(msg: Message):
                 callback_data="plat_buy:plat_1m"
             )],
             [InlineKeyboardButton(
+                text=("🚀 Платформа · 3 мес — 699 ⭐ (−20%)" if ru else "🚀 Platform · 3 mo — 699 ⭐ (−20%)"),
+                callback_data="plat_buy:plat_3m"
+            )],
+            [InlineKeyboardButton(
                 text=("🚀 Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ (−28%)"),
                 callback_data="plat_buy:plat_6m"
             )],
@@ -2594,16 +2600,19 @@ async def cb_prem_all(cb: CallbackQuery):
     ru = (await get_lang(cb.from_user.id) or "ru") == "ru"
     rows = [
         [InlineKeyboardButton(text=("🚀 Платформа · 1 мес — 299 ⭐" if ru else "🚀 Platform · 1 mo — 299 ⭐"), callback_data="plat_buy:plat_1m")],
+        [InlineKeyboardButton(text=("🚀 Платформа · 3 мес — 699 ⭐ (−20%)" if ru else "🚀 Platform · 3 mo — 699 ⭐ (−20%)"), callback_data="plat_buy:plat_3m")],
         [InlineKeyboardButton(text=("🚀 Платформа · 6 мес — 1 290 ⭐ (−28%)" if ru else "🚀 Platform · 6 mo — 1 290 ⭐ (−28%)"), callback_data="plat_buy:plat_6m")],
     ]
     text = (
         "<b>📋 Тарифы PolyGlotty</b>\n\n"
         "<b>🚀 Платформа · 1 месяц</b> — 1 500 запросов к ALEX (до 50 в день), курс, экзамены, безлимит карточек.\n"
+        "<b>🚀 Платформа · 3 месяца</b> — 5 400 запросов к ALEX (до 60 в день), всё то же и выгоднее (−20%).\n"
         "<b>🚀 Платформа · 6 месяцев</b> — 13 500 запросов к ALEX (до 75 в день), всё то же и выгоднее.\n\n"
         "<i>Оплата через Telegram Stars.</i>"
     ) if ru else (
         "<b>📋 PolyGlotty plans</b>\n\n"
         "<b>🚀 Platform · 1 month</b> — 1,500 ALEX requests (up to 50/day), course, exams, unlimited cards.\n"
+        "<b>🚀 Platform · 3 months</b> — 5,400 ALEX requests (up to 60/day), same perks, better value (−20%).\n"
         "<b>🚀 Platform · 6 months</b> — 13,500 ALEX requests (up to 75/day), same perks, better value.\n\n"
         "<i>Telegram Stars only.</i>"
     )
@@ -2760,9 +2769,10 @@ async def on_payment_success(msg: Message):
             # provision both the platform window and the AI request pool
             # atomically (set_subscription_plan calls grant_platform, then
             # sets premium_type + total_requests_remaining + resets daily).
-            plan_map = {"1m": "MONTH_1", "6m": "MONTH_6"}
+            plan_map = {"1m": "MONTH_1", "3m": "MONTH_3", "6m": "MONTH_6"}
             plan = plan_map.get(period, "MONTH_1")
             label = {"1m": "1 месяц" if ru else "1 month",
+                     "3m": "3 месяца" if ru else "3 months",
                      "6m": "6 месяцев" if ru else "6 months"}.get(period, period)
             granted = False
             total_quota = 0
@@ -2780,7 +2790,7 @@ async def on_payment_success(msg: Message):
                                   else "Payment succeeded but access did not activate. Use /paysupport."),
                                  parse_mode="HTML")
                 return
-            daily_cap = 50 if plan == "MONTH_1" else 75
+            daily_cap = {"MONTH_1": 50, "MONTH_3": 60, "MONTH_6": 75}.get(plan, 50)
             quota_line_ru = f"\n💬 <b>{total_quota:,}</b> запросов к ALEX (до <b>{daily_cap}</b> в день).".replace(",", " ") if total_quota else ""
             quota_line_en = f"\n💬 <b>{total_quota:,}</b> ALEX requests (up to <b>{daily_cap}</b>/day)." if total_quota else ""
             text = (
