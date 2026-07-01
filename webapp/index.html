@@ -1682,32 +1682,62 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    interactive feature list (micro-demo popups) → gradient buy button.
    ══════════════════════════════════════════════════════════════════ */
 .pn-wrap{padding:6px 18px 4px;text-align:center}
-/* Interactive 3D flip logo — emerald speech-bubble + globe.
-   Outer node owns perspective + the gentle float; inner node is the
-   3D card (preserve-3d) that spins 360° on tap via pnFlipLogo(). */
-.pn-logo3d{width:88px;height:88px;margin:10px auto 16px;perspective:680px;
-  cursor:pointer;animation:pnFloat 3.6s ease-in-out infinite;
-  -webkit-tap-highlight-color:transparent;filter:drop-shadow(0 16px 24px rgba(0,163,131,.32))}
-.pn-logo3d-inner{width:100%;height:100%;border-radius:26px;
+/* Interactive 3D flip button — convex glass "bubble" of our logo.
+   Outer node: real perspective + gentle float. Inner node: preserve-3d
+   lens that spins a full 360° on tap and recesses on press (translateZ).
+   Flip amount lives in --flip so :active can compose translateZ without
+   the JS-set transform clobbering it. */
+.pn-logo3d{width:92px;height:92px;margin:12px auto 18px;
+  perspective:1000px;cursor:pointer;
+  animation:pnFloat 3.6s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;
+  filter:drop-shadow(0 18px 26px rgba(0,158,127,.34))}
+.pn-logo3d-inner{position:relative;width:100%;height:100%;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(150deg,#10D9AE 0%,#00B594 45%,#009E7F 75%,#008268 100%);
-  box-shadow:0 14px 34px rgba(0,158,127,.46),inset 0 1.5px 3px rgba(255,255,255,.45),inset 0 -3px 8px rgba(0,80,64,.35);
+  background:radial-gradient(120% 120% at 32% 24%,#22E6BC 0%,#00C6A0 34%,#00A383 68%,#007D64 100%);
+  box-shadow:
+    0 20px 42px rgba(0,150,120,.48),
+    0 8px 16px rgba(0,70,56,.34),
+    inset 0 3px 4px rgba(255,255,255,.55),
+    inset 0 -8px 14px rgba(0,66,53,.5),
+    inset 0 0 0 1px rgba(255,255,255,.16);
   transform-style:preserve-3d;
-  transition:transform .6s cubic-bezier(0.4,0,0.2,1);
+  transform:rotateY(var(--flip,0deg)) translateZ(0);
+  transition:transform .7s cubic-bezier(0.34,1.56,0.64,1);
   will-change:transform}
-.pn-logo3d:active .pn-logo3d-inner{box-shadow:0 8px 18px rgba(0,158,127,.4),inset 0 1.5px 3px rgba(255,255,255,.4)}
-.pn-logo3d-inner svg{width:50px;height:50px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.24));backface-visibility:hidden}
+/* Glossy convex highlight — top-left light source, sells the lens curvature. */
+.pn-logo3d-inner::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(60% 48% at 34% 22%,rgba(255,255,255,.6) 0%,rgba(255,255,255,.14) 42%,rgba(255,255,255,0) 66%);
+  pointer-events:none}
+/* Press: snappy recess into the Z axis (asymmetric — fast in, springy out). */
+.pn-logo3d:active .pn-logo3d-inner{
+  transform:rotateY(var(--flip,0deg)) translateZ(-10px) scale(.97);
+  transition:transform .13s ease-out;
+  box-shadow:
+    0 10px 20px rgba(0,150,120,.4),
+    inset 0 3px 4px rgba(255,255,255,.5),
+    inset 0 -8px 14px rgba(0,66,53,.5),
+    inset 0 0 0 1px rgba(255,255,255,.14)}
+.pn-logo3d-inner svg{position:relative;width:52px;height:52px;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,.26));backface-visibility:hidden}
 @keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@media (prefers-reduced-motion:reduce){
+  .pn-logo3d{animation:none;filter:drop-shadow(0 10px 18px rgba(0,158,127,.3))}
+  .pn-logo3d-inner{transition:transform .2s ease}
+}
 .pn-h1{font-size:23px;font-weight:950;letter-spacing:-.3px;margin:0 0 6px;color:var(--t1)}
 .pn-h1 b{background:linear-gradient(95deg,#00A383,#00B594);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .pn-desc{font-size:12.5px;line-height:1.5;color:var(--t2);max-width:300px;margin:0 auto 16px}
 /* ── Radio plan selector ── */
-.pn-plans{display:flex;flex-direction:column;gap:9px;padding:0 18px 4px;text-align:left}
-.pn-plan{position:relative;display:flex;align-items:center;gap:12px;
-  background:var(--e1);border:1.5px solid var(--b1);border-radius:14px;
-  padding:13px 15px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s}
-.pn-plan:active{transform:scale(.99)}
-.pn-plan.sel{border-color:#00A383;background:rgba(0,179,148,.08)}
+.pn-plans{display:flex;flex-direction:column;gap:12px;padding:0 20px 6px;text-align:left}
+.pn-plan{position:relative;display:flex;align-items:center;gap:14px;
+  background:var(--e1);border:1px solid var(--b1);border-radius:16px;
+  padding:17px 18px;cursor:pointer;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .13s ease-out}
+.pn-plan:active{transform:scale(.985)}
+/* Ultra-thin mint edge + soft translucent glow when selected. */
+.pn-plan.sel{border-color:rgba(0,179,148,.55);background:rgba(0,179,148,.07);
+  box-shadow:0 0 0 1px rgba(0,179,148,.35),0 8px 24px rgba(0,179,148,.16)}
 .pn-radio{flex:0 0 auto;width:21px;height:21px;border-radius:50%;
   border:2px solid var(--t3);position:relative;transition:border-color .15s}
 .pn-plan.sel .pn-radio{border-color:#00A383}
@@ -1722,8 +1752,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
   color:#fff;background:linear-gradient(95deg,#00A383,#00B594);padding:2px 8px;border-radius:100px}
 .pn-save{font-size:10.5px;font-weight:800;color:#00A383}
 /* ── Interactive feature list ── */
-.pn-feats{padding:16px 18px 6px;display:flex;flex-direction:column;gap:2px;text-align:left}
-.pn-feat{display:flex;align-items:center;gap:13px;padding:11px 4px;cursor:pointer;
+.pn-feats{padding:20px 20px 6px;display:flex;flex-direction:column;gap:2px;text-align:left}
+.pn-feat{display:flex;align-items:center;gap:14px;padding:13px 4px;cursor:pointer;
   border-bottom:1px solid var(--b1);transition:opacity .12s}
 .pn-feat:last-child{border-bottom:0}
 .pn-feat:active{opacity:.6}
@@ -1737,8 +1767,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .pn-feat-cv{flex:0 0 auto;width:16px;height:16px;fill:none;stroke:var(--t3);stroke-width:2.4;
   stroke-linecap:round;stroke-linejoin:round;opacity:.6}
 /* ── Gradient buy button ── */
-.pn-buybar{padding:16px 18px 6px}
-.pn-buy{display:block;width:100%;border:0;border-radius:14px;padding:15px 0;
+.pn-buybar{padding:18px 20px 8px}
+.pn-buy{display:block;width:100%;border:0;border-radius:16px;padding:16px 0;
   font-family:var(--f);font-size:15.5px;font-weight:900;letter-spacing:.1px;color:#fff;cursor:pointer;
   background:linear-gradient(95deg,#00A383,#00B594);
   box-shadow:0 8px 22px rgba(0,163,131,.4);transition:transform .12s,filter .12s}
@@ -15803,15 +15833,18 @@ let _pnSelPlan = null;
 const PN_STAR_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 7.1-1.01z"/></svg>';
 /* Official PolyGlotty mark: emerald dialog-bubble outline with a globe inside. */
 const PN_LOGO_SVG = '<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6.5C13.8 6.5 5.5 13.4 5.5 21.9c0 4.7 2.6 8.9 6.7 11.7-.4 2.4-1.4 4.7-2.9 6.6 3.4-.4 6.6-1.7 9.3-3.7 1.7.4 3.5.7 5.4.7 10.2 0 18.5-6.9 18.5-15.4S34.2 6.5 24 6.5z"/><circle cx="24" cy="21.5" r="8.6" stroke-width="1.9"/><ellipse cx="24" cy="21.5" rx="3.6" ry="8.6" stroke-width="1.7"/><line x1="15.4" y1="21.5" x2="32.6" y2="21.5" stroke-width="1.7"/></svg>';
-/* Spins the logo a full extra turn on each tap; accumulating degrees keeps
-   the direction consistent and the cubic-bezier gives a springy settle. */
+/* Spins the logo a full extra turn on each tap. We drive a CSS variable
+   (--flip) instead of writing transform directly, so the :active press
+   state can layer translateZ(-10px) on top without being clobbered.
+   Accumulating degrees keeps the spin direction consistent; the springy
+   cubic-bezier(0.34,1.56,0.64,1) gives the elastic overshoot. */
 let _pnFlipDeg = 0;
 function pnFlipLogo(el){
   try{
     const inner = el && el.querySelector('.pn-logo3d-inner');
     if(!inner) return;
     _pnFlipDeg += 360;
-    inner.style.transform = 'rotateY(' + _pnFlipDeg + 'deg)';
+    inner.style.setProperty('--flip', _pnFlipDeg + 'deg');
   }catch(_){}
 }
 function _pnT(o){ return (o&&(o[lang]!=null?o[lang]:o.en))||''; }

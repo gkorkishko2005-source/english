@@ -19,5 +19,7 @@ venv/
 
 # ── Tooling (not part of the app) ────────────────────────────────────
 .claude/
+.agents/
+skills-lock.json
 webapp/_preview_server.js
 .DS_Store
