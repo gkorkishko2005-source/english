@@ -1569,7 +1569,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .prem-feat-sub{font-size:11px;color:var(--t2)}
 .prem-btn{margin:0 17px 10px;padding:15px;background:#d4a843;border:none;border-radius:var(--r2);width:calc(100% - 34px);font-family:var(--f);font-size:15px;font-weight:800;color:#fff;cursor:pointer;transition:.18s;box-shadow:none}
 .prem-btn:active{transform:scale(.97)}
-.prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 14px;cursor:pointer}
+.prem-free{text-align:center;font-size:12px;color:var(--t3);padding:10px 0 calc(24px + env(safe-area-inset-bottom,0px));cursor:pointer}
 /* ══════════════════════════════════════════════════════════════════
    PAYWALL (minimal modular billing)
    Two products, three plans each, dense info, one accent colour.
@@ -1680,7 +1680,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
   pointer-events:none;transform-style:preserve-3d;transition:transform .12s ease-out;
   z-index:2;will-change:transform}
 .pn-orb3d-logo img,.pn-orb3d-logo svg{display:block;width:56px;height:56px;object-fit:contain;
-  filter:drop-shadow(0 2px 6px rgba(0,40,30,.5)) drop-shadow(0 0 9px rgba(255,255,255,.4));backface-visibility:hidden}
+  filter:brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,32,24,.55)) drop-shadow(0 0 10px rgba(120,255,214,.55));backface-visibility:hidden}
 /* CSS fallback when WebGL is unavailable — a static glossy emerald gradient. */
 .pn-orb3d.no-gl .pn-orb3d-gl{
   background:radial-gradient(120% 120% at 30% 22%,#5ff2cf 0%,#12c79a 30%,#079d7c 55%,#046a56 78%,#023b33 100%);
@@ -1917,6 +1917,13 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .course-level-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 2px 4px}
 .course-level-name{font-size:12px;font-weight:900;color:var(--t1);letter-spacing:.2px}
 .course-level-desc{font-size:10px;color:var(--t3);text-align:right}
+.course-mod-head{display:flex;align-items:center;gap:11px;margin:22px 2px 9px;padding:12px 13px;border-radius:16px;background:linear-gradient(135deg,rgba(46,204,113,.14),rgba(0,212,170,.045));border:1px solid rgba(46,204,113,.2)}
+.course-mod-head:first-child{margin-top:6px}
+.course-mod-emoji{font-size:26px;line-height:1;flex:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.28))}
+.course-mod-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.course-mod-name{font-size:13.5px;font-weight:900;color:var(--t1);letter-spacing:.2px}
+.course-mod-tag{font-size:10.5px;color:var(--t3);line-height:1.32}
+.course-level-cefr{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.7px;padding:2px 8px;border-radius:7px;color:var(--cefr-color,var(--t2));background:color-mix(in srgb,var(--cefr-color,#888) 14%,transparent);border:1px solid color-mix(in srgb,var(--cefr-color,#888) 40%,transparent)}
 .course-card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
 .course-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lesson-color,var(--a));opacity:.75}
 .course-card::after{content:'';position:absolute;right:-42px;top:-48px;width:112px;height:112px;border-radius:50%;background:transparent;opacity:0;transition:opacity .25s,transform .25s}
@@ -2014,6 +2021,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .course-stage-ring{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:conic-gradient(var(--a) var(--pct,0%),rgba(255,255,255,.08) 0);padding:3px}
 .course-stage-ring-in{width:100%;height:100%;border-radius:50%;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;color:var(--a);font-size:11px;font-weight:950}
 .course-stage-info{min-width:0;flex:1}
+.course-stage-phase{display:inline-flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:6px;margin-bottom:3px}
+.course-stage-phase.p1{color:#f39c12;background:rgba(243,156,18,.13)}
+.course-stage-phase.p2{color:#e74c3c;background:rgba(231,76,60,.13)}
+.course-stage-phase.p3{color:#9b59b6;background:rgba(155,89,182,.15)}
 .course-stage-title{font-size:13px;font-weight:950;color:var(--t1);line-height:1.2}
 .course-stage-sub{font-size:11px;color:var(--t2);line-height:1.3;margin-top:3px}
 .course-stage-go{width:31px;height:31px;border-radius:11px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -2441,6 +2452,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .dl-toggle{background:var(--bg-card);border:1px solid var(--border-ui);box-shadow:none;padding:13px 14px;border-radius:12px;transition:background .15s,border-color .15s;
            display:flex;align-items:center;gap:10px;min-height:54px;min-width:0;cursor:pointer}
 .dl-toggle:active{background:var(--e2);transform:none}
+/* Light theme isn't ready yet — the Dark toggle is shown but non-interactive
+   (dimmed, no pointer, switch frozen in the dark position). */
+.dl-toggle.dl-locked{opacity:.5;cursor:not-allowed;pointer-events:none}
+.dl-toggle.dl-locked:active{background:var(--bg-card);transform:none}
 .dl-toggle-text{font-size:13px;font-weight:600;color:var(--t1);flex:1;min-width:0;
                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .dl-toggle-icon{width:30px;height:30px;border-radius:9px;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -2649,6 +2664,11 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
   text-transform:uppercase;letter-spacing:.4px}
 #s-progress .premium-mask{color:var(--t3)!important;font-size:11px!important;font-weight:600;
   text-transform:none;letter-spacing:0}
+/* Locked stat cell (non-subscribers): muted dash + small lock, so a gated stat
+   reads as intentionally locked rather than an error or empty value. */
+#s-progress .s4cv.s4-locked{color:var(--t3)}
+.s4-lockwrap{display:inline-flex;align-items:center;justify-content:center;gap:5px;line-height:1}
+.s4-lockwrap .s4-lock{opacity:.72;flex:none;margin-top:-1px}
 
 /* Weekly chart card — flat, bars share one baseline */
 /* The previous design tilted the whole chart with rotateX(5deg) +
@@ -3329,7 +3349,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
 
   <!-- Compact quick-toggles row: Dark + Sound -->
   <div class="set-grid-2">
-    <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
+    <div class="dl-toggle dl-locked" id="dl-toggle" aria-disabled="true" title="Скоро">
       <div class="dl-toggle-icon" id="dl-icon">
         <span class="theme-orb">
           <svg class="moon" viewBox="0 0 24 24" fill="none"><path d="M20.5 14.5A8.5 8.5 0 019.5 3.5a8.8 8.8 0 1011 11z" fill="#8ea2ff"/><path d="M17 4.5l.5 1 .9.5-.9.5-.5 1-.5-1-.9-.5.9-.5.5-1z" fill="#c8d2ff"/></svg>
@@ -5314,17 +5334,24 @@ function renderProgress(d){
   _set('rlvtxt',d.level||'B1');
   const pxp=document.getElementById('pxp');if(pxp)animateCount(pxp,d.xp||0,900,' XP total');
   const pbc=document.getElementById('pbc');if(pbc)animateCount(pbc,d.xp||0,900,' XP');
-  if(hasTier('basic')){const e=document.getElementById('psess');if(e)e.classList.remove('premium-mask');animateCount(e,d.sessions||0,700);}
-  else{const e=document.getElementById('psess');if(e){e.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');e.classList.add('premium-mask');}}
+  if(hasTier('basic')){const e=document.getElementById('psess');if(e){e.classList.remove('premium-mask');_unlockStat(e);}animateCount(e,d.sessions||0,700);}
+  else{_lockStat(document.getElementById('psess'));}
   animateCount(document.getElementById('pwrds'),d.words||0,700);
   animateCount(document.getElementById('ptsts'),d.tests||0,700);
-  if(hasTier('basic')){const e=document.getElementById('perrs');if(e)e.classList.remove('premium-mask');animateCount(e,d.errors||0,700);}
-  else{const e=document.getElementById('perrs');if(e){e.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');e.classList.add('premium-mask');}}
+  if(hasTier('basic')){const e=document.getElementById('perrs');if(e){e.classList.remove('premium-mask');_unlockStat(e);}animateCount(e,d.errors||0,700);}
+  else{_lockStat(document.getElementById('perrs'));}
   const pbm=document.getElementById('pbm');if(pbm)pbm.textContent=inf.max<9999?`/ ${inf.max} XP`:'Max!';
   try{renderGrowth(d);}catch(_){}
   renderInterests(d.interests||[]);
   updateProfileUI(d);
 }
+
+/* Locked stat cell for non-subscribers: renders a muted em-dash plus a small
+   closed-lock icon, so a gated stat (Sessions / Error Diary) reads as an
+   intentionally locked feature — not an error or a broken empty value. */
+const _STAT_LOCK_SVG='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s4-lock"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/></svg>';
+function _lockStat(el){ if(!el)return; el.classList.remove('premium-mask'); el.classList.add('s4-locked'); el.innerHTML='<span class="s4-lockwrap">—'+_STAT_LOCK_SVG+'</span>'; }
+function _unlockStat(el){ if(!el)return; el.classList.remove('s4-locked'); }
 
 function drawProgress(){
   const d=window._d||{};
@@ -5339,11 +5366,11 @@ function drawProgress(){
   const errors=Math.max(d.errors||0,  savedStats.errors||0);
   const safe=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   if(hasTier('basic')){
-    ['psess','perrs'].forEach(id=>document.getElementById(id)?.classList.remove('premium-mask'));
+    ['psess','perrs'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('premium-mask');_unlockStat(el);}});
     safe('psess',sess); safe('perrs',errors);
   }else{
-    const se=document.getElementById('psess');if(se){se.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');se.classList.add('premium-mask');}
-    const er=document.getElementById('perrs');if(er){er.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');er.classList.add('premium-mask');}
+    _lockStat(document.getElementById('psess'));
+    _lockStat(document.getElementById('perrs'));
   }
   safe('pwrds',words); safe('ptsts',tests);
 
@@ -5631,8 +5658,8 @@ function bumpStat(key,delta=1){
   const idMap={sessions:'psess',words:'pwrds',tests:'ptsts',errors:'perrs'};
   const el=document.getElementById(idMap[key]);
   if(el){
-    if((key==='sessions'||key==='errors')&&!hasTier('basic')){el.textContent=({ru:'Подписка',en:'Subscription',es:'Suscripción',pt:'Assinatura',de:'Abo',fr:'Abonnement',uk:'Підписка',tr:'Abonelik',zh:'订阅',ar:'اشتراك'}[lang]||'Subscription');el.classList.add('premium-mask');}
-    else{el.textContent=s[key];el.classList.remove('premium-mask');}
+    if((key==='sessions'||key==='errors')&&!hasTier('basic')){_lockStat(el);}
+    else{_unlockStat(el);el.textContent=s[key];el.classList.remove('premium-mask');}
   }
   // Also update home stats
   if(key==='words'){const h=document.getElementById('hs2');if(h)h.textContent=s[key];}
@@ -11571,6 +11598,21 @@ function courseLevelLabel(level){
     CAE:{ru:'Cambridge CAE / CPE · продвинутый экзамен',en:'Cambridge CAE / CPE · advanced exam'}
   })[level]||{ru:'Уровень',en:'Level'};
 }
+/* Gamified module layer OVER the CEFR engine (locking/SRS/exam/level-colors
+   are untouched). Several CEFR levels roll up into one themed module so youth
+   see "Survival English / Gaming & Discord / AI Whisperer / Influencer Mindset"
+   instead of dry A0…C2. The CEFR tag is kept as a small chip for coherence. */
+function courseModuleInfo(level){
+  const M={
+    survival:{key:'survival',emoji:'🧟',n:1,name:{ru:'Survival English',en:'Survival English'},tag:{ru:'Мемы, сленг и фразы, чтобы выжить в любом чате',en:'Memes, slang and phrases to survive any chat'}},
+    gaming:{key:'gaming',emoji:'🎮',n:2,name:{ru:'Gaming & Discord',en:'Gaming & Discord'},tag:{ru:'Голосовой чат, ASAP/BRB и язык соревнований',en:'Voice chat, ASAP/BRB and competitive talk'}},
+    ai:{key:'ai',emoji:'🤖',n:3,name:{ru:'AI Whisperer',en:'AI Whisperer'},tag:{ru:'Промпты для ИИ и базовый технический английский',en:'Writing AI prompts and basic technical English'}},
+    influencer:{key:'influencer',emoji:'🎤',n:4,name:{ru:'Influencer Mindset',en:'Influencer Mindset'},tag:{ru:'Сторителлинг, блогинг и споры в комментах',en:'Storytelling, blogging and comment-section debate'}},
+    exam:{key:'exam',emoji:'🏆',n:5,name:{ru:'Exam Arena',en:'Exam Arena'},tag:{ru:'Подготовка к международным экзаменам',en:'International exam preparation'}}
+  };
+  const map={A0:'survival',A1:'survival',A2:'gaming',B1:'gaming',B2:'ai',C1:'ai',C2:'influencer',TOEFL:'exam',IELTS:'exam',CAE:'exam'};
+  return M[map[level]||'survival'];
+}
 const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2','TOEFL','IELTS','CAE'];
 const COURSE_EXAM_LEVELS=['TOEFL','IELTS','CAE'];
 function isExamLevel(lvl){return COURSE_EXAM_LEVELS.indexOf(lvl)>=0;}
@@ -11753,6 +11795,7 @@ function renderCourse(){
     <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${({ru:'Подтвердить уровень',en:'Confirm level',es:'Confirmar nivel',pt:'Confirmar nível',de:'Niveau bestätigen',fr:'Valider le niveau',uk:'Підтвердити рівень',tr:'Seviyeyi onayla',zh:'确认级别',ar:'تأكيد المستوى'}[lang]||'Confirm level')} ${nextExam}</button>
   </div>`;
   let lastLevel='';
+  let lastModule='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
   /* Exam-prep lessons live in their own tab (Exam Hub) — hide them here. */
   const sortedCourse=GALAXY_COURSE.slice().filter(x=>!isExamLevel(x.level)).sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
@@ -11762,7 +11805,16 @@ function renderCourse(){
     const unlocked=isCourseUnlocked(ls.id);
     const reason=unlocked?null:courseLockReason(ls.id);
     const meta=courseLevelLabel(ls.level);
-    const header=ls.level!==lastLevel?`<div class="course-level-head"><div class="course-level-name">${safeHTML(ls.level)}</div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`:'';
+    const mod=courseModuleInfo(ls.level);
+    let header='';
+    if(mod.key!==lastModule){
+      const modWord=lang==='ru'?'Модуль':(lang==='es'?'Módulo':(lang==='de'?'Modul':(lang==='fr'?'Module':(lang==='uk'?'Модуль':(lang==='tr'?'Modül':(lang==='pt'?'Módulo':'Module'))))));
+      header+=`<div class="course-mod-head"><div class="course-mod-emoji">${mod.emoji}</div><div class="course-mod-text"><div class="course-mod-name">${modWord} ${mod.n} · ${safeHTML(mod.name[lang]||mod.name.en)}</div><div class="course-mod-tag">${safeHTML(mod.tag[lang]||mod.tag.en)}</div></div></div>`;
+      lastModule=mod.key;
+    }
+    if(ls.level!==lastLevel){
+      header+=`<div class="course-level-head"><div class="course-level-name"><span class="course-level-cefr" style="--cefr-color:${ls.color}">${safeHTML(ls.level)}</span></div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`;
+    }
     lastLevel=ls.level;
     const statusIcon=!unlocked
       ?lockIconSmall
@@ -11963,6 +12015,12 @@ function courseWordOptions(correct,mode,pool){
 }
 function courseChoiceState(id,part){return LS.getJ('course_choice_'+id+'_'+part)||{};}
 function courseSaveChoiceState(id,part,state){LS.setJ('course_choice_'+id+'_'+part,state||{});}
+/* 3-phase gamified framing layered over the engine stages. Phase 1 "Punchline"
+   = intake of the rule/example (vocab), Phase 2 "Shadow Fight" = interactive
+   quiz-trainer (grammar/builders/errors), Phase 3 "Boss Fight" = the final
+   comprehension challenge. Names are brand terms, kept in English. */
+const STAGE_PHASE={vocab_native:1,vocab_reverse:1,synonym:1,grammar:2,builder:2,builder_native:2,errors:2,listen:3};
+const COURSE_PHASE_META={1:{name:'Punchline',emoji:'💥'},2:{name:'Shadow Fight',emoji:'⚔️'},3:{name:'Boss Fight',emoji:'👑'}};
 function courseStageMeta(id,ls,practice,parts){
   const done=k=>!!parts[k];
   const practiceDone=practice.filter((_,i)=>done('practice_'+i)).length;
@@ -11979,7 +12037,7 @@ function courseStageMeta(id,ls,practice,parts){
     {key:'errors',title:courseT('errors'),sub:({ru:'Найди тип ошибки в предложении',en:'Find the mistake type in a sentence',es:'Encuentra el tipo de error en la frase',pt:'Encontre o tipo de erro na frase',de:'Finde die Fehlerart im Satz',fr:'Trouve le type d’erreur dans la phrase',uk:'Знайди тип помилки в реченні',tr:'Cümledeki hata türünü bul',zh:'找出句中的错误类型',ar:'اعثر على نوع الخطأ في الجملة'}[lang]||'Find the mistake type in a sentence'),pct:done('errors')?100:0},
     {key:'listen',title:courseT('listen'),sub:({ru:'Диктант и понимание текста',en:'Dictation and reading check',es:'Dictado y comprensión lectora',pt:'Ditado e compreensão de leitura',de:'Diktat und Lesekontrolle',fr:'Dictée et compréhension écrite',uk:'Диктант і розуміння тексту',tr:'Dikte ve okuma kontrolü',zh:'听写与阅读理解',ar:'إملاء وفحص القراءة'}[lang]||'Dictation and reading check'),pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
   );
-  return stages.map((s,i)=>Object.assign({n:i+1},s));
+  return stages.map((s,i)=>Object.assign({n:i+1,phase:STAGE_PHASE[s.key]||2},s));
 }
 /* ── Strict in-lesson sequencing ───────────────────────────────────────────
    The learner must clear each stage before the next unlocks. A stage is
@@ -12009,7 +12067,7 @@ function renderCourseStageList(id,ls,practice,parts){
       if(!seenIncomplete&&s.pct<100)seenIncomplete=true;
       return `<div class="course-stage-card ${s.pct>=100?'done':''} ${locked?'locked':''}" data-stage="${s.key}" ${locked?'':`onclick="openCourseStage('${id}','${s.key}')"`}>
       <div class="course-stage-ring" style="--pct:${s.pct}%"><div class="course-stage-ring-in">${s.pct>=100?'✓':(locked?'🔒':s.n)}</div></div>
-      <div class="course-stage-info"><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
+      <div class="course-stage-info"><div class="course-stage-phase p${s.phase}">${(COURSE_PHASE_META[s.phase]||COURSE_PHASE_META[2]).emoji} ${(COURSE_PHASE_META[s.phase]||COURSE_PHASE_META[2]).name}</div><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
       <div class="course-stage-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>`;}).join('')}
   </div>`;
@@ -13119,12 +13177,15 @@ function maybeCompleteCourse(id){
   /* Count this genuinely-new completion against the free-tier daily budget.
      Exam Hub lessons (a separate paid flow) are not metered. */
   try{if(!_examLessonReturn)recordLessonDone();}catch(_){}
-  addLocalXP(10);
+  /* Level-scaled XP (10-25): harder levels feed the seed→tree growth faster. */
+  const _ls=GALAXY_COURSE.find(x=>x.id===id);
+  const _xpGain=({A0:12,A1:14,A2:16,B1:18,B2:20,C1:22,C2:25}[_ls&&_ls.level])||15;
+  addLocalXP(_xpGain);
   bumpStat('tests');
   try{trackM('lesson');}catch(e){}
   try{renderContinueLesson();}catch(_){}
   renderCourseCompleteCard(id,false);
-  toast('+10 XP · '+({ru:'урок закрыт',en:'lesson complete',es:'lección completada',pt:'lição concluída',de:'Lektion abgeschlossen',fr:'leçon terminée',uk:'урок завершено',tr:'ders tamamlandı',zh:'课程完成',ar:'اكتمل الدرس'}[lang]||'lesson complete'),'⭐');
+  toast('+'+_xpGain+' XP · '+({ru:'урок закрыт',en:'lesson complete',es:'lección completada',pt:'lição concluída',de:'Lektion abgeschlossen',fr:'leçon terminée',uk:'урок завершено',tr:'ders tamamlandı',zh:'课程完成',ar:'اكتمل الدرس'}[lang]||'lesson complete'),'⭐');
   return true;
 }
 function courseStageFromPart(part){
@@ -15918,7 +15979,7 @@ const PN_LOGO_SVG = '<svg viewBox="0 0 100 100" fill="none"><defs><linearGradien
    vector PN_LOGO_SVG so the sphere is never empty. */
 const PN_LOGO_MARKUP = '<img src="icons/pn-logo.png" alt="PolyGlotty" '
   + 'style="width:56px;height:56px;object-fit:contain;backface-visibility:hidden;'
-  + 'filter:drop-shadow(0 2px 6px rgba(0,40,30,.5)) drop-shadow(0 0 9px rgba(255,255,255,.4))" '
+  + 'filter:brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0,32,24,.55)) drop-shadow(0 0 10px rgba(120,255,214,.55))" '
   + 'onerror="this.onerror=null;this.outerHTML=PN_LOGO_SVG;">';
 /* ── Real 3D orb (WebGL) ────────────────────────────────────────────────────
    Instead of faking depth with stacked 2D gradients, we render an actual lit
