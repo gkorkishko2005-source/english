@@ -14,7 +14,12 @@ BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 # Hard ceiling on ALEX OUTPUT tokens per reply — applied to EVERY chat path
 # (credit, legacy and grandfathered) so a single reply can never blow the
 # budget. Owner-tunable via env without a deploy.
-MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "250") or "250")
+# NOTE: a low value here truncates complex answers mid-sentence (the model
+# stops before finishing a requested list/instruction), which wastes the
+# user's message. Keep it high enough for a full structured reply; the
+# per-tier caps in MODEL_ECONOMY below are the real budget knob, and metered
+# billing still reconciles to the ACTUAL tokens used (unused reserve refunded).
+MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "1400") or "1400")
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"

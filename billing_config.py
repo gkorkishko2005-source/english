@@ -73,7 +73,7 @@ _DEFAULTS = {
     # cmd_start (one ref per Telegram ID, brand-new users only).
     "REFERRAL_REWARD_CREDITS": 3,
     # Hard limits — the owner can never go negative.
-    "MAX_TOKENS_PER_REPLY": 250,       # caps Anthropic max_tokens (OUTPUT only)
+    "MAX_TOKENS_PER_REPLY": 1200,      # caps model max_tokens (OUTPUT only); low values truncate lists/instructions mid-answer. Metered reserve is sized on this but reconciled to real usage, so raising it never overcharges.
     # Upper bound on INPUT tokens (system prompt + cached context + history) used
     # ONLY to size the up-front reserve so it covers the worst case. The reserve
     # is refunded down to the real total afterwards, so over-estimating here is
