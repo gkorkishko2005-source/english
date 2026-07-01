@@ -488,19 +488,24 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .cmsgs{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:0}
 .cmsgs::-webkit-scrollbar{width:0}
 
-.msg{display:flex;gap:8px;margin-bottom:14px;animation:msgin .2s ease}
+.msg{display:flex;gap:12px;margin-bottom:16px;animation:msgin .2s ease}
 .msg.user{flex-direction:row-reverse}
 .mav{width:28px;height:28px;border-radius:9px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .msg.bot .mav{display:none}
-.msg.bot .mwrap{max-width:88%}
+.msg.bot .mwrap{max-width:85%}
 .msg.bot .mav img{width:100%;height:100%;object-fit:cover;border-radius:9px}
 .msg.bot .mav svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
 .msg.user .mav{background:var(--e3);border:1px solid var(--b1)}
 .msg.user .mav svg{width:15px;height:15px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round}
 
-.mwrap{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:82%}
+/* min-width:0 lets the flex child shrink so long words wrap instead of
+   forcing the bubble past the screen edge. */
+.mwrap{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:85%;min-width:0}
 .msg.user .mwrap{align-items:flex-end}
-.mbub{padding:12px 16px;font-size:14px;line-height:1.46;border-radius:16px}
+/* box-sizing + width caps keep the bubble inside its column; word-break/
+   overflow-wrap force long tokens (URLs, no-space strings) to wrap rather
+   than spill off the right edge. No fixed px widths anywhere. */
+.mbub{padding:12px 16px;font-size:14px;line-height:1.46;border-radius:16px;box-sizing:border-box;max-width:100%;word-break:break-word;overflow-wrap:break-word}
 /* User bubble: a clearer accent tint reads as "yours" at a glance on a
    phone, while staying flat (no heavy fill, no marble). Bot bubble is a
    raised surface with a defined hairline so both sides pop off the page.
@@ -512,8 +517,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    off it; the user's bubbles are a deep, saturated emerald with crisp white
    text. Light mode keeps its own palette (rules at the top of this sheet). */
 html:not([data-mode=light]) #s-chat,
-html:not([data-mode=light]) #s-chat .cmsgs{background:#0D0E10}
-html:not([data-mode=light]) .msg.bot .mbub{background:#1F2226;border-color:rgba(255,255,255,.07)}
+html:not([data-mode=light]) #s-chat .cmsgs{background:#0F1012}
+html:not([data-mode=light]) .msg.bot .mbub{background:#1D2024;border-color:rgba(255,255,255,.07)}
 html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba(0,181,148,.5);color:#FFFFFF}
 .mbub b{font-weight:700}
 .mbub i{font-style:italic;color:var(--t2)}
@@ -1013,9 +1018,9 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 /* Chips: hairline outline, transparent background, no gradient.
    Matches Home grammar — accent shows up only when the chip is
    actively pressed. */
-.chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px 5px;background:var(--bg);border-top:1px solid rgba(255,255,255,.02);flex-shrink:0;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:8px 12px 10px;background:var(--bg);border-top:1px solid rgba(255,255,255,.02);flex-shrink:0;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 22px),transparent)}
 .chips::-webkit-scrollbar{display:none}
-.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:100px;border:1px solid var(--b1);background:transparent;font-size:12px;font-weight:650;color:var(--t2);cursor:pointer;transition:.16s;white-space:nowrap}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:100px;border:1px solid rgba(var(--ar),.3);background:rgba(255,255,255,.03);font-size:13px;font-weight:650;color:var(--t2);cursor:pointer;transition:.16s;white-space:nowrap}
 .chip:hover{border-color:rgba(var(--ar),.35);color:var(--a)}
 .chip:active{border-color:var(--a);color:var(--a);transform:scale(.96);background:rgba(var(--ar),.06)}
 .chip svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
@@ -6087,9 +6092,13 @@ function fmtMsg(text){
   // The bot may return Telegram HTML (<b>, <i>, <code>) or markdown (**bold**)
   // We allow safe HTML tags through, convert markdown, handle newlines
 
+  // 0. Strip leaked system tags (belt-and-suspenders; backend also strips).
+  //    Removes bracketed ALL-CAPS DB commands like [SAVE_INTEREST: телефон]
+  //    while leaving legit brackets (IPA [ˈfəʊn], notes) untouched.
+  let t = (text||'').replace(/\[[A-Z][A-Z0-9_]{2,}(?::[^\]]*)?\]/g,'').trim();
+
   // 1. Temporarily protect safe HTML tags
   const TAGS = {'<b>':'§B§','</b>':'§/B§','<i>':'§I§','</i>':'§/I§','<code>':'§C§','</code>':'§/C§','<br>':'§BR§','<br/>':'§BR§'};
-  let t = text;
   for(const [tag, tok] of Object.entries(TAGS)) t=t.split(tag).join(tok);
 
   // 2. Escape remaining HTML (security)

@@ -20,6 +20,32 @@ BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 # per-tier caps in MODEL_ECONOMY below are the real budget knob, and metered
 # billing still reconciles to the ACTUAL tokens used (unused reserve refunded).
 MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "1400") or "1400")
+
+# ── System-tag sanitizer ───────────────────────────────────────────────
+# ALEX emits hidden DB commands like "[SAVE_INTEREST: телефон]" that the
+# Telegram path consumes and strips. The WebApp path must ALSO extract the
+# interest (so it isn't lost) and then remove ANY bracketed ALL-CAPS system
+# command from the visible reply — otherwise the raw tag leaks into the chat
+# UI and burns the user's credits on junk. The ALL-CAPS token guard keeps
+# legit brackets intact (IPA like [ˈfəʊn], notes like [see below]).
+_SYS_TAG_RE = re.compile(r'\[[A-Z][A-Z0-9_]{2,}(?::[^\]]*)?\]')
+
+
+async def _sanitize_reply(uid: int, reply: str) -> str:
+    """Save any [SAVE_INTEREST: …] tag, then strip all system tags for the UI."""
+    if not reply:
+        return reply
+    try:
+        from prompts import INTEREST_TAG
+        from database import save_interest
+        for interest in INTEREST_TAG.findall(reply):
+            try:
+                await save_interest(uid, interest.strip(), source="auto")
+            except Exception as e:
+                logger.warning("save_interest failed uid=%s: %s", uid, e)
+    except Exception as e:
+        logger.warning("interest extract failed uid=%s: %s", uid, e)
+    return _SYS_TAG_RE.sub("", reply).strip()
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
@@ -862,6 +888,7 @@ async def handle_chat(request):
             result = await openrouter_generate(prem_system, prem_send, prem_max,
                                                model=OPENROUTER_MODEL_PREMIUM)
             reply = re.sub(r"\n[ \t]*\n+", "\n", (result.get("text") or "").strip())
+            reply = await _sanitize_reply(uid, reply)  # save + strip system tags
         except GeminiRateLimit:
             reply = ""
         except Exception as e:
@@ -1032,6 +1059,7 @@ async def handle_chat(request):
                 result = await _GEN[_name](free_system, free_send, g_max)
                 r = (result.get("text") or "").strip()
                 r = re.sub(r"\n[ \t]*\n+", "\n", r)
+                r = await _sanitize_reply(uid, r)  # save + strip system tags
                 if not r:
                     all_rate_limited = False
                     continue
@@ -1262,6 +1290,7 @@ async def handle_chat(request):
             # Dense layout: collapse blank lines between paragraphs so ALEX
             # replies render tight (matches the prompt's LAYOUT rule).
             reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
+            reply = await _sanitize_reply(uid, reply)  # save + strip system tags
             if uid not in ADMIN_IDS:
                 cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
                 ai_cost = _estimate_ai_cost(model_key, data.get("usage") or {})
