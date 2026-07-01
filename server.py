@@ -118,6 +118,30 @@ _msg_counts: dict = {}  # daily quota points per user
 _daily_ai_costs: dict = {}  # estimated daily Anthropic cost per user
 _last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
 
+
+def _throttle_wait(uid, gap: float, bucket: str = "chat") -> int:
+    """Shared per-user rate limiter. Returns the seconds a caller must wait
+    before its next request, or 0 if it may proceed. On a green light it also
+    records 'now' so the next call is measured from this one.
+
+    One in-memory dict keyed by (uid, bucket) lets different endpoints
+    (chat, exam grading) keep independent cooldowns without extra plumbing.
+    Admins bypass. Backed by process memory (single-worker aiohttp); swap the
+    dict for Redis if the app is ever scaled horizontally."""
+    try:
+        if not uid or int(uid) in ADMIN_IDS:
+            return 0
+    except Exception:
+        pass
+    import time as _t
+    now = _t.time()
+    key = (uid, bucket)
+    last = _last_msg_ts.get(key, 0.0)
+    if now - last < gap:
+        return max(1, int(gap - (now - last)) + 1)
+    _last_msg_ts[key] = now
+    return 0
+
 # Anti-deficit input guard. Premium conversations can grow without bound; a long
 # history is billed on EVERY turn (input tokens), so we cap the context we send.
 PREMIUM_HISTORY_TOKEN_BUDGET = int(os.getenv("PREMIUM_HISTORY_TOKEN_BUDGET", "4000") or "4000")
@@ -758,6 +782,20 @@ async def handle_chat(request):
         from database import check_ai_access, consume_ai_request
         from ai_router import (openrouter_generate, OPENROUTER_MODEL_PREMIUM,
                                GeminiRateLimit, ai_busy_message)
+        # Anti-flood: paid users share the same OpenRouter key, so a scripted
+        # burst from one premium account still drains the wallet. Enforce a
+        # per-user cooldown (lighter than free's 5s so paid chat stays snappy).
+        _pg = float(os.getenv("PREMIUM_BURST_GAP", "2.0") or "2.0")
+        _pw = _throttle_wait(uid, _pg, "chat")
+        if _pw:
+            _slow = {"ru": f"⏳ Слишком быстро — подожди {_pw} с.",
+                     "es": f"⏳ Demasiado rápido — espera {_pw} s.",
+                     "pt": f"⏳ Rápido demais — espere {_pw} s."}
+            return web.json_response(
+                {"reply": _slow.get(lang, f"⏳ Slow down — wait {_pw} s."),
+                 "rate_limited": True, "retry_after": _pw},
+                status=429,
+                headers={"Access-Control-Allow-Origin": "*", "Retry-After": str(_pw)})
         access = await check_ai_access(uid)
         if not access.get("allowed"):
             reason = access.get("reason")
@@ -904,10 +942,14 @@ async def handle_chat(request):
                         status=429, headers={"Access-Control-Allow-Origin":"*"})
             except Exception as e:
                 logger.warning("free-credit gate check failed uid=%s: %s", uid, e)
-        # History (same depth as the Anthropic free tier).
+        # History depth for FREE. Kept deliberately short: free chat runs on the
+        # SHARED OpenRouter key, so a long glued-together context is the cheapest
+        # way for an abuser to inflate per-turn input cost ("context-window
+        # exploit"). Default 6 turns (~3 exchanges); override via FREE_HISTORY_MSGS
+        # (set 4 for the tightest anti-drain, higher for more coherent free chat).
         h = _histories.setdefault(uid, [])
         h.append({"role": "user", "content": message})
-        free_hist = int(TIER_ECONOMY["free"]["history"])
+        free_hist = max(2, int(os.getenv("FREE_HISTORY_MSGS", "6") or "6"))
         if len(h) > free_hist:
             _histories[uid] = h[-free_hist:]
         # ── Server-side context-size validation (anti-drain on the shared key) ──
