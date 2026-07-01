@@ -371,35 +371,6 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .xfill::after{content:'';position:absolute;right:0;top:0;width:16px;height:100%;background:rgba(255,255,255,.25);border-radius:100px;filter:blur(3px)}
 .xnms{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
 
-/* Streak */
-.stk{display:flex;align-items:center;gap:13px;padding:13px 16px;background:linear-gradient(135deg,rgba(255,149,0,.09),rgba(255,107,107,.05));border:1px solid rgba(255,149,0,.14);border-radius:var(--r);margin-bottom:6px}
-.streak-chip{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;margin:12px 0 0;background:linear-gradient(135deg,rgba(255,149,0,.13),rgba(255,107,107,.07));border:1px solid rgba(255,149,0,.25);border-radius:var(--r);cursor:pointer;transition:transform .15s,border-color .2s,box-shadow .2s;overflow:hidden}
-.streak-chip::after{content:'';position:absolute;inset:-40% -20% auto auto;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(255,184,48,.20),transparent 68%);pointer-events:none;animation:streakGlow 2.8s ease-in-out infinite}
-.streak-chip:hover{transform:translateY(-1px);border-color:rgba(255,149,0,.4);box-shadow:none}
-.streak-chip:active{transform:scale(.98)}
-.streak-chip-fire{position:relative;z-index:1;width:34px;height:34px;flex-shrink:0;filter:drop-shadow(0 4px 10px rgba(255,149,0,.38));animation:flameFloat 1.9s ease-in-out infinite}
-.flame-main{transform-origin:50% 82%;animation:flameMain 1.15s ease-in-out infinite}
-.flame-inner{transform-origin:50% 84%;animation:flameInner .95s ease-in-out infinite}
-.flame-spark{animation:sparkRise 1.7s ease-in-out infinite;opacity:.8}
-.flame-spark.s2{animation-delay:.38s}.flame-spark.s3{animation-delay:.72s}
-.streak-chip-n{font-size:20px;font-weight:800;color:#ff9500;line-height:1;min-width:20px}
-.streak-chip-lbl{font-size:13px;font-weight:600;color:var(--t2);margin-left:-2px}
-.streak-chip.ignite{animation:streakIgnite .9s cubic-bezier(.2,1.2,.2,1)}
-.streak-chip.ignite .streak-chip-n{animation:num-pop .8s ease}
-.streak-toast{position:fixed;left:50%;top:22%;z-index:350;transform:translateX(-50%) scale(.88);padding:14px 18px;border-radius:18px;background:linear-gradient(135deg,#ff9500,#ff5f57);color:#fff;font-weight:900;font-size:18px;box-shadow:0 18px 46px rgba(255,95,87,.32);opacity:0;pointer-events:none;animation:streakToast 1.8s ease forwards}
-.streak-toast small{display:block;font-size:11px;font-weight:700;opacity:.85;margin-top:3px;text-align:center}
-@keyframes flameFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-2px) rotate(1.5deg)}}
-@keyframes flameMain{0%,100%{transform:scale(1)}45%{transform:scale(1.06,.94) translateY(1px)}}
-@keyframes flameInner{0%,100%{transform:scale(1)}50%{transform:scale(.88,1.08) translateY(-1px)}}
-@keyframes sparkRise{0%{transform:translateY(5px) scale(.55);opacity:0}30%{opacity:.85}100%{transform:translateY(-12px) scale(.9);opacity:0}}
-@keyframes streakGlow{0%,100%{opacity:.55;transform:scale(.95)}50%{opacity:1;transform:scale(1.08)}}
-@keyframes streakIgnite{0%{transform:scale(1)}28%{transform:scale(1.04);box-shadow:none}65%{transform:scale(.99);box-shadow:none}100%{transform:scale(1)}}
-@keyframes streakToast{0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.86)}18%,72%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-18px) scale(.96)}}
-.stk-flame{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,rgba(255,149,0,.18),rgba(255,107,107,.12));flex-shrink:0;overflow:hidden}
-.stk-flame svg{width:28px;height:28px}
-.stk-flame img,.stk-flame video{width:40px;height:40px;object-fit:contain}
-.stkn{font-size:36px;font-weight:800;color:var(--or);line-height:1;min-width:44px;text-align:center}
-.stkt{font-size:14px;font-weight:700}.stks{font-size:12px;color:var(--t2);margin-top:2px}
 
 /* Stats 3 */
 .s3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
@@ -570,10 +541,6 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .dw-speak.playing{border-color:var(--a);background:rgba(var(--ar),.1)}
 .dw-speak svg{width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .dw-speak.playing svg{stroke:var(--a)}
-/* Share streak card */
-.share-streak-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:var(--r2);border:1px solid rgba(var(--ar),.2);background:rgba(var(--ar),.06);cursor:pointer;font-size:13px;font-weight:600;color:var(--a);transition:.2s;margin-top:8px;width:100%}
-.share-streak-btn:active{transform:scale(.96);background:rgba(var(--ar),.12)}
-.share-streak-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 
 .typw{display:flex;align-items:center;gap:4px;padding:10px 12px;background:var(--e1);border:1px solid var(--b1);border-radius:14px 14px 14px 4px;width:fit-content}
 .typw span{width:6px;height:6px;border-radius:50%;background:var(--t2);animation:bounce .9s ease-in-out infinite}
@@ -891,7 +858,6 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 /* ══ PROFILE BADGES ══ */
 .profile-badges{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
 .pbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;display:inline-flex;align-items:center;gap:3px;line-height:1.3}
-.pbadge-streak{background:rgba(255,149,0,.15);color:#ff9500}
 .pbadge-top{background:rgba(255,184,48,.15);color:#ffb830}
 .pbadge-prem{background:rgba(167,139,250,.15);color:#a78bfa}
 .pbadge-ref{background:rgba(46,204,113,.15);color:#2ecc71}
@@ -1572,9 +1538,6 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .rbi{display:flex;align-items:center;justify-content:center;margin-bottom:2px;width:28px;height:28px}
 .rbi svg{width:22px;height:22px}
 
-/* ══ STREAK — flame SVG ══ */
-.stk-flame{display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,rgba(255,149,0,.2),rgba(255,107,107,.15));flex-shrink:0}
-.stk-flame svg{width:28px;height:28px}
 
 /* ══ PROFILE ROW ICONS — colored background ══ */
 .sric{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -1691,45 +1654,57 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    recesses on press (translateZ). The flip amount lives in --flip so the
    :active press can compose translateZ(-10px) without the JS-set transform
    clobbering it. A Telegram-Premium-style confetti layer rains behind it. */
-.pn-logo3d{position:relative;z-index:1;width:96px;height:96px;margin:14px auto 18px;
-  perspective:1000px;cursor:pointer;-webkit-tap-highlight-color:transparent;
-  animation:pnFloat 3.6s ease-in-out infinite;
-  filter:drop-shadow(0 18px 26px rgba(0,200,158,.30))}
-/* Breathing brand halo behind the lens. */
-.pn-logo3d::after{content:"";position:absolute;inset:-7px;border-radius:50%;z-index:-1;
-  pointer-events:none;background:radial-gradient(circle,rgba(0,225,175,.30) 0%,rgba(0,225,175,0) 70%);
-  animation:pnHalo 3.6s ease-in-out infinite}
-/* Glass lens: deep-navy sphere built from layered depth shadows + inset glow. */
+.pn-logo3d{position:relative;z-index:1;width:96px;height:96px;margin:14px auto 20px;
+  perspective:640px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  animation:pnFloat 4s ease-in-out infinite;
+  filter:drop-shadow(0 20px 30px rgba(0,190,150,.42))}
+/* Soft floor contact shadow — grounds the orb so it reads as a real object
+   hovering above the sheet, the way the Telegram Premium coin does. */
+.pn-logo3d::before{content:"";position:absolute;left:50%;bottom:-16px;width:62%;height:16px;
+  transform:translateX(-50%);border-radius:50%;z-index:-2;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(0,0,0,.42),rgba(0,0,0,0) 78%);
+  filter:blur(3px);animation:pnShadow 4s ease-in-out infinite}
+/* Breathing brand halo behind the orb. */
+.pn-logo3d::after{content:"";position:absolute;inset:-12px;border-radius:50%;z-index:-1;
+  pointer-events:none;background:radial-gradient(circle,rgba(0,231,182,.42) 0%,rgba(0,210,166,.14) 46%,rgba(0,210,166,0) 72%);
+  animation:pnHalo 4s ease-in-out infinite}
+/* Vivid glossy 3D orb — a saturated emerald sphere (bright top-left, deep base)
+   with a colored rim-light and layered depth shadows, like the TG Premium coin. */
 .pn-logo3d-inner{position:relative;width:100%;height:100%;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(120% 120% at 32% 24%,#173a54 0%,#0f2740 36%,#0a1c30 68%,#061321 100%);
+  background:
+    radial-gradient(120% 120% at 30% 22%,#5ff2cf 0%,#12c79a 30%,#079d7c 55%,#046a56 78%,#023b33 100%);
   box-shadow:
-    0 20px 42px rgba(4,20,34,.55),
-    0 8px 16px rgba(0,0,0,.4),
-    inset 0 3px 5px rgba(120,205,235,.28),
-    inset 0 -9px 16px rgba(0,10,20,.6),
-    inset 0 0 0 1px rgba(120,205,235,.12);
+    0 24px 44px rgba(2,40,32,.55),
+    0 10px 18px rgba(0,0,0,.34),
+    inset 0 4px 7px rgba(224,255,246,.55),
+    inset 0 -12px 20px rgba(0,26,20,.6),
+    inset 0 0 0 1px rgba(180,255,236,.22);
   transform-style:preserve-3d;
   transform:rotateY(var(--flip,0deg)) translateZ(0);
   transition:transform .7s cubic-bezier(0.34,1.56,0.64,1);
   will-change:transform}
-/* Glossy convex highlight — top-left light source sells the lens curvature. */
+/* Two-layer specular: a broad soft sheen + a tight bright hotspot near the top,
+   the tell-tale gloss that makes a sphere look convex and lit from above-left. */
 .pn-logo3d-inner::before{content:"";position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(58% 46% at 34% 22%,rgba(200,240,255,.5) 0%,rgba(200,240,255,.1) 44%,rgba(200,240,255,0) 66%);
+  background:
+    radial-gradient(30% 22% at 33% 18%,rgba(255,255,255,.95) 0%,rgba(255,255,255,.35) 40%,rgba(255,255,255,0) 72%),
+    radial-gradient(62% 50% at 36% 26%,rgba(214,255,244,.5) 0%,rgba(214,255,244,.08) 46%,rgba(214,255,244,0) 68%);
   pointer-events:none;backface-visibility:hidden}
 /* Press: snappy recess into the Z axis + slight scale (fast in, springy out). */
 .pn-logo3d:active .pn-logo3d-inner{
-  transform:rotateY(var(--flip,0deg)) translateZ(-10px) scale(.97);
+  transform:rotateY(var(--flip,0deg)) translateZ(-12px) scale(.96);
   transition:transform .13s ease-out;
   box-shadow:
-    0 10px 20px rgba(4,20,34,.46),
-    inset 0 3px 5px rgba(120,205,235,.24),
-    inset 0 -9px 16px rgba(0,10,20,.6),
-    inset 0 0 0 1px rgba(120,205,235,.1)}
-.pn-logo3d-inner img,.pn-logo3d-inner svg{position:relative;width:64px;height:64px;object-fit:contain;
-  filter:drop-shadow(0 2px 7px rgba(0,225,175,.42));backface-visibility:hidden}
-@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-@keyframes pnHalo{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.95;transform:scale(1.06)}}
+    0 12px 22px rgba(2,40,32,.44),
+    inset 0 4px 7px rgba(224,255,246,.45),
+    inset 0 -12px 20px rgba(0,26,20,.6),
+    inset 0 0 0 1px rgba(180,255,236,.18)}
+.pn-logo3d-inner img,.pn-logo3d-inner svg{position:relative;width:60px;height:60px;object-fit:contain;
+  filter:drop-shadow(0 2px 5px rgba(0,40,30,.45)) drop-shadow(0 0 8px rgba(255,255,255,.35));backface-visibility:hidden}
+@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pnHalo{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.95;transform:scale(1.07)}}
+@keyframes pnShadow{0%,100%{opacity:.5;transform:translateX(-50%) scale(1)}50%{opacity:.28;transform:translateX(-50%) scale(.82)}}
 /* Telegram-Premium-style aura: soft mint & emerald glowing sparks that drift
    outward from the centre of the 3D logo and fade as they travel. Pure radial
    emanation — no confetti. Each spark's travel vector lives in --tx/--ty and
@@ -1746,8 +1721,8 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
   16%{opacity:.95}
   100%{opacity:0;transform:translate(calc(-50% + var(--tx,0)),calc(-50% + var(--ty,0))) scale(1)}}
 @media (prefers-reduced-motion:reduce){
-  .pn-logo3d{animation:none;filter:drop-shadow(0 10px 18px rgba(0,158,127,.3))}
-  .pn-logo3d::after{animation:none}
+  .pn-logo3d{animation:none;filter:drop-shadow(0 12px 20px rgba(0,158,127,.34))}
+  .pn-logo3d::after,.pn-logo3d::before{animation:none}
   .pn-logo3d-inner{transition:transform .2s ease}
   .pn-aura{display:none}
 }
@@ -5832,16 +5807,6 @@ function animateStreakComplete(streak){
     }
     if(typeof renderGrowth==='function'&&window._d)renderGrowth(window._d);
   }catch(e){appWarn('growth-pulse',e);}
-  try{sfx.level();}catch(e){}
-  haptic('success');
-  return;
-  /* ---- legacy fire-streak toast (unreachable, kept out of the UI) ---- */
-  // eslint-disable-next-line no-unreachable
-  const t=document.createElement('div');
-  t.className='streak-toast';
-  t.innerHTML=({ru:'Стрик продлён',en:'Streak extended',es:'Racha ampliada',pt:'Sequência mantida',de:'Streak verlängert',fr:'Streak prolongé',uk:'Стрік продовжено',tr:'Seri uzatıldı',zh:'连胜延续',ar:'تم تمديد السلسلة'}[lang]||'Streak extended')+'<small>'+streak+' '+({ru:'дней подряд',en:'days in a row',es:'días seguidos',pt:'dias seguidos',de:'Tage in Folge',fr:'jours d’affilée',uk:'днів поспіль',tr:'gün üst üste',zh:'天连续',ar:'يوم متتالي'}[lang]||'days in a row')+'</small>';
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),1900);
   try{sfx.level();}catch(e){}
   haptic('success');
 }
