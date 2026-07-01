@@ -1683,27 +1683,50 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    ══════════════════════════════════════════════════════════════════ */
 .pn-wrap{position:relative;padding:6px 18px 4px;text-align:center}
 .pn-wrap .pn-h1,.pn-wrap .pn-desc{position:relative;z-index:1}
-/* Brand badge — a flat circular medallion of the PolyGlotty logo on deep-navy
-   glass. No 3D, no tap interaction: it's a calm identity mark. A soft idle
-   glow-pulse (reduced-motion aware) gives it a little life, and a Telegram-
-   Premium-style confetti layer rains brand particles down from behind it. */
+/* Interactive 3D flip button — a convex glass "bubble" of the PolyGlotty logo.
+   Outer node: real perspective + gentle float + a breathing brand halo. Inner
+   node: a preserve-3d lens that spins a full 360° on tap (elastic spring) and
+   recesses on press (translateZ). The flip amount lives in --flip so the
+   :active press can compose translateZ(-10px) without the JS-set transform
+   clobbering it. A Telegram-Premium-style confetti layer rains behind it. */
 .pn-logo3d{position:relative;z-index:1;width:96px;height:96px;margin:14px auto 18px;
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  -webkit-tap-highlight-color:transparent;
-  background:radial-gradient(120% 120% at 32% 26%,#173a54 0%,#0f2740 38%,#0a1c30 70%,#061321 100%);
-  box-shadow:0 14px 30px rgba(4,20,34,.5),inset 0 0 0 1px rgba(120,205,235,.14),inset 0 2px 6px rgba(120,205,235,.12);
-  animation:pnGlow 3.6s ease-in-out infinite}
-/* Breathing brand halo behind the disc. */
+  perspective:1000px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  animation:pnFloat 3.6s ease-in-out infinite;
+  filter:drop-shadow(0 18px 26px rgba(0,200,158,.30))}
+/* Breathing brand halo behind the lens. */
 .pn-logo3d::after{content:"";position:absolute;inset:-7px;border-radius:50%;z-index:-1;
   pointer-events:none;background:radial-gradient(circle,rgba(0,225,175,.30) 0%,rgba(0,225,175,0) 70%);
   animation:pnHalo 3.6s ease-in-out infinite}
+/* Glass lens: deep-navy sphere built from layered depth shadows + inset glow. */
 .pn-logo3d-inner{position:relative;width:100%;height:100%;border-radius:50%;
-  display:flex;align-items:center;justify-content:center}
-.pn-logo3d-inner img,.pn-logo3d-inner svg{position:relative;width:82px;height:82px;object-fit:contain;
-  filter:drop-shadow(0 2px 7px rgba(0,225,175,.42))}
-@keyframes pnGlow{
-  0%,100%{box-shadow:0 14px 30px rgba(4,20,34,.5),inset 0 0 0 1px rgba(120,205,235,.14),inset 0 2px 6px rgba(120,205,235,.12)}
-  50%{box-shadow:0 16px 36px rgba(0,120,96,.42),inset 0 0 0 1px rgba(120,235,205,.22),inset 0 2px 6px rgba(120,205,235,.14)}}
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 120% at 32% 24%,#173a54 0%,#0f2740 36%,#0a1c30 68%,#061321 100%);
+  box-shadow:
+    0 20px 42px rgba(4,20,34,.55),
+    0 8px 16px rgba(0,0,0,.4),
+    inset 0 3px 5px rgba(120,205,235,.28),
+    inset 0 -9px 16px rgba(0,10,20,.6),
+    inset 0 0 0 1px rgba(120,205,235,.12);
+  transform-style:preserve-3d;
+  transform:rotateY(var(--flip,0deg)) translateZ(0);
+  transition:transform .7s cubic-bezier(0.34,1.56,0.64,1);
+  will-change:transform}
+/* Glossy convex highlight — top-left light source sells the lens curvature. */
+.pn-logo3d-inner::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(58% 46% at 34% 22%,rgba(200,240,255,.5) 0%,rgba(200,240,255,.1) 44%,rgba(200,240,255,0) 66%);
+  pointer-events:none;backface-visibility:hidden}
+/* Press: snappy recess into the Z axis + slight scale (fast in, springy out). */
+.pn-logo3d:active .pn-logo3d-inner{
+  transform:rotateY(var(--flip,0deg)) translateZ(-10px) scale(.97);
+  transition:transform .13s ease-out;
+  box-shadow:
+    0 10px 20px rgba(4,20,34,.46),
+    inset 0 3px 5px rgba(120,205,235,.24),
+    inset 0 -9px 16px rgba(0,10,20,.6),
+    inset 0 0 0 1px rgba(120,205,235,.1)}
+.pn-logo3d-inner img,.pn-logo3d-inner svg{position:relative;width:64px;height:64px;object-fit:contain;
+  filter:drop-shadow(0 2px 7px rgba(0,225,175,.42));backface-visibility:hidden}
+@keyframes pnFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes pnHalo{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.95;transform:scale(1.06)}}
 /* Confetti shower — small brand-coloured particles falling from behind the logo. */
 .pn-confetti{position:absolute;left:0;right:0;top:0;height:230px;overflow:hidden;pointer-events:none;z-index:0}
@@ -1715,28 +1738,30 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
   12%{opacity:.95}82%{opacity:.85}
   100%{transform:translate(var(--dx,0),230px) rotate(240deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){
-  .pn-logo3d,.pn-logo3d::after{animation:none}
+  .pn-logo3d{animation:none;filter:drop-shadow(0 10px 18px rgba(0,158,127,.3))}
+  .pn-logo3d::after{animation:none}
+  .pn-logo3d-inner{transition:transform .2s ease}
   .pn-confetti{display:none}
 }
 /* Compact the paywall header on short viewports so plans stay above the fold. */
 @media (max-height:680px){
-  .pn-logo3d{width:76px;height:76px;margin:8px auto 12px}
-  .pn-logo3d-inner img,.pn-logo3d-inner svg{width:64px;height:64px}
+  .pn-logo3d{width:80px;height:80px;margin:8px auto 12px}
+  .pn-logo3d-inner img,.pn-logo3d-inner svg{width:54px;height:54px}
   .pn-confetti{height:180px}
 }
 .pn-h1{font-size:23px;font-weight:950;letter-spacing:-.3px;margin:0 0 6px;color:var(--t1)}
 .pn-h1 b{background:linear-gradient(95deg,#00A383,#00B594);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .pn-desc{font-size:12.5px;line-height:1.5;color:var(--t2);max-width:300px;margin:0 auto 16px}
 /* ── Radio plan selector ── */
-.pn-plans{display:flex;flex-direction:column;gap:12px;padding:0 20px 6px;text-align:left}
-.pn-plan{position:relative;display:flex;align-items:center;gap:14px;
-  background:var(--e1);border:1px solid var(--b1);border-radius:16px;
-  padding:17px 18px;cursor:pointer;
+.pn-plans{display:flex;flex-direction:column;gap:14px;padding:2px 20px 8px;text-align:left}
+.pn-plan{position:relative;display:flex;align-items:center;gap:15px;
+  background:var(--e1);border:1px solid rgba(255,255,255,.055);border-radius:18px;
+  padding:20px 19px;cursor:pointer;
   transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .13s ease-out}
 .pn-plan:active{transform:scale(.985)}
-/* Ultra-thin mint edge + soft translucent glow when selected. */
-.pn-plan.sel{border-color:rgba(0,179,148,.55);background:rgba(0,179,148,.07);
-  box-shadow:0 0 0 1px rgba(0,179,148,.35),0 8px 24px rgba(0,179,148,.16)}
+/* Ultra-thin mint hairline edge + soft, layered translucent glow when selected. */
+.pn-plan.sel{border-color:rgba(0,179,148,.45);background:rgba(0,179,148,.06);
+  box-shadow:0 0 0 1px rgba(0,179,148,.30),0 10px 30px rgba(0,179,148,.14),0 2px 8px rgba(0,179,148,.10)}
 .pn-radio{flex:0 0 auto;width:21px;height:21px;border-radius:50%;
   border:2px solid var(--t3);position:relative;transition:border-color .15s}
 .pn-plan.sel .pn-radio{border-color:#00A383}
@@ -6282,14 +6307,16 @@ async function doChat(text,mode){
    fades after a few seconds. Purely a debug/QA aid. */
 function _showProviderBadge(txt,provider){
   if(!txt)return;
-  const gem=/gemini/i.test(String(provider||txt));
+  const gem=/gemini|basic|free/i.test(String(provider||txt));
   let b=document.getElementById('ai-prov-badge');
   if(!b){
     b=document.createElement('div');b.id='ai-prov-badge';
     b.style.cssText='position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:10000;font:700 11px/1 var(--f,system-ui);padding:6px 11px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25)';
     document.body.appendChild(b);
   }
-  b.textContent=txt;
+  /* Marketing-only surface: never expose the underlying model to users —
+     free tier reads as "ALEX Basic", premium as "ALEX Pro". */
+  b.textContent=gem?'ALEX Basic':'ALEX Pro';
   b.style.background=gem?'rgba(66,133,244,.16)':'rgba(20,184,166,.16)';
   b.style.color=gem?'#8ab4f8':'#5eead4';
   b.style.border='1px solid '+(gem?'rgba(66,133,244,.45)':'rgba(20,184,166,.45)');
@@ -14940,7 +14967,7 @@ async function openWordBreakdown(word,translation){
 /* Premium paywall card shown inside the dictionary modal for free users. */
 function _wbrkPaywallCard(){
   const ttl=({ru:'Разбор слова с ALEX — для Premium',en:'ALEX word breakdown — Premium',es:'Análisis con ALEX — Premium',pt:'Análise com ALEX — Premium',de:'ALEX-Wortanalyse — Premium',fr:'Analyse ALEX — Premium',uk:'Розбір слова з ALEX — Premium',tr:'ALEX kelime analizi — Premium',zh:'ALEX 单词解析 — Premium',ar:'تحليل ALEX — Premium'}[lang]||'ALEX word breakdown — Premium');
-  const sub=({ru:'ALEX (Claude) сгенерирует 3 примера использования этого слова в контексте. Доступно с подпиской Premium.',en:'ALEX (Claude) will generate 3 contextual examples for this word. Available with Premium.',es:'ALEX (Claude) generará 3 ejemplos en contexto. Disponible con Premium.',pt:'ALEX (Claude) gerará 3 exemplos em contexto. Disponível com Premium.',de:'ALEX (Claude) erstellt 3 Beispiele im Kontext. Mit Premium verfügbar.',fr:'ALEX (Claude) générera 3 exemples en contexte. Disponible avec Premium.',uk:'ALEX (Claude) згенерує 3 приклади в контексті. Доступно з Premium.',tr:'ALEX (Claude) bağlamda 3 örnek üretir. Premium ile kullanılabilir.',zh:'ALEX（Claude）将生成 3 个语境例句。需 Premium。',ar:'سيُنشئ ALEX (Claude) ٣ أمثلة سياقية. متاح مع Premium.'}[lang]||'ALEX (Claude) will generate 3 contextual examples for this word. Available with Premium.');
+  const sub=({ru:'ALEX Pro сгенерирует 3 примера использования этого слова в контексте. Доступно с подпиской Premium.',en:'ALEX Pro will generate 3 contextual examples for this word. Available with Premium.',es:'ALEX Pro generará 3 ejemplos en contexto. Disponible con Premium.',pt:'ALEX Pro gerará 3 exemplos em contexto. Disponível com Premium.',de:'ALEX Pro erstellt 3 Beispiele im Kontext. Mit Premium verfügbar.',fr:'ALEX Pro générera 3 exemples en contexte. Disponible avec Premium.',uk:'ALEX Pro згенерує 3 приклади в контексті. Доступно з Premium.',tr:'ALEX Pro bağlamda 3 örnek üretir. Premium ile kullanılabilir.',zh:'ALEX（Claude）将生成 3 个语境例句。需 Premium。',ar:'سيُنشئ ALEX Pro ٣ أمثلة سياقية. متاح مع Premium.'}[lang]||'ALEX Pro will generate 3 contextual examples for this word. Available with Premium.');
   const cta=({ru:'Перейти на Premium',en:'Go Premium',es:'Pasar a Premium',pt:'Assinar Premium',de:'Premium holen',fr:'Passer à Premium',uk:'Перейти на Premium',tr:'Premium’a geç',zh:'升级 Premium',ar:'الانتقال إلى Premium'}[lang]||'Go Premium');
   _wbrkRender(`<div class="wbrk-err" style="text-align:center"><div style="font-weight:850;color:var(--t1);font-size:14px;margin-bottom:6px">${safeHTML(ttl)}</div><div style="font-size:12.5px;line-height:1.5">${safeHTML(sub)}</div></div><button class="wbrk-retry" type="button" onclick="try{closeMod('wordbrkm')}catch(e){};openPremium(null,'platform')">${safeHTML(cta)}</button>`);
 }
@@ -15850,9 +15877,25 @@ const PN_LOGO_SVG = '<svg viewBox="0 0 100 100" fill="none"><defs><linearGradien
    If that file is missing/unreachable, onerror swaps in the vector PN_LOGO_SVG
    so the sphere is never empty. Drop the artwork at webapp/icons/pn-logo.png. */
 const PN_LOGO_MARKUP = '<img src="icons/pn-logo.png" alt="PolyGlotty" '
-  + 'style="position:relative;width:82px;height:82px;object-fit:contain;'
+  + 'style="position:relative;width:64px;height:64px;object-fit:contain;backface-visibility:hidden;'
   + 'filter:drop-shadow(0 2px 7px rgba(0,225,175,.42))" '
   + 'onerror="this.onerror=null;this.outerHTML=PN_LOGO_SVG;">';
+/* Tap → full 360° 3D flip of the logo lens. We drive a CSS variable (--flip)
+   instead of writing transform directly, so the :active press state can layer
+   translateZ(-10px) on top without being clobbered. Accumulating degrees keeps
+   the spin direction consistent; the springy cubic-bezier(0.34,1.56,0.64,1)
+   (set in CSS) gives the elastic overshoot. Haptic tick on supported clients. */
+let _pnFlipDeg = 0;
+function pnFlipLogo(el){
+  try{
+    const inner = el && el.querySelector('.pn-logo3d-inner');
+    if(!inner) return;
+    _pnFlipDeg += 360;
+    inner.style.setProperty('--flip', _pnFlipDeg + 'deg');
+    try{ if(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.HapticFeedback)
+      Telegram.WebApp.HapticFeedback.impactOccurred('light'); }catch(_){}
+  }catch(_){}
+}
 /* Telegram-Premium-style particle shower for the paywall. Spawns a set of
    small brand-coloured flecks (mix of dots and squares) at random x-offsets,
    each with its own duration / delay / horizontal drift, so they rain down
@@ -16024,7 +16067,7 @@ function renderPremNative(){
   host.innerHTML=`
     <div class="pn-wrap">
       <div class="pn-confetti" aria-hidden="true"></div>
-      <div class="pn-logo3d" title="PolyGlotty"><div class="pn-logo3d-inner">${PN_LOGO_MARKUP}</div></div>
+      <div class="pn-logo3d" onclick="pnFlipLogo(this)" title="PolyGlotty"><div class="pn-logo3d-inner">${PN_LOGO_MARKUP}</div></div>
       <div class="pn-h1">${titleHTML}</div>
       <div class="pn-desc">${safeHTML(desc)}</div>
     </div>
