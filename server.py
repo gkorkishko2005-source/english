@@ -2313,18 +2313,142 @@ async def handle_exam_section(request):
         return web.json_response({"error": str(e)[:160]}, status=500,
                                  headers={"Access-Control-Allow-Origin": "*"})
 
+def _exam_norm_txt(s) -> str:
+    """Whitespace/case-insensitive normaliser for comparing answer option text."""
+    return " ".join(str(s or "").lower().split())
+
+
+def _exam_public_item(item: dict) -> dict:
+    """Return a client-safe copy of a generated exam item: the correct-answer
+    index (`a`) and the `explanation` are stripped from every question so the
+    answer key NEVER leaves the server. Each question keeps a stable `qi` (its
+    position) so the client can later report which question a choice belongs to,
+    and the server can grade it against the stored template."""
+    if not isinstance(item, dict):
+        return {}
+    pub = {k: v for k, v in item.items() if k != "questions"}
+    qs = []
+    for i, q in enumerate(item.get("questions") or []):
+        if not isinstance(q, dict):
+            continue
+        cq = {"qi": i, "q": q.get("q", ""), "o": list(q.get("o") or [])}
+        if q.get("qtype"):
+            cq["qtype"] = q["qtype"]
+        qs.append(cq)
+    pub["questions"] = qs
+    return pub
+
+
+async def handle_exam_grade_section(request):
+    """Server-authoritative grading for an OBJECTIVE section (reading|listening)
+    built from AI-generated items. The client sends ONLY the option text it
+    chose per question — never a score. The server reads the correct answer from
+    the stored template payload (which it never shipped to the client) and
+    computes the section score itself.
+
+    body: {uid, session_id, section, responses:[{template_id, qi, choice}]}.
+    """
+    uid, lang, body, err = await _exam_auth(request)
+    if err:
+        return err
+    section = str(body.get("section") or "").lower()
+    if section not in ("reading", "listening"):
+        return web.json_response({"error": "bad section"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    try:
+        sid = int(body.get("session_id") or 0)
+    except Exception:
+        return web.json_response({"error": "bad request"}, status=400,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    responses = body.get("responses")
+    if not isinstance(responses, list):
+        responses = []
+    try:
+        from database import (get_exam_session, save_section_result,
+                              get_exam_template_by_id)
+        # sid > 0 → a persisted certificate exam: bind to the session and save
+        # the result. sid == 0 → an unscored practice drill: grade and return
+        # the score but persist nothing.
+        s = None
+        if sid > 0:
+            s = await get_exam_session(sid, uid)
+            if not s:
+                return web.json_response({"error": "no session"}, status=404,
+                                         headers={"Access-Control-Allow-Origin": "*"})
+            exam_type = "ielts" if str(s["exam_type"]).lower() == "ielts" else "toefl"
+        else:
+            exam_type = "ielts" if str(body.get("exam_type") or "toefl").lower() == "ielts" else "toefl"
+        smax = 9 if exam_type == "ielts" else 30
+        tcache = {}
+        correct = 0
+        total = 0
+        for r in responses[:80]:
+            if not isinstance(r, dict):
+                continue
+            try:
+                tid = int(r.get("template_id") or 0)
+                qi = int(r.get("qi"))
+            except Exception:
+                continue
+            choice = _exam_norm_txt(r.get("choice"))
+            if tid not in tcache:
+                row = await get_exam_template_by_id(tid)
+                try:
+                    tcache[tid] = json.loads(row["payload"]) if row else None
+                except Exception:
+                    tcache[tid] = None
+            item = tcache.get(tid)
+            if not isinstance(item, dict):
+                continue
+            qs = item.get("questions") or []
+            if qi < 0 or qi >= len(qs):
+                continue
+            q = qs[qi] or {}
+            opts = q.get("o") or []
+            ai = q.get("a")
+            total += 1
+            if isinstance(ai, int) and 0 <= ai < len(opts):
+                if choice and choice == _exam_norm_txt(opts[ai]):
+                    correct += 1
+        ratio = (correct / total) if total else 0.0
+        section_score = (round(ratio * smax * 2) / 2.0 if exam_type == "ielts"
+                         else int(round(ratio * smax)))
+        # Persist only for a real certificate session; drills (sid==0) return the
+        # score but store nothing.
+        if sid > 0:
+            await save_section_result(sid, uid, section, section_score, smax,
+                                      {"correct": correct, "total": total,
+                                       "server_graded": True})
+        return web.json_response({"ok": True, "section": section,
+                                  "score": section_score, "max_score": smax,
+                                  "correct": correct, "total": total},
+                                 headers={"Access-Control-Allow-Origin": "*"})
+    except Exception as e:
+        logger.error(f"exam_grade_section error: {e}")
+        return web.json_response({"error": str(e)[:160]}, status=500,
+                                 headers={"Access-Control-Allow-Origin": "*"})
+
+
 async def handle_exam_generate(request):
     """Serve ONE strictly-academic exam item (Reading or Listening) for the
     simulator. Cache-first: returns a random cached variant the learner has not
     seen; otherwise generates a fresh one with Claude Sonnet from the academic
     topic pool, caches it (reused across users) and marks it seen.
 
+    When the client sends `secure:1`, the correct answers are stripped before
+    the item is sent (see _exam_public_item) and grading happens server-side in
+    handle_exam_grade_section using the full payload kept in the DB. Legacy
+    clients that omit `secure` still receive the answer key inline, so this is a
+    fully backward-compatible rollout.
+
     body: {uid, exam_type:'toefl'|'ielts', section:'reading'|'listening',
-           level?:'C1'|'C2'}
+           level?:'C1'|'C2', secure?:1}
     """
     uid, lang, body, err = await _exam_auth(request)
     if err:
         return err
+    secure = bool(body.get("secure"))
+    _pub = _exam_public_item if secure else (lambda x: x)
     exam_type = "ielts" if str(body.get("exam_type") or "toefl").lower() == "ielts" else "toefl"
     section = str(body.get("section") or "reading").lower()
     if section not in ("reading", "listening"):
@@ -2345,7 +2469,7 @@ async def handle_exam_generate(request):
                 await mark_exam_template_seen(uid, int(cached["id"]))
                 return web.json_response(
                     {"template_id": int(cached["id"]), "exam_type": exam_type,
-                     "section": section, "cached": True, **item},
+                     "section": section, "cached": True, **_pub(item)},
                     headers={"Access-Control-Allow-Origin": "*"})
 
         # 2) Generate a fresh academic variant on a topic this user hasn't seen.
@@ -2372,7 +2496,7 @@ async def handle_exam_generate(request):
             await mark_exam_template_seen(uid, tid)
         return web.json_response(
             {"template_id": tid, "exam_type": exam_type, "section": section,
-             "cached": False, **item},
+             "cached": False, **_pub(item)},
             headers={"Access-Control-Allow-Origin": "*"})
     except Exception as e:
         logger.error("exam_generate error: %s", e)
@@ -2798,6 +2922,7 @@ def create_app():
     # Premium exam simulator (subscription-gated inside each handler).
     app.router.add_post("/api/exam/start",handle_exam_start)
     app.router.add_post("/api/exam/section",handle_exam_section)
+    app.router.add_post("/api/exam/grade-section",handle_exam_grade_section)
     app.router.add_post("/api/exam/generate",handle_exam_generate)
     app.router.add_post("/api/exam/writing",handle_exam_writing)
     app.router.add_post("/api/exam/speaking",handle_exam_speaking)

@@ -15849,6 +15849,13 @@ const PN_LOGO_SVG = '<svg viewBox="0 0 100 100" fill="none"><defs><linearGradien
   /* small British-isles + Scandinavia flecks */
   + '<circle cx="55.4" cy="30.5" r="1.7" fill="url(#pnG)"/><circle cx="52.8" cy="34.2" r="1.3" fill="url(#pnG)"/>'
   + '</svg>';
+/* Prefer the real brand PNG (icons/pn-logo.png) overlaid inside the 3D sphere.
+   If that file is missing/unreachable, onerror swaps in the vector PN_LOGO_SVG
+   so the sphere is never empty. Drop the artwork at webapp/icons/pn-logo.png. */
+const PN_LOGO_MARKUP = '<img src="icons/pn-logo.png" alt="PolyGlotty" '
+  + 'style="position:relative;width:82px;height:82px;object-fit:contain;'
+  + 'filter:drop-shadow(0 2px 7px rgba(0,225,175,.42))" '
+  + 'onerror="this.onerror=null;this.outerHTML=PN_LOGO_SVG;">';
 /* Spins the logo a full extra turn on each tap. We drive a CSS variable
    (--flip) instead of writing transform directly, so the :active press
    state can layer translateZ(-10px) on top without being clobbered.
@@ -16006,7 +16013,7 @@ function renderPremNative(){
   const desc=({ru:'Безлимитный английский: живой чат, экзамены, карточки и ролевые сценарии — всё в одной подписке.',en:'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.',es:'Inglés ilimitado: chat en vivo, exámenes, tarjetas y juegos de rol — todo en una suscripción.',pt:'Inglês ilimitado: chat ao vivo, exames, cartões e roleplay — tudo numa assinatura.',de:'Unbegrenztes Englisch: Live-Chat, Prüfungen, Karten und Rollenspiele — alles in einem Abo.',fr:'Anglais illimité : chat en direct, examens, cartes et jeux de rôle — tout en un abonnement.',uk:'Безлімітна англійська: живий чат, іспити, картки та рольові сценарії — усе в одній підписці.',tr:'Sınırsız İngilizce: canlı sohbet, sınavlar, kartlar ve rol yapma — tek abonelikte.',zh:'无限英语：实时聊天、考试、单词卡和角色扮演 — 一个订阅全包。',ar:'إنجليزية بلا حدود: دردشة حية، امتحانات، بطاقات ولعب أدوار — كل ذلك في اشتراك واحد.'}[lang]||'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.');
   host.innerHTML=`
     <div class="pn-wrap">
-      <div class="pn-logo3d" onclick="pnFlipLogo(this)" title="PolyGlotty"><div class="pn-logo3d-inner">${PN_LOGO_SVG}</div></div>
+      <div class="pn-logo3d" onclick="pnFlipLogo(this)" title="PolyGlotty"><div class="pn-logo3d-inner">${PN_LOGO_MARKUP}</div></div>
       <div class="pn-h1">${titleHTML}</div>
       <div class="pn-desc">${safeHTML(desc)}</div>
     </div>

@@ -2387,6 +2387,15 @@ async def get_unseen_exam_template(uid: int, exam_type: str, section: str):
         exam_type, section, uid, fetch="one")
 
 
+async def get_exam_template_by_id(template_id: int):
+    """Fetch one stored exam variant by id — including its full payload with the
+    answer key. Server-side grading reads the correct answers from here, so the
+    answers never have to be shipped to (or trusted from) the client."""
+    return await db(
+        "SELECT id, exam_type, section, payload FROM exam_templates WHERE id=?",
+        int(template_id), fetch="one")
+
+
 async def seen_topic_ids(uid: int) -> list:
     """Topic ids already served to this user — used to bias fresh generation
     toward unseen subjects."""
