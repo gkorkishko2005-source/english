@@ -2241,6 +2241,30 @@ async def _exam_auth(request):
             _paywall_json(lang), status=402, headers={"Access-Control-Allow-Origin": "*"})
     return uid, lang, body, None
 
+# Anti-spam for exam endpoints. The grading / generation routes hit the AI
+# provider (shared OpenRouter key) or the stored answer key, so a scripted burst
+# from one account is both costly and a scraping vector. Enforce one request per
+# EXAM_BURST_GAP seconds per user on the heavy routes (admins bypass inside
+# _throttle_wait). Env-configurable; process-memory backed (single aiohttp
+# worker) — swap the dict for Redis if scaled horizontally.
+EXAM_BURST_GAP = float(os.getenv("EXAM_BURST_GAP", "5.0") or "5.0")
+
+
+def _exam_throttle_or_429(uid, lang: str = "en"):
+    """Return a ready 429 response if `uid` is exam-throttled, else None."""
+    wait = _throttle_wait(uid, EXAM_BURST_GAP, "exam")
+    if not wait:
+        return None
+    msg = {"ru": f"⏳ Слишком быстро — подожди {wait} с.",
+           "es": f"⏳ Demasiado rápido — espera {wait} s.",
+           "pt": f"⏳ Rápido demais — espere {wait} s."}
+    return web.json_response(
+        {"error": msg.get(lang, f"⏳ Slow down — wait {wait} s."),
+         "rate_limited": True, "retry_after": wait},
+        status=429,
+        headers={"Access-Control-Allow-Origin": "*", "Retry-After": str(wait)})
+
+
 async def _exam_log_ai_cost(uid: int, usage: dict):
     """Best-effort: charge AI-grading cost to the daily quota ledger (Sonnet)."""
     if not usage or uid in ADMIN_IDS:
@@ -2351,6 +2375,9 @@ async def handle_exam_grade_section(request):
     uid, lang, body, err = await _exam_auth(request)
     if err:
         return err
+    t = _exam_throttle_or_429(uid, lang)
+    if t:
+        return t
     section = str(body.get("section") or "").lower()
     if section not in ("reading", "listening"):
         return web.json_response({"error": "bad section"}, status=400,
@@ -2447,6 +2474,9 @@ async def handle_exam_generate(request):
     uid, lang, body, err = await _exam_auth(request)
     if err:
         return err
+    t = _exam_throttle_or_429(uid, lang)
+    if t:
+        return t
     secure = bool(body.get("secure"))
     _pub = _exam_public_item if secure else (lambda x: x)
     exam_type = "ielts" if str(body.get("exam_type") or "toefl").lower() == "ielts" else "toefl"
@@ -2509,6 +2539,9 @@ async def handle_exam_writing(request):
     uid, lang, body, err = await _exam_auth(request)
     if err:
         return err
+    t = _exam_throttle_or_429(uid, lang)
+    if t:
+        return t
     prompt = str(body.get("prompt") or "").strip()[:2000]
     essay = str(body.get("essay") or "").strip()[:6000]
     if len(essay.split()) < 20:
@@ -2545,6 +2578,9 @@ async def handle_exam_speaking(request):
     uid, lang, body, err = await _exam_auth(request)
     if err:
         return err
+    t = _exam_throttle_or_429(uid, lang)
+    if t:
+        return t
     question = str(body.get("question") or "").strip()[:1000]
     transcript = str(body.get("transcript") or "").strip()[:4000]
     if len(transcript.split()) < 3:
