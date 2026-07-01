@@ -514,7 +514,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .hbtn:hover{color:var(--t2);background:var(--e2)}
 .hbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-.cmsgs{flex:1;overflow-y:auto;padding:12px 14px 8px;display:flex;flex-direction:column;gap:7px}
+.cmsgs{flex:1;overflow-y:auto;padding:10px 12px 8px;display:flex;flex-direction:column;gap:4px}
 .cmsgs::-webkit-scrollbar{width:0}
 
 .msg{display:flex;gap:8px;animation:msgin .2s ease}
@@ -527,27 +527,29 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .msg.user .mav{background:var(--e3);border:1px solid var(--b1)}
 .msg.user .mav svg{width:15px;height:15px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round}
 
-.mwrap{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:80%}
+.mwrap{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:82%}
 .msg.user .mwrap{align-items:flex-end}
-.mbub{padding:10px 12px;font-size:13.5px;line-height:1.52;border-radius:13px}
-/* User bubble: subtle accent tint instead of a heavy filled block.
-   Distinct from bot via right-alignment + corner-tail; no need to
-   shout in colour. */
-.msg.user .mbub{background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.16);color:var(--t1);border-radius:13px 13px 4px 13px}
-.msg.bot  .mbub{background:var(--e2);border:1px solid var(--border-ui);border-radius:13px 13px 13px 4px;color:var(--t1)}
+.mbub{padding:8px 11px;font-size:14px;line-height:1.42;border-radius:15px}
+/* User bubble: a clearer accent tint reads as "yours" at a glance on a
+   phone, while staying flat (no heavy fill, no marble). Bot bubble is a
+   raised surface with a defined hairline so both sides pop off the page. */
+.msg.user .mbub{background:rgba(var(--ar),.15);border:1px solid rgba(var(--ar),.26);color:var(--t1);border-radius:15px 15px 5px 15px}
+.msg.bot  .mbub{background:var(--e3);border:1px solid var(--b2);border-radius:15px 15px 15px 5px;color:var(--t1)}
 .mbub b{font-weight:700}
 .mbub i{font-style:italic;color:var(--t2)}
 .mbub code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:var(--e2);border:1px solid var(--b1);padding:1px 6px;border-radius:5px;color:var(--t1)}
-.mbub .mh{font-size:11px;font-weight:700;color:var(--a);margin:8px 0 4px;display:block;text-transform:uppercase;letter-spacing:.6px}
+.mbub .mh{font-size:11px;font-weight:700;color:var(--a);margin:6px 0 3px;display:block;text-transform:uppercase;letter-spacing:.6px}
 /* Inner blocks (lists, tips, corrections) are now neutral hairlines.
    The colour cue only lives in the small uppercase label inside, not
-   in the surface — Home grammar. */
-.mbub ul,.mbub ol{padding:8px 10px 8px 24px;margin:8px 0;background:var(--e2);border:1px solid var(--b1);border-radius:10px}
-.mbub li{margin-bottom:4px;font-size:14px;padding-left:2px}
+   in the surface — Home grammar. Kept tight so a structured answer
+   reads as one compact card, not a stack of boxes. */
+.mbub ul,.mbub ol{padding:6px 10px 6px 22px;margin:6px 0;background:var(--e2);border:1px solid var(--b1);border-radius:10px}
+.mbub li{margin-bottom:3px;font-size:13.5px;padding-left:2px}
+.mbub li:last-child{margin-bottom:0}
 .mbub li::marker{color:var(--t3);font-weight:700}
-.mbub .tip{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 11px;margin:9px 0;font-size:13px;color:var(--t1)}
-.mbub .corr{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 11px;margin:9px 0;font-size:13px;color:var(--t1)}
-.msg-block{display:block;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 11px;margin:9px 0}
+.mbub .tip{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:7px 10px;margin:6px 0;font-size:13px;color:var(--t1)}
+.mbub .corr{background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:7px 10px;margin:6px 0;font-size:13px;color:var(--t1)}
+.msg-block{display:block;background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:7px 10px;margin:6px 0}
 .msg-block-k{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--a);margin-bottom:4px}
 .msg-block-v{display:block;color:var(--t1)}
 
@@ -2530,19 +2532,21 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .srs{font-size:11.5px;color:var(--t3);margin-top:2px}
 .slist{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:12px;overflow:hidden}
 
-/* ── Settings · premium breathing room ─────────────────────────────
-   After hiding Interests + emptying the profile field the screen felt
-   sparse, so we widen the rhythm: ~24px between major sections and
-   +15–20% inner padding in each container for "air" in the dark theme. */
-#s-settings .sec{margin:28px 2px 14px}
-#s-settings .set-grid-2{margin-bottom:18px}
-#s-settings .slist,#s-settings .set-acc{margin-bottom:18px}
-#s-settings .set-grid-2 .dl-toggle,#s-settings .set-grid-2 .lang-picker-btn{padding:15px 16px;min-height:60px}
-#s-settings .lang-picker-btn{padding:15px 16px}
-#s-settings .srow{padding:17px 16px}
-#s-settings .set-acc>summary,#s-settings .set-acc summary{padding:16px 16px}
-#s-settings .set-acc-bd{padding:2px 16px 17px}
-#s-settings #premium-settings-banner{margin-bottom:20px}
+/* ── Settings · compact native rhythm ──────────────────────────────
+   iOS/Telegram-style density: settings are scannable rows, not sparse
+   cards. Tight section headers, ~10px between groups, and native row
+   paddings (~11–12px) with the icon chip on the left. The earlier
+   "breathing room" inflation (28px sections / 15–17px rows) read as
+   empty and stretched on phones — this reverses it. */
+#s-settings .sec{margin:16px 2px 7px}
+#s-settings .set-grid-2{margin-bottom:10px}
+#s-settings .slist,#s-settings .set-acc{margin-bottom:10px}
+#s-settings .set-grid-2 .dl-toggle,#s-settings .set-grid-2 .lang-picker-btn{padding:11px 13px;min-height:50px}
+#s-settings .lang-picker-btn{padding:11px 13px}
+#s-settings .srow{padding:11px 13px}
+#s-settings .set-acc>summary,#s-settings .set-acc summary{padding:12px 13px}
+#s-settings .set-acc-bd{padding:2px 13px 12px}
+#s-settings #premium-settings-banner{margin-bottom:12px}
 
 /* ── Home · big 4-quad cards (kill the gradient bar on top) ────── */
 .s4c{background:var(--e1);border:1px solid var(--b1);box-shadow:var(--sh);border-radius:12px;padding:13px}
@@ -5245,7 +5249,6 @@ function openProgressHistory(){
     ['🎯',T('lvl'),lvl],
     ['🌱',T('stage'),stageName],
     ['✨',T('xp'),xp.toLocaleString(lang==='ru'?'ru-RU':'en-US')],
-    ['🔥',T('streak'),streak],
     ['📅',T('week'),weekXp.toLocaleString(lang==='ru'?'ru-RU':'en-US')+' XP'],
     ['📖',T('words'),words],
     ['📝',T('tests'),tests],
@@ -5814,15 +5817,26 @@ function checkDailyStreakCompletion(sv){
   if(!enoughMissionsForStreak(sv))return;
   completeDailyStreak();
 }
+/* Daily activity is acknowledged through the GROWTH TREE now, not a fire
+   streak. The old "🔥 Streak extended" toast + ignite chip are gone (streak
+   mechanic removed). Completing today just pulses the plant and refreshes its
+   watered/radiant mood — feedback tied to the Дерево роста ecosystem. */
 function animateStreakComplete(streak){
-  const chip=document.getElementById('streak-chip');
-  if(chip){
-    chip.classList.remove('ignite');
-    void chip.offsetWidth;
-    chip.classList.add('ignite');
-    setTimeout(()=>chip.classList.remove('ignite'),950);
-  }
-  const old=document.querySelector('.streak-toast');if(old)old.remove();
+  try{
+    const hero=document.getElementById('growth-hero');
+    if(hero){
+      hero.classList.remove('bloom-burst');
+      void hero.offsetWidth;
+      hero.classList.add('bloom-burst');
+      setTimeout(()=>{try{hero.classList.remove('bloom-burst');}catch(_){}},820);
+    }
+    if(typeof renderGrowth==='function'&&window._d)renderGrowth(window._d);
+  }catch(e){appWarn('growth-pulse',e);}
+  try{sfx.level();}catch(e){}
+  haptic('success');
+  return;
+  /* ---- legacy fire-streak toast (unreachable, kept out of the UI) ---- */
+  // eslint-disable-next-line no-unreachable
   const t=document.createElement('div');
   t.className='streak-toast';
   t.innerHTML=({ru:'Стрик продлён',en:'Streak extended',es:'Racha ampliada',pt:'Sequência mantida',de:'Streak verlängert',fr:'Streak prolongé',uk:'Стрік продовжено',tr:'Seri uzatıldı',zh:'连胜延续',ar:'تم تمديد السلسلة'}[lang]||'Streak extended')+'<small>'+streak+' '+({ru:'дней подряд',en:'days in a row',es:'días seguidos',pt:'dias seguidos',de:'Tage in Folge',fr:'jours d’affilée',uk:'днів поспіль',tr:'gün üst üste',zh:'天连续',ar:'يوم متتالي'}[lang]||'days in a row')+'</small>';
@@ -9799,6 +9813,57 @@ function _feHeaders(){return {'Content-Type':'application/json','X-Telegram-Init
 function _feBody(extra){return JSON.stringify(Object.assign({uid:window._uid||0,lang:(lang||'ru'),init_data:(typeof tg!=='undefined'&&tg&&tg.initData)||''},extra||{}));}
 function _feShuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
+/* ── Server-authoritative objective grading (certificate exam) ────────────────
+   The Reading & Listening answer keys must NEVER reach the browser. Each section
+   is pulled from /api/exam/generate with secure:1 — the server keeps the full
+   item (with answers) in the DB and returns ONLY the question text + options and
+   a stable {template_id, qi} per question. At the end of the section the chosen
+   option TEXT for every question is posted to /api/exam/grade-section, which
+   grades against the stored key and returns the scaled score. Comparing by text
+   makes any client-side option shuffle irrelevant.
+   If a secure fetch is unavailable (offline / generator down / rate-limited) the
+   exam falls back to the offline EXAM_BANK path and grades locally, so it always
+   runs. NOTE: exam routes share a per-user burst throttle (EXAM_BURST_GAP, 5s
+   server-side), so the two section fetches run SEQUENTIALLY with a gap — a
+   back-to-back second call would be 429'd and drop us to the fallback. */
+const EXAM_SECURE_GAP_MS=5300;
+function _feSleep(ms){return new Promise(r=>setTimeout(r,ms));}
+async function _feGenSecure(exam,section){
+  if(!(window._uid||0)||typeof API==='undefined'||!API)return null;
+  try{
+    const r=await fetch(`${API}/api/exam/generate`,{method:'POST',headers:_feHeaders(),
+      body:_feBody({exam_type:exam,section,secure:1}),
+      signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(22000):undefined});
+    if(!r.ok)return null;
+    const item=await r.json().catch(()=>null);
+    if(!item||item.error||typeof item.template_id==='undefined')return null;
+    const tid=item.template_id;
+    const media=(section==='listening')?(item.transcript||''):(item.passage||'');
+    const tasks=[];
+    (Array.isArray(item.questions)?item.questions:[]).forEach(q=>{
+      if(!q||!Array.isArray(q.o)||typeof q.qi!=='number')return;
+      tasks.push({_sec:section,template_id:tid,qi:q.qi,
+        passage:(section==='reading')?media:'',
+        transcript:(section==='listening')?media:'',
+        topic:item.topic||'',q:q.q||'',o:q.o.slice()});
+    });
+    return tasks.length?tasks:null;
+  }catch(_){return null;}
+}
+/* Post {template_id, qi, choice-text} for EVERY question in an objective section
+   (unanswered → empty choice → graded wrong, matching the divide-by-total local
+   path). The server computes the section score from the stored answer key. */
+async function feSubmitSectionSecure(section,responses){
+  if(!fullExam)return;
+  try{
+    const r=await fetch(`${API}/api/exam/grade-section`,{method:'POST',headers:_feHeaders(),
+      body:_feBody({session_id:fullExam.sessionId,section,responses,exam_type:fullExam.exam}),
+      signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout)?AbortSignal.timeout(15000):undefined});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok&&typeof d.score!=='undefined')fullExam.results[section]=d.score;
+  }catch(_){}
+}
+
 async function startFullExam(exam){
   exam=(exam==='ielts')?'ielts':'toefl';
   /* HARD subscription gate (server enforces it too in _exam_auth). */
@@ -9827,14 +9892,28 @@ async function startFullExam(exam){
     if(!r.ok||!sess.session_id)throw new Error((sess&&sess.error)||'start failed');
   }catch(e){closeFullExam();toast(_feT(FE_L.startErr),'⚠️');return;}
   const stamp=Date.now();
-  /* _feMixPick spreads the drawn set across qtypes; shuffleMCQ no-ops on TFNG
-     (no `o`) and leaves the fixed True/False/Not Given order untouched. */
-  const rTasks=_feMixPick(rd,Math.min(FE_CFG.reading.n,rd.length)).map((t,k)=>shuffleMCQ(t,'fer'+k+stamp));
-  const lTasks=_feMixPick(ls,Math.min(FE_CFG.listening.n,ls.length)).map((t,k)=>shuffleMCQ(t,'fel'+k+stamp));
-  fullExam={exam,sessionId:sess.session_id,scaleMax:sess.scale_max,sectionMax:sess.section_max,
+  /* Prefer server-authoritative objective sections (answers never reach the
+     client). Fetch Reading then Listening SEQUENTIALLY (shared 5s throttle).
+     If EITHER secure fetch fails, drop BOTH to the offline EXAM_BANK path so
+     grading stays consistent within a single exam. */
+  let secure=false,rTasks=null,lTasks=null;
+  const rSec=await _feGenSecure(exam,'reading');
+  let lSec=null;
+  if(rSec){await _feSleep(EXAM_SECURE_GAP_MS);lSec=await _feGenSecure(exam,'listening');}
+  if(rSec&&lSec){secure=true;rTasks=rSec;lTasks=lSec;}
+  else{
+    /* Offline fallback: draw from EXAM_BANK, grade locally (client score).
+       _feMixPick spreads the drawn set across qtypes; shuffleMCQ no-ops on TFNG
+       (no `o`) and leaves the fixed True/False/Not Given order untouched. */
+    rTasks=_feMixPick(rd,Math.min(FE_CFG.reading.n,rd.length)).map((t,k)=>shuffleMCQ(t,'fer'+k+stamp));
+    lTasks=_feMixPick(ls,Math.min(FE_CFG.listening.n,ls.length)).map((t,k)=>shuffleMCQ(t,'fel'+k+stamp));
+  }
+  fullExam={exam,secure,sessionId:sess.session_id,scaleMax:sess.scale_max,sectionMax:sess.section_max,
     seq:['reading','listening','writing','speaking'],seqIdx:0,
     rTasks,lTasks,wTask:_feShuffle(wr)[0],sTask:_feShuffle(sp)[0],
     rIdx:0,rCorrect:0,lIdx:0,lCorrect:0,locked:false,_played:false,
+    rResp:(secure?rTasks.map(t=>({template_id:t.template_id,qi:t.qi,choice:''})):[]),
+    lResp:(secure?lTasks.map(t=>({template_id:t.template_id,qi:t.qi,choice:''})):[]),
     results:{},audits:{},noise:false,timerId:null,deadline:0,_onExpire:null,finished:false};
   try{trackM('drill');}catch(_){}
   feSectionIntro();
@@ -9918,7 +9997,8 @@ function feAnswerReading(i){
   if(!fullExam||fullExam.locked)return;
   fullExam.locked=true;
   const t=fullExam.rTasks[fullExam.rIdx];
-  if(i===t.a)fullExam.rCorrect++;
+  if(fullExam.secure){const rr=fullExam.rResp[fullExam.rIdx];if(rr)rr.choice=_feOpts(t)[i];}
+  else if(i===t.a)fullExam.rCorrect++;
   for(let k=0;k<_feOpts(t).length;k++){const el=document.getElementById('fe-opt-'+k);if(!el)continue;el.style.pointerEvents='none';if(k===i)el.classList.add('fe-opt-sel');}
   try{sfx.tap();}catch(_){}
   setTimeout(()=>{if(!fullExam)return;fullExam.rIdx++;if(fullExam.rIdx>=fullExam.rTasks.length)feFinishReading();else feRenderReadingQ();},420);
@@ -9926,7 +10006,8 @@ function feAnswerReading(i){
 async function feFinishReading(){
   if(!fullExam)return;
   feStopTimer();
-  await feSubmitSection('reading',fullExam.rCorrect,fullExam.rTasks.length);
+  if(fullExam.secure)await feSubmitSectionSecure('reading',fullExam.rResp);
+  else await feSubmitSection('reading',fullExam.rCorrect,fullExam.rTasks.length);
   feNextSection();
 }
 
@@ -9963,7 +10044,8 @@ function feAnswerListening(i){
   if(!fullExam||fullExam.locked)return;
   fullExam.locked=true;
   const t=fullExam.lTasks[fullExam.lIdx];
-  if(i===t.a)fullExam.lCorrect++;
+  if(fullExam.secure){const lr=fullExam.lResp[fullExam.lIdx];if(lr)lr.choice=_feOpts(t)[i];}
+  else if(i===t.a)fullExam.lCorrect++;
   for(let k=0;k<_feOpts(t).length;k++){const el=document.getElementById('fe-opt-'+k);if(!el)continue;el.style.pointerEvents='none';if(k===i)el.classList.add('fe-opt-sel');}
   try{sfx.tap();}catch(_){}
   try{if('speechSynthesis' in window)speechSynthesis.cancel();if(_ttsAudio){_ttsAudio.pause();}}catch(_){}
@@ -9973,7 +10055,8 @@ async function feFinishListening(){
   if(!fullExam)return;
   feStopTimer();
   try{if('speechSynthesis' in window)speechSynthesis.cancel();if(_ttsAudio){_ttsAudio.pause();}}catch(_){}
-  await feSubmitSection('listening',fullExam.lCorrect,fullExam.lTasks.length);
+  if(fullExam.secure)await feSubmitSectionSecure('listening',fullExam.lResp);
+  else await feSubmitSection('listening',fullExam.lCorrect,fullExam.lTasks.length);
   feNextSection();
 }
 
@@ -11739,10 +11822,11 @@ function renderCourse(){
         ?'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
         :'<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>');
     const onClick=unlocked?`openCourseLesson('${ls.id}')`:`handleLockedCourseTap('${ls.id}')`;
-    const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>${
-      reason&&reason.kind==='level'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="tapLockedLevelTest('${reason.target}',event)">${({ru:'Сдать тест',en:'Take the test',es:'Hacer el examen',pt:'Fazer o teste',de:'Test machen',fr:'Passer le test',uk:'Скласти тест',tr:'Testi yap',zh:'参加测试',ar:'اجتياز الاختبار'}[lang]||'Take the test')} · ${reason.target}</button><button class="course-lock-cta course-lock-cta-skip" type="button" onclick="tapSkipLevelTest('${reason.target}',event)">${({ru:'Открыть без теста',en:'Skip the test',es:'Abrir sin examen',pt:'Abrir sem teste',de:'Ohne Test öffnen',fr:'Ouvrir sans test',uk:'Відкрити без тесту',tr:'Testsiz aç',zh:'跳过测试',ar:'الفتح بدون اختبار'}[lang]||'Skip the test')}</button></div>`:
-      reason&&reason.kind==='prev'?`<div class="course-lock-actions"><button class="course-lock-cta" type="button" onclick="event.stopPropagation();openCourseLesson('${reason.prevId}')">${({ru:'Открыть нужный урок',en:'Open the required lesson',es:'Abrir la lección necesaria',pt:'Abrir a lição necessária',de:'Erforderliche Lektion öffnen',fr:'Ouvrir la leçon requise',uk:'Відкрити потрібний урок',tr:'Gerekli dersi aç',zh:'打开所需课程',ar:'افتح الدرس المطلوب'}[lang]||'Open the required lesson')}</button></div>`:''
-    }`:'';
+    /* Locked lessons stay minimal: dimmed card + lock icon + a short reason.
+       The ONLY place to confirm a level is the single "Программа обучения"
+       block on top — per-card "Открыть без теста"/"Сдать тест" CTAs were
+       duplicative and let users skip levels from the list, so they're gone. */
+    const lockedMeta=!unlocked?`<span class="course-lock-hint">${safeHTML(courseLockText(reason)||'')}</span>`:'';
     return `${header}<div class="course-card ${isDone?'done':''} ${unlocked?'':'locked'}" style="--lesson-color:${ls.color}" onclick="${onClick}">
       <div class="course-ico" style="color:${unlocked?ls.color:'#7a869a'}">${lessonThemeIcon(ls)}</div>
       <div class="course-info">
@@ -16766,18 +16850,18 @@ function haptic(style){
   }catch(e){}
 }
 
-/* ══ SHARE STREAK ══ */
+/* ══ SHARE PROGRESS (growth tree) ══ */
 function shareStreak(){
   haptic('medium');
   const d=window._d||{};
-  const streak=d.streak||0;
-  const xp=d.xp||0;
+  const xp=Math.max(d.xp||0, (typeof loadXP==='function'?loadXP():0));
   const words=d.words||0;
+  let stage='';try{const r=rankOf(xp),c=_growthCopy();stage=(c[r.r]&&(c[r.r][lang]||c[r.r].en))||r.r;}catch(_){}
   const botName=window.BOT_NAME||'PolyGlotty_bot';
   const link='https://t.me/'+botName+(window._uid?('?start=ref_'+window._uid):'');
   const texts={
-    ru:`Мой стрик ${streak} дней в PolyGlotty.\n${words} слов изучено · ${xp} XP\n\nУчи английский с AI-репетитором в Telegram: @${botName}`,
-    en:`${streak}-day streak on PolyGlotty.\n${words} words learned · ${xp} XP\n\nLearn English with an AI tutor in Telegram: @${botName}`,
+    ru:`Моё дерево знаний в PolyGlotty${stage?(': '+stage):''}.\n${words} слов изучено · ${xp} XP\n\nУчи английский с AI-репетитором в Telegram: @${botName}`,
+    en:`My learning tree on PolyGlotty${stage?(': '+stage):''}.\n${words} words learned · ${xp} XP\n\nLearn English with an AI tutor in Telegram: @${botName}`,
   };
   const text=texts[lang]||texts.en;
   // Try Telegram share
@@ -17080,11 +17164,11 @@ const ACHIEVEMENTS=[
   {id:'words_50',   icon:'📘',tier:'silver', title:{ru:'Словарный запас',en:'Bookworm'},   desc:{ru:'Выучи 50 слов',en:'Learn 50 words'},           check:s=>(s.words||0)>=50,  badge:'📘'},
   {id:'words_100',  icon:'📙',tier:'gold',   title:{ru:'Полиглот',en:'Polyglot'},          desc:{ru:'Выучи 100 слов',en:'Learn 100 words'},         check:s=>(s.words||0)>=100, badge:'📙'},
   {id:'words_500',  icon:'💎',tier:'diamond',title:{ru:'Лексикон',en:'Lexicon master'},    desc:{ru:'Выучи 500 слов',en:'Learn 500 words'},         check:s=>(s.words||0)>=500, badge:'💎'},
-  // Streak tiers
-  {id:'streak_3',   icon:'🔥',tier:'bronze', title:{ru:'На огне',en:'On fire'},            desc:{ru:'3 дня подряд',en:'3-day streak'},              check:s=>(s.streak||0)>=3},
-  {id:'streak_7',   icon:'⚡',tier:'silver', title:{ru:'Неделя!',en:'Week warrior'},       desc:{ru:'7 дней подряд',en:'7-day streak'},              check:s=>(s.streak||0)>=7,  badge:'⚡'},
-  {id:'streak_30',  icon:'👑',tier:'gold',   title:{ru:'Месяц!',en:'Monthly legend'},      desc:{ru:'30 дней подряд',en:'30-day streak'},            check:s=>(s.streak||0)>=30, badge:'👑'},
-  {id:'streak_100', icon:'💫',tier:'diamond',title:{ru:'Легенда',en:'Legendary'},          desc:{ru:'100 дней подряд',en:'100-day streak'},          check:s=>(s.streak||0)>=100,badge:'💫'},
+  // Growth tree — the plant evolves with total XP (mirrors the RANKS ladder)
+  {id:'grow_sprout',icon:'🌿',tier:'bronze', title:{ru:'Первый росток',en:'First sprout'},  desc:{ru:'Вырасти росток (100 XP)',en:'Grow a sprout (100 XP)'},   check:s=>(s.xp||0)>=100},
+  {id:'grow_bloom', icon:'🌸',tier:'silver', title:{ru:'Первый цвет',en:'First bloom'},     desc:{ru:'Доведи растение до цветения (600 XP)',en:'Reach the bloom stage (600 XP)'}, check:s=>(s.xp||0)>=600},
+  {id:'grow_tree',  icon:'🌳',tier:'gold',   title:{ru:'Молодое дерево',en:'Young tree'},   desc:{ru:'Вырасти дерево (2500 XP)',en:'Grow a tree (2500 XP)'},   check:s=>(s.xp||0)>=2500, badge:'🌳'},
+  {id:'grow_grand', icon:'🌲',tier:'diamond',title:{ru:'Могучее дерево',en:'Grand tree'},   desc:{ru:'Дорасти до могучего дерева (4000 XP)',en:'Reach the grand tree (4000 XP)'}, check:s=>(s.xp||0)>=4000, badge:'🌲'},
   // Sessions tiers
   {id:'first_msg',  icon:'💬',tier:'bronze', title:{ru:'Первый шаг',en:'First step'},      desc:{ru:'Отправь сообщение ALEX',en:'Message ALEX'},    check:s=>(s.sessions||0)>=1},
   {id:'sessions_10',icon:'🎯',tier:'silver', title:{ru:'Активист',en:'Active learner'},    desc:{ru:'10 сессий',en:'10 sessions'},                  check:s=>(s.sessions||0)>=10},
@@ -17109,7 +17193,7 @@ const TIER_LABELS={bronze:{ru:'Бронза',en:'Bronze'},silver:{ru:'Сереб
    language matching the rest of the app. Tinted per tier via CSS. */
 const ACH_ICONS={
   word:'<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-  streak:'<svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+  growth:'<svg viewBox="0 0 24 24"><path d="M12 22V12"/><path d="M12 12C12 8 9 6 5 6c0 4 3 6 7 6z"/><path d="M12 10c0-3.5 2.5-5.5 6-5.5 0 3.5-2.5 5.5-6 5.5z"/></svg>',
   session:'<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   test:'<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
   xp:'<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
@@ -17119,7 +17203,7 @@ const ACH_LOCK_SVG='<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" heigh
 function _achCat(id){
   id=id||'';
   if(id.indexOf('word')===0)return 'word';
-  if(id.indexOf('streak')===0)return 'streak';
+  if(id.indexOf('grow')===0)return 'growth';
   if(id.indexOf('test')===0)return 'test';
   if(id.indexOf('xp')===0)return 'xp';
   if(id.indexOf('ref')===0)return 'ref';
