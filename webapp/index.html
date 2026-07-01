@@ -1917,13 +1917,24 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .course-level-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:13px 2px 4px}
 .course-level-name{font-size:12px;font-weight:900;color:var(--t1);letter-spacing:.2px}
 .course-level-desc{font-size:10px;color:var(--t3);text-align:right}
-.course-mod-head{display:flex;align-items:center;gap:11px;margin:22px 2px 9px;padding:12px 13px;border-radius:16px;background:linear-gradient(135deg,rgba(46,204,113,.14),rgba(0,212,170,.045));border:1px solid rgba(46,204,113,.2)}
-.course-mod-head:first-child{margin-top:6px}
-.course-mod-emoji{font-size:26px;line-height:1;flex:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.28))}
-.course-mod-text{display:flex;flex-direction:column;gap:3px;min-width:0}
-.course-mod-name{font-size:13.5px;font-weight:900;color:var(--t1);letter-spacing:.2px}
-.course-mod-tag{font-size:10.5px;color:var(--t3);line-height:1.32}
-.course-level-cefr{display:inline-block;font-size:9.5px;font-weight:900;letter-spacing:.7px;padding:2px 8px;border-radius:7px;color:var(--cefr-color,var(--t2));background:color-mix(in srgb,var(--cefr-color,#888) 14%,transparent);border:1px solid color-mix(in srgb,var(--cefr-color,#888) 40%,transparent)}
+/* ALEX daily recommendations */
+.alextip-wrap{margin:4px 0 16px}
+.alextip-head{display:flex;align-items:center;gap:8px;margin:0 2px 9px}
+.alextip-avatar{font-size:16px;line-height:1;flex:none}
+.alextip-htitle{font-size:13px;font-weight:900;color:var(--t1);letter-spacing:.1px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alextip-stage{font-size:9.5px;font-weight:900;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.24);border-radius:999px;padding:3px 8px;flex:none;white-space:nowrap}
+.alextip-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.alextip-row::-webkit-scrollbar{display:none}
+.alextip-card{flex:0 0 82%;max-width:280px;scroll-snap-align:start;display:flex;flex-direction:column;gap:6px;text-align:left;padding:13px;border-radius:15px;border:1px solid var(--border-ui);background:var(--bg-card);color:var(--t1);font-family:var(--f);cursor:pointer;transition:transform .16s,border-color .2s,box-shadow .2s}
+.alextip-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.3);box-shadow:0 10px 22px rgba(0,0,0,.08)}
+.alextip-card:active{transform:translateY(0)}
+.alextip-top{display:flex;align-items:center;gap:8px}
+.alextip-emoji{font-size:20px;line-height:1}
+.alextip-tag{font-size:9px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--a);background:rgba(var(--ar),.1);border-radius:6px;padding:2px 7px}
+.alextip-title{font-size:13px;font-weight:900;color:var(--t1);line-height:1.25}
+.alextip-body{font-size:11px;color:var(--t2);line-height:1.4;flex:1}
+.alextip-cta{display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-size:11px;font-weight:850;color:var(--a)}
+.alextip-cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .course-card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
 .course-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lesson-color,var(--a));opacity:.75}
 .course-card::after{content:'';position:absolute;right:-42px;top:-48px;width:112px;height:112px;border-radius:50%;background:transparent;opacity:0;transition:opacity .25s,transform .25s}
@@ -2021,10 +2032,6 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .course-stage-ring{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:conic-gradient(var(--a) var(--pct,0%),rgba(255,255,255,.08) 0);padding:3px}
 .course-stage-ring-in{width:100%;height:100%;border-radius:50%;background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;color:var(--a);font-size:11px;font-weight:950}
 .course-stage-info{min-width:0;flex:1}
-.course-stage-phase{display:inline-flex;align-items:center;gap:3px;font-size:8.5px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;padding:1px 6px;border-radius:6px;margin-bottom:3px}
-.course-stage-phase.p1{color:#f39c12;background:rgba(243,156,18,.13)}
-.course-stage-phase.p2{color:#e74c3c;background:rgba(231,76,60,.13)}
-.course-stage-phase.p3{color:#9b59b6;background:rgba(155,89,182,.15)}
 .course-stage-title{font-size:13px;font-weight:950;color:var(--t1);line-height:1.2}
 .course-stage-sub{font-size:11px;color:var(--t2);line-height:1.3;margin-top:3px}
 .course-stage-go{width:31px;height:31px;border-radius:11px;background:rgba(var(--ar),.12);color:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -2211,6 +2218,14 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .course-stage-card.locked{opacity:.45;pointer-events:none;filter:saturate(.45)}
 .course-stage-card.locked .course-stage-go svg{opacity:.5}
 .course-complete-card{margin-top:10px;border:1px solid rgba(0,212,170,.24);background:var(--bg-card);border-radius:14px;padding:14px;color:var(--t1)}
+.course-complete-cta{display:flex;align-items:center;gap:11px;width:100%;margin-top:12px;padding:11px 12px;border-radius:12px;border:1px solid rgba(var(--ar),.32);background:rgba(var(--ar),.12);color:var(--t1);font-family:var(--f);cursor:pointer;text-align:left;transition:transform .16s,background .2s,border-color .2s}
+.course-complete-cta:hover{transform:translateY(-1px);background:rgba(var(--ar),.17);border-color:rgba(var(--ar),.5)}
+.course-complete-cta:active{transform:translateY(0)}
+.course-complete-cta-ico{font-size:20px;line-height:1;flex:none}
+.course-complete-cta-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.course-complete-cta-txt b{font-size:13px;font-weight:900;color:var(--a)}
+.course-complete-cta-txt span{font-size:10.5px;color:var(--t2);line-height:1.3}
+.course-complete-cta-arrow{width:18px;height:18px;flex:none;stroke:var(--a);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
 .rp-passage{background:var(--e1);border:1px solid var(--b1);border-radius:14px;padding:14px;margin-top:8px;line-height:1.55;font-size:14px;color:var(--t1)}
 .rp-para{margin:0 0 12px}
 .rp-para:last-child{margin-bottom:0}
@@ -5350,7 +5365,7 @@ function renderProgress(d){
    closed-lock icon, so a gated stat (Sessions / Error Diary) reads as an
    intentionally locked feature — not an error or a broken empty value. */
 const _STAT_LOCK_SVG='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s4-lock"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.2"/><path d="M8 10.5V7.2a4 4 0 0 1 8 0v3.3"/></svg>';
-function _lockStat(el){ if(!el)return; el.classList.remove('premium-mask'); el.classList.add('s4-locked'); el.innerHTML='<span class="s4-lockwrap">—'+_STAT_LOCK_SVG+'</span>'; }
+function _lockStat(el){ if(!el)return; el.classList.remove('premium-mask'); el.classList.add('s4-locked'); el.innerHTML='<span class="s4-lockwrap">0'+_STAT_LOCK_SVG+'</span>'; }
 function _unlockStat(el){ if(!el)return; el.classList.remove('s4-locked'); }
 
 function drawProgress(){
@@ -11598,21 +11613,6 @@ function courseLevelLabel(level){
     CAE:{ru:'Cambridge CAE / CPE · продвинутый экзамен',en:'Cambridge CAE / CPE · advanced exam'}
   })[level]||{ru:'Уровень',en:'Level'};
 }
-/* Gamified module layer OVER the CEFR engine (locking/SRS/exam/level-colors
-   are untouched). Several CEFR levels roll up into one themed module so youth
-   see "Survival English / Gaming & Discord / AI Whisperer / Influencer Mindset"
-   instead of dry A0…C2. The CEFR tag is kept as a small chip for coherence. */
-function courseModuleInfo(level){
-  const M={
-    survival:{key:'survival',emoji:'🧟',n:1,name:{ru:'Survival English',en:'Survival English'},tag:{ru:'Мемы, сленг и фразы, чтобы выжить в любом чате',en:'Memes, slang and phrases to survive any chat'}},
-    gaming:{key:'gaming',emoji:'🎮',n:2,name:{ru:'Gaming & Discord',en:'Gaming & Discord'},tag:{ru:'Голосовой чат, ASAP/BRB и язык соревнований',en:'Voice chat, ASAP/BRB and competitive talk'}},
-    ai:{key:'ai',emoji:'🤖',n:3,name:{ru:'AI Whisperer',en:'AI Whisperer'},tag:{ru:'Промпты для ИИ и базовый технический английский',en:'Writing AI prompts and basic technical English'}},
-    influencer:{key:'influencer',emoji:'🎤',n:4,name:{ru:'Influencer Mindset',en:'Influencer Mindset'},tag:{ru:'Сторителлинг, блогинг и споры в комментах',en:'Storytelling, blogging and comment-section debate'}},
-    exam:{key:'exam',emoji:'🏆',n:5,name:{ru:'Exam Arena',en:'Exam Arena'},tag:{ru:'Подготовка к международным экзаменам',en:'International exam preparation'}}
-  };
-  const map={A0:'survival',A1:'survival',A2:'gaming',B1:'gaming',B2:'ai',C1:'ai',C2:'influencer',TOEFL:'exam',IELTS:'exam',CAE:'exam'};
-  return M[map[level]||'survival'];
-}
 const COURSE_LEVEL_ORDER=['A0','A1','A2','B1','B2','C1','C2','TOEFL','IELTS','CAE'];
 const COURSE_EXAM_LEVELS=['TOEFL','IELTS','CAE'];
 function isExamLevel(lvl){return COURSE_EXAM_LEVELS.indexOf(lvl)>=0;}
@@ -11740,6 +11740,81 @@ function tapSkipLevelTest(target,evt){
   requestAnimationFrame(()=>{try{renderCourse();}catch(_){}});
   return false;
 }
+/* ── ALEX daily recommendations ────────────────────────────────────────────
+   Context-aware tips tied to the learner's seed stage (1-8, derived from XP).
+   Two tracks: an immersion lifehack + a level-matched series/media pick. The
+   cards re-generate on every course render, so they auto-advance as the seed
+   grows. Tapping a card opens ALEX seeded with a related question. */
+function _seedStageNow(){
+  try{return Math.max(1,Math.min(8,(rankOf((window._d&&window._d.xp)||0)||{}).stage||1));}catch(_){return 1;}
+}
+function alexTipCards(){
+  const st=_seedStageNow();
+  const tagLife={ru:'Лайфхак',en:'Lifehack'};
+  const tagWatch={ru:'Что посмотреть',en:'What to watch'};
+  const cards=[];
+  /* Immersion lifehack by stage. */
+  if(st<=2){
+    cards.push({emoji:'📱',tag:tagLife,
+      title:{ru:'Переключи телефон на английский',en:'Switch your phone to English'},
+      body:{ru:'Смени язык интерфейса на English — это +50 слов в пассивный словарь за неделю без зубрёжки.',en:'Change your interface language to English — that is +50 passive words a week with zero cramming.'},
+      prompt:{ru:'Как аккуратно переключить телефон на английский и не запутаться? Дай короткую инструкцию по шагам.',en:'How do I switch my phone to English without getting lost? Give me a short step-by-step guide.'}});
+  } else if(st<=5){
+    cards.push({emoji:'🎯',tag:tagLife,
+      title:{ru:'Перенастрой ленту TikTok / Reels',en:'Retrain your TikTok / Reels feed'},
+      body:{ru:'Лайкай только английские видео, задерживайся на них, скрывай русские. Через неделю лента заговорит на английском.',en:'Like only English videos, linger on them, hide native-language ones. In a week your feed will speak English.'},
+      prompt:{ru:'Составь пошаговый план, как перенастроить алгоритм TikTok на англоязычный контент.',en:'Give me a step-by-step plan to retrain the TikTok algorithm toward English content.'}});
+  } else {
+    cards.push({emoji:'🎧',tag:tagLife,
+      title:{ru:'Погружение 24/7',en:'Immersion 24/7'},
+      body:{ru:'Слушай английские подкасты в фоне и веди короткий дневник дня на английском. Думай про себя фразами, а не словами.',en:'Play English podcasts in the background and keep a short daily journal in English. Think in phrases, not single words.'},
+      prompt:{ru:'Порекомендуй 3 английских подкаста моего уровня и дай тему для дневника на сегодня.',en:'Recommend 3 English podcasts at my level and give me a journaling topic for today.'}});
+  }
+  /* Level-matched series / media pick by stage. */
+  if(st<=2){
+    cards.push({emoji:'📺',tag:tagWatch,
+      title:{ru:'Начни с простой речи',en:'Start with clear, simple speech'},
+      body:{ru:'«Extra English» (обучающий ситком) и «Свинка Пеппа» — чёткая дикция и базовая лексика. Смотри с английскими субтитрами.',en:'“Extra English” (a learner sitcom) and “Peppa Pig” — clear diction and core vocabulary. Watch with English subtitles.'},
+      prompt:{ru:'Дай список из 5 простых сериалов для новичка A1–A2 с чёткой речью и о чём каждый.',en:'Give me 5 easy shows for an A1–A2 beginner with clear speech, and a line on each.'}});
+  } else if(st<=4){
+    cards.push({emoji:'📺',tag:tagWatch,
+      title:{ru:'Прокачай понимание речи',en:'Level up your listening'},
+      body:{ru:'«Adventure Time», «Friends» или «Wednesday». Выписывай незнакомые фразы в Умные карточки.',en:'“Adventure Time”, “Friends” or “Wednesday”. Save new phrases to your Smart Cards.'},
+      prompt:{ru:'Дай 5 сериалов уровня B1 и подскажи, как выписывать из них фразы в карточки.',en:'Give me 5 B1-level shows and tips on saving phrases from them into flashcards.'}});
+  } else {
+    cards.push({emoji:'📺',tag:tagWatch,
+      title:{ru:'Смотри без субтитров',en:'Watch without subtitles'},
+      body:{ru:'«Очень странные дела», «Шерлок» или «Рик и Морти» (для продвинутого сленга). Строго без субтитров.',en:'“Stranger Things”, “Sherlock” or “Rick and Morty” (advanced slang). Strictly no subtitles.'},
+      prompt:{ru:'Дай 5 сериалов уровня B2+ и объясни, как смотреть без субтитров и не терять нить.',en:'Give me 5 B2+ shows and explain how to watch without subtitles and still follow along.'}});
+  }
+  return cards;
+}
+function alexTipAsk(i){
+  const c=(alexTipCards()||[])[i];if(!c)return;
+  try{haptic('light');}catch(_){}
+  if(typeof hasChatAccess==='function'&&!hasChatAccess()){try{showChatPaywall();}catch(_){}return;}
+  const p=(c.prompt&&(c.prompt[lang]||c.prompt.en))||'';
+  try{goTab('chat');}catch(_){}
+  if(typeof busy==='undefined'||!busy)setTimeout(()=>{try{sendChip(p);}catch(_){}},170);
+}
+function renderAlexTipsBlock(){
+  let cards;try{cards=alexTipCards();}catch(_){return '';}
+  if(!cards||!cards.length)return '';
+  const st=_seedStageNow();
+  const headTitle={ru:'Рекомендации дня от ALEX',en:"ALEX's tips of the day"}[lang]||"ALEX's tips of the day";
+  const stageLbl=({ru:'Стадия',en:'Stage',es:'Etapa',pt:'Estágio',de:'Stufe',fr:'Étape',uk:'Стадія',tr:'Aşama',zh:'阶段',ar:'مرحلة'}[lang]||'Stage')+' '+st+'/8';
+  const ask={ru:'Спросить ALEX',en:'Ask ALEX'}[lang]||'Ask ALEX';
+  const items=cards.map((c,i)=>`<button type="button" class="alextip-card" onclick="alexTipAsk(${i})">
+      <div class="alextip-top"><span class="alextip-emoji">${c.emoji}</span><span class="alextip-tag">${safeHTML(c.tag[lang]||c.tag.en)}</span></div>
+      <div class="alextip-title">${safeHTML(c.title[lang]||c.title.en)}</div>
+      <div class="alextip-body">${safeHTML(c.body[lang]||c.body.en)}</div>
+      <div class="alextip-cta">${safeHTML(ask)}<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+    </button>`).join('');
+  return `<div class="alextip-wrap">
+    <div class="alextip-head"><span class="alextip-avatar">🤖</span><span class="alextip-htitle">${safeHTML(headTitle)}</span><span class="alextip-stage">🌱 ${safeHTML(stageLbl)}</span></div>
+    <div class="alextip-row">${items}</div>
+  </div>`;
+}
 function renderCourse(){
   /* Hard guard: if a lesson is currently open, ignore any indirect
      renderCourse() call (tab refresh, scroll, lifecycle events). The user
@@ -11795,7 +11870,6 @@ function renderCourse(){
     <button class="course-exam-btn" onclick="startLevelTest('${nextExam}')">${({ru:'Подтвердить уровень',en:'Confirm level',es:'Confirmar nivel',pt:'Confirmar nível',de:'Niveau bestätigen',fr:'Valider le niveau',uk:'Підтвердити рівень',tr:'Seviyeyi onayla',zh:'确认级别',ar:'تأكيد المستوى'}[lang]||'Confirm level')} ${nextExam}</button>
   </div>`;
   let lastLevel='';
-  let lastModule='';
   const levelOrder={A0:0,A1:1,A2:2,B1:3,B2:4,C1:5,C2:6};
   /* Exam-prep lessons live in their own tab (Exam Hub) — hide them here. */
   const sortedCourse=GALAXY_COURSE.slice().filter(x=>!isExamLevel(x.level)).sort((a,b)=>(levelOrder[a.level]??99)-(levelOrder[b.level]??99));
@@ -11805,16 +11879,7 @@ function renderCourse(){
     const unlocked=isCourseUnlocked(ls.id);
     const reason=unlocked?null:courseLockReason(ls.id);
     const meta=courseLevelLabel(ls.level);
-    const mod=courseModuleInfo(ls.level);
-    let header='';
-    if(mod.key!==lastModule){
-      const modWord=lang==='ru'?'Модуль':(lang==='es'?'Módulo':(lang==='de'?'Modul':(lang==='fr'?'Module':(lang==='uk'?'Модуль':(lang==='tr'?'Modül':(lang==='pt'?'Módulo':'Module'))))));
-      header+=`<div class="course-mod-head"><div class="course-mod-emoji">${mod.emoji}</div><div class="course-mod-text"><div class="course-mod-name">${modWord} ${mod.n} · ${safeHTML(mod.name[lang]||mod.name.en)}</div><div class="course-mod-tag">${safeHTML(mod.tag[lang]||mod.tag.en)}</div></div></div>`;
-      lastModule=mod.key;
-    }
-    if(ls.level!==lastLevel){
-      header+=`<div class="course-level-head"><div class="course-level-name"><span class="course-level-cefr" style="--cefr-color:${ls.color}">${safeHTML(ls.level)}</span></div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`;
-    }
+    const header=ls.level!==lastLevel?`<div class="course-level-head"><div class="course-level-name">${safeHTML(ls.level)}</div><div class="course-level-desc">${safeHTML(meta[lang]||meta.en)}</div></div>`:'';
     lastLevel=ls.level;
     const statusIcon=!unlocked
       ?lockIconSmall
@@ -11837,7 +11902,7 @@ function renderCourse(){
       <div class="course-status">${statusIcon}</div>
     </div>`;
   }).join('');
-  wrap.innerHTML=system+lessons;
+  wrap.innerHTML=system+renderAlexTipsBlock()+lessons;
   bindCourseTopBtn();
 }
 function courseShortRule(ls){
@@ -12015,12 +12080,6 @@ function courseWordOptions(correct,mode,pool){
 }
 function courseChoiceState(id,part){return LS.getJ('course_choice_'+id+'_'+part)||{};}
 function courseSaveChoiceState(id,part,state){LS.setJ('course_choice_'+id+'_'+part,state||{});}
-/* 3-phase gamified framing layered over the engine stages. Phase 1 "Punchline"
-   = intake of the rule/example (vocab), Phase 2 "Shadow Fight" = interactive
-   quiz-trainer (grammar/builders/errors), Phase 3 "Boss Fight" = the final
-   comprehension challenge. Names are brand terms, kept in English. */
-const STAGE_PHASE={vocab_native:1,vocab_reverse:1,synonym:1,grammar:2,builder:2,builder_native:2,errors:2,listen:3};
-const COURSE_PHASE_META={1:{name:'Punchline',emoji:'💥'},2:{name:'Shadow Fight',emoji:'⚔️'},3:{name:'Boss Fight',emoji:'👑'}};
 function courseStageMeta(id,ls,practice,parts){
   const done=k=>!!parts[k];
   const practiceDone=practice.filter((_,i)=>done('practice_'+i)).length;
@@ -12037,7 +12096,7 @@ function courseStageMeta(id,ls,practice,parts){
     {key:'errors',title:courseT('errors'),sub:({ru:'Найди тип ошибки в предложении',en:'Find the mistake type in a sentence',es:'Encuentra el tipo de error en la frase',pt:'Encontre o tipo de erro na frase',de:'Finde die Fehlerart im Satz',fr:'Trouve le type d’erreur dans la phrase',uk:'Знайди тип помилки в реченні',tr:'Cümledeki hata türünü bul',zh:'找出句中的错误类型',ar:'اعثر على نوع الخطأ في الجملة'}[lang]||'Find the mistake type in a sentence'),pct:done('errors')?100:0},
     {key:'listen',title:courseT('listen'),sub:({ru:'Диктант и понимание текста',en:'Dictation and reading check',es:'Dictado y comprensión lectora',pt:'Ditado e compreensão de leitura',de:'Diktat und Lesekontrolle',fr:'Dictée et compréhension écrite',uk:'Диктант і розуміння тексту',tr:'Dikte ve okuma kontrolü',zh:'听写与阅读理解',ar:'إملاء وفحص القراءة'}[lang]||'Dictation and reading check'),pct:(done('dictation')&&done('reading'))?100:(done('dictation')||done('reading')?50:0)}
   );
-  return stages.map((s,i)=>Object.assign({n:i+1,phase:STAGE_PHASE[s.key]||2},s));
+  return stages.map((s,i)=>Object.assign({n:i+1},s));
 }
 /* ── Strict in-lesson sequencing ───────────────────────────────────────────
    The learner must clear each stage before the next unlocks. A stage is
@@ -12067,7 +12126,7 @@ function renderCourseStageList(id,ls,practice,parts){
       if(!seenIncomplete&&s.pct<100)seenIncomplete=true;
       return `<div class="course-stage-card ${s.pct>=100?'done':''} ${locked?'locked':''}" data-stage="${s.key}" ${locked?'':`onclick="openCourseStage('${id}','${s.key}')"`}>
       <div class="course-stage-ring" style="--pct:${s.pct}%"><div class="course-stage-ring-in">${s.pct>=100?'✓':(locked?'🔒':s.n)}</div></div>
-      <div class="course-stage-info"><div class="course-stage-phase p${s.phase}">${(COURSE_PHASE_META[s.phase]||COURSE_PHASE_META[2]).emoji} ${(COURSE_PHASE_META[s.phase]||COURSE_PHASE_META[2]).name}</div><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
+      <div class="course-stage-info"><div class="course-stage-title">${safeHTML(s.title)}</div><div class="course-stage-sub">${safeHTML(s.sub)}</div></div>
       <div class="course-stage-go"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
     </div>`;}).join('')}
   </div>`;
@@ -13159,11 +13218,47 @@ function renderCourseCompleteCard(id,already){
       </div>
     </div>`;
   }
+  const _clv=(GALAXY_COURSE.find(x=>x.id===id)||{}).level;
+  const _cxp=({A0:12,A1:14,A2:16,B1:18,B2:20,C1:22,C2:25}[_clv])||15;
+  const doneTitle=already
+    ?({ru:'Урок уже закрыт',en:'Lesson already complete',es:'Lección ya completada',pt:'Lição já concluída',de:'Lektion bereits abgeschlossen',fr:'Leçon déjà terminée',uk:'Урок уже завершено',tr:'Ders zaten tamamlandı',zh:'课程已完成',ar:'الدرس مكتمل بالفعل'}[lang]||'Lesson already complete')
+    :((({ru:'Урок закрыт',en:'Lesson complete',es:'Lección completada',pt:'Lição concluída',de:'Lektion abgeschlossen',fr:'Leçon terminée',uk:'Урок завершено',tr:'Ders tamamlandı',zh:'课程完成',ar:'اكتمل الدرس'}[lang]||'Lesson complete'))+' · +'+_cxp+' XP');
+  /* Duolingo-style finale: a short live dialogue with ALEX to lock in the
+     topic. This is the closing step of every lesson. */
+  const alexLabel=({ru:'Закрепить с ALEX',en:'Practise with ALEX',es:'Practicar con ALEX',pt:'Praticar com ALEX',de:'Mit ALEX üben',fr:'Pratiquer avec ALEX',uk:'Закріпити з ALEX',tr:'ALEX ile pekiştir',zh:'和 ALEX 巩固',ar:'تدرّب مع ALEX'}[lang]||'Practise with ALEX');
+  const alexHint=({ru:'Короткий диалог по теме урока — финальный шаг.',en:'A short dialogue on the lesson topic — the final step.',es:'Un diálogo corto sobre el tema — el paso final.',pt:'Um diálogo curto sobre o tema — o passo final.',de:'Ein kurzer Dialog zum Thema — der letzte Schritt.',fr:'Un court dialogue sur le thème — l’étape finale.',uk:'Короткий діалог за темою уроку — фінальний крок.',tr:'Konu üzerine kısa bir diyalog — son adım.',zh:'围绕主题的简短对话——最后一步。',ar:'حوار قصير حول الموضوع — الخطوة الأخيرة.'}[lang]||'A short dialogue on the lesson topic — the final step.');
   box.innerHTML=`<div class="course-complete-card">
-    <div class="course-complete-title">${already?({ru:'Урок уже закрыт',en:'Lesson already complete',es:'Lección ya completada',pt:'Lição já concluída',de:'Lektion bereits abgeschlossen',fr:'Leçon déjà terminée',uk:'Урок уже завершено',tr:'Ders zaten tamamlandı',zh:'课程已完成',ar:'الدرس مكتمل بالفعل'}[lang]||'Lesson already complete'):({ru:'Урок закрыт · +10 XP',en:'Lesson complete · +10 XP',es:'Lección completada · +10 XP',pt:'Lição concluída · +10 XP',de:'Lektion abgeschlossen · +10 XP',fr:'Leçon terminée · +10 XP',uk:'Урок завершено · +10 XP',tr:'Ders tamamlandı · +10 XP',zh:'课程完成 · +10 XP',ar:'اكتمل الدرس · +10 XP'}[lang]||'Lesson complete · +10 XP')}</div>
+    <div class="course-complete-title">${doneTitle}</div>
     ${scoreBlock}
     <div class="course-complete-sub">${safeHTML(courseWarmLine())}</div>
+    <button type="button" class="course-complete-cta" onclick="courseTalkToAlex('${id}')">
+      <span class="course-complete-cta-ico">💬</span>
+      <span class="course-complete-cta-txt"><b>${safeHTML(alexLabel)}</b><span>${safeHTML(alexHint)}</span></span>
+      <svg viewBox="0 0 24 24" class="course-complete-cta-arrow"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>`;
+}
+/* Lesson finale: open ALEX seeded with a short practice dialogue about the
+   lesson's grammar/topic. Respects chat access gating like the other chips. */
+function courseTalkToAlex(id){
+  const ls=GALAXY_COURSE.find(x=>x.id===id)||{};
+  const topic=(ls.title&&(ls.title[lang]||ls.title.en))||(ls.sub&&(ls.sub[lang]||ls.sub.en))||'English';
+  try{haptic('light');}catch(_){}
+  if(typeof hasChatAccess==='function'&&!hasChatAccess()){try{showChatPaywall();}catch(_){}return;}
+  const prompt=({
+    ru:`Давай короткий диалог, чтобы закрепить тему «${topic}». Задавай мне по одному вопросу и мягко исправляй ошибки.`,
+    en:`Let's have a short dialogue to practise "${topic}". Ask me one question at a time and gently correct my mistakes.`,
+    es:`Tengamos un diálogo corto para practicar "${topic}". Hazme una pregunta a la vez y corrige mis errores con suavidad.`,
+    pt:`Vamos ter um diálogo curto para praticar "${topic}". Faça uma pergunta de cada vez e corrija meus erros com gentileza.`,
+    de:`Lass uns einen kurzen Dialog führen, um "${topic}" zu üben. Stelle mir eine Frage nach der anderen und korrigiere meine Fehler behutsam.`,
+    fr:`Faisons un court dialogue pour pratiquer "${topic}". Pose-moi une question à la fois et corrige gentiment mes erreurs.`,
+    uk:`Давай короткий діалог, щоб закріпити тему «${topic}». Став мені по одному запитанню і м'яко виправляй помилки.`,
+    tr:`"${topic}" konusunu pekiştirmek için kısa bir diyalog yapalım. Bana teker teker soru sor ve hatalarımı nazikçe düzelt.`,
+    zh:`我们来一段简短对话练习「${topic}」。请一次问我一个问题，并温和地纠正我的错误。`,
+    ar:`لنجرِ حوارًا قصيرًا لممارسة "${topic}". اطرح عليّ سؤالًا واحدًا في كل مرة وصحّح أخطائي بلطف.`
+  })[lang]||`Let's have a short dialogue to practise "${topic}". Ask me one question at a time and gently correct my mistakes.`;
+  try{goTab('chat');}catch(_){}
+  if(typeof busy==='undefined'||!busy)setTimeout(()=>{try{sendChip(prompt);}catch(_){}},170);
 }
 function maybeCompleteCourse(id){
   const parts=courseStoredParts(id);
