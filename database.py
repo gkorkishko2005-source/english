@@ -1100,7 +1100,7 @@ ALEX_CREDIT_COST = {
     "opus":    18,
     "opus48":  22,
 }
-VOICE_CREDIT_SURCHARGE = 5
+VOICE_CREDIT_SURCHARGE = 0   # voice input is FREE — no surcharge
 
 
 def credits_for_message(model: str, voice: bool = False) -> int:

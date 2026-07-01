@@ -79,7 +79,7 @@ _DEFAULTS = {
     # is refunded down to the real total afterwards, so over-estimating here is
     # safe — it just holds a few extra credits for a moment.
     "MAX_INPUT_TOKENS": 8000,
-    "VOICE_SURCHARGE_CREDITS": 5,      # flat add for voice (STT+TTS) requests
+    "VOICE_SURCHARGE_CREDITS": 0,      # voice input is FREE — no surcharge
     "DAILY_TOKENS_PER_USER": 120000,   # anti-abuse / runaway bot guard
     "GLOBAL_DAILY_BUDGET_USD": 25.0,   # kill-switch across ALL users per day
     # ── Saved-words dictionary caps (anti-hoarding / DB-load guard) ─────

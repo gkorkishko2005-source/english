@@ -40,7 +40,7 @@ GEMINI_FREE_ENABLED = os.getenv("GEMINI_FREE_ENABLED", "1") != "0"
 # prod. Default OFF. Flip GEMINI_FORCE_ALL=1 in Railway to enable; delete the var
 # to instantly restore Claude for paying users (no code change / redeploy needed).
 GEMINI_FORCE_ALL = os.getenv("GEMINI_FORCE_ALL", "0") == "1"
-GEMINI_MAX_TOKENS = int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600")
+GEMINI_MAX_TOKENS = int(os.getenv("GEMINI_MAX_TOKENS", "1000") or "1000")
 GEMINI_TIMEOUT    = float(os.getenv("GEMINI_TIMEOUT", "45") or "45")
 GEMINI_BASE_URL   = os.getenv(
     "GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta"
@@ -299,7 +299,7 @@ OPENROUTER_BASE_URL     = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.a
 OPENROUTER_MODEL         = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
 OPENROUTER_MODEL_PREMIUM = os.getenv("OPENROUTER_MODEL_PREMIUM", "google/gemini-2.5-pro")
 OPENROUTER_FREE_ENABLED = os.getenv("OPENROUTER_FREE_ENABLED", "1") != "0"
-OPENROUTER_MAX_TOKENS   = int(os.getenv("OPENROUTER_MAX_TOKENS", "600") or "600")
+OPENROUTER_MAX_TOKENS   = int(os.getenv("OPENROUTER_MAX_TOKENS", "1000") or "1000")
 OPENROUTER_TIMEOUT      = float(os.getenv("OPENROUTER_TIMEOUT", "45") or "45")
 # Optional ranking headers OpenRouter recommends (harmless if unset).
 OPENROUTER_REFERER      = os.getenv("OPENROUTER_REFERER", "https://t.me/PolyGlotty_bot")

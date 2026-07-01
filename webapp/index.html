@@ -6259,7 +6259,7 @@ async function doChat(text,mode){
     const r=await fetch(`${API}/api/chat`,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Telegram-Init-Data':tg?.initData||''},
-      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,answer_lang:botLang,chosen_model:getChosenModel(),voice:!!window._voicePending,mode:mode||'',init_data:tg?.initData||''}),
+      body:JSON.stringify({uid:window._uid||0,message:text,bot_lang:bl,answer_lang:botLang,chosen_model:getChosenModel(),voice:false,mode:mode||'',init_data:tg?.initData||''}),
       signal:AbortSignal.timeout(45000)
     });
     rmTyping();
@@ -6522,19 +6522,17 @@ async function _uploadVoice(blob,mime){
     const r=await fetch(`${API}/api/transcribe`,{method:'POST',body:fd,signal:AbortSignal.timeout(45000)});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.text){toast((d&&d.error)||_micT('empty'),'⚠️');return;}
+    /* Voice input is FREE and NEVER auto-sends. The transcript is dropped
+       straight into the composer so the user can read it, edit it, and
+       press send (paper-plane) themselves. Append to any existing draft
+       instead of clobbering it. */
     const inp=document.getElementById('cinp');
     const text=d.text.trim();
-    inp.value=text;
-    try{grow(inp);}catch(_){}
-    /* Voice-to-voice mode: auto-send the transcript and read the reply
-       back through TTS. Server charges the +5 credit voice surcharge
-       because we set voice:true on the /api/chat payload. */
-    if(window._voiceMode){
-      _voicePending=true;
+    if(text){
+      inp.value=(inp.value&&inp.value.trim())?(inp.value.replace(/\s+$/,'')+' '+text):text;
+      try{grow(inp);}catch(_){}
+      try{inp.focus();inp.selectionStart=inp.selectionEnd=inp.value.length;}catch(_){}
       try{sfx.tap();}catch(_){}
-      setTimeout(()=>{try{sendMsg();}catch(_){_voicePending=false;}},120);
-    } else {
-      inp.focus?.();
     }
   }catch(e){
     toast(_micT('failed'),'⚠️');
@@ -6547,7 +6545,10 @@ async function _uploadVoice(blob,mime){
      → ALEX replies → TTS reads the reply out loud.
    The flag survives a page reload (LS) so users who prefer voice-only
    conversations don't re-toggle every session. */
-window._voiceMode = (typeof window!=='undefined' && (LS.get('voice_mode')||'')==='1');
+/* Legacy voice-to-voice (auto-send + TTS + surcharge) is retired: voice input
+   is now free and always manual-send. Force the mode off and keep the flags
+   only so any lingering references stay harmless. */
+window._voiceMode = false;
 window._voicePending = false;
 function toggleVoiceMode(){
   window._voiceMode = !window._voiceMode;
@@ -6561,22 +6562,11 @@ function toggleVoiceMode(){
     window._voiceMode?'🎙️':'⌨️');
 }
 function _bindMicLongPress(){
+  /* Retired: the long-press used to toggle a paid voice-to-voice mode. Voice
+     input is now free and manual-send, so the mic button just records. Kept as
+     a no-op to avoid touching every call site. */
   const btn=document.getElementById('micb');
-  if(!btn||btn._lpBound)return;
-  btn._lpBound=true;
-  let timer=null,fired=false;
-  const start=(e)=>{fired=false;timer=setTimeout(()=>{fired=true;toggleVoiceMode();},520);};
-  const cancel=(e)=>{if(timer){clearTimeout(timer);timer=null;}};
-  btn.addEventListener('touchstart',start,{passive:true});
-  btn.addEventListener('mousedown',start);
-  btn.addEventListener('touchend',cancel);
-  btn.addEventListener('mouseup',cancel);
-  btn.addEventListener('mouseleave',cancel);
-  btn.addEventListener('touchcancel',cancel);
-  /* Intercept click so a long-press doesn't immediately also start
-     recording. */
-  btn.addEventListener('click',(e)=>{if(fired){e.preventDefault();e.stopPropagation();fired=false;}},true);
-  if(window._voiceMode)btn.classList.add('voice-mode');
+  if(btn)btn.classList.remove('voice-mode');
 }
 async function _startMediaMic(btn){
   if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast(_micT('notsup'),'⚠️');return;}
@@ -6611,9 +6601,13 @@ async function toggleMic(){
     return;
   }
   if(srRec){try{srRec.stop();}catch(e){}_resetMicBtn();return;}
+  // Prefer the free on-device Web Speech API (window.(webkit)SpeechRecognition).
+  // It's free, multilingual (lang set from the user's bot/UI language) and runs
+  // natively — no server round-trip. When it's unavailable (e.g. iOS Telegram
+  // webview) we fall back to MediaRecorder + our /api/transcribe endpoint. Both
+  // paths only fill the input; neither auto-sends and neither costs credits.
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const inTelegram=!!window.Telegram?.WebApp;
-  if(inTelegram||!SR){
+  if(!SR){
     await _startMediaMic(btn);
     return;
   }
@@ -6639,13 +6633,18 @@ async function toggleMic(){
   const inp=document.getElementById('cinp');
   try{
     srRec=new SR();
-    srRec.lang=micLangBCP47();
-    srRec.interimResults=true;
+    srRec.lang=micLangBCP47();          // multilingual: follows the user's language
+    srRec.interimResults=false;         // deliver the finished transcript only
     srRec.continuous=false;
     srRec.maxAlternatives=1;
+    /* Drop the recognised text into the composer (appending to any draft) so
+       the user can read/edit it and send it themselves. Never auto-sends. */
     srRec.onresult=e=>{
-      const txt=Array.from(e.results).map(r=>r[0].transcript).join('').trim();
-      inp.value=txt;try{grow(inp);}catch(_){}
+      const txt=Array.from(e.results).map(r=>r[0].transcript).join(' ').trim();
+      if(!txt)return;
+      inp.value=(inp.value&&inp.value.trim())?(inp.value.replace(/\s+$/,'')+' '+txt):txt;
+      try{grow(inp);}catch(_){}
+      try{inp.focus();inp.selectionStart=inp.selectionEnd=inp.value.length;}catch(_){}
     };
     srRec.onerror=e=>{
       _resetMicBtn();

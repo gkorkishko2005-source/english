@@ -880,9 +880,12 @@ async def handle_chat(request):
         # a very long conversation can never inflate the per-turn input cost. Even
         # Premium history is archived down to the freshest PREMIUM_HISTORY_TOKEN_BUDGET.
         prem_send = _trim_history_by_tokens(_histories[uid][-prem_hist_n:])
-        # Output guard: cap a single Gemini Pro reply at 350 tokens so ALEX can't
-        # generate a balance-burning wall of text. Env-overridable but defaults low.
-        prem_max = int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "350") or "350")
+        # Output budget for a premium ALEX reply. 350 was far too low — it cut
+        # answers off mid-sentence ("Если это всё,"), wasting the user's message.
+        # Give the model room to finish its thought; the hard ceiling still caps
+        # the worst case, and metered billing reconciles to real usage.
+        prem_max = min(MAX_REPLY_TOKENS_HARD,
+                       int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1200") or "1200"))
         reply = ""
         try:
             result = await openrouter_generate(prem_system, prem_send, prem_max,
@@ -1012,7 +1015,9 @@ async def handle_chat(request):
             return web.json_response(
                 {"reply": big_map.get(lang, big_map["en"]), "context_too_large": True},
                 headers={"Access-Control-Allow-Origin":"*"})
-        g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "600") or "600"))
+        # Free-tier output budget. Raised from 600 so free ALEX can also finish
+        # a full structured answer; still clamped by the hard per-reply ceiling.
+        g_max = min(MAX_REPLY_TOKENS_HARD, int(os.getenv("GEMINI_MAX_TOKENS", "1000") or "1000"))
         # Build the attempt order: the routed provider first, then any OTHER
         # configured free provider as a fallback (so a single upstream blip can't
         # break free chat). Production runs OpenRouter-only → order == [openrouter].
