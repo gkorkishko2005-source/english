@@ -857,6 +857,26 @@ async def handle_chat(request):
             "- Be thorough and well-structured with formatting and examples — you "
             "are NOT limited to a few sentences."
         )
+        # ── PREMIUM CONTEXTUAL GAMIFICATION ───────────────────────────────────
+        # Turn the premium chat into a live, interactive coach that hijacks the
+        # topic of whatever lesson/test the student just did and drills the exact
+        # weak point through a game — never a dry lecture.
+        prem_directive += (
+            "\n\nPREMIUM INTERACTIVE MODE — make every reply a game, not a lecture:\n"
+            "- If the student's message carries lesson/exam context or a mistake they just "
+            "made (a grammar point they failed, an error being reviewed), DON'T just explain "
+            "it. Instantly launch a short, immersive mini-game or roleplay built AROUND that "
+            "exact weak spot. E.g. they missed Present Perfect → 'You're a detective at a crime "
+            "scene: tell me what you HAVE FOUND, using Present Perfect. I'll feed you clues.'\n"
+            "- Always hand the turn back: end almost every message with a concrete challenge "
+            "or a counter-question in English that forces a FULL sentence, never a yes/no.\n"
+            "- Provoke depth — never accept one-word replies. Push with 'why?', 'give me one "
+            "more example', 'now say it in the past'. Keep them producing language.\n"
+            f"- Adapt the game and your English to their level ({level}): gentle prompts and a "
+            "slow pace at A0–A2; rich scenarios, idioms and register play at B2–C2.\n"
+            "- Stay fully in character during roleplay; correct gently inside the story so it "
+            "never feels like a test, and give a short warm feedback recap only at the end."
+        )
         prem_system = system + prem_directive
         try:
             from billing_config import load_config as _lc
