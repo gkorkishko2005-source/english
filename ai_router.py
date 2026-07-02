@@ -317,12 +317,16 @@ OPENROUTER_TITLE        = os.getenv("OPENROUTER_TITLE", "PolyGlotty")
 #  overflow valve is OPENROUTER_MODEL_FALLBACK — a paid model that keeps serving
 #  once every free model is exhausted. Set it to "" to disable the paid fallback
 #  (free chat then shows the daily-limit card instead of spending owner balance).
+#  Curated general-purpose chat models (excludes code-only, guardrail/safety,
+#  uncensored, and tiny <=3B variants — none suit a language tutor). Ordered
+#  proven-slug-first so the chain keeps working even if a newer slug 404s.
 _DEFAULT_FREE_MODELS = ",".join([
-    "deepseek/deepseek-chat-v3-0324:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemini-2.0-flash-exp:free",
-    "qwen/qwen-2.5-72b-instruct:free",
-    "mistralai/mistral-small-3.1-24b-instruct:free",
+    "meta-llama/llama-3.3-70b-instruct:free",   # strong, multilingual, reliable
+    "openai/gpt-oss-120b:free",                 # high-reasoning general purpose
+    "qwen/qwen3-next-80b-a3b-instruct:free",    # fast, multilingual
+    "nvidia/nemotron-nano-9b-v2:free",          # light, quick fallback
+    "google/gemma-4-31b-it:free",               # 140+ languages
+    "openai/gpt-oss-20b:free",                  # lightweight last resort
 ])
 OPENROUTER_FREE_MODELS   = [m.strip() for m in os.getenv("OPENROUTER_FREE_MODELS", _DEFAULT_FREE_MODELS).split(",") if m.strip()]
 OPENROUTER_MODEL_FALLBACK = os.getenv("OPENROUTER_MODEL_FALLBACK", "google/gemini-2.5-flash-lite").strip()
