@@ -193,16 +193,53 @@ async def _elevenlabs_tts(text: str, lang: str = "en", role: str | None = None) 
 #  STT — Whisper произношение
 # ══════════════════════════════════════════════════════════════════
 
+#  Частые галлюцинации Whisper на тишине/шуме — модель "додумывает" фразы.
+_WHISPER_HALLUCINATIONS = {
+    "thank you", "thank you.", "thanks for watching", "thank you for watching",
+    "thank you for watching.", "thanks for watching.", "you", "you.",
+    "please subscribe", "subscribe", ".", "bye", "bye.", "so", "so.",
+    "thank you very much", "okay", "ok",
+}
+
+
+def _looks_like_hallucination(text: str) -> bool:
+    """
+    Определяет "словесный мусор" Whisper при пустой/тихой записи:
+    короткие типовые фразы или зацикленное повторение одного токена.
+    """
+    if not text:
+        return True
+    t = text.strip()
+    low = t.lower()
+    if low in _WHISPER_HALLUCINATIONS:
+        return True
+    words = [w for w in re.split(r"\s+", low) if w]
+    if not words:
+        return True
+    # Зацикленный бред: много слов, но почти все одинаковые (низкое разнообразие).
+    if len(words) >= 4:
+        uniq = len(set(words))
+        if uniq / len(words) <= 0.3:
+            return True
+    return False
+
+
 async def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg", lang: str = "en") -> str | None:
     """
     Транскрибирует аудио.
     Приоритет: OpenAI Whisper (если есть ключ) → Google STT (бесплатно).
     `lang` — BCP-47 base (e.g. 'en','ru','es','pt'). Whisper auto-detects but
-    accepts a hint; Google free STT needs explicit lang.
+    accepts a hint; Google free STT needs explicit hint.
+    Возвращает None, если аудио пустое/тихое (или Whisper вернул галлюцинацию),
+    чтобы вызывающий код показал пользователю ошибку вместо «мусорной» оценки.
     """
+    # Пустая/обрезанная запись — не тратим STT-запрос.
+    if not audio_bytes or len(audio_bytes) < 2000:
+        return None
     if OPENAI_KEY:
         result = await _whisper_transcribe(audio_bytes, filename, lang)
-        if result: return result
+        if result and not _looks_like_hallucination(result):
+            return result
     return await _google_stt(audio_bytes, lang, filename)
 
 

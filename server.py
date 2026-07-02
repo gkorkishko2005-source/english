@@ -1815,6 +1815,9 @@ async def handle_transcribe(request):
 
     if not audio:
         return web.json_response({"error":"empty audio"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    # Обрезанная/тихая запись — не гоняем STT, сразу просим повторить.
+    if len(audio) < 2000:
+        return web.json_response({"error":"speech not recognized"},status=422,headers={"Access-Control-Allow-Origin":"*"})
 
     try:
         from tts import transcribe_audio

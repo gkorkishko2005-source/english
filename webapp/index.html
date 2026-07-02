@@ -636,19 +636,22 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .examsim-noise{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--b2);background:var(--e2);color:var(--t3);font-size:15px;line-height:1;cursor:pointer}
 .examsim-noise.on{color:var(--exam);border-color:rgba(var(--exam-r),.4);background:rgba(var(--exam-r),.12)}
 .examsim-noise:active{transform:scale(.94)}
-.examsim-rail{height:3px;background:rgba(255,255,255,.07)}
-.examsim-railfill{height:100%;width:0%;background:var(--exam);transition:width .35s cubic-bezier(.4,1,.4,1)}
+.examsim-rail{height:6px;background:var(--e3);border-radius:4px;overflow:hidden}
+.examsim-railfill{height:100%;width:0%;background:var(--exam);border-radius:4px;transition:width .35s cubic-bezier(.4,1,.4,1)}
 .examsim-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;transform:translate3d(0,0,0);will-change:scroll-position;padding:16px;display:flex;flex-direction:column;gap:12px}
 .examsim-opt{touch-action:manipulation}
 .examsim-count{font-size:11px;font-weight:850;letter-spacing:.4px;color:var(--t3);text-transform:uppercase}
-.examsim-passage{font-size:13px;line-height:1.6;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:12px}
+.examsim-passage{font-size:13.5px;line-height:1.6;letter-spacing:.3px;color:var(--t1);opacity:.9;background:var(--e2);border:1px solid var(--b1);border-radius:12px;padding:16px}
 .examsim-listen{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .examsim-hint{font-size:11px;color:var(--t3);line-height:1.4}
 .examsim-q{font-size:15px;font-weight:800;color:var(--t1);line-height:1.45}
 .examsim-qtype{display:inline-block;align-self:flex-start;font-size:10px;font-weight:850;letter-spacing:.4px;text-transform:uppercase;color:var(--acc,#6ea8fe);background:color-mix(in srgb,var(--acc,#6ea8fe) 14%,transparent);border:1px solid color-mix(in srgb,var(--acc,#6ea8fe) 30%,transparent);border-radius:999px;padding:3px 10px}
-.examsim-opts{display:flex;flex-direction:column;gap:8px}
-.examsim-opt{text-align:left;padding:12px 13px;background:var(--e2);border:1.5px solid var(--b2);border-radius:12px;font-family:var(--f);font-size:13.5px;color:var(--t1);cursor:pointer;transition:.18s;line-height:1.4}
-.examsim-opt:active{transform:scale(.985)}
+/* margin-top stacks with the .examsim-body flex gap (12px) → ~24px of air
+   between the question/passage and the A/B/C/D options so they don't slip together. */
+.examsim-opts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.examsim-opt{text-align:left;padding:14px 18px;background:var(--e2);border:2px solid var(--b2);border-radius:12px;font-family:var(--f);font-size:13.5px;color:var(--t1);cursor:pointer;transition:border-color .18s,background .18s,transform .12s ease;line-height:1.4}
+.examsim-opt:hover{border-color:rgba(var(--ar),.5)}
+.examsim-opt:active{transform:scale(.985);border-color:var(--a);background:rgba(var(--ar),.08)}
 .examsim-correct{border-color:var(--a2)!important;background:rgba(0,212,170,.13)!important;color:var(--a2)!important;font-weight:700}
 .examsim-wrong{border-color:var(--rd)!important;background:rgba(255,107,107,.11)!important;color:var(--rd)!important}
 .examsim-result{text-align:center;padding:24px 8px;display:flex;flex-direction:column;align-items:center;gap:6px}
@@ -711,7 +714,11 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .fe-cert-rows{width:100%;max-width:320px;display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
 .fe-cert-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--t2);background:var(--e2);border:1px solid var(--b1);border-radius:10px;padding:9px 12px}
 .fe-cert-row .fe-cert-v{font-weight:850;color:var(--t1);font-variant-numeric:tabular-nums}
-.fe-cert-code{font-size:12px;font-weight:800;letter-spacing:1.5px;color:var(--exam);font-variant-numeric:tabular-nums}
+.fe-cert-foot{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:12px}
+.fe-cert-id{font-size:11px;color:var(--t3);opacity:.5;letter-spacing:.5px;font-variant-numeric:tabular-nums}
+.fe-cert-copy{font-size:11px;font-weight:700;color:var(--t3);background:transparent;border:1px solid var(--b1);border-radius:8px;padding:4px 10px;cursor:pointer;transition:.15s}
+.fe-cert-copy:active{transform:scale(.95)}
+.fe-cert-copy.ok{color:var(--ok,#22c55e);border-color:var(--ok,#22c55e)}
 /* Roadmap test button */
 .rm-test-btn{display:flex;align-items:center;gap:10px;padding:14px;background:var(--bg-card);border:1.5px dashed rgba(var(--ar),.3);border-radius:var(--r2);margin:4px 0 10px;cursor:pointer;transition:.2s}
 .rm-test-btn:active{transform:scale(.97)}
@@ -1175,12 +1182,13 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .ca-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;border-radius:var(--r2);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;-webkit-tap-highlight-color:transparent}
 .ca-btn svg{width:18px;height:18px;flex-shrink:0}
 .ca-btn:active{transform:scale(.95)}
-/* Secondary actions stay monochrome (outline) per the dark palette */
-.ca-skip{background:var(--e2);border:1px solid var(--b2);color:var(--t2)}
-.ca-skip:active{background:var(--e3)}
-.ca-save{background:var(--e2);border:1px solid var(--b2);color:var(--t1)}
-.ca-save svg{stroke:var(--a)}
-.ca-save:active{background:var(--e3)}
+/* Skip = secondary/ghost outline; Save = primary emerald CTA. The clear
+   hierarchy tells the eye which action is the "keep" one. */
+.ca-skip{background:transparent;border:1px solid var(--b2);color:var(--t3)}
+.ca-skip:active{background:var(--e2)}
+.ca-save{background:var(--a);border:1px solid var(--a);color:#fff;font-weight:600}
+.ca-save svg{stroke:#fff}
+.ca-save:active{background:var(--a2);border-color:var(--a2)}
 /* Ask ALEX = the single premium teal CTA — deep teal with a soft, muted glow
    (no acid neon). The screen's focus stays on the white English word. */
 .ca-ask{background:var(--a);border:1px solid rgba(var(--ar),.45);color:#031f1a;box-shadow:none}
@@ -1987,7 +1995,20 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .course-jump-btn:hover{transform:translateY(-1px) scale(1.03)}
 .course-top-btn:active{transform:scale(.94)}
 .course-top-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.course-system{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:16px;margin-bottom:16px}
+.course-system{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:16px;padding:16px;margin-bottom:16px}
+/* ── Home logical zones: each major block is its own card container so the
+   screen reads as distinct sections instead of one dense wall. ── */
+.home-zone{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:16px;padding:12px;margin-bottom:16px}
+.home-zone-tips .alextip-wrap{margin:0}
+.home-zone-tips .alextip-head{padding:2px 2px 8px}
+.home-zone-lessons{padding:8px 12px 12px}
+.home-zone-lessons .course-level-head{margin-top:6px}
+.home-zone-lessons .course-level-head:first-child{margin-top:2px}
+/* Inner lesson cards drop to a lighter recessed surface so they stand out
+   against the zone container (page → zone → card depth hierarchy). */
+.home-zone-lessons .course-card,
+.home-zone-lessons .course-card.done,
+.home-zone-lessons .course-card.locked{background:var(--e2)}
 .course-system-prog{height:6px;border-radius:999px;background:var(--e3);overflow:hidden;margin-top:12px}
 .course-system-prog-fill{height:100%;border-radius:999px;background:var(--color-primary);transition:width .4s ease}
 .course-system-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
@@ -2033,6 +2054,8 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .course-track-node:hover{transform:scale(1.12)}
 .course-track-node.done{color:#fff;background:var(--a);border-color:rgba(255,255,255,.55);box-shadow:none}
 .course-track-node.done::after{content:'';position:absolute;width:8px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(.5px,-1.5px)}
+.course-track-node.locked{cursor:default;opacity:.45}
+.course-track-node.locked:hover{transform:none}
 .course-track-node.active{color:#fff;background:var(--lesson-color,var(--a));border-color:#fff;box-shadow:none;animation:courseTrackPulse 1.6s ease-in-out infinite}
 .course-track-node.active::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(var(--ar),.45);animation:courseTrackRipple 1.8s ease-out infinite;pointer-events:none}
 .course-track-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%) translateY(2px);background:var(--e2);border:1px solid var(--b2);color:var(--t1);font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 6px 16px rgba(0,0,0,.18);z-index:5}
@@ -6507,6 +6530,7 @@ function _micT(key){
     rec:{ru:'Запись идёт — нажми ещё раз, чтобы остановить',en:'Recording — tap again to stop',es:'Grabando — toca otra vez para parar',pt:'Gravando — toque de novo para parar'},
     trans:{ru:'Распознаю голос...',en:'Transcribing...',es:'Transcribiendo...',pt:'Transcrevendo...'},
     empty:{ru:'Речь не распознана',en:'Speech not recognized',es:'No se reconoció la voz',pt:'Fala não reconhecida'},
+    noaudio:{ru:'Микрофон не записал звук, повторите',en:'The mic recorded no sound, please try again',es:'El micrófono no grabó sonido, inténtalo de nuevo',pt:'O microfone não gravou som, tente novamente'},
     failed:{ru:'Не удалось запустить микрофон',en:'Could not start mic',es:'No se pudo iniciar el micrófono',pt:'Não foi possível iniciar o microfone'},
     granted:{ru:'Микрофон разрешён',en:'Microphone allowed',es:'Micrófono permitido',pt:'Microfone permitido'},
   };
@@ -9751,7 +9775,7 @@ const FE_CFG={
   speaking:{secs:45},
 };
 let fullExam=null;
-let _feRec=null,_feChunks=[],_feStream=null,_feRecTimer=null;
+let _feRec=null,_feChunks=[],_feStream=null,_feRecTimer=null,_feRecStart=0;
 
 const FE_L={
   loading:{ru:'Готовим экзамен…',en:'Preparing your exam…',es:'Preparando tu examen…',pt:'Preparando seu exame…',de:'Prüfung wird vorbereitet…',fr:'Préparation de l’examen…',uk:'Готуємо іспит…',tr:'Sınav hazırlanıyor…',zh:'正在准备考试…',ar:'نُجهّز الامتحان…'},
@@ -9792,6 +9816,9 @@ const FE_L={
   cert:{ru:'Сертификат',en:'Certificate',es:'Certificado',pt:'Certificado',de:'Zertifikat',fr:'Certificat',uk:'Сертифікат',tr:'Sertifika',zh:'证书',ar:'الشهادة'},
   done:{ru:'Готово',en:'Done',es:'Listo',pt:'Concluir',de:'Fertig',fr:'Terminé',uk:'Готово',tr:'Bitti',zh:'完成',ar:'تم'},
   result:{ru:'Результат',en:'Result',es:'Resultado',pt:'Resultado',de:'Ergebnis',fr:'Résultat',uk:'Результат',tr:'Sonuç',zh:'结果',ar:'النتيجة'},
+  sessId:{ru:'ID сессии',en:'Session ID',es:'ID de sesión',pt:'ID da sessão',de:'Sitzungs-ID',fr:'ID de session',uk:'ID сесії',tr:'Oturum kimliği',zh:'会话 ID',ar:'معرّف الجلسة'},
+  copyId:{ru:'Скопировать ID сессии',en:'Copy session ID',es:'Copiar ID de sesión',pt:'Copiar ID da sessão',de:'Sitzungs-ID kopieren',fr:'Copier l’ID de session',uk:'Скопіювати ID сесії',tr:'Oturum kimliğini kopyala',zh:'复制会话 ID',ar:'نسخ معرّف الجلسة'},
+  copied:{ru:'Скопировано',en:'Copied',es:'Copiado',pt:'Copiado',de:'Kopiert',fr:'Copié',uk:'Скопійовано',tr:'Kopyalandı',zh:'已复制',ar:'تم النسخ'},
   exitMsg:{ru:'Выйти из экзамена? Прогресс не сохранится.',en:'Exit the exam? Your progress will be lost.',es:'¿Salir del examen? Se perderá tu progreso.',pt:'Sair do exame? Seu progresso será perdido.',de:'Prüfung verlassen? Dein Fortschritt geht verloren.',fr:'Quitter l’examen ? Ta progression sera perdue.',uk:'Вийти з іспиту? Прогрес не збережеться.',tr:'Sınavdan çık? İlerlemen kaybolacak.',zh:'退出考试？进度将丢失。',ar:'الخروج من الامتحان؟ سيُفقد تقدمك.'},
   speakShort:{ru:'Ответ слишком короткий — попробуй ещё.',en:'Your answer was too short — try again.',es:'Tu respuesta fue muy corta, inténtalo de nuevo.',pt:'Sua resposta foi muito curta — tente de novo.',de:'Deine Antwort war zu kurz – versuch es erneut.',fr:'Ta réponse était trop courte — réessaie.',uk:'Відповідь надто коротка — спробуй ще.',tr:'Yanıtın çok kısaydı — tekrar dene.',zh:'回答太短——请重试。',ar:'إجابتك قصيرة جدًا — حاول مرة أخرى.'},
   paywall:{ru:'Полный экзамен TOEFL/IELTS — только по подписке.',en:'The full TOEFL/IELTS exam is subscription only.',es:'El examen completo TOEFL/IELTS es solo con suscripción.',pt:'O exame completo TOEFL/IELTS é apenas por assinatura.',de:'Die vollständige TOEFL/IELTS-Prüfung gibt es nur mit Abo.',fr:'L’examen complet TOEFL/IELTS est réservé aux abonnés.',uk:'Повний іспит TOEFL/IELTS — лише за підпискою.',tr:'Tam TOEFL/IELTS sınavı yalnızca abonelikle.',zh:'完整的 TOEFL/IELTS 考试仅限订阅。',ar:'امتحان TOEFL/IELTS الكامل للمشتركين فقط.'},
@@ -10098,12 +10125,19 @@ function feRunWriting(){
   if(!fullExam)return;
   const t=fullExam.wTask;
   feStartTimer(FE_CFG.writing.secs,()=>feSubmitWriting(true));
+  if(typeof fullExam.wDraft!=='string')fullExam.wDraft='';
   const body=document.getElementById('examsim-body');
   if(body){body.innerHTML=`<div class="examsim-count">${_feT(FE_L.secWriting)}</div>
     <div class="examsim-q">${safeHTML(t.prompt||t.topic||'')}</div>
-    <textarea class="fe-area" id="fe-essay" placeholder="${_feT(FE_L.essayPh)}" oninput="feWordCount()"></textarea>
+    <textarea class="fe-area" id="fe-essay" placeholder="${_feT(FE_L.essayPh)}" oninput="feWriteInput(this)"></textarea>
     <div class="fe-wc" id="fe-wc">0 / ${FE_CFG.writing.min} ${_feT(FE_L.words)}</div>
     <button class="fe-btn-primary" id="fe-submit-w" onclick="feSubmitWriting(false)" disabled>${_feT(FE_L.submit)}</button>`;body.scrollTop=0;}
+  const ta=document.getElementById('fe-essay');
+  if(ta&&fullExam.wDraft){ta.value=fullExam.wDraft;}
+  feWordCount();
+}
+function feWriteInput(ta){
+  if(fullExam&&ta){fullExam.wDraft=ta.value;}
   feWordCount();
 }
 function feWordCount(){
@@ -10118,7 +10152,10 @@ function feWordCount(){
 async function feSubmitWriting(auto){
   if(!fullExam)return;
   const ta=document.getElementById('fe-essay');
-  const essay=((ta&&ta.value)||'').trim();
+  /* read live field first, fall back to persisted draft so timer-expiry never sends empty */
+  let essay=((ta&&ta.value)||'').trim();
+  if(!essay&&fullExam.wDraft){essay=fullExam.wDraft.trim();}
+  if(ta&&ta.value.trim()){fullExam.wDraft=ta.value;}
   const n=(essay.match(/\S+/g)||[]).length;
   if(!auto&&n<FE_CFG.writing.min){return;}
   feStopTimer();
@@ -10175,6 +10212,7 @@ async function feToggleRec(){
   _feRec.ondataavailable=(ev)=>{if(ev.data&&ev.data.size)_feChunks.push(ev.data);};
   _feRec.onstop=()=>feOnRecStop(_feRec&&_feRec.mimeType||mime);
   try{_feRec.start();}catch(e){toast(_micT('failed'),'⚠️');feReleaseStream();return;}
+  _feRecStart=Date.now();
   try{sfx.tap();}catch(_){}
   const btn=document.getElementById('fe-rec');if(btn){btn.classList.add('rec');btn.textContent=_feT(FE_L.stop);}
   let left=FE_CFG.speaking.secs;
@@ -10194,7 +10232,14 @@ function feOnRecStop(mime){
   const btn=document.getElementById('fe-rec');if(btn){btn.classList.remove('rec');btn.textContent=_feT(FE_L.rec);}
   const blob=new Blob(_feChunks,{type:mime||'audio/webm'});
   _feChunks=[];
-  if(!blob.size){toast(_micT('empty'),'⚠️');return;}
+  const durMs=_feRecStart?(Date.now()-_feRecStart):0;_feRecStart=0;
+  /* hard validation: don't send empty/near-empty audio (silent or truncated recording).
+     ~6KB and ~700ms floors filter out clicks / mic that captured no sound. */
+  if(!blob.size||blob.size<6000||durMs<700){
+    toast(_micT('noaudio'),'🎤');
+    const st=document.getElementById('fe-rec-state');if(st)st.textContent=_feT(FE_L.recHint);
+    return;
+  }
   feTranscribeAndGrade(blob,mime);
 }
 async function feTranscribeAndGrade(blob,mime){
@@ -10257,7 +10302,7 @@ async function feFinish(){
     <div class="fe-cert-total">${res.total}<span>/${res.scale_max}</span></div>
     <div class="fe-cert-sub">${_feT(FE_L.totalScore)}</div>
     <div class="fe-cert-rows">${rowsHTML}</div>
-    ${res.cert_code?`<div class="fe-cert-code">${safeHTML(res.cert_code)}</div>`:''}
+    ${res.cert_code?`<div class="fe-cert-foot"><span class="fe-cert-id">${_feT(FE_L.sessId)}: ${safeHTML(res.cert_code)}</span><button class="fe-cert-copy" id="fe-cert-copy" onclick="feCopySession('${String(res.cert_code).replace(/[^A-Za-z0-9_-]/g,'')}')">${_feT(FE_L.copyId)}</button></div>`:''}
     <div class="examsim-result-btns">
       <button class="ghost" onclick="closeFullExam()">${_feT(FE_L.done)}</button>
       ${certUrl?`<button class="primary" onclick="feOpenCert('${certUrl.replace(/'/g,'')}')">${_feT(FE_L.cert)}</button>`:''}
@@ -10269,6 +10314,15 @@ function feOpenCert(url){
   if(!url)return;
   try{if(typeof tg!=='undefined'&&tg&&tg.openLink){tg.openLink(url);return;}}catch(_){}
   try{window.open(url,'_blank');}catch(_){try{location.href=url;}catch(e){}}
+}
+function feCopySession(code){
+  if(!code)return;
+  const btn=document.getElementById('fe-cert-copy');
+  const done=()=>{if(btn){btn.textContent=_feT(FE_L.copied);btn.classList.add('ok');setTimeout(()=>{btn.textContent=_feT(FE_L.copyId);btn.classList.remove('ok');},1500);}};
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(done).catch(()=>{});return;}
+  }catch(_){}
+  try{const ta=document.createElement('textarea');ta.value=code;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);done();}catch(_){}
 }
 
 /* ── noise + exit (shared with the free sim's ✕/🔊 buttons) ── */
@@ -11945,7 +11999,12 @@ function renderCourse(){
       <div class="course-status">${statusIcon}</div>
     </div>`;
   }).join('');
-  wrap.innerHTML=system+renderAlexTipsBlock()+lessons;
+  const _tips=renderAlexTipsBlock();
+  /* Split the screen into clearly separated logical zones: the learning-path
+     card (already a zone), the ALEX tips card, and the lessons list card. */
+  wrap.innerHTML=system
+    +(_tips?`<div class="home-zone home-zone-tips">${_tips}</div>`:'')
+    +`<div class="home-zone home-zone-lessons">${lessons}</div>`;
   bindCourseTopBtn();
 }
 function courseShortRule(ls){
@@ -12951,11 +13010,15 @@ function _openCourseLessonInner(id){
   const activeStageKey=(stageMeta.find(s=>s.pct<100)||stageMeta[stageMeta.length-1]).key;
   const completedStages=stageMeta.filter(s=>s.pct>=100).length;
   const fillPct=stageMeta.length>1?Math.round(completedStages/(stageMeta.length-1)*100):0;
+  const _trackUnlocked=new Set();for(const s of stageMeta){_trackUnlocked.add(s.key);if(s.pct<100)break;}
   const trackHtml=`<div class="course-track-rail"><div class="course-track-rail-fill" id="course-track-fill-${id}" style="width:${Math.min(100,fillPct)}%"></div></div>`+
     stageMeta.map(s=>{
-      const cls=s.pct>=100?'done':(s.key===activeStageKey?'active':'');
+      const locked=!_trackUnlocked.has(s.key);
+      const cls=s.pct>=100?'done':(s.key===activeStageKey?'active':(locked?'locked':''));
       const label=safeHTML(s.title);
-      return `<div class="course-track-node ${cls}" data-stage="${s.key}" onclick="openCourseStage('${id}','${s.key}')" title="${label}"><span class="course-track-tip">${label}</span>${s.pct>=100?'':s.n}</div>`;
+      /* Locked nodes carry no onclick — mirrors the locked stage cards, so
+         tapping ahead during theory no longer fires the "finish step first" toast. */
+      return `<div class="course-track-node ${cls}" data-stage="${s.key}" ${locked?'':`onclick="openCourseStage('${id}','${s.key}')"`} title="${label}"><span class="course-track-tip">${label}</span>${s.pct>=100?'':s.n}</div>`;
     }).join('');
   const grammarDone=practice.every((_,i)=>partState['practice_'+i]);
   const builderDone=partState.builder;
@@ -12988,7 +13051,7 @@ function _openCourseLessonInner(id){
       <div class="course-track" id="course-track-${id}">${trackHtml}</div>
     </div>
     <div class="course-rule-compact"><b>${({ru:'Правило',en:'Rule',es:'Regla',pt:'Regra',de:'Regel',fr:'Règle',uk:'Правило',tr:'Kural',zh:'规则',ar:'القاعدة'}[lang]||'Rule')}</b><span>${safeHTML(ruleText)}</span></div>
-    ${currentTaskKind().helpEnabled?`<button class="course-ask" type="button" onclick="askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>`:''}
+    ${currentTaskKind().helpEnabled?`<button class="course-ask" type="button" onclick="event.stopPropagation();askCourseAI('${id}')">${ASK_ALEX_SVG}${_askAlexExplainLabel()}</button>`:''}
     <div class="course-hint" style="margin-top:7px">${({ru:'Совет: выдели любое слово или фразу в уроке — появится кнопка «Спросить ALEX».',en:'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.',es:'Consejo: selecciona cualquier palabra o frase de la lección y aparecerá un botón “Preguntar a ALEX”.',pt:'Dica: selecione qualquer palavra ou frase da lição — aparecerá um botão “Perguntar ao ALEX”.',de:'Tipp: Markiere ein Wort oder einen Satz in der Lektion — ein „ALEX fragen“-Button erscheint.',fr:'Astuce : sélectionne un mot ou une phrase de la leçon — un bouton « Demander à ALEX » apparaît.',uk:'Порада: виділи будь-яке слово чи фразу в уроці — з’явиться кнопка «Запитати ALEX».',tr:'İpucu: derste herhangi bir kelime veya cümleyi seç — “ALEX’e sor” düğmesi belirir.',zh:'提示：在课程中选中任意单词或短语，会弹出“问问 ALEX”按钮。',ar:'نصيحة: حدّد أي كلمة أو عبارة في الدرس — سيظهر زر «اسأل ALEX».'}[lang]||'Tip: select any word or phrase in the lesson — an “Ask ALEX” button will pop up.')}</div>
     <div class="course-insight">
       <div class="course-insight-card"><div class="course-insight-label">${({ru:'Паттерн',en:'Pattern',es:'Patrón',pt:'Padrão',de:'Muster',fr:'Schéma',uk:'Патерн',tr:'Kalıp',zh:'句型',ar:'النمط'}[lang]||'Pattern')}</div><div class="course-insight-text">${_courseInsightText(insight.pattern[lang]||insight.pattern.en)}</div></div>
