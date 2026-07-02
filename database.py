@@ -342,6 +342,18 @@ CREATE TABLE IF NOT EXISTS ai_usage_log (
     credits_charged INTEGER DEFAULT 0,
     ts              TIMESTAMPTZ DEFAULT NOW()
 );
+-- referrals_log: one AUDIT + idempotency row per invited user. The UNIQUE
+-- constraint on invited_id is the anti-abuse gate — a given Telegram account can
+-- only ever be the SUBJECT of one rewarded referral, so credits can never be
+-- paid twice for the same friend even under a race.
+CREATE TABLE IF NOT EXISTS referrals_log (
+    id          BIGSERIAL PRIMARY KEY,
+    referrer_id BIGINT  NOT NULL,
+    invited_id  BIGINT  NOT NULL UNIQUE,
+    credits     INTEGER DEFAULT 0,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
 
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_state  ON vocabulary(uid, state);
@@ -480,6 +492,14 @@ CREATE TABLE IF NOT EXISTS ai_usage_log (
     cost_usd REAL DEFAULT 0, credits_charged INTEGER DEFAULT 0,
     ts TEXT DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS referrals_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_id INTEGER NOT NULL,
+    invited_id  INTEGER NOT NULL UNIQUE,
+    credits     INTEGER DEFAULT 0,
+    created_at  TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
 """
 
@@ -610,87 +630,97 @@ async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
 
-# Credits granted to the inviter per VALID new referral (0.5× a message price).
-# Env-overridable so the owner can retune without a deploy; mirrors
-# billing_config REFERRAL_REWARD_CREDITS.
-REFERRAL_REWARD_CREDITS = int(os.getenv("BILLING_REFERRAL_REWARD_CREDITS", os.getenv("REFERRAL_REWARD_CREDITS", "3")) or "3")
-# Premium granted to the inviter per VALID new referral. The reward is now real
-# subscription time (Platform) instead of credits — but capped lifetime so free
-# value can't snowball: once REFERRAL_PREMIUM_CAP_DAYS of referral-granted Premium
-# have been handed out, further referrals fall back to REFERRAL_REWARD_CREDITS
-# ALEX credits only (no more free subscription days). Env-overridable.
-REFERRAL_PREMIUM_DAYS = int(os.getenv("BILLING_REFERRAL_PREMIUM_DAYS", os.getenv("REFERRAL_PREMIUM_DAYS", "3")) or "3")
-REFERRAL_PREMIUM_CAP_DAYS = int(os.getenv("BILLING_REFERRAL_PREMIUM_CAP_DAYS", os.getenv("REFERRAL_PREMIUM_CAP_DAYS", "14")) or "14")
+# Credits granted to the inviter per VALID new referral. This is THE referral
+# reward now — a fixed ALEX credit grant, no more subscription days. Env-
+# overridable so the owner can retune (e.g. 5→10) without a deploy; mirrors
+# billing_config REFERRAL_REWARD_CREDITS. Keep it in the intended 5–10 band.
+REFERRAL_REWARD_CREDITS = int(os.getenv("BILLING_REFERRAL_REWARD_CREDITS", os.getenv("REFERRAL_REWARD_CREDITS", "5")) or "5")
+# Legacy premium-days knobs — retained only so old imports don't break. The
+# referral reward is credits-only now; these are never used to grant Premium.
+REFERRAL_PREMIUM_DAYS = 0
+REFERRAL_PREMIUM_CAP_DAYS = 0
 
 
 async def apply_referral(new_uid: int, ref_uid: int) -> dict:
-    """Attach a valid first referral once and reward the inviter.
+    """Attach a valid first referral once and reward the inviter with CREDITS.
 
-    Anti-abuse: a Telegram ID can be referred at most once (ref_by is set under a
-    guarded UPDATE and never overwritten), self-referral is rejected, and the
-    caller (cmd_start) only invokes this for brand-new users so existing accounts
-    can't be farmed.
+    Anti-abuse (hard gates, checked in order — any failure pays out nothing):
+      1. Self-referral is rejected (new_uid == ref_uid).
+      2. The INVITER must already exist as a real prior user — you cannot invent
+         a referrer id, only a genuine link owner counts.
+      3. The INVITED user must be BRAND NEW: no ref_by yet AND no prior
+         referrals_log row. The caller (cmd_start) additionally only fires this
+         on a first-ever /start, so an existing account can never be farmed.
+      4. referrals_log has a UNIQUE(invited_id) constraint: even under a race the
+         payout row can be written exactly once, so credits are never granted
+         twice for the same friend. Whoever wins the INSERT pays out; the loser
+         gets nothing.
 
-    Reward (Unit 3 — limit free value):
-      * The inviter gets REFERRAL_PREMIUM_DAYS days of Platform access, but only
-        up to a lifetime cap of REFERRAL_PREMIUM_CAP_DAYS days (tracked in
-        users.ref_premium_days). Beyond the cap the inviter instead receives
-        REFERRAL_REWARD_CREDITS ALEX credits — never more free subscription days.
-      * XP bonuses are unchanged (+150 inviter, +50 new user).
+    Reward: the inviter receives REFERRAL_REWARD_CREDITS ALEX credits (5–10).
+    XP bonuses are unchanged (+150 inviter, +50 new user).
 
-    Returns a result dict for the caller's user-facing message:
-      {"ok": bool, "premium_days": int, "credits": int, "capped": bool}
+    Returns {"ok": bool, "credits": int} for the caller's user-facing message.
     """
-    fail = {"ok": False, "premium_days": 0, "credits": 0, "capped": False}
+    fail = {"ok": False, "credits": 0}
     if not new_uid or not ref_uid or new_uid == ref_uid:
         return fail
-    await upsert_user(ref_uid, "Student")
+    # (2) The inviter must be a REAL existing user (they got their link by using
+    # the bot). Reject fabricated referrer ids before creating anything.
+    referrer = await get_user(ref_uid)
+    if not referrer:
+        return fail
+    # Ensure the invited row exists, then verify it's genuinely new.
     await upsert_user(new_uid, "Student")
     user = await get_user(new_uid)
     if not user or user.get("ref_by"):
         return fail
-    # Guarded write: only attaches when ref_by is still empty. If a concurrent
-    # call won the race, rowcount semantics differ per backend, so we re-read to
-    # confirm WE are the one that attached this inviter before paying out.
+    # (3) Idempotency pre-check: a prior payout for THIS invited user blocks any
+    # further reward regardless of who claims it.
+    already = await db("SELECT id FROM referrals_log WHERE invited_id=?", new_uid, fetch="one")
+    if already:
+        return fail
+    # Guarded attach: only writes when ref_by is still empty; re-read to confirm
+    # WE won before paying out (rowcount semantics differ per backend).
     await db("UPDATE users SET ref_by=? WHERE uid=? AND (ref_by IS NULL OR ref_by=0)", ref_uid, new_uid)
     confirm = await get_user(new_uid)
     if not confirm or int(confirm.get("ref_by") or 0) != int(ref_uid):
         return fail
+    reward = max(0, REFERRAL_REWARD_CREDITS)
+    # (4) Atomic idempotency gate: the UNIQUE(invited_id) INSERT is the real
+    # transaction boundary. Only the caller that inserts the row proceeds to pay.
+    try:
+        if USE_POSTGRES:
+            row = await db(
+                "INSERT INTO referrals_log (referrer_id, invited_id, credits) "
+                "VALUES (?, ?, ?) ON CONFLICT (invited_id) DO NOTHING RETURNING id",
+                ref_uid, new_uid, reward, fetch="one")
+            if not row:
+                return fail  # a concurrent call already logged this invite
+        else:
+            await db(
+                "INSERT OR IGNORE INTO referrals_log (referrer_id, invited_id, credits) "
+                "VALUES (?, ?, ?)", ref_uid, new_uid, reward)
+            chk = await db("SELECT referrer_id FROM referrals_log WHERE invited_id=?",
+                           new_uid, fetch="one")
+            if not chk or int(chk.get("referrer_id") or 0) != int(ref_uid):
+                return fail  # our INSERT lost the race
+    except Exception as e:
+        logger.warning("referrals_log insert failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
+        return fail
+    # Past the gate — pay out exactly once.
     await db("UPDATE users SET referrals=COALESCE(referrals,0)+1 WHERE uid=?", ref_uid)
     # Route referral XP through add_xp so both users' weekly charts record today.
     await add_xp(ref_uid, 150)
     await add_xp(new_uid, 50)
-    # Decide the inviter's reward: Premium days while under the lifetime cap,
-    # otherwise ALEX credits. The cap counter (ref_premium_days) is the source of
-    # truth so the cap holds even across many invites.
-    inviter = await get_user(ref_uid) or {}
-    granted_days = int(inviter.get("ref_premium_days") or 0)
-    cap = max(0, REFERRAL_PREMIUM_CAP_DAYS)
-    want = max(0, REFERRAL_PREMIUM_DAYS)
-    days_to_grant = max(0, min(want, cap - granted_days)) if cap > 0 else want
-    result = {"ok": True, "premium_days": 0, "credits": 0, "capped": False}
-    if days_to_grant > 0:
+    result = {"ok": True, "credits": 0}
+    if reward > 0:
         try:
-            await grant_platform_days(ref_uid, days_to_grant)
-            await db("UPDATE users SET ref_premium_days=COALESCE(ref_premium_days,0)+? WHERE uid=?",
-                     days_to_grant, ref_uid)
-            await ledger_add(ref_uid, "referral", 0,
-                             meta=f"ref new_uid={new_uid} premium_days={days_to_grant}")
-            result["premium_days"] = days_to_grant
+            await add_credits(ref_uid, reward)
+            await ledger_add(ref_uid, "referral", reward,
+                             meta=f"ref new_uid={new_uid} credits={reward}")
+            result["credits"] = reward
         except Exception as e:
-            logger.warning("referral premium reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
-    else:
-        # Cap reached — fall back to credits so the invite is still rewarded.
-        result["capped"] = True
-        reward = REFERRAL_REWARD_CREDITS
-        if reward > 0:
-            try:
-                await add_credits(ref_uid, reward)
-                await ledger_add(ref_uid, "referral", reward,
-                                 meta=f"ref new_uid={new_uid} (cap reached, credits)")
-                result["credits"] = reward
-            except Exception as e:
-                logger.warning("referral credit reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
+            logger.warning("referral credit reward failed inviter=%s new=%s: %s", ref_uid, new_uid, e)
     return result
 
 async def get_referral_count(uid: int) -> int:
@@ -1657,10 +1687,10 @@ async def _free_credits_cfg() -> tuple[int, int]:
         from billing_config import load_config
         cfg = await load_config()
         daily = max(0, int(cfg.get("FREE_CREDITS_DAILY", 2) or 0))
-        cap = max(0, int(cfg.get("FREE_CREDITS_CAP", 10) or 0))
+        cap = max(0, int(cfg.get("FREE_CREDITS_CAP", 20) or 0))
         return daily, cap
     except Exception:
-        return 2, 10
+        return 2, 20
 
 
 def _days_between(d1: str, d2: str) -> int:

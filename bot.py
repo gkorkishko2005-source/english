@@ -43,6 +43,7 @@ from database import (
     log_tone,
     check_premium,
     apply_referral, get_referral_count,
+    REFERRAL_REWARD_CREDITS,
 )
 from prompts import (
     build_system, INTEREST_TAG,
@@ -1249,7 +1250,7 @@ async def cmd_start(message: Message):
             await message.answer(f"{ICON['warn']} Не удалось создать платёж. Попробуй /premium" if user_lang == "ru"
                                   else f"{ICON['warn']} Could not create invoice. Try /premium")
         return
-    ref_result = {"ok": False, "premium_days": 0, "credits": 0, "capped": False}
+    ref_result = {"ok": False, "credits": 0}
     # Anti-abuse: only a BRAND-NEW account can trigger a referral reward. An
     # existing user who later opens a ref link is ignored, so invites can't be
     # farmed by recycling known IDs. apply_referral additionally enforces
@@ -1271,18 +1272,14 @@ async def cmd_start(message: Message):
 
     greet = _greeting_by_time(ru)
 
-    # The referral reward now grants the inviter real Premium days (capped
-    # lifetime), or ALEX credits once the cap is reached. Surface whichever the
-    # friend actually received so the new user knows the invite "landed".
+    # The referral reward is ALEX credits for the inviter (the friend who shared
+    # the link). Surface how many they received so the new user knows the invite
+    # "landed"; the new user themselves gets welcome XP.
     ref_line = ""
     if ref_applied:
-        _days = int(ref_result.get("premium_days") or 0)
         _cred = int(ref_result.get("credits") or 0)
-        if _days > 0:
-            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и {_days} дн. Premium, вам +50 XP." if ru
-                        else f"\n\nReferral bonus: your friend gets +150 XP and {_days} days of Premium, you get +50 XP.")
-        elif _cred > 0:
-            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и +{_cred} кредита ALEX, вам +50 XP." if ru
+        if _cred > 0:
+            ref_line = (f"\n\nБонус за приглашение: другу +150 XP и +{_cred} кредитов ALEX, вам +50 XP." if ru
                         else f"\n\nReferral bonus: your friend gets +150 XP and +{_cred} ALEX credits, you get +50 XP.")
         else:
             ref_line = ("\n\nБонус за приглашение: другу +150 XP, вам +50 XP." if ru
@@ -1392,22 +1389,23 @@ async def cmd_share(message: Message):
         logger.warning(f"share stats failed uid={uid}: {e}")
     link = referral_url(uid)
     link_code = html.escape(link, quote=False)
+    _reward = int(REFERRAL_REWARD_CREDITS or 0)
     text = (
         "<b>🎓 Приглашай друзей в PolyGlotty</b>\n\n"
-        "Поделись английским с друзьями — и получай XP за каждого, кто начнёт учиться.\n\n"
+        f"Приглашай друзей и получай <b>+{_reward} кредитов</b> за каждого!\n\n"
         "<blockquote><b>Награда за приглашение</b>\n"
-        "• Другу — <b>+50 XP</b> на старт\n"
-        "• Тебе — <b>+150 XP</b> за каждого нового ученика</blockquote>\n"
+        f"• Тебе — <b>+{_reward} кредитов ALEX</b> и <b>+150 XP</b> за каждого\n"
+        "• Другу — <b>+50 XP</b> на старт</blockquote>\n"
         "<b>Твоя ссылка</b> — нажми, чтобы скопировать:\n"
         f"<code>{link_code}</code>\n\n"
         f"<blockquote>👥 Уже приглашено: <b>{ref_count}</b></blockquote>\n"
         "Жми <b>«Поделиться»</b> — друг получит готовое приглашение со ссылкой внутри."
     ) if ru else (
         "<b>🎓 Invite friends to PolyGlotty</b>\n\n"
-        "Share English with your friends — and earn XP for everyone who starts learning.\n\n"
+        f"Invite friends and get <b>+{_reward} credits</b> for each one!\n\n"
         "<blockquote><b>Referral reward</b>\n"
-        "• Your friend — <b>+50 XP</b> to start\n"
-        "• You — <b>+150 XP</b> for every new learner</blockquote>\n"
+        f"• You — <b>+{_reward} ALEX credits</b> and <b>+150 XP</b> for each\n"
+        "• Your friend — <b>+50 XP</b> to start</blockquote>\n"
         "<b>Your link</b> — tap to copy:\n"
         f"<code>{link_code}</code>\n\n"
         f"<blockquote>👥 Invited so far: <b>{ref_count}</b></blockquote>\n"

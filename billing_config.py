@@ -68,10 +68,12 @@ _DEFAULTS = {
     # billing (reserve sized on tokens, refund the unused part).
     "BILLING_FLAT_COST": True,
     "ALEX_MESSAGE_COST": 6,            # credits per ALEX reply (flat)
-    # Referral reward — credits granted to the inviter per VALID new referral
-    # (0.5× the price of one message). Anti-abuse gates live in apply_referral /
-    # cmd_start (one ref per Telegram ID, brand-new users only).
-    "REFERRAL_REWARD_CREDITS": 3,
+    # Referral reward — ALEX credits granted to the inviter per VALID new
+    # referral. This is THE reward now (no more subscription days). Intended
+    # 5–10 band; anti-abuse gates live in apply_referral / cmd_start (real
+    # inviter required, brand-new invited user only, one payout per invited id
+    # enforced by referrals_log UNIQUE(invited_id)).
+    "REFERRAL_REWARD_CREDITS": 5,
     # Hard limits — the owner can never go negative.
     "MAX_TOKENS_PER_REPLY": 1200,      # caps model max_tokens (OUTPUT only); low values truncate lists/instructions mid-answer. Metered reserve is sized on this but reconciled to real usage, so raising it never overcharges.
     # Upper bound on INPUT tokens (system prompt + cached context + history) used
@@ -117,7 +119,7 @@ _DEFAULTS = {
     # FREE_AI_MAX_CHARS bounds the prompt (system + trimmed history + message)
     # a free reply may carry, so a single huge message can't burn the shared key.
     "FREE_CREDITS_DAILY": 2,           # credits granted each UTC day
-    "FREE_CREDITS_CAP": 10,            # max accumulated free credits
+    "FREE_CREDITS_CAP": 20,            # max accumulated free credits (free-plan ceiling)
     "FREE_AI_MAX_CHARS": 6000,         # server-side context-size cap for free chat
     # ── Subscription caps (premium_type FREE/MONTH_1/MONTH_3/MONTH_6) ──────────
     # The new monetization model: a paid plan grants a WHOLE-PERIOD pool of ALEX
