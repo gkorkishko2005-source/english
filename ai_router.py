@@ -305,6 +305,28 @@ OPENROUTER_TIMEOUT      = float(os.getenv("OPENROUTER_TIMEOUT", "45") or "45")
 OPENROUTER_REFERER      = os.getenv("OPENROUTER_REFERER", "https://t.me/PolyGlotty_bot")
 OPENROUTER_TITLE        = os.getenv("OPENROUTER_TITLE", "PolyGlotty")
 
+# ── FREE-model rotation + paid safety-net ─────────────────────────────────────
+#  A single OpenRouter key fronts many ":free" models. For FREE users we try a
+#  list of free models in order; when one is rate-limited (429) or transiently
+#  unavailable we fall through to the NEXT model, and finally to a cheap PAID
+#  fallback (google/gemini-2.5-flash-lite) so free chat never dead-ends.
+#
+#  HONEST NOTE: OpenRouter's free daily quota is ACCOUNT-WIDE (shared across all
+#  ":free" variants), so rotating free models buys RELIABILITY (it dodges a
+#  single model's outage / per-model throttle), NOT extra daily quota. The real
+#  overflow valve is OPENROUTER_MODEL_FALLBACK — a paid model that keeps serving
+#  once every free model is exhausted. Set it to "" to disable the paid fallback
+#  (free chat then shows the daily-limit card instead of spending owner balance).
+_DEFAULT_FREE_MODELS = ",".join([
+    "deepseek/deepseek-chat-v3-0324:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemini-2.0-flash-exp:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+    "mistralai/mistral-small-3.1-24b-instruct:free",
+])
+OPENROUTER_FREE_MODELS   = [m.strip() for m in os.getenv("OPENROUTER_FREE_MODELS", _DEFAULT_FREE_MODELS).split(",") if m.strip()]
+OPENROUTER_MODEL_FALLBACK = os.getenv("OPENROUTER_MODEL_FALLBACK", "google/gemini-2.5-flash-lite").strip()
+
 if OPENROUTER_API_KEY:
     logger.info(f"✅ OPENROUTER_API_KEY loaded (model={OPENROUTER_MODEL}, base={OPENROUTER_BASE_URL}, starts with {OPENROUTER_API_KEY[:12]}...)")
 
@@ -405,6 +427,54 @@ async def openrouter_generate(system: str, messages: list[dict],
         "total_tokens": int(u.get("total_tokens") or 0),
     }
     return {"text": text, "usage": usage}
+
+
+def openrouter_free_chain() -> list[str]:
+    """Ordered model list for FREE users: every configured ":free" model, then
+    the paid fallback (if set) as the final safety net. Never empty when
+    OpenRouter is configured — falls back to the base OPENROUTER_MODEL."""
+    chain = list(OPENROUTER_FREE_MODELS) or [OPENROUTER_MODEL]
+    if OPENROUTER_MODEL_FALLBACK and OPENROUTER_MODEL_FALLBACK not in chain:
+        chain.append(OPENROUTER_MODEL_FALLBACK)
+    return chain
+
+
+async def openrouter_generate_free(system: str, messages: list[dict],
+                                   max_tokens: int | None = None,
+                                   timeout: float | None = None) -> dict:
+    """FREE-tier OpenRouter call with model rotation + paid fallback.
+
+    Tries each model in ``openrouter_free_chain()`` in order. A 429 / rate-limit
+    or a transient failure on one model moves on to the NEXT model; the last
+    entry is the cheap paid fallback so a free user still gets an answer once all
+    the ":free" models are exhausted.
+
+    Raises OpenRouterRateLimit only if EVERY model (including the paid fallback)
+    is rate-limited — so the caller shows the daily-limit card. Raises
+    OpenRouterError if all models fail for other reasons (→ calm retry card).
+    Signature matches ``openrouter_generate`` minus ``model`` so it can be a
+    drop-in provider in the free-tier dispatch table."""
+    if not openrouter_available():
+        raise OpenRouterError("OpenRouter not configured")
+    last_rate: Exception | None = None
+    last_err: Exception | None = None
+    for m in openrouter_free_chain():
+        try:
+            return await openrouter_generate(system, messages, max_tokens, timeout, model=m)
+        except OpenRouterRateLimit as e:
+            last_rate = e
+            logger.info("OpenRouter free model rate-limited (%s) — trying next", m)
+            continue
+        except OpenRouterError as e:
+            last_err = e
+            logger.warning("OpenRouter free model failed (%s): %s", m, e)
+            continue
+    # Every model in the chain failed. If at least one non-rate error occurred we
+    # surface that (retry card); if it was purely rate-limits, surface the
+    # rate-limit so the caller shows the daily-limit card.
+    if last_err is not None:
+        raise last_err
+    raise (last_rate or OpenRouterError("no OpenRouter free models configured"))
 
 
 # ── Friendly rate-limit message (i18n) ────────────────────────────────────────

@@ -698,6 +698,13 @@ async def handle_chat(request):
         system = build_system(level, lang, interests, profession, chat_mode)
     except Exception:
         system = f"You are ALEX, a friendly English tutor. The student's level is {level}."
+    # Product knowledge base — injected per tier below (FULL for paid / prompt-
+    # cached, SHORT for free / token-thrifty) so ALEX can point students to the
+    # exact lesson, card deck or exam. Degrade to "" if prompts import fails.
+    try:
+        from prompts import COURSE_KB_FULL, COURSE_KB_SHORT
+    except Exception:
+        COURSE_KB_FULL = COURSE_KB_SHORT = ""
 
     bl = str(body.get("bot_lang", "Respond in Russian."))
 
@@ -877,7 +884,7 @@ async def handle_chat(request):
             "- Stay fully in character during roleplay; correct gently inside the story so it "
             "never feels like a test, and give a short warm feedback recap only at the end."
         )
-        prem_system = system + prem_directive
+        prem_system = system + COURSE_KB_FULL + prem_directive
         try:
             from billing_config import load_config as _lc
             _pc = await _lc()
@@ -1035,9 +1042,12 @@ async def handle_chat(request):
         # break free chat). Production runs OpenRouter-only → order == [openrouter].
         from ai_router import (gemini_generate, gemini_free_limit_message,
                                ai_busy_message, GeminiRateLimit, deepseek_generate,
-                               openrouter_generate, should_use_openrouter,
+                               openrouter_generate_free, should_use_openrouter,
                                should_use_deepseek, should_use_gemini)
-        _GEN = {"openrouter": openrouter_generate, "deepseek": deepseek_generate,
+        # FREE users go through openrouter_generate_free → rotates every ":free"
+        # model, then the cheap paid fallback (gemini-2.5-flash-lite) so chat
+        # never dead-ends on a single model's outage / rate-limit.
+        _GEN = {"openrouter": openrouter_generate_free, "deepseek": deepseek_generate,
                 "gemini": gemini_generate}
         _LABEL = {"openrouter": ("openrouter", "Powered by ALEX Basic"),
                   "deepseek": ("deepseek", "Powered by ALEX Basic"),
@@ -1065,9 +1075,14 @@ async def handle_chat(request):
             "Be encouraging yet hold the student to a high standard: gently fix "
             "every real mistake and briefly explain why. Keep EVERY reply short: "
             "at most 3–4 sentences. No filler, no repeating the question — get "
-            "straight to the correction and one useful tip."
+            "straight to the correction and one useful tip.\n"
+            "HARD BREVITY RULE (free tier): keep the whole answer under ~90 words "
+            "so it ALWAYS fits and is never cut off mid-thought. If a full answer "
+            "would need more, give the single most useful point and point them to "
+            "the right lesson or card deck instead of writing a long reply. Never "
+            "start a list you can't finish in this message."
         )
-        free_system = system + alex_free
+        free_system = system + COURSE_KB_SHORT + alex_free
         reply = ""
         prov_tag = prov_label = None
         all_rate_limited = True
@@ -1133,6 +1148,11 @@ async def handle_chat(request):
                 resp["ai_limit"] = fc_cap
             resp["reset_in"] = fc_reset
         return web.json_response(resp, headers={"Access-Control-Allow-Origin":"*"})
+
+    # Past this point every path is PAID (premium already returned above). Give
+    # the paid/legacy model the FULL product knowledge base so ALEX can direct
+    # the student to real lessons/cards/exams. Prompt-caching keeps it cheap.
+    system = system + COURSE_KB_FULL
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
