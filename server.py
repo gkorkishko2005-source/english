@@ -30,22 +30,66 @@ MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "1500") or
 # legit brackets intact (IPA like [ˈfəʊn], notes like [see below]).
 _SYS_TAG_RE = re.compile(r'\[[A-Z][A-Z0-9_]{2,}(?::[^\]]*)?\]')
 
+# Less-obedient open models (Llama/Qwen/gpt-oss on the free tier) sometimes
+# NARRATE the hidden SAVE_INTEREST command in prose instead of emitting the
+# bracket token — e.g. "*Saving interest: phones*" or "Сохраняю интерес: игры".
+# Match that machine-like colon form on its own line so it never shows as ALEX
+# dialogue; capture group 1 = the value so we can still save it + surface a chip.
+# Colon is required to keep the false-positive rate near zero (a normal sentence
+# almost never reads "<save-verb> … interest: …").
+_INTEREST_LEAK_RE = re.compile(
+    r'(?im)^[\s*_>()\[\].,–—-]*'
+    r'(?:saving|noting|remembering|noted|saved|logging|logged'
+    r'|запомина\w*|запомн\w*|сохран\w*|отмеча\w*|отмет\w*|фиксир\w*)'
+    r'[^\n:]{0,32}(?:interest|интерес\w*)[^\n:]{0,20}:\s*([^\n*_)\]]+)[\s*_)\].]*'
+)
 
-async def _sanitize_reply(uid: int, reply: str) -> str:
-    """Save any [SAVE_INTEREST: …] tag, then strip all system tags for the UI."""
+
+async def _sanitize_reply(uid: int, reply: str):
+    """Save any interest ALEX detected (bracket token OR narrated leak), strip all
+    system tags / leaks from the visible reply, and return (clean_reply, [interests]).
+    The interest list is echoed to the Mini App so it can render a subtle
+    "✓ remembered: …" caption chip under the message."""
     if not reply:
-        return reply
+        return reply, []
+    saved: list[str] = []
     try:
         from prompts import INTEREST_TAG
-        from database import save_interest
-        for interest in INTEREST_TAG.findall(reply):
-            try:
-                await save_interest(uid, interest.strip(), source="auto")
-            except Exception as e:
-                logger.warning("save_interest failed uid=%s: %s", uid, e)
+        for m in INTEREST_TAG.findall(reply):
+            v = (m or "").strip().strip(".,;:!?")
+            if v:
+                saved.append(v)
+        for m in _INTEREST_LEAK_RE.findall(reply):
+            v = (m or "").strip().strip(".,;:!?")
+            if v:
+                saved.append(v)
     except Exception as e:
-        logger.warning("interest extract failed uid=%s: %s", uid, e)
-    return _SYS_TAG_RE.sub("", reply).strip()
+        logger.warning("interest parse failed uid=%s: %s", uid, e)
+    # De-dupe (case-insensitive) preserving first-seen order.
+    seen, uniq = set(), []
+    for v in saved:
+        k = v.lower()
+        if k not in seen:
+            seen.add(k); uniq.append(v)
+    if uniq:
+        try:
+            from database import save_interest
+            for v in uniq:
+                try:
+                    await save_interest(uid, v, source="auto")
+                except Exception as e:
+                    logger.warning("save_interest failed uid=%s: %s", uid, e)
+        except Exception as e:
+            logger.warning("interest save import failed uid=%s: %s", uid, e)
+    clean = _INTEREST_LEAK_RE.sub("", reply)
+    try:
+        from prompts import INTEREST_TAG
+        clean = INTEREST_TAG.sub("", clean)   # strips the token in any case
+    except Exception:
+        pass
+    clean = _SYS_TAG_RE.sub("", clean)        # other ALL-CAPS system tags
+    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
+    return clean, uniq
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
@@ -910,7 +954,7 @@ async def handle_chat(request):
             result = await openrouter_generate(prem_system, prem_send, prem_max,
                                                model=OPENROUTER_MODEL_PREMIUM)
             reply = re.sub(r"\n[ \t]*\n+", "\n", (result.get("text") or "").strip())
-            reply = await _sanitize_reply(uid, reply)  # save + strip system tags
+            reply, saved_int = await _sanitize_reply(uid, reply)  # save + strip system tags
         except GeminiRateLimit:
             reply = ""
         except Exception as e:
@@ -941,6 +985,7 @@ async def handle_chat(request):
         _avail = 0 if _tot <= 0 else max(0, _dl - _du)
         return web.json_response(
             {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by ALEX Pro",
+             "saved_interests": saved_int,
              "premium_type": cons.get("premium_type"),
              "daily_used": cons.get("daily_used"), "daily_limit": cons.get("daily_limit"),
              "total_remaining": cons.get("total_remaining"),
@@ -1084,6 +1129,7 @@ async def handle_chat(request):
         )
         free_system = system + COURSE_KB_SHORT + alex_free
         reply = ""
+        saved_int = []
         prov_tag = prov_label = None
         all_rate_limited = True
         for _name in order:
@@ -1091,11 +1137,12 @@ async def handle_chat(request):
                 result = await _GEN[_name](free_system, free_send, g_max)
                 r = (result.get("text") or "").strip()
                 r = re.sub(r"\n[ \t]*\n+", "\n", r)
-                r = await _sanitize_reply(uid, r)  # save + strip system tags
+                r, r_int = await _sanitize_reply(uid, r)  # save + strip system tags
                 if not r:
                     all_rate_limited = False
                     continue
                 reply = r
+                saved_int = r_int
                 prov_tag, prov_label = _LABEL[_name]
                 break
             except GeminiRateLimit:
@@ -1137,7 +1184,8 @@ async def handle_chat(request):
                 await log_session(uid, "webapp_chat")
             except Exception:
                 pass
-        resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label}
+        resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label,
+                "saved_interests": saved_int}
         if fc_balance is not None:
             resp["free_credits"] = fc_balance
             resp["free_credits_cap"] = fc_cap
@@ -1327,7 +1375,7 @@ async def handle_chat(request):
             # Dense layout: collapse blank lines between paragraphs so ALEX
             # replies render tight (matches the prompt's LAYOUT rule).
             reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
-            reply = await _sanitize_reply(uid, reply)  # save + strip system tags
+            reply, saved_int = await _sanitize_reply(uid, reply)  # save + strip system tags
             if uid not in ADMIN_IDS:
                 cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
                 ai_cost = _estimate_ai_cost(model_key, data.get("usage") or {})
@@ -1385,7 +1433,8 @@ async def handle_chat(request):
             logger.warning("credit deduction failed uid=%s: %s", uid, e)
 
     # Debug marker: this branch always answered via Anthropic Claude (paid users).
-    resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by ALEX Pro"}
+    resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by ALEX Pro",
+            "saved_interests": saved_int}
     if new_balance is not None:
         resp["chat_credits"] = new_balance
     return web.json_response(resp, headers={"Access-Control-Allow-Origin": "*"})

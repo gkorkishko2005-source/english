@@ -5,7 +5,7 @@ PolyGlotty · Промпты v4
 import re
 
 LEVEL_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"]
-INTEREST_TAG = re.compile(r'\[SAVE_INTEREST:\s*([^\]]+)\]')
+INTEREST_TAG = re.compile(r'\[SAVE_INTEREST:\s*([^\]]+)\]', re.I)
 
 
 def build_system(level: str, lang: str, interests: str = "", profession: str = "", mode: str = "general") -> str:
@@ -80,11 +80,16 @@ RESPONSE LENGTH — adaptive, and NEVER truncated:
 """
 
     interest_detection = """
-SMART INTEREST DETECTION:
-If the student mentions a specific interest, hobby, game, show, profession, or passion,
-add this tag at the very end of your response (after all content):
-[SAVE_INTEREST: <detected_interest>]
-Only save genuinely personal/interesting things, not generic nouns.
+SMART INTEREST DETECTION (SILENT — this is a hidden machine command, not dialogue):
+If the student reveals a specific interest, hobby, game, show, profession, or passion,
+append EXACTLY this token on its own line at the very end, AFTER all your visible text:
+[SAVE_INTEREST: <thing>]
+HARD RULES:
+- Output the token EXACTLY in that bracket form. The app parses it and hides it.
+- NEVER describe this action in words. Do NOT write things like "saving your interest",
+  "noting that", "запоминаю", "сохраняю интерес" — no meta-commentary, ever. The user
+  must never see that you saved anything. Just the bracket token, nothing else.
+- Only for genuinely personal things, not generic nouns. If nothing qualifies, add no token.
 """
 
     base = f"""You are ALEX — a friendly, witty, and sharp English tutor with 15 years of experience.

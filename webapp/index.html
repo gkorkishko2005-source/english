@@ -550,6 +550,15 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 @media(hover:none),(pointer:coarse){.macts{opacity:1;pointer-events:auto}}
 .mtime{font-size:10px;color:var(--t3);padding:0 2px;line-height:1.2}
 .msg.user .mtime{display:none}
+/* Quiet "ALEX remembered your interest" caption chip under a bot bubble. */
+.int-chip{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 9px 3px 7px;
+  background:rgba(var(--ar),.10);border:1px solid rgba(var(--ar),.22);border-radius:999px;
+  font-size:10.5px;line-height:1.25;color:var(--t3);max-width:100%;
+  animation:intChipIn .28s ease both}
+.int-chip svg{width:11px;height:11px;flex:0 0 auto;fill:none;stroke:var(--a);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round}
+.int-chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes intChipIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 .cpbtn{background:var(--e2);border:1px solid var(--b1);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:11px;color:var(--t3);font-family:var(--f);display:flex;align-items:center;gap:3px;transition:.15s}
 .cpbtn:hover{border-color:var(--a);color:var(--a)}
 .cpbtn.ok{color:var(--a2);border-color:var(--a2)}
@@ -3969,7 +3978,7 @@ const LANGS = {
     welcome:'Привет! Я ALEX, твой репетитор английского.\n\nПиши по-английски — исправлю ошибки, или задай вопрос.',
     errconn:'Ошибка соединения. Попробуй ещё раз.',clrd:'Диалог очищен',allrev:'Все карточки!',
     spam:'Напиши что-нибудь по-английски — помогу!',
-    copied:'Скопировано',copy:'Копировать',audgen:'Генерирую аудио-задание...',
+    copied:'Скопировано',copy:'Копировать',remembered:'Запомнил',audgen:'Генерирую аудио-задание...',
     notift:'Пиши по-английски — исправлю!',notifcta:'Открыть чат →',
     nosessiont:'Новая беседа',profpt:'Расскажи о себе',remsav:'Напоминание: ',remoff:'Напоминания отключены',psav:'Сохранено',
     blsav:'Язык бота: ',no_prof:'Не задана',no_rem:'Не задано',
@@ -3993,7 +4002,7 @@ const LANGS = {
     welcome:"Hi! I'm ALEX, your English tutor.\n\nWrite in English — I'll correct mistakes, or ask me anything.",
     errconn:'Connection error. Please try again.',clrd:'Chat cleared',allrev:'All cards reviewed!',
     spam:'Write something in English and I\'ll help!',
-    copied:'Copied',copy:'Copy',audgen:'Generating audio task...',
+    copied:'Copied',copy:'Copy',remembered:'Remembered',audgen:'Generating audio task...',
     notift:"Write in English — I'll correct you!",notifcta:'Open chat →',
     nosessiont:'New chat',profpt:'Tell us about you',remsav:'Reminder: ',remoff:'Reminders disabled',psav:'Saved',
     blsav:'Bot language: ',no_prof:'Not set',no_rem:'Not set',
@@ -4017,7 +4026,7 @@ const LANGS = {
     welcome:'¡Hola! Soy ALEX, tu tutor de inglés.\n\nEscribe en inglés — corregiré errores.',
     errconn:'Error de conexión. Inténtalo de nuevo.',clrd:'Chat borrado',allrev:'¡Todas las tarjetas!',
     spam:'¡Escribe algo en inglés y te ayudaré!',
-    copied:'Copiado',copy:'Copiar',audgen:'Generando tarea de audio...',
+    copied:'Copiado',copy:'Copiar',remembered:'Recordado',audgen:'Generando tarea de audio...',
     notift:'¡Escribe en inglés — te corrijo!',notifcta:'Abrir chat →',
     nosessiont:'Nuevo chat',profpt:'Cuéntanos sobre ti',remsav:'Recordatorio: ',remoff:'Recordatorios desactivados',psav:'Guardado',
     blsav:'Idioma bot: ',no_prof:'No definida',no_rem:'No definido',
@@ -4041,7 +4050,7 @@ const LANGS = {
     welcome:'Olá! Sou o ALEX, seu tutor de inglês.\n\nEscreva em inglês — vou corrigir os erros.',
     errconn:'Erro de conexão. Tente novamente.',clrd:'Chat limpo',allrev:'Todos os cartões!',
     spam:'Escreva algo em inglês — vou ajudar!',
-    copied:'Copiado',copy:'Copiar',audgen:'Gerando tarefa de áudio...',
+    copied:'Copiado',copy:'Copiar',remembered:'Lembrado',audgen:'Gerando tarefa de áudio...',
     notift:'Escreva em inglês — vou corrigir!',notifcta:'Abrir chat →',
     nosessiont:'Novo chat',profpt:'Fale sobre você',remsav:'Lembrete: ',remoff:'Lembretes desativados',psav:'Salvo',
     blsav:'Idioma bot: ',no_prof:'Não definida',no_rem:'Não definido',
@@ -4065,7 +4074,7 @@ const LANGS = {
     welcome:'Hallo! Ich bin ALEX, dein Englischtutor.\n\nSchreibe auf Englisch — ich korrigiere Fehler.',
     errconn:'Verbindungsfehler. Versuche es erneut.',clrd:'Chat gelöscht',allrev:'Alle Karten geschafft!',
     spam:'Schreibe etwas auf Englisch — ich helfe!',
-    copied:'Kopiert',copy:'Kopieren',audgen:'Audio-Aufgabe wird erstellt...',
+    copied:'Kopiert',copy:'Kopieren',remembered:'Gemerkt',audgen:'Audio-Aufgabe wird erstellt...',
     notift:'Schreibe auf Englisch — ich korrigiere!',notifcta:'Chat öffnen →',
     nosessiont:'Neuer Chat',profpt:'Erzähle uns von dir',remsav:'Erinnerung: ',remoff:'Erinnerungen aus',psav:'Gespeichert',
     blsav:'Bot-Sprache: ',no_prof:'Nicht gesetzt',no_rem:'Nicht gesetzt',
@@ -4089,7 +4098,7 @@ const LANGS = {
     welcome:'Salut ! Je suis ALEX, ton tuteur d’anglais.\n\nÉcris en anglais — je corrige.',
     errconn:'Erreur de connexion. Réessaie.',clrd:'Chat effacé',allrev:'Toutes les cartes !',
     spam:'Écris quelque chose en anglais et je t’aide !',
-    copied:'Copié',copy:'Copier',audgen:'Génération de la tâche audio...',
+    copied:'Copié',copy:'Copier',remembered:'Retenu',audgen:'Génération de la tâche audio...',
     notift:'Écris en anglais — je corrige !',notifcta:'Ouvrir le chat →',
     nosessiont:'Nouveau chat',profpt:'Parle-nous de toi',remsav:'Rappel : ',remoff:'Rappels désactivés',psav:'Enregistré',
     blsav:'Langue du bot : ',no_prof:'Non défini',no_rem:'Non défini',
@@ -4113,7 +4122,7 @@ const LANGS = {
     welcome:'Привіт! Я ALEX, твій репетитор англійської.\n\nПиши англійською — виправлю помилки.',
     errconn:'Помилка з’єднання. Спробуй ще раз.',clrd:'Діалог очищено',allrev:'Усі картки!',
     spam:'Напиши щось англійською — я допоможу!',
-    copied:'Скопійовано',copy:'Копіювати',audgen:'Генерую аудіо-завдання...',
+    copied:'Скопійовано',copy:'Копіювати',remembered:'Запам’ятав',audgen:'Генерую аудіо-завдання...',
     notift:'Пиши англійською — виправлю!',notifcta:'Відкрити чат →',
     nosessiont:'Новий чат',profpt:'Розкажи про себе',remsav:'Нагадування: ',remoff:'Нагадування вимкнено',psav:'Збережено',
     blsav:'Мова бота: ',no_prof:'Не задано',no_rem:'Не задано',
@@ -4137,7 +4146,7 @@ const LANGS = {
     welcome:'Merhaba! Ben ALEX, İngilizce öğretmenin.\n\nİngilizce yaz — hataları düzeltirim.',
     errconn:'Bağlantı hatası. Tekrar dene.',clrd:'Sohbet temizlendi',allrev:'Tüm kartlar bitti!',
     spam:'İngilizce bir şey yaz — yardım ederim!',
-    copied:'Kopyalandı',copy:'Kopyala',audgen:'Ses görevi oluşturuluyor...',
+    copied:'Kopyalandı',copy:'Kopyala',remembered:'Hatırlandı',audgen:'Ses görevi oluşturuluyor...',
     notift:'İngilizce yaz — düzeltirim!',notifcta:'Sohbeti aç →',
     nosessiont:'Yeni sohbet',profpt:'Kendinden bahset',remsav:'Hatırlatma: ',remoff:'Hatırlatmalar kapalı',psav:'Kaydedildi',
     blsav:'Bot dili: ',no_prof:'Ayarlı değil',no_rem:'Ayarlı değil',
@@ -4161,7 +4170,7 @@ const LANGS = {
     welcome:'你好！我是 ALEX，你的英语老师。\n\n请用英文写——我会纠正错误。',
     errconn:'连接错误，请重试。',clrd:'对话已清空',allrev:'所有卡片完成！',
     spam:'用英文写一些内容，我会帮你！',
-    copied:'已复制',copy:'复制',audgen:'正在生成音频任务...',
+    copied:'已复制',copy:'复制',remembered:'已记住',audgen:'正在生成音频任务...',
     notift:'用英文写——我来纠正！',notifcta:'打开聊天 →',
     nosessiont:'新对话',profpt:'介绍一下自己',remsav:'提醒：',remoff:'提醒已关闭',psav:'已保存',
     blsav:'机器人语言：',no_prof:'未设置',no_rem:'未设置',
@@ -4185,7 +4194,7 @@ const LANGS = {
     welcome:'مرحبا! أنا ALEX، معلمك للإنجليزية.\n\nاكتب بالإنجليزية — سأصحح الأخطاء.',
     errconn:'خطأ في الاتصال. حاول مرة أخرى.',clrd:'تم مسح المحادثة',allrev:'كل البطاقات تمت!',
     spam:'اكتب شيئا بالإنجليزية وسأساعدك!',
-    copied:'تم النسخ',copy:'نسخ',audgen:'جاري إنشاء المهمة الصوتية...',
+    copied:'تم النسخ',copy:'نسخ',remembered:'تم الحفظ',audgen:'جاري إنشاء المهمة الصوتية...',
     notift:'اكتب بالإنجليزية — سأصحح!',notifcta:'افتح المحادثة →',
     nosessiont:'محادثة جديدة',profpt:'أخبرنا عنك',remsav:'تذكير: ',remoff:'التذكيرات متوقفة',psav:'تم الحفظ',
     blsav:'لغة البوت: ',no_prof:'غير محدد',no_rem:'غير محدد',
@@ -6257,6 +6266,22 @@ function renderMsg(role,text,save=true,time=null){
 
 function addMsg(role,text){renderMsg(role,text,true);}
 
+/* Subtle "remembered" caption under the last ALEX bubble. ALEX detects a
+   personal interest and saves it silently; instead of leaking a system tag or
+   narrating "saving interest", we surface a small, quiet chip so the user can
+   see (and trust) that personalization is happening. */
+function attachInterestChip(list){
+  const mw=document.querySelector('#cmsgs .msg.bot:last-child .mwrap');
+  if(!mw||mw.querySelector('.int-chip'))return;
+  const names=[...new Set(list.map(s=>String(s||'').trim()).filter(Boolean))].slice(0,3);
+  if(!names.length)return;
+  const label=(typeof L!=='undefined'&&L.remembered)?L.remembered:'Remembered';
+  const chip=document.createElement('div');chip.className='int-chip';
+  chip.innerHTML=`<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>${label}: ${names.map(n=>n.replace(/[<>&]/g,'')).join(', ')}</span>`;
+  const acts=mw.querySelector('.macts');
+  if(acts)mw.insertBefore(chip,acts);else mw.appendChild(chip);
+}
+
 function openPracticeShell(title,sub){
   const t=document.getElementById('practice-title');
   const s=document.getElementById('practice-sub');
@@ -6338,6 +6363,9 @@ async function doChat(text,mode){
       try{_showProviderBadge(data.ai_provider,data.provider);}catch(_){}
     }
     addMsg('bot',data.reply||'...');
+    /* If ALEX quietly learned a new interest, show a subtle caption chip under
+       the message (the raw [SAVE_INTEREST] tag is stripped server-side). */
+    try{if(Array.isArray(data.saved_interests)&&data.saved_interests.length)attachInterestChip(data.saved_interests);}catch(_){}
     /* Server tells us the new balance after spending credits — sync UI. */
     if(typeof data.chat_credits==='number'){
       chatCredits=data.chat_credits;
