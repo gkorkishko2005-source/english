@@ -674,6 +674,8 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 @keyframes feSpin{to{transform:rotate(360deg)}}
 .fe-intro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;padding:24px 12px}
 .fe-intro-ico{width:62px;height:62px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--bg-card);border:1px solid rgba(var(--exam-r),.28)}
+.ex-ico{width:1em;height:1em;vertical-align:-.14em;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.fe-intro-ico .ex-ico{filter:drop-shadow(0 0 6px rgba(var(--ar),.4))}
 .fe-intro-step{font-size:11px;font-weight:850;letter-spacing:.5px;text-transform:uppercase;color:var(--exam)}
 .fe-intro-title{font-size:21px;font-weight:950;color:var(--t1);line-height:1.2}
 .fe-intro-desc{font-size:13px;color:var(--t2);line-height:1.55;max-width:330px}
@@ -1413,6 +1415,8 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 @keyframes msu{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes msd{from{transform:translateY(0)}to{transform:translateY(100%)}}
 .mhnd{width:32px;height:4px;border-radius:2px;background:var(--e3);margin:11px auto 4px}
 .mtit{font-size:16px;font-weight:700;padding:8px 17px 13px;border-bottom:1px solid var(--b1)}
+.tit-ico{width:19px;height:19px;vertical-align:-3px;margin-right:7px;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(var(--ar),.45))}
+.btn-ico{width:16px;height:16px;vertical-align:-3px;margin-right:6px;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .mbdy{padding:14px 17px}
 .msav{margin-top:12px;padding:13px;background:var(--a);border:none;border-radius:var(--r2);width:100%;font-family:var(--f);font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:.18s}
 .msav:active{transform:scale(.97)}
@@ -1907,6 +1911,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .scenario-card{padding:16px 12px;border-radius:var(--r);border:1.5px solid var(--b1);background:var(--e1);cursor:pointer;transition:.2s;text-align:center}
 .scenario-card:active{transform:scale(.94);background:var(--e2)}
 .scenario-ico{font-size:30px;display:block;margin-bottom:8px}
+.scenario-ico .ex-ico{filter:drop-shadow(0 0 6px rgba(var(--ar),.4))}
 .scenario-title{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--t1)}
 .scenario-sub{font-size:11px;color:var(--t3);line-height:1.4}
 .rp-banner{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--bg-card);border-bottom:1px solid rgba(var(--ar),.15);flex-shrink:0}
@@ -3589,7 +3594,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
 <!-- ACHIEVEMENT MODAL -->
 <div class="mov" id="achm" style="display:none" onclick="closeMod('achm')">
   <div class="msh" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto"><div class="mhnd"></div>
-    <div class="mtit" id="ach-mtit">🏅 Achievements</div>
+    <div class="mtit" id="ach-mtit"><svg viewBox="0 0 24 24" class="tit-ico" fill="none"><circle cx="12" cy="15" r="6"/><path d="M9 9.5 6 2.5M15 9.5l3-7M9.6 15l1.6 1.6 3.2-3.4"/></svg>Achievements</div>
     <div style="padding:4px 16px 20px" id="achievements-wrap"></div>
   </div>
 </div>
@@ -3614,10 +3619,10 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
 <div id="subgate" role="dialog" aria-modal="true">
   <div class="subgate-card">
     <div class="subgate-ico"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-7-7 18-2.5-7.5L3 11z"/></svg></div>
-    <div class="subgate-tit" id="subgate-tit">Остался один шаг 🚀</div>
+    <div class="subgate-tit" id="subgate-tit">Остался один шаг</div>
     <div class="subgate-txt" id="subgate-txt">Чтобы активировать ИИ-ассистента ALEX и открыть доступ к курсам, подпишись на наш официальный Telegram-канал. Там мы публикуем полезные разборы и лайфхаки для учебы!</div>
-    <button class="subgate-btn primary" id="subgate-join" type="button" onclick="subgateJoin()">👉 Подписаться на канал</button>
-    <button class="subgate-btn outline" id="subgate-recheck" type="button" onclick="subgateRecheck(this)">🔄 Проверить подписку</button>
+    <button class="subgate-btn primary" id="subgate-join" type="button" onclick="subgateJoin()">Подписаться на канал</button>
+    <button class="subgate-btn outline" id="subgate-recheck" type="button" onclick="subgateRecheck(this)"><svg viewBox="0 0 24 24" class="btn-ico" fill="none"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/></svg>Проверить подписку</button>
     <div class="subgate-err" id="subgate-err"></div>
   </div>
 </div>
@@ -9865,11 +9870,17 @@ function _feMixPick(items,n){
   return out;
 }
 
+const EX_ICO={
+  reading:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M12 6C10 4.6 6.5 4.4 3.5 5v14c3-.6 6.5-.4 8.5 1 2-1.4 5.5-1.6 8.5-1V5c-3-.6-6.5-.4-8.5 1z"/><path d="M12 6v14"/></svg>`,
+  listening:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="7" rx="1.6"/><rect x="17" y="13" width="4" height="7" rx="1.6"/></svg>`,
+  writing:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M14 4l6 6L9 21l-6 1 1-6z"/><path d="M13 5l6 6"/></svg>`,
+  speaking:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>`,
+};
 const FE_SECTION_META={
-  reading:{ico:'📖',title:FE_L.secReading,desc:FE_L.descReading},
-  listening:{ico:'🎧',title:FE_L.secListening,desc:FE_L.descListening},
-  writing:{ico:'✍️',title:FE_L.secWriting,desc:FE_L.descWriting},
-  speaking:{ico:'🎙️',title:FE_L.secSpeaking,desc:FE_L.descSpeaking},
+  reading:{ico:EX_ICO.reading,title:FE_L.secReading,desc:FE_L.descReading},
+  listening:{ico:EX_ICO.listening,title:FE_L.secListening,desc:FE_L.descListening},
+  writing:{ico:EX_ICO.writing,title:FE_L.secWriting,desc:FE_L.descWriting},
+  speaking:{ico:EX_ICO.speaking,title:FE_L.secSpeaking,desc:FE_L.descSpeaking},
 };
 const FE_SECLBL={reading:FE_L.secReading,listening:FE_L.secListening,writing:FE_L.secWriting,speaking:FE_L.secSpeaking};
 
@@ -14508,10 +14519,10 @@ function renderRoadmap(){
   const minLbl=({ru:'минут',en:'minutes',es:'minutos',pt:'minutos',de:'Minuten',fr:'minutes',uk:'хвилин',tr:'dakika',zh:'分钟',ar:'دقيقة'}[lang]||'minutes');
   const premLbl=({ru:'Premium',en:'Premium',es:'Premium',pt:'Premium',de:'Premium',fr:'Premium',uk:'Premium',tr:'Premium',zh:'Premium',ar:'Premium'}[lang]||'Premium');
   const secNames=[
-    {k:'reading',ico:'📖',t:({ru:'Reading',en:'Reading'}).en},
-    {k:'listening',ico:'🎧',t:'Listening'},
-    {k:'writing',ico:'✍️',t:'Writing'},
-    {k:'speaking',ico:'🎙️',t:'Speaking'}
+    {k:'reading',ico:EX_ICO.reading,t:({ru:'Reading',en:'Reading'}).en},
+    {k:'listening',ico:EX_ICO.listening,t:'Listening'},
+    {k:'writing',ico:EX_ICO.writing,t:'Writing'},
+    {k:'speaking',ico:EX_ICO.speaking,t:'Speaking'}
   ];
   const lockSvg='<svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   const playSvg='<svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
@@ -14688,25 +14699,45 @@ function readingSubmitSummary(pid,qi){
 /* ══════════════════════════════════════════════════
    🎭  ROLEPLAY SCENARIOS
 ══════════════════════════════════════════════════ */
+const ROLE_ICO={
+  job:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M2 13h20"/></svg>`,
+  restaurant:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M6 2v7M9 2v7M6 9h3M7.5 9v11"/><path d="M17 2c-1.4 0-2.5 1.8-2.5 4.5S15.6 11 17 11v9"/></svg>`,
+  airport:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M12 3c.7 0 1.3.8 1.3 1.8v4l7.7 4.5v1.6L13.3 13v4l1.9 1.4v1.4L12 20l-3.2 1.2v-1.4L10.7 17v-4L3 15.9v-1.6l7.7-4.5v-4C10.7 3.8 11.3 3 12 3z"/></svg>`,
+  negotiation:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16l1.5 1.5L14 14"/></svg>`,
+  doctor:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>`,
+  date:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4 8h13v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 9h2a2.5 2.5 0 0 1 0 5h-2M7 2v2.5M11 2v2.5M14 2v2.5"/></svg>`,
+  hotel:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21v-4h6v4M8 7h.5M12 7h.5M15.5 7h.5M8 11h.5M12 11h.5M15.5 11h.5"/></svg>`,
+  debate:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M3 5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H7l-4 3z"/><path d="M18 9h1a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2v3l-3-3h-3"/></svg>`,
+  shopping:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M5 8h14l-1.2 12.5H6.2z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>`,
+  taxi:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4 16v-4l2-5h12l2 5v4M3 16h18v3h-2v-2H5v2H3z"/><circle cx="7.5" cy="16.5" r="1"/><circle cx="16.5" cy="16.5" r="1"/><path d="M10 4h4"/></svg>`,
+  bank:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M3 9 12 4l9 5M4 9v8M9 9v8M15 9v8M20 9v8M3 21h18"/></svg>`,
+  complaint:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4 4h16v11H9l-4 4v-4H4z"/><path d="M12 7v4M12 13h.01"/></svg>`,
+  gym:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>`,
+  pharmacy:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M4.5 14.5 14.5 4.5a4 4 0 0 1 5 5L9.5 19.5a4 4 0 0 1-5-5z"/><path d="M9.5 9.5 14.5 14.5"/></svg>`,
+  train:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><rect x="5" y="3" width="14" height="13" rx="3"/><path d="M5 11h14M9 3v8M15 3v8M8 20l-2 2M16 20l2 2"/><circle cx="9" cy="13.5" r=".6"/><circle cx="15" cy="13.5" r=".6"/></svg>`,
+  customs:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>`,
+  rental:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-6h4v6"/></svg>`,
+  networking:`<svg viewBox="0 0 24 24" class="ex-ico" fill="none"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M15 20a6 6 0 0 0-2-4.5"/></svg>`,
+};
 const SCENARIOS=[
-  {id:'job',icon:'💼',title:{ru:'Собеседование',en:'Job Interview'},sub:{ru:'Apple / Google',en:'Tech company interview'},prompt:{ru:'Давай сыграем собеседование в крупной компании. Ты — HR менеджер, я — кандидат. Начни с "Tell me about yourself."',en:"Let's roleplay a job interview. You are the HR manager, I am the candidate. Start with 'Tell me about yourself.'"}},
-  {id:'restaurant',icon:'🍽️',title:{ru:'Ресторан',en:'Restaurant'},sub:{ru:'Заказ и общение',en:'Order & small talk'},prompt:{ru:'Давай сыграем сценку в ресторане в Лондоне. Ты — официант, я — гость. Начни с приветствия.',en:"Let's roleplay at a London restaurant. You are the waiter, I am the guest. Start with a greeting."}},
-  {id:'airport',icon:'✈️',title:{ru:'Аэропорт',en:'Airport'},sub:{ru:'Регистрация и таможня',en:'Check-in & customs'},prompt:{ru:'Давай сыграем сцену в аэропорту. Ты — сотрудник авиакомпании, я — пассажир. Начни с проверки документов.',en:"Let's roleplay at an airport. You are the airline staff, I am the passenger. Start checking my documents."}},
-  {id:'negotiation',icon:'🤝',title:{ru:'Переговоры',en:'Business Deal'},sub:{ru:'Деловая встреча',en:'Negotiating a contract'},prompt:{ru:'Давай сыграем деловые переговоры. Ты — потенциальный партнёр, я — предлагаю сотрудничество. Будь немного скептичным.',en:"Let's roleplay business negotiations. You are a potential partner, I am pitching a deal. Be slightly skeptical."}},
-  {id:'doctor',icon:'🏥',title:{ru:'У врача',en:'At the Doctor'},sub:{ru:'Описание симптомов',en:'Describe symptoms'},prompt:{ru:'Давай сыграем визит к врачу. Ты — врач, я — пациент. Начни с "What brings you in today?"',en:"Let's roleplay a doctor visit. You are the doctor, I am the patient. Start with 'What brings you in today?'"}},
-  {id:'date',icon:'☕',title:{ru:'Знакомство',en:'First Date'},sub:{ru:'Кафе в Лондоне',en:'Coffee in London'},prompt:{ru:'Давай сыграем первое свидание в кафе. Ты — собеседник, я — только познакомился(ась). Будь дружелюбным и любопытным.',en:"Let's roleplay a first date at a coffee shop. You just met me. Be friendly and curious."}},
-  {id:'hotel',icon:'🏨',title:{ru:'В отеле',en:'Hotel Check-in'},sub:{ru:'Заселение и проблемы',en:'Check-in & complaints'},prompt:{ru:'Давай сыграем заселение в отель. Ты — ресепшионист, я — гость. У меня есть проблема с бронированием.',en:"Let's roleplay a hotel check-in. You are the receptionist, I am the guest. I have a problem with my reservation."}},
-  {id:'debate',icon:'🎤',title:{ru:'Дебаты',en:'Debate'},sub:{ru:'Аргументы и мнения',en:'Argue your point'},prompt:{ru:'Давай проведём дебаты на английском. Тема: "Работа из дома лучше, чем в офисе." Ты — против, я — за. Начни со своего аргумента.',en:"Let's debate in English. Topic: 'Remote work is better than office.' You argue against it, I argue for it. Start with your argument."}},
-  {id:'shopping',icon:'🛍️',title:{ru:'Магазин одежды',en:'Clothes shopping'},sub:{ru:'Примерка и обмен',en:'Trying on & returning'},prompt:{ru:'Сыграем сцену в магазине одежды. Ты — продавец, я — покупатель. Я ищу пальто моего размера, возможно нужен обмен. Начни с приветствия.',en:"Roleplay at a clothes shop. You are the sales assistant, I am the customer. I am looking for a coat in my size and may need to exchange one. Start with a greeting."}},
-  {id:'taxi',icon:'🚕',title:{ru:'Такси',en:'Taxi ride'},sub:{ru:'Адрес и small talk',en:'Address & small talk'},prompt:{ru:'Сыграем поездку в такси. Ты — водитель, я — пассажир. Спроси куда мне ехать и поддержи лёгкий разговор. Используй разговорный британский.',en:"Roleplay a taxi ride. You are the driver, I am the passenger. Ask where to go and make some small talk. Use casual British English."}},
-  {id:'bank',icon:'🏦',title:{ru:'В банке',en:'At the bank'},sub:{ru:'Открыть счёт',en:'Open an account'},prompt:{ru:'Сыграем сцену в банке. Ты — банковский менеджер, я — клиент. Я хочу открыть счёт. Задавай реальные вопросы (документы, тип счёта, доход).',en:"Roleplay at a bank. You are the bank officer, I am the client opening an account. Ask realistic questions (ID, account type, income)."}},
-  {id:'complaint',icon:'😤',title:{ru:'Жалоба',en:'Complaint'},sub:{ru:'Возврат товара',en:'Product return'},prompt:{ru:'Сыграем сцену в магазине: я возвращаю бракованный товар, ты — менеджер. Будь профессионально-вежливым, но без излишних уступок.',en:"Roleplay a complaint in a shop: I am returning a faulty product, you are the manager. Be professionally polite but do not concede too easily."}},
-  {id:'gym',icon:'💪',title:{ru:'Фитнес-клуб',en:'Gym membership'},sub:{ru:'Запись и тарифы',en:'Sign up & plans'},prompt:{ru:'Сыграем сцену в фитнес-клубе. Ты — менеджер, я — потенциальный клиент. Расскажи о тарифах, расписании, попробуй продать абонемент.',en:"Roleplay at a gym. You are the membership manager, I am a potential client. Pitch the plans, schedule, and try to sell me a membership."}},
-  {id:'pharmacy',icon:'💊',title:{ru:'В аптеке',en:'At the pharmacy'},sub:{ru:'Купить лекарство',en:'Buying medicine'},prompt:{ru:'Сыграем сцену в аптеке. Ты — фармацевт, я — посетитель с насморком и температурой. Уточни симптомы, посоветуй безрецептурное средство.',en:"Roleplay at a pharmacy. You are the pharmacist, I have a cold and fever. Ask about symptoms and recommend an over-the-counter remedy."}},
-  {id:'train',icon:'🚆',title:{ru:'На вокзале',en:'Train station'},sub:{ru:'Купить билет',en:'Buy a ticket'},prompt:{ru:'Сыграем сцену на вокзале. Ты — кассир, я — пассажир. Я хочу купить билет, уточняй пункт назначения, время и тип вагона.',en:"Roleplay at a train station ticket counter. You are the clerk, I am the passenger. Help me buy a ticket — ask destination, time, class."}},
-  {id:'customs',icon:'🛃',title:{ru:'Таможня',en:'Customs'},sub:{ru:'Декларация',en:'Declaring items'},prompt:{ru:'Сыграем прохождение таможни. Ты — таможенник, я — турист. Спроси цель визита, длительность, что декларирую. Будь немного строгим.',en:"Roleplay going through customs. You are the customs officer, I am a tourist. Ask purpose, duration, anything to declare. Be slightly stern."}},
-  {id:'rental',icon:'🏠',title:{ru:'Аренда квартиры',en:'Apartment rental'},sub:{ru:'Осмотр и условия',en:'Viewing & terms'},prompt:{ru:'Сыграем осмотр квартиры. Ты — агент, я — арендатор. Покажи квартиру, расскажи условия, ответь на мои вопросы по депозиту и коммуналке.',en:"Roleplay an apartment viewing. You are the agent, I am the renter. Show the place, explain terms, answer questions about deposit and bills."}},
-  {id:'networking',icon:'🥂',title:{ru:'Нетворкинг',en:'Networking event'},sub:{ru:'Конференция',en:'Tech conference'},prompt:{ru:'Сыграем small talk на IT-конференции. Ты — другой участник, я — представляюсь первым. Поддержи разговор, спроси чем я занимаюсь.',en:"Roleplay small talk at a tech conference. You are another attendee. I introduce myself first — keep the conversation going and ask about my work."}},
+  {id:'job',icon:ROLE_ICO.job,title:{ru:'Собеседование',en:'Job Interview'},sub:{ru:'Apple / Google',en:'Tech company interview'},prompt:{ru:'Давай сыграем собеседование в крупной компании. Ты — HR менеджер, я — кандидат. Начни с "Tell me about yourself."',en:"Let's roleplay a job interview. You are the HR manager, I am the candidate. Start with 'Tell me about yourself.'"}},
+  {id:'restaurant',icon:ROLE_ICO.restaurant,title:{ru:'Ресторан',en:'Restaurant'},sub:{ru:'Заказ и общение',en:'Order & small talk'},prompt:{ru:'Давай сыграем сценку в ресторане в Лондоне. Ты — официант, я — гость. Начни с приветствия.',en:"Let's roleplay at a London restaurant. You are the waiter, I am the guest. Start with a greeting."}},
+  {id:'airport',icon:ROLE_ICO.airport,title:{ru:'Аэропорт',en:'Airport'},sub:{ru:'Регистрация и таможня',en:'Check-in & customs'},prompt:{ru:'Давай сыграем сцену в аэропорту. Ты — сотрудник авиакомпании, я — пассажир. Начни с проверки документов.',en:"Let's roleplay at an airport. You are the airline staff, I am the passenger. Start checking my documents."}},
+  {id:'negotiation',icon:ROLE_ICO.negotiation,title:{ru:'Переговоры',en:'Business Deal'},sub:{ru:'Деловая встреча',en:'Negotiating a contract'},prompt:{ru:'Давай сыграем деловые переговоры. Ты — потенциальный партнёр, я — предлагаю сотрудничество. Будь немного скептичным.',en:"Let's roleplay business negotiations. You are a potential partner, I am pitching a deal. Be slightly skeptical."}},
+  {id:'doctor',icon:ROLE_ICO.doctor,title:{ru:'У врача',en:'At the Doctor'},sub:{ru:'Описание симптомов',en:'Describe symptoms'},prompt:{ru:'Давай сыграем визит к врачу. Ты — врач, я — пациент. Начни с "What brings you in today?"',en:"Let's roleplay a doctor visit. You are the doctor, I am the patient. Start with 'What brings you in today?'"}},
+  {id:'date',icon:ROLE_ICO.date,title:{ru:'Знакомство',en:'First Date'},sub:{ru:'Кафе в Лондоне',en:'Coffee in London'},prompt:{ru:'Давай сыграем первое свидание в кафе. Ты — собеседник, я — только познакомился(ась). Будь дружелюбным и любопытным.',en:"Let's roleplay a first date at a coffee shop. You just met me. Be friendly and curious."}},
+  {id:'hotel',icon:ROLE_ICO.hotel,title:{ru:'В отеле',en:'Hotel Check-in'},sub:{ru:'Заселение и проблемы',en:'Check-in & complaints'},prompt:{ru:'Давай сыграем заселение в отель. Ты — ресепшионист, я — гость. У меня есть проблема с бронированием.',en:"Let's roleplay a hotel check-in. You are the receptionist, I am the guest. I have a problem with my reservation."}},
+  {id:'debate',icon:ROLE_ICO.debate,title:{ru:'Дебаты',en:'Debate'},sub:{ru:'Аргументы и мнения',en:'Argue your point'},prompt:{ru:'Давай проведём дебаты на английском. Тема: "Работа из дома лучше, чем в офисе." Ты — против, я — за. Начни со своего аргумента.',en:"Let's debate in English. Topic: 'Remote work is better than office.' You argue against it, I argue for it. Start with your argument."}},
+  {id:'shopping',icon:ROLE_ICO.shopping,title:{ru:'Магазин одежды',en:'Clothes shopping'},sub:{ru:'Примерка и обмен',en:'Trying on & returning'},prompt:{ru:'Сыграем сцену в магазине одежды. Ты — продавец, я — покупатель. Я ищу пальто моего размера, возможно нужен обмен. Начни с приветствия.',en:"Roleplay at a clothes shop. You are the sales assistant, I am the customer. I am looking for a coat in my size and may need to exchange one. Start with a greeting."}},
+  {id:'taxi',icon:ROLE_ICO.taxi,title:{ru:'Такси',en:'Taxi ride'},sub:{ru:'Адрес и small talk',en:'Address & small talk'},prompt:{ru:'Сыграем поездку в такси. Ты — водитель, я — пассажир. Спроси куда мне ехать и поддержи лёгкий разговор. Используй разговорный британский.',en:"Roleplay a taxi ride. You are the driver, I am the passenger. Ask where to go and make some small talk. Use casual British English."}},
+  {id:'bank',icon:ROLE_ICO.bank,title:{ru:'В банке',en:'At the bank'},sub:{ru:'Открыть счёт',en:'Open an account'},prompt:{ru:'Сыграем сцену в банке. Ты — банковский менеджер, я — клиент. Я хочу открыть счёт. Задавай реальные вопросы (документы, тип счёта, доход).',en:"Roleplay at a bank. You are the bank officer, I am the client opening an account. Ask realistic questions (ID, account type, income)."}},
+  {id:'complaint',icon:ROLE_ICO.complaint,title:{ru:'Жалоба',en:'Complaint'},sub:{ru:'Возврат товара',en:'Product return'},prompt:{ru:'Сыграем сцену в магазине: я возвращаю бракованный товар, ты — менеджер. Будь профессионально-вежливым, но без излишних уступок.',en:"Roleplay a complaint in a shop: I am returning a faulty product, you are the manager. Be professionally polite but do not concede too easily."}},
+  {id:'gym',icon:ROLE_ICO.gym,title:{ru:'Фитнес-клуб',en:'Gym membership'},sub:{ru:'Запись и тарифы',en:'Sign up & plans'},prompt:{ru:'Сыграем сцену в фитнес-клубе. Ты — менеджер, я — потенциальный клиент. Расскажи о тарифах, расписании, попробуй продать абонемент.',en:"Roleplay at a gym. You are the membership manager, I am a potential client. Pitch the plans, schedule, and try to sell me a membership."}},
+  {id:'pharmacy',icon:ROLE_ICO.pharmacy,title:{ru:'В аптеке',en:'At the pharmacy'},sub:{ru:'Купить лекарство',en:'Buying medicine'},prompt:{ru:'Сыграем сцену в аптеке. Ты — фармацевт, я — посетитель с насморком и температурой. Уточни симптомы, посоветуй безрецептурное средство.',en:"Roleplay at a pharmacy. You are the pharmacist, I have a cold and fever. Ask about symptoms and recommend an over-the-counter remedy."}},
+  {id:'train',icon:ROLE_ICO.train,title:{ru:'На вокзале',en:'Train station'},sub:{ru:'Купить билет',en:'Buy a ticket'},prompt:{ru:'Сыграем сцену на вокзале. Ты — кассир, я — пассажир. Я хочу купить билет, уточняй пункт назначения, время и тип вагона.',en:"Roleplay at a train station ticket counter. You are the clerk, I am the passenger. Help me buy a ticket — ask destination, time, class."}},
+  {id:'customs',icon:ROLE_ICO.customs,title:{ru:'Таможня',en:'Customs'},sub:{ru:'Декларация',en:'Declaring items'},prompt:{ru:'Сыграем прохождение таможни. Ты — таможенник, я — турист. Спроси цель визита, длительность, что декларирую. Будь немного строгим.',en:"Roleplay going through customs. You are the customs officer, I am a tourist. Ask purpose, duration, anything to declare. Be slightly stern."}},
+  {id:'rental',icon:ROLE_ICO.rental,title:{ru:'Аренда квартиры',en:'Apartment rental'},sub:{ru:'Осмотр и условия',en:'Viewing & terms'},prompt:{ru:'Сыграем осмотр квартиры. Ты — агент, я — арендатор. Покажи квартиру, расскажи условия, ответь на мои вопросы по депозиту и коммуналке.',en:"Roleplay an apartment viewing. You are the agent, I am the renter. Show the place, explain terms, answer questions about deposit and bills."}},
+  {id:'networking',icon:ROLE_ICO.networking,title:{ru:'Нетворкинг',en:'Networking event'},sub:{ru:'Конференция',en:'Tech conference'},prompt:{ru:'Сыграем small talk на IT-конференции. Ты — другой участник, я — представляюсь первым. Поддержи разговор, спроси чем я занимаюсь.',en:"Roleplay small talk at a tech conference. You are another attendee. I introduce myself first — keep the conversation going and ask about my work."}},
 ];
 
 let activeRoleplay=null;

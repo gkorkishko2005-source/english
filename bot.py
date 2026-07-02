@@ -259,6 +259,7 @@ ICON = {
     "vocab": "🗂",
     "test": "📝",
     "menu": "📋",
+    "language": "🌐",
     "support": "💬",
     "share": "🎁",
     "channel": "📣",
@@ -1147,6 +1148,7 @@ async def setup_bot_profile():
         BotCommand(command="story", description="Interactive stories"),
         BotCommand(command="premium", description="Plans and limits"),
         BotCommand(command="share", description="Invite a friend"),
+        BotCommand(command="language", description="Change language"),
         BotCommand(command="help", description="How to use"),
     ]
     commands_ru = [
@@ -1158,6 +1160,7 @@ async def setup_bot_profile():
         BotCommand(command="story", description="Истории"),
         BotCommand(command="premium", description="Подписки"),
         BotCommand(command="share", description="Пригласить друга"),
+        BotCommand(command="language", description="Сменить язык"),
         BotCommand(command="help", description="Помощь"),
     ]
     app_url = webapp_url()
@@ -1339,6 +1342,7 @@ def _quick_menu_kb(ru: bool) -> InlineKeyboardMarkup:
          InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
         [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
          InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
+        [InlineKeyboardButton(text=f"{ICON['language']} Язык" if ru else f"{ICON['language']} Language", callback_data="quick_lang")],
     ])
 
 @dp.message(Command("menu"))
@@ -1368,6 +1372,12 @@ async def cb_quick_menu(cb: CallbackQuery):
         await cb.message.answer(f"{ICON['test']} <b>Тесты</b>" if ru else f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
         await send_support_prompt(cb.message, uid)
+    elif action == "lang":
+        await cb.message.answer(
+            "🌐 <b>Язык интерфейса</b>\nВыбери язык, на котором бот будет с тобой общаться:"
+            if ru else
+            "🌐 <b>Interface language</b>\nPick the language the bot will talk to you in:",
+            parse_mode="HTML", reply_markup=lang_kb())
     else:  # "menu" — the 6-section navigation grid
         await cb.message.answer(
             "<b>📋 Меню</b>\nВыберите раздел — или откройте приложение для полного курса."
@@ -1459,9 +1469,14 @@ async def cb_open_terms(cb: CallbackQuery):
     lang = await get_lang(cb.from_user.id) or "ru"
     await send_terms(cb.message, lang)
 
-@dp.message(Command("lang"))
+@dp.message(Command("lang", "language"))
 async def cmd_lang(m: Message):
-    await m.answer("Language / Язык", reply_markup=lang_kb())
+    lang = await get_lang(m.from_user.id) or "ru"
+    ru = lang == "ru"
+    txt = ("🌐 <b>Язык интерфейса</b>\nВыбери язык, на котором бот будет с тобой общаться:"
+           if ru else
+           "🌐 <b>Interface language</b>\nPick the language the bot will talk to you in:")
+    await m.answer(txt, parse_mode="HTML", reply_markup=lang_kb())
 
 @dp.message(Command("level"))
 async def cmd_level(m: Message):
@@ -1890,8 +1905,10 @@ async def cb_lang(cb: CallbackQuery):
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer("✓")
     name = html.escape(user_display_name(cb.from_user), quote=False)
-    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\nPolyGlotty готов к практике.", reply_markup=main_kb(lang))
-    await cb.message.answer("🎯 <b>Level</b>", reply_markup=level_kb())
+    ready = "PolyGlotty готов к практике." if lang == "ru" else "PolyGlotty is ready to practise."
+    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\n{ready}", reply_markup=main_kb(lang))
+    lvl_title = "🎯 <b>Уровень</b>" if lang == "ru" else "🎯 <b>Level</b>"
+    await cb.message.answer(lvl_title, reply_markup=level_kb())
 
 @dp.callback_query(F.data == "back_main")
 async def cb_back(cb: CallbackQuery):
