@@ -656,8 +656,10 @@ async def apply_referral(new_uid: int, ref_uid: int) -> dict:
     confirm = await get_user(new_uid)
     if not confirm or int(confirm.get("ref_by") or 0) != int(ref_uid):
         return fail
-    await db("UPDATE users SET referrals=COALESCE(referrals,0)+1, xp=COALESCE(xp,0)+150 WHERE uid=?", ref_uid)
-    await db("UPDATE users SET xp=COALESCE(xp,0)+50 WHERE uid=?", new_uid)
+    await db("UPDATE users SET referrals=COALESCE(referrals,0)+1 WHERE uid=?", ref_uid)
+    # Route referral XP through add_xp so both users' weekly charts record today.
+    await add_xp(ref_uid, 150)
+    await add_xp(new_uid, 50)
     # Decide the inviter's reward: Premium days while under the lifetime cap,
     # otherwise ALEX credits. The cap counter (ref_premium_days) is the source of
     # truth so the cap holds even across many invites.
@@ -1971,7 +1973,10 @@ async def update_streak(uid: int):
     if last == today: return
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     if last == yesterday:
-        await db("UPDATE users SET streak=streak+1, last_active=?, xp=xp+10 WHERE uid=?", today, uid)
+        await db("UPDATE users SET streak=streak+1, last_active=? WHERE uid=?", today, uid)
+        # Route the +10 streak bonus through add_xp so it lands in the per-day
+        # xp_history ledger — otherwise this day would be blank on the weekly chart.
+        await add_xp(uid, 10)
     else:
         await db("UPDATE users SET streak=1, last_active=? WHERE uid=?", today, uid)
 

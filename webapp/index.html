@@ -23,19 +23,21 @@
 
 /* ══ LIGHT MODE ══ */
 [data-mode=light]{
-  --e0:#F6F8FA;--e1:#ffffff;--e2:rgba(0,0,0,.03);--e3:rgba(0,0,0,.06);
-  /* Accent unified to the teal primary in BOTH themes (was blue #3478f6). */
-  --a:#00A383;--a2:#009b7d;--ar:0,163,131;
-  --g:#FFFFFF;--gb:#00A383;
-  --t1:#1A1D24;--t2:#627285;--t3:#8a93a8;
-  --b1:rgba(0,0,0,.06);--b2:rgba(0,0,0,.10);
+  /* Premium light theme: near-white app bg (#F8F9FA), lightly recessed card
+     surfaces (#F1F3F5), graphite text, and our brand emerald (#007A6A) kept
+     as the single accent so it stays contrasty on white. */
+  --e0:#F8F9FA;--e1:#FFFFFF;--e2:#F1F3F5;--e3:#E7EAEE;
+  --a:#007A6A;--a2:#006657;--ar:0,122,106;
+  --g:#FFFFFF;--gb:#007A6A;
+  --t1:#1A1C1F;--t2:#5A6472;--t3:#8A93A0;
+  --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.11);
   --or:#e08600;--or-r:224,134,0;--rd:#e54545;--gd:#d49a20;
   --green:#0ca678;--green-r:12,166,120;--exam:#7c5cf0;--exam-r:124,92,240;
-  --edge:rgba(255,255,255,.7);--sh:0 4px 14px rgba(0,0,0,.08);
+  --edge:rgba(255,255,255,.7);--sh:0 4px 14px rgba(0,0,0,.07);
   /* Design-system tokens — light theme values. */
-  --bg-app:#F6F8FA;--bg-card:#FFFFFF;--color-primary:#00A383;
-  --text-main:#1A1D24;--text-muted:#627285;
-  --border-ui:rgba(0,0,0,.05);--shadow-ui:0 4px 12px rgba(0,0,0,.03);
+  --bg-app:#F8F9FA;--bg-card:#FFFFFF;--color-primary:#007A6A;
+  --text-main:#1A1C1F;--text-muted:#5A6472;
+  --border-ui:rgba(0,0,0,.06);--shadow-ui:0 4px 12px rgba(0,0,0,.05);
 }
 [data-mode=light] #app{background:#f5f5f7}
 [data-mode=light] .card{box-shadow:var(--shadow-ui)}
@@ -2377,20 +2379,12 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .ed-gram:active{transform:scale(.99)}
 .ed-gram:hover{border-color:rgba(var(--ar),.36)}
 .ed-gram-ico{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:24px;border-radius:13px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.20)}
+  border-radius:13px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.20);color:var(--a)}
+.ed-gram-ico svg{width:24px;height:24px}
 .ed-gram-body{flex:1;min-width:0}
 .ed-gram-t{font-size:17px;font-weight:800;color:var(--t1);line-height:1.15;letter-spacing:.2px}
 .ed-gram-cta{font-size:13px;font-weight:700;color:var(--a);margin-top:4px}
 .ed-gram-arr{color:var(--t3);font-size:22px;font-weight:300;flex-shrink:0}
-/* Achievements strip under the Grammar card. */
-.ed-ach-row{display:flex;align-items:center;gap:12px;background:var(--e1);border:1px solid var(--b1);
-  border-radius:14px;padding:13px 16px;margin-bottom:16px;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
-.ed-ach-row:active{transform:scale(.99)}
-.ed-ach-t{font-size:13px;font-weight:800;color:var(--t1);flex:1;min-width:0}
-.ed-ach-icos{display:flex;gap:6px}
-.ed-ach-ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;
-  border-radius:9px;background:var(--e2);border:1px solid var(--b1)}
-.ed-ach-arr{color:var(--t3);font-size:20px;font-weight:300}
 /* Corrections spoiler + collapsible box. */
 .ed-spoiler{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;
   border:1px solid var(--b1);border-radius:12px;padding:12px 14px;cursor:pointer;color:var(--t2);
@@ -2770,6 +2764,18 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
 /* The chart-empty hint that shows when the user has no XP this week.   */
 #s-progress .chart-empty{text-align:center;font-size:11.5px;color:var(--t3);padding:6px 0 2px;
   font-weight:500}
+
+/* ── Progress section grouping ────────────────────────────────────
+   Consistent 16px vertical rhythm between the major blocks (growth
+   hero → stats → weekly chart → recommendations → achievements) so
+   each logical section reads as its own grouped card, per the
+   redesign brief. */
+#s-progress .growth-hero{margin-bottom:16px}
+#s-progress .s4{margin-bottom:16px}
+#s-progress .chart-wrap{margin-bottom:16px!important}
+#s-progress #errdiary-wrap{margin-bottom:4px}
+#s-progress .sec{margin:20px 2px 12px}
+#s-progress .sec:first-of-type{margin-top:4px}
 
 /* ── CEFR path ladder ─────────────────────────────────────────────
    Seven badges A0→C2. Passed levels carry a tint of their own colour,
@@ -3395,11 +3401,9 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <!-- Admin Dashboard (visible only to admins) -->
   <div class="admin-panel" id="admin-panel" style="display:none"></div>
 
-  <!-- Compact quick-toggles row: Sound only. The Dark toggle is hidden until a
-       real light theme ships (the app is dark-only), so a frozen switch can't
-       confuse users. -->
-  <div class="set-grid-2" style="grid-template-columns:1fr">
-    <div class="dl-toggle dl-locked" id="dl-toggle" aria-disabled="true" title="Скоро" style="display:none">
+  <!-- Compact quick-toggles row: Dark/Light + Sound. Light theme is live now. -->
+  <div class="set-grid-2">
+    <div class="dl-toggle" id="dl-toggle" onclick="toggleDarkLight()">
       <div class="dl-toggle-icon" id="dl-icon">
         <span class="theme-orb">
           <svg class="moon" viewBox="0 0 24 24" fill="none"><path d="M20.5 14.5A8.5 8.5 0 019.5 3.5a8.8 8.8 0 1011 11z" fill="#8ea2ff"/><path d="M17 4.5l.5 1 .9.5-.9.5-.5 1-.5-1-.9-.5.9-.5.5-1z" fill="#c8d2ff"/></svg>
@@ -14963,9 +14967,21 @@ function renderErrorDiary(){
   const grammarLbl={ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'}[lang]||'Grammar';
   const tryLbl={ru:'Попробуй',en:'Try',es:'Prueba',pt:'Tente',de:'Versuch',fr:'Essaie',uk:'Спробуй',tr:'Dene',zh:'试试',ar:'جرّب'}[lang]||'Try';
   // Weakest area from the real error log becomes the single suggestion; with a
-  // clean log we nudge a sensible default topic instead of showing nothing.
+  // clean log we nudge a sensible default topic. We map each category to a
+  // CONCRETE grammar topic so the CTA never reads the redundant "Try: Grammar".
+  const topicByCat={
+    grammar:'Present Perfect',
+    tense:'Past Simple vs Present Perfect',
+    article:{ru:'Артикли a / an / the',en:'Articles a / an / the',es:'Artículos a / an / the',pt:'Artigos a / an / the',de:'Artikel a / an / the',fr:'Articles a / an / the',uk:'Артиклі a / an / the',tr:'a / an / the artikelleri',zh:'冠词 a / an / the',ar:'أدوات التعريف a / an / the'},
+    preposition:{ru:'Предлоги at / in / on',en:'Prepositions at / in / on',es:'Preposiciones at / in / on',pt:'Preposições at / in / on',de:'Präpositionen at / in / on',fr:'Prépositions at / in / on',uk:'Прийменники at / in / on',tr:'at / in / on edatları',zh:'介词 at / in / on',ar:'حروف الجر at / in / on'},
+    word_order:{ru:'Порядок слов в предложении',en:'Word order in a sentence',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung im Satz',fr:'Ordre des mots',uk:'Порядок слів у реченні',tr:'Cümlede sözcük dizimi',zh:'句子语序',ar:'ترتيب الكلمات في الجملة'},
+    vocabulary:{ru:'Полезная лексика',en:'Useful vocabulary',es:'Vocabulario útil',pt:'Vocabulário útil',de:'Nützlicher Wortschatz',fr:'Vocabulaire utile',uk:'Корисна лексика',tr:'Faydalı kelimeler',zh:'实用词汇',ar:'مفردات مفيدة'},
+    spelling:{ru:'Правописание слов',en:'Spelling of tricky words',es:'Ortografía',pt:'Ortografia',de:'Rechtschreibung',fr:'Orthographe',uk:'Правопис слів',tr:'Zor kelimelerin yazımı',zh:'易错拼写',ar:'إملاء الكلمات'},
+    punctuation:{ru:'Пунктуация',en:'Punctuation',es:'Puntuación',pt:'Pontuação',de:'Zeichensetzung',fr:'Ponctuation',uk:'Пунктуація',tr:'Noktalama',zh:'标点',ar:'الترقيم'}
+  };
+  const topicFor=function(k){const key=k in topicByCat?k:k.replace(/s$/,'').replace(/\s+/g,'_');const v=topicByCat[key];if(!v)return lblName(k);return typeof v==='string'?v:(v[lang]||v.en);};
   const cats=errors.length?errorDiaryCategories(errors):[];
-  const topName=cats.length?lblName(cats[0][0]):'Present Perfect';
+  const topName=cats.length?topicFor(cats[0][0]):'Present Perfect';
 
   wrap.innerHTML='';
 
@@ -14973,7 +14989,7 @@ function renderErrorDiary(){
   //     Just a friendly "Try: <topic>" that opens targeted practice.
   const gcard=document.createElement('div');
   gcard.className='ed-gram';
-  gcard.innerHTML=`<div class="ed-gram-ico">📘</div>`
+  gcard.innerHTML=`<div class="ed-gram-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7"/><path d="M9 11h5"/></svg></div>`
     +`<div class="ed-gram-body"><div class="ed-gram-t">${safeHTML(grammarLbl)}</div>`
     +`<div class="ed-gram-cta">${safeHTML(tryLbl)}: ${safeHTML(topName)}</div></div>`
     +`<div class="ed-gram-arr">›</div>`;
@@ -14983,10 +14999,7 @@ function renderErrorDiary(){
   };
   wrap.appendChild(gcard);
 
-  // (2) Achievements strip right under Grammar — 3 most recent badges.
-  try{const ach=_recentAchRow();if(ach)wrap.appendChild(ach);}catch(_){}
-
-  // (3) Corrections are their own card type: shown only when mistakes exist,
+  // (2) Corrections are their own card type: shown only when mistakes exist,
   //     tucked under a spoiler, and gone entirely once the log is clean.
   if(errors.length){
     _mistakesCache=errors;
@@ -15016,26 +15029,6 @@ function renderErrorDiary(){
 
   const beforeLen=errors.length;
   refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});
-}
-
-/* Compact achievements strip for the Progress recommendations area: shows the
-   three most recently unlocked badges (falls back to sensible defaults) and
-   opens the full achievements modal on tap. */
-function _recentAchRow(){
-  let list=[],unlocked={};
-  try{list=getAchievements();unlocked=LS.getJ('achievements_unlocked')||{};}catch(_){return null;}
-  const done=(list||[]).filter(a=>unlocked[a.id]);
-  const badges=done.slice(-3).map(a=>a.badge||a.icon||'🏅');
-  const defs=['🏆','🎓','🔥'];
-  while(badges.length<3)badges.push(defs[badges.length]);
-  const achLbl={ru:'Достижения',en:'Achievements',es:'Logros',pt:'Conquistas',de:'Erfolge',fr:'Succès',uk:'Досягнення',tr:'Başarılar',zh:'成就',ar:'الإنجازات'}[lang]||'Achievements';
-  const row=document.createElement('div');
-  row.className='ed-ach-row';row.setAttribute('role','button');
-  row.innerHTML=`<div class="ed-ach-t">${achLbl}</div>`
-    +`<div class="ed-ach-icos">${badges.map(b=>`<span class="ed-ach-ico">${b}</span>`).join('')}</div>`
-    +`<div class="ed-ach-arr">›</div>`;
-  row.onclick=()=>{try{openAchModal();}catch(_){}};
-  return row;
 }
 
 /* Progress → My Saved Words: list words the user saved from flashcards, with
