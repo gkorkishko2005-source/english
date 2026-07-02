@@ -308,9 +308,13 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .nic svg{width:20px;height:20px;stroke:rgba(255,255,255,.65);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nlb{font-size:8px;font-weight:600;color:rgba(255,255,255,.65);letter-spacing:-.1px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%;text-align:center;transition:color .2s}
 .ni{min-width:0}
-.ni.on .nic{background:rgba(var(--ar),.16);transform:scale(1.1)}
+.ni.on .nic{background:linear-gradient(135deg,rgba(var(--ar),.26),rgba(var(--ar),.07));transform:translateY(-4px) scale(1.08);box-shadow:0 8px 18px rgba(var(--ar),.30),inset 0 0 0 1px rgba(var(--ar),.28)}
 .ni.on .nic svg{stroke:var(--a)}
-.ni.on .nlb{color:var(--a)}
+.ni.on .nlb{color:var(--a);font-weight:700}
+.ni.on::before{content:'';position:absolute;top:-1px;left:50%;width:26px;height:3px;border-radius:0 0 5px 5px;background:linear-gradient(90deg,transparent,var(--a),transparent);box-shadow:0 2px 10px rgba(var(--ar),.55);transform:translateX(-50%);transform-origin:center;animation:navRail .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.ni:active .nic{transform:scale(.9)}
+.ni.on:active .nic{transform:translateY(-3px) scale(.98)}
+@keyframes navRail{from{opacity:0;transform:translateX(-50%) scaleX(.2)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
 .ni.locked{opacity:.62}
 .ni.locked .nic::after{content:'';position:absolute;right:4px;top:4px;width:6px;height:6px;border-radius:50%;background:var(--gd);box-shadow:0 0 0 2px var(--e1)}
 

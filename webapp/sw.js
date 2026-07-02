@@ -18,7 +18,7 @@
  *
  * Bump CACHE_VERSION to force a clean re-cache after a breaking shell change.
  */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE = 'polyglotty-' + CACHE_VERSION;
 const SHELL = ['/', '/data/growth_engine.js', '/icons/fire.png'];
 
