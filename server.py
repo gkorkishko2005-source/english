@@ -19,7 +19,7 @@ BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
 # user's message. Keep it high enough for a full structured reply; the
 # per-tier caps in MODEL_ECONOMY below are the real budget knob, and metered
 # billing still reconciles to the ACTUAL tokens used (unused reserve refunded).
-MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "1400") or "1400")
+MAX_REPLY_TOKENS_HARD = int(os.getenv("BILLING_MAX_TOKENS_PER_REPLY", "1500") or "1500")
 
 # ── System-tag sanitizer ───────────────────────────────────────────────
 # ALEX emits hidden DB commands like "[SAVE_INTEREST: телефон]" that the
@@ -885,7 +885,7 @@ async def handle_chat(request):
         # Give the model room to finish its thought; the hard ceiling still caps
         # the worst case, and metered billing reconciles to real usage.
         prem_max = min(MAX_REPLY_TOKENS_HARD,
-                       int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1200") or "1200"))
+                       int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1500") or "1500"))
         reply = ""
         try:
             result = await openrouter_generate(prem_system, prem_send, prem_max,
