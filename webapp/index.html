@@ -12,11 +12,11 @@
    a single teal accent (used only for primary CTAs + active tabs), pure-white
    headings and muted-grey secondary text. Status hues (--or/--rd/--exam/level
    colours) are kept for semantic meaning but no longer paint full backgrounds. */
-:root{--e0:#0B0F17;--e1:#161A22;--e2:#1E232D;--e3:#272D38;--a:#00B594;--a2:#0d9488;--ar:0,181,148;--g:#161A22;--gb:#00B594;--t1:#FFFFFF;--t2:#9CA3AF;--t3:#6B7280;--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.05);--sh:0 6px 18px rgba(0,0,0,.40);
+:root{--e0:#0D0E10;--e1:#141619;--e2:#1B1E22;--e3:#24282E;--a:#007A6A;--a2:#006657;--ar:0,122,106;--g:#141619;--gb:#007A6A;--t1:#FFFFFF;--t2:#9CA3AF;--t3:#6B7280;--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.05);--sh:0 6px 18px rgba(0,0,0,.40);
   /* ── Design-system tokens (mapped onto the existing scale above) ──
      New canonical names per the redesign spec. They ALIAS our real
      variables so old and new code stay in sync. Dark theme values. */
-  --bg-app:#0F1115;--bg-card:#161920;--color-primary:#00B594;
+  --bg-app:#0D0E10;--bg-card:#141619;--color-primary:#007A6A;
   --text-main:#FFFFFF;--text-muted:#8F9CAE;
   --border-ui:rgba(255,255,255,.06);--shadow-ui:none;
   --r-card:14px;--r-chip:8px}
@@ -2370,6 +2370,35 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 /* "Show all mistakes" text button + mistake detail breakdown modal */
 .mist-all-btn{display:block;width:100%;text-align:center;margin-top:10px;padding:11px;background:transparent;border:none;color:var(--a2);font-size:12.5px;font-weight:700;cursor:pointer}
 .mist-all-btn:active{opacity:.6}
+/* Single "Grammar" recommendation card — the one big CTA on Progress. */
+.ed-gram{display:flex;align-items:center;gap:14px;background:var(--e1);border:1px solid rgba(var(--ar),.20);
+  border-radius:16px;padding:18px 16px;margin-bottom:16px;cursor:pointer;box-shadow:var(--sh);
+  transition:transform .15s,border-color .2s}
+.ed-gram:active{transform:scale(.99)}
+.ed-gram:hover{border-color:rgba(var(--ar),.36)}
+.ed-gram-ico{width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:24px;border-radius:13px;background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.20)}
+.ed-gram-body{flex:1;min-width:0}
+.ed-gram-t{font-size:17px;font-weight:800;color:var(--t1);line-height:1.15;letter-spacing:.2px}
+.ed-gram-cta{font-size:13px;font-weight:700;color:var(--a);margin-top:4px}
+.ed-gram-arr{color:var(--t3);font-size:22px;font-weight:300;flex-shrink:0}
+/* Achievements strip under the Grammar card. */
+.ed-ach-row{display:flex;align-items:center;gap:12px;background:var(--e1);border:1px solid var(--b1);
+  border-radius:14px;padding:13px 16px;margin-bottom:16px;cursor:pointer;box-shadow:var(--sh);transition:transform .15s}
+.ed-ach-row:active{transform:scale(.99)}
+.ed-ach-t{font-size:13px;font-weight:800;color:var(--t1);flex:1;min-width:0}
+.ed-ach-icos{display:flex;gap:6px}
+.ed-ach-ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;
+  border-radius:9px;background:var(--e2);border:1px solid var(--b1)}
+.ed-ach-arr{color:var(--t3);font-size:20px;font-weight:300}
+/* Corrections spoiler + collapsible box. */
+.ed-spoiler{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;
+  border:1px solid var(--b1);border-radius:12px;padding:12px 14px;cursor:pointer;color:var(--t2);
+  font-size:12.5px;font-weight:700;transition:background .15s}
+.ed-spoiler:active{background:var(--e2)}
+.ed-spoiler-arr{transition:transform .2s;color:var(--t3)}
+.ed-spoiler.open .ed-spoiler-arr{transform:rotate(180deg)}
+.ed-mist-box{margin-top:8px;background:var(--e1);border:1px solid var(--b1);border-radius:12px;overflow:hidden}
 .md-sec{margin-top:16px}
 .md-sec:first-child{margin-top:4px}
 .md-sec-lbl{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
@@ -2660,8 +2689,8 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 /* The XP ring hero was replaced by the growth-hero card (see below). */
 
 /* Section headers — same uppercase tracker letter as Settings */
-#s-progress .sec{font-size:10.5px!important;font-weight:700!important;text-transform:uppercase;
-  letter-spacing:.7px;color:var(--t3);margin:18px 2px 8px}
+#s-progress .sec{font-size:12px!important;font-weight:800!important;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--t2);margin:22px 2px 12px}
 #s-progress .sec .seca{font-size:10.5px;color:var(--a);font-weight:700;letter-spacing:.5px;
   text-transform:none;cursor:pointer}
 
@@ -2670,10 +2699,10 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
    surface (works in both themes via color-mix). */
 #s-progress{background:color-mix(in srgb,var(--e0) 93%,#000)}
 html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#000)}
-#s-progress .s4{gap:8px;margin-bottom:4px}
+#s-progress .s4{gap:12px;margin-bottom:16px}
 #s-progress .s4c{background:var(--e1)!important;border:1px solid var(--b1)!important;
   border-top:1px solid var(--edge)!important;
-  box-shadow:var(--sh)!important;border-radius:12px;padding:14px 12px;position:relative;overflow:hidden;
+  box-shadow:var(--sh)!important;border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;
   transition:transform .15s ease,box-shadow .2s ease}
 #s-progress .s4c::before{display:none!important}
 #s-progress .s4c:active{background:var(--e2)!important;transform:scale(.985)}
@@ -2706,7 +2735,7 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    from a single shared baseline. */
 #s-progress .chart-wrap{background:var(--e1)!important;border:1px solid var(--b1)!important;
   box-shadow:var(--sh)!important;perspective:none!important;padding:14px 14px 12px;border-radius:12px}
-#s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:112px;margin:0;
+#s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:74px;margin:0;
   transform:none!important;transform-origin:50% 100%;overflow:visible;
   border-bottom:1px solid var(--b1);padding-bottom:0}
 /* Each column is a flex-column: value label on top, bar at the bottom.
@@ -2723,14 +2752,14 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
 #s-progress .bbv{font-size:10px;color:var(--t3);font-weight:700;text-align:center;
   font-variant-numeric:tabular-nums;line-height:1;min-height:11px;width:100%}
 /* Explicit percentage width matches the original chart pattern. */
-#s-progress .bb{width:62%;max-width:24px;border-radius:4px 4px 0 0;
-  background:var(--a)!important;opacity:.9;min-height:3px;
+#s-progress .bb{width:62%;max-width:24px;border-radius:5px 5px 0 0;
+  background:linear-gradient(180deg,#1FE0A4 0%,#0E9F82 48%,#044F41 100%)!important;opacity:1;min-height:3px;
   transition:height .7s cubic-bezier(.22,1,.36,1);box-shadow:none!important;
   transform:none!important;position:relative;align-self:center}
 #s-progress .bb::before,
 #s-progress .bb::after{display:none!important}
-#s-progress .bb:hover{opacity:1;transform:none!important}
-#s-progress .bb.td{background:var(--a)!important;opacity:1}
+#s-progress .bb:hover{opacity:.92;transform:none!important}
+#s-progress .bb.td{background:linear-gradient(180deg,#2CF3B4 0%,#12B896 50%,#065C4B 100%)!important;opacity:1}
 #s-progress .bb.zero{background:var(--b1)!important;opacity:.32;min-height:14px!important;height:14px!important;box-shadow:none!important}
 #s-progress .bb.zero::before{display:none}
 #s-progress .bbv.bbv-zero{opacity:.4;font-weight:700;color:var(--t3)}
@@ -3323,11 +3352,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   </div>
   <div class="sec"><span id="stat-lbl"></span></div>
   <div class="s4">
-    <div class="s4c">
-      <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#4f8aff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><rect x="3" y="6" width="22" height="18" rx="3"/><path d="M3 11h22M8 3v6M20 3v6"/></svg></div>
-      <div class="s4cv" id="psess">—</div><div class="s4cl" id="psl1"></div>
-    </div>
     <div class="s4c" onclick="goTab('learn')">
       <div class="s4ca">›</div>
       <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M4 5h12a2 2 0 012 2v14a2 2 0 01-2 2H4a2 2 0 01-2-2V7a2 2 0 012-2z"/><path d="M26 7l-8 4v10l8-4V7z"/><path d="M18 5l8 4"/></svg></div>
@@ -3338,11 +3362,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
       <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#ffb830" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><path d="M14 2l3.09 6.26L24 9.27l-5 4.87 1.18 6.88L14 17.77l-6.18 3.35L9 14.14 4 9.27l6.91-1.01L14 2z" fill="rgba(255,184,48,.15)"/></svg></div>
       <div class="s4cv" id="ptsts">—</div><div class="s4cl" id="psl3"></div>
     </div>
-    <div class="s4c" onclick="openChat('mistakes')">
-      <div class="s4ca">›</div>
-      <div class="s4ci-svg"><svg viewBox="0 0 28 28" fill="none" stroke="#ff6b6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="stat-svg"><circle cx="14" cy="14" r="11" fill="rgba(255,107,107,.1)"/><path d="M14 9v5.5"/><circle cx="14" cy="19" r="1" fill="#ff6b6b"/></svg></div>
-      <div class="s4cv" id="perrs">—</div><div class="s4cl" id="psl4"></div>
-    </div>
   </div>
   <div class="sec"><span id="tw-lbl"></span></div>
   <div class="card chart-wrap">
@@ -3352,7 +3371,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <!-- CEFR ladder, Exam-prep and TOEFL blocks moved to the "Учёба" (Courses)
        tab to declutter Progress. They live there exclusively now. -->
   <!-- Error Diary -->
-  <div class="sec"><span id="errdiary-lbl">Error Diary</span><span class="seca" onclick="openChat('mistakes')" id="errdiary-cta">Ask ALEX →</span></div>
+  <div class="sec"><span id="errdiary-lbl">Error Diary</span></div>
   <div id="errdiary-wrap"></div>
   <!-- My Saved Words — personal dictionary now lives INSIDE the Flashcards
        screen (opened via the dictionary button); markup moved to #dictm modal. -->
@@ -3376,9 +3395,11 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <!-- Admin Dashboard (visible only to admins) -->
   <div class="admin-panel" id="admin-panel" style="display:none"></div>
 
-  <!-- Compact quick-toggles row: Dark + Sound -->
-  <div class="set-grid-2">
-    <div class="dl-toggle dl-locked" id="dl-toggle" aria-disabled="true" title="Скоро">
+  <!-- Compact quick-toggles row: Sound only. The Dark toggle is hidden until a
+       real light theme ships (the app is dark-only), so a frozen switch can't
+       confuse users. -->
+  <div class="set-grid-2" style="grid-template-columns:1fr">
+    <div class="dl-toggle dl-locked" id="dl-toggle" aria-disabled="true" title="Скоро" style="display:none">
       <div class="dl-toggle-icon" id="dl-icon">
         <span class="theme-orb">
           <svg class="moon" viewBox="0 0 24 24" fill="none"><path d="M20.5 14.5A8.5 8.5 0 019.5 3.5a8.8 8.8 0 1011 11z" fill="#8ea2ff"/><path d="M17 4.5l.5 1 .9.5-.9.5-.5 1-.5-1-.9-.5.9-.5.5-1z" fill="#c8d2ff"/></svg>
@@ -4411,8 +4432,9 @@ function applyLang(){
   // Progress
   document.getElementById('p-tit').textContent=L.prog;document.getElementById('p-sub').textContent=L.progs;
   document.getElementById('stat-lbl').textContent=L.stats;
-  document.getElementById('psl1').textContent=L.sess;document.getElementById('psl2').textContent=L.wl;
-  document.getElementById('psl3').textContent=L.td;document.getElementById('psl4').textContent=L.ef;
+  {const _e=id=>document.getElementById(id);
+   if(_e('psl1'))_e('psl1').textContent=L.sess; if(_e('psl2'))_e('psl2').textContent=L.wl;
+   if(_e('psl3'))_e('psl3').textContent=L.td;   if(_e('psl4'))_e('psl4').textContent=L.ef;}
   document.getElementById('tw-lbl').textContent=L.tw;
   // TOEFL block is re-rendered by drawProgress() (handles empty CTA + scores);
   // only set placeholder text here if it has not been populated yet.
@@ -5453,7 +5475,7 @@ function drawProgress(){
     bb.className='bb'+(isToday?' td':'')+(v===0?' zero':'');
     bb.style.height='0';
     bc.appendChild(bb);cEl.appendChild(bc);
-    setTimeout(()=>bb.style.height=(v/mx*86)+'px',70+i*45);
+    setTimeout(()=>bb.style.height=(v/mx*57)+'px',70+i*45);
     const dl=document.createElement('div');
     dl.className='bd'+(isToday?' td':'');dl.textContent=days[i];dEl.appendChild(dl);
   });
@@ -14927,16 +14949,6 @@ function renderErrorDiary(){
     return;
   }
   const errors=(LS.getJ('error_diary')||[]).map(normalizeMistake);
-  if(!errors.length){
-    wrap.innerHTML=`<div class="ed-empty">${({ru:'Пока нет рекомендаций — пообщайся с ALEX, и он подскажет, над чем поработать.',en:'No recommendations yet — chat with ALEX and it will suggest what to work on.',es:'Aún no hay recomendaciones — habla con ALEX y te sugerirá en qué trabajar.',pt:'Ainda sem recomendações — converse com o ALEX e ele sugerirá no que focar.',de:'Noch keine Empfehlungen — chatte mit ALEX und es schlägt vor, woran du arbeiten solltest.',fr:'Pas encore de recommandations — discute avec ALEX et il te dira sur quoi travailler.',uk:'Поки немає рекомендацій — поспілкуйся з ALEX, і він підкаже, над чим попрацювати.',tr:'Henüz öneri yok — ALEX ile sohbet et, neye çalışacağını önersin.',zh:'暂无建议——和 ALEX 聊聊，它会告诉你该练什么。',ar:'لا توصيات بعد — تحدّث مع ALEX وسيقترح ما يجب التركيز عليه.'}[lang]||'No recommendations yet — chat with ALEX and it will suggest what to work on.')}</div>`;
-    refreshErrorDiaryFromServer().then(()=>{const fresh=LS.getJ('error_diary')||[];if(fresh.length)renderErrorDiary();}).catch(()=>{});
-    return;
-  }
-  wrap.innerHTML='';
-  // Active recommendations: derive focus areas from the user's real mistake
-  // history. Top error categories become "work on this" cards; tapping one
-  // asks ALEX for targeted practice on that exact pattern.
-  const cats=errorDiaryCategories(errors); // [[category,count],…] up to 4
   const catName={
     grammar:{ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'},
     vocabulary:{ru:'Лексика',en:'Vocabulary',es:'Vocabulario',pt:'Vocabulário',de:'Wortschatz',fr:'Vocabulaire',uk:'Лексика',tr:'Kelime',zh:'词汇',ar:'المفردات'},
@@ -14948,39 +14960,82 @@ function renderErrorDiary(){
     word_order:{ru:'Порядок слов',en:'Word order',es:'Orden de palabras',pt:'Ordem das palavras',de:'Wortstellung',fr:'Ordre des mots',uk:'Порядок слів',tr:'Sözcük dizimi',zh:'语序',ar:'ترتيب الكلمات'}
   };
   const lblName=function(k){const m=catName[k]||catName[k.replace(/s$/,'')]||catName[k.replace(/\s+/g,'_')];return (m&&(m[lang]||m.en))||(k.charAt(0).toUpperCase()+k.slice(1));};
-  const headTxt={ru:`ALEX заметил ${errors.length} ошибок. Рекомендую поработать над:`,en:`ALEX spotted ${errors.length} mistakes. Recommended focus areas:`,es:`ALEX detectó ${errors.length} errores. Áreas recomendadas:`,pt:`ALEX notou ${errors.length} erros. Áreas recomendadas:`,de:`ALEX hat ${errors.length} Fehler bemerkt. Empfohlene Schwerpunkte:`,fr:`ALEX a repéré ${errors.length} erreurs. Axes recommandés :`,uk:`ALEX помітив ${errors.length} помилок. Рекомендую попрацювати над:`,tr:`ALEX ${errors.length} hata fark etti. Önerilen alanlar:`,zh:`ALEX 发现了 ${errors.length} 个错误。建议重点练习：`,ar:`لاحظ ALEX ${errors.length} خطأ. مجالات التركيز المقترحة:`}[lang]||`ALEX spotted ${errors.length} mistakes. Recommended focus areas:`;
-  const practiceLbl={ru:'Тренировать с ALEX →',en:'Practice with ALEX →',es:'Practicar con ALEX →',pt:'Praticar com ALEX →',de:'Mit ALEX üben →',fr:'S’entraîner avec ALEX →',uk:'Тренувати з ALEX →',tr:'ALEX ile çalış →',zh:'与 ALEX 练习 →',ar:'تدرّب مع ALEX →'}[lang]||'Practice with ALEX →';
-  const head=document.createElement('div');head.className='ed-rec-head';head.textContent=headTxt;wrap.appendChild(head);
-  cats.forEach(([cat,n])=>{
-    const name=lblName(cat);
-    const card=document.createElement('div');card.className='ed-rec';
-    card.innerHTML=`<div class="ed-rec-top"><span class="ed-rec-name">${safeHTML(name)}</span><span class="ed-rec-cnt">${n}</span></div><div class="ed-rec-act">${practiceLbl}</div>`;
-    card.onclick=()=>{
-      if(!hasChatAccess()){showChatPaywall();return;}
-      sendChip(({ru:`Дай мне короткую тренировку на тему «${name}» — это моя слабая зона по дневнику ошибок.`,en:`Give me a short practice on "${name}" — it's my weak area from the error log.`,es:`Dame una práctica corta sobre "${name}" — es mi punto débil según el registro de errores.`,pt:`Dê-me uma prática curta sobre "${name}" — é meu ponto fraco no registro de erros.`,de:`Gib mir eine kurze Übung zu "${name}" — das ist laut Fehlerprotokoll meine Schwäche.`,fr:`Donne-moi un court exercice sur « ${name} » — c'est mon point faible d'après le journal d'erreurs.`,uk:`Дай мені коротку вправу на тему «${name}» — це моя слабка зона за щоденником помилок.`,tr:`"${name}" konusunda kısa bir alıştırma ver — hata kaydıma göre zayıf alanım.`,zh:`给我一个关于"${name}"的简短练习——这是我错误记录里的薄弱点。`,ar:`أعطني تدريبًا قصيرًا حول "${name}" — إنها نقطة ضعفي حسب سجل الأخطاء.`}[lang]||`Give me a short practice on "${name}" — it's my weak area from the error log.`));
+  const grammarLbl={ru:'Грамматика',en:'Grammar',es:'Gramática',pt:'Gramática',de:'Grammatik',fr:'Grammaire',uk:'Граматика',tr:'Dilbilgisi',zh:'语法',ar:'القواعد'}[lang]||'Grammar';
+  const tryLbl={ru:'Попробуй',en:'Try',es:'Prueba',pt:'Tente',de:'Versuch',fr:'Essaie',uk:'Спробуй',tr:'Dene',zh:'试试',ar:'جرّب'}[lang]||'Try';
+  // Weakest area from the real error log becomes the single suggestion; with a
+  // clean log we nudge a sensible default topic instead of showing nothing.
+  const cats=errors.length?errorDiaryCategories(errors):[];
+  const topName=cats.length?lblName(cats[0][0]):'Present Perfect';
+
+  wrap.innerHTML='';
+
+  // (1) ONE big Grammar card — no error counters, no small Ask/Train buttons.
+  //     Just a friendly "Try: <topic>" that opens targeted practice.
+  const gcard=document.createElement('div');
+  gcard.className='ed-gram';
+  gcard.innerHTML=`<div class="ed-gram-ico">📘</div>`
+    +`<div class="ed-gram-body"><div class="ed-gram-t">${safeHTML(grammarLbl)}</div>`
+    +`<div class="ed-gram-cta">${safeHTML(tryLbl)}: ${safeHTML(topName)}</div></div>`
+    +`<div class="ed-gram-arr">›</div>`;
+  gcard.onclick=()=>{
+    if(!hasChatAccess()){showChatPaywall();return;}
+    sendChip(({ru:`Дай мне короткую тренировку на тему «${topName}».`,en:`Give me a short practice on "${topName}".`,es:`Dame una práctica corta sobre "${topName}".`,pt:`Dê-me uma prática curta sobre "${topName}".`,de:`Gib mir eine kurze Übung zu "${topName}".`,fr:`Donne-moi un court exercice sur « ${topName} ».`,uk:`Дай мені коротку вправу на тему «${topName}».`,tr:`"${topName}" konusunda kısa bir alıştırma ver.`,zh:`给我一个关于"${topName}"的简短练习。`,ar:`أعطني تدريبًا قصيرًا حول "${topName}".`}[lang]||`Give me a short practice on "${topName}".`));
+  };
+  wrap.appendChild(gcard);
+
+  // (2) Achievements strip right under Grammar — 3 most recent badges.
+  try{const ach=_recentAchRow();if(ach)wrap.appendChild(ach);}catch(_){}
+
+  // (3) Corrections are their own card type: shown only when mistakes exist,
+  //     tucked under a spoiler, and gone entirely once the log is clean.
+  if(errors.length){
+    _mistakesCache=errors;
+    const showLbl={ru:`Показать исправления (${errors.length})`,en:`Show corrections (${errors.length})`,es:`Ver correcciones (${errors.length})`,pt:`Ver correções (${errors.length})`,de:`Korrekturen anzeigen (${errors.length})`,fr:`Voir les corrections (${errors.length})`,uk:`Показати виправлення (${errors.length})`,tr:`Düzeltmeleri göster (${errors.length})`,zh:`查看纠正 (${errors.length})`,ar:`عرض التصحيحات (${errors.length})`}[lang]||`Show corrections (${errors.length})`;
+    const hideLbl={ru:'Скрыть исправления',en:'Hide corrections',es:'Ocultar correcciones',pt:'Ocultar correções',de:'Korrekturen ausblenden',fr:'Masquer les corrections',uk:'Сховати виправлення',tr:'Düzeltmeleri gizle',zh:'隐藏纠正',ar:'إخفاء التصحيحات'}[lang]||'Hide corrections';
+    const spoiler=document.createElement('button');
+    spoiler.type='button';spoiler.className='ed-spoiler';
+    spoiler.innerHTML=`<span class="ed-spoiler-t">${showLbl}</span><span class="ed-spoiler-arr">▾</span>`;
+    const box=document.createElement('div');box.className='ed-mist-box';box.style.display='none';
+    errors.slice(0,5).forEach((e,i)=>box.appendChild(mistakeRow(e,i)));
+    if(errors.length>5){
+      const more=document.createElement('button');
+      more.type='button';more.className='mist-all-btn';
+      const moreTpl={ru:`Показать все ошибки (${errors.length})`,en:`Show all mistakes (${errors.length})`,es:`Ver todos los errores (${errors.length})`,pt:`Ver todos os erros (${errors.length})`,de:`Alle Fehler anzeigen (${errors.length})`,fr:`Voir toutes les erreurs (${errors.length})`,uk:`Показати всі помилки (${errors.length})`,tr:`Tüm hataları göster (${errors.length})`,zh:`查看全部错误 (${errors.length})`,ar:`عرض كل الأخطاء (${errors.length})`};
+      more.textContent=moreTpl[lang]||moreTpl.en;
+      more.onclick=()=>openMistakesScreen();
+      box.appendChild(more);
+    }
+    spoiler.onclick=()=>{
+      const open=box.style.display!=='none';
+      box.style.display=open?'none':'';
+      spoiler.classList.toggle('open',!open);
+      const t=spoiler.querySelector('.ed-spoiler-t');if(t)t.textContent=open?showLbl:hideLbl;
     };
-    wrap.appendChild(card);
-  });
-  // Compact context: the most recent corrections that feed these recommendations.
-  const recentLbl={ru:'Последние исправления',en:'Recent corrections',es:'Correcciones recientes',pt:'Correções recentes',de:'Neueste Korrekturen',fr:'Corrections récentes',uk:'Останні виправлення',tr:'Son düzeltmeler',zh:'最近的纠正',ar:'أحدث التصحيحات'}[lang]||'Recent corrections';
-  const recentHead=document.createElement('div');recentHead.className='ed-rec-sub';recentHead.textContent=recentLbl;wrap.appendChild(recentHead);
-  // Cache the full, ordered list so the detail/full-screen views index into it.
-  _mistakesCache=errors;
-  // Show STRICTLY the 2 most recent corrections; tapping one opens the AI breakdown.
-  errors.slice(0,2).forEach((e,i)=>{
-    wrap.appendChild(mistakeRow(e,i));
-  });
-  // When there are more than 2, offer a tidy text button into the full diary.
-  if(errors.length>2){
-    const more=document.createElement('button');
-    more.type='button';more.className='mist-all-btn';
-    const moreTpl={ru:`Показать все ошибки (${errors.length})`,en:`Show all mistakes (${errors.length})`,es:`Ver todos los errores (${errors.length})`,pt:`Ver todos os erros (${errors.length})`,de:`Alle Fehler anzeigen (${errors.length})`,fr:`Voir toutes les erreurs (${errors.length})`,uk:`Показати всі помилки (${errors.length})`,tr:`Tüm hataları göster (${errors.length})`,zh:`查看全部错误 (${errors.length})`,ar:`عرض كل الأخطاء (${errors.length})`};
-    more.textContent=moreTpl[lang]||moreTpl.en;
-    more.onclick=()=>openMistakesScreen();
-    wrap.appendChild(more);
+    wrap.appendChild(spoiler);wrap.appendChild(box);
   }
+
   const beforeLen=errors.length;
   refreshErrorDiaryFromServer().then(fresh=>{if((fresh||[]).length!==beforeLen)renderErrorDiary();}).catch(()=>{});
+}
+
+/* Compact achievements strip for the Progress recommendations area: shows the
+   three most recently unlocked badges (falls back to sensible defaults) and
+   opens the full achievements modal on tap. */
+function _recentAchRow(){
+  let list=[],unlocked={};
+  try{list=getAchievements();unlocked=LS.getJ('achievements_unlocked')||{};}catch(_){return null;}
+  const done=(list||[]).filter(a=>unlocked[a.id]);
+  const badges=done.slice(-3).map(a=>a.badge||a.icon||'🏅');
+  const defs=['🏆','🎓','🔥'];
+  while(badges.length<3)badges.push(defs[badges.length]);
+  const achLbl={ru:'Достижения',en:'Achievements',es:'Logros',pt:'Conquistas',de:'Erfolge',fr:'Succès',uk:'Досягнення',tr:'Başarılar',zh:'成就',ar:'الإنجازات'}[lang]||'Achievements';
+  const row=document.createElement('div');
+  row.className='ed-ach-row';row.setAttribute('role','button');
+  row.innerHTML=`<div class="ed-ach-t">${achLbl}</div>`
+    +`<div class="ed-ach-icos">${badges.map(b=>`<span class="ed-ach-ico">${b}</span>`).join('')}</div>`
+    +`<div class="ed-ach-arr">›</div>`;
+  row.onclick=()=>{try{openAchModal();}catch(_){}};
+  return row;
 }
 
 /* Progress → My Saved Words: list words the user saved from flashcards, with
