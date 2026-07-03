@@ -626,8 +626,29 @@ async def upsert_user(uid: int, name: str):
             uid, name, _today()
         )
 
+# SECURITY: whitelist of columns update_user may write. The kwarg KEY is
+# interpolated into the SQL column position (values are always parameterized),
+# so this guard guarantees no untrusted/unknown identifier can ever reach the
+# query — hard SQL-injection stop for column names. All current callers pass
+# literal keywords, but this makes accidental future misuse impossible.
+_USER_UPDATABLE_COLS = frozenset({
+    "name", "lang", "level", "interests", "profession", "streak",
+    "last_active", "plant_tonus", "last_xp_date", "xp", "hearts",
+    "hearts_updated_at", "lessons_done_today", "lessons_done_date",
+    "ai_req_today", "ai_req_date", "cards_done_today", "cards_done_date",
+    "remind_time", "complex_streak", "simple_streak", "auto_level",
+    "is_premium", "premium_until", "premium_tier", "platform_until",
+    "platform_lifetime", "chat_credits", "grandfathered_tier",
+    "free_credits", "free_credits_date", "premium_type",
+    "total_requests_remaining", "sub_exp_notified", "ref_by",
+    "referrals", "ref_premium_days",
+})
+
 async def update_user(uid: int, **kwargs):
     for k, v in kwargs.items():
+        if k not in _USER_UPDATABLE_COLS:
+            logger.warning("update_user rejected non-whitelisted column %r uid=%s", k, uid)
+            continue
         await db(f"UPDATE users SET {k}=? WHERE uid=?", v, uid)
 
 # Credits granted to the inviter per VALID new referral. This is THE referral
@@ -1087,8 +1108,21 @@ async def spend_credits(uid: int, amount: int) -> bool:
     have = int(user.get("chat_credits") or 0)
     if have < amount:
         return False
+    # Atomically confirm the guarded debit actually applied. The
+    # `chat_credits>=amount` guard makes the balance impossible to drive
+    # negative; here we additionally require the row to have changed, so a
+    # lost concurrent race returns False (no free request) instead of a
+    # phantom success.
+    if USE_POSTGRES:
+        row = await db(
+            "UPDATE users SET chat_credits=chat_credits-? "
+            "WHERE uid=? AND chat_credits>=? RETURNING chat_credits",
+            amount, uid, amount, fetch="one")
+        return bool(row)
     await db("UPDATE users SET chat_credits=chat_credits-? WHERE uid=? AND chat_credits>=?", amount, uid, amount)
-    return True
+    u2 = await get_user(uid) or {}
+    new_bal = int(u2.get("chat_credits") or 0)
+    return new_bal == have - amount
 
 
 # ── Grandfather snapshot ───────────────────────────────────────────

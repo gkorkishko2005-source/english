@@ -3466,23 +3466,16 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
     </div>
   </div>
 
-  <!-- Compact languages row: UI + Bot -->
+  <!-- Interface language. The separate "ALEX replies" language picker was
+       removed: ALEX now always answers in the interface language, so there's
+       one setting instead of two. -->
   <div class="sec"><span id="lang-sec-lbl">Languages</span></div>
-  <div class="set-grid-2">
-    <div class="lang-picker-btn" onclick="openLangPicker('ui')">
-      <div class="lang-picker-col">
-        <div class="lang-picker-cap" id="ui-lang-cap">Интерфейс</div>
-        <div class="lang-picker-name" id="ui-lang-name">Русский</div>
-      </div>
-      <span class="lang-picker-arr">›</span>
+  <div class="lang-picker-btn" onclick="openLangPicker('ui')">
+    <div class="lang-picker-col">
+      <div class="lang-picker-cap" id="ui-lang-cap">Интерфейс</div>
+      <div class="lang-picker-name" id="ui-lang-name">Русский</div>
     </div>
-    <div class="lang-picker-btn" onclick="openLangPicker('bot')">
-      <div class="lang-picker-col">
-        <div class="lang-picker-cap" id="bot-lang-cap">Ответы ALEX</div>
-        <div class="lang-picker-name" id="bot-lang-name">Русский</div>
-      </div>
-      <span class="lang-picker-arr">›</span>
-    </div>
+    <span class="lang-picker-arr">›</span>
   </div>
 
   <!-- Profile: reminder + interests inline -->
@@ -3736,13 +3729,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   </div>
 </div>
 
-<!-- BOT LANGUAGE PICKER MODAL -->
-<div class="mov" id="botlangm" style="display:none" onclick="closeMod('botlangm')">
-  <div class="msh" onclick="event.stopPropagation()"><div class="mhnd"></div>
-    <div class="mtit" id="botlang-mtit">Bot language</div>
-    <div class="lang-scroll-wrap" id="botlang-scroll"></div>
-  </div>
-</div>
+<!-- BOT LANGUAGE PICKER MODAL — removed. ALEX answers in the interface language. -->
 
 <!-- RENAME MODAL -->
 <div class="mov" id="renamem" style="display:none" onclick="closeRenameModal()">
@@ -4420,13 +4407,11 @@ function updateAlexOnlineState(){
 const SUPPORTED_LANGS = ['ru','en','es','pt','de','fr','uk','tr','zh','ar'];
 function _normLang(v){return SUPPORTED_LANGS.includes(v)?v:'en';}
 let lang    = _normLang(LS.get('app_lang')   || 'ru');
-/* ALEX reply language defaults to the interface language so RU UI → RU answers.
-   Migration: older builds could leave a stray bot_lang (e.g. 'ar') that was
-   never intentionally chosen, making ALEX reply in the wrong language. We only
-   honour bot_lang when the user explicitly picked it (bot_lang_set marker);
-   otherwise drop it so the ALEX language follows the interface. */
-if(LS.get('bot_lang') && !LS.get('bot_lang_set')){try{LS.del('bot_lang');}catch(e){}}
-let botLang = _normLang(LS.get('bot_lang')   || LS.get('app_lang') || 'ru');
+/* ALEX ALWAYS answers in the interface language now — the separate "ALEX
+   replies" language setting was removed. Drop any legacy bot_lang override so
+   old accounts (some had a stray 'ar') snap back to following the interface. */
+try{LS.del('bot_lang');LS.del('bot_lang_set');}catch(e){}
+let botLang = lang;
 let L = LANGS[lang] || LANGS.en;
 
 /* ══ APPLY LANGUAGE ══ */
@@ -4546,33 +4531,26 @@ const BOT_LANGS=[
 
 function updateLangPickerBtns(){
   const ul=UI_LANGS.find(x=>x.code===lang)||UI_LANGS[0];
-  const bl=BOT_LANGS.find(x=>x.code===botLang)||BOT_LANGS[0];
   const un=document.getElementById('ui-lang-name');  if(un)un.textContent=ul.name;
-  const bn=document.getElementById('bot-lang-name'); if(bn)bn.textContent=bl.name;
   const uc=document.getElementById('ui-lang-cap');  if(uc)uc.textContent=({ru:'Интерфейс',en:'Interface',es:'Interfaz',pt:'Interface',de:'Oberfläche',fr:'Interface',uk:'Інтерфейс',tr:'Arayüz',zh:'界面',ar:'الواجهة'}[lang]||'Interface');
-  const bc=document.getElementById('bot-lang-cap'); if(bc)bc.textContent=({ru:'Ответы ALEX',en:'ALEX replies',es:'Respuestas de ALEX',pt:'Respostas do ALEX',de:'ALEX-Antworten',fr:'Réponses d’ALEX',uk:'Відповіді ALEX',tr:'ALEX yanıtları',zh:'ALEX 回复',ar:'ردود ALEX'}[lang]||'ALEX replies');
-  // Also update modal titles
   const um=document.getElementById('uilang-mtit');  if(um)um.textContent=L.uilang||'Interface language';
-  const bm=document.getElementById('botlang-mtit'); if(bm)bm.textContent=L.botlang||'Bot language';
 }
 
 function openLangPicker(type){
-  const isUI=type==='ui';
-  const modalId=isUI?'uilangm':'botlangm';
-  const scrollId=isUI?'uilang-scroll':'botlang-scroll';
-  const langs=isUI?UI_LANGS:BOT_LANGS;
-  const cur=isUI?lang:botLang;
-  const wrap=document.getElementById(scrollId);
+  /* Only the interface-language picker remains. The 'bot' variant was removed
+     because ALEX now always answers in the interface language. */
+  const modalId='uilangm';
+  const wrap=document.getElementById('uilang-scroll');
   if(!wrap)return;
   wrap.innerHTML='';
-  langs.forEach(l=>{
+  UI_LANGS.forEach(l=>{
     const row=document.createElement('div');
-    row.className='lang-opt-row'+(l.code===cur?' on':'');
+    row.className='lang-opt-row'+(l.code===lang?' on':'');
     row.innerHTML=`<span class="lang-opt-name">${l.name}</span><span class="lang-opt-chk">✓</span>`;
     row.onclick=()=>{
       wrap.querySelectorAll('.lang-opt-row').forEach(r=>r.classList.remove('on'));
       row.classList.add('on');
-      if(isUI)setLang(l.code);else setBotLang(l.code);
+      setLang(l.code);
       setTimeout(()=>closeMod(modalId),280);
     };
     wrap.appendChild(row);
@@ -4583,9 +4561,9 @@ function openLangPicker(type){
 
 function setLang(l){
   lang=l;LS.set('app_lang',l);L=LANGS[l]||LANGS.en;
-  /* Keep ALEX answering in the interface language unless the user has
-     explicitly chosen a different ALEX language before. */
-  if(!LS.get('bot_lang')){botLang=_normLang(l);}
+  /* ALEX always follows the interface language now (the separate ALEX-language
+     setting was removed), so the reply language moves in lock-step with the UI. */
+  botLang=_normLang(l);
   applyLang();updateLangPickerBtns();
   syncBotUiLang(l);
   toast(UI_LANGS.find(x=>x.code===l)?.name||l);
@@ -4601,11 +4579,6 @@ function syncBotUiLang(l){
       body:JSON.stringify({uid:window._uid,lang:l,init_data:(typeof tg!=='undefined'&&tg&&tg.initData)||''})
     }).catch(()=>{});
   }catch(_){}
-}
-function setBotLang(l){
-  botLang=l;LS.set('bot_lang',l);LS.set('bot_lang_set','1');
-  updateLangPickerBtns();
-  toast(BOT_LANGS.find(x=>x.code===l)?.name||l);
 }
 
 /* ══ CHIPS ══ */
@@ -6429,28 +6402,13 @@ async function doChat(text,mode){
   finally{busy=false;try{document.getElementById('sndb').disabled=false;}catch(e){}try{resetChipCooldown();}catch(e){}}
 }
 
-/* Small, unobtrusive test badge showing which AI model answered the last chat
-   message: "Powered by Gemini" (free) or "Powered by Claude" (premium). Auto-
-   fades after a few seconds. Purely a debug/QA aid. */
+/* Provider badge — REMOVED for release. This used to float a "ALEX Basic/Pro"
+   pill at the very top of the screen (top:10px) with a teal tint, which read as
+   a bright green light in the header and risked OLED burn-in. It's a debug/QA
+   leftover with no user value, so it's now a no-op: nothing is rendered, and any
+   stray badge left in the DOM is cleaned up. */
 function _showProviderBadge(txt,provider){
-  if(!txt)return;
-  const gem=/gemini|basic|free/i.test(String(provider||txt));
-  let b=document.getElementById('ai-prov-badge');
-  if(!b){
-    b=document.createElement('div');b.id='ai-prov-badge';
-    b.style.cssText='position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:10000;font:700 11px/1 var(--f,system-ui);padding:6px 11px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap';
-    document.body.appendChild(b);
-  }
-  /* Marketing-only surface: never expose the underlying model to users —
-     free tier reads as "ALEX Basic", premium as "ALEX Pro". Monochrome,
-     matte styling only — no colored glow/tint so the header stays calm. */
-  b.textContent=gem?'ALEX Basic':'ALEX Pro';
-  b.style.background='rgba(22,22,26,.78)';
-  b.style.color='#c9c9cf';
-  b.style.border='1px solid rgba(255,255,255,.12)';
-  b.style.boxShadow='none';
-  b.style.opacity='1';
-  clearTimeout(b._t);b._t=setTimeout(()=>{try{b.style.opacity='0';}catch(_){}} ,4000);
+  try{const b=document.getElementById('ai-prov-badge');if(b)b.remove();}catch(_){}
 }
 function confirmClear(){openMod('cfmm');}
 function doClear(){closeCfm();clearSilent();toast(L.clrd,'🔄');setTimeout(()=>addMsg('bot',L.welcome),80);}

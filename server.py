@@ -1523,8 +1523,12 @@ async def handle_rate(request):
     try:
         body=await request.json()
         uid=int(body.get("uid",0)); word_id=int(body.get("word_id",0)); quality=int(body.get("quality",3))
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception as e:
         return web.json_response({"error":str(e)},status=400)
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     if uid and word_id:
         try:
             from database import update_word_review, upsert_user
@@ -1539,8 +1543,12 @@ async def handle_add_xp(request):
     try:
         body=await request.json()
         uid=int(body.get("uid",0)); xp=int(body.get("xp",0))
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"error":"bad request"},status=400)
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     if uid and xp>0:
         try:
             from database import add_xp, upsert_user
@@ -1555,8 +1563,12 @@ async def handle_set_profession(request):
     try:
         body=await request.json()
         uid=int(body.get("uid",0)); profession=str(body.get("profession",""))[:500]
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"error":"bad"},status=400)
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     if uid and profession:
         try:
             from database import set_profession, upsert_user
@@ -1571,8 +1583,12 @@ async def handle_set_reminder(request):
     try:
         body=await request.json()
         uid=int(body.get("uid",0)); remind_time=str(body.get("remind_time",""))
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"error":"bad"},status=400)
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     if uid:
         try:
             from database import set_reminder, upsert_user
@@ -1597,8 +1613,12 @@ async def handle_set_lang(request):
         body=await request.json()
         uid=int(body.get("uid",0) or 0)
         raw=str(body.get("lang","") or "").strip().lower()[:5]
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"error":"bad"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     bot_lang = "ru" if raw.startswith("ru") else "en"
     if uid:
         try:
@@ -1623,8 +1643,12 @@ async def handle_complete_day(request):
         body = await request.json()
         uid = int(body.get("uid",0) or 0)
         tz = int(body.get("tz_offset_min",0) or 0)
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"ok":False},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"ok":False,"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     if not uid:
         return web.json_response({"ok":False},headers={"Access-Control-Allow-Origin":"*"})
     try:
@@ -1886,13 +1910,38 @@ async def handle_tts(request):
         return web.json_response({"error":str(e)[:200]},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── STT ──────────────────────────────────────────────────────────────────────
+# Hard limits on the audio-upload path (TOEFL/IELTS speaking + chat voice).
+# The 5 MB cap + MIME/extension allow-list stop a DoS where someone streams a
+# multi-GB "voice message" (or a non-audio blob) to crash / bill the server.
+MAX_AUDIO_BYTES = 5 * 1024 * 1024
+_ALLOWED_AUDIO_EXT = (".webm", ".ogg", ".oga", ".opus", ".mp3", ".mpeg",
+                      ".mpga", ".m4a", ".mp4", ".wav", ".aac", ".flac")
+def _audio_ct_ok(content_type: str, filename: str) -> bool:
+    ct = (content_type or "").split(";")[0].strip().lower()
+    if ct.startswith("audio/"):
+        return True
+    # Browser MediaRecorder frequently labels webm/ogg/mp4 containers as video/*
+    # or application/ogg even though they carry an audio-only track — allow those.
+    if ct in ("video/webm", "video/ogg", "video/mp4", "application/ogg"):
+        return True
+    fn = (filename or "").lower()
+    return any(fn.endswith(ext) for ext in _ALLOWED_AUDIO_EXT)
+
 async def handle_transcribe(request):
     """Speech-to-text endpoint for Telegram WebView, where Web Speech API is unreliable."""
-    max_bytes = 8 * 1024 * 1024
+    max_bytes = MAX_AUDIO_BYTES
     audio = b""
     filename = "voice.webm"
     lang = "en"
     try:
+        # Reject oversized uploads up-front via the declared Content-Length so a
+        # huge body is never buffered into memory in the first place.
+        try:
+            declared = int(request.headers.get("Content-Length") or 0)
+        except Exception:
+            declared = 0
+        if declared and declared > max_bytes + 65536:
+            return web.json_response({"error":"audio too large"},status=413,headers={"Access-Control-Allow-Origin":"*"})
         if request.content_type.startswith("multipart/"):
             reader = await request.multipart()
             async for part in reader:
@@ -1900,6 +1949,9 @@ async def handle_transcribe(request):
                     lang = (await part.text()).strip()[:5] or "en"
                 elif part.name in ("audio", "file", "voice"):
                     filename = part.filename or filename
+                    part_ct = part.headers.get("Content-Type", "")
+                    if not _audio_ct_ok(part_ct, filename):
+                        return web.json_response({"error":"unsupported audio format"},status=415,headers={"Access-Control-Allow-Origin":"*"})
                     chunks = []
                     size = 0
                     while True:
@@ -1912,9 +1964,11 @@ async def handle_transcribe(request):
                         chunks.append(chunk)
                     audio = b"".join(chunks)
         else:
-            audio = await request.read()
             filename = request.query.get("filename", filename)
             lang = request.query.get("lang", lang)[:5] or "en"
+            if not _audio_ct_ok(request.content_type, filename):
+                return web.json_response({"error":"unsupported audio format"},status=415,headers={"Access-Control-Allow-Origin":"*"})
+            audio = await request.read()
             if len(audio) > max_bytes:
                 return web.json_response({"error":"audio too large"},status=413,headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
@@ -1939,13 +1993,23 @@ async def handle_transcribe(request):
 
 # ── MISTAKES / ERROR DIARY ───────────────────────────────────────────────────
 def _auth_uid_from_request(request, uid: int, init_data: str):
+    """Return (ok, reason, trusted_uid).
+
+    SECURITY: when initData verification is active, the trusted uid is derived
+    EXCLUSIVELY from the cryptographically-signed Telegram initData — the
+    client-supplied ``uid`` is never trusted. If a raw uid is also supplied it
+    must match the signed one (mismatch → rejected), so a spoofed body can't
+    act on another account. Only local/dev requests (or a disabled gate) fall
+    back to the raw uid."""
     if REQUIRE_TG_INIT_DATA and BOT_TOKEN and not _is_local_request(request):
         ok, reason, signed_uid = _verify_telegram_init_data(init_data, uid)
         if not ok:
-            logger.warning("blocked mistakes uid=%s signed_uid=%s reason=%s", uid, signed_uid, reason)
+            logger.warning("blocked request uid=%s signed_uid=%s reason=%s", uid, signed_uid, reason)
             return False, reason, uid
-        if signed_uid and not uid:
-            uid = signed_uid
+        if not signed_uid:
+            return False, "no signed uid", uid
+        # Always act as the signed identity, never the client-claimed one.
+        return True, "", int(signed_uid)
     return True, "", uid
 
 def _mistake_row(row):
@@ -2907,10 +2971,14 @@ async def handle_sync_stats(request):
     try:
         body = await request.json()
         uid = int(body.get("uid",0))
+        init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
         if not uid:
             return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
     except Exception:
         return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
+    ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"ok":False,"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
     try:
         from database import db, upsert_user
         # Ensure user exists
