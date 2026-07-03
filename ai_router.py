@@ -309,7 +309,7 @@ OPENROUTER_TITLE        = os.getenv("OPENROUTER_TITLE", "PolyGlotty")
 #  A single OpenRouter key fronts many ":free" models. For FREE users we try a
 #  list of free models in order; when one is rate-limited (429) or transiently
 #  unavailable we fall through to the NEXT model, and finally to a cheap PAID
-#  fallback (google/gemini-2.5-flash-lite) so free chat never dead-ends.
+#  fallback (google/gemma-3-27b-it) so free chat never dead-ends.
 #
 #  HONEST NOTE: OpenRouter's free daily quota is ACCOUNT-WIDE (shared across all
 #  ":free" variants), so rotating free models buys RELIABILITY (it dodges a
@@ -329,7 +329,7 @@ _DEFAULT_FREE_MODELS = ",".join([
     "openai/gpt-oss-20b:free",                  # lightweight last resort
 ])
 OPENROUTER_FREE_MODELS   = [m.strip() for m in os.getenv("OPENROUTER_FREE_MODELS", _DEFAULT_FREE_MODELS).split(",") if m.strip()]
-OPENROUTER_MODEL_FALLBACK = os.getenv("OPENROUTER_MODEL_FALLBACK", "google/gemini-2.5-flash-lite").strip()
+OPENROUTER_MODEL_FALLBACK = os.getenv("OPENROUTER_MODEL_FALLBACK", "google/gemma-3-27b-it").strip()
 
 if OPENROUTER_API_KEY:
     logger.info(f"✅ OPENROUTER_API_KEY loaded (model={OPENROUTER_MODEL}, base={OPENROUTER_BASE_URL}, starts with {OPENROUTER_API_KEY[:12]}...)")

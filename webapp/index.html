@@ -4587,7 +4587,20 @@ function setLang(l){
      explicitly chosen a different ALEX language before. */
   if(!LS.get('bot_lang')){botLang=_normLang(l);}
   applyLang();updateLangPickerBtns();
+  syncBotUiLang(l);
   toast(UI_LANGS.find(x=>x.code===l)?.name||l);
+}
+/* Push the interface-language choice to the backend so the Telegram bot's
+   own messages (greetings, /help, plans) match the app. The bot speaks only
+   RU or EN, so anything that isn't Russian collapses to English server-side. */
+function syncBotUiLang(l){
+  try{
+    if(!API||!window._uid)return;
+    fetch(`${API}/api/set_lang`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:window._uid,lang:l,init_data:(typeof tg!=='undefined'&&tg&&tg.initData)||''})
+    }).catch(()=>{});
+  }catch(_){}
 }
 function setBotLang(l){
   botLang=l;LS.set('bot_lang',l);LS.set('bot_lang_set','1');
@@ -6425,15 +6438,17 @@ function _showProviderBadge(txt,provider){
   let b=document.getElementById('ai-prov-badge');
   if(!b){
     b=document.createElement('div');b.id='ai-prov-badge';
-    b.style.cssText='position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:10000;font:700 11px/1 var(--f,system-ui);padding:6px 11px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25)';
+    b.style.cssText='position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:10000;font:700 11px/1 var(--f,system-ui);padding:6px 11px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap';
     document.body.appendChild(b);
   }
   /* Marketing-only surface: never expose the underlying model to users —
-     free tier reads as "ALEX Basic", premium as "ALEX Pro". */
+     free tier reads as "ALEX Basic", premium as "ALEX Pro". Monochrome,
+     matte styling only — no colored glow/tint so the header stays calm. */
   b.textContent=gem?'ALEX Basic':'ALEX Pro';
-  b.style.background=gem?'rgba(66,133,244,.16)':'rgba(20,184,166,.16)';
-  b.style.color=gem?'#8ab4f8':'#5eead4';
-  b.style.border='1px solid '+(gem?'rgba(66,133,244,.45)':'rgba(20,184,166,.45)');
+  b.style.background='rgba(22,22,26,.78)';
+  b.style.color='#c9c9cf';
+  b.style.border='1px solid rgba(255,255,255,.12)';
+  b.style.boxShadow='none';
   b.style.opacity='1';
   clearTimeout(b._t);b._t=setTimeout(()=>{try{b.style.opacity='0';}catch(_){}} ,4000);
 }

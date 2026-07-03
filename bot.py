@@ -1295,11 +1295,11 @@ async def cmd_start(message: Message):
     # WebApp URL is unavailable (local dev) we fall back to a plain bot link.
     app_url = webapp_url()
     open_btn = (InlineKeyboardButton(
-                    text="Открыть практику 🚀" if ru else "Open practice 🚀",
+                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
                     web_app=WebAppInfo(url=app_url))
                 if app_url else
                 InlineKeyboardButton(
-                    text="Открыть практику 🚀" if ru else "Open practice 🚀",
+                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
                     url=public_bot_url()))
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=[
         [open_btn],
@@ -1307,42 +1307,47 @@ async def cmd_start(message: Message):
             text="📢 Канал" if ru else "📢 Channel",
             url=channel_url())],
     ])
-    # Short, official onboarding copy.
+    # Short, official onboarding copy — kept tight so it fits one phone screen.
     if ru:
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
-            f"PolyGlotty — интерактивный AI-репетитор английского языка в Telegram. "
-            f"Вам доступны программы обучения A0–C2, персональный чат с ассистентом "
-            f"ALEX, симуляторы TOEFL/IELTS и умные карточки.\n\n"
-            f"Для начала обучения нажмите кнопку «Open App» (Открыть приложение) "
-            f"на панели управления ниже.\n\n"
-            f"Наш официальный канал: {handle}"
+            f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram:\n"
+            f"• Курс <b>A0–C2</b>, карточки, экзамены\n"
+            f"• Персональный чат с ассистентом <b>ALEX</b>\n\n"
+            f"Жми <b>«Открыть приложение»</b> ниже. 👇\n"
+            f"Канал: {handle}"
             f"{ref_line}"
         )
     else:
         text = (
             f"<b>{greet}, {name_html}!</b>\n\n"
-            f"PolyGlotty is an interactive AI English tutor inside Telegram. You have "
-            f"access to A0–C2 learning programs, a personal chat with the ALEX "
-            f"assistant, TOEFL/IELTS simulators and smart flashcards.\n\n"
-            f"To start learning, tap the “Open App” button on the control panel below.\n\n"
-            f"Our official channel: {handle}"
+            f"<b>PolyGlotty</b> — an AI English tutor inside Telegram:\n"
+            f"• <b>A0–C2</b> course, flashcards, exams\n"
+            f"• Personal chat with the <b>ALEX</b> assistant\n\n"
+            f"Tap <b>“Open App”</b> below. 👇\n"
+            f"Channel: {handle}"
             f"{ref_line}"
         )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
 
 def _quick_menu_kb(ru: bool) -> InlineKeyboardMarkup:
-    """The 6-section navigation grid (Урок/Слова/Тест/Подписка/Поддержка/
-    Пригласить). Used by /menu and the inline "Меню" entry. The "Все функции"
-    button is intentionally absent."""
+    """Minimal 3-button hub: Open App / Plans / Invite. Everything else
+    (lessons, vocab, tests, flashcards) lives INSIDE the Mini App — the chat
+    stays uncluttered instead of spamming section buttons in Telegram."""
+    app_url = webapp_url()
+    open_btn = (InlineKeyboardButton(
+                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
+                    web_app=WebAppInfo(url=app_url))
+                if app_url else
+                InlineKeyboardButton(
+                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
+                    url=public_bot_url()))
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=f"{ICON['lesson']} Урок" if ru else f"{ICON['lesson']} Lesson", callback_data="quick_lesson"),
-         InlineKeyboardButton(text=f"{ICON['vocab']} Слова" if ru else f"{ICON['vocab']} Vocab", callback_data="quick_vocab")],
-        [InlineKeyboardButton(text=f"{ICON['test']} Тест" if ru else f"{ICON['test']} Test", callback_data="quick_test"),
-         InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans", callback_data="open_premium")],
-        [InlineKeyboardButton(text=f"{ICON['support']} Поддержка" if ru else f"{ICON['support']} Support", callback_data="quick_support"),
-         InlineKeyboardButton(text=f"{ICON['share']} Пригласить" if ru else f"{ICON['share']} Invite", switch_inline_query="invite")],
-        [InlineKeyboardButton(text=f"{ICON['language']} Язык" if ru else f"{ICON['language']} Language", callback_data="quick_lang")],
+        [open_btn],
+        [InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans",
+                              callback_data="open_premium")],
+        [InlineKeyboardButton(text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
+                              switch_inline_query="invite")],
     ])
 
 @dp.message(Command("menu"))
@@ -1350,9 +1355,9 @@ async def cmd_menu(message: Message):
     lang = await get_lang(message.from_user.id) or "ru"
     ru = lang == "ru"
     await message.answer(
-        "<b>📋 Меню</b>\nВыберите раздел — или откройте приложение для полного курса."
+        "<b>📋 Меню</b>\nВсё обучение — внутри приложения."
         if ru else
-        "<b>📋 Menu</b>\nPick a section — or open the app for the full course.",
+        "<b>📋 Menu</b>\nAll learning lives inside the app.",
         parse_mode="HTML",
         reply_markup=_quick_menu_kb(ru),
     )

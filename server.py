@@ -1582,6 +1582,33 @@ async def handle_set_reminder(request):
             logger.warning(f"set_reminder failed uid={uid}: {e}")
     return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
 
+# ── SET INTERFACE LANGUAGE ─────────────────────────────────────────────────────
+# Syncs the Mini App interface-language choice into the bot's DB `lang` column
+# (read by get_lang), so the Telegram bot's system messages, plans and /help
+# follow the language the user picked in the app. The bot itself only speaks
+# RU or EN, so we collapse everything that is not Russian to English.
+async def handle_set_lang(request):
+    if request.method == "OPTIONS":
+        return web.json_response({"ok":True},headers={
+            "Access-Control-Allow-Origin":"*",
+            "Access-Control-Allow-Methods":"POST, OPTIONS",
+            "Access-Control-Allow-Headers":"Content-Type"})
+    try:
+        body=await request.json()
+        uid=int(body.get("uid",0) or 0)
+        raw=str(body.get("lang","") or "").strip().lower()[:5]
+    except Exception:
+        return web.json_response({"error":"bad"},status=400,headers={"Access-Control-Allow-Origin":"*"})
+    bot_lang = "ru" if raw.startswith("ru") else "en"
+    if uid:
+        try:
+            from database import update_user, upsert_user
+            await upsert_user(uid, "Student")
+            await update_user(uid, lang=bot_lang)
+        except Exception as e:
+            logger.warning(f"set_lang failed uid={uid}: {e}")
+    return web.json_response({"ok":True,"lang":bot_lang},headers={"Access-Control-Allow-Origin":"*"})
+
 # ── COMPLETE DAY (server-authoritative streak) ─────────────────────────────────
 async def handle_complete_day(request):
     """Count today's streak on the SERVER. The day boundary is computed from
@@ -3091,6 +3118,7 @@ def create_app():
     app.router.add_post("/api/add_xp",handle_add_xp)
     app.router.add_post("/api/set_profession",handle_set_profession)
     app.router.add_post("/api/set_reminder",handle_set_reminder)
+    app.router.add_post("/api/set_lang",handle_set_lang)
     app.router.add_post("/api/complete_day",handle_complete_day)
     app.router.add_route("OPTIONS","/api/complete_day",handle_complete_day)
     app.router.add_post("/api/audio_task",handle_audio_task)
