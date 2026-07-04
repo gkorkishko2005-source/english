@@ -12,12 +12,12 @@
    a single teal accent (used only for primary CTAs + active tabs), pure-white
    headings and muted-grey secondary text. Status hues (--or/--rd/--exam/level
    colours) are kept for semantic meaning but no longer paint full backgrounds. */
-:root{--e0:#0B0B0C;--e1:#161513;--e2:#1E1C19;--e3:#2A2723;--a:#C79A5B;--a2:#A17A40;--ar:199,154,91;--g:#161513;--gb:#C79A5B;--t1:#ECE7DD;--t2:rgba(236,231,221,.60);--t3:rgba(236,231,221,.36);--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.10);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.06);--sh:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 24px -12px rgba(0,0,0,.7);
+:root{--e0:#0B0C0C;--e1:#141615;--e2:#1C1F1E;--e3:#262A28;--a:#12C79A;--a2:#0DA37E;--ar:18,199,154;--g:#141615;--gb:#12C79A;--t1:#EFF2F0;--t2:rgba(239,242,240,.60);--t3:rgba(239,242,240,.36);--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.10);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.06);--sh:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 24px -12px rgba(0,0,0,.7);
   /* ── Design-system tokens (mapped onto the existing scale above) ──
      New canonical names per the redesign spec. They ALIAS our real
      variables so old and new code stay in sync. Dark theme values. */
-  --bg-app:#0B0B0C;--bg-card:#161513;--color-primary:#C79A5B;
-  --text-main:#ECE7DD;--text-muted:rgba(236,231,221,.60);
+  --bg-app:#0B0C0C;--bg-card:#141615;--color-primary:#12C79A;
+  --text-main:#EFF2F0;--text-muted:rgba(239,242,240,.60);
   --border-ui:rgba(255,255,255,.06);--shadow-ui:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 24px -12px rgba(0,0,0,.7);
   --r-card:20px;--r-chip:10px}
 
@@ -26,17 +26,17 @@
   /* Premium light theme: near-white app bg (#F8F9FA), lightly recessed card
      surfaces (#F1F3F5), graphite text, and our brand emerald (#007A6A) kept
      as the single accent so it stays contrasty on white. */
-  --e0:#F8F9FA;--e1:#FFFFFF;--e2:#F1F3F5;--e3:#E7EAEE;
-  --a:#007A6A;--a2:#006657;--ar:0,122,106;
-  --g:#FFFFFF;--gb:#007A6A;
-  --t1:#1A1C1F;--t2:#5A6472;--t3:#8A93A0;
+  --e0:#F5F8F7;--e1:#FFFFFF;--e2:#EEF3F1;--e3:#E3EAE7;
+  --a:#0AA37D;--a2:#088A69;--ar:10,163,125;
+  --g:#FFFFFF;--gb:#0AA37D;
+  --t1:#141B18;--t2:#556560;--t3:#8A948F;
   --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.11);
   --or:#e08600;--or-r:224,134,0;--rd:#e54545;--gd:#d49a20;
   --green:#0ca678;--green-r:12,166,120;--exam:#7c5cf0;--exam-r:124,92,240;
   --edge:rgba(255,255,255,.7);--sh:0 4px 14px rgba(0,0,0,.07);
   /* Design-system tokens — light theme values. */
-  --bg-app:#F8F9FA;--bg-card:#FFFFFF;--color-primary:#007A6A;
-  --text-main:#1A1C1F;--text-muted:#5A6472;
+  --bg-app:#F5F8F7;--bg-card:#FFFFFF;--color-primary:#0AA37D;
+  --text-main:#141B18;--text-muted:#556560;
   --border-ui:rgba(0,0,0,.06);--shadow-ui:0 4px 12px rgba(0,0,0,.05);
 }
 [data-mode=light] #app{background:#f5f5f7}
@@ -313,10 +313,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .nic svg{width:20px;height:20px;stroke:rgba(255,255,255,.65);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nlb{font-size:8px;font-weight:600;color:rgba(255,255,255,.65);letter-spacing:-.1px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%;text-align:center;transition:color .2s}
 .ni{min-width:0}
-.ni.on .nic{background:linear-gradient(145deg,rgba(var(--ar),.20),rgba(var(--ar),.05));transform:translateY(-4px) scale(1.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 14px -6px rgba(var(--ar),.22),inset 0 0 0 1px rgba(var(--ar),.22)}
+.ni.on .nic{background:rgba(var(--ar),.14);transform:translateY(-4px) scale(1.08);box-shadow:inset 0 0 0 1px rgba(var(--ar),.22)}
 .ni.on .nic svg{stroke:var(--a)}
 .ni.on .nlb{color:var(--a);font-weight:700}
-.ni.on::before{content:'';position:absolute;top:-1px;left:50%;width:26px;height:3px;border-radius:0 0 5px 5px;background:linear-gradient(90deg,transparent,var(--a),transparent);box-shadow:0 2px 8px rgba(var(--ar),.40);transform:translateX(-50%);transform-origin:center;animation:navRail .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.ni.on::before{content:'';position:absolute;top:-1px;left:50%;width:26px;height:3px;border-radius:0 0 5px 5px;background:var(--a);box-shadow:none;transform:translateX(-50%);transform-origin:center;animation:navRail .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .ni:active .nic{transform:scale(.9)}
 .ni.on:active .nic{transform:translateY(-3px) scale(.98)}
 @keyframes navRail{from{opacity:0;transform:translateX(-50%) scaleX(.2)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
@@ -361,7 +361,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
   box-shadow:0 2px 10px rgba(0,0,0,.28)}
 .hero-av img{width:100%;height:100%;object-fit:cover;display:block}
 /* Initials fallback when photo_url is missing / hidden / fails to load. */
-.hero-av.fallback{background:linear-gradient(135deg,#8b5cf6,#14b8a6)}
+.hero-av.fallback{background:var(--a)}
 .hero-text{min-width:0;display:flex;flex-direction:column;gap:2px}
 .htm{font-size:11px;font-weight:650;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;line-height:1.2;margin:0}
 .hnm{font-size:20px;font-weight:700;line-height:1.2;color:var(--t1);word-break:break-word;letter-spacing:-.2px;margin:0}
@@ -2061,11 +2061,11 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .course-lesson{background:var(--bg-app);border:1px solid rgba(var(--ar),.13);border-radius:var(--r2);padding:12px;padding-top:max(12px,env(safe-area-inset-top));padding-bottom:calc(20px + env(safe-area-inset-bottom));margin-bottom:10px}
 .course-lesson h3{margin:0 0 4px;font-size:15px;color:var(--t1)}
 .course-lesson-sub{font-size:11px;color:var(--t3);margin-bottom:9px}
-.course-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 22%,transparent),rgba(0,212,170,.06));border:1px solid color-mix(in srgb,var(--lesson-color,var(--a)) 32%,transparent);border-radius:18px;padding:16px 14px;margin-bottom:10px;isolation:isolate}
-.course-hero::before{content:'';position:absolute;inset:-30% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--lesson-color,var(--a)) 45%,transparent),transparent 72%);opacity:.5;z-index:-1}
+.course-hero{position:relative;overflow:hidden;background:color-mix(in srgb,var(--lesson-color,var(--a)) 12%,var(--bg-card));border:1px solid color-mix(in srgb,var(--lesson-color,var(--a)) 28%,transparent);border-radius:18px;padding:16px 14px;margin-bottom:10px;isolation:isolate}
+.course-hero::before{content:'';position:absolute;inset:-30% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:transparent;opacity:.5;z-index:-1}
 .course-hero::after{content:'';position:absolute;left:-22%;bottom:-44%;width:62%;aspect-ratio:1;border-radius:50%;background:transparent;opacity:.4;z-index:-1}
 .course-hero-top{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
-.course-hero-ico{position:relative;width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--lesson-color,var(--a)) 28%,transparent),rgba(0,212,170,.10));display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));box-shadow:0 10px 24px color-mix(in srgb,var(--lesson-color,var(--a)) 30%,transparent);overflow:hidden}
+.course-hero-ico{position:relative;width:48px;height:48px;border-radius:16px;background:color-mix(in srgb,var(--lesson-color,var(--a)) 18%,transparent);display:flex;align-items:center;justify-content:center;color:var(--lesson-color,var(--a));overflow:hidden}
 .course-hero-ico::after{content:'';position:absolute;inset:0;border-radius:16px;background:transparent;pointer-events:none}
 .course-hero-ico svg{position:relative;z-index:1;width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .course-hero-title{font-size:18px;font-weight:950;color:var(--t1);line-height:1.1}
@@ -2116,7 +2116,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .course-stepnav{display:flex;gap:8px;margin-top:12px}
 .course-stepnav button{flex:1;padding:12px 16px;border-radius:13px;font-size:13px;font-weight:900;cursor:pointer;border:1px solid var(--b2);background:transparent;color:var(--t2);transition:transform .15s,opacity .15s,box-shadow .2s,color .15s,border-color .15s}
 .course-stepnav button:not(.primary):hover{color:var(--t1);border-color:rgba(var(--ar),.32)}
-.course-stepnav button.primary{flex:2;padding:12px 16px;border:none;color:#fff;background:linear-gradient(135deg,var(--lesson-color,var(--a)),var(--a2));box-shadow:none}
+.course-stepnav button.primary{flex:2;padding:12px 16px;border:none;color:#fff;background:var(--lesson-color,var(--a));box-shadow:none}
 .course-stepnav button:active{transform:scale(.97)}
 .course-stepnav button:disabled{opacity:.35;pointer-events:none}
 /* Lesson vocabulary as a collapsible "Словарь урока". */
