@@ -5,21 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>PolyGlotty · ALEX</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ══ THEMES ══ */
 /* Dark Mode — standardized premium palette: neutral charcoal surfaces,
    a single teal accent (used only for primary CTAs + active tabs), pure-white
    headings and muted-grey secondary text. Status hues (--or/--rd/--exam/level
    colours) are kept for semantic meaning but no longer paint full backgrounds. */
-:root{--e0:#0D0E10;--e1:#141619;--e2:#1B1E22;--e3:#24282E;--a:#007A6A;--a2:#006657;--ar:0,122,106;--g:#141619;--gb:#007A6A;--t1:#FFFFFF;--t2:#9CA3AF;--t3:#6B7280;--b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.09);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.05);--sh:0 6px 18px rgba(0,0,0,.40);
+:root{--e0:#0B0B0C;--e1:#161513;--e2:#1E1C19;--e3:#2A2723;--a:#E6A94B;--a2:#C6883A;--ar:230,169,75;--g:#161513;--gb:#E6A94B;--t1:#F5F1EA;--t2:rgba(245,241,234,.62);--t3:rgba(245,241,234,.38);--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.10);--or:#ff9500;--or-r:255,149,0;--rd:#ff6b6b;--gd:#ffb830;--green:#34d399;--green-r:52,211,153;--exam:#a78bfa;--exam-r:167,139,250;--edge:rgba(255,255,255,.06);--sh:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 24px -12px rgba(0,0,0,.7);
   /* ── Design-system tokens (mapped onto the existing scale above) ──
      New canonical names per the redesign spec. They ALIAS our real
      variables so old and new code stay in sync. Dark theme values. */
-  --bg-app:#0D0E10;--bg-card:#141619;--color-primary:#007A6A;
-  --text-main:#FFFFFF;--text-muted:#8F9CAE;
-  --border-ui:rgba(255,255,255,.06);--shadow-ui:none;
-  --r-card:16px;--r-chip:8px}
+  --bg-app:#0B0B0C;--bg-card:#161513;--color-primary:#E6A94B;
+  --text-main:#F5F1EA;--text-muted:rgba(245,241,234,.62);
+  --border-ui:rgba(255,255,255,.06);--shadow-ui:inset 0 1px 0 rgba(255,255,255,.05), 0 10px 24px -12px rgba(0,0,0,.7);
+  --r-card:20px;--r-chip:10px}
 
 /* ══ LIGHT MODE ══ */
 [data-mode=light]{
@@ -278,7 +278,7 @@
 }
 /* Unified corner-radius scale — one tight family (16/14/12) so cards, buttons
    and chips share a consistent rounded-xl look across the whole app. */
-:root{--r:16px;--r2:16px;--r3:12px;--nav:64px;
+:root{--r:20px;--r2:14px;--r3:12px;--nav:64px;
   /* Telegram fullscreen safe areas — populated from JS (see syncTgInsets).
      Defaults keep the layout correct outside Telegram / before init. */
   --tg-safe-area-inset-top:0px;--tg-safe-area-inset-bottom:0px;
@@ -287,7 +287,12 @@
   --safe-top:calc(var(--tg-safe-area-inset-top) + var(--tg-content-safe-area-inset-top));
   /* Bottom clearance: home indicator (env) OR Telegram bottom UI, whichever is larger. */
   --safe:max(env(safe-area-inset-bottom,0px), calc(var(--tg-safe-area-inset-bottom) + var(--tg-content-safe-area-inset-bottom)));
-  --f:'Inter',-apple-system,sans-serif}
+  --f:'Inter',-apple-system,sans-serif;
+  /* Display font for headings — geometric, gives the UI a hand-made,
+     non-stock personality. Applied only to large screen/hero titles. */
+  --fh:'Space Grotesk','Inter',-apple-system,sans-serif}
+/* Curated display-font headings (capped at 700; Space Grotesk stops there). */
+.stit,.ptit,.chnm,.exsim-hero-title{font-family:var(--fh);font-weight:700;letter-spacing:-.01em}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--e0);color:var(--t1);font-family:var(--f);font-size:15px;-webkit-font-smoothing:antialiased;display:flex;align-items:center;justify-content:center;min-height:100vh;transition:background .3s,color .3s}
@@ -308,10 +313,10 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .nic svg{width:20px;height:20px;stroke:rgba(255,255,255,.65);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
 .nlb{font-size:8px;font-weight:600;color:rgba(255,255,255,.65);letter-spacing:-.1px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%;text-align:center;transition:color .2s}
 .ni{min-width:0}
-.ni.on .nic{background:linear-gradient(135deg,rgba(var(--ar),.26),rgba(var(--ar),.07));transform:translateY(-4px) scale(1.08);box-shadow:0 8px 18px rgba(var(--ar),.30),inset 0 0 0 1px rgba(var(--ar),.28)}
+.ni.on .nic{background:linear-gradient(145deg,rgba(var(--ar),.20),rgba(var(--ar),.05));transform:translateY(-4px) scale(1.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 14px -6px rgba(var(--ar),.22),inset 0 0 0 1px rgba(var(--ar),.22)}
 .ni.on .nic svg{stroke:var(--a)}
 .ni.on .nlb{color:var(--a);font-weight:700}
-.ni.on::before{content:'';position:absolute;top:-1px;left:50%;width:26px;height:3px;border-radius:0 0 5px 5px;background:linear-gradient(90deg,transparent,var(--a),transparent);box-shadow:0 2px 10px rgba(var(--ar),.55);transform:translateX(-50%);transform-origin:center;animation:navRail .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.ni.on::before{content:'';position:absolute;top:-1px;left:50%;width:26px;height:3px;border-radius:0 0 5px 5px;background:linear-gradient(90deg,transparent,var(--a),transparent);box-shadow:0 2px 8px rgba(var(--ar),.40);transform:translateX(-50%);transform-origin:center;animation:navRail .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .ni:active .nic{transform:scale(.9)}
 .ni.on:active .nic{transform:translateY(-3px) scale(.98)}
 @keyframes navRail{from{opacity:0;transform:translateX(-50%) scaleX(.2)}to{opacity:1;transform:translateX(-50%) scaleX(1)}}
