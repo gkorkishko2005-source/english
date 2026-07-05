@@ -192,6 +192,7 @@ _histories: dict = {}
 _msg_counts: dict = {}  # daily quota points per user
 _daily_ai_costs: dict = {}  # estimated daily Anthropic cost per user
 _last_msg_ts: dict = {}  # last-message timestamp per uid (anti-burst throttle)
+_app_open_seen: set = set()  # (uid, iso-date) dedup for app_open events (bounds row growth; DAU still exact via DISTINCT uid)
 
 
 def _throttle_wait(uid, gap: float, bucket: str = "chat") -> int:
@@ -529,11 +530,45 @@ async def gzip_mw(request, handler):
     return resp
 
 # ── USER DATA ────────────────────────────────────────────────────────────────
+async def handle_track(request):
+    """Lightweight client-side analytics beacon. Accepts ONLY a whitelisted set
+    of funnel events so the endpoint can't be abused to write arbitrary rows.
+    Fire-and-forget: always 200 so the Mini App never blocks on it."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    name = str(body.get("event") or "")[:40]
+    meta = str(body.get("meta") or "")[:200]
+    uid = body.get("uid")
+    allowed = {"paywall_view", "checkout_open"}
+    if name in allowed:
+        try:
+            from database import log_event
+            await log_event(int(uid) if uid else None, name, meta)
+        except Exception:
+            pass
+    return web.json_response({"ok": True}, headers={"Access-Control-Allow-Origin": "*"})
+
+
 async def handle_user(request):
     try:
         uid = int(request.match_info["uid"])
     except Exception:
         return web.json_response({"error": "invalid uid"}, status=400)
+    # Analytics: app_open (deduped once per uid/day in-process to bound row
+    # growth — DAU stays exact via DISTINCT uid). Never let this break the load.
+    try:
+        import datetime as _dt
+        from database import log_event as _log_event
+        _ok = (uid, _dt.date.today().isoformat())
+        if _ok not in _app_open_seen:
+            if len(_app_open_seen) > 50000:
+                _app_open_seen.clear()
+            _app_open_seen.add(_ok)
+            await _log_event(uid, "app_open")
+    except Exception:
+        pass
     try:
         from database import (
             get_user, get_level, get_xp, get_streak_count,
@@ -547,6 +582,12 @@ async def handle_user(request):
             # Auto-create user from WebApp
             await upsert_user(uid, "Student")
             user = await get_user(uid)
+            # Analytics: first ever load of this uid → new-user (install) event.
+            try:
+                from database import log_event as _log_ev
+                await _log_ev(uid, "first_seen")
+            except Exception:
+                pass
         if not user:
             # Fallback - return minimal data
             return web.json_response({
@@ -3155,6 +3196,7 @@ def create_app():
     app.router.add_get("/",handle_index)
     app.router.add_get("/sw.js",handle_sw)
     app.router.add_get("/api/user/{uid}",handle_user)
+    app.router.add_post("/api/track",handle_track)
     app.router.add_get("/api/referral/{uid}",handle_referral)
     app.router.add_post("/api/chat",handle_chat)
     app.router.add_delete("/api/chat/{uid}",handle_chat_reset)

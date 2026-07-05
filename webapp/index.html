@@ -16541,6 +16541,13 @@ function renderPremNative(){
 }
 
 function openPremium(highlightFeature, initialTab){
+  /* Analytics beacon: paywall opened. Fire-and-forget — must never block or
+     throw into the UI (keepalive lets it survive the modal render). */
+  try{
+    fetch(API+'/api/track',{method:'POST',keepalive:true,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({uid:window._uid,event:'paywall_view',meta:String(initialTab||'')})}).catch(()=>{});
+  }catch(e){}
   const title=document.getElementById('prem-title');
   const sub=document.getElementById('prem-sub');
   const free=document.getElementById('prem-free');

@@ -2779,6 +2779,16 @@ async def on_payment_success(msg: Message):
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
 
+    # Analytics: every successful payment → purchase event. meta = "<kind>:<stars>"
+    # (kind from payload head, stars = XTR amount) so /funnel can split later.
+    try:
+        from database import log_event
+        _head = payload.split(":", 1)[0] if payload else "?"
+        _stars = int(getattr(msg.successful_payment, "total_amount", 0) or 0)
+        await log_event(uid, "purchase", f"{_head}:{_stars}")
+    except Exception as e:
+        logger.warning("purchase event log failed uid=%s: %s", uid, e)
+
     # ── New modular billing routes ────────────────────────────────────
     # payload format:
     #   premium:<plan_id>:<uid>      (legacy bundle, still allowed)
@@ -2933,6 +2943,47 @@ async def on_payment_success(msg: Message):
         await msg.answer("✓ Payment received. Premium activated." if not ru else "✓ Оплата получена. Premium активирован.")
 
 # ══ /admin COMMAND (grant free premium to anyone) ═════════════════════════
+@dp.message(Command("funnel"))
+async def cmd_funnel(msg: Message):
+    """Admin-only product funnel: install → open → paywall → pay over N days.
+    Usage: /funnel [days]  (default 7, max 90)."""
+    if msg.from_user.id not in ADMIN_IDS:
+        return  # Silently ignore for non-admins
+    days = 7
+    parts = (msg.text or "").split()
+    if len(parts) > 1:
+        try:
+            days = max(1, min(int(parts[1]), 90))
+        except Exception:
+            days = 7
+    try:
+        from database import get_funnel
+        f = await get_funnel(days)
+    except Exception as e:
+        logger.error("funnel query failed: %s", e)
+        await msg.answer("⚠️ Не удалось собрать воронку.")
+        return
+
+    def pct(a, b):
+        return f"{(100.0 * a / b):.1f}%" if b else "—"
+
+    text = (
+        f"📊 <b>Воронка · {days} дн.</b>\n\n"
+        f"Всего юзеров: <b>{f['total_users']}</b>\n"
+        f"Новых за период: <b>{f['new_users']}</b>\n"
+        f"DAU сегодня: <b>{f['dau']}</b>\n\n"
+        f"<b>Воронка</b>\n"
+        f"Заходили: <b>{f['openers']}</b> уник. ({f['opens']} заходов)\n"
+        f"Открыли пейвол: <b>{f['paywall_users']}</b> "
+        f"({pct(f['paywall_users'], f['openers'])} от заходивших)\n"
+        f"Оплатили: <b>{f['buyers']}</b> ({f['purchases']} платежей)\n\n"
+        f"<b>Конверсия</b>\n"
+        f"Заход → оплата: <b>{pct(f['buyers'], f['openers'])}</b>\n"
+        f"Пейвол → оплата: <b>{pct(f['buyers'], f['paywall_users'])}</b>"
+    )
+    await msg.answer(text)
+
+
 @dp.message(Command("admin_grant"))
 async def cmd_admin_grant(msg: Message):
     """Only admins can use this to grant free premium to someone."""

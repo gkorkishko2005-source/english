@@ -354,6 +354,20 @@ CREATE TABLE IF NOT EXISTS referrals_log (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
+-- events: lightweight product-analytics funnel. One row per tracked action
+-- (app_open / first_seen / paywall_view / checkout_open / purchase). The
+-- /funnel admin command aggregates these into an install→pay funnel. `day`
+-- is denormalised so GROUP BY needs no timestamp math.
+CREATE TABLE IF NOT EXISTS events (
+    id    BIGSERIAL PRIMARY KEY,
+    uid   BIGINT,
+    name  TEXT NOT NULL,
+    meta  TEXT DEFAULT '',
+    day   DATE,
+    ts    TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_events_name_day ON events(name, day);
+CREATE INDEX IF NOT EXISTS idx_events_day ON events(day);
 
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_review ON vocabulary(uid, next_review);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_state  ON vocabulary(uid, state);
@@ -501,6 +515,12 @@ CREATE TABLE IF NOT EXISTS referrals_log (
 );
 CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, name TEXT NOT NULL,
+    meta TEXT DEFAULT '', day TEXT, ts TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_events_name_day ON events(name, day);
+CREATE INDEX IF NOT EXISTS idx_events_day ON events(day);
 """
 
 
@@ -2330,6 +2350,51 @@ async def get_test_count(uid: int) -> int:
 async def get_toefl_count(uid: int) -> int:
     row = await db("SELECT COUNT(*) as c FROM sessions WHERE uid=? AND type LIKE '%toefl%'", uid, fetch="one")
     return row["c"] if row else 0
+
+
+# ── Product analytics (funnel events) ─────────────────────────────
+# Fire-and-forget instrumentation. A failed insert must NEVER break the user
+# request that triggered it, so every call site wraps this AND we swallow here.
+# `day` is stored denormalised (via _today) for cheap GROUP BY in get_funnel.
+async def log_event(uid, name: str, meta: str = ""):
+    try:
+        await db("INSERT INTO events (uid,name,meta,day) VALUES (?,?,?,?)",
+                 (int(uid) if uid else None), str(name)[:40], (meta or "")[:200], _today())
+    except Exception as e:
+        logger.warning("log_event failed name=%s uid=%s: %s", name, uid, e)
+
+async def get_funnel(days: int = 7) -> dict:
+    """Aggregate the install→pay funnel over the last `days` days (inclusive of
+    today). Returns raw counts; the caller formats them into the /funnel card."""
+    days = max(1, min(int(days or 7), 90))
+    since = _days_later(-(days - 1))   # start-of-window date (negative offset)
+    today = _today()
+    async def _one(sql, *p):
+        row = await db(sql, *p, fetch="one")
+        if not row:
+            return 0
+        if isinstance(row, dict):
+            return int(row.get("c") or 0)
+        try:
+            return int(row[0] or 0)
+        except Exception:
+            return 0
+    opens        = await _one("SELECT COUNT(*) as c FROM events WHERE name='app_open' AND day>=?", since)
+    openers      = await _one("SELECT COUNT(DISTINCT uid) as c FROM events WHERE name='app_open' AND day>=?", since)
+    new_users    = await _one("SELECT COUNT(*) as c FROM events WHERE name='first_seen' AND day>=?", since)
+    paywall_v    = await _one("SELECT COUNT(*) as c FROM events WHERE name='paywall_view' AND day>=?", since)
+    paywall_u    = await _one("SELECT COUNT(DISTINCT uid) as c FROM events WHERE name='paywall_view' AND day>=?", since)
+    checkout     = await _one("SELECT COUNT(*) as c FROM events WHERE name='checkout_open' AND day>=?", since)
+    purchases    = await _one("SELECT COUNT(*) as c FROM events WHERE name='purchase' AND day>=?", since)
+    buyers       = await _one("SELECT COUNT(DISTINCT uid) as c FROM events WHERE name='purchase' AND day>=?", since)
+    dau          = await _one("SELECT COUNT(DISTINCT uid) as c FROM events WHERE name='app_open' AND day=?", today)
+    total_users  = await _one("SELECT COUNT(*) as c FROM users")
+    return {
+        "days": days, "opens": opens, "openers": openers, "new_users": new_users,
+        "paywall_views": paywall_v, "paywall_users": paywall_u,
+        "checkout_opens": checkout, "purchases": purchases, "buyers": buyers,
+        "dau": dau, "total_users": total_users,
+    }
 
 
 # ── TOEFL ─────────────────────────────────────────────────────────
