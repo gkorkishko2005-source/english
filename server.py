@@ -677,7 +677,12 @@ async def handle_user(request):
             "profession": profession,
             "remind_time": user.get("remind_time", "") if isinstance(user, dict) else "",
             "referrals": int(user.get("referrals") or 0) if isinstance(user, dict) else 0,
-            "interests": [i["name"] for i in interests] if interests else [],
+            # interests_log columns are (interest, source) — there is NO "name"
+            # column. Reading i["name"] raised KeyError: 'name' for every user
+            # who had ANY logged interest, crashing the whole /api/user handler
+            # into its error fallback (is_premium False, available_daily 0) —
+            # which is exactly why the header counter showed orange-0 on boot.
+            "interests": [i.get("interest") for i in (interests or []) if isinstance(i, dict) and i.get("interest")],
             "weekly": weekly,
             "toefl_scores": [],
             "due_words": [],
