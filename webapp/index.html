@@ -4810,7 +4810,7 @@ function goTab(n,allowPractice){
   if(n==='progress'){drawProgress();try{renderErrorDiary();}catch(e){}}
   if(n==='learn'){initLearn();updateNewLabels();}
   if(n==='settings'){try{updatePremiumUI();}catch(e){}}
-  if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}try{updateAlexOnlineState();}catch(e){}}
+  if(n==='chat'){scrollMsgs();try{maybeOnboardChat();}catch(e){}try{updateAlexOnlineState();}catch(e){}try{refreshReqChip();}catch(e){}}
   try{updateCourseTopBtn();}catch(e){}
 }
 /* hasChatAccess() is redefined in the modular-billing helpers further down
@@ -15596,17 +15596,42 @@ let _cardBudgetSyncing = false;  /* re-entry guard for initLearn → refreshDail
    Server is the source of truth (available_daily_requests from /api/user and
    /api/chat); we also decrement optimistically right after each reply so the
    number drops the instant the user sees ALEX answer. */
-let availableRequests = 0;
+/* null = we have NOT yet heard an authoritative number from the server.
+   In that "unknown" state the chip must stay neutral — never orange —
+   because Telegram keeps the WebApp DOM cached across re-entry, and a
+   stale orange-0 from an earlier state (e.g. a just-reset FREE account)
+   would otherwise linger until the user sent a message. */
+let availableRequests = null;
 function updateReqChip(opts){
   const chip=document.getElementById('req-chip');
   if(!chip)return;
   const n=document.getElementById('req-chip-n');
+  const known=(availableRequests!==null&&availableRequests!==undefined);
   const v=Math.max(0,parseInt(availableRequests,10)||0);
-  if(n) n.textContent=v.toLocaleString(lang==='ru'?'ru-RU':'en-US');
-  chip.classList.toggle('req-low', v<=0);
+  if(n) n.textContent=known?v.toLocaleString(lang==='ru'?'ru-RU':'en-US'):'…';
+  /* Only turn orange for a CONFIRMED zero, never for the unknown state. */
+  chip.classList.toggle('req-low', known&&v<=0);
   if(opts&&opts.bump){
     chip.classList.remove('bump');void chip.offsetWidth;chip.classList.add('bump');
   }
+}
+/* Pull the authoritative counter from /api/user. Called on every ALEX-screen
+   open so a Telegram-cached DOM can't keep showing a stale value without the
+   user having to send a message first. Fails silently — leaves the last known
+   value untouched on any network hiccup. */
+async function refreshReqChip(){
+  try{
+    const uid=window._uid;
+    if(!uid||typeof API==='undefined'||!API)return;
+    const r=await fetch(`${API}/api/user/${uid}`,{headers:{'X-Telegram-Init-Data':(typeof tg!=='undefined'&&tg&&tg.initData)||''},signal:AbortSignal.timeout(6000)});
+    if(!r.ok)return;
+    const s=await r.json();
+    if(s&&typeof s.available_daily_requests==='number'){
+      availableRequests=s.available_daily_requests;
+      try{updateReqChip();}catch(_){}
+      try{if(window._d)window._d.available_daily_requests=availableRequests;}catch(_){}
+    }
+  }catch(_){}
 }
 
 function updateCreditChip(){
