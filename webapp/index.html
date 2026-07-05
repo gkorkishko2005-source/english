@@ -55,7 +55,7 @@
 [data-mode=light] .mopt{color:#202124!important}
 [data-mode=light] .mopt:hover,[data-mode=light] .mopt.on{background:rgba(0,0,0,.06)!important}
 [data-mode=light] .mt-cell{background:rgba(0,0,0,.06)!important;color:rgba(0,0,0,.58)!important}
-[data-mode=light] .msg.bot .mbub{background:rgba(0,0,0,.04)!important;color:#1a1a2e}
+[data-mode=light] .msg.bot .mbub{background:transparent!important;border-color:transparent!important;color:#1a1a2e}
 [data-mode=light] .msg.user .mbub{background:rgba(52,120,246,.10)!important;border-color:rgba(52,120,246,.22)!important;color:#1a1a2e!important}
 [data-mode=light] .chip{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.08)!important;color:#1a1a2e!important}
 [data-mode=light] .hero{background:var(--bg-card)!important}
@@ -503,7 +503,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .msg.user{flex-direction:row-reverse}
 .mav{width:28px;height:28px;border-radius:9px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .msg.bot .mav{display:none}
-.msg.bot .mwrap{max-width:85%}
+.msg.bot .mwrap{max-width:100%}
 .msg.bot .mav img{width:100%;height:100%;object-fit:cover;border-radius:9px}
 .msg.bot .mav svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
 .msg.user .mav{background:var(--e3);border:1px solid var(--b1)}
@@ -521,15 +521,18 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    phone, while staying flat (no heavy fill, no marble). Bot bubble is a
    raised surface with a defined hairline so both sides pop off the page.
    Messenger-standard tail: sharper bottom corner on the avatar side. */
-.msg.user .mbub{background:rgba(var(--ar),.15);border:1px solid rgba(var(--ar),.26);color:var(--t1);border-radius:16px 16px 4px 16px}
-.msg.bot  .mbub{background:var(--e3);border:1px solid var(--b2);border-radius:16px 16px 16px 4px;color:var(--t1)}
+.msg.user .mbub{background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.22);color:var(--t1);border-radius:18px 18px 6px 18px;padding:10px 15px}
+/* ChatGPT-minimal: ALEX replies render as plain full-width text — no bubble,
+   no border, no fill — so the answer reads like a document, not a chat balloon.
+   Emerald stays as the accent inside (labels, links, inline blocks). */
+.msg.bot  .mbub{background:transparent;border:none;border-radius:0;padding:2px 0;color:var(--t1)}
 /* ── Deep matte-black chat palette (dark theme only) ─────────────────────────
    Screen goes to a rich near-black; ALEX bubbles are dark graphite that pops
    off it; the user's bubbles are a deep, saturated emerald with crisp white
    text. Light mode keeps its own palette (rules at the top of this sheet). */
 html:not([data-mode=light]) #s-chat,
 html:not([data-mode=light]) #s-chat .cmsgs{background:#0F1012}
-html:not([data-mode=light]) .msg.bot .mbub{background:#1D2024;border-color:rgba(255,255,255,.07)}
+html:not([data-mode=light]) .msg.bot .mbub{background:transparent;border-color:transparent}
 html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba(0,181,148,.5);color:#FFFFFF}
 .mbub b{font-weight:700}
 .mbub i{font-style:italic;color:var(--t2)}
@@ -3287,7 +3290,6 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
     </div>
   </div>
   <div class="cmsgs" id="cmsgs"></div>
-  <div class="chips" id="chips"></div>
   <div class="alex-off" id="alex-off">
     <svg viewBox="0 0 24 24"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M5 12.55a10.94 10.94 0 015.17-2.39"/><path d="M10.71 5.05A16 16 0 0122.58 9"/><path d="M1.42 9a15.91 15.91 0 014.7-2.88"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
     <span id="alex-off-txt"></span>
@@ -4451,8 +4453,6 @@ function applyLang(){
   // Chat
   var ol=document.getElementById('online-lbl');if(ol)ol.textContent=L.online;
   document.getElementById('cinp').placeholder={ru:'Пиши по-английски — ALEX поможет...',en:'Write in English — ALEX will help...',es:'Escribe en inglés — ALEX ayudará...',de:'Auf Englisch schreiben...',fr:'Écris en anglais...',pt:'Escreva em inglês...',uk:'Пиши по-англійськи...',tr:'İngilizce yaz...',zh:'用英语写作...',ar:'اكتب بالإنجليزية...'}[lang]||'Write in English...';
-  // Build chips
-  buildChips();
   // Session panel
   document.getElementById('sp-title').textContent=L.chats;
   document.getElementById('sp-new').textContent=L.new_chat;
@@ -18817,10 +18817,6 @@ async function init(){
       if(s?.msgs?.length)s.msgs.forEach(m=>renderMsg(m.role,m.content,false,m.time));
       else{
         addMsg('bot',L.welcome||'Привет! Я ALEX 👋');
-        // Add quick action hints
-        setTimeout(function(){
-          addMsg('bot',quickHintChips());
-        },400);
       }
       /* First open of the day: deliver the day's idiom as a message,
          not a card on Home. Runs whether the session was restored or

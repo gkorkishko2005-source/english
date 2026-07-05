@@ -293,11 +293,12 @@ async def deepseek_generate(system: str, messages: list[dict],
 # missing, the provider gate degrades gracefully instead of crashing the app.
 OPENROUTER_API_KEY      = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL     = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-# FREE tier → ultra-cheap Flash; PREMIUM tier → flagship Pro. Both Gemini,
-# both via OpenRouter (the whole PolyGlotty AI ecosystem runs on Gemini now —
-# no Anthropic Claude in the chat path).
-OPENROUTER_MODEL         = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
-OPENROUTER_MODEL_PREMIUM = os.getenv("OPENROUTER_MODEL_PREMIUM", "google/gemini-2.5-pro")
+# FREE tier → ultra-cheap Gemini Flash-Lite. PREMIUM tier → OpenAI GPT-4o mini:
+# far cheaper than Gemini 2.5 Pro (the old premium that dominated the cost logs)
+# yet clearly smarter than the free Flash-Lite, so the paid quality jump is
+# visible. Both env-driven — swapping a model never needs a code change.
+OPENROUTER_MODEL         = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite")
+OPENROUTER_MODEL_PREMIUM = os.getenv("OPENROUTER_MODEL_PREMIUM", "openai/gpt-4o-mini")
 OPENROUTER_FREE_ENABLED = os.getenv("OPENROUTER_FREE_ENABLED", "1") != "0"
 OPENROUTER_MAX_TOKENS   = int(os.getenv("OPENROUTER_MAX_TOKENS", "1000") or "1000")
 OPENROUTER_TIMEOUT      = float(os.getenv("OPENROUTER_TIMEOUT", "45") or "45")
