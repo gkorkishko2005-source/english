@@ -3039,6 +3039,42 @@ async def cmd_test_buy(msg: Message):
         await msg.answer(f"⚠️ test_buy error: {e}")
 
 
+@dp.message(Command("test_reset"))
+async def cmd_test_reset(msg: Message):
+    """TEST-ONLY: fully revoke the CALLER's own subscription back to a clean FREE
+    state, so the purchase flow can be re-tested from scratch. Self-service (no
+    second admin account needed) — gated to test-payment users. ALEX credits are
+    left untouched."""
+    uid = msg.from_user.id
+    if not is_test_payment_user(uid):
+        return  # Silently ignore for everyone else
+    ru = (await get_lang(uid) or "ru") == "ru"
+    try:
+        from database import revoke_subscription, update_user
+        res = await revoke_subscription(uid)                       # clear legacy + platform + grandfathered
+        await update_user(uid, premium_type="FREE", total_requests_remaining=0)  # reset request-counter model
+        was = res.get("cleared", {})
+        await msg.answer(
+            f"🧪 <b>ТЕСТ: подписка сброшена</b>\n\n"
+            f"Аккаунт <code>{uid}</code> снова на FREE-тарифе.\n"
+            f"Было: platform_until=<code>{was.get('platform_until') or '—'}</code> "
+            f"lifetime=<code>{was.get('platform_lifetime')}</code> "
+            f"premium={was.get('is_premium')}\n\n"
+            f"Теперь открой приложение — должен быть пейвол. Кредиты ALEX не тронуты."
+            if ru else
+            f"🧪 <b>TEST: subscription reset</b>\n\n"
+            f"Account <code>{uid}</code> is back on the FREE tier.\n"
+            f"Was: platform_until=<code>{was.get('platform_until') or '—'}</code> "
+            f"lifetime=<code>{was.get('platform_lifetime')}</code> "
+            f"premium={was.get('is_premium')}\n\n"
+            f"Open the app now — you should see the paywall. ALEX credits untouched."
+        )
+        logger.info("TEST subscription reset uid=%s (was=%s)", uid, was)
+    except Exception as e:
+        logger.error("test_reset failed uid=%s: %s", uid, e)
+        await msg.answer(f"⚠️ test_reset error: {e}")
+
+
 @dp.message(Command("admin_grant"))
 async def cmd_admin_grant(msg: Message):
     """Only admins can use this to grant free premium to someone."""
