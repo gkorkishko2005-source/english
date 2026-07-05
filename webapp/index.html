@@ -499,14 +499,18 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 .cmsgs{flex:1;overflow-y:auto;padding:12px 12px 8px;display:flex;flex-direction:column;gap:0}
 .cmsgs::-webkit-scrollbar{width:0}
 
-.msg{display:flex;gap:12px;margin-bottom:16px;animation:msgin .2s ease}
+/* ChatGPT-style thread: even vertical rhythm + a faint full-width hairline
+   between turns, no avatars in the flow. Palette stays ours (emerald). */
+.msg{display:flex;gap:12px;margin:0;padding:18px 2px;animation:msgin .2s ease}
+.msg + .msg{border-top:1px solid var(--b1)}
 .msg.user{flex-direction:row-reverse}
 .mav{width:28px;height:28px;border-radius:9px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.msg.bot .mav{display:none}
+/* No avatars in the flow — like ChatGPT, turns are told apart by alignment
+   and the hairline divider, not by a repeated avatar column. */
+.msg .mav{display:none}
 .msg.bot .mwrap{max-width:100%}
 .msg.bot .mav img{width:100%;height:100%;object-fit:cover;border-radius:9px}
 .msg.bot .mav svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
-.msg.user .mav{background:var(--e3);border:1px solid var(--b1)}
 .msg.user .mav svg{width:15px;height:15px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round}
 
 /* min-width:0 lets the flex child shrink so long words wrap instead of
@@ -521,11 +525,11 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
    phone, while staying flat (no heavy fill, no marble). Bot bubble is a
    raised surface with a defined hairline so both sides pop off the page.
    Messenger-standard tail: sharper bottom corner on the avatar side. */
-.msg.user .mbub{background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.22);color:var(--t1);border-radius:18px 18px 6px 18px;padding:10px 15px}
+.msg.user .mbub{background:rgba(var(--ar),.13);border:1px solid rgba(var(--ar),.22);color:var(--t1);border-radius:20px;padding:10px 16px}
 /* ChatGPT-minimal: ALEX replies render as plain full-width text — no bubble,
    no border, no fill — so the answer reads like a document, not a chat balloon.
    Emerald stays as the accent inside (labels, links, inline blocks). */
-.msg.bot  .mbub{background:transparent;border:none;border-radius:0;padding:2px 0;color:var(--t1)}
+.msg.bot  .mbub{background:transparent;border:none;border-radius:0;padding:2px 0;color:var(--t1);font-size:15px;line-height:1.6}
 /* ── Deep matte-black chat palette (dark theme only) ─────────────────────────
    Screen goes to a rich near-black; ALEX bubbles are dark graphite that pops
    off it; the user's bubbles are a deep, saturated emerald with crisp white
