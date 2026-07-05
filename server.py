@@ -631,9 +631,9 @@ async def handle_user(request):
         # ── Header limits payload ─────────────────────────────────────────
         # available_daily_requests = what the top bar shows.
         #   FREE  → free-credit balance (0..cap).
-        #   PAID  → whole-period pool left (total_requests_remaining). Subscribers
-        #           want to see how many ALEX requests their plan still has, not
-        #           the internal per-day throttle (which read a confusing 0).
+        #   PAID  → requests left TODAY (daily_limit − daily_used), the small
+        #           per-day number subscribers expect; forced to 0 once the
+        #           whole-period pool (total_requests_remaining) is exhausted.
         ai_state = {}
         available_daily = 0
         try:
@@ -641,7 +641,8 @@ async def handle_user(request):
             if str(ai_state.get("premium_type") or "FREE") == "FREE":
                 available_daily = int(ai_state.get("free_credits") or 0)
             else:
-                available_daily = max(0, int(ai_state.get("total_remaining") or 0))
+                total_rem = int(ai_state.get("total_remaining") or 0)
+                available_daily = 0 if total_rem <= 0 else int(ai_state.get("daily_remaining") or 0)
         except Exception as _ae:
             logger.warning(f"ai access state failed for {uid}: {_ae}")
         return web.json_response({
@@ -683,6 +684,7 @@ async def handle_user(request):
             "referrals": 0,
             "interests": [], "weekly": [0]*7, "toefl_scores": [], "due_words": [],
             "is_premium": False,
+            "available_daily_requests": 0, "premium_type": "FREE",
         }, headers={"Access-Control-Allow-Origin": "*"})
 
 # ── REFERRAL LINK ──────────────────────────────────────────────────────────────
@@ -1018,9 +1020,12 @@ async def handle_chat(request):
                 await log_session(uid, "webapp_chat")
             except Exception:
                 pass
-        # Header counter, authoritative post-charge: the whole-period pool left
-        # (what subscribers read as "requests remaining"), not the daily throttle.
-        _avail = max(0, int(cons.get("total_remaining") or 0))
+        # Header counter, authoritative post-charge: requests left TODAY
+        # (daily_limit − daily_used), 0 once the whole-period pool is gone.
+        _tot = int(cons.get("total_remaining") or 0)
+        _dl = int(cons.get("daily_limit") or 0)
+        _du = int(cons.get("daily_used") or 0)
+        _avail = 0 if _tot <= 0 else max(0, _dl - _du)
         return web.json_response(
             {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by ALEX Pro",
              "saved_interests": saved_int,
