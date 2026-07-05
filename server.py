@@ -169,7 +169,7 @@ TIER_ECONOMY = {
 # Add Telegram user IDs here for admin tools. Premium is database-driven only.
 # To find your ID: message @userinfobot in Telegram
 ADMIN_IDS = {
-    1738695057,
+    # 1738695057,  # TEMP: de-admined for live purchase test (mirrors bot.py). RESTORE after test.
     5399839500,
     725259177,
     1241890707,

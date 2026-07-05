@@ -120,14 +120,14 @@ def html_link(url: str, text: str, bold: bool = False) -> str:
 # Добавь сюда Telegram UID админов. Premium больше не выдаётся автоматически.
 # Узнать свой UID: написать @userinfobot
 ADMIN_IDS: set = {
-    1738695057,
+    # 1738695057,  # TEMP: de-admined for live purchase test (see TEST_PAYMENT_USER_IDS). RESTORE after test.
     5399839500,
     725259177,
     1241890707,
     1428437531,
 }
 TEST_PAYMENT_USER_IDS: set = {
-    int(x) for x in os.getenv("TEST_PAYMENT_USER_IDS", "8702782202").split(",")
+    int(x) for x in os.getenv("TEST_PAYMENT_USER_IDS", "8702782202,1738695057").split(",")
     if x.strip().isdigit()
 }
 
