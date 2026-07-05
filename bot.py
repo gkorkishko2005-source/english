@@ -2662,13 +2662,20 @@ async def cb_prem_all(cb: CallbackQuery):
     await cb.message.answer(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=rows))
 
 # ── Invoice helpers (shared by callback + deep-link /start) ──────────────
+def _invoice_price(uid: int, stars: int) -> int:
+    """TEST HOOK: test-payment users (admins + env TEST_PAYMENT_USER_IDS) pay a
+    symbolic 1 ⭐ so the full payment flow (invoice → pre_checkout →
+    successful_payment → activation) can be tested end-to-end without spending
+    real Stars. Everyone else pays the real price."""
+    return 1 if is_test_payment_user(uid) else int(stars)
+
 async def _send_platform_invoice(uid: int, plan_id: str, ru: bool) -> bool:
     from aiogram.types import LabeledPrice
     plan = PLATFORM_PLANS.get(plan_id)
     if not plan:
         return False
     label = plan["label_ru"] if ru else plan["label_en"]
-    stars = int(plan["stars"])
+    stars = _invoice_price(uid, int(plan["stars"]))
     desc = ("Подписка PolyGlotty Platform — курс, экзамены, статистика. ALEX-чат покупается отдельно кредитами."
             if ru else
             "PolyGlotty Platform subscription — course, exams, analytics. ALEX chat is sold separately as credits.")
@@ -2699,7 +2706,7 @@ async def _hearts_refill_stars() -> int:
 async def _send_hearts_invoice(uid: int, ru: bool) -> bool:
     """Invoice for an instant full refill of the free-tier heart pool (Stars)."""
     from aiogram.types import LabeledPrice
-    stars = await _hearts_refill_stars()
+    stars = _invoice_price(uid, await _hearts_refill_stars())
     label = "Полное восстановление жизней" if ru else "Full hearts refill"
     desc = ("Мгновенно восстанавливает все жизни для уроков. Жизни также сами "
             "восстанавливаются со временем — это для тех, кто не хочет ждать."
@@ -2982,6 +2989,54 @@ async def cmd_funnel(msg: Message):
         f"Пейвол → оплата: <b>{pct(f['buyers'], f['paywall_users'])}</b>"
     )
     await msg.answer(text)
+
+
+@dp.message(Command("test_buy"))
+async def cmd_test_buy(msg: Message):
+    """TEST-ONLY: simulate a successful Platform purchase WITHOUT spending Stars.
+    Runs the SAME activation path a real payment uses (set_subscription_plan) and
+    logs the SAME 'purchase' analytics event, so the whole post-payment flow can
+    be verified end-to-end when Stars aren't available. Gated to test-payment
+    users (admins + env TEST_PAYMENT_USER_IDS). Usage: /test_buy <1m|3m|6m>."""
+    uid = msg.from_user.id
+    if not is_test_payment_user(uid):
+        return  # Silently ignore for everyone else
+    ru = (await get_lang(uid) or "ru") == "ru"
+    parts = (msg.text or "").split()
+    period = parts[1].lower() if len(parts) > 1 else "1m"
+    plan_map = {"1m": "MONTH_1", "3m": "MONTH_3", "6m": "MONTH_6"}
+    if period not in plan_map:
+        await msg.answer("Usage: /test_buy <1m|3m|6m>")
+        return
+    plan = plan_map[period]
+    try:
+        from database import set_subscription_plan, log_event
+        state = await set_subscription_plan(uid, plan)
+        total_quota = int((state or {}).get("total_requests_remaining", 0))
+        # Same analytics event a real purchase fires (meta marks it as a test).
+        await log_event(uid, "purchase", f"test_platform:{period}:0")
+        label = {"1m": "1 месяц" if ru else "1 month",
+                 "3m": "3 месяца" if ru else "3 months",
+                 "6m": "6 месяцев" if ru else "6 months"}.get(period, period)
+        await msg.answer(
+            f"🧪 <b>ТЕСТ: покупка сымитирована</b>\n\n"
+            f"🚀 Платформа активна: <b>{label}</b>\n"
+            f"💬 Запросов к ALEX: <b>{total_quota}</b>\n"
+            f"premium_type = <code>{plan}</code>\n\n"
+            f"Проверь <code>/admin_sub {uid}</code> — доступ должен быть ACTIVE.\n"
+            f"Событие <b>purchase</b> записано в воронку (<code>/funnel</code>)."
+            if ru else
+            f"🧪 <b>TEST: purchase simulated</b>\n\n"
+            f"🚀 Platform active: <b>{label}</b>\n"
+            f"💬 ALEX requests: <b>{total_quota}</b>\n"
+            f"premium_type = <code>{plan}</code>\n\n"
+            f"Check <code>/admin_sub {uid}</code> — access should be ACTIVE.\n"
+            f"A <b>purchase</b> event was logged to the funnel (<code>/funnel</code>)."
+        )
+        logger.info("TEST purchase simulated uid=%s plan=%s total=%s", uid, plan, total_quota)
+    except Exception as e:
+        logger.error("test_buy failed uid=%s: %s", uid, e)
+        await msg.answer(f"⚠️ test_buy error: {e}")
 
 
 @dp.message(Command("admin_grant"))
