@@ -333,6 +333,67 @@ Tabs: Главная · Чат (you) · Учёба · Прогресс · Нас
 
 
 # ══════════════════════════════════════════════════════════════════
+#  EXTERNAL RESOURCES KNOWLEDGE BASE — curated, real, level-tagged.
+#  So ALEX can recommend genuinely good ways to learn English OUTSIDE
+#  the app (shows, sites, podcasts, YouTube, tools) without depending
+#  on the model's training cutoff or inventing dead links.
+#  RULES for ALEX when using this: recommend by the student's LEVEL and
+#  INTEREST, pick only 2-4 relevant items (never dump the whole list),
+#  and always suggest a PolyGlotty feature first — external resources
+#  supplement the app, they don't replace it. Names are stable; do NOT
+#  invent titles, channels, or URLs that are not in this list.
+# ══════════════════════════════════════════════════════════════════
+RESOURCES_KB_FULL = """
+
+═══ HOW TO LEARN OUTSIDE POLYGLOTTY (curated, real resources) ═══
+Recommend by LEVEL + INTEREST. Pick 2-4 that fit — never list everything. Suggest a PolyGlotty feature first; these supplement it.
+
+TV SERIES (best comprehensible input — watch with ENGLISH subtitles, never native-language subs):
+• A1-A2: "Extra English" (a sitcom made for learners), "Peppa Pig" (short, clear, everyday phrases), "Friends" (simple, repetitive, warm).
+• B1-B2: "The Office (US)", "Modern Family", "Brooklyn Nine-Nine", "How I Met Your Mother" — natural everyday speech, clear American accents.
+• C1-C2: "Sherlock", "The Crown", "Black Mirror", "Suits", "Peaky Blinders" (heavy accent — advanced only). Add documentaries for neutral, dense input.
+
+YOUTUBE CHANNELS:
+• Grammar/general: BBC Learning English, English with Lucy, Papa Teach Me, mmmEnglish.
+• Pronunciation: Rachel's English (American), English with Lucy (British).
+• Via shows/movies: "Learn English With TV Series".
+• Conversation: Speak English With Vanessa.
+
+PODCASTS (for listening on the go):
+• A2-B1: BBC "6 Minute English", "The English We Speak" (idioms), ESLPod.
+• B2-C1: "Luke's English Podcast", "All Ears English", "Culips".
+• Any level for news: BBC News, VOA Learning English (slower, graded).
+
+WEBSITES:
+• BBC Learning English, British Council LearnEnglish — free structured lessons + exercises.
+• News graded by level: "News in Levels", "Breaking News English".
+• Word tools: Youglish (hear any word in real videos), Reverso Context (word in real sentences), Ludwig (is my sentence natural?), Cambridge Dictionary (definitions + audio).
+
+TOOLS / APPS (complements, not replacements):
+• Anki — the gold-standard spaced-repetition deck app (PolyGlotty's Карточки do this inside the app already).
+• ELSA Speak — pronunciation drilling with feedback.
+• HelloTalk / Tandem — text/talk with native speakers (language exchange).
+• Grammarly — catches writing mistakes as you type.
+
+READING BY LEVEL:
+• A1-B1: graded readers — Oxford Bookworms, Penguin Readers; Simple English Wikipedia.
+• B2+: real articles (BBC, The Guardian), short stories, then novels you already know in your language.
+
+METHOD TIPS (say these as a tutor, not a lecture):
+• Comprehensible input: pick material where you get ~80-90% without stopping — a little above your level, not far above.
+• Watch with English subs, then rewatch a scene with none.
+• Shadowing: play a line, pause, copy the rhythm and intonation out loud.
+• 15 focused minutes daily beats a 3-hour cram once a week.
+"""
+
+RESOURCES_KB_SHORT = """
+
+═══ LEARN OUTSIDE THE APP (real resources — recommend 1-3 by level/interest, app feature first) ═══
+Series (English subs): A1-A2 Extra English, Friends · B1-B2 The Office, Modern Family, Brooklyn Nine-Nine · C1-C2 Sherlock, The Crown. YouTube: BBC Learning English, English with Lucy, Rachel's English (pronunciation). Podcasts: 6 Minute English, The English We Speak, Luke's English Podcast. Sites: BBC Learning English, British Council; News in Levels (graded news); Youglish + Reverso Context (words in real use). Tools: Anki (SRS), ELSA (pronunciation), HelloTalk (native chat). Tip: comprehensible input ~80-90% understood, English subtitles, 15 min daily. Never invent titles/links not listed.
+"""
+
+
+# ══════════════════════════════════════════════════════════════════
 #  ПРОМПТЫ
 # ══════════════════════════════════════════════════════════════════
 

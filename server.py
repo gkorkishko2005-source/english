@@ -814,6 +814,14 @@ async def handle_chat(request):
         from prompts import COURSE_KB_FULL, COURSE_KB_SHORT
     except Exception:
         COURSE_KB_FULL = COURSE_KB_SHORT = ""
+    # External-resources knowledge base (real shows/sites/podcasts/tools) so ALEX
+    # can recommend genuinely good ways to learn English regardless of the model's
+    # training cutoff. FULL for paid, SHORT for free — same per-tier pattern as the
+    # course KB. Degrade to "" if the import fails.
+    try:
+        from prompts import RESOURCES_KB_FULL, RESOURCES_KB_SHORT
+    except Exception:
+        RESOURCES_KB_FULL = RESOURCES_KB_SHORT = ""
 
     bl = str(body.get("bot_lang", "Respond in Russian."))
 
@@ -993,7 +1001,7 @@ async def handle_chat(request):
             "- Stay fully in character during roleplay; correct gently inside the story so it "
             "never feels like a test, and give a short warm feedback recap only at the end."
         )
-        prem_system = system + COURSE_KB_FULL + prem_directive
+        prem_system = system + COURSE_KB_FULL + RESOURCES_KB_FULL + prem_directive
         try:
             from billing_config import load_config as _lc
             _pc = await _lc()
@@ -1192,7 +1200,7 @@ async def handle_chat(request):
             "the right lesson or card deck instead of writing a long reply. Never "
             "start a list you can't finish in this message."
         )
-        free_system = system + COURSE_KB_SHORT + alex_free
+        free_system = system + COURSE_KB_SHORT + RESOURCES_KB_SHORT + alex_free
         reply = ""
         saved_int = []
         prov_tag = prov_label = None
@@ -1265,7 +1273,7 @@ async def handle_chat(request):
     # Past this point every path is PAID (premium already returned above). Give
     # the paid/legacy model the FULL product knowledge base so ALEX can direct
     # the student to real lessons/cards/exams. Prompt-caching keeps it cheap.
-    system = system + COURSE_KB_FULL
+    system = system + COURSE_KB_FULL + RESOURCES_KB_FULL
 
     # Model picker (paid tiers only). Server is source of truth — client
     # cannot upgrade beyond their tier by spoofing chosen_model.
