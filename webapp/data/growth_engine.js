@@ -53,6 +53,9 @@
   function hx(h){h=String(h).replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
   function mix(a,b,t){var x=hx(a),y=hx(b);return'rgb('+Math.round(lerp(x[0],y[0],t))+','+Math.round(lerp(x[1],y[1],t))+','+Math.round(lerp(x[2],y[2],t))+')'}
   function stageHue(sf){var s=clamp(Math.floor(sf),1,8),p=clamp(sf-s,0,1);return mix(STAGE_HEX[s-1],STAGE_HEX[Math.min(7,s)],p)}
+  /* Build an rgba() string at alpha `a` from either a #hex or an
+     rgb(r,g,b) colour, so tints (foliage, bark) can be drawn softly. */
+  function rgba(col,a){if(!col)return'rgba(0,0,0,'+a+')';if(col.charAt(0)==='#'){var p=hx(col);return'rgba('+p[0]+','+p[1]+','+p[2]+','+a+')'}return col.indexOf('rgb(')===0?col.replace('rgb(','rgba(').replace(')',','+a+')'):col}
 
   function Engine(container,opt){
     opt=opt||{};this.c=container;this.stage=clamp(opt.stage||1,1,8);this.targetStage=this.stage;
@@ -61,6 +64,10 @@
     this.levelCol=(typeof opt.levelCol==='string'&&opt.levelCol.charAt(0)==='#')?opt.levelCol:null;
     this.moodBlend=1;this.onTap=opt.onTap;this.rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.a=css(container,'--a','#4f8aff');this.t=css(container,'--t1','#eef2ff');
+    /* Wood tone: a warm bark brown so a mature trunk reads as timber on
+       the dark card instead of a stark white blob. Overridable via
+       --tree-bark; falls back to a mid warm brown that sits well on dark. */
+    this.bark=css(container,'--tree-bark','#8a6f57');
     /* Foliage colour (set per-frame in draw via stageHue) + a warm
        fruit tone so berries pop against green/teal leaves. */
     this.fol=stageHue(this.stage);this.fruitCol='#ffb454';
@@ -146,7 +153,7 @@
 
   Engine.prototype.buildTree=function(sf){
     var H=this.h,W=this.w,x=W*.5,b=this.base,st=clamp(sf,5,8),depth=Math.round(lerp(3,6,(st-5)/3)),rr=rng(this.seed);
-    var trunk=lerp(H*.20,H*.34,(st-5)/3), baseW=lerp(7,W*.15,(st-5)/3), topW=lerp(3,7,(st-5)/3);
+    var trunk=lerp(H*.22,H*.36,(st-5)/3), baseW=lerp(6,W*.11,(st-5)/3), topW=lerp(3,6.5,(st-5)/3);
     this.branch(x,b,x,b-trunk,baseW,2);this.branch(x-baseW*.35,b,x-3,b-trunk*.38,baseW*.45,5);this.branch(x+baseW*.35,b,x+3,b-trunk*.38,baseW*.45,6);
     var self=this, tipY=b-trunk, scale=lerp(H*.11,H*.19,(st-5)/3), spread=lerp(.72,.78,(st-5)/3);
     function rec(x,y,len,ang,w,d,seed,side){
@@ -232,12 +239,14 @@
     /* Soft accent halo behind the canopy so a mature tree feels
        lit-from-within. Stronger as the stage grows. */
     var W=this.w,H=this.h,b=this.base,trunk=lerp(H*.16,H*.32,(clamp(sf,5,8)-5)/3);
-    var cx=W*.5,cy=b-trunk-H*.06,r=H*.34+(sf-5)*H*.04;
+    var cx=W*.5,cy=b-trunk-H*.10,r=H*.30+(sf-5)*H*.035;
     var g=c.createRadialGradient(cx,cy,4,cx,cy,r);
-    var alpha=.10+.05*(sf-5)+.02*Math.sin(t*.6);
-    g.addColorStop(0,'rgba(255,255,255,'+alpha.toFixed(3)+')');
-    g.addColorStop(.55,'rgba(255,255,255,'+(alpha*.4).toFixed(3)+')');
-    g.addColorStop(1,'rgba(255,255,255,0)');
+    /* Green foliage halo (not white) so a mature tree glows leafy from
+       within rather than reading as a bare white bulb on the dark card. */
+    var alpha=.07+.035*(sf-5)+.015*Math.sin(t*.6), fol=this.fol||'#2fc55f';
+    g.addColorStop(0,rgba(fol,alpha));
+    g.addColorStop(.55,rgba(fol,alpha*.42));
+    g.addColorStop(1,rgba(fol,0));
     c.fillStyle=g;c.beginPath();c.arc(cx,cy,r,0,TWO);c.fill();
   };
   Engine.prototype.drawShimmers=function(c,t){
@@ -261,7 +270,7 @@
     /* Young plants (≤ Bloom) are mostly stem, so tint the stem with the
        stage colour; mature trees keep a neutral woody outline so the
        coloured canopy reads against it. */
-    c.strokeStyle=this.stageFloat()<4.7?this.fol:this.t;for(var i=0;i<this.br.length;i++){var b=this.br[i],n=noise(b.x2*.01,b.y2*.01,t*.22)*.9,amp=(MOOD[this.mood]||MOOD.fresh)[0],dx=n*amp*10*(1-b.w/18);
+    c.strokeStyle=this.stageFloat()<4.7?this.fol:this.bark;for(var i=0;i<this.br.length;i++){var b=this.br[i],n=noise(b.x2*.01,b.y2*.01,t*.22)*.9,amp=(MOOD[this.mood]||MOOD.fresh)[0],dx=n*amp*10*(1-b.w/18);
       this.taper(c,b.x1,b.y1,b.x2+dx,b.y2,b.w,b.w*.35);if(this.stageFloat()>=7&&b.w>4){c.globalAlpha=.26;c.lineWidth=1;c.beginPath();c.moveTo(lerp(b.x1,b.x2,.45)+2,b.y1+(b.y2-b.y1)*.45);c.lineTo(lerp(b.x1,b.x2,.45)-3,b.y1+(b.y2-b.y1)*.45+5);c.stroke();c.globalAlpha=1}}
   };
   Engine.prototype.drawLeaf=function(c,L,t){
