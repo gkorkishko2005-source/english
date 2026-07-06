@@ -2786,13 +2786,30 @@ async def on_payment_success(msg: Message):
     user_lang = await get_lang(uid) or "ru"
     ru = user_lang == "ru"
 
+    # ── Idempotency gate ──────────────────────────────────────────────
+    # Telegram can REDELIVER the same successful_payment (e.g. the bot restarts
+    # before the getUpdates offset advances). Record the provider charge_id once;
+    # a duplicate delivery is acknowledged but NOT re-granted, so a single payment
+    # never doubles subscription time / credits. First-time → proceed to grant.
+    _charge_id = getattr(msg.successful_payment, "telegram_payment_charge_id", "") or ""
+    _amount = int(getattr(msg.successful_payment, "total_amount", 0) or 0)
+    try:
+        from database import mark_payment_processed
+        _is_new = await mark_payment_processed(_charge_id, uid, payload or "", _amount)
+    except Exception as e:
+        logger.warning("payment idempotency check errored uid=%s charge=%s: %s", uid, _charge_id, e)
+        _is_new = True  # fail open — never withhold paid-for access
+    if not _is_new:
+        logger.info("duplicate payment redelivery skipped uid=%s charge=%s payload=%s", uid, _charge_id, payload)
+        await msg.answer("✓ Этот платёж уже обработан." if ru else "✓ This payment is already processed.")
+        return
+
     # Analytics: every successful payment → purchase event. meta = "<kind>:<stars>"
     # (kind from payload head, stars = XTR amount) so /funnel can split later.
     try:
         from database import log_event
         _head = payload.split(":", 1)[0] if payload else "?"
-        _stars = int(getattr(msg.successful_payment, "total_amount", 0) or 0)
-        await log_event(uid, "purchase", f"{_head}:{_stars}")
+        await log_event(uid, "purchase", f"{_head}:{_amount}")
     except Exception as e:
         logger.warning("purchase event log failed uid=%s: %s", uid, e)
 

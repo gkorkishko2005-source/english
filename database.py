@@ -354,6 +354,19 @@ CREATE TABLE IF NOT EXISTS referrals_log (
     created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
+-- processed_payments: payment idempotency ledger. One row per Telegram
+-- `successful_payment`, keyed by the provider charge_id (PRIMARY KEY). Telegram
+-- may REDELIVER the same successful_payment update if the bot restarts before
+-- the getUpdates offset advances — without this gate that redelivery would
+-- double-grant subscription time / credits. The first insert wins; any repeat
+-- is detected and the grant is skipped.
+CREATE TABLE IF NOT EXISTS processed_payments (
+    charge_id  TEXT PRIMARY KEY,
+    uid        BIGINT,
+    payload    TEXT DEFAULT '',
+    amount     INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 -- events: lightweight product-analytics funnel. One row per tracked action
 -- (app_open / first_seen / paywall_view / checkout_open / purchase). The
 -- /funnel admin command aggregates these into an install→pay funnel. `day`
@@ -514,6 +527,13 @@ CREATE TABLE IF NOT EXISTS referrals_log (
     created_at  TEXT DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_reflog_referrer ON referrals_log(referrer_id);
+CREATE TABLE IF NOT EXISTS processed_payments (
+    charge_id  TEXT PRIMARY KEY,
+    uid        INTEGER,
+    payload    TEXT DEFAULT '',
+    amount     INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, name TEXT NOT NULL,
@@ -769,6 +789,44 @@ async def get_referral_count(uid: int) -> int:
     if not user:
         return 0
     return int(user.get("referrals") or 0)
+
+
+async def mark_payment_processed(charge_id: str, uid: int, payload: str = "", amount: int = 0) -> bool:
+    """Payment idempotency gate. Returns True the FIRST time a charge_id is seen
+    (caller SHOULD grant), False if it was already recorded (a redelivered or
+    duplicate Telegram `successful_payment` — caller must NOT grant again).
+
+    The PRIMARY KEY on charge_id is the atomic boundary. Postgres uses an
+    ON CONFLICT ... RETURNING insert (fully race-safe); SQLite pre-checks then
+    inserts (safe here because polling redelivers the same update only AFTER the
+    prior handling finished, i.e. sequentially — never concurrently).
+
+    Fails OPEN: on a missing charge_id or any DB error it returns True so a
+    transient blip can never withhold paid-for access. The rare cost is a
+    possible double-grant, which is strictly preferable to denying a paying
+    customer; genuine grant failures are still caught by the /paysupport path."""
+    cid = str(charge_id or "").strip()
+    if not cid:
+        return True  # nothing to dedup on → treat as new (fail open)
+    try:
+        if USE_POSTGRES:
+            row = await db(
+                "INSERT INTO processed_payments (charge_id, uid, payload, amount) "
+                "VALUES (?, ?, ?, ?) ON CONFLICT (charge_id) DO NOTHING RETURNING charge_id",
+                cid, int(uid), str(payload or ""), int(amount or 0), fetch="one")
+            return bool(row)
+        else:
+            existing = await db("SELECT charge_id FROM processed_payments WHERE charge_id=?",
+                                cid, fetch="one")
+            if existing:
+                return False
+            await db(
+                "INSERT OR IGNORE INTO processed_payments (charge_id, uid, payload, amount) "
+                "VALUES (?, ?, ?, ?)", cid, int(uid), str(payload or ""), int(amount or 0))
+            return True
+    except Exception as e:
+        logger.warning("mark_payment_processed failed charge=%s uid=%s: %s — failing open", cid, uid, e)
+        return True
 
 async def get_quota_usage(uid: int) -> dict:
     row = await db(
