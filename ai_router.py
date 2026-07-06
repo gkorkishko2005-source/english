@@ -483,31 +483,6 @@ async def openrouter_generate_free(system: str, messages: list[dict],
 
 
 # ── Friendly rate-limit message (i18n) ────────────────────────────────────────
-# Rendered as an HTML limit-card inside the chat reply (same classes the other
-# limit messages use), so it shows up styled rather than as raw text.
-_LIMIT_TXT = {
-    "ru": "На сегодня бесплатные лимиты ИИ-ассистента исчерпаны. Возвращайся завтра или переходи на Premium для безлимитного доступа к ALEX без очередей!",
-    "en": "Today's free AI-assistant limits are used up. Come back tomorrow, or go Premium for unlimited ALEX access with no queues!",
-    "es": "Los límites gratuitos del asistente de IA se agotaron por hoy. Vuelve mañana o pásate a Premium para acceso ilimitado a ALEX sin colas.",
-    "pt": "Os limites gratuitos do assistente de IA acabaram por hoje. Volte amanhã ou assine o Premium para acesso ilimitado ao ALEX sem filas!",
-    "de": "Die kostenlosen KI-Assistenten-Limits sind für heute aufgebraucht. Komm morgen wieder oder hol dir Premium für unbegrenzten ALEX-Zugang ohne Warteschlangen!",
-    "fr": "Les limites gratuites de l’assistant IA sont épuisées pour aujourd’hui. Reviens demain ou passe à Premium pour un accès illimité à ALEX, sans file d’attente !",
-    "uk": "Безкоштовні ліміти ШІ-асистента на сьогодні вичерпано. Повертайся завтра або переходь на Premium для безлімітного доступу до ALEX без черг!",
-    "tr": "Yapay zekâ asistanının bugünkü ücretsiz limitleri doldu. Yarın tekrar gel veya sırasız sınırsız ALEX erişimi için Premium’a geç!",
-    "zh": "今日的免费 AI 助手额度已用完。明天再来，或升级 Premium 享受无限制、无排队的 ALEX！",
-    "ar": "انتهت حدود مساعد الذكاء الاصطناعي المجانية لليوم. عُد غدًا أو اشترك في Premium للوصول غير المحدود إلى ALEX بلا انتظار!",
-}
-_LIMIT_KICKER = {
-    "ru": "Лимит ИИ", "en": "AI limit", "es": "Límite de IA", "pt": "Limite de IA",
-    "de": "KI-Limit", "fr": "Limite IA", "uk": "Ліміт ШІ", "tr": "YZ limiti",
-    "zh": "AI 上限", "ar": "حد الذكاء الاصطناعي",
-}
-_LIMIT_CTA = {
-    "ru": "Перейти на Premium", "en": "Go Premium", "es": "Pasar a Premium",
-    "pt": "Assinar Premium", "de": "Premium holen", "fr": "Passer à Premium",
-    "uk": "Перейти на Premium", "tr": "Premium’a geç", "zh": "升级 Premium",
-    "ar": "الانتقال إلى Premium",
-}
 # Subtle inline "upgrade" text-link appended to the compact limit notice — NOT a
 # full purchase card. Tapping it opens Premium; by default the user just reads
 # the notice and waits. Lower-case, quiet, non-shouty.
@@ -555,21 +530,7 @@ def gemini_free_limit_message(lang: str = "ru") -> str:
 
 # ── Per-user daily-cap message (i18n) ─────────────────────────────────────────
 # Shown when a FREE user spends their AI_FREE_DAILY messages for the UTC day —
-# distinct from the upstream provider-quota card above (which is global).
-_DAILY_TXT = {
-    "ru": "Бесплатные кредиты ALEX на сегодня закончились. Новые начислятся в 00:00 UTC — или подключи Premium для безлимита.",
-    "en": "You're out of free ALEX credits for today. More arrive at 00:00 UTC — or go Premium for unlimited chat.",
-    "es": "Te quedaste sin créditos gratis de ALEX por hoy. Llegan más a las 00:00 UTC, o pásate a Premium para chat ilimitado.",
-    "pt": "Seus créditos grátis do ALEX acabaram por hoje. Mais chegam às 00:00 UTC — ou assine o Premium para chat ilimitado.",
-    "de": "Deine kostenlosen ALEX-Credits für heute sind aufgebraucht. Neue gibt es um 00:00 UTC — oder hol dir Premium für unbegrenzten Chat.",
-    "fr": "Tu n'as plus de crédits ALEX gratuits pour aujourd'hui. De nouveaux arrivent à 00:00 UTC — ou passe à Premium pour un chat illimité.",
-    "uk": "Безкоштовні кредити ALEX на сьогодні вичерпано. Нові нараховуються о 00:00 UTC — або підключи Premium для безліміту.",
-    "tr": "Bugünlük ücretsiz ALEX kredilerin bitti. Yenileri 00:00 UTC'de gelir — ya da sınırsız sohbet için Premium'a geç.",
-    "zh": "今日免费 ALEX 额度已用完。新额度将于 UTC 00:00 发放，或升级 Premium 畅聊无限。",
-    "ar": "نفدت أرصدة ALEX المجانية لهذا اليوم. تصل أرصدة جديدة عند 00:00 UTC — أو اشترك في Premium للدردشة بلا حدود.",
-}
-
-
+# distinct from the upstream provider-quota notice above (which is global).
 # Compact daily-cap text (no trailing "Premium" — the subtle link carries that).
 _DAILY_TXT_MINI = {
     "ru": "Бесплатные сообщения на сегодня закончились. Новые — в 00:00 UTC.",
