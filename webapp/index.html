@@ -571,6 +571,21 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
   stroke-linecap:round;stroke-linejoin:round}
 .int-chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @keyframes intChipIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+/* Tappable "next step" chips ALEX drops under a reply — open a lesson, jump to
+   flashcards, exam prep. Deliberately more prominent than the quiet int-chip:
+   these are actions, not captions. Wired to real navigation in runAlexAction(). */
+.act-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-width:100%}
+.act-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;
+  background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.34);border-radius:11px;
+  font-family:var(--f);font-size:12.5px;font-weight:600;line-height:1.15;color:var(--a);
+  cursor:pointer;transition:transform .12s,background .16s,border-color .16s,color .16s;
+  max-width:100%;-webkit-tap-highlight-color:transparent;animation:actChipIn .3s ease both}
+.act-chip svg{width:14px;height:14px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.act-chip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act-chip:hover{background:var(--a);color:#fff;border-color:var(--a)}
+.act-chip:active{transform:scale(.96)}
+@keyframes actChipIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .cpbtn{background:var(--e2);border:1px solid var(--b1);border-radius:5px;cursor:pointer;padding:3px 7px;font-size:11px;color:var(--t3);font-family:var(--f);display:flex;align-items:center;gap:3px;transition:.15s}
 .cpbtn:hover{border-color:var(--a);color:var(--a)}
 .cpbtn.ok{color:var(--a2);border-color:var(--a2)}
@@ -1520,6 +1535,10 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .limit-title{font-size:16px;font-weight:800;color:var(--t1);margin-bottom:5px}
 .limit-text{font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:10px}
 .limit-card .chip{display:inline-flex;margin:0}
+.limit-mini{display:flex;align-items:flex-start;gap:7px;padding:9px 11px;margin:2px 0;background:rgba(var(--ar),.06);border:1px solid rgba(var(--ar),.16);border-radius:12px;font-size:12.5px;line-height:1.45;color:var(--t2)}
+.limit-mini-ic{width:14px;height:14px;flex:0 0 auto;margin-top:1px;fill:none;stroke:var(--a);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.limit-mini-link{background:none;border:none;padding:0;margin:0;font:inherit;color:var(--a);font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.limit-mini-link:hover{opacity:.8}
 .mtg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .mtb{padding:12px 6px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--e2);cursor:pointer;text-align:center;transition:.2s;font-size:13px;font-weight:600;color:var(--t1)}
 .mtb:active{transform:scale(.93)}
@@ -6291,6 +6310,82 @@ function attachInterestChip(list){
   if(acts)mw.insertBefore(chip,acts);else mw.appendChild(chip);
 }
 
+/* ══ ALEX → APP ACTION CHIPS ══
+   ALEX can propose ONE concrete in-app next step per reply (open the matching
+   course lesson, jump to flashcards, exam prep, words of the day). It emits a
+   hidden [ACTION: type | level | topic | label] token; the server extracts it
+   into data.actions and strips the raw token from the text. Here we render the
+   actions as tappable chips under the message and wire them to real navigation
+   so ALEX is part of the app, not just a talking head. */
+function attachActionChips(list){
+  const mw=document.querySelector('#cmsgs .msg.bot:last-child .mwrap');
+  if(!mw||mw.querySelector('.act-chips'))return;
+  const items=(list||[]).filter(a=>a&&a.type).slice(0,2);
+  if(!items.length)return;
+  const wrap=document.createElement('div');wrap.className='act-chips';
+  items.forEach(a=>{
+    const label=(String(a.label||'').replace(/[<>&]/g,'').trim())||_actDefaultLabel(a);
+    const btn=document.createElement('button');btn.className='act-chip';btn.type='button';
+    btn.innerHTML=_actIcon(a.type)+'<span>'+label+'</span>';
+    btn.onclick=()=>{try{haptic('light');}catch(_){}try{sfx.tap&&sfx.tap();}catch(_){}runAlexAction(a);};
+    wrap.appendChild(btn);
+  });
+  const acts=mw.querySelector('.macts');
+  if(acts)mw.insertBefore(wrap,acts);else mw.appendChild(wrap);
+}
+function _actIcon(type){
+  const I={
+    lesson:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+    cards:'<rect x="3" y="4" width="14" height="16" rx="2"/><path d="M20 8v12a2 2 0 01-2 2H7"/>',
+    exam:'<path d="M9 11l3 3L20 5"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
+    words:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'
+  };
+  return '<svg viewBox="0 0 24 24">'+(I[type]||I.lesson)+'</svg>';
+}
+function _actDefaultLabel(a){
+  const T={
+    lesson:{ru:'Открыть урок',en:'Open lesson',es:'Abrir lección',pt:'Abrir lição',de:'Lektion öffnen',fr:'Ouvrir la leçon',uk:'Відкрити урок',tr:'Dersi aç',zh:'打开课程',ar:'افتح الدرس'},
+    cards:{ru:'Повторить слова',en:'Review cards',es:'Repasar tarjetas',pt:'Revisar cartões',de:'Karten üben',fr:'Réviser les cartes',uk:'Повторити слова',tr:'Kartları tekrar et',zh:'复习卡片',ar:'راجع البطاقات'},
+    exam:{ru:'Подготовка к экзамену',en:'Exam prep',es:'Preparar examen',pt:'Preparar exame',de:'Prüfungsvorbereitung',fr:'Préparer l’examen',uk:'Підготовка до іспиту',tr:'Sınav hazırlığı',zh:'考试备考',ar:'التحضير للامتحان'},
+    words:{ru:'Слова дня',en:'Words of the day',es:'Palabras del día',pt:'Palavras do dia',de:'Wörter des Tages',fr:'Mots du jour',uk:'Слова дня',tr:'Günün kelimeleri',zh:'每日单词',ar:'كلمات اليوم'}
+  }[a.type]||{ru:'Открыть',en:'Open'};
+  return T[lang]||T.en;
+}
+function runAlexAction(a){
+  try{
+    if(a.type==='cards'||a.type==='words'){goCardsTab();return;}
+    if(a.type==='exam'){goTab('learn');try{switchLearnTab('road');}catch(_){}return;}
+    if(a.type==='lesson'){openLessonByTopic(a.level,a.topic);return;}
+  }catch(e){console.error('runAlexAction failed:',e);}
+}
+/* Fuzzy-match a grammar/vocab topic (+ optional CEFR level) to a real lesson in
+   GALAXY_COURSE and open it. Falls back to the first lesson of the given level
+   if the topic doesn't match anything. openCourseLesson handles its own lock /
+   hearts / daily-cap gates, so a suggestion the user hasn't unlocked yet just
+   shows the standard locked prompt instead of failing silently. */
+function openLessonByTopic(level,topic){
+  goTab('learn');
+  try{switchLearnTab('course');}catch(_){}
+  const course=(typeof GALAXY_COURSE!=='undefined'&&Array.isArray(GALAXY_COURSE))?GALAXY_COURSE:[];
+  const lvl=String(level||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const q=String(topic||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  const qWords=q.split(' ').filter(w=>w.length>2);
+  let best=null,bestScore=0;
+  course.forEach(ls=>{
+    if(!ls||!ls.id)return;
+    const hay=(((ls.title&&ls.title.en)||'')+' '+((ls.sub&&ls.sub.en)||'')+' '+ls.id).toLowerCase();
+    let score=0;
+    qWords.forEach(w=>{if(hay.indexOf(w)>=0)score+=2;});
+    if(q&&hay.indexOf(q)>=0)score+=3;
+    if(lvl&&String(ls.level||'').toUpperCase()===lvl)score+=1;
+    if(score>bestScore){bestScore=score;best=ls;}
+  });
+  if(!best||bestScore<=0){
+    if(lvl)best=course.find(ls=>String(ls.level||'').toUpperCase()===lvl)||null;
+  }
+  if(best)setTimeout(()=>{try{openCourseLesson(best.id);}catch(e){console.error('openLessonByTopic open failed:',e);}},70);
+}
+
 function openPracticeShell(title,sub){
   const t=document.getElementById('practice-title');
   const s=document.getElementById('practice-sub');
@@ -6375,6 +6470,9 @@ async function doChat(text,mode){
     /* If ALEX quietly learned a new interest, show a subtle caption chip under
        the message (the raw [SAVE_INTEREST] tag is stripped server-side). */
     try{if(Array.isArray(data.saved_interests)&&data.saved_interests.length)attachInterestChip(data.saved_interests);}catch(_){}
+    /* ALEX may propose a tappable in-app next step (open a lesson, review cards,
+       exam prep) — render it as action chips under the message. */
+    try{if(Array.isArray(data.actions)&&data.actions.length)attachActionChips(data.actions);}catch(_){}
     /* Server tells us the new balance after spending credits — sync UI. */
     if(typeof data.chat_credits==='number'){
       chatCredits=data.chat_credits;

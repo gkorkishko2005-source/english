@@ -508,21 +508,49 @@ _LIMIT_CTA = {
     "uk": "Перейти на Premium", "tr": "Premium’a geç", "zh": "升级 Premium",
     "ar": "الانتقال إلى Premium",
 }
+# Subtle inline "upgrade" text-link appended to the compact limit notice — NOT a
+# full purchase card. Tapping it opens Premium; by default the user just reads
+# the notice and waits. Lower-case, quiet, non-shouty.
+_LIMIT_UPSELL = {
+    "ru": "обновить подписку", "en": "upgrade", "es": "mejorar plan",
+    "pt": "assinar premium", "de": "Premium holen", "fr": "passer à Premium",
+    "uk": "оновити підписку", "tr": "yükselt", "zh": "升级会员",
+    "ar": "ترقية الاشتراك",
+}
+# Short, upstream-quota variant of the free-limit notice ("come back later").
+_LIMIT_TXT_MINI = {
+    "ru": "Бесплатные лимиты ALEX на сегодня исчерпаны — возвращайся завтра.",
+    "en": "Today's free ALEX limits are used up — come back tomorrow.",
+    "es": "Los límites gratis de ALEX se agotaron por hoy — vuelve mañana.",
+    "pt": "Os limites grátis do ALEX acabaram por hoje — volte amanhã.",
+    "de": "Die kostenlosen ALEX-Limits sind heute aufgebraucht — komm morgen wieder.",
+    "fr": "Les limites gratuites d’ALEX sont épuisées aujourd’hui — reviens demain.",
+    "uk": "Безкоштовні ліміти ALEX на сьогодні вичерпано — повертайся завтра.",
+    "tr": "ALEX’in bugünkü ücretsiz limitleri doldu — yarın tekrar gel.",
+    "zh": "今日免费 ALEX 额度已用完 — 明天再来。",
+    "ar": "انتهت حدود ALEX المجانية لليوم — عُد غدًا.",
+}
+
+
+def _limit_mini(txt: str, upsell: str) -> str:
+    """Compact, quiet inline limit notice (NOT a full-screen purchase menu).
+    A single muted line: what happened + a subtle text-link to upgrade. Renders
+    as HTML inside the chat bubble (the WebApp detects the leading <div>)."""
+    return (
+        '<div class="limit-mini">'
+        '<svg viewBox="0 0 24 24" class="limit-mini-ic"><circle cx="12" cy="12" r="9"/>'
+        '<path d="M12 7.5v5l3.2 2"/></svg>'
+        f'<span>{txt} '
+        f'<button type="button" class="limit-mini-link" onclick="openPremium()">{upsell}</button>'
+        '</span></div>'
+    )
 
 
 def gemini_free_limit_message(lang: str = "ru") -> str:
-    """HTML limit-card shown when the free Gemini quota is exhausted."""
-    txt = _LIMIT_TXT.get(lang, _LIMIT_TXT["en"])
-    kicker = _LIMIT_KICKER.get(lang, _LIMIT_KICKER["en"])
-    cta = _LIMIT_CTA.get(lang, _LIMIT_CTA["en"])
-    return (
-        '<div class="limit-card">'
-        f'<div class="limit-kicker">{kicker}</div>'
-        f'<div class="limit-title">ALEX</div>'
-        f'<div class="limit-text">{txt}</div>'
-        f'<button class="chip" onclick="openPremium()">{cta}</button>'
-        '</div>'
-    )
+    """Compact inline notice when the free upstream quota is exhausted."""
+    txt = _LIMIT_TXT_MINI.get(lang, _LIMIT_TXT_MINI["en"])
+    upsell = _LIMIT_UPSELL.get(lang, _LIMIT_UPSELL["en"])
+    return _limit_mini(txt, upsell)
 
 
 # ── Per-user daily-cap message (i18n) ─────────────────────────────────────────
@@ -542,19 +570,27 @@ _DAILY_TXT = {
 }
 
 
+# Compact daily-cap text (no trailing "Premium" — the subtle link carries that).
+_DAILY_TXT_MINI = {
+    "ru": "Бесплатные сообщения на сегодня закончились. Новые — в 00:00 UTC.",
+    "en": "You're out of free messages for today. New ones arrive at 00:00 UTC.",
+    "es": "Se acabaron tus mensajes gratis por hoy. Llegan más a las 00:00 UTC.",
+    "pt": "Seus mensagens grátis acabaram por hoje. Chegam mais às 00:00 UTC.",
+    "de": "Deine kostenlosen Nachrichten für heute sind aufgebraucht. Neue um 00:00 UTC.",
+    "fr": "Tu n'as plus de messages gratuits aujourd'hui. De nouveaux à 00:00 UTC.",
+    "uk": "Безкоштовні повідомлення на сьогодні вичерпано. Нові — о 00:00 UTC.",
+    "tr": "Bugünlük ücretsiz mesajların bitti. Yenileri 00:00 UTC'de gelir.",
+    "zh": "今日免费消息已用完。新消息将于 UTC 00:00 发放。",
+    "ar": "نفدت رسائلك المجانية لهذا اليوم. تصل رسائل جديدة عند 00:00 UTC.",
+}
+
+
 def ai_daily_limit_message(lang: str = "ru") -> str:
-    """HTML limit-card shown when a free user runs out of daily free credits."""
-    txt = _DAILY_TXT.get(lang, _DAILY_TXT["en"])
-    kicker = _LIMIT_KICKER.get(lang, _LIMIT_KICKER["en"])
-    cta = _LIMIT_CTA.get(lang, _LIMIT_CTA["en"])
-    return (
-        '<div class="limit-card">'
-        f'<div class="limit-kicker">{kicker}</div>'
-        f'<div class="limit-title">ALEX</div>'
-        f'<div class="limit-text">{txt}</div>'
-        f'<button class="chip" onclick="openPremium()">{cta}</button>'
-        '</div>'
-    )
+    """Compact inline notice when a free user runs out of daily messages — a quiet
+    'limit reached, wait or upgrade' line, NOT a full-screen purchase menu."""
+    txt = _DAILY_TXT_MINI.get(lang, _DAILY_TXT_MINI["en"])
+    upsell = _LIMIT_UPSELL.get(lang, _LIMIT_UPSELL["en"])
+    return _limit_mini(txt, upsell)
 
 
 # ── Transient "service busy" message (i18n) ───────────────────────────────────

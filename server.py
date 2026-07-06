@@ -90,6 +90,40 @@ async def _sanitize_reply(uid: int, reply: str):
     clean = _SYS_TAG_RE.sub("", clean)        # other ALL-CAPS system tags
     clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
     return clean, uniq
+
+
+# ALEX can propose ONE concrete in-app next step by emitting a hidden token, one
+# per line, in the form:  [ACTION: <type> | <level> | <topic> | <label>]
+# The Mini App turns each into a tappable chip under the message (open the
+# matching course lesson, jump to flashcards, exam prep, words of the day). We
+# extract them here BEFORE _sanitize_reply strips every bracketed ALL-CAPS tag,
+# so the structured data survives while the raw token never reaches the UI.
+_ACTION_TAG_RE = re.compile(r'\[ACTION:\s*([^\]]+)\]', re.I)
+_ACTION_TYPES = {"lesson", "cards", "words", "exam"}
+
+
+def _extract_actions(reply: str):
+    """Pull [ACTION:...] tokens out of the reply, return (clean_reply, actions).
+    Each action = {type, level, topic, label}. Unknown types are dropped; the
+    raw token is always removed from the visible text either way. Capped at 2 so
+    the chat never fills with buttons."""
+    if not reply:
+        return reply, []
+    actions = []
+    for raw in _ACTION_TAG_RE.findall(reply):
+        parts = [p.strip() for p in raw.split("|")]
+        atype = (parts[0] if parts else "").lower()
+        if atype not in _ACTION_TYPES:
+            continue
+        level = (parts[1].upper() if len(parts) > 1 and parts[1] else "")[:8]
+        topic = (parts[2] if len(parts) > 2 else "")[:80]
+        label = (parts[3] if len(parts) > 3 and parts[3] else "")[:40]
+        actions.append({"type": atype, "level": level, "topic": topic, "label": label})
+        if len(actions) >= 2:
+            break
+    clean = _ACTION_TAG_RE.sub("", reply)
+    clean = re.sub(r"\n{3,}", "\n\n", clean).strip()
+    return clean, actions
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
@@ -1023,10 +1057,12 @@ async def handle_chat(request):
         prem_max = min(MAX_REPLY_TOKENS_HARD,
                        int(os.getenv("OPENROUTER_PREMIUM_MAX_TOKENS", "1500") or "1500"))
         reply = ""
+        actions = []
         try:
             result = await openrouter_generate(prem_system, prem_send, prem_max,
                                                model=OPENROUTER_MODEL_PREMIUM)
             reply = re.sub(r"\n[ \t]*\n+", "\n", (result.get("text") or "").strip())
+            reply, actions = _extract_actions(reply)               # pull in-app action chips
             reply, saved_int = await _sanitize_reply(uid, reply)  # save + strip system tags
         except GeminiRateLimit:
             reply = ""
@@ -1058,7 +1094,7 @@ async def handle_chat(request):
         _avail = 0 if _tot <= 0 else max(0, _dl - _du)
         return web.json_response(
             {"reply": reply, "provider": "openrouter", "ai_provider": "Powered by ALEX Pro",
-             "saved_interests": saved_int,
+             "saved_interests": saved_int, "actions": actions,
              "premium_type": cons.get("premium_type"),
              "daily_used": cons.get("daily_used"), "daily_limit": cons.get("daily_limit"),
              "total_remaining": cons.get("total_remaining"),
@@ -1203,6 +1239,7 @@ async def handle_chat(request):
         free_system = system + COURSE_KB_SHORT + RESOURCES_KB_SHORT + alex_free
         reply = ""
         saved_int = []
+        actions = []
         prov_tag = prov_label = None
         all_rate_limited = True
         for _name in order:
@@ -1210,12 +1247,14 @@ async def handle_chat(request):
                 result = await _GEN[_name](free_system, free_send, g_max)
                 r = (result.get("text") or "").strip()
                 r = re.sub(r"\n[ \t]*\n+", "\n", r)
+                r, r_actions = _extract_actions(r)        # pull in-app action chips
                 r, r_int = await _sanitize_reply(uid, r)  # save + strip system tags
                 if not r:
                     all_rate_limited = False
                     continue
                 reply = r
                 saved_int = r_int
+                actions = r_actions
                 prov_tag, prov_label = _LABEL[_name]
                 break
             except GeminiRateLimit:
@@ -1258,7 +1297,7 @@ async def handle_chat(request):
             except Exception:
                 pass
         resp = {"reply": reply, "provider": prov_tag, "ai_provider": prov_label,
-                "saved_interests": saved_int}
+                "saved_interests": saved_int, "actions": actions}
         if fc_balance is not None:
             resp["free_credits"] = fc_balance
             resp["free_credits_cap"] = fc_cap
@@ -1448,6 +1487,7 @@ async def handle_chat(request):
             # Dense layout: collapse blank lines between paragraphs so ALEX
             # replies render tight (matches the prompt's LAYOUT rule).
             reply = re.sub(r"\n[ \t]*\n+", "\n", reply)
+            reply, actions = _extract_actions(reply)               # pull in-app action chips
             reply, saved_int = await _sanitize_reply(uid, reply)  # save + strip system tags
             if uid not in ADMIN_IDS:
                 cost_key = f"cost:{uid}:{__import__('datetime').date.today()}"
@@ -1507,7 +1547,7 @@ async def handle_chat(request):
 
     # Debug marker: this branch always answered via Anthropic Claude (paid users).
     resp = {"reply": reply, "provider": "anthropic", "ai_provider": "Powered by ALEX Pro",
-            "saved_interests": saved_int}
+            "saved_interests": saved_int, "actions": actions}
     if new_balance is not None:
         resp["chat_credits"] = new_balance
     return web.json_response(resp, headers={"Access-Control-Allow-Origin": "*"})
