@@ -679,23 +679,6 @@ async def handle_user(request):
                 available_daily = 0 if total_rem <= 0 else int(ai_state.get("daily_remaining") or 0)
         except Exception as _ae:
             logger.warning(f"ai access state failed for {uid}: {_ae}")
-        # DIAGNOSTIC (temporary): the header counter renders orange-0 when this
-        # value is 0. Log the full billing snapshot ONLY in that anomalous case
-        # so we can see, from prod logs, why a supposed subscriber reads zero.
-        if int(available_daily or 0) <= 0:
-            try:
-                _u = user if isinstance(user, dict) else {}
-                logger.info(
-                    "REQCHIP-DIAG uid=%s avail=0 is_prem=%s ai_state=%s "
-                    "premium_type=%s total_rem=%s ai_req_today=%s ai_req_date=%s "
-                    "platform_until=%s platform_lifetime=%s free_credits=%s",
-                    uid, is_prem, ai_state,
-                    _u.get("premium_type"), _u.get("total_requests_remaining"),
-                    _u.get("ai_req_today"), _u.get("ai_req_date"),
-                    _u.get("platform_until"), _u.get("platform_lifetime"),
-                    _u.get("free_credits"))
-            except Exception:
-                pass
         return web.json_response({
             "uid": uid,
             "name": user.get("name", "Student") if isinstance(user, dict) else "Student",

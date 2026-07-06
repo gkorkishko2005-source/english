@@ -18907,10 +18907,8 @@ async function subgateRecheck(btn){
   if(subscribed){hideSubGate();}
   else if(err){err.textContent=_subgateTxt('still');}
 }
-const BUILD_ID='reqchip-fix-3';
 async function init(){
   hideLoader();
-  try{console.log('%cPolyGlotty build: '+BUILD_ID,'color:#5eead4;font-weight:700');}catch(_){}
   try{
     lang   =_normLang(LS.get('app_lang')   ||'ru');
     botLang=_normLang(LS.get('bot_lang')   ||'ru');
