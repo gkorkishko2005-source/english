@@ -40,16 +40,16 @@
   function rng(seed){return function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
   function css(el,k,fb){return (getComputedStyle(el).getPropertyValue(k)||fb).trim()||fb}
   /* ── Stage colour ramp ─────────────────────────────────────────
-     Progress should read as colour, not a flat blue blueprint. The
-     foliage hue walks the life cycle:
+     Progress reads as colour, but the plant stays believably alive —
+     the foliage hue walks a green→teal life cycle, never blue:
        1 Seedling · 2 Sprout  → fresh green
-       3 Bud                  → blue (a closed bud about to open)
+       3 Bud                  → green (a closed bud, not a blueprint)
        4 Bloom                → teal-green stem (petals stay pink/gold)
-       5 Bush · 6 Sapling     → blue-green → blue
+       5 Bush · 6 Sapling     → sea-green → teal
        7 Tree · 8 Grand Tree  → saturated green → vivid teal
      We interpolate between the anchors using the float stage so the
      colour drifts smoothly as XP climbs. */
-  var STAGE_HEX=['#5fce72','#54c98a','#4f9bf0','#3fb89a','#34b0a8','#3aa0d8','#2fc55f','#1fd6a0'];
+  var STAGE_HEX=['#5fce72','#54c98a','#49c883','#3fb89a','#34b0a8','#2fb59a','#2fc55f','#1fd6a0'];
   function hx(h){h=String(h).replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
   function mix(a,b,t){var x=hx(a),y=hx(b);return'rgb('+Math.round(lerp(x[0],y[0],t))+','+Math.round(lerp(x[1],y[1],t))+','+Math.round(lerp(x[2],y[2],t))+')'}
   function stageHue(sf){var s=clamp(Math.floor(sf),1,8),p=clamp(sf-s,0,1);return mix(STAGE_HEX[s-1],STAGE_HEX[Math.min(7,s)],p)}
@@ -153,8 +153,11 @@
 
   Engine.prototype.buildTree=function(sf){
     var H=this.h,W=this.w,x=W*.5,b=this.base,st=clamp(sf,5,8),depth=Math.round(lerp(3,6,(st-5)/3)),rr=rng(this.seed);
-    var trunk=lerp(H*.22,H*.36,(st-5)/3), baseW=lerp(6,W*.11,(st-5)/3), topW=lerp(3,6.5,(st-5)/3);
-    this.branch(x,b,x,b-trunk,baseW,2);this.branch(x-baseW*.35,b,x-3,b-trunk*.38,baseW*.45,5);this.branch(x+baseW*.35,b,x+3,b-trunk*.38,baseW*.45,6);
+    var trunk=lerp(H*.24,H*.40,(st-5)/3), baseW=lerp(6,W*.095,(st-5)/3), topW=lerp(3,6,(st-5)/3);
+    /* Trunk is a filled column (drawTrunk), not a round-capped stroke,
+       so it reads as timber with a flat base + soft root flare instead
+       of a teardrop "lightbulb". No buttress stubs at the foot. */
+    this.trunkGeom={x:x,b:b,tipY:b-trunk,baseW:baseW,topW:topW};
     var self=this, tipY=b-trunk, scale=lerp(H*.11,H*.19,(st-5)/3), spread=lerp(.72,.78,(st-5)/3);
     function rec(x,y,len,ang,w,d,seed,side){
       if(d<=0||len<5){self.addLeaf(x,y,ang,len*.33,H*.012,seed);return}
@@ -216,6 +219,7 @@
     c.save();c.translate(W*.5,b);c.rotate(sway);c.translate(-W*.5,-b);
     this.drawRoots(c);
     if(sf>=5)this.drawCanopyGlow(c,sf,t);
+    if(sf>=4.7)this.drawTrunk(c,t);
     this.drawBranches(c,t);this.drawShimmers(c,t);this.drawYoungExtras(c,sf,t);this.drawLeaves(c,t);this.drawFruit(c,t);
     c.restore();
     this.drawParticles(c,t);this.drawDirt(c);
@@ -238,8 +242,8 @@
   Engine.prototype.drawCanopyGlow=function(c,sf,t){
     /* Soft accent halo behind the canopy so a mature tree feels
        lit-from-within. Stronger as the stage grows. */
-    var W=this.w,H=this.h,b=this.base,trunk=lerp(H*.16,H*.32,(clamp(sf,5,8)-5)/3);
-    var cx=W*.5,cy=b-trunk-H*.10,r=H*.30+(sf-5)*H*.035;
+    var W=this.w,H=this.h,b=this.base,trunk=lerp(H*.24,H*.40,(clamp(sf,5,8)-5)/3);
+    var cx=W*.5,cy=b-trunk-H*.08,r=H*.30+(sf-5)*H*.035;
     var g=c.createRadialGradient(cx,cy,4,cx,cy,r);
     /* Green foliage halo (not white) so a mature tree glows leafy from
        within rather than reading as a bare white bulb on the dark card. */
@@ -252,7 +256,7 @@
   Engine.prototype.drawShimmers=function(c,t){
     /* Progress shimmer: ascending sparks along the trunk after XP gain. */
     if(!this.shimmers.length)return;
-    var W=this.w,H=this.h,b=this.base,sf=this.stageFloat(),trunk=sf<4.7?H*.42:lerp(H*.16,H*.32,(clamp(sf,5,8)-5)/3);
+    var W=this.w,H=this.h,b=this.base,sf=this.stageFloat(),trunk=sf<4.7?H*.42:lerp(H*.24,H*.40,(clamp(sf,5,8)-5)/3);
     var tipY=b-trunk,x=W*.5;
     for(var i=0;i<this.shimmers.length;i++){
       var s=this.shimmers[i],p=clamp(s.t/s.dur,0,1),fade=Math.sin(p*Math.PI),y=lerp(b-4,tipY-6,p),wob=Math.sin(p*8+i)*2;
@@ -266,6 +270,25 @@
   Engine.prototype.drawDirt=function(c){if(!this.dirt)return;c.fillStyle=this.t;c.globalAlpha=.34;for(var i=0;i<this.dirt.length;i++){var d=this.dirt[i];c.beginPath();c.arc(d.x,d.y,d.r,0,TWO);c.fill()}c.globalAlpha=1};
   Engine.prototype.drawRoots=function(c){if(!this.roots)return;c.strokeStyle=this.t;c.globalAlpha=.55;for(var i=0;i<this.roots.length;i++){var r=this.roots[i];this.taper(c,r[0],r[1],r[2],r[3],3,1.2)}c.globalAlpha=1};
   Engine.prototype.taper=function(c,x1,y1,x2,y2,w1,w2){var n=7;for(var i=0;i<n;i++){var a=i/n,b=(i+1)/n;c.lineWidth=lerp(w1,w2,a);c.beginPath();c.moveTo(lerp(x1,x2,a),lerp(y1,y2,a));c.lineTo(lerp(x1,x2,b),lerp(y1,y2,b));c.stroke()}};
+  Engine.prototype.drawTrunk=function(c,t){
+    /* Filled bark column: widest (soft root flare) at a FLAT base, gently
+       narrowing to the crown. Two mirrored bezier sides give an organic
+       taper without the round-cap teardrop that read as a lightbulb. */
+    var T=this.trunkGeom;if(!T)return;
+    var x=T.x,b=T.b,ty=T.tipY,hB=Math.max(3,T.baseW*.5),hT=Math.max(1.6,T.topW*.5),flare=hB*1.22, tall=b-ty;
+    var sway=Math.sin(t*.42)*3;
+    c.fillStyle=this.bark;c.beginPath();
+    c.moveTo(x-flare,b);
+    c.quadraticCurveTo(x-hB*.96,b-tall*.16, x-hT+sway*.3, ty);
+    c.quadraticCurveTo(x-hT*.5+sway, ty-1, x+hT*.5+sway, ty-1);
+    c.quadraticCurveTo(x+hT+sway*.3, ty, x+hB*.96,b-tall*.16);
+    c.quadraticCurveTo(x+flare,b-tall*.02, x+flare,b);
+    c.lineTo(x-flare,b);
+    c.closePath();c.fill();
+    /* A hair of inner shading for volume on bigger trunks. */
+    if(this.stageFloat()>=6){c.save();c.globalAlpha=.14;c.fillStyle='rgba(0,0,0,1)';c.beginPath();
+      c.moveTo(x+hB*.1,b);c.quadraticCurveTo(x+hB*.55,b-tall*.16,x+hT*.5+sway,ty);c.lineTo(x+flare,b);c.closePath();c.fill();c.restore()}
+  };
   Engine.prototype.drawBranches=function(c,t){
     /* Young plants (≤ Bloom) are mostly stem, so tint the stem with the
        stage colour; mature trees keep a neutral woody outline so the
