@@ -11,6 +11,8 @@ logger      = logging.getLogger(__name__)
 WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
+# Process start time — used by /health to report uptime.
+_START_TS   = time.time()
 # Hard ceiling on ALEX OUTPUT tokens per reply — applied to EVERY chat path
 # (credit, legacy and grandfathered) so a single reply can never blow the
 # budget. Owner-tunable via env without a deploy.
@@ -1801,7 +1803,39 @@ async def handle_audio_task(request):
 
 # ── HEALTH ────────────────────────────────────────────────────────────────────
 async def handle_health(request):
-    return web.json_response({"status":"ok","model":MODEL},headers={"Access-Control-Allow-Origin":"*"})
+    """Liveness + readiness probe. Pings the DB with a short timeout so a
+    monitor (Railway/UptimeRobot) can tell 'process up but DB down' from
+    'fully healthy'. Never leaks secrets — only booleans, timings and the
+    model name. Returns 200 when healthy, 503 when the DB is unreachable so
+    external monitors treat a degraded instance as down."""
+    import asyncio
+    db_ok = False
+    db_ms = None
+    db_err = None
+    try:
+        from database import db
+        _t0 = time.perf_counter()
+        # SELECT 1 is valid on both Postgres and SQLite; the shared db() helper
+        # normalises placeholders/flavours. Bounded so a hung pool can't wedge
+        # the probe.
+        await asyncio.wait_for(db("SELECT 1", fetch="one"), timeout=4.0)
+        db_ms = round((time.perf_counter() - _t0) * 1000, 1)
+        db_ok = True
+    except Exception as e:
+        db_err = type(e).__name__
+        logger.warning("healthcheck: DB ping failed: %s: %s", db_err, e)
+
+    payload = {
+        "status": "ok" if db_ok else "degraded",
+        "model": MODEL,
+        "uptime_s": int(time.time() - _START_TS),
+        "db": {"ok": db_ok, "latency_ms": db_ms, "error": db_err},
+    }
+    return web.json_response(
+        payload,
+        status=200 if db_ok else 503,
+        headers={"Access-Control-Allow-Origin": "*"},
+    )
 
 # ── CHECK PREMIUM ─────────────────────────────────────────────────────────────
 async def handle_check_premium(request):
@@ -1911,6 +1945,9 @@ async def handle_grant_platform(request):
         return web.json_response({"ok":True,"uid":uid,"period":period},
                                   headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
+        # CRITICAL: the user has already paid — a failure here means access was
+        # NOT granted. Log loudly with traceback so it can be reconciled by hand.
+        logger.exception("GRANT-PLATFORM FAILED uid=%s period=%s: %s", uid, period, e)
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── GRANT CREDITS (bot → server after credit pack purchase) ───────────────────
@@ -1944,6 +1981,9 @@ async def handle_grant_credits(request):
         return web.json_response({"ok":True,"uid":uid,"credits":credits,"balance":new_balance},
                                   headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
+        # CRITICAL: the user has already paid — a failure here means credits were
+        # NOT added. Log loudly with traceback so it can be reconciled by hand.
+        logger.exception("GRANT-CREDITS FAILED uid=%s credits=%s: %s", uid, credits, e)
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── GRANT PREMIUM (called by bot after successful payment) ────────────────────
@@ -1970,6 +2010,9 @@ async def handle_grant_premium(request):
         return web.json_response({"ok":True,"uid":uid,"months":months,"tier":tier},
                                   headers={"Access-Control-Allow-Origin":"*"})
     except Exception as e:
+        # CRITICAL: the user has already paid — a failure here means premium was
+        # NOT granted. Log loudly with traceback so it can be reconciled by hand.
+        logger.exception("GRANT-PREMIUM FAILED uid=%s months=%s tier=%s: %s", uid, months, tier, e)
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── TTS ──────────────────────────────────────────────────────────────────────
