@@ -3309,7 +3309,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <div class="chdr">
     <div class="chtxt"><div class="chnm">ALEX</div></div>
     <div class="hbtns">
-      <button class="req-chip" id="req-chip" onclick="openPremium(null,'platform')" type="button" title="Запросов к ALEX сегодня">
+      <button class="req-chip" id="req-chip" onclick="openPremium(null,'platform')" type="button" title="ALEX requests today">
         <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span id="req-chip-n">0</span>
       </button>
@@ -14121,7 +14121,7 @@ function toggleLevelPicker(){
 }
 function startLevelTest(targetLevel){
   const test=LEVEL_TESTS[targetLevel];
-  if(!test){toast('Test not available','⚠️');return;}
+  if(!test){toast(({ru:'Тест недоступен',en:'Test not available',es:'Prueba no disponible',pt:'Teste indisponível',de:'Test nicht verfügbar',fr:'Test indisponible',uk:'Тест недоступний',tr:'Test kullanılamıyor',zh:'测试不可用',ar:'الاختبار غير متاح'}[lang]||'Test not available'),'⚠️');return;}
   /* The graded level-transition TEST is a Premium feature. Free users still
      advance levels for free via the "Открыть без теста" (skip) path — only the
      official assessment is gated. */
@@ -14134,7 +14134,7 @@ function startLevelTest(targetLevel){
   }
   const cfg=levelTestCfg(targetLevel);
   const questions=buildLevelQuestions(targetLevel);
-  if(!questions.length){toast('Test not available','⚠️');return;}
+  if(!questions.length){toast(({ru:'Тест недоступен',en:'Test not available',es:'Prueba no disponible',pt:'Teste indisponível',de:'Test nicht verfügbar',fr:'Test indisponible',uk:'Тест недоступний',tr:'Test kullanılamıyor',zh:'测试不可用',ar:'الاختبار غير متاح'}[lang]||'Test not available'),'⚠️');return;}
   haptic('medium');
   const session='lt-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999);
   const timeLimitSec=cfg.timeLimitSec||300;
@@ -15721,6 +15721,7 @@ let availableRequests = null;
 function updateReqChip(opts){
   const chip=document.getElementById('req-chip');
   if(!chip)return;
+  chip.title={ru:'Запросов к ALEX сегодня',en:'ALEX requests today',es:'Solicitudes a ALEX hoy',pt:'Pedidos ao ALEX hoje',de:'ALEX-Anfragen heute',fr:'Requêtes ALEX aujourd’hui',uk:'Запитів до ALEX сьогодні',tr:'Bugünkü ALEX istekleri',zh:'今日 ALEX 请求数',ar:'طلبات ALEX اليوم'}[lang]||'ALEX requests today';
   const n=document.getElementById('req-chip-n');
   const known=(availableRequests!==null&&availableRequests!==undefined);
   const v=Math.max(0,parseInt(availableRequests,10)||0);
