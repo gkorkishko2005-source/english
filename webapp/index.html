@@ -2871,10 +2871,15 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    the tree growing), but everything else around it stays
    restrained — small type, a single hairline divider, the accent
    colour reserved for the progress bar and the SVG's blossoms. */
-.growth-hero{position:relative;background:var(--e1);border:1px solid var(--b1);border-radius:14px;
+.growth-hero{position:relative;background:var(--e1);border:1px solid var(--b1);border-radius:16px;
   box-shadow:var(--sh);overflow:hidden;
-  padding:7px 16px 9px;margin-bottom:11px;display:flex;flex-direction:column;
-  align-items:stretch;gap:5px}
+  padding:14px 16px 16px;margin-bottom:16px;display:flex;flex-direction:column;
+  align-items:stretch;gap:6px}
+/* Stage counter (e.g. "4 / 8") — a quiet marker pinned to the top-right of the
+   card. Muted + tabular so it reads as metadata, not a headline. */
+.growth-count{position:absolute;top:12px;right:14px;z-index:2;
+  font-size:12px;font-weight:600;color:var(--t2);opacity:.7;
+  letter-spacing:.3px;font-variant-numeric:tabular-nums;pointer-events:none}
 .growth-stage{position:relative;width:100%;height:150px;display:flex;
   align-items:flex-end;justify-content:center;overflow:hidden;border-radius:12px;
   transition:filter .6s ease,transform .6s ease}
@@ -2981,13 +2986,13 @@ html[data-mode=light] .growth-hero[data-tod="night"] .growth-stage{background:tr
   .growth-hero[data-mood] .growth-stage{animation:none!important;transition:none}
 }
 .growth-meta{text-align:center;margin-top:1px}
-.growth-title{font-size:15px;font-weight:800;color:var(--t1);letter-spacing:-.2px;
+.growth-title{font-size:15px;font-weight:600;color:var(--t1);letter-spacing:-.2px;
   margin-bottom:1px}
 .growth-sub{font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.3px;
   text-transform:uppercase}
-.growth-progress{height:3px;background:var(--e3);border-radius:100px;overflow:hidden;
-  margin:0 4px}
-.growth-fill{position:relative;height:100%;background:var(--color-primary);border-radius:100px;
+.growth-progress{height:4px;background:var(--e3);border-radius:100px;overflow:hidden;
+  margin:4px 4px 0}
+.growth-fill{position:relative;height:100%;background:#007A6A;border-radius:100px;
   transition:width .9s cubic-bezier(.22,1,.36,1);overflow:hidden}
 .growth-fill::after{content:'';position:absolute;inset:0;border-radius:100px;
   background:transparent;
@@ -3392,6 +3397,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
        when the daily goal is met. The card background shifts with the time
        of day, and "weeds" sprout when the error diary has entries. -->
   <div class="growth-hero" id="growth-hero" data-mood="fresh" data-tod="day">
+    <div class="growth-count" id="growth-count" aria-hidden="true">—</div>
     <div class="growth-stage">
       <div class="growth-weather" id="growth-weather" aria-hidden="true"></div>
       <div class="growth-svg" id="growth-svg"></div>
@@ -5383,18 +5389,26 @@ function renderGrowth(d){
   if(wxHost) wxHost.innerHTML = (window.WEATHER_OVERLAYS&&window.WEATHER_OVERLAYS[mood])||'';
   const c=_growthCopy();
   const localName = (c[cur.r] && (c[cur.r][lang] || c[cur.r].en)) || cur.r;
+  /* Title = stage name ONLY. No emoji — the animated plant IS the visual;
+     the discrete stage lives in the top-right counter. */
   const title=document.getElementById('growth-title');
-  if(title)title.textContent=`${cur.emoji} ${localName}`;
-  /* Subtitle: CEFR level + stage index. */
+  if(title)title.textContent=localName;
+  /* Top-right stage counter: "4 / 8". */
+  const countEl=document.getElementById('growth-count');
+  if(countEl)countEl.textContent=`${stage} / 8`;
+  /* Subtitle: CEFR level (the stage index moved to the corner counter). */
   const sub=document.getElementById('growth-sub');
   if(sub){
     const cefr=(d&&d.level)||LS.get('ob_level')||'';
     sub.textContent = cefr
-      ? `${cefr} · ${({ru:'стадия',en:'stage',es:'etapa',de:'Stufe',fr:'étape',pt:'etapa',uk:'стадія',tr:'aşama',zh:'阶段',ar:'مرحلة'}[lang]||'stage')} ${stage}/8`
-      : `${({ru:'Стадия',en:'Stage'}[lang]||'Stage')} ${stage}/8`;
+      ? `${({ru:'Уровень',en:'Level',es:'Nivel',de:'Niveau',fr:'Niveau',pt:'Nível',uk:'Рівень',tr:'Seviye',zh:'级别',ar:'المستوى'}[lang]||'Level')} ${cefr}`
+      : (c[cur.r]&&(c[cur.r][lang]||c[cur.r].en))||'';
   }
-  /* Progress fill within current stage. */
-  const pct=Math.max(0,Math.min(100,Math.round(((xp-cur.min)/(cur.max-cur.min))*100)));
+  /* Progress bar = overall journey across the 8 stages: completed stages plus
+     how far into the current one. It sits near the halfway mark around stage 4
+     and always moves toward the next stage as XP climbs. */
+  const within=Math.max(0,Math.min(1,(xp-cur.min)/Math.max(1,(cur.max-cur.min))));
+  const pct=Math.max(0,Math.min(100,Math.round((((stage-1)+within)/8)*100)));
   const fill=document.getElementById('growth-fill');
   if(fill)fill.style.width=Math.max(3,pct)+'%';
   /* Footer line — current XP + to-next. */
