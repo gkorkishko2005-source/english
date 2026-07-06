@@ -118,16 +118,22 @@ _DEFAULTS = {
     # from prepaid `chat_credits` (which never expire / are never capped here).
     # FREE_AI_MAX_CHARS bounds the prompt (system + trimmed history + message)
     # a free reply may carry, so a single huge message can't burn the shared key.
-    "FREE_CREDITS_DAILY": 2,           # credits granted each UTC day
-    "FREE_CREDITS_CAP": 20,            # max accumulated free credits (free-plan ceiling)
+    "FREE_CREDITS_DAILY": 3,           # credits granted each UTC day
+    "FREE_CREDITS_CAP": 9,             # max accumulated free credits (free-plan ceiling)
     "FREE_AI_MAX_CHARS": 6000,         # server-side context-size cap for free chat
     # ── Subscription caps (premium_type FREE/MONTH_1/MONTH_3/MONTH_6) ──────────
-    # The new monetization model: a paid plan grants a WHOLE-PERIOD pool of ALEX
-    # requests (SUB_TOTAL_REQUESTS) plus a hard DAILY ceiling (SUB_DAILY_LIMIT).
-    # Both are checked before every premium ALEX call (database.check_ai_access)
-    # and tunable live / via env without a deploy.
-    "SUB_DAILY_LIMIT":    {"MONTH_1": 50,   "MONTH_3": 60,   "MONTH_6": 75},
-    "SUB_TOTAL_REQUESTS": {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 13500},
+    # Paid tiers are a PURE DAILY-RESET model: at 00:00 UTC every subscriber's
+    # daily balance is HARD-RESET to the full plan limit (no roll-over / no
+    # accumulation). SUB_DAILY_LIMIT is that per-day ceiling; SUB_TOTAL_REQUESTS
+    # is a belt-and-suspenders whole-period pool set to exactly limit × days
+    # (50×30, 60×90, 70×180) so it can never bite before the subscription itself
+    # expires. Both are checked before every premium ALEX call
+    # (database.check_ai_access) and are tunable live / via env without a deploy.
+    #   Tier 1 (MONTH_1, Базовый):    50 msg/day
+    #   Tier 2 (MONTH_3, Стандарт):   60 msg/day
+    #   Tier 3 (MONTH_6, Ультра):     70 msg/day
+    "SUB_DAILY_LIMIT":    {"MONTH_1": 50,   "MONTH_3": 60,   "MONTH_6": 70},
+    "SUB_TOTAL_REQUESTS": {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 12600},
     # Premium chat memory depth: how many recent messages the Pro model sees so
     # it perfectly remembers a long, complex conversation.
     "PREMIUM_HISTORY": 18,             # last N messages sent for paid users

@@ -1740,11 +1740,11 @@ async def _free_credits_cfg() -> tuple[int, int]:
     try:
         from billing_config import load_config
         cfg = await load_config()
-        daily = max(0, int(cfg.get("FREE_CREDITS_DAILY", 2) or 0))
-        cap = max(0, int(cfg.get("FREE_CREDITS_CAP", 20) or 0))
+        daily = max(0, int(cfg.get("FREE_CREDITS_DAILY", 3) or 0))
+        cap = max(0, int(cfg.get("FREE_CREDITS_CAP", 9) or 0))
         return daily, cap
     except Exception:
-        return 2, 20
+        return 3, 9
 
 
 def _days_between(d1: str, d2: str) -> int:
@@ -1831,8 +1831,8 @@ async def spend_free_credit(uid: int, amount: int = 1) -> dict:
 #  The DAILY counter reuses ai_req_today / ai_req_date (lazy UTC reset).
 async def _sub_limits() -> dict:
     """Owner-tunable per-plan caps → {daily:{MONTH_1,MONTH_3,MONTH_6}, total:{...}}."""
-    daily = {"MONTH_1": 50, "MONTH_3": 60, "MONTH_6": 75}
-    total = {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 13500}
+    daily = {"MONTH_1": 50, "MONTH_3": 60, "MONTH_6": 70}
+    total = {"MONTH_1": 1500, "MONTH_3": 5400, "MONTH_6": 12600}
     try:
         from billing_config import load_config
         cfg = await load_config()
@@ -1978,12 +1978,23 @@ async def set_subscription_plan(uid: int, plan: str) -> dict:
 
 
 async def reset_daily_counters() -> dict:
-    """Daily 00:00 UTC maintenance (cron): zero EVERY user's daily request
-    counter and top FREE users up by FREE_CREDITS_DAILY (clamped to the cap).
+    """Daily 00:00 UTC maintenance cron — one bulk pass, two rules:
+
+      • PREMIUM (MONTH_1/3/6): HARD RESET, no roll-over. Zeroing the day counter
+        (ai_req_today=0) makes the derived daily balance snap back to the FULL
+        plan limit — 50 / 60 / 70 (limit − used, used now 0). A Tier-2 user who
+        had 15 left last night starts today at exactly 60.
+      • FREE: ACCUMULATE-WITH-CAP. free_credits += FREE_CREDITS_DAILY (3) but
+        clamped to FREE_CREDITS_CAP (9): 7 → 9 (not 10), 9 → 9. Postgres uses
+        LEAST(), SQLite MIN().
+
     Idempotent within a UTC day (the free top-up skips rows already dated today).
-    The per-user lazy grant elsewhere is a safety net; this is the bulk pass."""
+    The per-user lazy grant in the access layer is the safety net; this is the
+    bulk pass. total_requests_remaining (period pool) is intentionally untouched
+    — it drains across the whole subscription and is refilled on renewal."""
     today = _utc_day_str()
     daily, cap = await _free_credits_cfg()
+    # PREMIUM hard-reset (+ harmless zero for FREE, who are gated by free_credits).
     await db("UPDATE users SET ai_req_today=0, ai_req_date=?", today)
     if USE_POSTGRES:
         await db("UPDATE users SET free_credits=LEAST(COALESCE(free_credits,0)+?, ?), free_credits_date=? "
