@@ -367,6 +367,22 @@ CREATE TABLE IF NOT EXISTS processed_payments (
     amount     INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- xp_transactions: per-event XP ledger. ONE row per (uid, source_id); the
+-- UNIQUE constraint is the idempotency boundary. The old /api/add_xp was a
+-- blind additive UPDATE with no dedup, so any duplicate POST (double-tap,
+-- network retry, redelivered request) permanently inflated the balance via the
+-- client's monotonic max()-merge. Now every grant must land a ledger row first;
+-- a repeated source_id is detected and the users.xp cache is left untouched.
+CREATE TABLE IF NOT EXISTS xp_transactions (
+    id         BIGSERIAL PRIMARY KEY,
+    uid        BIGINT NOT NULL,
+    amount     INTEGER NOT NULL,
+    reason     TEXT DEFAULT 'action',
+    source_id  TEXT DEFAULT '',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(uid, source_id)
+);
+CREATE INDEX IF NOT EXISTS idx_xptx_uid ON xp_transactions(uid, created_at DESC);
 -- events: lightweight product-analytics funnel. One row per tracked action
 -- (app_open / first_seen / paywall_view / checkout_open / purchase). The
 -- /funnel admin command aggregates these into an install→pay funnel. `day`
@@ -534,6 +550,18 @@ CREATE TABLE IF NOT EXISTS processed_payments (
     amount     INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
+-- xp_transactions: per-event XP ledger (idempotency boundary = UNIQUE(uid, source_id)).
+-- See the Postgres schema above for the full rationale.
+CREATE TABLE IF NOT EXISTS xp_transactions (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    uid        INTEGER NOT NULL,
+    amount     INTEGER NOT NULL,
+    reason     TEXT DEFAULT 'action',
+    source_id  TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(uid, source_id)
+);
+CREATE INDEX IF NOT EXISTS idx_xptx_uid ON xp_transactions(uid, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_vocab_uid_created ON vocabulary(uid, created_at DESC, id DESC);
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT, uid INTEGER, name TEXT NOT NULL,
@@ -1508,6 +1536,59 @@ async def get_weekly_xp(uid: int) -> list:
 
 async def get_xp(uid: int) -> int:
     u = await get_user(uid); return (u.get("xp") or 0) if u else 0
+
+
+async def record_xp(uid: int, amount: int, reason: str = "action", source_id: str = "") -> dict:
+    """Idempotent XP grant — the ONLY path the WebApp may use to add points.
+
+    Writes exactly one row into xp_transactions per (uid, source_id) and only
+    THEN bumps the users.xp cache. A repeated source_id (double-tap, network
+    retry, redelivered request) is detected and the balance is left unchanged —
+    this is what stops the old additive /api/add_xp from inflating XP through
+    the client's monotonic max()-merge.
+
+    Returns {"applied": bool, "xp": <current server total>}.
+
+    Fails CLOSED (applied=False) on any error: the WebApp keeps the XP locally
+    and the max()-merge on the next sync preserves it, so a transient DB blip
+    can never inflate the stored balance and the user never visibly loses XP.
+    """
+    uid = int(uid or 0)
+    amount = int(amount or 0)
+    reason = (str(reason or "action") or "action")[:32]
+    sid = str(source_id or "").strip()[:128]
+    if not uid or amount == 0:
+        return {"applied": False, "xp": await get_xp(uid) if uid else 0}
+    # Empty source_id can't be deduped by itself, so collapse it into a short
+    # per-(user, reason, 2-second) bucket. That still kills rapid duplicate fires
+    # from a stale client that hasn't started sending an explicit id yet.
+    if not sid:
+        import time as _t
+        sid = f"{reason}:{uid}:{int(_t.time()) // 2}"
+    try:
+        applied = False
+        if USE_POSTGRES:
+            row = await db(
+                "INSERT INTO xp_transactions (uid, amount, reason, source_id) "
+                "VALUES (?, ?, ?, ?) ON CONFLICT (uid, source_id) DO NOTHING RETURNING id",
+                uid, amount, reason, sid, fetch="one")
+            applied = bool(row)
+        else:
+            existing = await db("SELECT id FROM xp_transactions WHERE uid=? AND source_id=?",
+                                uid, sid, fetch="one")
+            if not existing:
+                await db("INSERT OR IGNORE INTO xp_transactions (uid, amount, reason, source_id) "
+                         "VALUES (?, ?, ?, ?)", uid, amount, reason, sid)
+                applied = True
+        if applied:
+            await db("UPDATE users SET xp=xp+? WHERE uid=?", amount, uid)
+            if amount > 0:
+                await register_activity(uid)
+                await _record_xp_day(uid, amount)
+        return {"applied": applied, "xp": await get_xp(uid)}
+    except Exception as e:
+        logger.warning("record_xp failed uid=%s reason=%s sid=%s: %s — not applied", uid, reason, sid, e)
+        return {"applied": False, "xp": await get_xp(uid)}
 
 
 # ── PLANT TONUS (regularity meter, server-clock only) ──────────────────────────

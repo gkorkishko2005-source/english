@@ -5983,7 +5983,7 @@ function trackM(key,delta=1){
   sv.cnt[key]=(sv.cnt[key]||0)+delta;
   try{incrementChallenge(key,delta);}catch(e){}
   // Award all matching missions for today
-  let earned=false,xpGain=0;
+  let earned=false,xpGain=0,earnedIds=[];
   todayMissions().forEach(m=>{
     if(m.key!==key)return;
     if(sv.done[m.id])return;
@@ -5991,13 +5991,15 @@ function trackM(key,delta=1){
       sv.done[m.id]=true;
       earned=true;
       xpGain+=m.xp;
+      earnedIds.push(m.id);
     }
   });
   LS.setJ('missions',sv);
   if(earned&&xpGain>0){
     haptic('success');
     toast(`+${xpGain} XP`, '⭐');
-    addLocalXP(xpGain);
+    // Stable id from the exact missions cleared → each mission grants once/day.
+    addLocalXP(xpGain,'mission','mission:'+sv.date+':'+earnedIds.join('_'));
     checkDailyStreakCompletion(sv);
   }
   loadMissions();
@@ -14240,7 +14242,7 @@ function finishLevelTest(timedOut=false){
       <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${({ru:'нужно',en:'required',es:'requerido',pt:'exigido',de:'erforderlich',fr:'requis',uk:'потрібно',tr:'gerekli',zh:'需要',ar:'المطلوب'}[lang]||'required')} ${pass}%</div>
       <div style="font-size:14px">${({ru:`Твой новый уровень: <b>${target}</b>. Спокойно, база становится крепче.`,en:`Your new level: <b>${target}</b>. Steady work, stronger base.`,es:`Tu nuevo nivel: <b>${target}</b>. Con calma, tu base se fortalece.`,pt:`Seu novo nível: <b>${target}</b>. Com calma, sua base fica mais forte.`,de:`Dein neues Level: <b>${target}</b>. Ruhig weiter, die Basis wird stärker.`,fr:`Ton nouveau niveau : <b>${target}</b>. Tranquillement, ta base se renforce.`,uk:`Твій новий рівень: <b>${target}</b>. Спокійно, база міцнішає.`,tr:`Yeni seviyen: <b>${target}</b>. Sakin ol, temelin güçleniyor.`,zh:`你的新级别：<b>${target}</b>。稳步前进，基础更牢固。`,ar:`مستواك الجديد: <b>${target}</b>. بهدوء، أساسك يزداد قوة.`}[lang]||`Your new level: <b>${target}</b>. Steady work, stronger base.`)}</div>
     </div>`);
-    if(!alreadyPassed){addLocalXP(60);bumpStat('tests');toast(`+60 XP · Level ${target}`,'⭐');}
+    if(!alreadyPassed){addLocalXP(60,'level_test','leveltest:'+target);bumpStat('tests');toast(`+60 XP · Level ${target}`,'⭐');}
     else toast(`Level ${target}`,'✅');
   } else {
     haptic('error');
@@ -15686,7 +15688,7 @@ function incrementChallenge(metric,delta=1){
   LS.setJ('ch_progress',prog);
   if(!wasDone&&prog.count>=ch.goal){
     toast(({ru:'Испытание выполнено!',en:'Challenge complete!',es:'¡Desafío completado!',pt:'Desafio concluído!',de:'Herausforderung gemeistert!',fr:'Défi relevé !',uk:'Випробування виконано!',tr:'Meydan okuma tamamlandı!',zh:'挑战完成！',ar:'اكتمل التحدي!'}[lang]||'Challenge complete!'),'⭐');
-    addLocalXP(parseInt((ch.reward||'+300').replace(/\D/g,''),10)||300);
+    addLocalXP(parseInt((ch.reward||'+300').replace(/\D/g,''),10)||300,'challenge','challenge:'+week);
   }
   renderChallenge();
 }
@@ -18218,7 +18220,7 @@ function animateXPBar(el,pct){
 }
 
 /* ══ ADD LOCAL XP WITH ANIMATION ══ */
-function addLocalXP(amount){
+function addLocalXP(amount,reason,sourceId){
   try{
     const d=window._d||{};
     const oldXP=d.xp||0;
@@ -18229,7 +18231,13 @@ function addLocalXP(amount){
     saveXP(d.xp);
     addWeeklyXP(amount);
     if(API&&window._uid){
-      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:amount})}).catch(function(e){appWarn('add_xp sync failed',e);});
+      // source_id = the server's idempotency key. Callers with a natural id
+      // (level test target, mission id, challenge id) pass a STABLE one so a
+      // double-tap can't double-grant. Everyone else gets a per-call id, which
+      // still makes network-layer retries of the SAME request idempotent.
+      const rs=(reason||'action');
+      const sid=sourceId||(rs+':'+Date.now()+':'+Math.floor(Math.random()*1e6));
+      fetch(`${API}/api/add_xp`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,xp:amount,reason:rs,source_id:sid})}).catch(function(e){appWarn('add_xp sync failed',e);});
     }
     // Animate XP display
     const xpEl=document.getElementById('xpv');

@@ -1641,20 +1641,28 @@ async def handle_add_xp(request):
     try:
         body=await request.json()
         uid=int(body.get("uid",0)); xp=int(body.get("xp",0))
+        reason=str(body.get("reason") or "action")[:32]
+        source_id=str(body.get("source_id") or body.get("event_id") or "")[:128]
         init_data=str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
     except Exception:
         return web.json_response({"error":"bad request"},status=400)
     ok, _reason, uid = _auth_uid_from_request(request, uid, init_data)
     if not ok:
         return web.json_response({"error":"Telegram session check failed. Reopen the bot app and try again."},status=403,headers={"Access-Control-Allow-Origin":"*"})
+    # Idempotent grant: record_xp writes a ledger row per (uid, source_id) and
+    # only bumps the balance the FIRST time that id is seen. A duplicate POST
+    # (double-tap, network retry, redelivered request) is a no-op, so the old
+    # additive inflation via the client's max()-merge can no longer happen.
+    applied=False; total=None
     if uid and xp>0:
         try:
-            from database import add_xp, upsert_user
+            from database import record_xp, upsert_user
             await upsert_user(uid, "Student")  # гарантируем строку, иначе UPDATE затронет 0 строк
-            await add_xp(uid,min(xp,100))
+            res=await record_xp(uid, min(xp,100), reason, source_id)
+            applied=bool(res.get("applied")); total=res.get("xp")
         except Exception as e:
             logger.warning(f"add_xp failed uid={uid}: {e}")
-    return web.json_response({"ok":True},headers={"Access-Control-Allow-Origin":"*"})
+    return web.json_response({"ok":True,"applied":applied,"xp":total},headers={"Access-Control-Allow-Origin":"*"})
 
 # ── SET PROFESSION ────────────────────────────────────────────────────────────
 async def handle_set_profession(request):
