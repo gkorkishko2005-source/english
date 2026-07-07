@@ -977,7 +977,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .xp-gained .xpf{animation:xp-glow 1s ease}
 
 /* ══ ACHIEVEMENTS home button ══ */
-.ach-home-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:var(--bg-card);border:1px solid rgba(var(--ar),.15);border-radius:var(--r);cursor:pointer;transition:.2s;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);margin-bottom:6px}
+.ach-home-btn{display:flex;align-items:center;gap:10px;width:100%;padding:var(--space-md) var(--space-lg);background:var(--bg-card);border:1px solid rgba(var(--ar),.15);border-radius:var(--r);cursor:pointer;transition:.2s;font-family:var(--f);font-size:13px;font-weight:600;color:var(--t1);margin-bottom:var(--space-sm)}
 .ach-home-btn:active{transform:scale(.97)}
 .ach-home-btn svg{width:18px;height:18px;stroke:var(--gd);flex-shrink:0}
 .ach-home-cnt{margin-left:auto;font-size:12px;color:var(--a);font-weight:700}
@@ -2449,7 +2449,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .mist-all-btn:active{opacity:.6}
 /* Single "Grammar" recommendation card — the one big CTA on Progress. */
 .ed-gram{display:flex;align-items:center;gap:14px;background:var(--e1);border:1px solid rgba(var(--ar),.20);
-  border-radius:16px;padding:18px 16px;margin-bottom:16px;cursor:pointer;box-shadow:var(--sh);
+  border-radius:16px;padding:var(--space-lg);margin-bottom:var(--space-lg);cursor:pointer;box-shadow:var(--sh);
   transition:transform .15s,border-color .2s}
 .ed-gram:active{transform:scale(.99)}
 .ed-gram:hover{border-color:rgba(var(--ar),.36)}
@@ -2772,7 +2772,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 
 /* Section headers — same uppercase tracker letter as Settings */
 #s-progress .sec{font-size:12px!important;font-weight:800!important;text-transform:uppercase;
-  letter-spacing:.7px;color:var(--t2);margin:22px 2px 12px}
+  letter-spacing:.7px;color:var(--t2);margin:var(--space-xl) 2px var(--space-md)}
 #s-progress .sec .seca{font-size:10.5px;color:var(--a);font-weight:700;letter-spacing:.5px;
   text-transform:none;cursor:pointer}
 
@@ -2781,10 +2781,10 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
    surface (works in both themes via color-mix). */
 #s-progress{background:color-mix(in srgb,var(--e0) 93%,#000)}
 html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#000)}
-#s-progress .s4{gap:12px;margin-bottom:16px}
+#s-progress .s4{gap:var(--space-md);margin-bottom:var(--space-lg)}
 #s-progress .s4c{background:var(--e1)!important;border:1px solid var(--b1)!important;
   border-top:1px solid var(--edge)!important;
-  box-shadow:var(--sh)!important;border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;
+  box-shadow:var(--sh)!important;border-radius:14px;padding:var(--space-lg);position:relative;overflow:hidden;
   transition:transform .15s ease,box-shadow .2s ease}
 #s-progress .s4c::before{display:none!important}
 #s-progress .s4c:active{background:var(--e2)!important;transform:scale(.985)}
@@ -2816,7 +2816,7 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    heights. We kill the 3D entirely so every bar grows straight up
    from a single shared baseline. */
 #s-progress .chart-wrap{background:var(--e1)!important;border:1px solid var(--b1)!important;
-  box-shadow:var(--sh)!important;perspective:none!important;padding:14px 14px 12px;border-radius:12px}
+  box-shadow:var(--sh)!important;perspective:none!important;padding:var(--space-lg);border-radius:12px}
 #s-progress .chart{display:flex;align-items:flex-end;gap:6px;height:74px;margin:0;
   transform:none!important;transform-origin:50% 100%;overflow:visible;
   border-bottom:1px solid var(--b1);padding-bottom:0}
@@ -2858,12 +2858,12 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    hero → stats → weekly chart → recommendations → achievements) so
    each logical section reads as its own grouped card, per the
    redesign brief. */
-#s-progress .growth-hero{margin-bottom:16px}
-#s-progress .s4{margin-bottom:16px}
-#s-progress .chart-wrap{margin-bottom:16px!important}
-#s-progress #errdiary-wrap{margin-bottom:4px}
-#s-progress .sec{margin:20px 2px 12px}
-#s-progress .sec:first-of-type{margin-top:4px}
+#s-progress .growth-hero{margin-bottom:var(--space-lg)}
+#s-progress .s4{margin-bottom:var(--space-lg)}
+#s-progress .chart-wrap{margin-bottom:var(--space-lg)!important}
+#s-progress #errdiary-wrap{margin-bottom:var(--space-xs)}
+#s-progress .sec{margin:var(--space-xl) 2px var(--space-md)}
+#s-progress .sec:first-of-type{margin-top:var(--space-xs)}
 
 /* ── CEFR path ladder ─────────────────────────────────────────────
    Seven badges A0→C2. Passed levels carry a tint of their own colour,
@@ -2908,8 +2908,8 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
    colour reserved for the progress bar and the SVG's blossoms. */
 .growth-hero{position:relative;background:var(--e1);border:1px solid var(--b1);border-radius:16px;
   box-shadow:var(--sh);overflow:hidden;
-  padding:14px 16px 16px;margin-bottom:16px;display:flex;flex-direction:column;
-  align-items:stretch;gap:6px}
+  padding:var(--space-lg);margin-bottom:var(--space-lg);display:flex;flex-direction:column;
+  align-items:stretch;gap:var(--space-sm)}
 /* Stage counter (e.g. "4 / 8") — a quiet marker pinned to the top-right of the
    card. Muted + tabular so it reads as metadata, not a headline. */
 .growth-count{position:absolute;top:12px;right:14px;z-index:2;
