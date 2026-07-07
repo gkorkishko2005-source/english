@@ -279,6 +279,9 @@
 /* Unified corner-radius scale — one tight family (16/14/12) so cards, buttons
    and chips share a consistent rounded-xl look across the whole app. */
 :root{--r:20px;--r2:14px;--r3:12px;--nav:64px;
+  /* 8px spacing grid — proportional layout scale. Use var(--space-*) for
+     paddings/margins so vertical rhythm stays consistent across screens. */
+  --space-xs:4px;--space-sm:8px;--space-md:12px;--space-lg:16px;--space-xl:24px;
   /* Telegram fullscreen safe areas — populated from JS (see syncTgInsets).
      Defaults keep the layout correct outside Telegram / before init. */
   --tg-safe-area-inset-top:0px;--tg-safe-area-inset-bottom:0px;
@@ -326,7 +329,7 @@ nav{flex-shrink:0;height:calc(var(--nav) + var(--safe) + 6px);padding-bottom:cal
 /* ══ CARD / BTN ══ */
 /* Flat design-system card: matte fill, 1px hairline border, 14px radius,
    16px padding, NO neon glow (shadow is none in dark / a whisper in light). */
-.card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:16px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:var(--shadow-ui);transition:box-shadow .2s,transform .15s,filter .15s}
+.card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:var(--space-lg);margin-bottom:var(--space-lg);position:relative;overflow:hidden;box-shadow:var(--shadow-ui);transition:box-shadow .2s,transform .15s,filter .15s}
 .card.tap:active{transform:scale(.98);filter:brightness(.94)}
 .continue-card:active,.exam-card:active{transform:scale(.98);filter:brightness(.94)}
 .sec{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:1px;text-transform:uppercase;margin:26px 0 11px;display:flex;align-items:center;justify-content:space-between}
