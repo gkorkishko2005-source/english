@@ -2636,14 +2636,23 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
    "breathing room" inflation (28px sections / 15–17px rows) read as
    empty and stretched on phones — this reverses it. */
 #s-settings .sec{margin:16px 2px 7px}
+#s-settings #premium-settings-banner{margin-bottom:10px}
 #s-settings .set-grid-2{margin-bottom:10px}
 #s-settings .slist,#s-settings .set-acc{margin-bottom:10px}
 #s-settings .set-grid-2 .dl-toggle,#s-settings .set-grid-2 .lang-picker-btn{padding:11px 13px;min-height:50px}
-#s-settings .lang-picker-btn{padding:11px 13px}
+/* Interface-language row: match the toggle cards (height + rhythm) and carry
+   the same left icon chip as every other actionable row. */
+#s-settings .lang-picker-btn{padding:11px 13px;margin-bottom:10px;min-height:50px}
 #s-settings .srow{padding:11px 13px}
+/* One radius for every settings card (was 12px on toggles but 20px on the
+   About-you accordion / premium banner — the mismatch read as sloppy). */
+#s-settings .set-acc{border-radius:12px}
 #s-settings .set-acc>summary,#s-settings .set-acc summary{padding:12px 13px}
 #s-settings .set-acc-bd{padding:2px 13px 12px}
-#s-settings #premium-settings-banner{margin-bottom:12px}
+/* Unify every left icon chip to one 30px square (About-you was 28px). */
+#s-settings .set-acc-ico,#s-settings .sric,#s-settings .lang-picker-ico,#s-settings .dl-toggle-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0}
+#s-settings .lang-picker-ico{background:var(--e2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center}
+#s-settings .lang-picker-ico svg{width:16px;height:16px;fill:none;stroke:var(--t2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ── Home · big 4-quad cards (kill the gradient bar on top) ────── */
 .s4c{background:var(--e1);border:1px solid var(--b1);box-shadow:var(--sh);border-radius:12px;padding:13px}
@@ -3471,7 +3480,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   <div class="shdr"><div class="stit" id="set-tit"></div></div>
 
   <!-- Premium banner in settings -->
-  <div id="premium-settings-banner" style="margin-bottom:14px">
+  <div id="premium-settings-banner" style="margin-bottom:10px">
     <!-- Rendered by JS based on premium status -->
   </div>
 
@@ -3507,6 +3516,7 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
        one setting instead of two. -->
   <div class="sec"><span id="lang-sec-lbl">Languages</span></div>
   <div class="lang-picker-btn" onclick="openLangPicker('ui')">
+    <div class="lang-picker-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg></div>
     <div class="lang-picker-col">
       <div class="lang-picker-cap" id="ui-lang-cap">Интерфейс</div>
       <div class="lang-picker-name" id="ui-lang-name">Русский</div>
@@ -16142,7 +16152,7 @@ function updatePremiumUI(){
     const detailLine=[detailActive,untilText].filter(Boolean).join(' · ');
     const badgeLbl={ru:'АКТИВНА',en:'ACTIVE',es:'ACTIVA',pt:'ATIVA',de:'AKTIV',fr:'ACTIF',uk:'АКТИВНА',tr:'AKTİF',zh:'已激活',ar:'مُفعّل'}[lang]||'ACTIVE';
     banner.innerHTML=`
-      <div style="padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r)">
+      <div style="padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:12px">
         <div style="display:flex;align-items:center;gap:13px">
           <div style="flex:1">
             <div style="font-size:14px;font-weight:700;margin-bottom:2px">${subTitle}</div>
@@ -16153,7 +16163,7 @@ function updatePremiumUI(){
       </div>`;
   } else {
     banner.innerHTML=`
-      <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r);cursor:pointer" onclick="openPremium()">
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:12px;cursor:pointer" onclick="openPremium()">
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;margin-bottom:2px">ALEX Subscriptions</div>
           <div style="font-size:12px;color:var(--t2);line-height:1.35">${{ru:'ALEX Chat, модели и AI-разборы открываются после оплаты',en:'ALEX Chat, models and AI explanations unlock after payment',es:'ALEX Chat, modelos y explicaciones AI tras pagar',pt:'ALEX Chat, modelos e explicações AI após pagar'}[lang]||'ALEX Chat unlocks after payment'}</div>
