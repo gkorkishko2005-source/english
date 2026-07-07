@@ -6717,6 +6717,8 @@ async function _uploadVoice(blob,mime){
   const ext=_audioExt(mime);
   fd.append('audio',blob,`voice.${ext}`);
   fd.append('lang',(botLang||lang||'en').slice(0,2));
+  fd.append('uid',''+(window._uid||0));
+  fd.append('init_data',(typeof tg!=='undefined'&&tg&&tg.initData)||'');
   try{
     toast(_micT('trans'),'🎤');
     const r=await fetch(`${API}/api/transcribe`,{method:'POST',body:fd,signal:AbortSignal.timeout(45000)});
@@ -10408,6 +10410,8 @@ async function feTranscribeAndGrade(blob,mime){
     const fd=new FormData();
     fd.append('audio',blob,`voice.${_audioExt(mime)}`);
     fd.append('lang','en');
+    fd.append('uid',''+(window._uid||0));
+    fd.append('init_data',(typeof tg!=='undefined'&&tg&&tg.initData)||'');
     const r=await fetch(`${API}/api/transcribe`,{method:'POST',body:fd,signal:AbortSignal.timeout(45000)});
     const d=await r.json().catch(()=>({}));
     transcript=((d&&d.text)||'').trim();
@@ -17302,7 +17306,7 @@ async function speakText(text,btn,role){
   try{
     // Try server TTS first
     if(API){
-      const _b={text:clean,lang:'en'};if(role)_b.role=role;
+      const _b={text:clean,lang:'en',uid:(window._uid||0),init_data:(typeof tg!=='undefined'&&tg&&tg.initData)||''};if(role)_b.role=role;
       const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_b)});
       if(r.ok){
         const blob=await r.blob();
@@ -17348,7 +17352,7 @@ async function playListenTTS(text,statusCb,role){
   try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(_){}
   if(typeof API!=='undefined'&&API){
     try{
-      const _b={text:clean,lang:'en'};if(role)_b.role=role;
+      const _b={text:clean,lang:'en',uid:(window._uid||0),init_data:(typeof tg!=='undefined'&&tg&&tg.initData)||''};if(role)_b.role=role;
       const r=await fetch(`${API}/api/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(_b)});
       if(r.ok){
         const url=URL.createObjectURL(await r.blob());
@@ -18734,7 +18738,7 @@ function renderAdminPanel(){
 }
 function loadAdminStats(){
   if(!API||!window._uid)return;
-  fetch(API+'/api/admin/stats',{headers:{'X-UID':''+(window._uid||0)}}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  fetch(API+'/api/admin/stats',{headers:{'X-UID':''+(window._uid||0),'X-Telegram-Init-Data':(typeof tg!=='undefined'&&tg&&tg.initData)||''}}).then(function(r){return r.ok?r.json():null;}).then(function(d){
     if(!d)return;
     var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=(v==null||v==='')?'--':v;};
     e('adm-users',d.total_users);e('adm-today',d.today_active);e('adm-prem',d.premium_users);e('adm-msgs',d.today_messages);
@@ -18774,7 +18778,7 @@ function syncToServer(){
 }
 function syncFromServer(){
   if(!API||!window._uid)return;
-  fetch(API+'/api/user/'+window._uid).then(function(r){return r.json();}).then(function(d){
+  fetch(API+'/api/user/'+window._uid,{headers:{'X-Telegram-Init-Data':(typeof tg!=='undefined'&&tg&&tg.initData)||''}}).then(function(r){return r.json();}).then(function(d){
     if(!d||d.error)return;
     var stats=LS.getJ('local_stats')||{};var localXP=loadXP();
     // Монотонная сверка: серверное значение (может отставать/быть 0 из-за гонки

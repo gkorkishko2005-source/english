@@ -129,6 +129,28 @@ def _extract_actions(reply: str):
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
+# SECURITY: no hardcoded default. This secret is the only thing standing between
+# an anonymous request and free premium/credits (see handle_grant_*). If it's
+# unset, grant endpoints are disabled outright rather than falling back to a
+# guessable value that has been sitting in git history.
+BOT_SECRET = os.getenv("BOT_SECRET", "")
+if not BOT_SECRET:
+    logging.getLogger(__name__).critical(
+        "BOT_SECRET is not set — /api/premium/grant, /api/platform/grant and "
+        "/api/credits/grant are DISABLED until BOT_SECRET is configured in "
+        "Railway Variables. Set it to a long random value on both the bot and "
+        "the web service."
+    )
+
+def _valid_bot_secret(secret) -> bool:
+    """Constant-time compare against the configured BOT_SECRET. Always False
+    (never a bypass) if the secret isn't configured server-side."""
+    if not BOT_SECRET:
+        return False
+    try:
+        return hmac.compare_digest(str(secret or ""), BOT_SECRET)
+    except Exception:
+        return False
 # ── Mandatory channel-subscription gate ────────────────────────────────
 # The user must be a member of TG_CHANNEL before the bot/Mini App unlocks.
 # Verified server-side via Telegram getChatMember (bot must be channel admin).
@@ -592,6 +614,11 @@ async def handle_user(request):
         uid = int(request.match_info["uid"])
     except Exception:
         return web.json_response({"error": "invalid uid"}, status=400)
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error": "Telegram session check failed. Reopen the bot app and try again."},
+                                  status=403, headers={"Access-Control-Allow-Origin": "*"})
     # Analytics: app_open (deduped once per uid/day in-process to bound row
     # growth — DAU stays exact via DISTINCT uid). Never let this break the load.
     try:
@@ -747,6 +774,11 @@ async def handle_referral(request):
     except Exception:
         return web.json_response({"error": "invalid uid"}, status=400,
                                  headers={"Access-Control-Allow-Origin": "*"})
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error": "Telegram session check failed. Reopen the bot app and try again."},
+                                  status=403, headers={"Access-Control-Allow-Origin": "*"})
     link = f"https://t.me/{BOT_NAME.lstrip('@')}?start=ref_{uid}"
     count = 0
     try:
@@ -1944,8 +1976,7 @@ async def handle_grant_platform(request):
         return web.json_response({"error":"bad request"},status=400)
     if period not in {"1m","6m","lifetime"}:
         return web.json_response({"error":"invalid period"},status=400)
-    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
-    if secret != BOT_SECRET:
+    if not _valid_bot_secret(secret):
         return web.json_response({"error":"unauthorized"},status=403)
     try:
         from database import grant_platform
@@ -1969,8 +2000,7 @@ async def handle_grant_credits(request):
         return web.json_response({"error":"bad request"},status=400)
     if credits <= 0 or credits > 100000:
         return web.json_response({"error":"invalid credits"},status=400)
-    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
-    if secret != BOT_SECRET:
+    if not _valid_bot_secret(secret):
         return web.json_response({"error":"unauthorized"},status=403)
     try:
         # Route through ai_billing.topup so the purchase is also recorded in the
@@ -2008,8 +2038,7 @@ async def handle_grant_premium(request):
     if tier not in {"basic", "pro", "ultimate"}:
         return web.json_response({"error":"invalid tier"},status=400)
 
-    BOT_SECRET = os.getenv("BOT_SECRET","polyglotty_secret_2025")
-    if secret != BOT_SECRET:
+    if not _valid_bot_secret(secret):
         return web.json_response({"error":"unauthorized"},status=403)
 
     try:
@@ -2024,8 +2053,16 @@ async def handle_grant_premium(request):
         return web.json_response({"error":str(e)},status=500,headers={"Access-Control-Allow-Origin":"*"})
 
 # ── TTS ──────────────────────────────────────────────────────────────────────
+TTS_BURST_GAP = float(os.getenv("TTS_BURST_GAP", "2.0") or "2.0")
+STT_BURST_GAP = float(os.getenv("STT_BURST_GAP", "3.0") or "3.0")
+
 async def handle_tts(request):
-    """Text-to-speech endpoint. Returns MP3 audio bytes."""
+    """Text-to-speech endpoint. Returns MP3 audio bytes.
+
+    Hits a paid external provider per call, so it's authenticated (signed
+    Telegram initData, same pattern as the rest of the data endpoints) and
+    rate-limited per user — otherwise it's an open door to run up the AI bill
+    with an unbounded number of anonymous requests."""
     try:
         body = await request.json()
         text = str(body.get("text","")).strip()[:500]  # limit 500 chars
@@ -2034,10 +2071,21 @@ async def handle_tts(request):
         tts_role = str(body.get("role","") or "default")[:16].lower()
         if tts_role not in ("teacher","casual","academic","default"):
             tts_role = "default"
+        uid = int(body.get("uid", 0) or 0)
         if not text:
             return web.json_response({"error":"empty text"},status=400)
     except Exception:
         return web.json_response({"error":"bad request"},status=400)
+
+    init_data = str(body.get("init_data") or request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error": "Telegram session check failed. Reopen the bot app and try again."},
+                                  status=403, headers={"Access-Control-Allow-Origin":"*"})
+    wait = _throttle_wait(uid, TTS_BURST_GAP, "tts")
+    if wait:
+        return web.json_response({"error": f"rate limited, wait {wait}s"}, status=429,
+                                  headers={"Access-Control-Allow-Origin":"*"})
 
     try:
         from tts import text_to_speech
@@ -2080,6 +2128,8 @@ async def handle_transcribe(request):
     audio = b""
     filename = "voice.webm"
     lang = "en"
+    uid = 0
+    init_data = ""
     try:
         # Reject oversized uploads up-front via the declared Content-Length so a
         # huge body is never buffered into memory in the first place.
@@ -2094,6 +2144,13 @@ async def handle_transcribe(request):
             async for part in reader:
                 if part.name == "lang":
                     lang = (await part.text()).strip()[:5] or "en"
+                elif part.name == "uid":
+                    try:
+                        uid = int((await part.text()).strip() or 0)
+                    except Exception:
+                        uid = 0
+                elif part.name == "init_data":
+                    init_data = (await part.text()).strip()
                 elif part.name in ("audio", "file", "voice"):
                     filename = part.filename or filename
                     part_ct = part.headers.get("Content-Type", "")
@@ -2113,6 +2170,11 @@ async def handle_transcribe(request):
         else:
             filename = request.query.get("filename", filename)
             lang = request.query.get("lang", lang)[:5] or "en"
+            try:
+                uid = int(request.query.get("uid", 0) or 0)
+            except Exception:
+                uid = 0
+            init_data = request.query.get("init_data", "") or ""
             if not _audio_ct_ok(request.content_type, filename):
                 return web.json_response({"error":"unsupported audio format"},status=415,headers={"Access-Control-Allow-Origin":"*"})
             audio = await request.read()
@@ -2127,6 +2189,14 @@ async def handle_transcribe(request):
     # Обрезанная/тихая запись — не гоняем STT, сразу просим повторить.
     if len(audio) < 2000:
         return web.json_response({"error":"speech not recognized"},status=422,headers={"Access-Control-Allow-Origin":"*"})
+
+    init_data = init_data or str(request.headers.get("X-Telegram-Init-Data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, uid, init_data)
+    if not ok:
+        return web.json_response({"error":"unauthorized"},status=403,headers={"Access-Control-Allow-Origin":"*"})
+    wait = _throttle_wait(uid, STT_BURST_GAP, "stt")
+    if wait:
+        return web.json_response({"error":f"rate limited, wait {wait}s"},status=429,headers={"Access-Control-Allow-Origin":"*"})
 
     try:
         from tts import transcribe_audio
@@ -3170,8 +3240,13 @@ async def handle_sync_stats(request):
 
 # ── ADMIN STATS ───────────────────────────────────────────────────────────────
 async def handle_admin_stats(request):
-    uid = int(request.headers.get("X-UID", "0"))
-    if uid not in ADMIN_IDS:
+    try:
+        raw_uid = int(request.headers.get("X-UID", "0") or 0)
+    except Exception:
+        raw_uid = 0
+    init_data = str(request.headers.get("X-Telegram-Init-Data") or request.query.get("init_data") or "")
+    ok, reason, uid = _auth_uid_from_request(request, raw_uid, init_data)
+    if not ok or uid not in ADMIN_IDS:
         return web.json_response({"error": "forbidden"}, status=403, headers={"Access-Control-Allow-Origin":"*"})
     from database import db
     import datetime as _dt

@@ -56,7 +56,17 @@ from tts import text_to_speech, transcribe_audio, analyze_pronunciation, format_
 load_dotenv()
 BOT_TOKEN     = os.getenv("BOT_TOKEN")
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY")
-BOT_SECRET    = os.getenv("BOT_SECRET", "polyglotty_secret_2025")
+# SECURITY: no hardcoded default — must match the value configured on the web
+# service (server.py). A guessable fallback here would let anyone who has seen
+# this code grant themselves free premium/credits via the server's grant
+# endpoints. See server.py's BOT_SECRET check for the enforcement side.
+BOT_SECRET    = os.getenv("BOT_SECRET", "")
+if not BOT_SECRET:
+    logging.getLogger(__name__).critical(
+        "BOT_SECRET is not set — premium/credits grant calls to the web "
+        "service will be rejected. Set BOT_SECRET in Railway Variables "
+        "(same value on both the bot and web service)."
+    )
 RAILWAY_URL   = os.getenv("RAILWAY_PUBLIC_DOMAIN", "localhost:8080")
 BOT_USERNAME  = (os.getenv("BOT_NAME", "PolyGlotty_bot") or "PolyGlotty_bot").lstrip("@")
 OFFICIAL_CHANNEL_URL = os.getenv("OFFICIAL_CHANNEL_URL", "https://t.me/polyglotty_daily").strip()
