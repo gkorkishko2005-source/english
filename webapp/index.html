@@ -2642,12 +2642,16 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 #s-settings .set-grid-2 .dl-toggle,#s-settings .set-grid-2 .lang-picker-btn{padding:11px 13px;min-height:50px}
 /* Interface-language row: match the toggle cards (height + rhythm) and carry
    the same left icon chip as every other actionable row. */
-#s-settings .lang-picker-btn{padding:11px 13px;margin-bottom:10px;min-height:50px}
+#s-settings .lang-picker-btn{padding:11px 13px;margin-bottom:10px;min-height:50px;gap:12px}
 #s-settings .srow{padding:11px 13px}
 /* One radius for every settings card (was 12px on toggles but 20px on the
    About-you accordion / premium banner — the mismatch read as sloppy). */
 #s-settings .set-acc{border-radius:12px}
-#s-settings .set-acc>summary,#s-settings .set-acc summary{padding:12px 13px}
+/* Same icon→text offset as the reminder & language rows: 11px vertical
+   padding and a single 12px gap (the About-you icon also had its own
+   margin-right, which double-indented the text). */
+#s-settings .set-acc>summary,#s-settings .set-acc summary{padding:11px 13px;gap:12px}
+#s-settings .set-acc-ico{margin-right:0}
 #s-settings .set-acc-bd{padding:2px 13px 12px}
 /* Unify every left icon chip to one 30px square (About-you was 28px). */
 #s-settings .set-acc-ico,#s-settings .sric,#s-settings .lang-picker-ico,#s-settings .dl-toggle-icon{width:30px;height:30px;border-radius:9px;flex-shrink:0}
