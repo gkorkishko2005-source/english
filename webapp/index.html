@@ -4901,7 +4901,7 @@ function maybeOnboardChat(){
     +'<div class="onb-txt">'+t.l1+'</div>'
     +'<div class="onb-txt">'+t.l2+'</div>'
     +'<div class="onb-txt">'+t.l3+'</div></div>';
-  try{addMsg('bot',html);LS.set('chat_onb_v2','1');}catch(e){}
+  try{addMsgHTML('bot',html);LS.set('chat_onb_v2','1');}catch(e){}
 }
 
 /* ══ REFRESH SUB (greeting / streak) ══ */
@@ -6267,7 +6267,7 @@ function fmtTime(ts){
   return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
 
-function renderMsg(role,text,save=true,time=null){
+function renderMsg(role,text,save=true,time=null,trustedHtml=false){
   const wrap=document.getElementById('cmsgs');
   const d=document.createElement('div');d.className='msg '+(role==='user'?'user':'bot');
   const msgTime=time||new Date().toISOString();
@@ -6280,8 +6280,12 @@ function renderMsg(role,text,save=true,time=null){
   const bub=document.createElement('div');bub.className='mbub';
   if(role==='user')bub.textContent=text;
   else{
-    // If text contains raw HTML tags (like buttons, divs), render directly
-    if(text.match(/^<div[\s>]|^<button[\s>]|class="chip"|class="lt-|class="drill-|class="share-|class="cert-|class="gg-/))
+    // SECURITY: raw HTML is only ever rendered for content WE built on the
+    // frontend (exam cards, onboarding, idiom-of-the-day, error diary, etc.) —
+    // never for an AI reply. Callers must pass trustedHtml=true explicitly
+    // (see addMsgHTML below); sniffing the content for "<div" is what let a
+    // prompt-injected ALEX reply raw-HTML/attribute-inject into the chat.
+    if(trustedHtml)
       bub.innerHTML=text;
     else
       bub.innerHTML=fmtMsg(text);
@@ -6312,6 +6316,10 @@ function renderMsg(role,text,save=true,time=null){
 }
 
 function addMsg(role,text){renderMsg(role,text,true);}
+/* Use ONLY for HTML strings WE built on the frontend (exam cards, onboarding
+   card, idiom-of-the-day, error-diary card, paywall card, etc.). NEVER pass an
+   AI reply (data.reply) here — see renderMsg's trustedHtml comment. */
+function addMsgHTML(role,html){renderMsg(role,html,true,null,true);}
 
 /* Subtle "remembered" caption under the last ALEX bubble. ALEX detects a
    personal interest and saves it silently; instead of leaking a system tag or
@@ -6416,13 +6424,13 @@ function openPracticeShell(title,sub){
 }
 function addPractice(html){
   const b=document.getElementById('practice-body');
-  if(!b){addMsg('bot',html);return;}
+  if(!b){addMsgHTML('bot',html);return;}
   b.insertAdjacentHTML('beforeend',html);
   setTimeout(()=>{try{b.scrollTo({top:b.scrollHeight,behavior:'smooth'});}catch(_){}},30);
 }
 function setPractice(html){
   const b=document.getElementById('practice-body');
-  if(!b){addMsg('bot',html);return;}
+  if(!b){addMsgHTML('bot',html);return;}
   b.innerHTML=html;
   setTimeout(()=>{try{b.scrollTo({top:0,behavior:'smooth'});}catch(_){}},30);
 }
@@ -6473,7 +6481,7 @@ async function doChat(text,mode){
       /* Daily free-AI limit (429) ships a paywall card in e.reply — render it
          instead of a bare "⚠️ 429" so the user sees the upgrade CTA. */
       if(e&&(e.free_ai_limit||e.daily_ai_limit||e.limit)&&e.reply){
-        addMsg('bot',e.reply);
+        addMsgHTML('bot',e.reply);
         try{if(!isPremium)sfx.warn();}catch(_){}
       }else{
         addMsg('bot','⚠️ '+((e&&e.error)||r.status));
@@ -6580,7 +6588,7 @@ function maybePostIdiom(){
     var idiom=IDIOMS[dayOfYear%IDIOMS.length];
     if(!idiom)return;
     setTimeout(function(){
-      try{addMsg('bot',_formatIdiomMessage(idiom));LS.set(key,'1');}catch(_){}
+      try{addMsgHTML('bot',_formatIdiomMessage(idiom));LS.set(key,'1');}catch(_){}
     },650);
   }catch(_){}
 }
@@ -6597,7 +6605,7 @@ function openChat(topic){
       'The most useful English progress usually comes from repeated simple sentences.',
       'Listening and reading together make vocabulary stick faster.'
     ];
-    addMsg('bot','<div class="course-note">'+safeHTML(facts[Math.floor(Math.random()*facts.length)])+'</div>');
+    addMsgHTML('bot','<div class="course-note">'+safeHTML(facts[Math.floor(Math.random()*facts.length)])+'</div>');
     return;
   }
   if(!hasChatAccess()){showChatPaywall();return;}
@@ -9547,7 +9555,7 @@ function pickExamTask(exam,section){
 function startAudio(){openExamPrep();}
 function openExamPrep(){
   goTab('chat',true);
-  addMsg('bot',`<div class="exam-hub">
+  addMsgHTML('bot',`<div class="exam-hub">
     <div><div class="exam-title">${({ru:'TOEFL / IELTS тренажёр',en:'TOEFL / IELTS trainer',es:'Entrenador TOEFL / IELTS',pt:'Treino TOEFL / IELTS',de:'TOEFL / IELTS Trainer',fr:'Entraîneur TOEFL / IELTS',uk:'Тренажер TOEFL / IELTS',tr:'TOEFL / IELTS antrenörü',zh:'TOEFL / IELTS 训练器',ar:'مدرّب TOEFL / IELTS'}[lang]||'TOEFL / IELTS trainer')}</div>
     <div class="exam-sub">${({ru:'Бесплатно: Reading, Listening, Writing и Speaking задания без AI. Подписка добавляет разбор ответа и подсказки ALEX.',en:'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.',es:'Gratis: tareas de Reading, Listening, Writing y Speaking sin IA. Una suscripción añade análisis y consejos de ALEX.',pt:'Grátis: tarefas de Reading, Listening, Writing e Speaking sem IA. Uma assinatura adiciona análise e dicas do ALEX.',de:'Kostenlos: Reading-, Listening-, Writing- und Speaking-Aufgaben ohne KI. Ein Abo ergänzt ALEX-Feedback und Tipps.',fr:'Gratuit : tâches Reading, Listening, Writing et Speaking sans IA. Un abonnement ajoute l’analyse et les conseils d’ALEX.',uk:'Безкоштовно: завдання Reading, Listening, Writing і Speaking без AI. Підписка додає розбір і поради ALEX.',tr:'Ücretsiz: yapay zekâsız Reading, Listening, Writing ve Speaking görevleri. Abonelik ALEX geri bildirimi ve ipuçları ekler.',zh:'免费：无 AI 的 Reading、Listening、Writing 和 Speaking 题目。订阅可获得 ALEX 的点评和提示。',ar:'مجانًا: مهام Reading وListening وWriting وSpeaking بدون ذكاء اصطناعي. الاشتراك يضيف تحليل ALEX ونصائحه.'}[lang]||'Free: Reading, Listening, Writing and Speaking tasks without AI. A subscription adds ALEX feedback and hints.')}</div></div>
     <div class="exam-grid">
@@ -9594,7 +9602,7 @@ function runExamTask(exam,section){
     body+=`<div class="exam-prompt">${safeHTML(task.prompt)}</div><textarea class="exam-area" id="${id}-txt" placeholder="${section==='writing'?({ru:'Напиши ответ или план',en:'Write your response or plan',es:'Escribe tu respuesta o plan',pt:'Escreva sua resposta ou plano',de:'Schreibe deine Antwort oder einen Plan',fr:'Rédige ta réponse ou ton plan',uk:'Напиши відповідь або план',tr:'Yanıtını veya planını yaz',zh:'写下你的回答或提纲',ar:'اكتب إجابتك أو خطتك'}[lang]||'Write your response or plan'):({ru:'Запиши краткий план ответа',en:'Write a short answer plan',es:'Escribe un plan breve de respuesta',pt:'Escreva um plano breve de resposta',de:'Schreibe einen kurzen Antwortplan',fr:'Note un bref plan de réponse',uk:'Запиши короткий план відповіді',tr:'Kısa bir yanıt planı yaz',zh:'写一个简短的答题提纲',ar:'اكتب خطة إجابة موجزة'}[lang]||'Write a short answer plan')}"></textarea>`;
     body+=`<div class="exam-actions"><button class="exam-btn" onclick="localExamChecklist('${id}')">${({ru:'Чек-лист',en:'Checklist',es:'Lista',pt:'Checklist',de:'Checkliste',fr:'Checklist',uk:'Чек-лист',tr:'Kontrol listesi',zh:'清单',ar:'قائمة تحقّق'}[lang]||'Checklist')}</button><button class="exam-btn" onclick="askExamAI('${id}')">${({ru:'Разбор с ALEX',en:'ALEX feedback',es:'Análisis con ALEX',pt:'Análise com ALEX',de:'ALEX-Feedback',fr:'Analyse avec ALEX',uk:'Розбір з ALEX',tr:'ALEX geri bildirimi',zh:'ALEX 点评',ar:'تحليل مع ALEX'}[lang]||'ALEX feedback')}</button></div><div class="course-result" id="${id}-res"></div>`;
   }
-  addMsg('bot',`<div class="exam-task" id="${id}"><div class="exam-kicker">${safeHTML(kicker)}</div>${body}</div>`);
+  addMsgHTML('bot',`<div class="exam-task" id="${id}"><div class="exam-kicker">${safeHTML(kicker)}</div>${body}</div>`);
   try{trackM(section==='listening'?'listen':'drill');}catch(e){}
 }
 function answerExamTask(id,picked){
@@ -14179,7 +14187,7 @@ function startLevelTest(targetLevel){
   };
   goTab('chat',true);
   const title=test.title[lang]||test.title.en;
-  addMsg('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'питань',tr:'soru',zh:'道题',ar:'سؤالًا'}[lang]||'questions')} · ${({ru:'5 минут',en:'5 minutes',es:'5 minutos',pt:'5 minutos',de:'5 Minuten',fr:'5 minutes',uk:'5 хвилин',tr:'5 dakika',zh:'5 分钟',ar:'5 دقائق'}[lang]||'5 minutes')} · ${({ru:'проходной балл',en:'passing score',es:'puntuación mínima',pt:'nota de corte',de:'Mindestpunktzahl',fr:'score de réussite',uk:'прохідний бал',tr:'geçme puanı',zh:'及格分',ar:'درجة النجاح'}[lang]||'passing score')} ${cfg.pass}%</span></div>`);
+  addMsgHTML('bot',`<div class="lt-header"><b>${safeHTML(title)}</b><br><span style="font-size:12px;color:var(--t2)">${levelTestState.total} ${({ru:'вопросов',en:'questions',es:'preguntas',pt:'perguntas',de:'Fragen',fr:'questions',uk:'питань',tr:'soru',zh:'道题',ar:'سؤالًا'}[lang]||'questions')} · ${({ru:'5 минут',en:'5 minutes',es:'5 minutos',pt:'5 minutos',de:'5 Minuten',fr:'5 minutes',uk:'5 хвилин',tr:'5 dakika',zh:'5 分钟',ar:'5 دقائق'}[lang]||'5 minutes')} · ${({ru:'проходной балл',en:'passing score',es:'puntuación mínima',pt:'nota de corte',de:'Mindestpunktzahl',fr:'score de réussite',uk:'прохідний бал',tr:'geçme puanı',zh:'及格分',ar:'درجة النجاح'}[lang]||'passing score')} ${cfg.pass}%</span></div>`);
   setTimeout(showLevelQuestion,500);
 }
 
@@ -14195,7 +14203,7 @@ function showLevelQuestion(){
   levelTestState.answers[qid]=q.a;
   levelTestState.answered[qid]=false;
   const opts=q.o.map((o,i)=>`<div class="lt-opt" onclick="answerLevelQ('${qid}',${i})">${String.fromCharCode(65+i)}) ${safeHTML(o)}</div>`).join('');
-  addMsg('bot',`<div class="lt-q" id="${qid}">
+  addMsgHTML('bot',`<div class="lt-q" id="${qid}">
     <div class="lt-num">${current+1}/${total} · ${leftText}</div>
     <div class="lt-mini-bar"><div class="lt-mini-fill" style="width:${Math.round((current+1)/total*100)}%"></div></div>
     <div class="lt-text">${safeHTML(q.q)}</div>
@@ -14244,7 +14252,7 @@ function finishLevelTest(timedOut=false){
     setLevelTestCooldown(target,true);
     // Sync to server
     if(API&&window._uid)fetch(`${API}/api/chat`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({uid:window._uid,message:`/setlevel ${target}`})}).catch(()=>{});
-    addMsg('bot',`<div class="lt-result lt-pass">
+    addMsgHTML('bot',`<div class="lt-result lt-pass">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${({ru:'Тест пройден!',en:'Test passed!',es:'¡Examen aprobado!',pt:'Teste aprovado!',de:'Test bestanden!',fr:'Test réussi !',uk:'Тест складено!',tr:'Test geçildi!',zh:'测试通过！',ar:'تم اجتياز الاختبار!'}[lang]||'Test passed!')}</div>
       <div style="font-size:15px;color:var(--a2);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) · ${({ru:'нужно',en:'required',es:'requerido',pt:'exigido',de:'erforderlich',fr:'requis',uk:'потрібно',tr:'gerekli',zh:'需要',ar:'المطلوب'}[lang]||'required')} ${pass}%</div>
       <div style="font-size:14px">${({ru:`Твой новый уровень: <b>${target}</b>. Спокойно, база становится крепче.`,en:`Your new level: <b>${target}</b>. Steady work, stronger base.`,es:`Tu nuevo nivel: <b>${target}</b>. Con calma, tu base se fortalece.`,pt:`Seu novo nível: <b>${target}</b>. Com calma, sua base fica mais forte.`,de:`Dein neues Level: <b>${target}</b>. Ruhig weiter, die Basis wird stärker.`,fr:`Ton nouveau niveau : <b>${target}</b>. Tranquillement, ta base se renforce.`,uk:`Твій новий рівень: <b>${target}</b>. Спокійно, база міцнішає.`,tr:`Yeni seviyen: <b>${target}</b>. Sakin ol, temelin güçleniyor.`,zh:`你的新级别：<b>${target}</b>。稳步前进，基础更牢固。`,ar:`مستواك الجديد: <b>${target}</b>. بهدوء، أساسك يزداد قوة.`}[lang]||`Your new level: <b>${target}</b>. Steady work, stronger base.`)}</div>
@@ -14254,7 +14262,7 @@ function finishLevelTest(timedOut=false){
   } else {
     haptic('error');
     setLevelTestCooldown(target,false);
-    addMsg('bot',`<div class="lt-result lt-fail">
+    addMsgHTML('bot',`<div class="lt-result lt-fail">
       <div style="font-size:18px;font-weight:800;margin-bottom:4px">${({ru:'Пока не прошёл',en:'Not yet',es:'Aún no',pt:'Ainda não',de:'Noch nicht',fr:'Pas encore',uk:'Поки що ні',tr:'Henüz değil',zh:'还没通过',ar:'ليس بعد'}[lang]||'Not yet')}</div>
       <div style="font-size:15px;color:var(--or);font-weight:700;margin-bottom:8px">${correct}/${total} (${pct}%) — ${({ru:'нужно',en:'need',es:'necesitas',pt:'precisa',de:'nötig',fr:'requis',uk:'потрібно',tr:'gerekli',zh:'需要',ar:'تحتاج'}[lang]||'need')} ${pass}%</div>
       <div style="font-size:13px;color:var(--t2)">${overTime?({ru:'Время вышло: тест рассчитан на 5 минут.',en:'Time is up: the test is designed for 5 minutes.',es:'Se acabó el tiempo: el examen es de 5 minutos.',pt:'Tempo esgotado: o teste é de 5 minutos.',de:'Zeit abgelaufen: der Test dauert 5 Minuten.',fr:'Temps écoulé : le test dure 5 minutes.',uk:'Час вийшов: тест розрахований на 5 хвилин.',tr:'Süre doldu: test 5 dakika içindir.',zh:'时间到：测试限时 5 分钟。',ar:'انتهى الوقت: الاختبار مدته 5 دقائق.'}[lang]||'Time is up: the test is designed for 5 minutes.'):tooFast?({ru:`Попытка слишком быстрая для зачёта: минимум ${minSeconds} сек.`,en:`Attempt too fast to validate: minimum ${minSeconds} sec.`,es:`Intento demasiado rápido para validar: mínimo ${minSeconds} s.`,pt:`Tentativa rápida demais para validar: mínimo ${minSeconds} s.`,de:`Versuch zu schnell zum Werten: mindestens ${minSeconds} Sek.`,fr:`Tentative trop rapide pour être validée : minimum ${minSeconds} s.`,uk:`Спроба надто швидка для заліку: мінімум ${minSeconds} с.`,tr:`Doğrulamak için çok hızlı: en az ${minSeconds} sn.`,zh:`作答太快，无法计分：至少需 ${minSeconds} 秒。`,ar:`المحاولة سريعة جدًا للاحتساب: ${minSeconds} ثانية على الأقل.`}[lang]||`Attempt too fast to validate: minimum ${minSeconds} sec.`):({ru:'Это не провал. Повтори слабые темы и зайди ещё раз спокойно.',en:'This is not a failure. Review weak topics and try again calmly.',es:'Esto no es un fracaso. Repasa los temas flojos y vuelve a intentarlo con calma.',pt:'Isto não é uma falha. Revise os temas fracos e tente de novo com calma.',de:'Das ist kein Misserfolg. Wiederhole schwache Themen und versuch es in Ruhe erneut.',fr:'Ce n’est pas un échec. Revois les points faibles et réessaie tranquillement.',uk:'Це не провал. Повтори слабкі теми й спробуй ще раз спокійно.',tr:'Bu bir başarısızlık değil. Zayıf konuları tekrar et ve sakince yeniden dene.',zh:'这不是失败。复习薄弱的主题，然后从容再试一次。',ar:'هذا ليس فشلًا. راجِع المواضيع الضعيفة وحاول مجددًا بهدوء.'}[lang]||'This is not a failure. Review weak topics and try again calmly.')}</div>
@@ -15558,10 +15566,10 @@ async function openErrorDiaryChat(showUser=false){
   goTab('chat');
   if(showUser)addMsg('user',L.c_er);
   const local=LS.getJ('error_diary')||[];
-  addMsg('bot',renderErrorDiaryChatCard(local));
+  addMsgHTML('bot',renderErrorDiaryChatCard(local));
   const fresh=await refreshErrorDiaryFromServer(true);
   if(fresh.length!==local.length){
-    addMsg('bot',renderErrorDiaryChatCard(fresh));
+    addMsgHTML('bot',renderErrorDiaryChatCard(fresh));
     try{renderErrorDiary();}catch(_){}
   }
 }

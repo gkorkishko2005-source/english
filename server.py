@@ -8,6 +8,25 @@ from aiohttp import web
 import httpx
 
 logger      = logging.getLogger(__name__)
+
+# ── Error monitoring (optional) ───────────────────────────────────────────
+# Off by default. Set SENTRY_DSN in Railway Variables to start capturing
+# unhandled exceptions/tracebacks from the web server. No DSN → no-op, never
+# blocks startup (a bad sentry-sdk install or a typo'd DSN must not take the
+# app down).
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if _SENTRY_DSN:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(
+            dsn=_SENTRY_DSN,
+            environment=os.getenv("SENTRY_ENV", "production"),
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0") or "0"),
+        )
+        logger.info("Sentry initialized (server.py)")
+    except Exception as e:
+        logger.warning("Sentry init failed: %s", e)
+
 WEBAPP_DIR  = Path(__file__).parent / "webapp"
 RAILWAY_URL = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
 BOT_NAME    = os.getenv("BOT_NAME", "PolyGlotty_bot")
@@ -128,6 +147,54 @@ def _extract_actions(reply: str):
     return clean, actions
 ANT_KEY     = os.getenv("ANTHROPIC_API_KEY", "")
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
+
+# ── Premium (OpenRouter) cost visibility ──────────────────────────────────
+# The Platform-plan gate (check_ai_access/consume_ai_request) is a request
+# COUNTER, not a $ tracker — so the real OpenRouter spend for paid users was
+# invisible in ai_usage_log / usage_today_cost_global() (that table only ever
+# saw the legacy Anthropic credit path). These constants let us log the real
+# cost of every premium reply too, purely for monitoring/alerting — they do
+# NOT gate or block requests. Defaults reflect openai/gpt-4o-mini list pricing;
+# override via env if OPENROUTER_MODEL_PREMIUM points at a different model.
+PREMIUM_MODEL_IN_PER_1K  = float(os.getenv("PREMIUM_MODEL_IN_PER_1K", "0.00015") or "0.00015")
+PREMIUM_MODEL_OUT_PER_1K = float(os.getenv("PREMIUM_MODEL_OUT_PER_1K", "0.0006") or "0.0006")
+_budget_alert_last_date = None  # in-memory de-dup: at most one Telegram alert per UTC day
+
+async def _log_premium_cost_and_maybe_alert(uid: int, model: str, usage: dict) -> None:
+    """Best-effort: record the real $ cost of a premium OpenRouter reply, and
+    fire a one-per-day Telegram alert to admins if today's tracked AI spend
+    crosses BUDGET_ALERT_RATIO of GLOBAL_DAILY_BUDGET_USD. Never raises —
+    this must never affect the chat response."""
+    global _budget_alert_last_date
+    try:
+        in_tok = int((usage or {}).get("input_tokens") or 0)
+        out_tok = int((usage or {}).get("output_tokens") or 0)
+        cost = (in_tok / 1000.0) * PREMIUM_MODEL_IN_PER_1K + (out_tok / 1000.0) * PREMIUM_MODEL_OUT_PER_1K
+        from database import usage_log_add, usage_today_cost_global
+        await usage_log_add(uid, str(model), in_tok, out_tok, cost, 0)
+        try:
+            from billing_config import load_config as _lc
+            cfg = await _lc()
+            budget = float(cfg.get("GLOBAL_DAILY_BUDGET_USD", 25.0) or 25.0)
+        except Exception:
+            budget = 25.0
+        ratio = float(os.getenv("BUDGET_ALERT_RATIO", "0.8") or "0.8")
+        spent = await usage_today_cost_global()
+        import datetime as _dt
+        today = _dt.datetime.utcnow().date().isoformat()
+        if spent >= budget * ratio and _budget_alert_last_date != today and BOT_TOKEN and ADMIN_IDS:
+            _budget_alert_last_date = today
+            text = (f"⚠️ AI spend alert: ${spent:.2f} / ${budget:.2f} tracked today "
+                    f"({ratio*100:.0f}%+ of GLOBAL_DAILY_BUDGET_USD).")
+            try:
+                async with httpx.AsyncClient(timeout=10) as client:
+                    for aid in ADMIN_IDS:
+                        await client.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                                          json={"chat_id": aid, "text": text})
+            except Exception as e:
+                logger.warning("budget alert send failed: %s", e)
+    except Exception as e:
+        logger.warning("premium cost logging failed uid=%s: %s", uid, e)
 REQUIRE_TG_INIT_DATA = os.getenv("REQUIRE_TG_INIT_DATA", "1") != "0"
 # SECURITY: no hardcoded default. This secret is the only thing standing between
 # an anonymous request and free premium/credits (see handle_grant_*). If it's
@@ -1081,6 +1148,10 @@ async def handle_chat(request):
             reply = re.sub(r"\n[ \t]*\n+", "\n", (result.get("text") or "").strip())
             reply, actions = _extract_actions(reply)               # pull in-app action chips
             reply, saved_int = await _sanitize_reply(uid, reply)  # save + strip system tags
+            try:
+                await _log_premium_cost_and_maybe_alert(uid, OPENROUTER_MODEL_PREMIUM, result.get("usage"))
+            except Exception:
+                pass
         except GeminiRateLimit:
             reply = ""
         except Exception as e:

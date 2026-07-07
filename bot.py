@@ -219,6 +219,23 @@ def plan_stars_for_user(plan_id: str, uid: int, has_discount: bool = False) -> i
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+# ── Error monitoring (optional) ───────────────────────────────────────────
+# Off by default. Set SENTRY_DSN in Railway Variables (same one used by
+# server.py) to start capturing unhandled exceptions from the bot process.
+# No DSN → no-op, never blocks startup.
+_SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if _SENTRY_DSN:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(
+            dsn=_SENTRY_DSN,
+            environment=os.getenv("SENTRY_ENV", "production"),
+            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0") or "0"),
+        )
+        logger.info("Sentry initialized (bot.py)")
+    except Exception as e:
+        logger.warning("Sentry init failed: %s", e)
+
 bot       = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp        = Dispatcher()
 scheduler = AsyncIOScheduler(timezone="Europe/Moscow")
@@ -2829,6 +2846,46 @@ async def on_payment_success(msg: Message):
     #   platform:<period>:<uid>      (1m / 6m / lifetime)
     #   credits:<n>:<uid>            (ALEX credit pack)
     head = payload.split(":", 1)[0] if payload else ""
+
+    # ── Amount-integrity check ─────────────────────────────────────────
+    # Telegram Stars invoices are created server-side by us (_send_platform_invoice
+    # / _send_hearts_invoice), so today there is no path for a client to pay a
+    # different amount than the canonical price. This is defense-in-depth for
+    # if that ever changes (e.g. a future client-constructed invoice link):
+    # cross-check what was actually paid against the canonical price for the
+    # payload kind BEFORE granting anything. `credits:<n>` packs are retired
+    # (no code creates that invoice anymore) so there's no live price table to
+    # check against — nothing currently routes real Stars there.
+    try:
+        _parts = payload.split(":") if payload else []
+        _expected_stars = None
+        if head == "platform":
+            _period = _parts[1] if len(_parts) > 1 else "1m"
+            _plan = next((p for p in PLATFORM_PLANS.values() if p["period"] == _period), None)
+            if _plan:
+                _expected_stars = _invoice_price(uid, int(_plan["stars"]))
+        elif head == "hearts":
+            _expected_stars = _invoice_price(uid, await _hearts_refill_stars())
+        elif head == "premium":
+            _plan_id = _parts[1] if len(_parts) > 1 else "basic"
+            _plan = PREMIUM_PLANS.get(_plan_id)
+            if _plan:
+                _expected_stars = _invoice_price(uid, int(_plan["stars"]))
+        if _expected_stars is not None and _amount < _expected_stars:
+            logger.error(
+                "payment amount mismatch uid=%s payload=%s paid=%s expected=%s charge=%s",
+                uid, payload, _amount, _expected_stars, _charge_id,
+            )
+            await msg.answer(
+                "Платёж получен, но сумма не совпала с ожидаемой — доступ не активирован. Напиши /paysupport."
+                if ru else
+                "Payment received, but the amount didn't match the expected price — access was not activated. Use /paysupport."
+            )
+            return
+    except Exception as e:
+        logger.warning("payment amount-integrity check errored uid=%s charge=%s: %s", uid, _charge_id, e)
+        # fail open — never withhold paid-for access due to a check bug
+
     if head == "hearts":
         try:
             from database import refill_hearts
