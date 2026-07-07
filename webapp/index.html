@@ -16692,10 +16692,12 @@ function renderPremNative(){
         <div class="pn-pprice"><b>${_starsFmt(p.stars)}</b></div>
       </div>`;
   }).join('');
-  const featsHTML=_pnFeatures().map(f=>`<div class="pn-feat" onclick="pnFeatureDemo('${f.k}')">
+  /* Plain feature list at purchase time — just the function name, no example
+     text and no tap-to-demo (previously each row opened an interactive demo
+     modal; simplified per product decision to a clean checklist). */
+  const featsHTML=_pnFeatures().map(f=>`<div class="pn-feat">
       <div class="pn-feat-ic">${f.icon}</div>
-      <div class="pn-feat-tx"><div class="pn-feat-tt">${safeHTML(_pnT(f.tt))}</div><div class="pn-feat-sb">${safeHTML(_pnT(f.sb))}</div></div>
-      <svg class="pn-feat-cv" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <div class="pn-feat-tx"><div class="pn-feat-tt">${safeHTML(_pnT(f.tt))}</div></div>
     </div>`).join('');
   const titleHTML=({ru:'PolyGlotty <b>Premium</b>',en:'PolyGlotty <b>Premium</b>'}[lang]||'PolyGlotty <b>Premium</b>');
   const desc=({ru:'Безлимитный английский: живой чат, экзамены, карточки и ролевые сценарии — всё в одной подписке.',en:'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.',es:'Inglés ilimitado: chat en vivo, exámenes, tarjetas y juegos de rol — todo en una suscripción.',pt:'Inglês ilimitado: chat ao vivo, exames, cartões e roleplay — tudo numa assinatura.',de:'Unbegrenztes Englisch: Live-Chat, Prüfungen, Karten und Rollenspiele — alles in einem Abo.',fr:'Anglais illimité : chat en direct, examens, cartes et jeux de rôle — tout en un abonnement.',uk:'Безлімітна англійська: живий чат, іспити, картки та рольові сценарії — усе в одній підписці.',tr:'Sınırsız İngilizce: canlı sohbet, sınavlar, kartlar ve rol yapma — tek abonelikte.',zh:'无限英语：实时聊天、考试、单词卡和角色扮演 — 一个订阅全包。',ar:'إنجليزية بلا حدود: دردشة حية، امتحانات، بطاقات ولعب أدوار — كل ذلك في اشتراك واحد.'}[lang]||'Unlimited English: live chat, exams, flashcards and roleplay — all in one subscription.');
