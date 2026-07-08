@@ -32,7 +32,7 @@ from database import (
     db, db_init, get_user, get_lang, get_level, get_interests, get_profession,
     upsert_user, update_user, add_xp, update_streak,
     get_streak_count, get_xp, get_rank, LEVEL_ORDER,
-    add_word, get_due_words, update_word_review, get_word_count,
+    get_due_words,
     add_idiom, get_due_idioms,
     log_mistake, get_mistakes,
     log_session, get_full_stats,
@@ -48,7 +48,7 @@ from database import (
 from prompts import (
     build_system, INTEREST_TAG,
     ROLEPLAY_SCENARIOS, STORY_TYPES,
-    LESSON_PROMPTS, VOCAB_PROMPTS,
+    LESSON_PROMPTS,
     TEST_PROMPTS, TOEFL_PROMPTS, TALK_PROMPTS,
 )
 from tts import text_to_speech, transcribe_audio, analyze_pronunciation, format_pronunciation_report
@@ -249,13 +249,13 @@ BOT_PROFILE = {
         "PolyGlotty is an AI English tutor inside Telegram.\n\n"
         "Free: A0-C2 course, flashcards, drills, listening, growth tree.\n"
         "Subscription: live ALEX chat, roleplay, text check, TOEFL · IELTS · CAE prep. Top up with ALEX credits.\n\n"
-        "Commands: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules."
+        "Commands: /start, /app, /premium, /share, /help."
     ),
     "description_ru": (
         "PolyGlotty — AI-репетитор английского прямо в Telegram.\n\n"
         "Бесплатно: курс A0-C2, карточки, упражнения, аудирование, дерево роста.\n"
         "По подписке: живой чат ALEX, roleplay, проверка текста, подготовка к TOEFL · IELTS · CAE. Кредиты ALEX можно докупать отдельно.\n\n"
-        "Команды: /start, /premium, /share, /lesson, /vocab, /test, /toefl, /roleplay, /support, /terms, /rules."
+        "Команды: /start, /app, /premium, /share, /help."
     ),
 }
 
@@ -277,7 +277,7 @@ def set_ctx(uid, **kw): session_ctx.setdefault(uid, {}).update(kw)
 def get_ctx(uid) -> dict: return session_ctx.get(uid, {})
 def clear_ctx(uid): session_ctx.pop(uid, None)
 
-FOOTER = "\n\n<i>────────────────</i>\n<i>/lesson · /vocab · /test · /toefl · /roleplay · /story · /help</i>"
+FOOTER = "\n\n<i>────────────────</i>\n<i>/help · /premium</i>"
 
 ICON = {
     "app": "🚀",
@@ -622,19 +622,6 @@ def lesson_kb(lang):
     }
     return _simple_kb(items, lang)
 
-def vocab_kb(lang):
-    items = {
-        "vocab_new":         ("✨ Новые слова","✨ New Words"),
-        "vocab_review":      ("🔁 Умное повторение","🔁 Smart Review"),
-        "vocab_flashcards":  ("🃏 Флэш-карточки","🃏 Flashcards"),
-        "vocab_collocations":("🔗 Коллокации","🔗 Collocations"),
-        "vocab_idioms_adv":  ("💠 Продвинутые идиомы","💠 Advanced Idioms"),
-        "vocab_topic":       ("🗂 По теме","🗂 By Topic"),
-        "daily_quiz":        ("🎲 Ежедневный квиз","🎲 Daily Quiz"),
-        "idioms_cultural":   ("🌍 Культурные идиомы","🌍 Cultural Idioms"),
-    }
-    return _simple_kb(items, lang)
-
 def test_kb(lang):
     items = {
         "test_grammar":   ("📘 Грамматика","📘 Grammar"),
@@ -683,10 +670,6 @@ def remind_kb():
         [InlineKeyboardButton(text="Disable",callback_data="remind_off")],
     ])
 
-def flashcard_kb(word_id: int, lang: str):
-    opts = [("😵 Не знал",1),("😅 Почти",2),("🙂 Помнил",4),("😎 Легко",5)] if lang=="ru" else [("😵 Forgot",1),("😅 Hard",2),("🙂 Good",4),("😎 Easy",5)]
-    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text=l,callback_data=f"fc_{word_id}_{q}") for l,q in opts]])
-
 def shadowing_kb(lang: str):
     return InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="🔁 Ещё раз" if lang=="ru" else "🔁 Hear again", callback_data="shadow_repeat"),
@@ -731,9 +714,9 @@ async def send_reminder(uid: int):
     if streak > 2:
         rows_extra.append(f"Streak: <b>{streak}</b>")
     if due_cnt:
-        rows_extra.append(f"{'Слов на повторение' if ru_ else 'Words to review'}: <b>{due_cnt}</b>  /vocab")
+        rows_extra.append(f"{'Слов на повторение' if ru_ else 'Words to review'}: <b>{due_cnt}</b>")
     if due_idioms:
-        rows_extra.append(f"{'Идиом на повторение' if ru_ else 'Idioms to review'}: <b>{due_idioms}</b>  /vocab")
+        rows_extra.append(f"{'Идиом на повторение' if ru_ else 'Idioms to review'}: <b>{due_idioms}</b>")
     if rows_extra:
         text += "\n\n" + "\n".join(rows_extra)
     # Word of the day now rides along with the daily reminder instead of
@@ -1382,8 +1365,6 @@ async def cb_quick_menu(cb: CallbackQuery):
     await cb.answer()
     if action == "lesson":
         await cb.message.answer(f"{ICON['lesson']} <b>Уроки грамматики</b>" if ru else f"{ICON['lesson']} <b>Grammar Lessons</b>", reply_markup=lesson_kb(lang))
-    elif action == "vocab":
-        await cb.message.answer(f"{ICON['vocab']} <b>Словарь</b>" if ru else f"{ICON['vocab']} <b>Vocabulary</b>", reply_markup=vocab_kb(lang))
     elif action == "test":
         await cb.message.answer(f"{ICON['test']} <b>Тесты</b>" if ru else f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
     elif action == "support":
@@ -1794,76 +1775,6 @@ async def cb_lesson(cb: CallbackQuery):
     log_session(uid, cb.data)
     waiting[uid] = "lesson_active"
 
-@dp.callback_query(F.data.startswith("vocab_") | F.data.in_(["daily_quiz","idioms_cultural"]))
-async def cb_vocab(cb: CallbackQuery):
-    uid  = cb.from_user.id
-    lang = await get_lang(uid)
-
-    if cb.data == "idioms_cultural":
-        await cb.message.edit_reply_markup(reply_markup=None)
-        await cb.answer()
-        await bot.send_chat_action(cb.message.chat.id, "typing")
-        reply = await ask_alex(uid, "Generate a cultural idioms learning scenario with a short story rich in idioms, then ask me to identify 3 highlighted idioms.", mode="idioms_cultural")
-        await cb.message.answer(reply)
-        log_session(uid, "idioms_cultural")
-        waiting[uid] = "vocab_active"
-        return
-
-    if cb.data in ("vocab_review","daily_quiz"):
-        due = await get_due_words(uid, limit=5)
-        if not due:
-            await cb.answer()
-            await cb.message.answer("✓ No words due today." if lang=="en" else "✓ Нет слов для повторения.")
-            return
-        await cb.message.edit_reply_markup(reply_markup=None)
-        await cb.answer()
-        word = due[0]
-        set_ctx(uid, review_queue=due, review_idx=0)
-        await cb.message.answer(
-            f"🃏 <b>Card 1/{len(due)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>\n\n"
-            f"{'Помнишь перевод?' if lang=='ru' else 'Remember the translation?'}",
-            reply_markup=flashcard_kb(word["id"], lang)
-        )
-        return
-
-    prompt = VOCAB_PROMPTS.get(cb.data,"")
-    if not prompt: await cb.answer(); return
-    await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.answer()
-    await bot.send_chat_action(cb.message.chat.id, "typing")
-    reply = await ask_alex(uid, prompt, mode="vocab")
-    await cb.message.answer(reply)
-    log_session(uid, cb.data)
-    waiting[uid] = "vocab_active"
-
-@dp.callback_query(F.data.startswith("fc_"))
-async def cb_flashcard(cb: CallbackQuery):
-    uid     = cb.from_user.id
-    lang    = await get_lang(uid)
-    parts   = cb.data.split("_")
-    word_id = int(parts[1]); quality = int(parts[2])
-    await update_word_review(word_id, quality)
-    await add_xp(uid, 3)
-    ctx   = get_ctx(uid)
-    queue = ctx.get("review_queue",[])
-    idx   = ctx.get("review_idx",0) + 1
-    set_ctx(uid, review_idx=idx)
-    await cb.message.edit_reply_markup(reply_markup=None)
-    word_row = await db("SELECT * FROM vocabulary WHERE id=?", word_id, fetch="one")
-    if word_row:
-        await cb.message.answer(f"✓ <b>{word_row['word']}</b> = {word_row['translation']}\n<i>{word_row['example']}</i>")
-    if idx < len(queue):
-        word = queue[idx]
-        await cb.message.answer(
-            f"🃏 <b>Card {idx+1}/{len(queue)}</b>\n\n<b>{word['word']}</b>\n\n<i>{word['example']}</i>",
-            reply_markup=flashcard_kb(word["id"], lang)
-        )
-    else:
-        await cb.message.answer(f"✓ Done. +{len(queue)*3} XP")
-        log_session(uid, "vocab_review")
-        clear_ctx(uid)
-    await cb.answer()
-
 # TOEFL — специфичные хэндлеры ПЕРВЫЕ
 @dp.callback_query(F.data == "toefl_q_start")
 async def cb_toefl_q_start(cb: CallbackQuery):
@@ -2142,23 +2053,6 @@ async def handle_webapp_data(message: Message):
         new_lang = data.get("lang", "ru")
         await update_user(uid, lang=new_lang)
         await message.answer("✓ Language updated." if new_lang=="en" else "✓ Язык обновлён.")
-        return
-
-    if action == "rate_card":
-        word_id = data.get("word_id")
-        quality = data.get("quality", 3)
-        if word_id:
-            from database import update_word_review, add_xp
-            await update_word_review(word_id, quality)
-            await add_xp(uid, 3)
-        return
-
-    if action == "add_word":
-        await message.answer(
-            f"{ICON['vocab']} Напиши слово, которое хочешь добавить:" if lang=="ru"
-            else f"{ICON['vocab']} Write the word you want to add:"
-        )
-        waiting[uid] = "vocab_active"
         return
 
     handler = action_map.get(action)
