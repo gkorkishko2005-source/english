@@ -1148,17 +1148,14 @@ def user_display_name(user) -> str:
 
 async def setup_bot_profile():
     """Apply BotFather growth basics from prompt.rtf: searchable name, about text, commands, WebApp menu."""
-    # Compact command menu: only the everyday actions, single-language
-    # descriptions (no "EN / RU" clutter). Less-used commands (toefl,
-    # roleplay, channel, support, paysupport, terms, rules, privacy) still
-    # work as handlers — they're just hidden from the "/" menu.
+    # Compact command menu: only the everyday, non-learning actions.
+    # All actual learning (course, cards, drills, exams, ALEX) lives in the
+    # WebApp behind the blue menu button — it has no command-menu duplicate.
+    # Support/legal/admin/test commands still work as handlers, just hidden
+    # from the "/" autocomplete menu.
     commands_en = [
         BotCommand(command="start", description="Main menu"),
         BotCommand(command="app", description="Open the app"),
-        BotCommand(command="lesson", description="Grammar lesson"),
-        BotCommand(command="vocab", description="Vocabulary"),
-        BotCommand(command="test", description="English test"),
-        BotCommand(command="story", description="Interactive stories"),
         BotCommand(command="premium", description="Plans and limits"),
         BotCommand(command="share", description="Invite a friend"),
         BotCommand(command="language", description="Change language"),
@@ -1167,10 +1164,6 @@ async def setup_bot_profile():
     commands_ru = [
         BotCommand(command="start", description="Главное меню"),
         BotCommand(command="app", description="Открыть приложение"),
-        BotCommand(command="lesson", description="Урок грамматики"),
-        BotCommand(command="vocab", description="Слова"),
-        BotCommand(command="test", description="Тест"),
-        BotCommand(command="story", description="Истории"),
         BotCommand(command="premium", description="Подписки"),
         BotCommand(command="share", description="Пригласить друга"),
         BotCommand(command="language", description="Сменить язык"),
@@ -1500,238 +1493,6 @@ async def cmd_lang(m: Message):
            if ru else
            "🌐 <b>Interface language</b>\nPick the language the bot will talk to you in:")
     await m.answer(txt, parse_mode="HTML", reply_markup=lang_kb())
-
-@dp.message(Command("level"))
-async def cmd_level(m: Message):
-    await m.answer("Choose your level / Выбери уровень", reply_markup=level_kb())
-
-@dp.message(Command("lesson"))
-async def cmd_lesson(m: Message):
-    lang = await get_lang(m.from_user.id)
-    await m.answer("<b>Grammar lessons</b>" if lang!="ru" else "<b>Уроки грамматики</b>", reply_markup=lesson_kb(lang))
-
-@dp.message(Command("vocab"))
-async def cmd_vocab(m: Message):
-    lang = await get_lang(m.from_user.id)
-    await m.answer("<b>Vocabulary</b>" if lang!="ru" else "<b>Словарь</b>", reply_markup=vocab_kb(lang))
-
-@dp.message(Command("roleplay"))
-async def cmd_roleplay(m: Message):
-    lang = await get_lang(m.from_user.id)
-    if not await has_access(m.from_user.id, "pro"):
-        await send_upgrade_hint(m, "pro", lang, "Roleplay")
-        return
-    await m.answer("🎭 <b>Roleplay</b>", reply_markup=roleplay_kb(lang))
-
-@dp.message(Command("story"))
-async def cmd_story(m: Message):
-    lang = await get_lang(m.from_user.id)
-    if not await has_access(m.from_user.id, "basic"):
-        await send_upgrade_hint(m, "basic", lang, "Story Quest")
-        return
-    await m.answer("🎮 <b>Story Quest</b>", reply_markup=story_kb(lang))
-
-@dp.message(Command("debate"))
-async def cmd_debate(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    if not await has_access(uid, "pro"):
-        await send_upgrade_hint(m, "pro", lang, "Debate")
-        return
-    clear_history(uid)
-    set_ctx(uid, debate_round=1)
-    await bot.send_chat_action(m.chat.id, "typing")
-    reply = await ask_alex(uid,
-        "Start a debate exercise. Choose a controversial topic. Assign me a position. Explain rules briefly, then begin Round 1.",
-        mode="debate"
-    )
-    await m.answer(reply)
-    log_session(uid, "debate")
-    waiting[uid] = "debate_active"
-
-@dp.message(Command("test"))
-async def cmd_test(m: Message):
-    lang = await get_lang(m.from_user.id)
-    await m.answer(f"{ICON['test']} <b>Tests</b>", reply_markup=test_kb(lang))
-
-@dp.message(Command("toefl"))
-async def cmd_toefl(m: Message):
-    lang = await get_lang(m.from_user.id)
-    if not await has_access(m.from_user.id, "ultimate"):
-        await send_upgrade_hint(m, "ultimate", lang, "TOEFL")
-        return
-    await m.answer("🎓 <b>TOEFL iBT</b>", reply_markup=toefl_kb(lang))
-
-@dp.message(Command("talk"))
-async def cmd_talk(m: Message):
-    lang = await get_lang(m.from_user.id)
-    await m.answer("💬 <b>Speaking</b>", reply_markup=talk_kb(lang))
-
-@dp.message(Command("tone"))
-async def cmd_tone(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    await m.answer(
-        (f"{ICON['lesson']} <b>Редактор тона фразы</b>\n\n"
-         "Отправь любую фразу на английском. ALEX покажет 5 вариантов с разным стилем:\n"
-         "<code>Professional</code> · <code>Polite</code> · <code>Assertive</code> · <code>Soft</code> · <code>Casual</code>")
-        if lang=="ru" else
-        (f"{ICON['lesson']} <b>Tone Editor</b>\n\n"
-         "Send any English phrase. ALEX will show 5 versions with different tones:\n"
-         "<code>Professional</code> · <code>Polite</code> · <code>Assertive</code> · <code>Soft</code> · <code>Casual</code>")
-    )
-    waiting[uid] = "tone_editor"
-
-@dp.message(Command("shadow"))
-async def cmd_shadow(m: Message):
-    uid   = m.from_user.id
-    lang  = await get_lang(uid)
-    level = await get_level(uid)
-    await bot.send_chat_action(m.chat.id, "typing")
-    phrase = await ask_alex_raw(
-        f"Give me ONE shadowing practice phrase for {level} level (10-20 words). Return ONLY the phrase.",
-        "Return only the practice phrase, nothing else."
-    )
-    phrase = phrase.strip().strip('"').strip("'")
-    set_ctx(uid, shadow_phrase=phrase)
-    audio = await text_to_speech(phrase)
-    if audio:
-        await m.answer_voice(
-            BufferedInputFile(audio,"phrase.mp3"),
-            caption=f"{ICON['audio']} <b>Shadowing</b>\n\n<i>{phrase}</i>\n\n{'Запиши голосовое или напиши:' if lang=='ru' else 'Record a voice message or type:'}",
-            reply_markup=pronunciation_kb(lang)
-        )
-    else:
-        await m.answer(f"{ICON['audio']} <b>Shadowing</b>\n\n<i>{phrase}</i>", reply_markup=shadowing_kb(lang))
-    waiting[uid] = "shadowing"
-    log_session(uid, "shadowing")
-
-@dp.message(Command("writing"))
-async def cmd_writing(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    await m.answer(
-        (f"{ICON['lesson']} <b>Проверка текста</b>\n\n"
-         "Отправь текст. ALEX вернёт:\n"
-         "<code>Corrected</code> · <code>Native-like</code> · <code>Error breakdown</code>")
-        if lang=="ru" else
-        (f"{ICON['lesson']} <b>Writing Check</b>\n\n"
-         "Send a text. ALEX will return:\n"
-         "<code>Corrected</code> · <code>Native-like</code> · <code>Error breakdown</code>")
-    )
-    waiting[uid] = "writing"
-
-@dp.message(Command("sentence"))
-async def cmd_sentence(m: Message):
-    uid   = m.from_user.id
-    level = await get_level(uid)
-    await bot.send_chat_action(m.chat.id, "typing")
-    reply = await ask_alex(uid, f"Give me a sentence builder exercise for {level}. 6-8 jumbled words. After I answer, confirm or show correct with explanation.", mode="grammar")
-    await m.answer(reply)
-    log_session(uid, "sentence_builder")
-    waiting[uid] = "lesson_active"
-
-@dp.message(Command("idioms"))
-async def cmd_idioms(m: Message):
-    uid   = m.from_user.id
-    level = await get_level(uid)
-    await bot.send_chat_action(m.chat.id, "typing")
-    reply = await ask_alex(uid, f"Teach me 5 English idioms for {level}. Each: idiom, meaning, brief origin, 2 examples, when to use.", mode="vocab")
-    await m.answer(reply)
-    log_session(uid, "idioms")
-
-@dp.message(Command("profession"))
-async def cmd_profession(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    await m.answer(
-        (f"{ICON['lesson']} <b>О себе</b>\n\n"
-         "Напиши профессию, интересы или цель обучения.\n"
-         "Например: <code>Java Developer, хочу говорить на митингах</code>\n\n"
-         "ALEX будет подбирать примеры ближе к твоему контексту.")
-        if lang=="ru" else
-        (f"{ICON['lesson']} <b>About You</b>\n\n"
-         "Write your field, interests, or learning goal.\n"
-         "Example: <code>Java Developer, I want to speak in meetings</code>\n\n"
-         "ALEX will make examples closer to your context.")
-    )
-    waiting[uid] = "set_profession"
-
-@dp.message(Command("stats"))
-async def cmd_stats(m: Message):
-    uid   = m.from_user.id
-    lang  = await get_lang(uid)
-    stats = await get_full_stats(uid)
-    xp    = stats["xp"]
-    interests = await get_all_interests(uid)
-    interest_line = ", ".join(r["interest"] for r in interests[:5]) if interests else ("нет" if lang=="ru" else "none")
-    profession = await get_profession(uid)
-    nxt_xp = {"🌱 Seedling":100,"📗 Beginner":300,"📘 Elementary":600,
-               "📙 Pre-Intermediate":1000,"⭐ Intermediate":1500,
-               "🌟 Upper-Intermediate":2500,"💫 Advanced":4000,"🏆 Master":9999}
-    nxt = nxt_xp.get(stats["rank"],9999)
-    # Clean stats: plain typographic hierarchy, no decorative glyphs,
-    # no ASCII progress bar. Profession and interests appear as their
-    # own labelled rows, not as captioned icons.
-    ru_ = lang == "ru"
-    body = (
-        f"<b>{'Прогресс' if ru_ else 'Progress'}</b>\n\n"
-        f"{stats['level']} · {stats['rank']}\n"
-        f"XP: <b>{xp}</b> / {nxt}\n\n"
-        f"Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-        f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>\n"
-        f"Errors: <b>{stats['errors']}</b> · TOEFL: <b>{stats['toefl']}</b>"
-    )
-    if profession:
-        body += f"\n\n{'Профессия' if ru_ else 'Profession'}: <i>{html.escape(str(profession), quote=False)}</i>"
-    body += f"\n{'Интересы' if ru_ else 'Interests'}: <i>{html.escape(interest_line, quote=False)}</i>"
-    await m.answer(body)
-
-@dp.message(Command("mistakes"))
-async def cmd_mistakes(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    rows = await get_mistakes(uid, limit=10)
-    ru = lang == "ru"
-    if not rows:
-        await m.answer(
-            "Пока пусто.\n\nПиши ALEX на английском или проверь текст в приложении — исправления появятся здесь."
-            if ru else
-            "Nothing here yet.\n\nWrite to ALEX in English or check a text in the app — corrections will appear here."
-        )
-        return
-    text = (
-        "<b>Дневник ошибок ALEX</b>\n"
-        "Последние исправления из чата и проверки текста.\n\n"
-        if ru else
-        "<b>ALEX Error Diary</b>\n"
-        "Recent corrections from chat and text checks.\n\n"
-    )
-    for i, r in enumerate(rows, 1):
-        original = html.escape(str(r["original"])[:90], quote=False)
-        corrected = html.escape(str(r["corrected"])[:90], quote=False)
-        explanation = html.escape(str(r["explanation"] or "")[:120], quote=False)
-        text += (
-            f"<b>{i}.</b> <s>{original}</s>\n"
-            f"<b>→</b> <code>{corrected}</code>\n"
-            f"<i>{explanation}</i>\n\n"
-        )
-    text += "Открой WebApp, чтобы попросить ALEX разобрать повторяющиеся паттерны." if ru else "Open the WebApp to ask ALEX to review repeated patterns."
-    await m.answer(text.rstrip())
-
-@dp.message(Command("interests"))
-async def cmd_interests(m: Message):
-    uid  = m.from_user.id
-    lang = await get_lang(uid)
-    rows = await get_all_interests(uid)
-    current = ", ".join(r["interest"] for r in rows) if rows else ("пусто" if lang=="ru" else "empty")
-    await m.answer(
-        f"<b>{'Интересы' if lang=='ru' else 'Interests'}</b>\n\n"
-        f"{'Сейчас' if lang=='ru' else 'Now'}: <i>{html.escape(current, quote=False)}</i>\n\n"
-        f"{'Напиши через запятую — ALEX также запоминает их из разговора.' if lang=='ru' else 'Write comma-separated — ALEX also picks them up from chat.'}\n"
-        f"<code>gaming, music, travel, tech</code>"
-    )
-    waiting[uid] = "set_interests"
 
 @dp.message(Command("remind"))
 async def cmd_remind(m: Message):
@@ -2369,16 +2130,12 @@ async def handle_webapp_data(message: Message):
     except Exception:
         return
 
+    # Note: the WebApp never actually calls Telegram.WebApp.sendData(), so
+    # this handler (and action_map) is currently unreachable in practice.
+    # Kept minimal — only pointing at commands that still exist.
     action_map = {
-        "lesson":     cmd_lesson,
-        "vocab":      cmd_vocab,
-        "toefl":      cmd_toefl,
-        "roleplay":   cmd_roleplay,
-        "remind":     cmd_remind,
-        "mistakes":   cmd_mistakes,
-        "interests":  cmd_interests,
-        "profession": cmd_profession,
-        "reset":      cmd_reset,
+        "remind": cmd_remind,
+        "reset":  cmd_reset,
     }
 
     if action == "set_lang":
