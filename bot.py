@@ -749,18 +749,13 @@ async def send_reminder(uid: int):
         )
     except Exception:
         pass
-    # Bot-side messages always carry a Channel button so the reader has
-    # somewhere to go when they're not ready to open the app.
-    app_url = webapp_url()
-    rows = []
-    if app_url:
-        rows.append([InlineKeyboardButton(
-            text="Открыть практику" if lang=="ru" else "Open practice",
-            web_app=WebAppInfo(url=app_url))])
-    rows.append([InlineKeyboardButton(
+    # The blue "Open App" menu button by the input field is the single
+    # app-launch affordance (product decision) — no web_app button here
+    # anymore, just point at it in the copy. Channel stays a plain link.
+    text += "\n\n" + ("Жми синюю кнопку у поля ввода 👇" if ru_ else "Tap the blue button by the text field 👇")
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
         text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel",
-        url=channel_url())])
-    kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
+        url=channel_url())]])
     try: await bot.send_message(uid, text, reply_markup=kb)
     except Exception as e: logger.warning(f"Reminder failed {uid}: {e}")
 
@@ -769,21 +764,17 @@ async def send_weekly_report(uid: int):
     lang  = await get_lang(uid)
     ru = lang == "ru"
     try:
-        app_url = webapp_url()
-        rows = []
-        if app_url:
-            rows.append([InlineKeyboardButton(
-                text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open app",
-                web_app=WebAppInfo(url=app_url))])
-        rows.append([InlineKeyboardButton(
+        # Same rule as send_reminder: the blue menu button is the only
+        # app-launch affordance, so this message only links the Channel.
+        kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(
             text=f"{ICON['channel']} Канал" if ru else f"{ICON['channel']} Channel",
-            url=channel_url())])
-        kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
+            url=channel_url())]])
         await bot.send_message(uid,
             f"<b>{'Отчёт за неделю' if ru else 'Weekly report'}</b>\n\n"
             f"{stats['level']} · {stats['rank']} · <b>{stats['xp']}</b> XP\n"
             f"Streak: <b>{stats['streak']}</b> · Sessions: <b>{stats['sessions']}</b>\n"
-            f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>",
+            f"Words: <b>{stats['words']}</b> · Tests: <b>{stats['tests']}</b>\n\n"
+            + ("Жми синюю кнопку у поля ввода 👇" if ru else "Tap the blue button by the text field 👇"),
             reply_markup=kb
         )
     except Exception as e:
@@ -932,15 +923,10 @@ def _sub_expiry_text(days: int, lang: str) -> str:
 
 async def send_sub_expiry(uid: int, days: int, lang: str):
     text = "<b>PolyGlotty</b>\n\n" + html.escape(_sub_expiry_text(days, lang), quote=False)
-    rows = []
-    app_url = webapp_url()
-    if app_url:
-        rows.append([InlineKeyboardButton(
-            text="Продлить подписку" if lang == "ru" else "Renew subscription",
-            web_app=WebAppInfo(url=app_url))])
-    kb = InlineKeyboardMarkup(inline_keyboard=rows) if rows else None
+    text += "\n\n" + ("Жми синюю кнопку у поля ввода, чтобы продлить 👇" if lang == "ru"
+                       else "Tap the blue button by the text field to renew 👇")
     try:
-        await bot.send_message(uid, text, reply_markup=kb)
+        await bot.send_message(uid, text)
     except Exception as e:
         logger.warning(f"sub-expiry push failed uid={uid}: {e}")
 
@@ -1200,6 +1186,12 @@ async def setup_bot_profile():
         await bot.set_my_description(BOT_PROFILE["description_ru"], language_code="ru")
         await bot.set_my_commands(commands_en)
         await bot.set_my_commands(commands_ru, language_code="ru")
+        # Product decision: the native chat menu button (blue "Open App" pill
+        # next to the input field) is the ONE way to launch the Mini App.
+        # Having it PLUS an inline "Open App" button under every message PLUS
+        # the persistent keyboard button was three ways at once and confused
+        # new users (reported live) — the other two were dropped, this one
+        # stays as the single, permanent launch point.
         if app_url:
             await bot.set_chat_menu_button(menu_button=MenuButtonWebApp(text="🤖 Открыть PolyGlotty", web_app=WebAppInfo(url=app_url)))
         logger.info("Bot profile metadata updated")
@@ -1316,20 +1308,12 @@ async def cmd_start(message: Message):
                         else "\n\nReferral bonus: your friend gets +150 XP, you get +50 XP.")
     name_html = html.escape(name, quote=False)
     handle = channel_handle() or "@polyglotty_daily"
-    # Inline keyboard under the welcome message: a primary Mini App launcher and
-    # a link to the official channel. The "⌨️ Все функции" button stays removed
-    # (per product decision). web_app= launches the Mini App in-place; if the
-    # WebApp URL is unavailable (local dev) we fall back to a plain bot link.
-    app_url = webapp_url()
-    open_btn = (InlineKeyboardButton(
-                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-                    web_app=WebAppInfo(url=app_url))
-                if app_url else
-                InlineKeyboardButton(
-                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-                    url=public_bot_url()))
+    # The ONE way to launch the Mini App is the native blue "Open App" pill
+    # next to the input field (set in setup_bot_profile via
+    # set_chat_menu_button) — no inline "Open App" button here anymore, the
+    # welcome message just points at it in the copy. Channel is still a
+    # regular inline link since it isn't an app-launch affordance.
     welcome_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [open_btn],
         [InlineKeyboardButton(
             text="📢 Канал" if ru else "📢 Channel",
             url=channel_url())],
@@ -1341,7 +1325,7 @@ async def cmd_start(message: Message):
             f"<b>PolyGlotty</b> — AI-репетитор английского в Telegram:\n"
             f"• Курс <b>A0–C2</b>, карточки, экзамены\n"
             f"• Персональный чат с ассистентом <b>ALEX</b>\n\n"
-            f"Жми <b>«Открыть приложение»</b> ниже. 👇\n"
+            f"Жми синюю кнопку <b>«Открыть PolyGlotty»</b> у поля ввода. 👇\n"
             f"Канал: {handle}"
             f"{ref_line}"
         )
@@ -1351,26 +1335,33 @@ async def cmd_start(message: Message):
             f"<b>PolyGlotty</b> — an AI English tutor inside Telegram:\n"
             f"• <b>A0–C2</b> course, flashcards, exams\n"
             f"• Personal chat with the <b>ALEX</b> assistant\n\n"
-            f"Tap <b>“Open App”</b> below. 👇\n"
+            f"Tap the blue <b>“Open PolyGlotty”</b> button by the text field. 👇\n"
             f"Channel: {handle}"
             f"{ref_line}"
         )
     await message.answer(text, parse_mode="HTML", reply_markup=welcome_kb)
+    # One-time cleanup: older sessions may still have the retired persistent
+    # "🤖 Открыть PolyGlotty" keyboard button (main_kb) stuck at the bottom of
+    # the chat — Telegram keeps a custom ReplyKeyboardMarkup showing until a
+    # NEW message explicitly clears it, and a message can't carry both an
+    # inline keyboard AND a ReplyKeyboardRemove at once. Send a throwaway
+    # message with the removal, then delete it immediately so nothing extra
+    # is visible — leaves the inline "Open App" button above as the ONE way
+    # to launch the app.
+    try:
+        _rm = await message.answer("⁣", reply_markup=ReplyKeyboardRemove())
+        await _rm.delete()
+    except Exception as e:
+        logger.warning(f"stale keyboard cleanup failed uid={uid}: {e}")
 
 def _quick_menu_kb(ru: bool) -> InlineKeyboardMarkup:
     """Minimal 3-button hub: Open App / Plans / Invite. Everything else
     (lessons, vocab, tests, flashcards) lives INSIDE the Mini App — the chat
-    stays uncluttered instead of spamming section buttons in Telegram."""
-    app_url = webapp_url()
-    open_btn = (InlineKeyboardButton(
-                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-                    web_app=WebAppInfo(url=app_url))
-                if app_url else
-                InlineKeyboardButton(
-                    text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-                    url=public_bot_url()))
+    stays uncluttered instead of spamming section buttons in Telegram.
+    NOTE: no "Open App" entry here anymore — the native blue menu button by
+    the input field is the single app-launch affordance now (product
+    decision, see setup_bot_profile / cmd_start)."""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [open_btn],
         [InlineKeyboardButton(text=f"{ICON['premium']} Подписка" if ru else f"{ICON['premium']} Plans",
                               callback_data="open_premium")],
         [InlineKeyboardButton(text=f"{ICON['share']} Пригласить друга" if ru else f"{ICON['share']} Invite a friend",
@@ -1759,21 +1750,17 @@ async def cmd_remind(m: Message):
 @dp.message(Command("help"))
 async def cmd_help(m: Message):
     lang = await get_lang(m.from_user.id) or "ru"
-    app_url = webapp_url()
-    kb = None
-    if app_url:
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
-                                  web_app=WebAppInfo(url=app_url))],
-            [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
-            [InlineKeyboardButton(text=f"{ICON['share']} Пригласить друга" if lang=="ru" else f"{ICON['share']} Invite a friend", switch_inline_query="invite")],
-            [
-                InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url()),
-                InlineKeyboardButton(text="📜 Правила" if lang=="ru" else "📜 Rules", callback_data="open_terms"),
-            ],
-        ])
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
+        [InlineKeyboardButton(text=f"{ICON['share']} Пригласить друга" if lang=="ru" else f"{ICON['share']} Invite a friend", switch_inline_query="invite")],
+        [
+            InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url()),
+            InlineKeyboardButton(text="📜 Правила" if lang=="ru" else "📜 Rules", callback_data="open_terms"),
+        ],
+    ])
     await m.answer(
         ("<b>PolyGlotty · AI-репетитор английского</b>\n\n"
+         "Жми синюю кнопку у поля ввода, чтобы открыть приложение 👇\n\n"
          "<blockquote><b>В приложении</b>\n"
          "• Бесплатный курс A0–C2\n"
          "• Карточки и повторение (SRS)\n"
@@ -1789,6 +1776,7 @@ async def cmd_help(m: Message):
          "/support — поддержка\n"
          "/terms · /rules · /privacy — правовая часть</blockquote>") if lang=="ru" else
         ("<b>PolyGlotty · AI English tutor</b>\n\n"
+         "Tap the blue button by the text field to open the app 👇\n\n"
          "<blockquote><b>Inside the app</b>\n"
          "• Free A0–C2 course\n"
          "• Flashcards and review (SRS)\n"
@@ -1815,9 +1803,6 @@ async def send_support_prompt(target, uid: int):
     ru = lang == "ru"
     waiting[uid] = "support_message"
     kb_rows = [[InlineKeyboardButton(text=f"{ICON['support']} Написать в поддержку" if ru else f"{ICON['support']} Message support", url=support_contact_url())]]
-    if RAILWAY_URL and "localhost" not in RAILWAY_URL:
-        kb_rows.append([InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if ru else f"{ICON['app']} Open App",
-                                             web_app=WebAppInfo(url=webapp_url()))])
     kb = InlineKeyboardMarkup(inline_keyboard=kb_rows)
     await target.answer(
         ("<b>Поддержка PolyGlotty</b>\n\n"
@@ -1937,8 +1922,15 @@ async def cb_lang(cb: CallbackQuery):
     await cb.message.edit_reply_markup(reply_markup=None)
     await cb.answer("✓")
     name = html.escape(user_display_name(cb.from_user), quote=False)
-    ready = "PolyGlotty готов к практике." if lang == "ru" else "PolyGlotty is ready to practise."
-    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\n{ready}", reply_markup=main_kb(lang))
+    ready = ("PolyGlotty готов к практике. Жми синюю кнопку у поля ввода 👇" if lang == "ru"
+             else "PolyGlotty is ready to practise. Tap the blue button by the text field 👇")
+    # Single app-launch affordance: the native blue menu button by the input
+    # field (see setup_bot_profile). _quick_menu_kb below only carries
+    # Plans/Invite now — no inline "Open App" button (having a persistent
+    # bottom button + inline buttons on every message was reported as
+    # confusing — too many ways to open the app at once).
+    await cb.message.answer(f"<b>{'Привет' if lang=='ru' else 'Hey'}, {name}!</b>\n\n{ready}",
+                             reply_markup=_quick_menu_kb(lang == "ru"))
     lvl_title = "🎯 <b>Уровень</b>" if lang == "ru" else "🎯 <b>Level</b>"
     await cb.message.answer(lvl_title, reply_markup=level_kb())
 
@@ -1947,7 +1939,7 @@ async def cb_back(cb: CallbackQuery):
     uid  = cb.from_user.id
     lang = await get_lang(uid)
     await cb.message.edit_reply_markup(reply_markup=None)
-    await cb.message.answer(f"{ICON['menu']} Menu", reply_markup=main_kb(lang))
+    await cb.message.answer(f"{ICON['menu']} Menu", reply_markup=_quick_menu_kb(lang == "ru"))
     await cb.answer()
 
 @dp.callback_query(F.data.startswith("setlevel_"))
@@ -2336,44 +2328,33 @@ async def handle_text(message: Message):
         waiting.pop(uid, None)
 
     # Redirect to WebApp
-    from aiogram.types import WebAppInfo
-    app_url = webapp_url()
-    kb = None
-    if app_url:
-        kb = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
-                                  web_app=WebAppInfo(url=app_url))],
-            [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
-            [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url())],
-        ])
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"{ICON['premium']} Подписки" if lang=="ru" else f"{ICON['premium']} Plans", callback_data="open_premium")],
+        [InlineKeyboardButton(text=f"{ICON['channel']} Канал" if lang=="ru" else f"{ICON['channel']} Channel", url=channel_url())],
+    ])
     await message.answer(
         ("<b>Продолжи в приложении</b>\n\n"
+         "Жми синюю кнопку у поля ввода 👇\n\n"
          "Free даёт карточки, drills, игры и прогресс. ALEX Chat открывается по подписке.") if lang=="ru" else
         ("<b>Continue in the app</b>\n\n"
+         "Tap the blue button by the text field 👇\n\n"
          "Free includes flashcards, drills, games and progress. ALEX Chat starts with a subscription."),
         reply_markup=kb
     )
 
 @dp.message(Command("app"))
 async def cmd_app(m: Message):
-    """Открывает WebApp."""
+    """Подсказывает открыть WebApp через синюю кнопку меню."""
     uid  = m.from_user.id
     lang = await get_lang(uid)
     domain = os.getenv("RAILWAY_PUBLIC_DOMAIN", "")
     if not domain:
         await m.answer("! WebApp URL not configured." if lang=="en" else "! WebApp ещё не настроен.")
         return
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
     await m.answer(
         f"{ICON['app']} <b>PolyGlotty App</b>\n\n"
-        + ("Открывай приложение — там твой прогресс, флэш-карточки и статистика!" if lang=="ru"
-           else "Open the app — your progress, flashcards and stats!"),
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(
-                text=f"{ICON['app']} Открыть приложение" if lang=="ru" else f"{ICON['app']} Open App",
-                web_app=WebAppInfo(url=webapp_url() or f"https://{domain}")
-            )
-        ]])
+        + ("Жми синюю кнопку «Открыть PolyGlotty» у поля ввода 👇\nТам твой прогресс, флэш-карточки и статистика!" if lang=="ru"
+           else "Tap the blue “Open PolyGlotty” button by the text field 👇\nYour progress, flashcards and stats are there!")
     )
 
 
