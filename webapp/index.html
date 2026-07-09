@@ -1337,19 +1337,19 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 @keyframes rankBreath{0%,100%{box-shadow:none}50%{box-shadow:none}}
 
 .s4{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
-.s4c{--stat:var(--a);display:grid;grid-template-columns:38px 1fr;align-items:center;column-gap:10px;min-height:72px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:16px;cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;position:relative;box-shadow:var(--shadow-ui);animation:statRise .38s ease both}
+.s4c{--stat:var(--a);display:grid;grid-template-columns:38px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:10px;row-gap:2px;min-height:72px;background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r-card);padding:16px;cursor:pointer;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;position:relative;box-shadow:var(--shadow-ui);animation:statRise .38s ease both}
 .s4c:nth-child(1){--stat:var(--a)}.s4c:nth-child(2){--stat:var(--a2)}.s4c:nth-child(3){--stat:var(--gd)}.s4c:nth-child(4){--stat:var(--rd)}
 .s4c:nth-child(2){animation-delay:.04s}.s4c:nth-child(3){animation-delay:.08s}.s4c:nth-child(4){animation-delay:.12s}
 .s4c:active{transform:scale(.97);box-shadow:0 0 0 rgba(0,0,0,0)}
 .s4c:hover{border-color:rgba(var(--ar),.18);background:var(--bg-card)}
 .s4ca{display:none}
-.s4ci-svg{width:38px;height:38px;margin:0;border-radius:12px;background:rgba(var(--ar),.11);display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--ar),.18)}
+.s4ci-svg{grid-column:1;grid-row:1;align-self:center;width:38px;height:38px;margin:0;border-radius:12px;background:rgba(var(--ar),.11);display:flex;align-items:center;justify-content:center;border:1px solid rgba(var(--ar),.18)}
 .s4c:nth-child(2) .s4ci-svg{background:rgba(0,212,170,.10);border-color:rgba(0,212,170,.18)}
 .s4c:nth-child(3) .s4ci-svg{background:rgba(255,184,48,.10);border-color:rgba(255,184,48,.18)}
 .s4c:nth-child(4) .s4ci-svg{background:rgba(255,107,107,.10);border-color:rgba(255,107,107,.18)}
 .s4ci-svg svg{width:22px;height:22px;stroke:var(--stat)!important}
-.s4cv{font-size:21px;font-weight:850;line-height:1.05;margin-bottom:3px;color:var(--stat)!important;letter-spacing:-.3px}
-.s4cl{font-size:10.5px;color:var(--t2);line-height:1.25}
+.s4cv{grid-column:2;grid-row:1;align-self:center;font-size:21px;font-weight:850;line-height:1.05;margin-bottom:0;color:var(--stat)!important;letter-spacing:-.3px}
+.s4cl{grid-column:1/-1;grid-row:2;font-size:10.5px;color:var(--t2);line-height:1.25}
 .premium-mask{font-size:11px!important;color:var(--a)!important}
 @keyframes statRise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -1999,18 +1999,21 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .alextip-avatar{font-size:16px;line-height:1;flex:none}
 .alextip-htitle{font-size:13px;font-weight:900;color:var(--t1);letter-spacing:.1px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .alextip-stage{font-size:9.5px;font-weight:900;color:var(--a);background:rgba(var(--ar),.12);border:1px solid rgba(var(--ar),.24);border-radius:999px;padding:3px 8px;flex:none;white-space:nowrap}
-.alextip-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.alextip-row{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .alextip-row::-webkit-scrollbar{display:none}
-.alextip-card{flex:0 0 82%;max-width:280px;scroll-snap-align:start;display:flex;flex-direction:column;gap:6px;text-align:left;padding:13px;border-radius:15px;border:1px solid var(--border-ui);background:var(--bg-card);color:var(--t1);font-family:var(--f);cursor:pointer;transition:transform .16s,border-color .2s,box-shadow .2s}
+.alextip-card{flex:0 0 100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;gap:5px;text-align:left;padding:11px 12px;border-radius:15px;border:1px solid var(--border-ui);background:var(--bg-card);color:var(--t1);font-family:var(--f);cursor:pointer;transition:transform .16s,border-color .2s,box-shadow .2s}
 .alextip-card:hover{transform:translateY(-1px);border-color:rgba(var(--ar),.3);box-shadow:0 10px 22px rgba(0,0,0,.08)}
 .alextip-card:active{transform:translateY(0)}
 .alextip-top{display:flex;align-items:center;gap:8px}
-.alextip-emoji{font-size:20px;line-height:1}
+.alextip-emoji{font-size:18px;line-height:1}
 .alextip-tag{font-size:9px;font-weight:900;letter-spacing:.6px;text-transform:uppercase;color:var(--a);background:rgba(var(--ar),.1);border-radius:6px;padding:2px 7px}
 .alextip-title{font-size:13px;font-weight:900;color:var(--t1);line-height:1.25}
-.alextip-body{font-size:11px;color:var(--t2);line-height:1.4;flex:1}
-.alextip-cta{display:inline-flex;align-items:center;gap:3px;margin-top:2px;font-size:11px;font-weight:850;color:var(--a)}
+.alextip-body{font-size:11px;color:var(--t2);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.alextip-cta{display:inline-flex;align-items:center;gap:3px;margin-top:1px;font-size:11px;font-weight:850;color:var(--a)}
 .alextip-cta svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.alextip-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:8px}
+.alextip-dot{width:5px;height:5px;border-radius:50%;background:var(--b1);transition:background .2s,transform .2s;flex:none}
+.alextip-dot.on{background:var(--a);transform:scale(1.4)}
 .course-card{background:var(--bg-card);border:1px solid var(--border-ui);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:transform .18s,border-color .2s,box-shadow .2s;display:flex;gap:12px;align-items:center;position:relative;overflow:hidden}
 .course-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--lesson-color,var(--a));opacity:.75}
 .course-card::after{content:'';position:absolute;right:-42px;top:-48px;width:112px;height:112px;border-radius:50%;background:transparent;opacity:0;transition:opacity .25s,transform .25s}
@@ -2790,7 +2793,7 @@ html[data-mode=light] #s-progress{background:color-mix(in srgb,var(--e0) 95%,#00
 #s-progress .s4c:active{background:var(--e2)!important;transform:scale(.985)}
 #s-progress .s4ca{font-size:14px;color:var(--t3);position:absolute;top:10px;right:12px}
 #s-progress .s4ci-svg{width:30px!important;height:30px!important;background:var(--e2)!important;
-  border:1px solid var(--b1)!important;border-radius:9px;margin-bottom:10px}
+  border:1px solid var(--b1)!important;border-radius:9px;margin-bottom:0}
 #s-progress .s4ci-svg svg{width:16px!important;height:16px!important;stroke:var(--t2)!important}
 #s-progress .s4c .s4ci-svg svg [fill]:not([fill="none"]){fill:transparent!important}
 /* Override the rainbow per-card accent for stat values */
@@ -12075,10 +12078,26 @@ function renderAlexTipsBlock(){
       <div class="alextip-body">${safeHTML(c.body[lang]||c.body.en)}</div>
       <div class="alextip-cta">${safeHTML(ask)}<svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
     </button>`).join('');
+  const dots=cards.length>1?`<div class="alextip-dots">${cards.map((_,i)=>`<span class="alextip-dot${i===0?' on':''}"></span>`).join('')}</div>`:'';
   return `<div class="alextip-wrap">
     <div class="alextip-head"><span class="alextip-avatar">🤖</span><span class="alextip-htitle">${safeHTML(headTitle)}</span><span class="alextip-stage">🌱 ${safeHTML(stageLbl)}</span></div>
-    <div class="alextip-row">${items}</div>
+    <div class="alextip-row" onscroll="_alexTipScrollSync(this)">${items}</div>
+    ${dots}
   </div>`;
+}
+/* Keep the paging dots under the ALEX-tips carousel in sync with which
+   full-width card is currently snapped into view. rAF-throttled so a swipe's
+   scroll-event burst only updates the DOM once per frame. */
+function _alexTipScrollSync(row){
+  if(!row||row._atRaf)return;
+  row._atRaf=requestAnimationFrame(()=>{
+    row._atRaf=0;
+    const w=row.clientWidth||1;
+    const i=Math.max(0,Math.round(row.scrollLeft/w));
+    const wrap=row.parentElement;
+    const dots=wrap&&wrap.querySelectorAll('.alextip-dot');
+    if(dots)dots.forEach((d,idx)=>d.classList.toggle('on',idx===i));
+  });
 }
 function renderCourse(){
   /* Hard guard: if a lesson is currently open, ignore any indirect
@@ -14358,27 +14377,14 @@ function updateLearnHeader(){
   }catch(e){}
   try{
     const lsub=document.getElementById('learn-sub');
-    if(lsub){
-      if(learnTab==='cards'){
-        /* Session-progress counter (NOT the full review pool). A user may have
-           122 cards queued but a 15/60-per-day cap; showing the whole pool is
-           overwhelming and misleading. Instead show "Текущая сессия: X из 15". */
-        const _wi=cardWindowInfo();
-        const _used=Math.max(0,Math.min(_wi.limit,_wi.used)),_limit=_wi.limit;
-        const _sessLbl=({ru:'Текущая сессия',en:'Current session',es:'Sesión actual',pt:'Sessão atual',de:'Aktuelle Sitzung',fr:'Session actuelle',uk:'Поточна сесія',tr:'Geçerli oturum',zh:'本次学习',ar:'الجلسة الحالية'}[lang]||'Current session');
-        if(_limit>0 && _used>=_limit){
-          /* Day's quota done — short "completed" line instead of progress. */
-          lsub.textContent=({ru:`Сессия завершена · ${_used} из ${_limit}`,en:`Session done · ${_used} of ${_limit}`,es:`Sesión completa · ${_used} de ${_limit}`,pt:`Sessão concluída · ${_used} de ${_limit}`,de:`Sitzung fertig · ${_used} von ${_limit}`,fr:`Session terminée · ${_used} sur ${_limit}`,uk:`Сесію завершено · ${_used} з ${_limit}`,tr:`Oturum bitti · ${_used}/${_limit}`,zh:`本次完成 · ${_used}/${_limit}`,ar:`انتهت الجلسة · ${_used} من ${_limit}`}[lang]||`Session done · ${_used} of ${_limit}`);
-        } else {
-          const _ofw=({ru:'из',en:'of',es:'de',pt:'de',de:'von',fr:'sur',uk:'з',tr:'/',zh:'/',ar:'من'}[lang]||'of');
-          lsub.textContent=`${_sessLbl}: ${_used} ${_ofw} ${_limit}`;
-        }
-        lsub.style.display='';
-      } else {
-        lsub.textContent='';
-        lsub.style.display='none';
-      }
-    }
+    /* The "Текущая сессия: X из Y" line used to live here, directly under the
+       tab title — right next to the X/Y card-position pill (#fctr) in the
+       same header. Two near-identical ".../Y" numbers stacked that close read
+       as a glitch/clash, not two distinct stats. The exact same info (cards
+       left + reset countdown) already lives one screen-region down in the
+       "ОЧЕРЕДЬ ПОВТОРЕНИЯ" row, so this subtitle is dropped entirely instead
+       of duplicating it right under the title. */
+    if(lsub){lsub.textContent='';lsub.style.display='none';}
   }catch(e){}
 }
 /* Monetization model: the grammar COURSE (all levels A0–C2, every lesson) and
