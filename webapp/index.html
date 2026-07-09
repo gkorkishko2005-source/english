@@ -1154,9 +1154,9 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .sndb:disabled{background:var(--e3);box-shadow:none;filter:grayscale(1);cursor:not-allowed}
 
 /* ══ LEARN ══ */
-.lhdr{display:flex;align-items:center;justify-content:space-between;padding-top:3px;margin-bottom:14px}
+.lhdr{display:flex;align-items:center;justify-content:space-between;padding-top:3px;margin-bottom:10px}
 .ltit{font-size:21px;font-weight:800}.lctr{font-size:13px;color:var(--t2);font-weight:600}
-.pl{background:var(--e2);border-radius:100px;height:3px;overflow:hidden;margin-bottom:14px}
+.pl{background:var(--e2);border-radius:100px;height:3px;overflow:hidden;margin-bottom:11px}
 .pf{height:100%;background:var(--gb);border-radius:100px;transition:width .4s ease}
 
 /* Daily words */
@@ -1174,7 +1174,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .dwarr:disabled{opacity:.25;cursor:default}
 
 /* Flashcard */
-.fcs{perspective:1000px;height:236px;cursor:pointer;margin-bottom:13px;overflow:hidden;user-select:none}
+.fcs{perspective:1000px;height:236px;cursor:pointer;margin-bottom:10px;overflow:hidden;user-select:none}
 .fci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1)}
 @keyframes wcardIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 .fci.flip{transform:rotateY(180deg)}
@@ -1222,7 +1222,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .rb1{border-color:rgba(255,107,107,.3);color:var(--rd)}.rb2{border-color:rgba(255,149,0,.3);color:var(--or)}.rb3{border-color:rgba(var(--ar),.3);color:var(--a)}.rb4{border-color:rgba(0,212,170,.3);color:var(--a2)}
 
 /* ── Card action row: Skip · Save · Ask ALEX ── */
-.card-acts{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:9px;margin-bottom:11px}
+.card-acts{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:9px;margin-bottom:9px}
 .card-acts.card-acts-2{grid-template-columns:1fr 1fr}
 .ca-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 10px;border-radius:var(--r2);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease;-webkit-tap-highlight-color:transparent}
 .ca-btn svg{width:18px;height:18px;flex-shrink:0}
@@ -1276,7 +1276,7 @@ html:not([data-mode=light]) .msg.user .mbub{background:#0C4A3C;border-color:rgba
 .sw-row.tappable{cursor:pointer}
 .sw-row.tappable:active{background:var(--e2)}
 /* Dictionary launcher button at the bottom of the Cards screen */
-.dict-launch{display:flex;align-items:center;gap:9px;width:100%;padding:12px 14px;margin-bottom:11px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--e1);color:var(--t1);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,background .2s ease}
+.dict-launch{display:flex;align-items:center;gap:9px;width:100%;padding:11px 14px;margin-bottom:9px;border-radius:var(--r2);border:1px solid var(--b2);background:var(--e1);color:var(--t1);font-family:var(--f);font-size:13px;font-weight:800;cursor:pointer;transition:transform .14s ease,background .2s ease}
 .dict-launch:active{transform:scale(.985);background:var(--e2)}
 .dict-launch svg{width:18px;height:18px;flex-shrink:0;stroke:var(--a)}
 .dict-launch-cnt{margin-left:auto;min-width:22px;text-align:center;font-size:11px;font-weight:850;color:var(--a);background:rgba(var(--ar),.14);border-radius:100px;padding:2px 8px}
@@ -3370,7 +3370,10 @@ html:not([data-mode=light]) .lp-icon{box-shadow:none}
   </button>
   <!-- CARDS panel -->
   <div id="learn-cards-panel" style="display:none">
-    <div class="sec"><span id="rev-lbl"></span><span class="seca" id="fc-cnt-lbl"></span></div>
+    <!-- "ОЧЕРЕДЬ ПОВТОРЕНИЯ" section header + quota counter removed: the card
+         position (X/Y) already shows in the header pill (#fctr) above, and the
+         daily-limit/reset info is fully explained in the empty/frozen states
+         when it actually matters — keeping it here was redundant clutter. -->
     <div class="word-pref-row" id="word-pref-row"></div>
     <div id="lmain">
       <div class="pl"><div class="pf" id="pfill" style="width:0"></div></div>
@@ -4507,7 +4510,6 @@ function applyLang(){
   document.getElementById('sp-new').textContent=L.new_chat;
   // Learn
   updateLearnHeader();
-  document.getElementById('rev-lbl').textContent=L.rev;
   var _fh=document.getElementById('fchint');if(_fh)_fh.setAttribute('aria-label',L.tap_flip);
   document.getElementById('fcbg2').textContent=L.translation;
   try{setCardActionLabels();}catch(_){}
